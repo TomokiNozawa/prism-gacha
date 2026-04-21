@@ -2032,11 +2032,32 @@ function killEnemy(e) {
     e.el.style.transform += " scale(1.3)";
     setTimeout(() => e.el && e.el.remove(), 260);
   }
-  const reward = e.def.reward * (e.isBoss ? 1 : 1);
+  // Sparkles
+  for (let i = 0; i < (e.isBoss ? 12 : 4); i++) {
+    spawnSparkle(e.cx + (Math.random() - 0.5) * 30, e.cy + (Math.random() - 0.5) * 30);
+  }
+  const reward = e.def.reward;
   b.resource += reward;
+  // Reward float
+  showDamageNum(e.cx, e.cy + 16, reward, false, true);
   renderHUD();
   flashCrystal();
   SE.enemyDie();
+  if (e.isBoss) {
+    // Big victory flash on boss death
+    SE.win();
+    showMsg("討伐！", e.def.name, 1200);
+  }
+}
+
+function spawnSparkle(cx, cy) {
+  const fx = $("#battle-fx");
+  const el = document.createElement("div");
+  el.className = "sparkle";
+  el.style.left = cx + "px";
+  el.style.top = cy + "px";
+  fx.appendChild(el);
+  setTimeout(() => el.remove(), 750);
 }
 
 function flashCrystal() {
