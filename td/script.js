@@ -1312,7 +1312,7 @@ function renderUnitGrid() {
     if (state.deck.includes(u.id)) card.classList.add("sel");
     card.innerHTML = `
       <div class="tier-stripe tier-${u.tier}"></div>
-      <img src="${u.img}" alt="${u.name}" loading="lazy" onerror="this.style.display='none'">
+      <img src="${u.img}" alt="${u.name}" loading="eager" onerror="this.style.display='none'">
       <div class="uc-body">
         <div class="uc-name">${u.name}</div>
         <div class="uc-role">
@@ -1431,7 +1431,7 @@ function renderDex() {
     card.className = `unit-card tier-${u.tier}`;
     card.innerHTML = `
       <div class="tier-stripe tier-${u.tier}"></div>
-      <img src="${u.img}" alt="${u.name}" loading="lazy" onerror="this.style.display='none'">
+      <img src="${u.img}" alt="${u.name}" loading="eager" onerror="this.style.display='none'">
       <div class="uc-body">
         <div class="uc-name">${u.name}</div>
         <div class="uc-role"><span>${u.title || ""}</span></div>
