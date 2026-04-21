@@ -1235,9 +1235,17 @@ function renderStageGrid() {
     if (s.final) card.classList.add("final");
     if (locked) card.classList.add("locked");
 
+    const stars = state.clearedStages[s.num]?.stars || 0;
+    let starRow = "";
+    if (cleared) {
+      starRow = '<div class="stage-stars">';
+      for (let i = 0; i < 3; i++) starRow += `<span class="${i < stars ? 'lit' : ''}">★</span>`;
+      starRow += "</div>";
+    }
     card.innerHTML = `
       <div class="stage-num">${s.num}</div>
       <div class="stage-title">${s.title}</div>
+      ${starRow}
       <div class="stage-chap">${s.chap.replace("第", "").replace("章", "").split(" ")[0]}章</div>
     `;
 
@@ -2221,11 +2229,13 @@ function winBattle() {
   const b = state.battle;
   b.ended = true;
   cancelAnimationFrame(rafId);
+  const stars = b.baseHp >= 3 ? 3 : b.baseHp >= 2 ? 2 : 1;
+  const prevStars = state.clearedStages[b.stage.num]?.stars || 0;
   state.clearedStages[b.stage.num] = {
     clearedAt: Date.now(),
     baseHp: b.baseHp,
+    stars: Math.max(prevStars, stars),
   };
-  const isFirst = !state.clearedStages[b.stage.num]?.clearedAt || (state.clearedStages[b.stage.num].clearedAt === Date.now());
   state.totalShards += 30 + b.stage.num * 10;
   saveSave();
   SE.win();
@@ -2234,6 +2244,14 @@ function winBattle() {
     const isBoss = b.stage.boss || b.stage.final;
     $("#result-title").textContent = b.stage.final ? "🌈 虹霊界、救われし" : (isBoss ? "討伐！" : "勝利");
     $("#result-subtitle").textContent = `第${b.stage.num}話 「${b.stage.title}」 クリア`;
+    const starsEl = $("#result-stars");
+    starsEl.innerHTML = "";
+    for (let i = 0; i < 3; i++) {
+      const s = document.createElement("span");
+      s.className = "star" + (i < stars ? " lit" : "");
+      s.textContent = "★";
+      starsEl.appendChild(s);
+    }
     $("#result-story").textContent = b.stage.winStory || "";
     $("#reward-shards").textContent = `+${30 + b.stage.num * 10}`;
     $("#reward-first-clear").style.display = "none";
