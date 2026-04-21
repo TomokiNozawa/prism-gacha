@@ -135,11 +135,12 @@ function loadState() {
     return {
       total: raw.total || 0,
       ur: raw.ur || 0,
-      pity: raw.pity || 0,           // UR以外を引いた連続回数
+      pity: raw.pity || 0,
       god: raw.god || false,
       history: raw.history || [],
+      galleryViewed: raw.galleryViewed || {},  // 図鑑で詳細を開いたキャラ{"UR_セラフィエル": true}
     };
-  } catch { return { total:0, ur:0, pity:0, god:false, history:[] }; }
+  } catch { return { total:0, ur:0, pity:0, god:false, history:[], galleryViewed:{} }; }
 }
 function saveState() {
   localStorage.setItem("prism-gacha", JSON.stringify(state));
@@ -166,6 +167,8 @@ function pickTier(tier) {
 }
 
 function applyPull(result) {
+  // 初回獲得判定(履歴に追加する前に確認)
+  result.isNew = !state.history.some(h => h.name === result.name && h.tier === result.tier);
   state.total += 1;
   if (result.tier === "UR") { state.ur += 1; state.pity = 0; }
   else state.pity += 1;
@@ -173,6 +176,53 @@ function applyPull(result) {
   if (state.history.length > 120) state.history.length = 120;
   saveState();
   updateHUD();
+}
+
+// ────────────── 10連希少度計算 (多項分布) ──────────────
+function factorial(n) {
+  let r = 1;
+  for (let i = 2; i <= n; i++) r *= i;
+  return r;
+}
+function multinomialProb(nR, nSR, nSSR, nUR) {
+  const total = nR + nSR + nSSR + nUR;
+  const coef = factorial(total) / (factorial(nR) * factorial(nSR) * factorial(nSSR) * factorial(nUR));
+  return coef *
+    Math.pow(RATES.R, nR) *
+    Math.pow(RATES.SR, nSR) *
+    Math.pow(RATES.SSR, nSSR) *
+    Math.pow(RATES.UR, nUR);
+}
+
+function computeTenRollRarity(results) {
+  const counts = { R: 0, SR: 0, SSR: 0, UR: 0 };
+  for (const r of results) counts[r.tier]++;
+  const thisP = multinomialProb(counts.R, counts.SR, counts.SSR, counts.UR);
+  // 今回と同等以下の確率を持つ組み合わせの合計（=「同等以上の珍しさ」確率）
+  let rarerOrEqualProb = 0;
+  for (let nUR = 0; nUR <= 10; nUR++) {
+    for (let nSSR = 0; nSSR <= 10 - nUR; nSSR++) {
+      for (let nSR = 0; nSR <= 10 - nUR - nSSR; nSR++) {
+        const nR = 10 - nUR - nSSR - nSR;
+        const p = multinomialProb(nR, nSR, nSSR, nUR);
+        if (p <= thisP + 1e-15) rarerOrEqualProb += p;
+      }
+    }
+  }
+  const oneInN = thisP > 0 ? Math.round(1 / thisP) : Infinity;
+  // ランク判定: UR数が多いほど上位、細かくは rarerOrEqualProb で区別
+  let rank, rankClass;
+  if (counts.UR >= 3) { rank = "SSS"; rankClass = "sss"; }
+  else if (counts.UR >= 2) { rank = "SS"; rankClass = "ss"; }
+  else if (counts.UR >= 1 && counts.SSR >= 2) { rank = "SS"; rankClass = "ss"; }
+  else if (counts.UR >= 1) { rank = "S+"; rankClass = "splus"; }
+  else if (counts.SSR >= 3) { rank = "S"; rankClass = "s"; }
+  else if (counts.SSR >= 2) { rank = "A+"; rankClass = "aplus"; }
+  else if (counts.SSR >= 1) { rank = "A"; rankClass = "a"; }
+  else if (counts.SR >= 4) { rank = "B+"; rankClass = "bplus"; }
+  else if (counts.SR >= 2) { rank = "B"; rankClass = "b"; }
+  else { rank = "C"; rankClass = "c"; }
+  return { thisP, rarerOrEqualProb, oneInN, rank, rankClass, counts };
 }
 
 // ────────────── HUD ──────────────
@@ -574,7 +624,7 @@ function showCharName(result) {
   const wrap = document.createElement("div");
   wrap.className = "fx-charname go " + result.tier.toLowerCase();
 
-  // 1行目: [tierバッジ] + 名前
+  // 1行目: [tierバッジ] + 名前 + (NEW)
   const top = document.createElement("div");
   top.className = "fx-charname-top";
   const badge = document.createElement("span");
@@ -585,6 +635,12 @@ function showCharName(result) {
   nameEl.className = "fx-charname-main";
   nameEl.textContent = result.name;
   top.appendChild(nameEl);
+  if (result.isNew) {
+    const newBadge = document.createElement("span");
+    newBadge.className = "fx-charname-new";
+    newBadge.textContent = "NEW";
+    top.appendChild(newBadge);
+  }
   wrap.appendChild(top);
 
   // 2行目: 肩書き (SSR/URのみ)
@@ -1181,6 +1237,12 @@ function showResult(results, best) {
     const c = document.createElement("div");
     c.className = "rcard " + r.tier.toLowerCase();
     c.style.backgroundImage = `url('${r.img}')`;
+    if (r.isNew) {
+      const nb = document.createElement("div");
+      nb.className = "rcard-new";
+      nb.textContent = "NEW";
+      c.appendChild(nb);
+    }
     const nm = document.createElement("div");
     nm.className = "rcard-name"; nm.textContent = r.name;
     c.appendChild(nm);
@@ -1190,11 +1252,35 @@ function showResult(results, best) {
   const hasSSR = results.some(r => r.tier === "SSR");
   const nUR = results.filter(r => r.tier === "UR").length;
   const nSSR = results.filter(r => r.tier === "SSR").length;
-  $("#result-title").textContent =
-    hasUR ? `🌈 UR ×${nUR} 確定!!` :
-    hasSSR ? `✨ SSR ×${nSSR} 獲得!` : "10連結果";
+  const nNew = results.filter(r => r.isNew).length;
+  let title = hasUR ? `🌈 UR ×${nUR} 確定!!` :
+              hasSSR ? `✨ SSR ×${nSSR} 獲得!` : "10連結果";
+  if (nNew > 0) title += `  /  NEW ×${nNew}`;
+  $("#result-title").textContent = title;
+
+  // 希少度表示
+  const rar = computeTenRollRarity(results);
+  const rarBox = $("#result-rarity");
+  rarBox.innerHTML = "";
+  const rankEl = document.createElement("div");
+  rankEl.className = "rarity-rank rank-" + rar.rankClass;
+  rankEl.textContent = "RANK  " + rar.rank;
+  rarBox.appendChild(rankEl);
+  const lineEl = document.createElement("div");
+  lineEl.className = "rarity-line";
+  const oneInNStr = rar.oneInN >= 1e6 ? "100万回以上に1回" :
+                    rar.oneInN >= 1000 ? `約 ${(rar.oneInN/1000).toFixed(1)} 万回に1回`.replace(/\.0 万/, "万") :
+                    `約 ${rar.oneInN.toLocaleString()} 回に1回`;
+  lineEl.innerHTML =
+    `<span>出現率 <b>${(rar.thisP * 100).toFixed(4)}%</b></span>` +
+    `<span class="dot">·</span>` +
+    `<span>${oneInNStr}</span>` +
+    `<span class="dot">·</span>` +
+    `<span>希少度 上位 <b>${(rar.rarerOrEqualProb * 100).toFixed(2)}%</b></span>`;
+  rarBox.appendChild(lineEl);
+
   $("#result").classList.add("active");
-  resultOpenedAt = Date.now();  // キーガード開始
+  resultOpenedAt = Date.now();
 }
 
 function closeResult() {
@@ -1217,6 +1303,12 @@ function isUnlocked(c) {
   return state.history.some(h => h.name === c.name && h.tier === c.tier);
 }
 
+function galleryKey(c) { return c.tier + "_" + c.name; }
+function isNewUnlocked(c) {
+  if (!isUnlocked(c)) return false;
+  return !state.galleryViewed[galleryKey(c)];
+}
+
 function openGallery() {
   const grid = $("#gallery-grid");
   grid.innerHTML = "";
@@ -1236,6 +1328,12 @@ function openGallery() {
     tierBadge.className = "card-tier";
     tierBadge.textContent = c.tier;
     card.appendChild(tierBadge);
+    if (unlocked && isNewUnlocked(c)) {
+      const newB = document.createElement("div");
+      newB.className = "card-new";
+      newB.textContent = "NEW";
+      card.appendChild(newB);
+    }
     if (unlocked) {
       const nm = document.createElement("div");
       nm.className = "card-name";
@@ -1274,6 +1372,9 @@ function showCharDetail(c) {
   const desc = c.desc || "（ストーリーはまだ記されていない…）";
   $("#char-detail-desc").textContent = desc;
   $("#char-detail").classList.add("active");
+  // 閲覧マーク(NEWを消す)
+  state.galleryViewed[galleryKey(c)] = true;
+  saveState();
 }
 
 function closeCharDetail() {
