@@ -11,6 +11,15 @@
 //
 // UR: 専用3体(星暁峰で修行した最高位)／SSR: 5体(各地の精鋭)
 const POOL = {
+  LR: [
+    {
+      name: "虹意 プリズマ",
+      title: "原虹の意志・唯一の伝説",
+      caption: "我は光の源。終わりにして、始まり",
+      desc: "原虹の最初の光から生まれた自意識。性別という概念の外にいる、虹霊界そのものの『人格』。伝説では、影喰いの誕生はこの存在の無意識下の『迷い』から生じたとも語られる。虹光剣『始源(げんそう)』は、万色の刃を持つ。",
+      img: "images/lr_01_legend.png",
+    },
+  ],
   UR: [
     {
       name: "セラフィエル",
@@ -124,7 +133,8 @@ const POOL = {
 // ────────────── Settings ──────────────
 const PRICE_PER_ROLL = 300;
 const PITY = 180;            // 天井
-const RATES = { R: 0.65, SR: 0.25, SSR: 0.07, UR: 0.03 };
+// LR(Legend Rare) = 唯一の伝説枠、確率は R から 0.5% 移譲
+const RATES = { R: 0.645, SR: 0.25, SSR: 0.07, UR: 0.03, LR: 0.005 };
 
 // ────────────── State ──────────────
 const state = loadState();
@@ -159,11 +169,12 @@ function saveState() {
 function rollOne() {
   // 神モード: 全部 UR
   if (state.god) return pickTier("UR");
-  // 天井
+  // 天井: UR確定(LRではなく)
   if (state.pity >= PITY - 1) return pickTier("UR");
   const r = Math.random();
   let acc = 0;
-  for (const tier of ["UR", "SSR", "SR", "R"]) {
+  // LRから順に判定（稀なtierから降順）
+  for (const tier of ["LR", "UR", "SSR", "SR", "R"]) {
     acc += RATES[tier];
     if (r < acc) return pickTier(tier);
   }
@@ -206,9 +217,10 @@ function multinomialProb(nR, nSR, nSSR, nUR) {
 }
 
 function computeTenRollRarity(results) {
-  const counts = { R: 0, SR: 0, SSR: 0, UR: 0 };
+  const counts = { R: 0, SR: 0, SSR: 0, UR: 0, LR: 0 };
   for (const r of results) counts[r.tier]++;
-  const thisP = multinomialProb(counts.R, counts.SR, counts.SSR, counts.UR);
+  // LRは極低確率なので多項計算時はURと合算して近似(R/SR/SSR/UR+LR の4項)
+  const thisP = multinomialProb(counts.R, counts.SR, counts.SSR, counts.UR + counts.LR);
   // 今回と同等以下の確率を持つ組み合わせの合計（=「同等以上の珍しさ」確率）
   let rarerOrEqualProb = 0;
   for (let nUR = 0; nUR <= 10; nUR++) {
@@ -221,9 +233,10 @@ function computeTenRollRarity(results) {
     }
   }
   const oneInN = thisP > 0 ? Math.round(1 / thisP) : Infinity;
-  // ランク判定: UR数が多いほど上位、細かくは rarerOrEqualProb で区別
+  // ランク判定: LRヒットは最上位、次にUR数、その後rarerOrEqualProbで区別
   let rank, rankClass;
-  if (counts.UR >= 3) { rank = "SSS"; rankClass = "sss"; }
+  if (counts.LR >= 1) { rank = "LEGEND"; rankClass = "legend"; }
+  else if (counts.UR >= 3) { rank = "SSS"; rankClass = "sss"; }
   else if (counts.UR >= 2) { rank = "SS"; rankClass = "ss"; }
   else if (counts.UR >= 1 && counts.SSR >= 2) { rank = "SS"; rankClass = "ss"; }
   else if (counts.UR >= 1) { rank = "S+"; rankClass = "splus"; }
@@ -400,12 +413,14 @@ const TIER_COLORS = {
   SR:  ["#c87dff", "#e0a0ff"],
   SSR: ["#ffd96a", "#ffb347"],
   UR:  ["#ff5faa", "#ffd84d", "#5fffd4", "#7ea8ff", "#c87dff"],
+  LR:  ["#ffffff", "#ffd84d", "#ff5faa", "#5fffd4", "#7ea8ff", "#c87dff"],
 };
 const TIER_PILLAR = {
   R:   "images/fx_pillar_blue.png",
   SR:  "images/fx_pillar_purple.png",
   SSR: "images/fx_pillar_gold.png",
   UR:  "images/rainbow_pillar_effect.png",
+  LR:  "images/rainbow_pillar_effect.png",
 };
 
 // フラッシュ強度: "soft"(R/SR段階用), "mid"(SSR用), "hard"(UR用)
@@ -503,16 +518,19 @@ function startStars(ms = 3000) {
 function showWin(tier) {
   const w = document.createElement("div");
   w.className = "fx-win go " + tier.toLowerCase();
-  w.textContent = tier === "UR" ? "🌈  U  R   O B T A I N E D  🌈" : "✨  S S R   G E T  ✨";
+  w.textContent =
+    tier === "LR" ? "👑   L E G E N D   A W A K E N E D   👑" :
+    tier === "UR" ? "🌈  U  R   O B T A I N E D  🌈" :
+    "✨  S S R   G E T  ✨";
   stageVfx.appendChild(w);
-  setTimeout(() => w.remove(), 2500);
+  setTimeout(() => w.remove(), 2800);
 }
 
 function revealChar(result) {
   const img = document.createElement("img");
-  // SSR/URはズームバースト付きで登場
-  const burstClass = (result.tier === "SSR" || result.tier === "UR") ? " burst-in" : "";
-  const auraClass = result.tier === "UR" ? " ur-aura" : "";
+  // SSR/UR/LRはズームバースト付きで登場
+  const burstClass = (result.tier === "SSR" || result.tier === "UR" || result.tier === "LR") ? " burst-in" : "";
+  const auraClass = result.tier === "LR" ? " lr-aura" : (result.tier === "UR" ? " ur-aura" : "");
   img.className = "char-reveal" + auraClass + burstClass;
   img.src = result.img;
   img.alt = result.name;
@@ -605,6 +623,15 @@ function showMiracle() {
   m.textContent = "🌈  M I R A C L E  🌈";
   stageVfx.appendChild(m);
   setTimeout(() => m.remove(), 2200);
+}
+
+// LEGENDテロップ (LR時・MIRACLEより大きく)
+function showLegendIntro() {
+  const m = document.createElement("div");
+  m.className = "fx-legend-intro go";
+  m.textContent = "👑  L E G E N D  👑";
+  stageVfx.appendChild(m);
+  setTimeout(() => m.remove(), 3000);
 }
 
 // 上からの光条 (UR用)
@@ -868,7 +895,7 @@ function showTenIntro() {
   setTimeout(() => w.remove(), 1200);
 }
 
-const ORB_COLOR = { R: "#6fa8ff", SR: "#c87dff", SSR: "#ffd96a", UR: "#ff5faa" };
+const ORB_COLOR = { R: "#6fa8ff", SR: "#c87dff", SSR: "#ffd96a", UR: "#ff5faa", LR: "#ffffff" };
 
 // ────────────── Summon 各タイプ ──────────────
 
@@ -886,7 +913,7 @@ async function summonTypeZ(result, tier) {
 
 // Type A: オーブ昇格 (シンプル・テンポ良)
 async function summonTypeA(result, tier) {
-  const ladder = ["R", "SR", "SSR", "UR"];
+  const ladder = ["R", "SR", "SSR", "UR", "LR"];
   const stopIdx = ladder.indexOf(tier);
   const orb = showOrb();
   for (let i = 0; i <= stopIdx; i++) {
@@ -906,7 +933,7 @@ async function summonTypeA(result, tier) {
 
 // Type B: フェイク破壊
 async function summonTypeB(result, tier) {
-  const ladder = ["R", "SR", "SSR", "UR"];
+  const ladder = ["R", "SR", "SSR", "UR", "LR"];
   const stopIdx = ladder.indexOf(tier);
   const fakeIdx = Math.max(1, stopIdx - 1);
   const orb = showOrb();
@@ -943,7 +970,7 @@ async function summonTypeB(result, tier) {
 
 // Type C: スロー溜め (オーブが各色で脈動)
 async function summonTypeC(result, tier) {
-  const ladder = ["R", "SR", "SSR", "UR"];
+  const ladder = ["R", "SR", "SSR", "UR", "LR"];
   const stopIdx = ladder.indexOf(tier);
   const orb = showOrb();
   for (let i = 0; i <= stopIdx; i++) {
@@ -1032,30 +1059,32 @@ function pickWeighted(weights) {
 }
 
 function pickSummonType(tier, opts) {
-  // 10連のforceSlow時は C 必須 (SSR以上)
-  if (opts.forceSlow && (tier === "UR" || tier === "SSR")) return "C";
+  // 10連のforceSlow時は C 必須 (SSR以上、LR含む)
+  if (opts.forceSlow && (tier === "LR" || tier === "UR" || tier === "SSR")) return "C";
   // R/SR は脳汁演出なし、直接登場タイプ
   if (tier === "R") return "Z";
   if (tier === "SR") return "Z";
   // SSRは脳汁（6種ランダム）
   if (tier === "SSR") return pickWeighted({ A: 1, B: 1, C: 1, D: 2, E: 2, F: 2 });
-  // URは超脳汁（派手系のみ、AとF除外）
+  // URは超脳汁
   if (tier === "UR") return pickWeighted({ B: 3, C: 3, D: 3, E: 4 });
+  // LR は常にスロー溜め(最長の昇格演出)
+  if (tier === "LR") return "C";
   return "Z";
 }
 
 async function summonOne(result, opts = {}) {
   const tier = result.tier;
-  const isHigh = tier === "UR" || tier === "SSR";
+  const isHigh = tier === "LR" || tier === "UR" || tier === "SSR";
   // 10連中途キャラは showLadder=false で昇格演出スキップ（装飾だけ出す）
   const showLadder = opts.showLadder !== false;
   setStageTier(tier);
 
-  // ─ 溜め: SSR/URは長めの沈黙で期待感 ─
+  // ─ 溜め: SSR/UR/LRは長めの沈黙で期待感 ─
   if (isHigh) {
     stage.classList.add("charge-up");
     play("se-summon");
-    await sleep(tier === "UR" ? 850 : 600);
+    await sleep(tier === "LR" ? 1200 : tier === "UR" ? 850 : 600);
     stage.classList.remove("charge-up");
     if (checkSkip()) return finalize(result);
   } else {
@@ -1085,7 +1114,44 @@ async function summonOne(result, opts = {}) {
   if (checkSkip()) return finalize(result);
 
   // ────────── レア度別の追加派手演出 ──────────
-  if (tier === "UR") {
+  if (tier === "LR") {
+    // ━━━ 超超脳汁 LEGEND 専用フルコース ━━━
+    // UR と似るがすべての時間と量を増幅、さらに LEGEND テロップ
+    showRainbowBg(7500);
+    showGodRays(true, 7500);
+    showRaysDown("rgba(255,255,255,0.9)", 14, 7000);
+    showFountain(["#ff5faa", "#ffd84d", "#5fffd4", "#7ea8ff", "#c87dff", "#ffffff"], 150, 6000);
+    startStars(6500);
+    showConfetti(120, 6000);
+    showHalo();
+    // LEGEND テロップ
+    setTimeout(() => showLegendIntro(), 80);
+    // 7連波紋
+    for (let i = 0; i < 7; i++) {
+      setTimeout(() => showRing(), i * 140);
+    }
+    // fanfare 3重
+    play("se-fanfare");
+    setTimeout(() => play("se-fanfare"), 160);
+    setTimeout(() => play("se-fanfare"), 320);
+    flash("hard");
+    setTimeout(() => flash("hard"), 500);
+    // 4連シェイク
+    stage.classList.add("shake");
+    setTimeout(() => stage.classList.remove("shake"), 450);
+    setTimeout(() => stage.classList.add("shake"), 600);
+    setTimeout(() => stage.classList.remove("shake"), 1050);
+    setTimeout(() => stage.classList.add("shake"), 1200);
+    setTimeout(() => stage.classList.remove("shake"), 1650);
+    setTimeout(() => stage.classList.add("shake"), 1800);
+    setTimeout(() => stage.classList.remove("shake"), 2200);
+    // ズームイン (LRは2回)
+    stage.classList.add("zoom-in");
+    setTimeout(() => stage.classList.remove("zoom-in"), 600);
+    setTimeout(() => stage.classList.add("zoom-in"), 800);
+    setTimeout(() => stage.classList.remove("zoom-in"), 1400);
+    await sleep(700);
+  } else if (tier === "UR") {
     // ━━━ 超脳汁フルコース ━━━
     // 1. 全面虹背景 + 虹ゴッドレイ（長め）
     showRainbowBg(5500);
@@ -1145,7 +1211,10 @@ async function finalize(result) {
   await sleep(isHigh ? 550 : 300);
   showCharName(result);
   // 獲得テロップ
-  if (result.tier === "UR") {
+  if (result.tier === "LR") {
+    await sleep(400);
+    showWin("LR");
+  } else if (result.tier === "UR") {
     await sleep(300);
     showWin("UR");
   } else if (result.tier === "SSR") {
@@ -1155,7 +1224,7 @@ async function finalize(result) {
   // 余韻: SSR/URは表示しっぱなし→キー押下で進行
   if (isHigh) {
     // 最低限の余韻は確保（テロップ類が落ち着くまで）
-    await sleep(result.tier === "UR" ? 1400 : 1000);
+    await sleep(result.tier === "LR" ? 1800 : result.tier === "UR" ? 1400 : 1000);
     showContinueHint();
     await waitForKey();
   } else {
@@ -1188,7 +1257,7 @@ async function doTen() {
   for (let i = 0; i < 10; i++) { const r = rollOne(); applyPull(r); results.push(r); }
 
   // 最高レアの位置を特定
-  const order = { R: 0, SR: 1, SSR: 2, UR: 3 };
+  const order = { R: 0, SR: 1, SSR: 2, UR: 3, LR: 4 };
   let bestIdx = 0;
   for (let i = 1; i < results.length; i++) {
     if (order[results[i].tier] > order[results[bestIdx].tier]) bestIdx = i;
@@ -1242,7 +1311,7 @@ function showResult(results, best) {
   const grid = $("#result-grid");
   grid.innerHTML = "";
   // 最高レアを最後にソート(結果確認しやすい)
-  const order = { R: 0, SR: 1, SSR: 2, UR: 3 };
+  const order = { R: 0, SR: 1, SSR: 2, UR: 3, LR: 4 };
   const sorted = [...results].sort((a, b) => order[a.tier] - order[b.tier]);
   sorted.forEach(r => {
     const c = document.createElement("div");
@@ -1259,12 +1328,15 @@ function showResult(results, best) {
     c.appendChild(nm);
     grid.appendChild(c);
   });
+  const hasLR = results.some(r => r.tier === "LR");
   const hasUR = results.some(r => r.tier === "UR");
   const hasSSR = results.some(r => r.tier === "SSR");
+  const nLR = results.filter(r => r.tier === "LR").length;
   const nUR = results.filter(r => r.tier === "UR").length;
   const nSSR = results.filter(r => r.tier === "SSR").length;
   const nNew = results.filter(r => r.isNew).length;
-  let title = hasUR ? `🌈 UR ×${nUR} 確定!!` :
+  let title = hasLR ? `👑 LEGEND ×${nLR} 降臨!!!` :
+              hasUR ? `🌈 UR ×${nUR} 確定!!` :
               hasSSR ? `✨ SSR ×${nSSR} 獲得!` : "10連結果";
   if (nNew > 0) title += `  /  NEW ×${nNew}`;
   $("#result-title").textContent = title;
@@ -1302,7 +1374,7 @@ function closeResult() {
 
 function getAllCharactersWithTier() {
   const all = [];
-  for (const tier of ["UR", "SSR", "SR", "R"]) {
+  for (const tier of ["LR", "UR", "SSR", "SR", "R"]) {
     for (const c of POOL[tier]) {
       all.push({ ...c, tier });
     }
@@ -1324,8 +1396,8 @@ function openGallery() {
   const grid = $("#gallery-grid");
   grid.innerHTML = "";
   const all = getAllCharactersWithTier();
-  const unlockedByTier = { UR: 0, SSR: 0, SR: 0, R: 0 };
-  const totalByTier = { UR: POOL.UR.length, SSR: POOL.SSR.length, SR: POOL.SR.length, R: POOL.R.length };
+  const unlockedByTier = { LR: 0, UR: 0, SSR: 0, SR: 0, R: 0 };
+  const totalByTier = { LR: POOL.LR.length, UR: POOL.UR.length, SSR: POOL.SSR.length, SR: POOL.SR.length, R: POOL.R.length };
   for (const c of all) {
     const unlocked = isUnlocked(c);
     if (unlocked) unlockedByTier[c.tier]++;
@@ -1357,6 +1429,7 @@ function openGallery() {
   const total = Object.values(totalByTier).reduce((a, b) => a + b, 0);
   $("#gallery-unlocked-count").textContent = unlockedTotal;
   $("#gallery-total-count").textContent = total;
+  $("#gallery-lr-count").textContent = `${unlockedByTier.LR}/${totalByTier.LR}`;
   $("#gallery-ur-count").textContent = `${unlockedByTier.UR}/${totalByTier.UR}`;
   $("#gallery-ssr-count").textContent = `${unlockedByTier.SSR}/${totalByTier.SSR}`;
   $("#gallery-sr-count").textContent = `${unlockedByTier.SR}/${totalByTier.SR}`;

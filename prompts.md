@@ -180,6 +180,44 @@ high-quality detailed anime illustration, original character, no logos, no text,
 
 ---
 
+## 👑 LR (Legend Rare) — 唯一の伝説枠
+
+**ファイル名**: `lr_01_legend.png`
+
+**キャラ設定**:
+- **名前**: 虹意 プリズマ
+- **肩書き**: 原虹の意志・唯一の伝説
+- **キャッチコピー**: 「我は光の源。終わりにして、始まり」
+- **コンセプト**: 性別不明・中性的な中世ヨーロッパ王族風の神格。原虹の最初の光から生まれた『自意識』そのもの。性別という概念の外にいる。虹光剣『始源(げんそう)』は万色の刃。
+- **確率**: 0.5%（Rから吸い取り）
+
+### プロンプト
+
+```
+anime-style full-body portrait of a mysterious ethereal androgynous medieval royal figure,
+ambiguous sex, neither clearly masculine nor feminine, calm refined delicate features,
+long flowing straight silver-white hair with shifting rainbow prismatic highlights,
+pale luminous glowing skin, piercing wise eyes that shift through rainbow colors,
+wearing an elaborate ornate medieval royal ceremonial robe in white, gold and rainbow gradient,
+layered regal garments with cosmic embroidery, tall intricate crown made of floating rainbow prism crystals levitating above the head,
+long flowing white cape with rainbow aurora patterns trailing behind,
+holding a slender elegant longsword forged from solidified rainbow light, blade showing every color of the spectrum,
+standing in a serene majestic sovereign pose, one hand resting on the pommel of the sword, other hand held elegantly,
+an enormous prismatic crystal floating slowly behind them like a sacred halo,
+subtle rainbow aurora waves flowing gracefully around them, sacred geometry patterns faintly glowing in the air,
+clean starry night background with layered auroras, divine light from above,
+cinematic divine rim lighting, highly detailed anime illustration,
+original character, no logos, no text, no watermark, tasteful art, solemn dignified atmosphere
+```
+
+### ポイント
+- `androgynous` / `ambiguous sex` / `neither clearly masculine nor feminine` を明示 → 性別不明
+- `medieval royal` / `sovereign` / `dignified` → 唯一のLegendを名乗れる威厳
+- `rainbow prismatic` / `rainbow light` / `rainbow aurora` → 原虹の化身
+- `solidified rainbow light` の剣 → 世界観(虹霊界) とリンク
+
+---
+
 ## 使い方
 
 1. 上記プロンプトをそのままChatGPTにコピペ（1体ずつ）
