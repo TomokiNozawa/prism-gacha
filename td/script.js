@@ -19,9 +19,9 @@ const ROWS = 6;
 const IMG_BASE = "../images/characters/season1";
 
 const BASE_HP = 3;
-const START_RESOURCE = 200;
-const RESOURCE_REGEN = 4.2; // per second
-const DEPLOY_COOLDOWN = 6000; // ms before same unit can be redeployed
+const START_RESOURCE = 250;
+const RESOURCE_REGEN = 5.2; // per second
+const DEPLOY_COOLDOWN = 5500; // ms before same unit can be redeployed
 const UNIT_DEPLOY_ROWS_ALLOWED = [0, 1, 2, 3, 4, 5]; // all rows
 
 // ─────────────────────────────────────────────────────────────
@@ -1445,6 +1445,19 @@ function startBattle() {
 
   setTimeout(() => showMsg(`STAGE ${stage.num}`, stage.title, 1400), 100);
   setTimeout(() => startNextWave(), 1600);
+
+  // First-time tutorial
+  if (stage.num === 1 && !localStorage.getItem("prism-defense-tut")) {
+    setTimeout(() => {
+      const t = $("#tutorial-hint");
+      t.innerHTML = `<b>操作</b>: 下の戦士カードをタップ → マスをタップで配置。<br>💎虹晶は時間で回復＋敵撃破で獲得。`;
+      t.classList.add("show");
+      setTimeout(() => {
+        t.classList.remove("show");
+        localStorage.setItem("prism-defense-tut", "1");
+      }, 7500);
+    }, 1800);
+  }
 }
 
 function renderBattlefield() {
@@ -1589,6 +1602,16 @@ function renderHUD() {
   hearts.forEach((h, i) => {
     h.classList.toggle("lost", i >= b.baseHp);
   });
+  // Boss HP
+  const boss = b.enemies.find(e => e.isBoss);
+  const bossWrap = $("#boss-hp-wrap");
+  if (boss) {
+    bossWrap.classList.add("show");
+    $("#boss-hp-label").textContent = boss.def.name.toUpperCase();
+    $("#boss-hp-fill").style.width = `${Math.max(0, (boss.hp / boss.maxHp) * 100)}%`;
+  } else {
+    bossWrap.classList.remove("show");
+  }
 }
 
 function renderPaletteState() {
@@ -1886,6 +1909,10 @@ function damageEnemy(e, dmg, crit) {
   }
   showDamageNum(e.cx, e.cy, dmg, crit);
   SE.hit();
+  if (e.isBoss) {
+    const fill = $("#boss-hp-fill");
+    if (fill) fill.style.width = `${Math.max(0, (e.hp / e.maxHp) * 100)}%`;
+  }
   if (e.hp <= 0) killEnemy(e);
 }
 
@@ -1909,10 +1936,14 @@ function tickEnemies(dt) {
       }
     }
 
-    // Check if blocked by unit in same cell
-    const blockerKey = `${e.col},${Math.floor(e.y + 0.51)}`;
-    const blocker = b.cells[blockerKey];
-    if (blocker && e.y >= blocker.row - 0.4) {
+    // Check if blocked by a unit in same column in engagement window
+    let blocker = null;
+    for (const u of b.units) {
+      if (u.col !== e.col) continue;
+      const gap = u.row - e.y;
+      if (gap >= -0.1 && gap <= 0.55) { blocker = u; break; }
+    }
+    if (blocker) {
       // Attack blocker
       e.atkCd -= dt;
       if (e.atkCd <= 0) {
