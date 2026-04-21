@@ -180,6 +180,107 @@ high-quality detailed anime illustration, original character, no logos, no text,
 
 ---
 
+## 🌈 UR 追加1体（既存4体と同じ派手度レベル）
+
+既存URは「羽/龍影/銀河/九尾」など派手装飾MAX。同等レベルで欠けている『炎/鳳凰/赤金』属性を追加。
+
+### 12. `ur_05_flame_empress.png` — 焔帝 ヒノオウ（炎と鳳凰の女神帝）
+
+**キャラ設定**:
+- 肩書き: 虹霊界第七天の女神帝
+- キャッチ: 「すべての闇を、この火で照らしてやろう」
+- ストーリー: 七天の最高天を統べる炎の女神帝。背に巨大な朱の鳳凰を従え、双大剣『日輪(にちりん)』『月輪(げつりん)』を振るう。影喰いとの戦いでは常に前衛に立つ戦闘神。焔と虹を同時に纏う稀有な存在。
+
+```
+anime-style full-body portrait of a majestic divine flame empress,
+long flowing crimson-red hair with golden highlights shifting like living fire, piercing bright gold eyes with a fierce confident expression,
+fair luminous skin, wearing elaborate ornate crimson-and-gold imperial armor with scarlet silk robes layered beneath,
+intricate phoenix feather patterns embroidered in gold across the armor,
+a massive ethereal red-and-gold phoenix silhouette spread wide behind her, wings formed of flame and rainbow sparks,
+long flowing red and gold royal cape with phoenix feather trim,
+holding twin curved long swords "Sun-Wheel" and "Moon-Wheel" crossed elegantly, blades wreathed in ruby and golden flames with rainbow embers,
+commanding royal pose with both swords raised gracefully, subtle smile of certain victory,
+sacred flames and rainbow cinders swirling around her, heated air distortion behind her,
+small ornate golden imperial crown with a single burning rainbow gem,
+clean starry night background with dawn-red aurora and scattered glowing sparks,
+cinematic divine rim lighting, highly detailed anime illustration,
+original character, no logos, no text, no watermark, tasteful art
+```
+
+---
+
+## 💜 SR 追加3体（既存7体と同じ派手度レベル）
+
+既存SRは「推しキャラ風 + 虹アクセント少し」路線。追加3体も同じ華やかさ、武器・属性・性別のバランス考慮（男性1・女性2、音/影/炎）。
+
+### 13. `sr_08_songstress.png` — 詠聖 ベル（月光の歌姫）
+
+**キャラ設定**:
+- 肩書き: 月夜堂の歌姫
+- キャッチ: 「私の歌、届いてる？」
+- ストーリー: 月夜堂の看板歌姫。歌声そのものが神聖な浄化の力を宿し、影喰いを封じる。ソロ公演は虹霊界全域から観客を集める大スター。
+
+```
+anime-style full-body portrait of a gentle elegant young teenage songstress,
+long silky silver-lavender hair with soft curls, bright pale-blue eyes, soft kind gentle smile, fair skin,
+wearing an elegant flowing white and pale-violet performance gown with silver embroidery and subtle rainbow prism trim,
+gossamer lavender ribbons flowing from the shoulders, a sheer white stole,
+silver high-heeled shoes, small silver crescent moon earrings,
+holding an ornate silver hand-held microphone with a small rainbow crystal orb at the top,
+musical notes and glowing sound wave ripples in soft rainbow colors floating around her,
+graceful singing pose with one hand raised delicately, eyes closed softly in emotion,
+clean starry night background with pale violet and blue aurora and a small luminous moon,
+cinematic rim lighting, highly detailed anime illustration,
+original character, no logos, no text, no watermark, tasteful art
+```
+
+---
+
+### 14. `sr_09_shadow_ninja.png` — 影刃 シン（冥暗流の双剣忍影）
+
+**キャラ設定**:
+- 肩書き: 冥暗流若頭
+- キャッチ: 「気配は消した。覚悟だけしとけ」
+- ストーリー: 冥暗流の若き頭領。先代を影喰いに奪われ、復讐と世界救済を胸に夜の戦場を駆ける。短剣二刀流の名手。
+
+```
+anime-style full-body portrait of a cool stoic teenage boy shadow ninja,
+short messy jet-black hair with indigo streaks falling over one eye, sharp amber-gold eyes, fair skin,
+wearing a form-fitting dark indigo ninja combat outfit with silver metallic trim, a silver scarf trailing behind,
+dark fingerless gloves, ninja tabi sandals, subtle silver buckles and ninja pouches on the belt,
+wielding twin short curved kunai-style blades in a reverse-grip cross stance, blades edged with thin purple aura,
+calm confident expression with slight smirk, dynamic low ready pose with long shadow trailing behind,
+dark indigo smoke and silver sparks swirling around him,
+clean starry night background with cool blue aurora and a crescent moon silhouette,
+cinematic rim lighting, highly detailed anime illustration,
+original character, no logos, no text, no watermark, tasteful art
+```
+
+---
+
+### 15. `sr_10_flame_dancer.png` — 焔舞 ヒナカ（緋炎流の舞扇使い）
+
+**キャラ設定**:
+- 肩書き: 緋炎流舞踊家
+- キャッチ: 「さあ、燃えるような舞を見せてあげる♪」
+- ストーリー: 緋炎流の天才舞踊家。戦場では扇の舞で敵を撹乱しつつ焔で焼き尽くす。ステージで踊る事と戦場で戦う事に境界がない。
+
+```
+anime-style full-body portrait of a spirited teenage flame dancer,
+long flowing orange-red hair tied in a high ponytail with a gold ribbon bow, bright amber eyes, warm confident smile showing small fangs,
+fair skin with warm tones, wearing a flowing red and gold dance-kimono outfit short enough to allow movement,
+orange flame patterns embroidered in gold across the fabric, wide bell-sleeves,
+golden obi sash with large red bow, bare legs with red leg-warmers, red geta sandals,
+holding a pair of ornate golden folding fans spread wide, each fan emitting dancing orange-red flames and rainbow embers,
+dynamic graceful dance pose with one leg raised and arms outstretched like flames,
+warm flame particles and golden sparks swirling around her,
+clean starry night background with warm orange sunset aurora and scattered glowing embers,
+cinematic rim lighting, highly detailed anime illustration,
+original character, no logos, no text, no watermark, tasteful art
+```
+
+---
+
 ## 👑 LR (Legend Rare) — 唯一の伝説枠
 
 **ファイル名**: `lr_01_legend.png`
