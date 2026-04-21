@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0a0818">
+<title>Prism Defense — 虹光を守れ</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ─────────── Title Screen ─────────── -->
+<div id="screen-title" class="screen active">
+  <div class="title-bg"></div>
+  <div class="title-inner">
+    <div class="title-chapter">第一章</div>
+    <h1 class="title-main">Prism<span>Defense</span></h1>
+    <p class="title-sub">影喰い(シェイドーヴァ)が、虹を喰らいはじめた。</p>
+    <p class="title-tag">原虹の光を、君の手で守り抜け。</p>
+    <div class="title-buttons">
+      <button id="btn-start" class="btn btn-primary">⚔ 出撃する</button>
+      <button id="btn-dex" class="btn btn-ghost">📖 戦士図鑑</button>
+      <button id="btn-reset-progress" class="btn btn-mini" title="進行度リセット">⟳</button>
+    </div>
+    <a href="../index.html" class="back-gacha">← ガチャへ戻る</a>
+    <div class="ver">Prism Defense v0.1</div>
+  </div>
+</div>
+
+<!-- ─────────── Stage Select ─────────── -->
+<div id="screen-stages" class="screen">
+  <header class="sub-head">
+    <button class="back" data-back="title">←</button>
+    <h2>ステージ選択</h2>
+    <div class="spacer"></div>
+  </header>
+  <div class="stage-grid" id="stage-grid"></div>
+  <div class="chap-story" id="chap-story"></div>
+</div>
+
+<!-- ─────────── Deck Builder ─────────── -->
+<div id="screen-deck" class="screen">
+  <header class="sub-head">
+    <button class="back" data-back="stages">←</button>
+    <h2>編成 <span class="deck-count">(<span id="deck-current">0</span>/6)</span></h2>
+    <button class="start-battle" id="btn-battle-start" disabled>出撃 →</button>
+  </header>
+  <div class="deck-intro" id="deck-intro"></div>
+  <div class="deck-tabs">
+    <button class="tab active" data-tier="ALL">全</button>
+    <button class="tab" data-tier="LR">👑 LR</button>
+    <button class="tab" data-tier="UR">🌈 UR</button>
+    <button class="tab" data-tier="SSR">✨ SSR</button>
+    <button class="tab" data-tier="SR">💜 SR</button>
+    <button class="tab" data-tier="R">💙 R</button>
+  </div>
+  <div class="unit-grid" id="unit-grid"></div>
+  <div class="deck-preview" id="deck-preview"></div>
+</div>
+
+<!-- ─────────── Battle Screen ─────────── -->
+<div id="screen-battle" class="screen">
+  <div class="hud">
+    <div class="hud-left">
+      <div class="hud-stage">第<b id="hud-stage">1</b>話</div>
+      <div class="hud-wave">WAVE <b id="hud-wave">1</b>/<b id="hud-wave-total">3</b></div>
+    </div>
+    <div class="hud-center">
+      <div class="hud-crystal">
+        <span class="icon">💎</span><b id="hud-res">200</b>
+      </div>
+    </div>
+    <div class="hud-right">
+      <div class="hud-hp" id="hud-hp-wrap">
+        <span class="heart" data-i="0">♥</span>
+        <span class="heart" data-i="1">♥</span>
+        <span class="heart" data-i="2">♥</span>
+      </div>
+      <button id="btn-pause" class="hud-btn">⏸</button>
+      <button id="btn-speed" class="hud-btn" title="速度切替">▶</button>
+    </div>
+  </div>
+
+  <div class="battlefield-wrap">
+    <div class="base-marker top">▼ 影喰いの現れる空 ▼</div>
+    <div class="battlefield" id="battlefield"></div>
+    <div class="base-marker bottom">▲ 原虹の祭壇 ▲</div>
+    <div class="battle-fx" id="battle-fx"></div>
+    <div class="battle-msg" id="battle-msg"></div>
+  </div>
+
+  <div class="palette-wrap">
+    <div class="palette" id="palette"></div>
+    <div class="cancel-zone" id="cancel-zone">キャンセル</div>
+  </div>
+
+  <div id="pause-overlay" class="overlay">
+    <div class="overlay-inner">
+      <h2>一時停止</h2>
+      <button class="btn btn-primary" id="btn-resume">続ける</button>
+      <button class="btn btn-ghost" id="btn-retry">やり直す</button>
+      <button class="btn btn-ghost" id="btn-exit-battle">撤退</button>
+    </div>
+  </div>
+
+  <div id="result-overlay" class="overlay">
+    <div class="overlay-inner result-inner">
+      <h2 id="result-title">勝利</h2>
+      <div class="result-subtitle" id="result-subtitle"></div>
+      <div class="result-story" id="result-story"></div>
+      <div class="result-rewards">
+        <div class="reward"><span class="icon">💎</span><span id="reward-shards">+0</span></div>
+        <div class="reward" id="reward-first-clear" style="display:none">
+          <span class="icon">🏆</span>初クリア報酬
+        </div>
+      </div>
+      <div class="result-buttons">
+        <button class="btn btn-primary" id="btn-result-next">次へ →</button>
+        <button class="btn btn-ghost" id="btn-result-retry">やり直す</button>
+        <button class="btn btn-ghost" id="btn-result-home">選択画面へ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────── Dex ─────────── -->
+<div id="screen-dex" class="screen">
+  <header class="sub-head">
+    <button class="back" data-back="title">←</button>
+    <h2>戦士図鑑</h2>
+    <div class="spacer"></div>
+  </header>
+  <div class="dex-list" id="dex-list"></div>
+</div>
+
+<!-- Unit detail modal -->
+<div id="unit-modal" class="modal">
+  <div class="modal-backdrop" data-close-modal></div>
+  <div class="modal-inner unit-modal-inner">
+    <button class="modal-close" data-close-modal>×</button>
+    <div class="um-img-wrap"><img id="um-img" alt=""></div>
+    <div class="um-tier" id="um-tier"></div>
+    <div class="um-name" id="um-name"></div>
+    <div class="um-title" id="um-title"></div>
+    <div class="um-faction" id="um-faction"></div>
+    <div class="um-stats" id="um-stats"></div>
+    <div class="um-skill" id="um-skill"></div>
+    <div class="um-quote" id="um-quote"></div>
+    <div class="um-desc" id="um-desc"></div>
+    <div class="um-relations" id="um-relations"></div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
