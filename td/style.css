@@ -143,6 +143,27 @@ body::before {
   opacity: 0;
   animation: fadeInUp .8s .7s forwards;
 }
+.title-progress {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 18px;
+  font-size: 12px;
+  color: var(--dim);
+  letter-spacing: .08em;
+  opacity: 0;
+  animation: fadeInUp .8s .6s forwards;
+}
+.title-progress .p-chip {
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(20,12,40,0.4);
+  display: inline-flex;
+  gap: 4px;
+}
+.title-progress .p-chip b { color: var(--text); }
+.title-progress .p-chip .star { color: #ffd35c; }
 
 .btn {
   appearance: none;

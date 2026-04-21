@@ -1207,7 +1207,23 @@ const SE = {
 function showScreen(name) {
   document.querySelectorAll(".screen").forEach(s => s.classList.toggle("active", s.id === "screen-" + name));
   state.screen = name;
+  if (name === "title") updateTitleProgress();
   SE.tap();
+}
+
+function updateTitleProgress() {
+  const wrap = $("#title-progress");
+  if (!wrap) return;
+  const clearedCount = Object.keys(state.clearedStages).length;
+  const totalStars = Object.values(state.clearedStages).reduce((a, b) => a + (b.stars || 0), 0);
+  if (clearedCount === 0) {
+    wrap.innerHTML = "";
+    return;
+  }
+  wrap.innerHTML = `
+    <div class="p-chip">クリア <b>${clearedCount}/${STAGES.length}</b></div>
+    <div class="p-chip"><span class="star">★</span> <b>${totalStars}/${STAGES.length * 3}</b></div>
+  `;
 }
 
 function $(sel) { return document.querySelector(sel); }
@@ -2313,6 +2329,7 @@ function cleanupBattle() {
 document.addEventListener("DOMContentLoaded", () => {
   loadSave();
 
+  updateTitleProgress();
   $("#btn-start").addEventListener("click", () => {
     showScreen("stages");
     renderStageGrid();
