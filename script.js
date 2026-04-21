@@ -132,15 +132,24 @@ const state = loadState();
 function loadState() {
   try {
     const raw = JSON.parse(localStorage.getItem("prism-gacha") || "{}");
-    return {
+    const s = {
       total: raw.total || 0,
       ur: raw.ur || 0,
       pity: raw.pity || 0,
       god: raw.god || false,
       history: raw.history || [],
-      galleryViewed: raw.galleryViewed || {},  // 図鑑で詳細を開いたキャラ{"UR_セラフィエル": true}
+      galleryViewed: raw.galleryViewed || {},
+      unlockedSet: raw.unlockedSet || {},  // "UR_セラフィエル": true （永続）
     };
-  } catch { return { total:0, ur:0, pity:0, god:false, history:[], galleryViewed:{} }; }
+    // マイグレーション: 既存 history からunlockedSetを補完 (旧セーブデータ救済)
+    for (const h of s.history) {
+      const k = h.tier + "_" + h.name;
+      if (!s.unlockedSet[k]) s.unlockedSet[k] = true;
+    }
+    return s;
+  } catch {
+    return { total:0, ur:0, pity:0, god:false, history:[], galleryViewed:{}, unlockedSet:{} };
+  }
 }
 function saveState() {
   localStorage.setItem("prism-gacha", JSON.stringify(state));
@@ -167,8 +176,10 @@ function pickTier(tier) {
 }
 
 function applyPull(result) {
-  // 初回獲得判定(履歴に追加する前に確認)
-  result.isNew = !state.history.some(h => h.name === result.name && h.tier === result.tier);
+  const key = result.tier + "_" + result.name;
+  // 初回獲得判定(永続セットで判定 — 履歴120件制限の影響を受けない)
+  result.isNew = !state.unlockedSet[key];
+  state.unlockedSet[key] = true;
   state.total += 1;
   if (result.tier === "UR") { state.ur += 1; state.pity = 0; }
   else state.pity += 1;
@@ -1300,7 +1311,7 @@ function getAllCharactersWithTier() {
 }
 
 function isUnlocked(c) {
-  return state.history.some(h => h.name === c.name && h.tier === c.tier);
+  return !!state.unlockedSet[galleryKey(c)];
 }
 
 function galleryKey(c) { return c.tier + "_" + c.name; }
