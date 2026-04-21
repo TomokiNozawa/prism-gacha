@@ -283,6 +283,13 @@ function updateHUD() {
   renderHistory();
 }
 
+// 履歴・図鑑で古いセーブデータのimgパスを最新POOLから引き直す
+function resolveCharImg(tier, name, fallback) {
+  const pool = POOL[tier] || [];
+  const c = pool.find(p => p.name === name);
+  return c ? c.img : (fallback || "");
+}
+
 function renderHistory() {
   const grid = $("#history");
   grid.innerHTML = "";
@@ -291,7 +298,8 @@ function renderHistory() {
     c.className = "hcard " + h.tier.toLowerCase();
     const img = document.createElement("div");
     img.className = "hcard-img";
-    img.style.backgroundImage = `url('${h.img}')`;
+    // 旧パス履歴にも対応するため POOL から最新imgを引き直す
+    img.style.backgroundImage = `url('${resolveCharImg(h.tier, h.name, h.img)}')`;
     c.appendChild(img);
     const nm = document.createElement("div");
     nm.className = "hcard-name"; nm.textContent = h.name;
