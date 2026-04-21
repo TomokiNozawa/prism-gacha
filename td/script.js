@@ -1241,7 +1241,15 @@ function renderStageGrid() {
   }
   const unlockedUntil = Math.max(1, lastCleared + 1);
 
+  let curChap = "";
   for (const s of STAGES) {
+    if (s.chap !== curChap) {
+      curChap = s.chap;
+      const header = document.createElement("div");
+      header.className = "chap-header";
+      header.textContent = s.chap;
+      grid.appendChild(header);
+    }
     const card = document.createElement("div");
     card.className = "stage-card";
     const cleared = !!state.clearedStages[s.num];

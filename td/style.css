@@ -275,12 +275,28 @@ body::before {
 .stage-grid {
   flex: 1;
   overflow-y: auto;
-  padding: 16px 14px 80px;
+  padding: 14px 14px 100px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  gap: 8px;
   position: relative;
   z-index: 2;
+}
+.chap-header {
+  grid-column: 1 / -1;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text);
+  padding: 6px 4px;
+  margin-top: 6px;
+  letter-spacing: .12em;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(90deg, transparent, rgba(255,140,240,0.08), transparent);
+  border-radius: 0 0 6px 6px;
+}
+.chap-header::before {
+  content: "✦ ";
+  color: #ff8cf0;
 }
 .stage-card {
   aspect-ratio: 1 / 1.15;
