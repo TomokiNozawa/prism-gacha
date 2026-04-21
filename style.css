@@ -1,0 +1,1232 @@
+/* ============================================================
+   Prism Gacha v0.1 — 脳汁演出
+   ============================================================ */
+:root {
+  --bg: #05060d;
+  --bg-2: #0a0e1d;
+  --text: #e8ecff;
+  --muted: #7e86a6;
+  --r: #6fa8ff;
+  --sr: #c87dff;
+  --ssr: #ffd96a;
+  --ur-a: #ff5faa;
+  --ur-b: #ffd84d;
+  --ur-c: #5fffd4;
+  --ur-d: #7ea8ff;
+  --ur-e: #c87dff;
+}
+
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0; height: 100%;
+  font-family: -apple-system, "Segoe UI", "Yu Gothic UI", system-ui, sans-serif;
+  color: var(--text);
+  background: #000;
+  overflow-x: hidden;
+}
+
+/* background layer — tier によって明度/色を変化 */
+#bg-layer {
+  position: fixed; inset: 0; z-index: -1;
+  background: radial-gradient(ellipse at 50% 30%, #121a36 0%, #05060d 50%, #000 100%);
+  transition: filter 1.2s ease, background 1.2s ease;
+}
+body.t-100 #bg-layer { filter: hue-rotate(20deg) saturate(1.3); }
+body.t-500 #bg-layer {
+  background: radial-gradient(ellipse at 50% 30%, #2a1f56 0%, #0b0a22 50%, #000 100%);
+  filter: saturate(1.5);
+}
+body.t-1000 #bg-layer {
+  background: conic-gradient(from 0deg at 50% 50%, #ff5faa, #ffd84d, #5fffd4, #7ea8ff, #c87dff, #ff5faa);
+  filter: saturate(1.5) brightness(0.45) blur(1px);
+  animation: slow-spin 60s linear infinite;
+}
+@keyframes slow-spin { to { transform: rotate(360deg); } }
+
+/* starfield */
+body::before {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: -1;
+  background-image:
+    radial-gradient(1px 1px at 10% 20%, #fff, transparent 50%),
+    radial-gradient(1px 1px at 80% 30%, #fff, transparent 50%),
+    radial-gradient(1.5px 1.5px at 30% 70%, #fff, transparent 50%),
+    radial-gradient(1px 1px at 60% 80%, #fff, transparent 50%),
+    radial-gradient(1px 1px at 90% 60%, #fff, transparent 50%),
+    radial-gradient(1px 1px at 25% 90%, #fff, transparent 50%),
+    radial-gradient(1px 1px at 45% 15%, #fff, transparent 50%),
+    radial-gradient(1px 1px at 70% 45%, #fff, transparent 50%);
+  animation: twinkle 5s ease-in-out infinite alternate;
+}
+@keyframes twinkle { from {opacity:.3;} to {opacity:.9;} }
+
+/* ======= topbar ======= */
+.topbar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 22px;
+  background: rgba(10,14,29,0.7);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  position: sticky; top: 0; z-index: 10;
+}
+.title {
+  font-size: 20px; font-weight: 700; letter-spacing: 0.08em;
+  background: linear-gradient(90deg, #ffd84d, #5fffd4, #c87dff, #ff5faa);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.ver { font-size: 11px; color: var(--muted); margin-left: 6px; letter-spacing: 0; }
+.stats { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.stat {
+  font-size: 12px; color: var(--muted); padding: 6px 10px;
+  background: rgba(255,255,255,0.04); border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.stat b { color: var(--text); font-weight: 700; margin-left: 4px; }
+.god, .reset {
+  font-family: inherit; font-size: 11px;
+  padding: 6px 10px; border-radius: 6px; cursor: pointer;
+  background: rgba(255,255,255,0.04); color: var(--muted);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.god.on {
+  background: linear-gradient(90deg, #ff5faa, #ffd84d);
+  color: #111; border-color: #ffd84d; font-weight: 700;
+}
+
+/* ======= hero ======= */
+main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
+
+.hero {
+  display: grid; grid-template-columns: 1fr auto; gap: 40px; align-items: center;
+  margin-bottom: 48px;
+}
+.hero h1 {
+  font-size: 42px; margin: 0 0 8px; letter-spacing: 0.1em;
+  background: linear-gradient(90deg, #fff, #ffd84d 30%, #c87dff 60%, #5fffd4);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.hero p { color: var(--muted); margin: 0 0 14px; font-size: 14px; }
+.rate { display: flex; gap: 10px; flex-wrap: wrap; }
+.rate span {
+  font-size: 11px; padding: 4px 10px; border-radius: 999px;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+}
+.rate .r { color: var(--r); }
+.rate .sr { color: var(--sr); }
+.rate .ssr { color: var(--ssr); }
+.rate .ur { color: #fff; background: linear-gradient(90deg, var(--ur-a), var(--ur-b), var(--ur-c), var(--ur-d)); }
+
+/* summon buttons */
+.cta { display: flex; gap: 14px; }
+.summon {
+  position: relative; cursor: pointer;
+  min-width: 140px; padding: 22px 28px;
+  font-family: inherit; font-size: 18px; font-weight: 700; letter-spacing: 0.1em;
+  color: #fff; background: transparent;
+  border: 2px solid rgba(255,255,255,0.25);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: transform .15s ease, border-color .2s ease, box-shadow .2s ease;
+}
+.summon::before {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(200,125,255,0.15), rgba(95,255,212,0.15));
+  opacity: 0.7; z-index: -1;
+}
+.summon:hover {
+  border-color: rgba(255,255,255,0.6);
+  box-shadow: 0 0 30px rgba(200,125,255,0.4);
+  transform: translateY(-2px);
+}
+.summon:active { transform: translateY(0); }
+.summon .lbl { display: block; }
+.summon .hint {
+  display: block; font-size: 10px; margin-top: 4px;
+  color: rgba(255,255,255,0.5); letter-spacing: 0.2em;
+}
+.summon.ten {
+  border-color: rgba(255,216,77,0.5);
+  box-shadow: 0 0 20px rgba(255,216,77,0.15);
+}
+.summon.ten::before {
+  background: linear-gradient(135deg, rgba(255,95,170,0.2), rgba(255,216,77,0.2), rgba(95,255,212,0.2));
+}
+
+/* ======= history ======= */
+.history h3 { margin: 0 0 12px; font-size: 14px; color: var(--muted); font-weight: 500; }
+.muted { color: var(--muted); font-size: 11px; }
+.history-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+  gap: 8px;
+}
+.hcard {
+  aspect-ratio: 2/3; border-radius: 6px;
+  background: #0a0e1d; border: 1px solid rgba(255,255,255,0.08);
+  display: flex; align-items: end; justify-content: center;
+  padding: 4px; font-size: 10px; color: #fff;
+  background-size: cover; background-position: center;
+  position: relative; overflow: hidden;
+}
+.hcard.r { border-color: var(--r); box-shadow: 0 0 8px rgba(111,168,255,0.2); }
+.hcard.sr { border-color: var(--sr); box-shadow: 0 0 10px rgba(200,125,255,0.35); }
+.hcard.ssr { border-color: var(--ssr); box-shadow: 0 0 14px rgba(255,217,106,0.5); }
+.hcard.ur {
+  border: 2px solid transparent;
+  background-image:
+    linear-gradient(#0a0e1d, #0a0e1d),
+    linear-gradient(135deg, var(--ur-a), var(--ur-b), var(--ur-c), var(--ur-d), var(--ur-e));
+  background-origin: border-box; background-clip: padding-box, border-box;
+  box-shadow: 0 0 18px rgba(255,95,170,0.6);
+}
+.hcard-img {
+  position: absolute; inset: 0;
+  background-size: cover; background-position: center top;
+}
+.hcard-name {
+  position: relative;
+  background: rgba(0,0,0,0.6); padding: 2px 4px; border-radius: 3px;
+}
+
+/* ======= stage overlay ======= */
+.stage {
+  position: fixed; inset: 0; z-index: 100;
+  background: #000;
+  display: none;
+  overflow: hidden;
+}
+.stage.active { display: block; }
+#stage-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.stage-layer {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none;
+}
+.stage-skip {
+  position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+  color: rgba(255,255,255,0.4); font-size: 11px; letter-spacing: 0.2em;
+}
+
+/* tier colors during summon */
+.stage.tier-r { background: radial-gradient(circle at 50% 50%, #112a4a 0%, #000 70%); }
+.stage.tier-sr { background: radial-gradient(circle at 50% 50%, #2a1a4a 0%, #000 70%); }
+.stage.tier-ssr { background: radial-gradient(circle at 50% 50%, #4a3a10 0%, #000 70%); }
+.stage.tier-ur { background: #000; }
+
+/* character reveal */
+.char-reveal {
+  max-height: 82vh; max-width: 80vw;
+  filter: drop-shadow(0 0 30px rgba(255,255,255,0.4));
+  animation:
+    char-pop .6s cubic-bezier(.2,1.3,.4,1),
+    idle-breath 4s ease-in-out infinite 0.6s;
+}
+.tier-ur .char-reveal {
+  filter:
+    drop-shadow(0 0 30px rgba(255,95,170,0.8))
+    drop-shadow(0 0 60px rgba(255,216,77,0.6));
+  animation:
+    char-pop .6s cubic-bezier(.2,1.3,.4,1),
+    idle-float 3s ease-in-out infinite 0.6s,
+    idle-breath 4s ease-in-out infinite 0.6s;
+}
+.tier-ssr .char-reveal {
+  filter:
+    drop-shadow(0 0 25px rgba(255,216,77,0.55))
+    drop-shadow(0 0 50px rgba(255,185,60,0.35));
+  animation:
+    char-pop .6s cubic-bezier(.2,1.3,.4,1),
+    idle-sway 5s ease-in-out infinite 0.6s,
+    idle-breath 4s ease-in-out infinite 0.6s;
+}
+@keyframes char-pop {
+  0% { transform: scale(0.3) translateY(0); opacity: 0; filter: blur(20px); }
+  100% { transform: scale(1) translateY(0); opacity: 1; filter: blur(0); }
+}
+/* 浮遊(縦揺れ) */
+@keyframes idle-float {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+/* ゆらぎ(軽い左右) */
+@keyframes idle-sway {
+  0%,100% { transform: translateX(0) translateY(0); }
+  25% { transform: translateX(3px) translateY(-3px); }
+  75% { transform: translateX(-3px) translateY(-3px); }
+}
+/* 呼吸(スケール微) */
+@keyframes idle-breath {
+  0%,100% { scale: 1; }
+  50% { scale: 1.015; }
+}
+
+/* VFX pillar */
+.fx-pillar {
+  position: absolute; top: 0; bottom: 0; left: 50%;
+  width: 300px; transform: translateX(-50%);
+  background-size: contain; background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0;
+  mix-blend-mode: screen;
+}
+.fx-pillar.show {
+  animation: pillar-in 0.5s ease-out forwards;
+}
+@keyframes pillar-in {
+  0% { opacity: 0; transform: translateX(-50%) scaleY(0.1); }
+  60% { opacity: 1; transform: translateX(-50%) scaleY(1.1); }
+  100% { opacity: 1; transform: translateX(-50%) scaleY(1); }
+}
+
+/* text "gacha!" intro */
+.fx-text {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  font-size: 88px; font-weight: 900; letter-spacing: 0.15em;
+  color: transparent; -webkit-text-stroke: 2px #fff;
+  text-shadow: 0 0 40px currentColor;
+  opacity: 0;
+}
+.fx-text.pop { animation: text-pop 0.7s ease-out forwards; }
+@keyframes text-pop {
+  0% { opacity: 0; transform: translate(-50%,-50%) scale(0.4); letter-spacing: 0; }
+  50% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%,-50%) scale(1.4); letter-spacing: 0.3em; }
+}
+
+/* Crack VFX (fake break) */
+.fx-crack {
+  position: absolute; inset: 0;
+  background-size: cover; background-position: center;
+  opacity: 0;
+}
+.fx-crack.show {
+  animation: crack-in 0.7s ease-out forwards;
+}
+@keyframes crack-in {
+  0% { opacity: 0; transform: scale(0.85); }
+  40% { opacity: 0.95; transform: scale(1.05); filter: brightness(1.6); }
+  100% { opacity: 0; transform: scale(1.25); filter: brightness(1); }
+}
+
+/* white flash — tier強度に応じて3段階 */
+.fx-flash {
+  position: absolute; inset: 0; background: #fff;
+  opacity: 0; pointer-events: none;
+}
+.fx-flash.soft { animation: flash-soft .45s ease-out; }
+.fx-flash.mid  { animation: flash-mid  .5s ease-out; }
+.fx-flash.hard { animation: flash-hard .55s ease-out; }
+@keyframes flash-soft { 0%{opacity:0;} 30%{opacity:0.35;} 100%{opacity:0;} }
+@keyframes flash-mid  { 0%{opacity:0;} 25%{opacity:0.6;}  100%{opacity:0;} }
+@keyframes flash-hard { 0%{opacity:0;} 20%{opacity:0.85;} 100%{opacity:0;} }
+
+/* ======= 脳汁強化VFX ======= */
+
+/* 煽りテキスト: 「SR確定...?」など沈黙中の表示 */
+.fx-taunt {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  font-size: 28px; font-weight: 600; letter-spacing: 0.2em;
+  color: rgba(255,255,255,0.8);
+  text-shadow: 0 0 20px rgba(255,255,255,0.3);
+  opacity: 0;
+  white-space: nowrap;
+}
+.fx-taunt.show {
+  animation: taunt-in .5s ease-out forwards, taunt-fade .5s ease-in 2s forwards;
+}
+@keyframes taunt-in {
+  0% { opacity: 0; transform: translate(-50%, -30%); letter-spacing: 0; }
+  100% { opacity: 0.85; transform: translate(-50%, -50%); letter-spacing: 0.2em; }
+}
+@keyframes taunt-fade {
+  0% { opacity: 0.85; }
+  100% { opacity: 0; }
+}
+
+/* 確率ポップ: UR時の 0.3% 表示 */
+.fx-rate {
+  position: absolute; top: 14%; left: 50%; transform: translateX(-50%);
+  padding: 10px 22px; border-radius: 999px;
+  background: linear-gradient(90deg, #ff5faa, #ffd84d, #5fffd4, #7ea8ff, #c87dff);
+  background-size: 300% 300%;
+  color: #111; font-weight: 800; font-size: 22px; letter-spacing: 0.15em;
+  box-shadow: 0 0 30px rgba(255,255,255,0.5);
+  opacity: 0;
+  animation: rate-in .5s cubic-bezier(.2,1.4,.4,1) forwards, rate-shine 2s linear infinite;
+}
+@keyframes rate-in {
+  0% { opacity: 0; transform: translateX(-50%) translateY(-20px) scale(0.5); }
+  60% { opacity: 1; transform: translateX(-50%) translateY(5px) scale(1.15); }
+  100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+@keyframes rate-shine {
+  0%,100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* 波紋: UR確定時 */
+.fx-ring {
+  position: absolute; top: 50%; left: 50%;
+  width: 20px; height: 20px; border-radius: 50%;
+  transform: translate(-50%, -50%);
+  border: 3px solid rgba(255,255,255,0.8);
+  opacity: 0;
+  pointer-events: none;
+}
+.fx-ring.go {
+  animation: ring-expand 1.2s cubic-bezier(.2,.6,.3,1) forwards;
+}
+@keyframes ring-expand {
+  0% { opacity: 0.9; width: 20px; height: 20px; border-width: 6px; }
+  100% { opacity: 0; width: 140vmax; height: 140vmax; border-width: 1px; }
+}
+
+/* 星屑降下: UR時にキャラ背景へ */
+.fx-stars {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.fx-stars .star {
+  position: absolute; top: -20px;
+  width: 3px; height: 3px; border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 10px currentColor;
+  opacity: 0;
+  animation: star-fall linear forwards;
+}
+@keyframes star-fall {
+  0% { opacity: 0; transform: translateY(0) scale(0.5); }
+  10% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(110vh) scale(1.2); }
+}
+
+/* キャラ後方オーラ: UR時 */
+.char-reveal.ur-aura {
+  position: relative;
+}
+.tier-ur .stage-chars::before {
+  content: "";
+  position: absolute; top: 50%; left: 50%;
+  width: 600px; height: 600px; border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(255,216,77,0.35) 0%, rgba(255,95,170,0.2) 40%, transparent 70%);
+  filter: blur(30px);
+  animation: aura-pulse 2.5s ease-in-out infinite;
+  z-index: -1;
+}
+@keyframes aura-pulse {
+  0%,100% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+  50% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+}
+
+/* ============================================================
+   演出バリエーション: Orb / Meteor / Portal / Cutin
+   ============================================================ */
+
+/* ───── Type A: 結晶オーブ昇格（中央の1玉が色変化） ───── */
+.fx-orb {
+  position: absolute; top: 50%; left: 50%;
+  width: 40px; height: 40px; border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, #fff 0%, var(--c, #6fa8ff) 40%, transparent 70%);
+  filter: blur(6px);
+  box-shadow: 0 0 80px var(--c, #6fa8ff);
+  animation: orb-pulse 0.45s ease-in-out infinite alternate;
+  transition: width .4s ease, height .4s ease, box-shadow .4s ease, background .4s ease;
+  pointer-events: none;
+}
+.fx-orb.orb-r   { --c: #6fa8ff; width: 50px; height: 50px; }
+.fx-orb.orb-sr  { --c: #c87dff; width: 80px; height: 80px; box-shadow: 0 0 120px #c87dff; }
+.fx-orb.orb-ssr { --c: #ffd96a; width: 120px; height: 120px; box-shadow: 0 0 180px #ffd96a; }
+.fx-orb.orb-ur  {
+  --c: #ff5faa; width: 180px; height: 180px;
+  background: radial-gradient(circle, #fff 0%, #ffd84d 20%, #ff5faa 50%, #c87dff 80%, transparent 100%);
+  box-shadow: 0 0 250px #ff5faa, 0 0 400px #7ea8ff;
+}
+@keyframes orb-pulse {
+  0% { transform: translate(-50%, -50%) scale(1); }
+  100% { transform: translate(-50%, -50%) scale(1.12); }
+}
+.fx-orb.burst { animation: orb-burst 0.45s ease-out forwards; }
+@keyframes orb-burst {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(4); opacity: 0; filter: blur(30px); }
+}
+
+/* ───── Type D: 流星群 ───── */
+.fx-meteor {
+  position: absolute;
+  width: 4px; height: 220px; border-radius: 2px;
+  background: linear-gradient(to bottom, transparent, currentColor 70%, #fff);
+  color: #fff;
+  opacity: 0;
+  transform-origin: top center;
+  filter: drop-shadow(0 0 16px currentColor);
+  pointer-events: none;
+}
+.fx-meteor.go {
+  animation: meteor-fall var(--dur, 0.65s) cubic-bezier(.3,.1,.4,1) forwards;
+}
+@keyframes meteor-fall {
+  0%   { opacity: 0; transform: translate(var(--from-x), var(--from-y)) rotate(var(--angle)); }
+  20%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -50%) rotate(var(--angle)); }
+}
+
+/* ───── Type E: ポータル開扉 ───── */
+.fx-portal {
+  position: absolute; top: 50%; left: 50%;
+  width: 0; height: 0; border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: conic-gradient(from 0deg, #ff5faa, #ffd84d, #5fffd4, #7ea8ff, #c87dff, #ff5faa);
+  opacity: 0;
+  filter: blur(14px);
+  pointer-events: none;
+}
+.fx-portal.go {
+  animation: portal-open 1.6s ease-out forwards, portal-spin 2.2s linear infinite;
+}
+@keyframes portal-open {
+  0%   { opacity: 0; width: 0; height: 0; filter: blur(4px); }
+  20%  { opacity: 0.85; width: 120px; height: 120px; filter: blur(12px); }
+  70%  { opacity: 1; width: 520px; height: 520px; filter: blur(18px); }
+  100% { opacity: 0; width: 900px; height: 900px; filter: blur(40px); }
+}
+@keyframes portal-spin {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+.fx-portal-ring {
+  position: absolute; top: 50%; left: 50%;
+  width: 140px; height: 140px; border-radius: 50%;
+  transform: translate(-50%, -50%);
+  border: 3px solid rgba(255,255,255,0.9);
+  box-shadow: 0 0 40px #fff, inset 0 0 30px #fff;
+  opacity: 0;
+  pointer-events: none;
+}
+.fx-portal-ring.go {
+  animation: portal-ring 1.6s ease-out forwards;
+}
+@keyframes portal-ring {
+  0%   { opacity: 0; width: 20px; height: 20px; border-width: 6px; }
+  40%  { opacity: 1; }
+  100% { opacity: 0; width: 700px; height: 700px; border-width: 1px; }
+}
+
+/* ───── Type F: カットイン ───── */
+.fx-cutin {
+  position: absolute; left: 0; right: 0;
+  height: 50%;
+  background: linear-gradient(90deg, var(--c1, #ff5faa), var(--c2, #ffd84d));
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: 0 0 60px var(--c1, #ff5faa);
+}
+.fx-cutin.top    { top: -50%; }
+.fx-cutin.bottom { bottom: -50%; }
+.fx-cutin.top.go    { animation: cutin-top    .55s cubic-bezier(.2,.8,.3,1.3) forwards; }
+.fx-cutin.bottom.go { animation: cutin-bottom .55s cubic-bezier(.2,.8,.3,1.3) forwards; }
+@keyframes cutin-top    { 0% { top: -55%; opacity: 0; } 80% { top: -2%; opacity: 0.95; } 100% { top: -1%; opacity: 0.9; } }
+@keyframes cutin-bottom { 0% { bottom: -55%; opacity: 0; } 80% { bottom: -2%; opacity: 0.95; } 100% { bottom: -1%; opacity: 0.9; } }
+.fx-cutin.exit-top    { animation: cutin-exit-top    .3s ease-in forwards; }
+.fx-cutin.exit-bottom { animation: cutin-exit-bottom .3s ease-in forwards; }
+@keyframes cutin-exit-top    { to { top: -60%; opacity: 0; } }
+@keyframes cutin-exit-bottom { to { bottom: -60%; opacity: 0; } }
+
+/* ============================================================
+   高レア専用: 放射光 / 虹背景 / ズームバースト / 光シャワー
+   ============================================================ */
+
+/* UR専用: 画面全面が虹色でゆっくり回転 */
+.fx-rainbow-bg {
+  position: absolute; inset: 0;
+  background: conic-gradient(from 0deg,
+    rgba(255,95,170,0.55),
+    rgba(255,216,77,0.55),
+    rgba(95,255,212,0.55),
+    rgba(126,168,255,0.55),
+    rgba(200,125,255,0.55),
+    rgba(255,95,170,0.55)
+  );
+  filter: saturate(1.3) blur(40px);
+  opacity: 0;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+.fx-rainbow-bg.on {
+  animation: rb-in .6s ease-out forwards, rb-spin 10s linear infinite;
+}
+@keyframes rb-in {
+  0% { opacity: 0; transform: scale(0.5); }
+  100% { opacity: 0.8; transform: scale(1); }
+}
+@keyframes rb-spin { to { transform: rotate(360deg); } }
+
+/* ゴッドレイ: 中央から放射状に光線（SSR=金 / UR=虹） */
+.fx-godrays {
+  position: absolute; top: 50%; left: 50%;
+  width: 2000px; height: 2000px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  opacity: 0;
+  animation: godrays-spin 20s linear infinite;
+}
+.fx-godrays.on {
+  animation: godrays-in .6s ease-out forwards, godrays-spin 20s linear infinite;
+}
+.fx-godrays::before {
+  content: ""; position: absolute; inset: 0;
+  background: repeating-conic-gradient(
+    from 0deg at 50% 50%,
+    transparent 0deg,
+    var(--ray, rgba(255,217,106,0.6)) 4deg,
+    transparent 8deg,
+    transparent 18deg
+  );
+  filter: blur(2px);
+}
+.fx-godrays.ur::before {
+  background: repeating-conic-gradient(
+    from 0deg at 50% 50%,
+    transparent 0deg,
+    rgba(255,95,170,0.55) 3deg,
+    rgba(255,216,77,0.55) 6deg,
+    rgba(95,255,212,0.55) 9deg,
+    rgba(126,168,255,0.55) 12deg,
+    transparent 15deg,
+    transparent 24deg
+  );
+}
+@keyframes godrays-in {
+  0% { opacity: 0; transform: translate(-50%, -50%) rotate(0deg) scale(0.4); }
+  100% { opacity: 0.85; transform: translate(-50%, -50%) rotate(30deg) scale(1); }
+}
+@keyframes godrays-spin {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* キャラ降臨時のズームバースト（char-popの代替で派手化） */
+.char-reveal.burst-in {
+  animation:
+    char-burst 0.9s cubic-bezier(.15,1.5,.35,1) forwards,
+    idle-breath 4s ease-in-out infinite 0.9s;
+}
+.tier-ur .char-reveal.burst-in {
+  filter:
+    drop-shadow(0 0 40px rgba(255,95,170,0.95))
+    drop-shadow(0 0 80px rgba(255,216,77,0.7))
+    drop-shadow(0 0 140px rgba(95,255,212,0.6));
+  animation:
+    char-burst 0.9s cubic-bezier(.15,1.5,.35,1) forwards,
+    idle-float 3s ease-in-out infinite 0.9s,
+    idle-breath 4s ease-in-out infinite 0.9s;
+}
+.tier-ssr .char-reveal.burst-in {
+  filter:
+    drop-shadow(0 0 35px rgba(255,217,106,0.85))
+    drop-shadow(0 0 70px rgba(255,185,60,0.55));
+  animation:
+    char-burst 0.9s cubic-bezier(.15,1.5,.35,1) forwards,
+    idle-sway 5s ease-in-out infinite 0.9s,
+    idle-breath 4s ease-in-out infinite 0.9s;
+}
+@keyframes char-burst {
+  0%   { transform: scale(2.2); opacity: 0; filter: blur(30px); }
+  30%  { transform: scale(0.85); opacity: 1; filter: blur(0); }
+  55%  { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+/* 下から上への虹色粒子噴水 */
+.fx-fountain {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 60%;
+  pointer-events: none;
+  overflow: hidden;
+}
+.fx-fountain .drop {
+  position: absolute; bottom: -30px;
+  width: 6px; height: 20px; border-radius: 10px;
+  background: currentColor;
+  box-shadow: 0 0 20px currentColor;
+  opacity: 0;
+  animation: drop-up var(--dur, 1.6s) ease-out forwards;
+}
+@keyframes drop-up {
+  0%   { opacity: 0; transform: translateY(0) scaleY(1); }
+  10%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(calc(-100vh - 60px)) scaleY(0.6); }
+}
+
+/* 上からの光の条 (god-rays descending) */
+.fx-rays-down {
+  position: absolute; top: -10%; left: 0; right: 0; height: 120%;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0;
+}
+.fx-rays-down.on { animation: rays-down-in 0.6s ease-out forwards; }
+@keyframes rays-down-in { to { opacity: 1; } }
+.fx-rays-down .beam {
+  position: absolute; top: -20%;
+  width: 80px; height: 140%;
+  background: linear-gradient(to bottom, transparent, currentColor 30%, currentColor 70%, transparent);
+  filter: blur(18px);
+  opacity: 0.65;
+  mix-blend-mode: screen;
+  animation: beam-breath 2.5s ease-in-out infinite alternate;
+}
+@keyframes beam-breath {
+  0%   { opacity: 0.3; transform: scaleY(0.9); }
+  100% { opacity: 0.7; transform: scaleY(1.1); }
+}
+
+/* ───── 続行ヒント (SSR/UR演出後) ───── */
+.fx-continue-hint {
+  position: absolute; bottom: 4%; left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255,255,255,0.75);
+  font-size: 14px; letter-spacing: 0.35em;
+  white-space: nowrap; font-weight: 600;
+  text-shadow: 0 0 16px rgba(255,255,255,0.4);
+  animation: hint-pulse 1.4s ease-in-out infinite;
+}
+@keyframes hint-pulse {
+  0%,100% { opacity: 0.35; }
+  50% { opacity: 0.95; }
+}
+
+/* 表示前の「溜め」用 薄暗暴風 */
+.stage.charge-up::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 50%, rgba(255,255,255,0.08) 0%, transparent 60%);
+  animation: charge-breath 1s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 1;
+}
+@keyframes charge-breath {
+  0% { opacity: 0.3; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1.05); }
+}
+
+/* ───── UR超脳汁: 紙吹雪 / 虹大円環 / MIRACLEテロップ ───── */
+
+.fx-confetti {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.fx-confetti .piece {
+  position: absolute; top: -30px;
+  background: currentColor;
+  opacity: 0;
+  box-shadow: 0 0 8px currentColor;
+  animation: confetti-fall var(--dur, 3s) linear forwards;
+}
+@keyframes confetti-fall {
+  0%   { opacity: 0; transform: translateY(0) rotate(0deg); }
+  10%  { opacity: 1; }
+  100% { opacity: 0.4; transform: translateY(110vh) rotate(720deg); }
+}
+
+.fx-halo {
+  position: absolute; top: 50%; left: 50%;
+  width: 0; height: 0; border-radius: 50%;
+  transform: translate(-50%, -50%);
+  border: 14px solid transparent;
+  background-image:
+    linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)),
+    conic-gradient(from 0deg, #ff5faa, #ffd84d, #5fffd4, #7ea8ff, #c87dff, #ff5faa);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  opacity: 0;
+  pointer-events: none;
+  filter: drop-shadow(0 0 40px rgba(255,95,170,0.6));
+}
+.fx-halo.go {
+  animation: halo-appear 1.8s cubic-bezier(.2,.8,.3,1) forwards, halo-spin 12s linear infinite;
+}
+@keyframes halo-appear {
+  0%   { opacity: 0; width: 0; height: 0; }
+  40%  { opacity: 1; width: 760px; height: 760px; }
+  100% { opacity: 0.75; width: 820px; height: 820px; }
+}
+@keyframes halo-spin {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.fx-miracle {
+  position: absolute; top: 25%; left: 50%; transform: translate(-50%, -50%);
+  font-size: 72px; font-weight: 900; letter-spacing: 0.25em;
+  background: linear-gradient(90deg, #ff5faa, #ffd84d, #5fffd4, #7ea8ff, #c87dff, #ff5faa);
+  background-size: 400% 400%;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 30px rgba(255,95,170,0.8));
+  opacity: 0; white-space: nowrap;
+}
+.fx-miracle.go {
+  animation:
+    miracle-in .7s cubic-bezier(.2,1.4,.4,1) forwards,
+    miracle-shine 1.5s linear infinite;
+}
+@keyframes miracle-in {
+  0%   { opacity: 0; transform: translate(-50%,-50%) scale(0.4) rotate(-5deg); }
+  50%  { opacity: 1; transform: translate(-50%,-50%) scale(1.2) rotate(0deg); }
+  100% { opacity: 1; transform: translate(-50%,-50%) scale(1) rotate(0deg); }
+}
+@keyframes miracle-shine {
+  0%,100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* 画面全体に軽いズームイン（UR最終演出用） */
+.stage.zoom-in #stage-chars,
+.stage.zoom-in #stage-vfx {
+  animation: ur-zoom 0.5s cubic-bezier(.2,.8,.3,1) forwards;
+}
+@keyframes ur-zoom {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.05); }
+}
+
+/* ───── キャラ名プレート（降臨後に表示・SSR/URは設定も表示） ───── */
+.fx-charname {
+  position: absolute; bottom: 10%; left: 50%;
+  transform: translateX(-50%);
+  opacity: 0; z-index: 5;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  text-align: center; max-width: 90vw;
+}
+.fx-charname-top {
+  display: flex; align-items: center; gap: 18px;
+  font-size: 44px; font-weight: 800; letter-spacing: 0.18em;
+  white-space: nowrap;
+}
+.fx-charname-sub {
+  font-size: 18px; font-weight: 600; letter-spacing: 0.2em;
+  opacity: 0.9;
+  -webkit-text-fill-color: currentColor;
+}
+.fx-charname-caption {
+  font-size: 16px; font-style: italic; letter-spacing: 0.1em;
+  opacity: 0.85;
+  padding: 5px 18px;
+  background: rgba(0,0,0,0.4);
+  border-radius: 4px;
+  border-left: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  -webkit-text-fill-color: rgba(255,255,255,0.92);
+  max-width: 80vw;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.fx-charname.r   { color: #aad4ff; text-shadow: 0 0 20px var(--r); }
+.fx-charname.sr  { color: #e0a0ff; text-shadow: 0 0 25px var(--sr); }
+.fx-charname.ssr { color: #ffe49a; text-shadow: 0 0 28px var(--ssr); }
+.fx-charname.ur {
+  background: linear-gradient(90deg, #ff5faa, #ffd84d, #5fffd4, #7ea8ff, #c87dff);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 20px rgba(255,95,170,0.6));
+}
+.fx-charname.go { animation: charname-in .8s cubic-bezier(.2,1.3,.4,1) forwards; }
+@keyframes charname-in {
+  0%   { opacity: 0; transform: translateX(-50%) translateY(18px); letter-spacing: 0; }
+  100% { opacity: 1; transform: translateX(-50%) translateY(0); letter-spacing: 0.18em; }
+}
+.fx-charname-tier {
+  font-size: 18px; font-weight: 800; letter-spacing: 0.2em;
+  padding: 4px 14px; border-radius: 999px;
+  background: rgba(0,0,0,0.35);
+  border: 1.5px solid currentColor;
+  -webkit-text-fill-color: initial;
+}
+/* URのバッジは虹枠 */
+.fx-charname.ur .fx-charname-tier {
+  color: #fff;
+  background: linear-gradient(90deg, #ff5faa, #ffd84d, #5fffd4, #7ea8ff, #c87dff);
+  background-size: 300% 300%;
+  border-color: rgba(255,255,255,0.8);
+  animation: rate-shine 2s linear infinite;
+}
+
+/* ───── 10連イントロ「× 10」 ───── */
+.fx-ten-intro {
+  position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%);
+  font-size: 96px; font-weight: 900; letter-spacing: 0.25em;
+  color: transparent; -webkit-text-stroke: 2px #fff;
+  text-shadow: 0 0 40px #5fffd4, 0 0 80px #5fffd4;
+  opacity: 0; white-space: nowrap;
+}
+.fx-ten-intro.go {
+  animation: ten-intro 1.1s cubic-bezier(.2,1.3,.4,1) forwards;
+}
+@keyframes ten-intro {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.4); letter-spacing: 0; }
+  30%  { opacity: 1; transform: translate(-50%, -50%) scale(1.1); letter-spacing: 0.25em; }
+  80%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.15); letter-spacing: 0.45em; }
+}
+
+/* SSR/UR fanfare text（"SSR獲得!" などを画面下にドーン） */
+.fx-win {
+  position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%);
+  font-size: 48px; font-weight: 900; letter-spacing: 0.25em;
+  opacity: 0; white-space: nowrap;
+}
+.fx-win.ssr { color: #ffd96a; text-shadow: 0 0 30px rgba(255,216,77,0.8); }
+.fx-win.ur  {
+  background: linear-gradient(90deg, #ff5faa, #ffd84d, #5fffd4, #7ea8ff, #c87dff);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  text-shadow: 0 0 30px rgba(255,95,170,0.5);
+}
+.fx-win.go {
+  animation: win-in .6s cubic-bezier(.2,1.4,.4,1) forwards;
+}
+@keyframes win-in {
+  0% { opacity: 0; transform: translateX(-50%) scale(0.5); }
+  60% { opacity: 1; transform: translateX(-50%) scale(1.15); }
+  100% { opacity: 1; transform: translateX(-50%) scale(1); }
+}
+
+/* shake */
+.shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97); }
+@keyframes shake {
+  0%,100% { transform: translate(0,0); }
+  20% { transform: translate(-8px, 4px); }
+  40% { transform: translate(8px, -4px); }
+  60% { transform: translate(-5px, 3px); }
+  80% { transform: translate(5px, -3px); }
+}
+
+/* ======= result modal ======= */
+.result {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(12px);
+  display: none; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.result.active { display: flex; }
+.result-inner {
+  max-width: 720px; width: 100%;
+  background: rgba(15,20,40,0.9);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 16px; padding: 24px;
+  max-height: 90vh; overflow: auto;
+}
+.result-inner h2 {
+  margin: 0 0 16px; font-size: 22px; text-align: center;
+  letter-spacing: 0.1em;
+}
+.result-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;
+  margin-bottom: 16px;
+}
+.rcard {
+  aspect-ratio: 2/3; border-radius: 8px;
+  background: #0a0e1d; border: 1px solid rgba(255,255,255,0.1);
+  background-size: cover; background-position: center top;
+  display: flex; align-items: end; justify-content: center;
+  padding: 6px;
+  position: relative;
+}
+.rcard .rcard-name {
+  font-size: 11px; background: rgba(0,0,0,0.75);
+  padding: 3px 6px; border-radius: 4px;
+}
+.rcard.r { border-color: var(--r); box-shadow: 0 0 10px rgba(111,168,255,0.25); }
+.rcard.sr { border-color: var(--sr); box-shadow: 0 0 12px rgba(200,125,255,0.4); }
+.rcard.ssr { border-color: var(--ssr); box-shadow: 0 0 16px rgba(255,217,106,0.55); }
+.rcard.ur {
+  border: 2px solid transparent;
+  background-image:
+    linear-gradient(#0a0e1d, #0a0e1d),
+    linear-gradient(135deg, var(--ur-a), var(--ur-b), var(--ur-c), var(--ur-d), var(--ur-e));
+  background-origin: border-box; background-clip: padding-box, border-box;
+  box-shadow: 0 0 22px rgba(255,95,170,0.7);
+}
+.close {
+  display: block; margin: 0 auto;
+  padding: 10px 28px; border-radius: 10px;
+  background: linear-gradient(135deg, #c87dff, #5fffd4);
+  color: #111; font-weight: 700; letter-spacing: 0.1em;
+  border: none; cursor: pointer; font-family: inherit;
+}
+
+/* ============================================================
+   キャラ図鑑
+   ============================================================ */
+.gallery-btn {
+  font-family: inherit; font-size: 11px;
+  padding: 6px 12px; border-radius: 6px; cursor: pointer;
+  background: linear-gradient(135deg, #c87dff, #5fffd4);
+  color: #111; font-weight: 700; letter-spacing: 0.05em;
+  border: none;
+}
+
+.gallery-modal {
+  position: fixed; inset: 0; z-index: 150;
+  background: rgba(0,0,0,0.92);
+  backdrop-filter: blur(10px);
+  display: none; overflow-y: auto;
+  padding: 20px;
+}
+.gallery-modal.active { display: block; }
+
+.gallery-inner {
+  max-width: 1100px; margin: 20px auto;
+  background: rgba(15,20,40,0.95);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 24px;
+}
+.gallery-header {
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 14px;
+  margin-bottom: 20px; padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.gallery-header h2 {
+  margin: 0; font-size: 22px; letter-spacing: 0.1em;
+  background: linear-gradient(90deg, #ffd84d, #5fffd4, #c87dff, #ff5faa);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.gallery-stats { display: flex; gap: 8px; font-size: 11px; flex-wrap: wrap; }
+.gallery-stats span {
+  padding: 5px 10px; border-radius: 6px;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.06);
+}
+.gallery-stats .g-ur   { color: #ffd84d; }
+.gallery-stats .g-ssr  { color: var(--ssr); }
+.gallery-stats .g-sr   { color: var(--sr); }
+.gallery-stats .g-r    { color: var(--r); }
+.gallery-inner .close {
+  font-family: inherit; font-size: 11px;
+  padding: 6px 12px; border-radius: 6px; cursor: pointer;
+  background: rgba(255,255,255,0.08); color: var(--text);
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+.gallery-card {
+  aspect-ratio: 2/3; border-radius: 8px;
+  background-size: cover; background-position: center top;
+  background-color: #0a0e1d;
+  position: relative; overflow: hidden;
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .2s ease;
+  border: 1.5px solid rgba(255,255,255,0.1);
+}
+.gallery-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 24px rgba(255,255,255,0.2);
+}
+.gallery-card.locked {
+  cursor: not-allowed;
+  background-image: none !important;
+  background: repeating-linear-gradient(45deg, #141828 0 12px, #0c1020 12px 24px);
+}
+.gallery-card.locked::after {
+  content: "? ? ?"; position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; font-weight: 800; letter-spacing: 0.3em;
+  color: rgba(255,255,255,0.35);
+}
+.gallery-card.locked:hover {
+  transform: none;
+  box-shadow: none;
+}
+.gallery-card .card-tier {
+  position: absolute; top: 6px; left: 6px;
+  padding: 2px 7px; border-radius: 3px;
+  font-size: 10px; font-weight: 800; letter-spacing: 0.12em;
+  z-index: 2;
+}
+.gallery-card.r  .card-tier { background: var(--r);   color: #fff; }
+.gallery-card.sr .card-tier { background: var(--sr);  color: #fff; }
+.gallery-card.ssr .card-tier { background: var(--ssr); color: #111; }
+.gallery-card.ur .card-tier {
+  background: linear-gradient(135deg, var(--ur-a), var(--ur-b), var(--ur-c), var(--ur-d));
+  color: #111;
+}
+.gallery-card .card-name {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 10px 8px 8px;
+  background: linear-gradient(to top, rgba(0,0,0,0.92), transparent);
+  font-size: 12px; font-weight: 600;
+  text-align: center;
+}
+.gallery-card.r  { border-color: var(--r);   box-shadow: 0 0 8px rgba(111,168,255,0.25); }
+.gallery-card.sr { border-color: var(--sr);  box-shadow: 0 0 10px rgba(200,125,255,0.35); }
+.gallery-card.ssr { border-color: var(--ssr); box-shadow: 0 0 14px rgba(255,217,106,0.5); }
+.gallery-card.ur {
+  border: 2px solid transparent;
+  background-image:
+    linear-gradient(#0a0e1d, #0a0e1d),
+    linear-gradient(135deg, var(--ur-a), var(--ur-b), var(--ur-c), var(--ur-d), var(--ur-e));
+  background-origin: border-box; background-clip: padding-box, border-box;
+  box-shadow: 0 0 18px rgba(255,95,170,0.55);
+}
+.gallery-card.ur.locked {
+  background-image: none;
+  background: repeating-linear-gradient(45deg, #141828 0 12px, #0c1020 12px 24px);
+  border: 1.5px solid rgba(255,95,170,0.4);
+}
+
+/* ───── Character Detail (拡大) ───── */
+.char-detail {
+  position: fixed; inset: 0; z-index: 220;
+  background: rgba(0,0,0,0.95);
+  display: none;
+  align-items: center; justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(8px);
+}
+.char-detail.active { display: flex; }
+.char-detail-inner {
+  max-width: 1000px; width: 100%;
+  max-height: 92vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  background: rgba(15,20,40,0.98);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 16px;
+  padding: 30px;
+  position: relative;
+  overflow: hidden;
+}
+.char-detail-img-wrap {
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.char-detail-img-wrap img {
+  max-width: 100%; max-height: 80vh;
+  border-radius: 10px;
+  filter: drop-shadow(0 0 40px rgba(255,255,255,0.35));
+}
+.char-detail-info {
+  display: flex; flex-direction: column; gap: 14px;
+  overflow-y: auto; padding-right: 6px;
+}
+.char-detail-tier {
+  display: inline-block; padding: 5px 18px; border-radius: 999px;
+  font-size: 14px; font-weight: 800; letter-spacing: 0.25em;
+  width: fit-content;
+}
+.char-detail-tier.r  { background: var(--r);   color: #fff; }
+.char-detail-tier.sr { background: var(--sr);  color: #fff; }
+.char-detail-tier.ssr { background: var(--ssr); color: #111; }
+.char-detail-tier.ur {
+  background: linear-gradient(90deg, var(--ur-a), var(--ur-b), var(--ur-c), var(--ur-d), var(--ur-e));
+  color: #111; background-size: 300% 300%;
+  animation: rate-shine 2s linear infinite;
+}
+.char-detail-name {
+  font-size: 30px; font-weight: 800; letter-spacing: 0.12em;
+  margin-top: 4px;
+}
+.char-detail-title {
+  font-size: 15px; color: var(--muted); letter-spacing: 0.2em;
+}
+.char-detail-caption {
+  font-size: 17px; font-style: italic;
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.04);
+  border-left: 3px solid rgba(255,255,255,0.5);
+  border-radius: 4px;
+  color: rgba(255,255,255,0.92);
+}
+.char-detail-desc {
+  font-size: 14px; line-height: 1.9;
+  color: rgba(255,255,255,0.85);
+  letter-spacing: 0.03em;
+}
+.close-detail {
+  position: absolute; top: 14px; right: 14px;
+  width: 40px; height: 40px;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff; cursor: pointer;
+  border-radius: 50%; font-size: 22px; font-family: inherit;
+  z-index: 2;
+}
+.close-detail:hover { background: rgba(255,255,255,0.15); }
+
+/* responsive */
+@media (max-width: 720px) {
+  .char-detail-inner { grid-template-columns: 1fr; padding: 16px; gap: 16px; overflow-y: auto; }
+  .char-detail-img-wrap img { max-height: 45vh; }
+  .char-detail-name { font-size: 22px; }
+}
+
+@media (max-width: 640px) {
+  .hero { grid-template-columns: 1fr; gap: 24px; margin-bottom: 32px; }
+  .cta { justify-content: center; }
+  .result-grid { grid-template-columns: repeat(3, 1fr); }
+  .topbar {
+    padding: 10px 14px;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .title { font-size: 16px; }
+  .ver { font-size: 9px; }
+  .stats { font-size: 10px; flex-wrap: wrap; gap: 6px; width: 100%; }
+  .stat { padding: 4px 7px; }
+  .gallery-btn, .god, .reset { font-size: 10px; padding: 5px 8px; }
+  .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; }
+  .hero h1 { font-size: 32px; }
+  main { padding: 24px 14px 48px; }
+  .summon { min-width: 120px; padding: 18px 22px; font-size: 16px; }
+
+  /* ガチャ演出のモバイル調整 */
+  .fx-text { font-size: 56px; }
+  .fx-win { font-size: 28px; }
+  .fx-miracle { font-size: 44px; }
+  .fx-ten-intro { font-size: 64px; }
+  .fx-rate { font-size: 15px; padding: 8px 16px; }
+
+  /* キャラ名プレート */
+  .fx-charname { bottom: 16%; max-width: 92vw; }
+  .fx-charname-top { font-size: 24px; letter-spacing: 0.1em; gap: 10px; }
+  .fx-charname-tier { font-size: 12px; padding: 3px 10px; }
+  .fx-charname-sub { font-size: 12px; letter-spacing: 0.12em; }
+  .fx-charname-caption {
+    font-size: 11px; padding: 4px 10px;
+    white-space: normal;
+    line-height: 1.5;
+  }
+  .fx-continue-hint { font-size: 11px; letter-spacing: 0.2em; }
+
+  /* 図鑑ヘッダー */
+  .gallery-inner { padding: 16px; }
+  .gallery-header { gap: 8px; padding-bottom: 10px; margin-bottom: 14px; }
+  .gallery-header h2 { font-size: 18px; width: 100%; }
+  .gallery-stats { font-size: 10px; width: 100%; }
+  .gallery-stats span { padding: 4px 7px; }
+  .gallery-inner .close { font-size: 10px; padding: 5px 10px; }
+
+  /* キャラ詳細 */
+  .char-detail-name { font-size: 20px; }
+  .char-detail-title { font-size: 12px; }
+  .char-detail-caption { font-size: 14px; padding: 10px 12px; }
+  .char-detail-desc { font-size: 13px; line-height: 1.7; }
+  .char-detail-inner { padding: 14px; gap: 12px; }
+}
+
+/* iPhone safe-area (ノッチ/ホームバー対応) */
+@supports (padding: env(safe-area-inset-bottom)) {
+  main { padding-bottom: calc(48px + env(safe-area-inset-bottom)); }
+  .topbar { padding-top: calc(10px + env(safe-area-inset-top)); }
+}
+
+/* タッチ時のhover無効化（タップ時の不自然な残留hoverを防止） */
+@media (hover: none) {
+  .summon:hover { transform: none; box-shadow: 0 0 20px rgba(200,125,255,0.2); }
+  .gallery-card:hover { transform: none; box-shadow: none; }
+}

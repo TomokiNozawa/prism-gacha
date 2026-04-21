@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Prism Gacha — 脳汁体験</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="bg-layer"></div>
+
+<header class="topbar">
+  <div class="title">✦ Prism Gacha <span class="ver">v0.1</span></div>
+  <div class="stats">
+    <span class="stat" title="累計ガチャ回数">累計 <b id="stat-total">0</b></span>
+    <span class="stat" title="虹(UR)出現数">🌈 <b id="stat-ur">0</b></span>
+    <span class="stat" title="天井まで">天井 <b id="stat-pity">180</b></span>
+    <button id="btn-gallery" class="gallery-btn" title="図鑑 (Gキー)">📖 図鑑</button>
+    <button id="btn-god" class="god" title="Sキー: SSR率100%">神モード OFF</button>
+    <button id="btn-reset" class="reset" title="履歴・累計をリセット">⟳</button>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="hero-copy">
+      <h1>星の祈り</h1>
+      <p>虹が来るまで、引き続けろ。</p>
+      <div class="rate">
+        <span class="r">R 65%</span>
+        <span class="sr">SR 25%</span>
+        <span class="ssr">SSR 7%</span>
+        <span class="ur">🌈 UR 3%</span>
+      </div>
+    </div>
+
+    <div class="cta">
+      <button id="btn-single" class="summon single">
+        <span class="lbl">単発</span>
+        <span class="hint">Space</span>
+      </button>
+      <button id="btn-ten" class="summon ten">
+        <span class="lbl">10連</span>
+        <span class="hint">Enter</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="history">
+    <h3>履歴 <span class="muted">(直近30件)</span></h3>
+    <div id="history" class="history-grid"></div>
+  </section>
+</main>
+
+<!-- Summon stage overlay -->
+<div id="stage" class="stage">
+  <canvas id="stage-canvas"></canvas>
+  <div class="stage-layer" id="stage-vfx"></div>
+  <div class="stage-layer" id="stage-chars"></div>
+  <div class="stage-skip">クリック / Space でスキップ</div>
+</div>
+
+<!-- Result modal after 10-roll -->
+<div id="result" class="result">
+  <div class="result-inner">
+    <h2 id="result-title">結果</h2>
+    <div id="result-grid" class="result-grid"></div>
+    <button id="result-close" class="close">閉じる (Enter)</button>
+  </div>
+</div>
+
+<!-- Character Gallery Modal -->
+<div id="gallery" class="gallery-modal">
+  <div class="gallery-inner">
+    <div class="gallery-header">
+      <h2>✦ 星霊図鑑</h2>
+      <div class="gallery-stats">
+        <span>入手 <b id="gallery-unlocked-count">0</b> / <b id="gallery-total-count">24</b></span>
+        <span class="g-ur">🌈 <b id="gallery-ur-count">0/3</b></span>
+        <span class="g-ssr">✨ <b id="gallery-ssr-count">0/8</b></span>
+        <span class="g-sr">💜 <b id="gallery-sr-count">0/7</b></span>
+        <span class="g-r">💙 <b id="gallery-r-count">0/6</b></span>
+      </div>
+      <button class="close" onclick="closeGallery()">× 閉じる (Esc)</button>
+    </div>
+    <div id="gallery-grid" class="gallery-grid"></div>
+  </div>
+</div>
+
+<!-- Character Detail Modal -->
+<div id="char-detail" class="char-detail">
+  <div class="char-detail-inner">
+    <button class="close-detail" onclick="closeCharDetail()">×</button>
+    <div class="char-detail-img-wrap">
+      <img id="char-detail-img" src="" alt="">
+    </div>
+    <div class="char-detail-info">
+      <div class="char-detail-tier" id="char-detail-tier"></div>
+      <div class="char-detail-name" id="char-detail-name"></div>
+      <div class="char-detail-title" id="char-detail-title"></div>
+      <div class="char-detail-caption" id="char-detail-caption"></div>
+      <div class="char-detail-desc" id="char-detail-desc"></div>
+    </div>
+  </div>
+</div>
+
+<audio id="se-summon" preload="auto"></audio>
+<audio id="se-fanfare" preload="auto"></audio>
+<audio id="se-crack" preload="auto"></audio>
+
+<script src="script.js"></script>
+</body>
+</html>
