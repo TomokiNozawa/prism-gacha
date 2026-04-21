@@ -171,12 +171,16 @@ body::before {
   background: rgba(20,12,40,0.6);
 }
 .btn-mini {
-  align-self: center;
   padding: 6px 14px;
   font-size: 12px;
-  margin-top: 4px;
   background: rgba(20,12,40,0.4);
   color: var(--muted);
+  flex: 1;
+}
+.title-mini-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
 }
 
 .back-gacha {

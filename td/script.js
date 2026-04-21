@@ -1137,6 +1137,7 @@ function saveSave() {
 //  Audio (Web Audio API synth - no external files)
 // ─────────────────────────────────────────────────────────────
 let audioCtx = null;
+let soundEnabled = localStorage.getItem("prism-defense-sound") !== "0";
 function getAudio() {
   if (!audioCtx) {
     try {
@@ -1146,6 +1147,7 @@ function getAudio() {
   return audioCtx;
 }
 function playTone(opts) {
+  if (!soundEnabled) return;
   const ctx = getAudio();
   if (!ctx) return;
   const { freq = 440, dur = 0.12, type = "sine", vol = 0.08, slide = 0, delay = 0 } = opts;
@@ -1163,6 +1165,7 @@ function playTone(opts) {
   osc.stop(now + dur + 0.02);
 }
 function playNoise(opts) {
+  if (!soundEnabled) return;
   const ctx = getAudio();
   if (!ctx) return;
   const { dur = 0.12, vol = 0.06, cut = 4000 } = opts;
@@ -1473,16 +1476,25 @@ function renderBattlefield() {
       bf.appendChild(cell);
     }
   }
-  // Compute cell pixel size after layout
-  requestAnimationFrame(() => {
-    const c = bf.querySelector(".cell");
-    if (c) {
-      const rect = c.getBoundingClientRect();
-      bf.style.setProperty("--cell-w", rect.width + "px");
-      state.battle.cellW = rect.width;
-      state.battle.cellH = rect.height;
-    }
-  });
+  // Compute layout-dependent offsets
+  requestAnimationFrame(() => updateLayoutCache());
+}
+
+function updateLayoutCache() {
+  const b = state.battle;
+  if (!b) return;
+  const bf = $("#battlefield");
+  const fx = $("#battle-fx");
+  const c = bf.querySelector(".cell");
+  if (!c) return;
+  const rect = c.getBoundingClientRect();
+  const bfRect = bf.getBoundingClientRect();
+  const fxRect = fx.getBoundingClientRect();
+  b.cellW = rect.width;
+  b.cellH = rect.height;
+  b.bfOffsetX = bfRect.left - fxRect.left + 3;  // 3 = battlefield padding
+  b.bfOffsetY = bfRect.top - fxRect.top + 3;
+  bf.style.setProperty("--cell-w", rect.width + "px");
 }
 
 function renderPalette() {
@@ -1719,17 +1731,13 @@ function renderEnemy(e) {
 function updateEnemyPosition(e) {
   if (!e.el) return;
   const b = state.battle;
-  const bf = $("#battlefield");
-  const bfRect = bf.getBoundingClientRect();
-  const fxRect = $("#battle-fx").getBoundingClientRect();
   const cw = b.cellW || 88;
   const ch = b.cellH || 88;
-  const pad = 3; // battlefield padding
-  const offsetX = bfRect.left - fxRect.left + pad + 1;
-  const offsetY = bfRect.top - fxRect.top + pad + 1;
+  const offsetX = (b.bfOffsetX || 0);
+  const offsetY = (b.bfOffsetY || 0);
   const size = cw * (e.isBoss ? 1.5 : 0.82);
-  const cx = offsetX + e.col * (cw + 2) + (cw - size) / 2 + size / 2;
-  const cy = offsetY + e.y * (ch + 2) + (ch - size) / 2 + size / 2;
+  const cx = offsetX + e.col * (cw + 2) + cw / 2;
+  const cy = offsetY + e.y * (ch + 2) + ch / 2;
   e.el.style.width = size + "px";
   e.el.style.height = size + "px";
   e.el.style.transform = `translate(${cx - size/2}px, ${cy - size/2}px)`;
@@ -1937,11 +1945,16 @@ function tickEnemies(dt) {
     }
 
     // Check if blocked by a unit in same column in engagement window
+    // If multiple candidates, pick the one closest to enemy (smallest positive gap)
     let blocker = null;
+    let blockerGap = Infinity;
     for (const u of b.units) {
       if (u.col !== e.col) continue;
       const gap = u.row - e.y;
-      if (gap >= -0.1 && gap <= 0.55) { blocker = u; break; }
+      if (gap >= -0.1 && gap <= 0.55 && gap < blockerGap) {
+        blocker = u;
+        blockerGap = gap;
+      }
     }
     if (blocker) {
       // Attack blocker
@@ -2171,19 +2184,13 @@ function showDamageNum(cx, cy, n, crit, heal) {
 
 function cellCenterX(col) {
   const b = state.battle;
-  const bf = $("#battlefield");
-  const bfRect = bf.getBoundingClientRect();
-  const fxRect = $("#battle-fx").getBoundingClientRect();
   const cw = b.cellW || 88;
-  return (bfRect.left - fxRect.left) + 3 + col * (cw + 2) + cw / 2;
+  return (b.bfOffsetX || 0) + col * (cw + 2) + cw / 2;
 }
 function cellCenterY(row) {
   const b = state.battle;
-  const bf = $("#battlefield");
-  const bfRect = bf.getBoundingClientRect();
-  const fxRect = $("#battle-fx").getBoundingClientRect();
   const ch = b.cellH || 88;
-  return (bfRect.top - fxRect.top) + 3 + row * (ch + 2) + ch / 2;
+  return (b.bfOffsetY || 0) + row * (ch + 2) + ch / 2;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -2278,11 +2285,22 @@ document.addEventListener("DOMContentLoaded", () => {
   $("#btn-reset-progress").addEventListener("click", () => {
     if (confirm("進行度・編成をリセットしますか？")) {
       localStorage.removeItem("prism-defense");
+      localStorage.removeItem("prism-defense-tut");
       state.clearedStages = {};
       state.deck = [];
       state.totalShards = 0;
       alert("リセットしました");
     }
+  });
+
+  const soundBtn = $("#btn-sound-toggle");
+  const updateSoundBtn = () => soundBtn.innerHTML = soundEnabled ? "🔊 音 ON" : "🔇 音 OFF";
+  updateSoundBtn();
+  soundBtn.addEventListener("click", () => {
+    soundEnabled = !soundEnabled;
+    localStorage.setItem("prism-defense-sound", soundEnabled ? "1" : "0");
+    updateSoundBtn();
+    if (soundEnabled) SE.tap();
   });
 
   // Back buttons
@@ -2393,15 +2411,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // Reposition enemies on resize
   window.addEventListener("resize", () => {
     if (state.battle) {
-      const bf = $("#battlefield");
-      const c = bf.querySelector(".cell");
-      if (c) {
-        const rect = c.getBoundingClientRect();
-        bf.style.setProperty("--cell-w", rect.width + "px");
-        state.battle.cellW = rect.width;
-        state.battle.cellH = rect.height;
-        for (const e of state.battle.enemies) updateEnemyPosition(e);
-      }
+      updateLayoutCache();
+      for (const e of state.battle.enemies) updateEnemyPosition(e);
     }
   });
 
