@@ -9,8 +9,21 @@ ChatGPT（gpt-image-1 / DALL·E-3）に貼って生成できる形式。
 - 背景: `clean starry night background with subtle aurora`
 
 **保存先（このアプリで使う場合）:**
-`C:/Users/t2262/Box/DIK & Company/06_Other/野沢用/claude/gacha-sim/images/` に下記ファイル名で保存すれば自動で読まれる。
-(Box Drive 経由なのでデスクトップPCにも自動同期される)
+`C:/Users/t2262/Box/DIK & Company/06_Other/野沢用/claude/gacha-sim/images/characters/seasonN/<tier>/<slug>.png`
+
+ディレクトリ構成:
+```
+images/
+├── characters/
+│   └── season1/
+│       ├── lr/   prisma.png
+│       ├── ur/   seraph_paladin.png ・ dragon_emperor.png ・ cosmic_witch.png ・ ancient_sage.png ・ flame_empress.png
+│       ├── ssr/  elf_archer.png ・ wolf_warrior.png ・ draco_lancer.png ・ masked_knight.png ・ cat_librarian.png ・ kitsune_lady.png ・ paladin_lady.png ・ little_sister.png
+│       ├── sr/   silver_girl.png ・ swordsman.png ・ mage.png ・ red_twintail.png ・ katana_miko.png ・ pink_dragon_girl.png ・ white_priestess.png ・ songstress.png ・ shadow_ninja.png ・ flame_dancer.png
+│       └── r/    student.png ・ boy_scout.png ・ fox_girl.png ・ archer.png ・ young_mage.png ・ warrior.png
+└── fx/  (エフェクト素材)
+```
+※ 今後 season2/ 以降を追加。`script.js` の `POOL` は `season: N` フィールドで世代管理。
 
 ---
 

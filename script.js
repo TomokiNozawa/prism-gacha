@@ -9,124 +9,139 @@
 //   影喰い(シェイドーヴァ)が虹光を喰らい始め、色が失われつつある世界。
 //   選ばれし戦士が「虹因子」を宿し、光を取り戻すために集う。
 //
-// UR: 専用3体(星暁峰で修行した最高位)／SSR: 5体(各地の精鋭)
+// ★ 命名規則: images/characters/seasonN/<tier>/<slug>.png
+// ★ 各キャラ必ず `season: N` を持つ (図鑑フィルタ・グルーピングで使用)
+// ★ Season 1: 初期30体 (LR 1 / UR 5 / SSR 8 / SR 10 / R 6)
+const SEASON_META = {
+  1: { name: "Season 1 — 原虹の誕生", released: "2026-04-22" },
+  // 2: { name: "Season 2 — ...", released: "..." },
+};
+const S1 = "images/characters/season1";
+
 const POOL = {
   LR: [
     {
-      name: "虹意 プリズマ",
+      name: "虹意 プリズマ", season: 1,
       title: "原虹の意志・唯一の伝説",
       caption: "我は光の源。終わりにして、始まり",
       desc: "原虹の最初の光から生まれた自意識。性別という概念の外にいる、虹霊界そのものの『人格』。伝説では、影喰いの誕生はこの存在の無意識下の『迷い』から生じたとも語られる。虹光剣『始源(げんそう)』は、万色の刃を持つ。",
-      img: "images/lr_01_legend.png",
+      img: `${S1}/lr/prisma.png`,
     },
   ],
   UR: [
     {
-      name: "セラフィエル",
+      name: "セラフィエル", season: 1,
       title: "至天の聖騎士",
       caption: "貴方の祈り、我が光となる",
       desc: "原虹の中心で生まれた六翼の天使。人の姿を借りて降臨する神霊。ハルバード『虹天』は原虹そのものの結晶。世界が完全な闇に呑まれる時のみ顕現し、光を取り戻す。",
-      img: "images/ur_01_seraph_paladin.png",
+      img: `${S1}/ur/seraph_paladin.png`,
     },
     {
-      name: "龍帝 アルテミス",
+      name: "龍帝 アルテミス", season: 1,
       title: "虹霊界の覇王",
       caption: "我が背の龍が、世界の終わりを告げる",
       desc: "星暁峰で千年修行した竜人の皇帝。背に映る巨大な龍影は竜魂の実体化。双大剣『陰陽』は光と闇を同時に振るう。虹霊界十国すべてが彼に頭を垂れる。",
-      img: "images/ur_02_dragon_emperor.png",
+      img: `${S1}/ur/dragon_emperor.png`,
     },
     {
-      name: "星海のノクス",
+      name: "星海のノクス", season: 1,
       title: "虚空の星辰魔女",
       caption: "宇宙は私の中にある。貴方も、この瞬間も",
       desc: "人か神かも定かではない謎の魔女。髪には銀河を、従者に惑星を宿す。星杖『虚境』で時間と因果を織る。影喰いとの初戦で世界を救った伝説の存在。",
-      img: "images/ur_03_cosmic_witch.png",
+      img: `${S1}/ur/cosmic_witch.png`,
     },
     {
-      name: "千夜姫 カグヤ",
+      name: "千夜姫 カグヤ", season: 1,
       title: "虹霊界最古の賢者",
       caption: "幼く見えるか？ うむ、千年やっとるでな",
       desc: "原虹の誕生より前から在る月の化身。小柄な少女の姿で顕現しているが、実齢は計り知れぬ。九尾の天狐を従え、杖『月影(つきかげ)』に全魔術の原典を宿す。気まぐれに人前へ現れ、助言を残して消える。",
-      img: "images/ur_04_ancient_sage.png",
+      img: `${S1}/ur/ancient_sage.png`,
+    },
+    {
+      name: "焔帝 ヒノオウ", season: 1,
+      title: "虹霊界第七天の女神帝",
+      caption: "すべての闇を、この火で照らしてやろう",
+      desc: "七天の最高天を統べる炎の女神帝。背に巨大な朱の鳳凰を従え、双大剣『日輪(にちりん)』『月輪(げつりん)』を振るう。影喰いとの戦いでは常に前衛に立つ戦闘神。焔と虹を同時に纏う稀有な存在。",
+      img: `${S1}/ur/flame_empress.png`,
     },
   ],
   SSR: [
     {
-      name: "森の射手 リナエ",
+      name: "森の射手 リナエ", season: 1,
       title: "深緑樹海の守り手",
       caption: "葉音が消えた瞬間、狙いは定まっている",
       desc: "エルフ狩人氏族の末裔。樹齢千年の祖木から作られた『生きた弓』の継承者。葉擦れだけで敵の位置を読み、矢は外さない。樹海の異変をいち早く察知する斥候。",
-      img: "images/ssr_08_elf_archer.png",
+      img: `${S1}/ssr/elf_archer.png`,
     },
     {
-      name: "獣牙 ガルド",
+      name: "獣牙 ガルド", season: 1,
       title: "月牙狼族の戦士団長",
       caption: "群れのために斧を振るう。それだけだ",
       desc: "狼獣人の誇り高き戦士族。両手斧『月牙』は代々の団長が受け継ぐ英雄の遺物。寡黙で粗野に見えて、仲間のためには命を惜しまない。",
-      img: "images/ssr_09_wolf_warrior.png",
+      img: `${S1}/ssr/wolf_warrior.png`,
     },
     {
-      name: "竜爵 ヴィル",
+      name: "竜爵 ヴィル", season: 1,
       title: "紫竜王国の第三王女",
       caption: "竜の血を甘く見るな、死ぬぞ",
       desc: "紫竜王の三女にして、生まれながらの竜人。三叉槍『紫雷』は彼女自身の竜気を解放する。王位継承権を弟に譲り、戦場を己の居場所と決めた。",
-      img: "images/ssr_10_draco_lancer.png",
+      img: `${S1}/ssr/draco_lancer.png`,
     },
     {
-      name: "仮面騎士 シオン",
+      name: "仮面騎士 シオン", season: 1,
       title: "銀霜王国の沈黙の盾",
       caption: "騎士に名は要らぬ。仮面と誓いがあれば",
       desc: "素顔も声も伏せた謎の聖騎士。王族暗殺の陰謀から主君を守るため、名と顔を捨てた。盾『誓盾』とメイス『裁罰』は神器級。無言の剛力が恐怖を呼ぶ。",
-      img: "images/ssr_11_masked_knight.png",
+      img: `${S1}/ssr/masked_knight.png`,
     },
     {
-      name: "黒猫 ノア",
+      name: "黒猫 ノア", season: 1,
       title: "黒曜塔の若き司書官",
       caption: "本なら任せて♪ 読むのも書くのも、ぶっ壊すのも",
       desc: "黒曜塔の禁書庫を預かる猫獣人の天才。浮遊魔導書『夜導』で召喚魔術を操る。自由奔放で人懐っこいが、禁書の扱いだけは絶対に譲らない。",
-      img: "images/ssr_12_cat_librarian.png",
+      img: `${S1}/ssr/cat_librarian.png`,
     },
     {
-      name: "朱音",
+      name: "朱音", season: 1,
       title: "夜焔郷の遊芸師",
       caption: "逃げたいなら今のうち。逃げなかったら、もう遅いわ",
       desc: "夜焔郷の花街で一等と謳われる遊芸師。表の顔は舞い手、裏の顔は暗殺者。九尾の黒狐の血を引き、金の扇『紅月』から放つ灼火の術で標的を焼き尽くす。",
-      img: "images/ssr_13_kitsune_lady.png",
+      img: `${S1}/ssr/kitsune_lady.png`,
     },
     {
-      name: "イザベル",
+      name: "イザベル", season: 1,
       title: "白焔教会の聖巫騎士",
       caption: "あなたの傷、すべてこの手で癒してあげる",
       desc: "白焔教会の聖域を守る聖巫騎士。聖槍『天穹(てんきゅう)』は虹霊界十英雄の一人から受け継がれし神器。癒しの聖光と戦場の剛力を両立する、稀有な『戦う治癒者』。",
-      img: "images/ssr_14_paladin_lady.png",
+      img: `${S1}/ssr/paladin_lady.png`,
     },
     {
-      name: "ひなた",
+      name: "ひなた", season: 1,
       title: "皇家の末妹・見習い剣士",
       caption: "ね、わたしも連れてって！修行したんだから！",
       desc: "紅翼皇家の末妹、齢十三。兄姉たちの背を追って剣の道へ。小太刀『桜散(さくらちらし)』で舞うように戦う。屈託のない笑顔の奥に、家を守る強い意志を秘める。",
-      img: "images/ssr_15_little_sister.png",
+      img: `${S1}/ssr/little_sister.png`,
     },
   ],
   SR: [
-    // 旧SSR初期7体を SR に降格（推しキャラ風含む）
-    { name: "ルミナ",         img: "images/ssr_01_silver_girl.png" },
-    { name: "黒刃 玄",        img: "images/ssr_02_swordsman.png" },
-    { name: "セラフィ",       img: "images/ssr_03_mage.png" },
-    { name: "紅翼 ツキ",      img: "images/ssr_04_red_twintail.png" },
-    { name: "薫音",           img: "images/ssr_05_katana_miko.png" },
-    { name: "リリム",         img: "images/ssr_06_pink_dragon_girl.png" },
-    { name: "メイリ",         img: "images/ssr_07_white_priestess.png" },
+    { name: "ルミナ",         season: 1, img: `${S1}/sr/silver_girl.png` },
+    { name: "黒刃 玄",        season: 1, img: `${S1}/sr/swordsman.png` },
+    { name: "セラフィ",       season: 1, img: `${S1}/sr/mage.png` },
+    { name: "紅翼 ツキ",      season: 1, img: `${S1}/sr/red_twintail.png` },
+    { name: "薫音",           season: 1, img: `${S1}/sr/katana_miko.png` },
+    { name: "リリム",         season: 1, img: `${S1}/sr/pink_dragon_girl.png` },
+    { name: "メイリ",         season: 1, img: `${S1}/sr/white_priestess.png` },
+    { name: "詠聖 ベル",      season: 1, img: `${S1}/sr/songstress.png` },
+    { name: "影刃 シン",      season: 1, img: `${S1}/sr/shadow_ninja.png` },
+    { name: "焔舞 ヒナカ",    season: 1, img: `${S1}/sr/flame_dancer.png` },
   ],
   R: [
-    // 旧R 3体
-    { name: "ちさと",   img: "images/r_01_student.png" },
-    { name: "カイ",     img: "images/r_02_boy_scout.png" },
-    { name: "こはね",   img: "images/r_03_fox_girl.png" },
-    // 旧SR 3体を R に降格してマージ
-    { name: "ヴィオラ", img: "images/sr_01_archer.png" },
-    { name: "アルス",   img: "images/sr_02_young_mage.png" },
-    { name: "ミレイア", img: "images/sr_03_warrior.png" },
+    { name: "ちさと",   season: 1, img: `${S1}/r/student.png` },
+    { name: "カイ",     season: 1, img: `${S1}/r/boy_scout.png` },
+    { name: "こはね",   season: 1, img: `${S1}/r/fox_girl.png` },
+    { name: "ヴィオラ", season: 1, img: `${S1}/r/archer.png` },
+    { name: "アルス",   season: 1, img: `${S1}/r/young_mage.png` },
+    { name: "ミレイア", season: 1, img: `${S1}/r/warrior.png` },
   ],
 };
 
@@ -416,11 +431,11 @@ const TIER_COLORS = {
   LR:  ["#ffffff", "#ffd84d", "#ff5faa", "#5fffd4", "#7ea8ff", "#c87dff"],
 };
 const TIER_PILLAR = {
-  R:   "images/fx_pillar_blue.png",
-  SR:  "images/fx_pillar_purple.png",
-  SSR: "images/fx_pillar_gold.png",
-  UR:  "images/rainbow_pillar_effect.png",
-  LR:  "images/rainbow_pillar_effect.png",
+  R:   "images/fx/pillar_blue.png",
+  SR:  "images/fx/pillar_purple.png",
+  SSR: "images/fx/pillar_gold.png",
+  UR:  "images/fx/rainbow_pillar.png",
+  LR:  "images/fx/rainbow_pillar.png",
 };
 
 // フラッシュ強度: "soft"(R/SR段階用), "mid"(SSR用), "hard"(UR用)
@@ -447,7 +462,7 @@ function showPillar(tier) {
 function showCrack() {
   const c = document.createElement("div");
   c.className = "fx-crack show";
-  c.style.backgroundImage = "url('images/fx_crack_burst.png')";
+  c.style.backgroundImage = "url('images/fx/crack_burst.png')";
   stageVfx.appendChild(c);
   setTimeout(() => c.remove(), 700);
 }
@@ -623,6 +638,37 @@ function showMiracle() {
   m.textContent = "🌈  M I R A C L E  🌈";
   stageVfx.appendChild(m);
   setTimeout(() => m.remove(), 2200);
+}
+
+// LR専用: 画面シャター(破砕)演出
+async function showLegendShatter() {
+  // 第1波: 中央にヒビ
+  play("se-crack");
+  showCrack();
+  stage.classList.add("shake");
+  await sleep(280);
+  if (checkSkip()) { stage.classList.remove("shake"); return; }
+  // 第2波: 重ねヒビ + シャター背景
+  play("se-crack");
+  showCrack();
+  const bg = document.createElement("div");
+  bg.className = "fx-shatter on";
+  stageVfx.appendChild(bg);
+  setTimeout(() => bg.remove(), 1200);
+  await sleep(260);
+  if (checkSkip()) { stage.classList.remove("shake"); return; }
+  // 第3波: 画面が4分割に砕け散る
+  play("se-crack");
+  for (let i = 1; i <= 4; i++) {
+    const s = document.createElement("div");
+    s.className = "fx-shard on s" + i;
+    stageVfx.appendChild(s);
+    setTimeout(() => s.remove(), 1100);
+  }
+  flash("hard");
+  await sleep(500);
+  stage.classList.remove("shake");
+  // 破砕が収まり、ここから LR本命演出へ
 }
 
 // LEGENDテロップ (LR時・MIRACLEより大きく)
@@ -1100,6 +1146,11 @@ async function summonOne(result, opts = {}) {
     const fn = { A: summonTypeA, B: summonTypeB, C: summonTypeC, D: summonTypeD, E: summonTypeE, F: summonTypeF }[type] || summonTypeA;
     await fn(result, tier);
     if (checkSkip()) return finalize(result);
+    // LR確定なら昇格後に画面を砕く(超レア感の決定打)
+    if (tier === "LR") {
+      await showLegendShatter();
+      if (checkSkip()) return finalize(result);
+    }
   } else if (!showLadder && isHigh) {
     // 10連中途のSSR/UR: 装飾のみ発火 (昇格なし)
     setStageTier(tier);
