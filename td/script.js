@@ -400,16 +400,16 @@ for (const u of UNITS) UNIT_BY_ID[u.id] = u;
  atkRange = 0 (melee, only blocks & hits unit in same cell) or N (ranged: hunter)
 */
 const ENEMY_TYPES = {
-  walker: { name:"影歩み", hp:28, atk:5, atkInterval:1000, speed:0.45, shape:"👻", reward:8, armor:0 },
-  runner: { name:"影駆け", hp:20, atk:6, atkInterval:900,  speed:1.00, shape:"💨", reward:9, armor:0 },
-  brute:  { name:"影巨塊", hp:160, atk:12, atkInterval:1200, speed:0.28, shape:"🧿", reward:25, armor:2 },
-  hunter: { name:"影狩人", hp:60, atk:9, atkInterval:1600, speed:0.38, shape:"🏹", reward:16, armor:0, atkRange:2, atkProj:"magic" },
-  wraith: { name:"影霊",   hp:90, atk:7, atkInterval:1100, speed:0.32, shape:"🌫", reward:18, armor:3 },
-  swarm:  { name:"影群",   hp:10, atk:3, atkInterval:700,  speed:1.15, shape:"🕷", reward:5, armor:0 },
-  knight: { name:"影騎士", hp:130, atk:13, atkInterval:1000, speed:0.42, shape:"⚔",  reward:22, armor:2 },
-  lord:   { name:"影領公", hp:800, atk:22, atkInterval:1000, speed:0.28, shape:"👹", reward:150, armor:4, boss:true },
-  king:   { name:"影帝",   hp:1800, atk:32, atkInterval:900, speed:0.25, shape:"👿", reward:280, armor:5, boss:true },
-  origin: { name:"原影",   hp:4800, atk:44, atkInterval:800, speed:0.22, shape:"☠",  reward:500, armor:6, boss:true },
+  walker: { name:"影歩み", hp:28, atk:5, atkInterval:1000, speed:0.45, shape:"👻", reward:60, armor:0 },
+  runner: { name:"影駆け", hp:20, atk:6, atkInterval:900,  speed:1.00, shape:"💨", reward:65, armor:0 },
+  brute:  { name:"影巨塊", hp:160, atk:12, atkInterval:1200, speed:0.28, shape:"🧿", reward:150, armor:2 },
+  hunter: { name:"影狩人", hp:60, atk:9, atkInterval:1600, speed:0.38, shape:"🏹", reward:95, armor:0, atkRange:2, atkProj:"magic" },
+  wraith: { name:"影霊",   hp:90, atk:7, atkInterval:1100, speed:0.32, shape:"🌫", reward:110, armor:3 },
+  swarm:  { name:"影群",   hp:10, atk:3, atkInterval:700,  speed:1.15, shape:"🕷", reward:40, armor:0 },
+  knight: { name:"影騎士", hp:130, atk:13, atkInterval:1000, speed:0.42, shape:"⚔",  reward:130, armor:2 },
+  lord:   { name:"影領公", hp:800, atk:22, atkInterval:1000, speed:0.28, shape:"👹", reward:500, armor:4, boss:true },
+  king:   { name:"影帝",   hp:1800, atk:32, atkInterval:900, speed:0.25, shape:"👿", reward:850, armor:5, boss:true },
+  origin: { name:"原影",   hp:4800, atk:44, atkInterval:800, speed:0.22, shape:"☠",  reward:1800, armor:6, boss:true },
 };
 
 // ─────────────────────────────────────────────────────────────
@@ -443,7 +443,7 @@ const STAGES = [
     story: "虹霊界の辺境、星霊学院の演習場に黒い靄が現れた。学院の新人ちさとたちが、初めて影喰いと対峙する。",
     winStory: "ちさと「やった……倒せたよ、みんな！」カイ「僕、正直チビりそうだった……」新人たちは歓声を上げた。だが、これは始まりに過ぎなかった。",
     baseHp: BASE_HP,
-    startRes: 420,
+    startRes: 620,
     waves: [
       wave(lineup("walker", 3, 1800, "any", 1000)),
       wave(lineup("walker", 5, 1500, "any", 500)),
@@ -453,7 +453,7 @@ const STAGES = [
     num: 2, chap: "第一章 影の始まり", title: "影の群れ",
     story: "影喰いは一体ではなかった。学院の警報が鳴り響き、増援が駆けつける。",
     winStory: "ミレイア「前線は、わたしが持つ！」壁役となったミレイアが最後の影を盾で打ち砕いた。",
-    baseHp: BASE_HP, startRes: 440,
+    baseHp: BASE_HP, startRes: 640,
     waves: [
       wave(mix(
         lineup("walker", 4, 1500, "any", 800),
@@ -470,7 +470,7 @@ const STAGES = [
     num: 3, chap: "第一章 影の始まり", title: "深緑からの報せ",
     story: "深緑樹海からリナエの先触れとして、半エルフの斥候ヴィオラが学院に到着。『影喰いは今、五大国の全てに現れています』。",
     winStory: "ヴィオラ「……皆さん、強い。わたしも、もっと強くならないと」リナエ姉さまに報告する顔が、少し誇らしげだった。",
-    baseHp: BASE_HP, startRes: 480,
+    baseHp: BASE_HP, startRes: 680,
     waves: [
       wave(mix(
         lineup("walker", 4, 1400, "any", 500),
@@ -492,7 +492,7 @@ const STAGES = [
     num: 4, chap: "第一章 影の始まり", title: "夜焔の警鐘",
     story: "夜焔郷からこはねが影衆の見習いとして派遣された。『朱音ねえさまが、まだ来れぬからって……私が繋ぎに！』",
     winStory: "こはね「…ふぅ、間に合いました。朱音ねえさまに、ちゃんと報告できる」",
-    baseHp: BASE_HP, startRes: 500,
+    baseHp: BASE_HP, startRes: 700,
     waves: [
       wave(mix(
         lineup("walker", 3, 1300, "any", 500),
@@ -511,7 +511,7 @@ const STAGES = [
     num: 5, chap: "第一章 影の始まり", title: "若き星霊たち",
     story: "学院襲撃の首謀者『影の騎士』が現れる。学院の全員で立ち向かえ。",
     winStory: "アルス「やった！騎士級を倒した！」四人組が拳を突き合わせる。薫音師範が静かに頷いた。「……皆、立派になった」",
-    baseHp: BASE_HP, startRes: 540, miniBoss: true,
+    baseHp: BASE_HP, startRes: 740, miniBoss: true,
     waves: [
       wave(mix(
         lineup("walker", 4, 1200, "any", 500),
@@ -534,7 +534,7 @@ const STAGES = [
     num: 6, chap: "第二章 五大国の召集", title: "皇家の旗下",
     story: "紅翼皇家が召集令を発した。ひなたとツキ姉妹が駆けつける。桜の花びらと共に、影喰いの狩人型が現れた。",
     winStory: "ツキ「妹の分まで、守ったよ」ひなた「わたしもやったよ！ねえさま、見てた！？」",
-    baseHp: BASE_HP, startRes: 560,
+    baseHp: BASE_HP, startRes: 760,
     waves: [
       wave(mix(
         lineup("walker", 4, 1200, "any", 500),
@@ -551,7 +551,7 @@ const STAGES = [
     num: 7, chap: "第二章 五大国の召集", title: "銀霜の盾",
     story: "銀霜王国からシオンとルミナが到着。『盾は音を立てぬが、命は守る』",
     winStory: "シオン「……」ルミナ「シオン様、皆さんを守ってくださってありがとう」無言のまま騎士は頷く。",
-    baseHp: BASE_HP, startRes: 580,
+    baseHp: BASE_HP, startRes: 780,
     waves: [
       wave(mix(
         lineup("walker", 3, 1300, "any", 500),
@@ -573,7 +573,7 @@ const STAGES = [
     num: 8, chap: "第二章 五大国の召集", title: "月牙族の参戦",
     story: "西方、月牙狼族からガルドが到着。小さな影がうじゃうじゃと押し寄せてくる。",
     winStory: "ガルド「……群れというものは、こうして潰す」両手斧が闇を切り裂いた。",
-    baseHp: BASE_HP, startRes: 600,
+    baseHp: BASE_HP, startRes: 800,
     waves: [
       wave(mix(
         lineup("swarm", 10, 400, "any", 500),
@@ -590,7 +590,7 @@ const STAGES = [
     num: 9, chap: "第二章 五大国の召集", title: "紫竜の威",
     story: "紫竜王国の王女ヴィルと、若竜リリムが参戦。『竜の血を甘く見るな、死ぬぞ』",
     winStory: "リリム「ヴィル姉さま、わたしちゃんと戦えた！」ヴィル「うむ。…稽古は倍だがな」",
-    baseHp: BASE_HP, startRes: 640,
+    baseHp: BASE_HP, startRes: 840,
     waves: [
       wave(mix(
         lineup("walker", 3, 1100, "any", 500),
@@ -612,7 +612,7 @@ const STAGES = [
     num: 10, chap: "第二章 五大国の召集", title: "影領公 シャドー公爵",
     story: "大陸の境界に『影領公』が降臨。その背後で、虹霊界の七つの色のうち一つが、完全に消えた。",
     winStory: "影領公の首が地に落ちる。その瞬間、失われていた七色のうち一つがわずかに戻った——薄い紫の光が、夜空に流れた。",
-    baseHp: BASE_HP, startRes: 720, boss: true,
+    baseHp: BASE_HP, startRes: 920, boss: true,
     waves: [
       wave(mix(
         lineup("runner", 6, 800, "any", 500),
@@ -636,7 +636,7 @@ const STAGES = [
     num: 11, chap: "第三章 黒曜塔の秘密", title: "禁書の警告",
     story: "黒曜塔の若き司書官ノアが、禁書の中に影喰い誕生の記述を発見。『原虹の迷い、影として具現す』",
     winStory: "ノア「……この記述、ノクス様に見てもらわないと。でも、なんで禁書に最初から書かれてるんだろ？」",
-    baseHp: BASE_HP, startRes: 680,
+    baseHp: BASE_HP, startRes: 880,
     waves: [
       wave(mix(
         lineup("hunter", 3, 2000, "any", 500),
@@ -658,7 +658,7 @@ const STAGES = [
     num: 12, chap: "第三章 黒曜塔の秘密", title: "黒曜塔の異変",
     story: "黒曜塔の地下、禁書の一冊が勝手に開き、影喰いの生成装置と化していた。塔を守れ。",
     winStory: "ノア「……この本、燃やせないし、閉じないし、困った猫だよ。いったん封印しとこ」",
-    baseHp: BASE_HP, startRes: 700,
+    baseHp: BASE_HP, startRes: 900,
     waves: [
       wave(mix(
         lineup("wraith", 4, 1800, "any", 500),
@@ -679,7 +679,7 @@ const STAGES = [
     num: 13, chap: "第三章 黒曜塔の秘密", title: "月影宮の助言",
     story: "千夜姫カグヤが月影宮から姿を現した。『……千年ぶりじゃ。原虹の迷い、鎮めに参った』",
     winStory: "カグヤ「ふむ。わらわの杖、まだ鈍っておらぬな」天狐たちが戯れる。",
-    baseHp: BASE_HP, startRes: 740,
+    baseHp: BASE_HP, startRes: 940,
     waves: [
       wave(mix(
         lineup("runner", 6, 800, "any", 500),
@@ -702,7 +702,7 @@ const STAGES = [
     num: 14, chap: "第三章 黒曜塔の秘密", title: "白焔の奇跡",
     story: "白焔教会のイザベルと巫女メイリ、ベルが到着。『あなたの傷、すべてこの手で癒してあげる』",
     winStory: "ベルの歌声が戦場に響く。傷ついた戦士たちの体から、淡い虹色の光が滲んだ。",
-    baseHp: BASE_HP, startRes: 760,
+    baseHp: BASE_HP, startRes: 960,
     waves: [
       wave(mix(
         lineup("wraith", 5, 1500, "any", 500),
@@ -724,7 +724,7 @@ const STAGES = [
     num: 15, chap: "第三章 黒曜塔の秘密", title: "影蛛の巣",
     story: "黒曜塔地下の禁書室で、巨大な『影蛛(カゲグモ)』の巣が見つかった。虫の群れが地上に溢れる。",
     winStory: "小さな影が全て払われ、塔の地下に静けさが戻る。だが、禁書の奥にはまだ何かが眠っている気配が……",
-    baseHp: BASE_HP, startRes: 780, miniBoss: true,
+    baseHp: BASE_HP, startRes: 980, miniBoss: true,
     waves: [
       wave(mix(
         lineup("swarm", 24, 250, "any", 500),
@@ -748,7 +748,7 @@ const STAGES = [
     num: 16, chap: "第四章 深淵への道", title: "星の揺らぎ",
     story: "星海のノクスが虚境から降臨。『……宇宙が、一つ欠けている。原虹の奥深くに、何か』",
     winStory: "ノクス「……見えた、けれど触れられない。もう一度、星杖を研がねば」",
-    baseHp: BASE_HP, startRes: 780,
+    baseHp: BASE_HP, startRes: 980,
     waves: [
       wave(mix(
         lineup("hunter", 5, 1500, "any", 500),
@@ -771,7 +771,7 @@ const STAGES = [
     num: 17, chap: "第四章 深淵への道", title: "虹光の涸れ",
     story: "原虹の第二の色が失われる。前線は連戦で疲弊。夜焔郷から朱音が到着、戦線を焔で押し返す。",
     winStory: "朱音「あら、思ったよりしぶといのね。でも、火には弱いみたいよ」扇の焔が闇を舐めた。",
-    baseHp: BASE_HP, startRes: 800,
+    baseHp: BASE_HP, startRes: 1000,
     waves: [
       wave(mix(
         lineup("knight", 4, 2500, "any", 500),
@@ -794,7 +794,7 @@ const STAGES = [
     num: 18, chap: "第四章 深淵への道", title: "夜焔の犠牲",
     story: "夜焔郷の花街が影喰いに呑まれた。朱音は歯を噛みしめ『もう、演じるのはやめるわ』と扇を開く。",
     winStory: "朱音「……うちの街、取り戻すからね。覚悟なさいな」金の扇から放たれた焔が夜空を染めた。",
-    baseHp: BASE_HP, startRes: 840,
+    baseHp: BASE_HP, startRes: 1040,
     waves: [
       wave(mix(
         lineup("runner", 12, 550, "any", 500),
@@ -816,7 +816,7 @@ const STAGES = [
     num: 19, chap: "第四章 深淵への道", title: "天使の羽音",
     story: "天の雲からセラフィエルが降臨。白と虹の翼が戦場に大空の影を落とした。",
     winStory: "セラフィエル「司配よ、君の指揮は、プリズマの意志に届いている」六枚の翼が静かに畳まれた。",
-    baseHp: BASE_HP, startRes: 900,
+    baseHp: BASE_HP, startRes: 1100,
     waves: [
       wave(mix(
         lineup("knight", 5, 2200, "any", 500),
@@ -840,7 +840,7 @@ const STAGES = [
     num: 20, chap: "第四章 深淵への道", title: "影王 シェイド・キング",
     story: "原虹の境界で『影王』が顕現。膨大な影喰いを従え、虹霊界の第三の色を喰らわんとしている。",
     winStory: "影王の体が崩れ落ちる。『…我、は…プリズマの…迷い…』その言葉を残して闇が晴れた。戦士たちは言葉を失った。",
-    baseHp: BASE_HP, startRes: 1000, boss: true,
+    baseHp: BASE_HP, startRes: 1200, boss: true,
     waves: [
       wave(mix(
         lineup("runner", 10, 600, "any", 500),
@@ -866,7 +866,7 @@ const STAGES = [
     num: 21, chap: "第五章 天界の戦", title: "第七天への反攻",
     story: "第七天の焔帝ヒノオウが参戦。『我が炎で、影を照らし尽くす』",
     winStory: "ヒノオウ「司配よ、感謝は不要。光は、戦う者のためにあるのだ」朱鳳が夜空に羽ばたいた。",
-    baseHp: BASE_HP, startRes: 940,
+    baseHp: BASE_HP, startRes: 1140,
     waves: [
       wave(mix(
         lineup("knight", 6, 1800, "any", 500),
@@ -889,7 +889,7 @@ const STAGES = [
     num: 22, chap: "第五章 天界の戦", title: "焔と虹の誓い",
     story: "ヒノオウがセラフィエルに、戦友として誓いを交わす。『もし、我が焔が虹を喰らえば、お主が斬れ』",
     winStory: "二人の女帝が並び立ち、戦場の闇が一度に晴れた。",
-    baseHp: BASE_HP, startRes: 960,
+    baseHp: BASE_HP, startRes: 1160,
     waves: [
       wave(mix(
         lineup("wraith", 7, 1400, "any", 500),
@@ -912,7 +912,7 @@ const STAGES = [
     num: 23, chap: "第五章 天界の戦", title: "千夜の霧",
     story: "カグヤが月影宮の封印を解き、古い記憶を呼び起こす。『原虹の迷いを、最初に見たのは…わらわじゃった』",
     winStory: "カグヤ「千年前、わらわは気づいておった。だが止められなんだ。今度こそ……」",
-    baseHp: BASE_HP, startRes: 1000,
+    baseHp: BASE_HP, startRes: 1200,
     waves: [
       wave(mix(
         lineup("knight", 7, 1500, "any", 500),
@@ -935,7 +935,7 @@ const STAGES = [
     num: 24, chap: "第五章 天界の戦", title: "龍帝の目覚め",
     story: "星暁峰の龍帝アルテミスが千年の眠りから覚める。『……影よ、遅いぞ。もう一度だけ舞おう』",
     winStory: "龍帝の双大剣が影を両断する。『光と闇、両方振るうのが、覇王というものだ』",
-    baseHp: BASE_HP, startRes: 1060,
+    baseHp: BASE_HP, startRes: 1260,
     waves: [
       wave(mix(
         lineup("brute", 5, 2000, "any", 500),
@@ -958,7 +958,7 @@ const STAGES = [
     num: 25, chap: "第五章 天界の戦", title: "七英の結集",
     story: "五大国の戦士、天界の使者、最古の賢者——全員が集った。だが、原虹の中心から、不穏な鼓動が響いてきた。",
     winStory: "戦士たちは黙した。原虹の内側で、何かが目覚めている。光ではない。影でもない。もっと古い、『始まり』のようなものが——。",
-    baseHp: BASE_HP, startRes: 1120, miniBoss: true,
+    baseHp: BASE_HP, startRes: 1320, miniBoss: true,
     waves: [
       wave(mix(
         lineup("knight", 8, 1300, "any", 500),
@@ -984,7 +984,7 @@ const STAGES = [
     num: 26, chap: "第六章 原虹の咆哮", title: "原虹の鼓動",
     story: "原虹の結晶が脈打ちはじめた。その内側から、声のような音が漏れる。『……助けて……助けて……』",
     winStory: "戦士たちは首を傾げた。影喰いの声ではない。あれは……もしかして、原虹自身の？",
-    baseHp: BASE_HP, startRes: 1100,
+    baseHp: BASE_HP, startRes: 1300,
     waves: [
       wave(mix(
         lineup("knight", 9, 1200, "any", 500),
@@ -1007,7 +1007,7 @@ const STAGES = [
     num: 27, chap: "第六章 原虹の咆哮", title: "記憶の迷宮",
     story: "原虹の中、時空がねじれた迷宮に戦士たちは迷い込む。過去の影喰いと、未来の自分が襲ってきた。",
     winStory: "迷宮を抜けると、プリズマの姿が一瞬だけ見えた。だが、すぐに消えた。『……まだ、だ』",
-    baseHp: BASE_HP, startRes: 1140,
+    baseHp: BASE_HP, startRes: 1340,
     waves: [
       wave(mix(
         lineup("brute", 7, 1600, "any", 500),
@@ -1030,7 +1030,7 @@ const STAGES = [
     num: 28, chap: "第六章 原虹の咆哮", title: "最古の賢者",
     story: "原虹の最奥、カグヤだけが知る間に到達。『お主ら、もう少し、耐えてくれ。わらわが最後の封印を解く』",
     winStory: "カグヤ「…解いた。もう戻せぬ。司配よ、ここからは覚悟を決めよ」月の光が、これまでにないほど強く差した。",
-    baseHp: BASE_HP, startRes: 1180,
+    baseHp: BASE_HP, startRes: 1380,
     waves: [
       wave(mix(
         lineup("knight", 10, 1100, "any", 500),
@@ -1053,7 +1053,7 @@ const STAGES = [
     num: 29, chap: "第六章 原虹の咆哮", title: "虹意顕現",
     story: "原虹の中心から、虹色の髪を持つ中性的な『何か』が現れた。『……私は、プリズマ。そして、私は——影喰いでもある』",
     winStory: "プリズマが初めて地に降り立った。戦士たちの全員が膝をつき、次なる戦いの覚悟を固めた。",
-    baseHp: BASE_HP, startRes: 1320, miniBoss: true,
+    baseHp: BASE_HP, startRes: 1520, miniBoss: true,
     waves: [
       wave(mix(
         lineup("knight", 11, 1000, "any", 500),
@@ -1077,7 +1077,7 @@ const STAGES = [
     num: 30, chap: "第六章 原虹の咆哮", title: "原影 シェイド・オリジン",
     story: "ついに真の敵が姿を現す。プリズマの負の側面、忘却されたもう一つの意志——『原影』。世界の終わりが、ここで決まる。",
     winStory: "原影が崩れ落ちる瞬間、プリズマは目を伏せて笑った。『……ありがとう、司配。私の影を、祓ってくれて』虹霊界に、七つの色が、全て、戻った。",
-    baseHp: BASE_HP, startRes: 1620, final: true,
+    baseHp: BASE_HP, startRes: 1820, final: true,
     waves: [
       wave(mix(
         lineup("knight", 10, 1100, "any", 500),
