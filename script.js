@@ -1058,7 +1058,7 @@ async function summonTypeZ(result, tier) {
     speed: tier === "SR" ? 8 : 6,
   });
   if (tier === "SR") flash("soft");
-  await sleep(450);
+  await sleep(320);
 }
 
 // Type A: オーブ昇格 (シンプル・テンポ良)
@@ -1239,7 +1239,7 @@ async function summonOne(result, opts = {}) {
     if (checkSkip()) return finalize(result);
   } else {
     play("se-summon");
-    await sleep(200);
+    await sleep(150);
     if (checkSkip()) return finalize(result);
   }
 
@@ -1361,9 +1361,10 @@ async function summonOne(result, opts = {}) {
 
 async function finalize(result) {
   const isHigh = result.tier === "UR" || result.tier === "SSR";
+  const isLow = result.tier === "R" || result.tier === "SR";
   revealChar(result);
   // キャラ名プレートを少し遅れて (burst-inとタイミング合わせる)
-  await sleep(isHigh ? 550 : 300);
+  await sleep(isHigh ? 550 : isLow ? 220 : 300);
   showCharName(result);
   // 獲得テロップ
   if (result.tier === "LR") {
@@ -1383,7 +1384,7 @@ async function finalize(result) {
     showContinueHint();
     await waitForKey();
   } else {
-    await sleep(900);
+    await sleep(isLow ? 650 : 900);
   }
 }
 
