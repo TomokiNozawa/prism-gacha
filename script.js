@@ -1922,13 +1922,13 @@ function openRelations() {
   document.getElementById('relations').classList.add('active');
 
   // クリックでキャラ詳細にジャンプ (ドラッグと区別するため移動量チェック)
+  // 相関図は背後に残す → 詳細を閉じたら相関図に戻る
   canvas.querySelectorAll('[data-char-name]').forEach(el => {
     el.addEventListener('click', e => {
       if (relationsDragMoved) return; // ドラッグ後の偽クリックを無視
       const name = el.dataset.charName;
       const c = getCharByName(name);
       if (c && isUnlocked(c)) {
-        closeRelations();
         if (detailUnlockedList.length === 0) {
           detailUnlockedList = getAllCharactersWithTier().filter(x => isUnlocked(x));
         }
@@ -2166,7 +2166,9 @@ function onZoomDragStart(e) {
   const y = isTouch ? e.touches[0].clientY : e.clientY;
   zoomStartX = x; zoomStartY = y;
   zoomBaseTx = zoomTx; zoomBaseTy = zoomTy;
-  $("#char-img-zoom-img").style.cursor = "grabbing";
+  const img = $("#char-img-zoom-img");
+  img.style.cursor = "grabbing";
+  img.style.transition = "none";  // ドラッグ中はtransition無効化(遅延防止)
 }
 function onZoomDragMove(e) {
   if (!zoomMouseDown) return;       // ★ 押されてない時は無視
@@ -2185,7 +2187,9 @@ function onZoomDragMove(e) {
 }
 function onZoomDragEnd() {
   zoomMouseDown = false;
-  $("#char-img-zoom-img").style.cursor = zoomScale > 1 ? "grab" : "zoom-in";
+  const img = $("#char-img-zoom-img");
+  img.style.cursor = zoomScale > 1 ? "grab" : "zoom-in";
+  img.style.transition = "";  // ドラッグ終了でtransition復活 (ボタン等のスムーズ動作)
   setTimeout(() => { zoomDragging = false; }, 30);
 }
 
