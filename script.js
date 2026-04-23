@@ -250,6 +250,9 @@ const RATES = { R: 0.645, SR: 0.25, SSR: 0.07, UR: 0.03, LR: 0.005 };
 // ────────────── State ──────────────
 const state = loadState();
 
+// 凸システム: tier別最大凸数 (Lv1=初回, Lv2=1凸, ...)
+const MAX_DUPS = { R: 1, SR: 2, SSR: 3, UR: 4, LR: 4 };
+
 function loadState() {
   try {
     const raw = JSON.parse(localStorage.getItem("prism-gacha") || "{}");
@@ -260,6 +263,7 @@ function loadState() {
       history: raw.history || [],
       galleryViewed: raw.galleryViewed || {},
       unlockedSet: raw.unlockedSet || {},  // "UR_セラフィエル": true （永続）
+      dupCounts: raw.dupCounts || {},       // "UR_セラフィエル": 凸数 (初回0)
     };
     // マイグレーション: 既存 history からunlockedSetを補完 (旧セーブデータ救済)
     for (const h of s.history) {
@@ -268,7 +272,7 @@ function loadState() {
     }
     return s;
   } catch {
-    return { total:0, ur:0, pity:0, history:[], galleryViewed:{}, unlockedSet:{} };
+    return { total:0, ur:0, pity:0, history:[], galleryViewed:{}, unlockedSet:{}, dupCounts:{} };
   }
 }
 function saveState() {
@@ -299,6 +303,19 @@ function applyPull(result) {
   // 初回獲得判定(永続セットで判定 — 履歴120件制限の影響を受けない)
   result.isNew = !state.unlockedSet[key];
   state.unlockedSet[key] = true;
+  // 凸システム: 重複なら凸数+1 (Max凸まで)
+  if (!result.isNew) {
+    const max = MAX_DUPS[result.tier] || 0;
+    const cur = state.dupCounts[key] || 0;
+    if (cur < max) {
+      state.dupCounts[key] = cur + 1;
+      result.dupGained = state.dupCounts[key]; // 今回獲得した凸数
+    } else {
+      result.dupGained = null; // Max凸到達後
+    }
+  }
+  result.dupCount = state.dupCounts[key] || 0;
+  result.dupMax = MAX_DUPS[result.tier] || 0;
   state.total += 1;
   if (result.tier === "UR") { state.ur += 1; state.pity = 0; }
   else state.pity += 1;
@@ -1602,6 +1619,12 @@ function showResult(results, best) {
       nb.className = "rcard-new";
       nb.textContent = "NEW";
       c.appendChild(nb);
+    } else if (r.dupGained) {
+      // 凸獲得バッジ (NEWでない場合のみ)
+      const db = document.createElement("div");
+      db.className = "rcard-dup";
+      db.textContent = `+${r.dupGained}凸`;
+      c.appendChild(db);
     }
     const nm = document.createElement("div");
     nm.className = "rcard-name"; nm.textContent = r.name;
@@ -1764,6 +1787,8 @@ function renderCharDetail(c) {
   } else {
     $("#char-detail-counter").textContent = "";
   }
+  // 凸表示 (tierバッジ横に「N凸 / Max M凸」)
+  renderCharDup(c);
   // 関連キャラ表示
   renderCharRelations(c);
   // 詳細画面を開いたら拡大は解除
@@ -1771,6 +1796,35 @@ function renderCharDetail(c) {
   // 閲覧マーク(NEWを消す)
   state.galleryViewed[galleryKey(c)] = true;
   saveState();
+}
+
+function renderCharDup(c) {
+  const el = $("#char-detail-dup");
+  if (!el) return;
+  const key = c.tier + "_" + c.name;
+  const cur = state.dupCounts[key] || 0;
+  const max = MAX_DUPS[c.tier] || 0;
+  const totalLevels = max + 1; // Lv1=初回 + N凸
+  const currentLv = cur + 1;
+  el.innerHTML = `
+    <div class="dup-bar">
+      <span class="dup-current">${cur}凸</span>
+      <span class="dup-sep">/</span>
+      <span class="dup-max">最大 ${max}凸</span>
+    </div>
+    <div class="dup-levels">
+      ${Array.from({ length: totalLevels }, (_, i) => {
+        const lv = i + 1;
+        const unlocked = lv <= currentLv;
+        return `<div class="dup-lv ${unlocked ? 'unlocked' : 'locked'}">
+          <span class="dup-lv-num">Lv.${lv}</span>
+          <span class="dup-lv-text">${unlocked
+            ? (lv === 1 ? '基本情報 解放' : `秘話 Lv.${lv} (準備中)`)
+            : `${lv - 1}凸で解放`}</span>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
 }
 
 function renderCharRelations(c) {
