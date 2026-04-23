@@ -599,6 +599,16 @@ function showSummonTypeBadge(letter) {
   setTimeout(() => b.remove(), 2500);
 }
 
+// キャラセリフをシネマティック表示 (Type B 用)
+function showQuote(text) {
+  const q = document.createElement("div");
+  q.className = "fx-quote show";
+  q.textContent = `「${text}」`;
+  stageVfx.appendChild(q);
+  setTimeout(() => q.remove(), 3000);
+  return q;
+}
+
 // UR時の確率ポップ
 function showRate() {
   const r = document.createElement("div");
@@ -1092,7 +1102,7 @@ async function summonTypeA(result, tier) {
   await sleep(500);
 }
 
-// Type B: フェイク破壊
+// Type B: フェイク破壊 (UR/LR専用) — キャラのセリフを表示
 async function summonTypeB(result, tier) {
   const ladder = ["R", "SR", "SSR", "UR", "LR"];
   const stopIdx = ladder.indexOf(tier);
@@ -1105,14 +1115,13 @@ async function summonTypeB(result, tier) {
     await sleep(420);
     if (checkSkip()) { orbBurst(orb); return; }
   }
-  // 停滞音 + 煽り
-  const tauntMap = {
-    UR: ["SSR確定...?", "おや、SSRか...", "紫止まり...", "SR止まり... ?"],
-    SSR: ["紫止まり...", "SR確定...?"],
-  };
-  const arr = tauntMap[tier] || ["SR確定...?"];
-  showTaunt(arr[Math.floor(Math.random() * arr.length)]);
-  await sleep(1400);
+  // キャラのセリフ表示 (caption が無ければ汎用セリフ)
+  const fallback = tier === "LR"
+    ? "光は、まだ消えていない"
+    : "貴方に、見えるだろうか";
+  const quote = (result && result.caption) ? result.caption : fallback;
+  showQuote(quote);
+  await sleep(1700);
   if (checkSkip()) { orbBurst(orb); return; }
   // 破壊
   play("se-crack");
@@ -1236,12 +1245,12 @@ function pickSummonType(tier, opts) {
   // R/SR (通常時) は脳汁演出なし、直接登場タイプ
   if (tier === "R") return "Z";
   if (tier === "SR") return "Z";
-  // SSR: 軽量寄りミックス。E(金portal) と Z(柱+粒子) は SSR 専用。D/F は UR/LR 専用
-  if (tier === "SSR") return pickWeighted({ A: 3, B: 1, C: 1, E: 3, Z: 2 });
-  // UR: E/Z (SSR専用) を除外、D は UR/LR 専用
-  if (tier === "UR") return pickWeighted({ A: 1, B: 2, C: 2, D: 4, F: 1 });  // D=40%
-  // LR: E/Z (SSR専用) を除外、D は UR/LR 専用
-  if (tier === "LR") return pickWeighted({ A: 1, B: 2, C: 3, D: 4, F: 1 });  // D=36%
+  // SSR: 軽量寄りミックス。E(金portal)/Z(柱) は SSR 専用。B/D/F は UR/LR 専用
+  if (tier === "SSR") return pickWeighted({ A: 3, C: 1, E: 3, Z: 2 });
+  // UR: B(キャラセリフ)/D(流星)/F(カットイン) のフルセット
+  if (tier === "UR") return pickWeighted({ A: 1, B: 2, C: 2, D: 2, F: 1 });
+  // LR: 同上
+  if (tier === "LR") return pickWeighted({ A: 1, B: 2, C: 3, D: 2, F: 1 });
   return "Z";
 }
 
@@ -1507,9 +1516,38 @@ async function doTen() {
     tenFlag: true,
   });
 
+  // 10連最後が SSR 以上ならクリック待機 (リザルト自動移行を抑止)
+  if (order[best.tier] >= 2) {
+    skipRequested = false;
+    showHintTap();
+    while (!skipRequested) await sleep(80);
+    hideHintTap();
+  }
+
   closeStage();
   showResult(results, best);
   busy = false;
+}
+
+function showHintTap() {
+  let h = document.getElementById("fx-hint-tap");
+  if (!h) {
+    h = document.createElement("div");
+    h.id = "fx-hint-tap";
+    h.textContent = "タップで結果へ";
+    h.style.cssText = "position:fixed;bottom:36px;left:50%;transform:translateX(-50%);z-index:99998;color:rgba(255,255,255,0.9);font:600 16px/1 sans-serif;letter-spacing:0.2em;text-shadow:0 0 12px rgba(0,0,0,0.8);padding:10px 24px;background:rgba(0,0,0,0.4);border-radius:999px;border:1px solid rgba(255,255,255,0.3);pointer-events:none;animation:fx-hint-pulse 1.4s ease-in-out infinite;";
+    document.body.appendChild(h);
+    if (!document.getElementById("fx-hint-tap-style")) {
+      const s = document.createElement("style");
+      s.id = "fx-hint-tap-style";
+      s.textContent = "@keyframes fx-hint-pulse{0%,100%{opacity:0.55}50%{opacity:1}}";
+      document.head.appendChild(s);
+    }
+  }
+}
+function hideHintTap() {
+  const h = document.getElementById("fx-hint-tap");
+  if (h) h.remove();
 }
 
 function showResult(results, best) {
