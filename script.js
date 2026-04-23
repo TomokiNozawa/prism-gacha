@@ -2525,6 +2525,11 @@ function parseStoryToScenes(md) {
       preludeLines = [];
     } else if (h2) {
       flushCurrent();
+      // メタ情報 (編集メモ・編集後記等) はストーリー本編から除外
+      if (/^(編集メモ|編集後記|メモ|奥付|索引)$/.test(h2[1].trim())) {
+        current = null;
+        continue;
+      }
       current = { label: '', title: h2[1].trim(), contentLines: [], bg: detectBg(h2[1]) };
     } else if (h3) {
       flushCurrent();
@@ -2591,22 +2596,63 @@ function renderScene() {
 function renderSceneChars(scene) {
   const container = $("#story-scene-chars");
   if (!container) return;
+  // 表紙シーン (isCover=true) や本文がほぼ空の場合は表示しない
+  if (scene.isCover || !scene.contentMd || scene.contentMd.trim().length < 80) {
+    container.innerHTML = '';
+    container.style.display = 'none';
+    return;
+  }
   const text = (scene.title || '') + '\n' + (scene.contentMd || '');
+
+  // 検索候補を構築 (各キャラごとに複数の検索語)
+  // 例: '竜爵 ヴィル' → ['竜爵 ヴィル', 'ヴィル']
+  // 例: '星海のノクス' → ['星海のノクス', 'ノクス'] (末尾カタカナ列も追加)
+  const candidates = [];
+  for (const tier of ['LR','UR','SSR','SR','R']) {
+    for (const c of POOL[tier]) {
+      const fullName = c.name;
+      const tokens = fullName.split(/[\s ]/);
+      const lastToken = tokens[tokens.length - 1];
+      const katakanaMatch = fullName.match(/[ァ-ヶー]+$/);
+      const katakanaTail = katakanaMatch ? katakanaMatch[0] : null;
+      const seenCands = new Set();
+      const add = (s) => { if (s && s.length >= 2 && !seenCands.has(s)) { seenCands.add(s); candidates.push({ name: s, len: s.length, char: { ...c, tier } }); } };
+      add(fullName);
+      if (lastToken !== fullName) add(lastToken);
+      if (katakanaTail && katakanaTail !== lastToken) add(katakanaTail);
+    }
+  }
+  // 長い候補を先に処理 (短い候補が長い候補の一部にマッチする誤検出を防ぐ)
+  candidates.sort((a, b) => b.len - a.len);
+
+  // マッチ済み領域をマーク (重複カウント防止)
+  const matched = new Array(text.length).fill(false);
+  const hitsMap = new Map(); // キャラ名 → ヒット回数
+  for (const cand of candidates) {
+    let idx = 0;
+    while ((idx = text.indexOf(cand.name, idx)) !== -1) {
+      // 既にマーク済み領域に重なっていればスキップ
+      let overlap = false;
+      for (let i = idx; i < idx + cand.len; i++) {
+        if (matched[i]) { overlap = true; break; }
+      }
+      if (!overlap) {
+        for (let i = idx; i < idx + cand.len; i++) matched[i] = true;
+        const k = cand.char.name;
+        hitsMap.set(k, (hitsMap.get(k) || 0) + 1);
+      }
+      idx += cand.len;
+    }
+  }
+
+  // tier順 → 出現回数順で並べる
   const found = [];
   const seen = new Set();
   for (const tier of ['LR','UR','SSR','SR','R']) {
     for (const c of POOL[tier]) {
-      const fullName = c.name;
-      // フルネーム or 末尾の固有名 (例: '竜爵 ヴィル' → 'ヴィル')
-      const shortName = fullName.split(/[\s ]/).pop();
-      // descに繰り返し出るような自己説明部分を避けるため、単純に本文中の出現数で判定
-      let hits = 0;
-      // 全角半角スペース両方を考慮
-      const re = new RegExp(escapeRegExp(shortName), 'g');
-      const m = text.match(re);
-      if (m) hits = m.length;
-      if (hits > 0 && !seen.has(fullName)) {
-        seen.add(fullName);
+      const hits = hitsMap.get(c.name) || 0;
+      if (hits > 0 && !seen.has(c.name)) {
+        seen.add(c.name);
         found.push({ ...c, tier, hits });
       }
     }
