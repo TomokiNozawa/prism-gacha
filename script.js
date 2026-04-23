@@ -1937,14 +1937,14 @@ function openRelations() {
   canvas.innerHTML = svg;
   document.getElementById('relations').classList.add('active');
 
-  // クリックでキャラ詳細にジャンプ
+  // クリックでキャラ詳細にジャンプ (ドラッグと区別するため移動量チェック)
   canvas.querySelectorAll('[data-char-name]').forEach(el => {
-    el.addEventListener('click', () => {
+    el.addEventListener('click', e => {
+      if (relationsDragMoved) return; // ドラッグ後の偽クリックを無視
       const name = el.dataset.charName;
       const c = getCharByName(name);
       if (c && isUnlocked(c)) {
         closeRelations();
-        // 解放済みリストを構築 (図鑑は開いていない場合)
         if (detailUnlockedList.length === 0) {
           detailUnlockedList = getAllCharactersWithTier().filter(x => isUnlocked(x));
         }
@@ -1952,6 +1952,64 @@ function openRelations() {
       }
     });
   });
+
+  // 初期位置: 中央寄せ (派閥中心 800,550 が見えるように)
+  setTimeout(() => {
+    const sw = canvas.scrollWidth, sh = canvas.scrollHeight;
+    canvas.scrollLeft = (sw - canvas.clientWidth) / 2;
+    canvas.scrollTop = (sh - canvas.clientHeight) / 2;
+  }, 0);
+
+  bindRelationsPan(canvas);
+}
+
+// ドラッグでパン
+let relationsPanActive = false, relationsDragMoved = false;
+let relPanStartX = 0, relPanStartY = 0, relPanScrollX = 0, relPanScrollY = 0;
+let relationsPanBound = false;
+
+function bindRelationsPan(canvas) {
+  if (relationsPanBound) return;
+  relationsPanBound = true;
+
+  const start = (e) => {
+    // キャラサムネ上で押した時もパン開始可 (移動量で判別)
+    if (e.type === 'mousedown' && e.button !== 0) return;
+    relationsPanActive = true;
+    relationsDragMoved = false;
+    const isTouch = e.type === 'touchstart';
+    const x = isTouch ? e.touches[0].clientX : e.clientX;
+    const y = isTouch ? e.touches[0].clientY : e.clientY;
+    relPanStartX = x; relPanStartY = y;
+    relPanScrollX = canvas.scrollLeft; relPanScrollY = canvas.scrollTop;
+    canvas.style.cursor = 'grabbing';
+  };
+  const move = (e) => {
+    if (!relationsPanActive) return;
+    const isTouch = e.type === 'touchmove';
+    const x = isTouch ? e.touches[0].clientX : e.clientX;
+    const y = isTouch ? e.touches[0].clientY : e.clientY;
+    const dx = x - relPanStartX, dy = y - relPanStartY;
+    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) relationsDragMoved = true;
+    if (relationsDragMoved) {
+      canvas.scrollLeft = relPanScrollX - dx;
+      canvas.scrollTop = relPanScrollY - dy;
+      if (isTouch) e.preventDefault();
+    }
+  };
+  const end = () => {
+    relationsPanActive = false;
+    canvas.style.cursor = 'grab';
+    setTimeout(() => { relationsDragMoved = false; }, 30);
+  };
+
+  canvas.addEventListener('mousedown', start);
+  document.addEventListener('mousemove', move);
+  document.addEventListener('mouseup', end);
+  canvas.addEventListener('touchstart', start, {passive: true});
+  document.addEventListener('touchmove', move, {passive: false});
+  document.addEventListener('touchend', end);
+  canvas.style.cursor = 'grab';
 }
 
 function closeRelations() {
