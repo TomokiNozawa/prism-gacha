@@ -1668,24 +1668,44 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 
 /* result 画面のアクションボタン */
 .result-actions {
-  display: flex; gap: 10px; justify-content: center;
-  margin-top: 16px; flex-wrap: wrap;
+  display: flex; gap: 14px; justify-content: center;
+  margin-top: 24px; flex-wrap: wrap;
+  align-items: center;
 }
 .result-btn {
-  font-family: inherit; font-size: 13px; font-weight: 700;
-  padding: 10px 20px; border-radius: 999px;
+  font-family: inherit; font-size: 14px; font-weight: 700;
+  padding: 12px 28px; border-radius: 999px;
   cursor: pointer;
-  border: 1px solid rgba(255,255,255,0.15);
-  background: rgba(255,255,255,0.06);
-  color: #fff;
+  letter-spacing: 0.06em;
   transition: all 0.15s;
+  min-height: 44px;
+  display: inline-flex; align-items: center; justify-content: center;
+  line-height: 1;
 }
-.result-btn:hover { background: rgba(255,255,255,0.15); transform: translateY(-1px); }
 .result-btn.primary {
   background: linear-gradient(90deg, #ff5faa, #ffd84d);
-  color: #111; border-color: #ffd84d;
+  color: #111;
+  border: 1px solid #ffd84d;
+  font-size: 15px;
+  padding: 14px 36px;
+  box-shadow: 0 4px 16px rgba(255, 95, 170, 0.3);
 }
-.result-btn.primary:hover { filter: brightness(1.1); }
+.result-btn.primary:hover {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 95, 170, 0.45);
+}
+.result-btn.secondary {
+  background: transparent;
+  color: rgba(255,255,255,0.85);
+  border: 1px solid rgba(255,255,255,0.3);
+}
+.result-btn.secondary:hover {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  border-color: rgba(255,255,255,0.5);
+  transform: translateY(-1px);
+}
 
 /* ───── 相関図 ───── */
 .relations-modal {
@@ -1763,8 +1783,10 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 }
 /* 結果画面アクションボタンのモバイル */
 @media (max-width: 600px) {
-  .result-actions { flex-direction: column; gap: 8px; margin-top: 12px; }
-  .result-btn { width: 100%; padding: 12px 20px; font-size: 14px; }
+  .result-actions { flex-direction: column-reverse; gap: 10px; margin-top: 16px; }
+  .result-btn { width: 100%; max-width: 280px; }
+  .result-btn.primary { padding: 14px 24px; }
+  .result-btn.secondary { padding: 10px 24px; font-size: 13px; }
 }
 /* 画像ズームコントロールのモバイル */
 @media (max-width: 600px) {
