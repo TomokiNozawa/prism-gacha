@@ -589,6 +589,16 @@ function showTaunt(txt) {
   return t;
 }
 
+// デバッグ用: 演出パターン名を画面右上に一時表示
+function showSummonTypeBadge(letter) {
+  const b = document.createElement("div");
+  b.className = "fx-type-badge";
+  b.textContent = `演出: ${letter}`;
+  b.style.cssText = "position:fixed;top:12px;right:12px;z-index:99999;background:rgba(0,0,0,0.75);color:#fff;font:bold 16px/1 sans-serif;padding:8px 14px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);pointer-events:none;";
+  document.body.appendChild(b);
+  setTimeout(() => b.remove(), 2500);
+}
+
 // UR時の確率ポップ
 function showRate() {
   const r = document.createElement("div");
@@ -1247,6 +1257,7 @@ async function summonOne(result, opts = {}) {
   if (showLadder && isHigh) {
     const type = pickSummonType(tier, opts);
     console.log(`[Summon] tier=${tier} type=${type} ladder=on`);
+    showSummonTypeBadge(type);
     const fn = { A: summonTypeA, B: summonTypeB, C: summonTypeC, D: summonTypeD, E: summonTypeE, F: summonTypeF }[type] || summonTypeA;
     await fn(result, tier);
     if (checkSkip()) return finalize(result);
@@ -1265,9 +1276,11 @@ async function summonOne(result, opts = {}) {
   } else if (showLadder && opts.tenFlag && (tier === "R" || tier === "SR")) {
     // 10連目が R/SR の場合は Type A (オーブ昇格) で華やかに
     console.log(`[Summon] tier=${tier} type=A (10連目フィナーレ)`);
+    showSummonTypeBadge("A");
     await summonTypeA(result, tier);
   } else {
     // R/SR (通常): Type Z (シンプル登場)
+    showSummonTypeBadge("Z");
     await summonTypeZ(result, tier);
   }
   if (checkSkip()) return finalize(result);
