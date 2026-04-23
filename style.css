@@ -1555,6 +1555,8 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   border-left: 3px solid rgba(255,255,255,0.5);
   border-radius: 4px;
   color: rgba(255,255,255,0.92);
+  white-space: pre-line;  /* セリフ内の \n を改行として表示 */
+  line-height: 1.6;
 }
 .char-detail-desc {
   font-size: 14px; line-height: 1.9;
@@ -1690,6 +1692,10 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   transform: translate(0, 0) scale(1);
   transition: transform 0.2s cubic-bezier(.2,.8,.2,1);
   will-change: transform;
+  user-select: none;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+  pointer-events: auto;
 }
 .char-img-zoom-controls {
   position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);

@@ -23,7 +23,7 @@ const POOL = {
     {
       name: "虹意 プリズマ", season: 1,
       title: "原虹の意志・唯一の伝説",
-      caption: "我は光の源。終わりにして、始まり",
+      caption: "我は光の源。\n終わりにして、始まり。",
       desc: "原虹の最初の光から生まれた自意識。性別という概念の外にいる、虹霊界そのものの『人格』。影喰いの誕生はこの存在の無意識下の『迷い』から生じたと伝えられる。虹光剣『始源(げんそう)』は万色の刃を持つ。セラフィエルを『自分の羽』と呼び、カグヤを『最古の記憶の番人』と呼ぶ。他の全ての戦士は『プリズマの指先』である。",
       img: `${S1}/lr/prisma.png`,
     },
@@ -32,21 +32,21 @@ const POOL = {
     {
       name: "セラフィエル", season: 1,
       title: "至天の聖騎士",
-      caption: "貴方の祈り、我が光となる",
+      caption: "貴方の祈り、我が光となる。",
       desc: "原虹の中心で生まれた六翼の天使。人の姿を借りて降臨する神霊。ハルバード『虹天』は原虹そのものの結晶。世界が完全な闇に呑まれる時のみ顕現し、光を取り戻す。プリズマの分身とも言われ、カグヤ・ノクスと並ぶ『観測者の三姉妹』の一角。イザベルを地上の『代理』として認めている。",
       img: `${S1}/ur/seraph_paladin.png`,
     },
     {
       name: "龍帝 アルテミス", season: 1,
       title: "虹霊界の覇王",
-      caption: "我が背の龍が、世界の終わりを告げる",
+      caption: "我が背の龍が\n世界の終わりを告げる。",
       desc: "星暁峰で千年修行した竜人の皇帝。背に映る巨大な龍影は竜魂の実体化。双大剣『陰陽』は光と闇を同時に振るう。虹霊界十国すべてが彼に頭を垂れる。紫竜ヴィル・リリムとは遠縁。焔帝ヒノオウは戦友。紅翼末妹ひなたに一方的に『おにーさま！』と慕われている(本人は困惑気味)。",
       img: `${S1}/ur/dragon_emperor.png`,
     },
     {
       name: "星海のノクス", season: 1,
       title: "虚空の星辰魔女",
-      caption: "宇宙は私の中にある。貴方も、この瞬間も",
+      caption: "宇宙は私の中にある。\n貴方も、この瞬間も。",
       desc: "人か神かも定かではない謎の魔女。髪には銀河を、従者に惑星を宿す。星杖『虚境』で時間と因果を織る。影喰いとの初戦で世界を救った伝説の存在。黒曜塔の最古の卒業生。セラフィエル・カグヤと『観測者の三姉妹』。黒猫ノアが憧れて論文を投稿してくるが、毎度『まだ甘い』と返す(密かに成長を楽しんでいる)。",
       img: `${S1}/ur/cosmic_witch.png`,
     },
@@ -60,7 +60,7 @@ const POOL = {
     {
       name: "焔帝 ヒノオウ", season: 1,
       title: "虹霊界第七天の女神帝",
-      caption: "すべての闇を、この火で照らしてやろう",
+      caption: "すべての闇を\nこの火で照らしてやろう。",
       desc: "七天の最高天を統べる炎の女神帝。背に巨大な朱の鳳凰を従え、双大剣『日輪』『月輪』を振るう。影喰いとの戦いでは常に前衛に立つ戦闘神。焔と虹を同時に纏う稀有な存在。龍帝アルテミスとは戦友。焔舞ヒナカを『愛弟子』として認め、朱音の焔術も元を辿れば彼女に繋がる。",
       img: `${S1}/ur/flame_empress.png`,
     },
@@ -586,6 +586,8 @@ function showTaunt(txt) {
 
 // セリフを日本語的に自然な位置で改行する (句読点優先 + 中央寄り)
 function breakQuoteText(text) {
+  // 既に手動の改行 \n が含まれていれば尊重 (自動改行しない)
+  if (text.includes('\n')) return text;
   // 12文字以下は単行
   if (text.length <= 12) return text;
   // 句読点候補 (優先順位高→低)
@@ -2055,24 +2057,36 @@ function renderRelationLines() {
     lines.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${style.color}" stroke-opacity="0.65" stroke-width="${style.w}" ${dash} ${marker}/>`);
 
     // ラベル: 方向性 (aRole/bRole) なら各端寄り、双方向 (label) なら中央
+    // 短い線では中央に寄せ、長い線では端寄りに置く (アイコン被り対策)
+    const lineLen = Math.hypot(pb.x - pa.x, pb.y - pa.y);
+    // ノード半径(~36)+余白(~14) = 50px 以内には置かない
+    // ラベル端位置: pa から margin*lineLen の所、最低 t = 50/lineLen
+    const minMargin = Math.min(0.45, Math.max(0.30, 60 / lineLen));
     if (r.aRole || r.bRole) {
-      // 各端から線方向に向かって 30% の位置に配置
+      const tA = minMargin;
+      const tB = 1 - minMargin;
       const dx = pb.x - pa.x, dy = pb.y - pa.y;
-      const ax = pa.x + dx * 0.30, ay = pa.y + dy * 0.30;
-      const bx = pa.x + dx * 0.70, by = pa.y + dy * 0.70;
-      if (r.aRole) {
-        lines.push(`<text x="${ax}" y="${ay - 4}" text-anchor="middle" fill="${style.color}" font-size="11" font-weight="600" style="text-shadow: 0 0 4px rgba(0,0,0,0.95)">${r.aRole}</text>`);
-      }
-      if (r.bRole) {
-        lines.push(`<text x="${bx}" y="${by - 4}" text-anchor="middle" fill="${style.color}" font-size="11" font-weight="600" style="text-shadow: 0 0 4px rgba(0,0,0,0.95)">${r.bRole}</text>`);
-      }
+      const ax = pa.x + dx * tA, ay = pa.y + dy * tA;
+      const bx = pa.x + dx * tB, by = pa.y + dy * tB;
+      if (r.aRole) lines.push(relLabel(ax, ay, r.aRole, style.color));
+      if (r.bRole) lines.push(relLabel(bx, by, r.bRole, style.color));
     } else if (r.label) {
       const mx = (pa.x + pb.x) / 2;
       const my = (pa.y + pb.y) / 2;
-      lines.push(`<text x="${mx}" y="${my - 4}" text-anchor="middle" fill="${style.color}" font-size="11" font-weight="600" style="text-shadow: 0 0 4px rgba(0,0,0,0.9)">${r.label}</text>`);
+      lines.push(relLabel(mx, my, r.label, style.color));
     }
   }
   return lines.join('');
+}
+
+// ラベルを背景プレート付きで描画 (アイコン被り対策で視認性確保)
+function relLabel(x, y, text, color) {
+  const w = text.length * 13 + 14;
+  const h = 18;
+  return `<g class="rel-label">
+    <rect x="${x - w/2}" y="${y - h/2}" width="${w}" height="${h}" rx="4" fill="rgba(8,12,28,0.92)" stroke="${color}" stroke-opacity="0.45" stroke-width="0.8"/>
+    <text x="${x}" y="${y + 4}" text-anchor="middle" fill="${color}" font-size="11" font-weight="700">${text}</text>
+  </g>`;
 }
 
 function renderCharNodes() {
@@ -2173,6 +2187,8 @@ function onZoomDragStart(e) {
   if (zoomScale <= 1) return;
   // 左クリックのみ反応 (右クリック等を弾く)
   if (e.type === 'mousedown' && e.button !== 0) return;
+  // ブラウザの画像ドラッグ(D&D)を抑止
+  e.preventDefault();
   zoomMouseDown = true;
   zoomDragging = false;
   const isTouch = e.type === 'touchstart';
@@ -2247,12 +2263,14 @@ $("#char-detail").addEventListener("click", e => { if (e.target.id === "char-det
   zoom.addEventListener('click', e => { if (e.target === zoom) closeImgZoom(); });
   // 画像クリックで段階ズーム
   img.addEventListener('click', onZoomImgClick);
+  // ブラウザ標準の画像ドラッグ(dragstart)を完全抑止
+  img.addEventListener('dragstart', e => e.preventDefault());
   // ドラッグ
   img.addEventListener('mousedown', onZoomDragStart);
   document.addEventListener('mousemove', onZoomDragMove);
   document.addEventListener('mouseup', onZoomDragEnd);
   // タッチ
-  img.addEventListener('touchstart', onZoomDragStart, {passive: true});
+  img.addEventListener('touchstart', onZoomDragStart, {passive: false});
   document.addEventListener('touchmove', onZoomDragMove, {passive: false});
   document.addEventListener('touchend', onZoomDragEnd);
   // 滑車
