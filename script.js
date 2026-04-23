@@ -2319,6 +2319,37 @@ $("#result-again-ten").addEventListener("click", () => {
 $("#result").addEventListener("click", e => { if (e.target.id === "result") closeResult(); });
 $("#btn-gallery").addEventListener("click", openGallery);
 $("#btn-relations").addEventListener("click", openRelations);
+
+// BGM トグル (ホーム画面用ループ再生)
+const bgmAudio = document.getElementById("bgm-home");
+let bgmEnabled = localStorage.getItem("prism-bgm") === "on";
+function updateBgmBtn() {
+  const btn = $("#btn-bgm");
+  btn.textContent = bgmEnabled ? "🔊" : "🔇";
+  btn.title = bgmEnabled ? "BGM OFF" : "BGM ON";
+}
+function setBgm(on) {
+  bgmEnabled = on;
+  localStorage.setItem("prism-bgm", on ? "on" : "off");
+  if (on) {
+    bgmAudio.volume = 0.4;
+    bgmAudio.play().catch(() => {/* ユーザー操作ないと play 拒否されるが想定内 */});
+  } else {
+    bgmAudio.pause();
+  }
+  updateBgmBtn();
+}
+$("#btn-bgm").addEventListener("click", () => setBgm(!bgmEnabled));
+updateBgmBtn();
+// 設定が ON でも初回はブラウザポリシーで自動再生不可。次クリックで開始
+if (bgmEnabled) {
+  // ボリュームだけ準備、play は最初のユーザー操作で
+  bgmAudio.volume = 0.4;
+  document.addEventListener("click", function startBgmOnce() {
+    if (bgmEnabled) bgmAudio.play().catch(() => {});
+    document.removeEventListener("click", startBgmOnce);
+  }, { once: true });
+}
 $("#relations").addEventListener("click", e => { if (e.target.id === "relations") closeRelations(); });
 $("#gallery").addEventListener("click", e => { if (e.target.id === "gallery") closeGallery(); });
 $("#char-detail").addEventListener("click", e => { if (e.target.id === "char-detail") closeCharDetail(); });
