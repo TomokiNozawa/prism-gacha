@@ -1855,32 +1855,33 @@ const CHAR_FACTION = {
 // 注: こはね は 夜焔郷 配置で、星霊学院との関連は線で表現
 
 // 関係性データ
-// type: fellow(戦友) / master(師弟) / blood(血縁) / childhood(幼馴染) / admire(憧れ・片想い) / rival(好敵手) / sister(姉妹分)
+// type: fellow(戦友,双方向) / master(a=師→b=弟子) / blood(血縁,双方向) / childhood(幼馴染,双方向)
+//       / admire(a=憧れる人→b=憧れられる人) / rival(好敵手,双方向) / sister(a=姉→b=妹分)
 const RELATIONS = [
   // 観測者三姉妹
   { a: 'セラフィエル',    b: '千夜姫 カグヤ',     type: 'fellow', label: '三姉妹' },
   { a: '千夜姫 カグヤ',   b: '星海のノクス',      type: 'fellow', label: '三姉妹' },
   { a: 'セラフィエル',    b: '星海のノクス',      type: 'fellow', label: '三姉妹' },
-  // プリズマ → セラフィエル
-  { a: '虹意 プリズマ',   b: 'セラフィエル',      type: 'master', label: '我が羽' },
+  // プリズマ → セラフィエル (プリズマは分身と呼ぶ、master相当の上下関係)
+  { a: '虹意 プリズマ',   b: 'セラフィエル',      type: 'master', label: '我が羽と呼ぶ' },
   // 二大覇者
   { a: '龍帝 アルテミス', b: '焔帝 ヒノオウ',     type: 'fellow', label: '戦友' },
   // 白焔教会
-  { a: 'セラフィエル',    b: 'イザベル',          type: 'admire', label: '神↔代理' },
-  { a: 'イザベル',        b: 'メイリ',            type: 'sister', label: '姉妹' },
-  { a: 'セラフィ',        b: 'メイリ',            type: 'sister', label: '同期' },
+  { a: 'イザベル',        b: 'セラフィエル',      type: 'admire', label: '仰ぐ' },
+  { a: 'イザベル',        b: 'メイリ',            type: 'sister', label: '姉→妹' },
+  { a: 'セラフィ',        b: 'メイリ',            type: 'fellow', label: '同期' },
   { a: 'セラフィ',        b: '詠聖 ベル',         type: 'fellow', label: '相方' },
   // 紫竜
-  { a: '竜爵 ヴィル',     b: 'リリム',            type: 'master', label: '師' },
+  { a: '竜爵 ヴィル',     b: 'リリム',            type: 'master', label: '指導' },
   { a: '竜爵 ヴィル',     b: 'リリム',            type: 'blood',  label: '従姉妹' },
   { a: '龍帝 アルテミス', b: '竜爵 ヴィル',       type: 'blood',  label: '遠縁' },
   { a: '龍帝 アルテミス', b: 'リリム',            type: 'blood',  label: '遠縁' },
   // 紅翼皇家
-  { a: 'ひなた',          b: '紅翼 ツキ',         type: 'sister', label: '姉妹' },
+  { a: '紅翼 ツキ',       b: 'ひなた',            type: 'sister', label: '姉→妹' },
   { a: '薫音',            b: 'ひなた',            type: 'master', label: '剣師' },
   { a: '薫音',            b: '紅翼 ツキ',         type: 'master', label: '剣師' },
   { a: '黒刃 玄',         b: '薫音',              type: 'fellow', label: '兄弟子' },
-  { a: '龍帝 アルテミス', b: 'ひなた',            type: 'admire', label: '一方的' },
+  { a: 'ひなた',          b: '龍帝 アルテミス',   type: 'admire', label: '慕う(一方的)' },
   // 夜焔郷
   { a: '朱音',            b: 'こはね',            type: 'sister', label: '拾い妹' },
   { a: '影刃 シン',       b: 'こはね',            type: 'master', label: '先輩' },
@@ -1893,27 +1894,27 @@ const RELATIONS = [
   // 銀霜
   { a: 'イザベル',        b: '仮面騎士 シオン',   type: 'childhood', label: '幼馴染' },
   // 黒曜塔
-  { a: '星海のノクス',    b: '黒猫 ノア',         type: 'admire', label: '一方的' },
+  { a: '黒猫 ノア',       b: '星海のノクス',      type: 'admire', label: '憧れ(一方的)' },
   { a: '黒猫 ノア',       b: 'こはね',            type: 'sister', label: '獣人姉妹' },
   // 第七天
   { a: '焔帝 ヒノオウ',   b: '焔舞 ヒナカ',       type: 'master', label: '愛弟子' },
   { a: '朱音',            b: '焔舞 ヒナカ',       type: 'fellow', label: '焔姉妹' },
   // 星霊学院
-  { a: 'ちさと',          b: 'カイ',              type: 'admire', label: '一方的' },
+  { a: 'カイ',            b: 'ちさと',            type: 'admire', label: '想い(一方的)' },
   { a: 'ちさと',          b: 'ミレイア',          type: 'fellow', label: '同期' },
   { a: '黒刃 玄',         b: 'ミレイア',          type: 'master', label: '非公式' },
-  { a: '黒猫 ノア',       b: 'アルス',            type: 'admire', label: '一方的' },
-  { a: '森の射手 リナエ', b: 'カイ',              type: 'admire', label: '一方的' },
+  { a: 'アルス',          b: '黒猫 ノア',         type: 'admire', label: '崇拝(一方的)' },
+  { a: 'カイ',            b: '森の射手 リナエ',   type: 'admire', label: '目標' },
 ];
 
 const REL_STYLE = {
-  fellow:    { color: '#5fffaa', dash: 'none',     w: 2.5 },
-  master:    { color: '#ffd84d', dash: 'none',     w: 2.5 },
-  blood:     { color: '#ff5faa', dash: 'none',     w: 2.5 },
-  childhood: { color: '#c87dff', dash: 'none',     w: 2.5 },
-  admire:    { color: '#7ea8ff', dash: '6,4',      w: 1.8 },
-  rival:     { color: '#ff8855', dash: '2,3',      w: 2.0 },
-  sister:    { color: '#ff9fd0', dash: 'none',     w: 2.0 },
+  fellow:    { color: '#5fffaa', dash: 'none',     w: 2.5, directed: false },
+  master:    { color: '#ffd84d', dash: 'none',     w: 2.5, directed: true  }, // a=師 → b=弟子
+  blood:     { color: '#ff5faa', dash: 'none',     w: 2.5, directed: false },
+  childhood: { color: '#c87dff', dash: 'none',     w: 2.5, directed: false },
+  admire:    { color: '#7ea8ff', dash: '6,4',      w: 1.8, directed: true  }, // a=憧れる人 → b=憧れられる人
+  rival:     { color: '#ff8855', dash: '2,3',      w: 2.0, directed: false },
+  sister:    { color: '#ff9fd0', dash: 'none',     w: 2.0, directed: true  }, // a=姉 → b=妹分
 };
 
 function getCharByName(name) {
@@ -1929,6 +1930,7 @@ function openRelations() {
   // SVG構築
   const W = 1600, H = 1100;
   const svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+    <defs>${renderArrowMarkers()}</defs>
     ${renderFactionBg()}
     ${renderRelationLines()}
     ${renderFactionLabels()}
@@ -2038,6 +2040,16 @@ function renderFactionLabels() {
   }).join('');
 }
 
+// 各タイプ用の矢印マーカー定義
+function renderArrowMarkers() {
+  const directedTypes = Object.entries(REL_STYLE).filter(([_, s]) => s.directed);
+  return directedTypes.map(([type, s]) => `
+    <marker id="arrow-${type}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="${s.color}" fill-opacity="0.85"/>
+    </marker>
+  `).join('');
+}
+
 function renderRelationLines() {
   const lines = [];
   for (const r of RELATIONS) {
@@ -2046,11 +2058,23 @@ function renderRelationLines() {
     if (!pa || !pb) continue;
     const style = REL_STYLE[r.type] || REL_STYLE.fellow;
     const dash = style.dash !== 'none' ? `stroke-dasharray="${style.dash}"` : '';
-    lines.push(`<line x1="${pa.x}" y1="${pa.y}" x2="${pb.x}" y2="${pb.y}" stroke="${style.color}" stroke-opacity="0.65" stroke-width="${style.w}" ${dash}/>`);
-    // ラベル (中央)
+    // 方向性ありなら矢印マーカー、線分は円ノード手前で止める
+    let x1 = pa.x, y1 = pa.y, x2 = pb.x, y2 = pb.y;
+    if (style.directed) {
+      // 矢印が円に被らないよう b 端を 32px 手前で止める
+      const dx = x2 - x1, dy = y2 - y1;
+      const len = Math.hypot(dx, dy) || 1;
+      const trim = 36;
+      x2 = x2 - (dx / len) * trim;
+      y2 = y2 - (dy / len) * trim;
+    }
+    const marker = style.directed ? `marker-end="url(#arrow-${r.type})"` : '';
+    lines.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${style.color}" stroke-opacity="0.65" stroke-width="${style.w}" ${dash} ${marker}/>`);
+    // ラベル (中央) — 方向性ありなら矢印付きで方向感を補強
     const mx = (pa.x + pb.x) / 2;
     const my = (pa.y + pb.y) / 2;
-    lines.push(`<text x="${mx}" y="${my - 4}" text-anchor="middle" fill="${style.color}" font-size="11" font-weight="600" style="text-shadow: 0 0 4px rgba(0,0,0,0.9)">${r.label}</text>`);
+    const arrow = style.directed ? ' →' : '';
+    lines.push(`<text x="${mx}" y="${my - 4}" text-anchor="middle" fill="${style.color}" font-size="11" font-weight="600" style="text-shadow: 0 0 4px rgba(0,0,0,0.9)">${r.label}${arrow}</text>`);
   }
   return lines.join('');
 }
