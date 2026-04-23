@@ -16,6 +16,7 @@
     <span class="stat" title="虹(UR)出現数">🌈 <b id="stat-ur">0</b></span>
     <span class="stat" title="天井まで">天井 <b id="stat-pity">180</b></span>
     <button id="btn-gallery" class="gallery-btn" title="図鑑 (Gキー)">📖 図鑑</button>
+    <button id="btn-relations" class="gallery-btn" title="相関図">🌐 相関図</button>
     <button id="btn-god" class="god" title="Sキー: SSR率100%">神モード OFF</button>
     <button id="btn-reset" class="reset" title="履歴・累計をリセット">⟳</button>
   </div>
@@ -117,6 +118,23 @@
       <div class="char-detail-counter" id="char-detail-counter"></div>
     </div>
   </div>
+</div>
+
+<!-- 相関図 Modal -->
+<div id="relations" class="relations-modal">
+  <div class="relations-header">
+    <h2>✦ 星霊相関図</h2>
+    <div class="relations-legend">
+      <span class="leg-line leg-fellow"></span>戦友
+      <span class="leg-line leg-master"></span>師弟
+      <span class="leg-line leg-blood"></span>血縁
+      <span class="leg-line leg-childhood"></span>幼馴染
+      <span class="leg-line leg-admire"></span>憧れ
+      <span class="leg-line leg-rival"></span>好敵手
+    </div>
+    <button class="close" onclick="closeRelations()">× 閉じる (Esc)</button>
+  </div>
+  <div id="relations-canvas" class="relations-canvas"></div>
 </div>
 
 <!-- Image Zoom Overlay -->

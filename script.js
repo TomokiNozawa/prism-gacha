@@ -1784,6 +1784,243 @@ function navCharDetail(delta) {
   renderCharDetail(detailUnlockedList[detailIdx]);
 }
 
+// ═════════════ 相関図 ═════════════
+// 派閥 (faction) ごとに島状配置。座標は SVG viewBox 1600x1100 内の % ではなく絶対座標
+const FACTIONS = [
+  { id: 'genso',   label: '原虹・観測者',     x:  800, y: 130, color: '#fff8d4' },
+  { id: 'rulers',  label: '十国の覇者',       x:  800, y: 320, color: '#ffd97a' },
+  { id: 'church',  label: '白焔教会',          x:  220, y: 200, color: '#e3f0ff' },
+  { id: 'dragon',  label: '紫竜王国',          x:  220, y: 470, color: '#d6c5ff' },
+  { id: 'redwing', label: '紅翼皇家',          x:  220, y: 770, color: '#ffc0c0' },
+  { id: 'yakai',   label: '夜焔郷・影衆',      x: 1380, y: 200, color: '#ffaaaa' },
+  { id: 'wolf',    label: '月牙狼族',          x: 1380, y: 410, color: '#cccccc' },
+  { id: 'forest',  label: '深緑樹海',          x: 1380, y: 600, color: '#b8e0b0' },
+  { id: 'silver',  label: '銀霜王国',          x: 1380, y: 800, color: '#cce0ff' },
+  { id: 'tower',   label: '黒曜塔',            x:  500, y: 950, color: '#a0a0c0' },
+  { id: 'seventh', label: '第七天',            x:  800, y: 600, color: '#ffb070' },
+  { id: 'academy', label: '星霊学院',          x: 1100, y: 950, color: '#b0d0ff' },
+];
+
+// キャラの所属派閥マップ (name → factionId, dx, dy: 派閥中心からの相対オフセット)
+const CHAR_FACTION = {
+  // 原虹・観測者
+  '虹意 プリズマ':   { f: 'genso',   dx:    0, dy:    0 },
+  'セラフィエル':    { f: 'genso',   dx: -110, dy:   60 },
+  '千夜姫 カグヤ':   { f: 'genso',   dx:  110, dy:   60 },
+  '星海のノクス':    { f: 'genso',   dx:    0, dy:  100 },
+  // 十国の覇者
+  '龍帝 アルテミス': { f: 'rulers',  dx:  -75, dy:    0 },
+  '焔帝 ヒノオウ':   { f: 'rulers',  dx:   75, dy:    0 },
+  // 白焔教会
+  'イザベル':        { f: 'church',  dx:    0, dy:  -50 },
+  'セラフィ':        { f: 'church',  dx:  -85, dy:   50 },
+  'メイリ':          { f: 'church',  dx:    0, dy:   80 },
+  '詠聖 ベル':       { f: 'church',  dx:   85, dy:   50 },
+  // 紫竜王国
+  '竜爵 ヴィル':     { f: 'dragon',  dx:  -50, dy:    0 },
+  'リリム':          { f: 'dragon',  dx:   50, dy:   60 },
+  // 紅翼皇家
+  'ひなた':          { f: 'redwing', dx:    0, dy:  -60 },
+  '紅翼 ツキ':       { f: 'redwing', dx:  -90, dy:   30 },
+  '薫音':            { f: 'redwing', dx:   90, dy:   30 },
+  '黒刃 玄':         { f: 'redwing', dx:    0, dy:  100 },
+  // 夜焔郷
+  '朱音':            { f: 'yakai',   dx:    0, dy:  -50 },
+  '影刃 シン':       { f: 'yakai',   dx:  -75, dy:   60 },
+  'こはね':          { f: 'yakai',   dx:   75, dy:   60 },
+  // 月牙狼族
+  '獣牙 ガルド':     { f: 'wolf',    dx:    0, dy:    0 },
+  // 深緑樹海
+  '森の射手 リナエ': { f: 'forest',  dx:  -55, dy:    0 },
+  'ヴィオラ':        { f: 'forest',  dx:   55, dy:   60 },
+  // 銀霜王国
+  '仮面騎士 シオン': { f: 'silver',  dx:  -55, dy:    0 },
+  'ルミナ':          { f: 'silver',  dx:   55, dy:   60 },
+  // 黒曜塔
+  '黒猫 ノア':       { f: 'tower',   dx:    0, dy:    0 },
+  // 第七天
+  '焔舞 ヒナカ':     { f: 'seventh', dx:    0, dy:    0 },
+  // 星霊学院
+  'ちさと':          { f: 'academy', dx:  -90, dy:  -40 },
+  'カイ':            { f: 'academy', dx:    0, dy:  -60 },
+  'こはね_acad':     { f: 'academy', dx:   90, dy:  -40 }, // こはね は 夜焔/影衆 として配置 (重複なし)
+  'アルス':          { f: 'academy', dx:  -55, dy:   45 },
+  'ミレイア':        { f: 'academy', dx:   55, dy:   45 },
+};
+// 注: こはね は 夜焔郷 配置で、星霊学院との関連は線で表現
+
+// 関係性データ
+// type: fellow(戦友) / master(師弟) / blood(血縁) / childhood(幼馴染) / admire(憧れ・片想い) / rival(好敵手) / sister(姉妹分)
+const RELATIONS = [
+  // 観測者三姉妹
+  { a: 'セラフィエル',    b: '千夜姫 カグヤ',     type: 'fellow', label: '三姉妹' },
+  { a: '千夜姫 カグヤ',   b: '星海のノクス',      type: 'fellow', label: '三姉妹' },
+  { a: 'セラフィエル',    b: '星海のノクス',      type: 'fellow', label: '三姉妹' },
+  // プリズマ → セラフィエル
+  { a: '虹意 プリズマ',   b: 'セラフィエル',      type: 'master', label: '我が羽' },
+  // 二大覇者
+  { a: '龍帝 アルテミス', b: '焔帝 ヒノオウ',     type: 'fellow', label: '戦友' },
+  // 白焔教会
+  { a: 'セラフィエル',    b: 'イザベル',          type: 'admire', label: '神↔代理' },
+  { a: 'イザベル',        b: 'メイリ',            type: 'sister', label: '姉妹' },
+  { a: 'セラフィ',        b: 'メイリ',            type: 'sister', label: '同期' },
+  { a: 'セラフィ',        b: '詠聖 ベル',         type: 'fellow', label: '相方' },
+  // 紫竜
+  { a: '竜爵 ヴィル',     b: 'リリム',            type: 'master', label: '師' },
+  { a: '竜爵 ヴィル',     b: 'リリム',            type: 'blood',  label: '従姉妹' },
+  { a: '龍帝 アルテミス', b: '竜爵 ヴィル',       type: 'blood',  label: '遠縁' },
+  { a: '龍帝 アルテミス', b: 'リリム',            type: 'blood',  label: '遠縁' },
+  // 紅翼皇家
+  { a: 'ひなた',          b: '紅翼 ツキ',         type: 'sister', label: '姉妹' },
+  { a: '薫音',            b: 'ひなた',            type: 'master', label: '剣師' },
+  { a: '薫音',            b: '紅翼 ツキ',         type: 'master', label: '剣師' },
+  { a: '黒刃 玄',         b: '薫音',              type: 'fellow', label: '兄弟子' },
+  { a: '龍帝 アルテミス', b: 'ひなた',            type: 'admire', label: '一方的' },
+  // 夜焔郷
+  { a: '朱音',            b: 'こはね',            type: 'sister', label: '拾い妹' },
+  { a: '影刃 シン',       b: 'こはね',            type: 'master', label: '先輩' },
+  { a: '千夜姫 カグヤ',   b: '朱音',              type: 'blood',  label: '九尾' },
+  // 月牙
+  { a: '獣牙 ガルド',     b: '竜爵 ヴィル',       type: 'fellow', label: '戦友' },
+  // 深緑
+  { a: '森の射手 リナエ', b: 'ヴィオラ',          type: 'master', label: '指導' },
+  { a: '森の射手 リナエ', b: '影刃 シン',         type: 'rival',  label: '好敵手' },
+  // 銀霜
+  { a: 'イザベル',        b: '仮面騎士 シオン',   type: 'childhood', label: '幼馴染' },
+  // 黒曜塔
+  { a: '星海のノクス',    b: '黒猫 ノア',         type: 'admire', label: '一方的' },
+  { a: '黒猫 ノア',       b: 'こはね',            type: 'sister', label: '獣人姉妹' },
+  // 第七天
+  { a: '焔帝 ヒノオウ',   b: '焔舞 ヒナカ',       type: 'master', label: '愛弟子' },
+  { a: '朱音',            b: '焔舞 ヒナカ',       type: 'fellow', label: '焔姉妹' },
+  // 星霊学院
+  { a: 'ちさと',          b: 'カイ',              type: 'admire', label: '一方的' },
+  { a: 'ちさと',          b: 'ミレイア',          type: 'fellow', label: '同期' },
+  { a: '黒刃 玄',         b: 'ミレイア',          type: 'master', label: '非公式' },
+  { a: '黒猫 ノア',       b: 'アルス',            type: 'admire', label: '一方的' },
+  { a: '森の射手 リナエ', b: 'カイ',              type: 'admire', label: '一方的' },
+];
+
+const REL_STYLE = {
+  fellow:    { color: '#5fffaa', dash: 'none',     w: 2.5 },
+  master:    { color: '#ffd84d', dash: 'none',     w: 2.5 },
+  blood:     { color: '#ff5faa', dash: 'none',     w: 2.5 },
+  childhood: { color: '#c87dff', dash: 'none',     w: 2.5 },
+  admire:    { color: '#7ea8ff', dash: '6,4',      w: 1.8 },
+  rival:     { color: '#ff8855', dash: '2,3',      w: 2.0 },
+  sister:    { color: '#ff9fd0', dash: 'none',     w: 2.0 },
+};
+
+function getCharByName(name) {
+  for (const tier of ['LR','UR','SSR','SR','R']) {
+    const c = POOL[tier].find(x => x.name === name);
+    if (c) return { ...c, tier };
+  }
+  return null;
+}
+
+function openRelations() {
+  const canvas = document.getElementById('relations-canvas');
+  // SVG構築
+  const W = 1600, H = 1100;
+  const svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+    ${renderFactionBg()}
+    ${renderRelationLines()}
+    ${renderFactionLabels()}
+    ${renderCharNodes()}
+  </svg>`;
+  canvas.innerHTML = svg;
+  document.getElementById('relations').classList.add('active');
+
+  // クリックでキャラ詳細にジャンプ
+  canvas.querySelectorAll('[data-char-name]').forEach(el => {
+    el.addEventListener('click', () => {
+      const name = el.dataset.charName;
+      const c = getCharByName(name);
+      if (c && isUnlocked(c)) {
+        closeRelations();
+        // 解放済みリストを構築 (図鑑は開いていない場合)
+        if (detailUnlockedList.length === 0) {
+          detailUnlockedList = getAllCharactersWithTier().filter(x => isUnlocked(x));
+        }
+        showCharDetail(c);
+      }
+    });
+  });
+}
+
+function closeRelations() {
+  document.getElementById('relations').classList.remove('active');
+}
+
+function getCharPos(name) {
+  const meta = CHAR_FACTION[name];
+  if (!meta) return null;
+  const f = FACTIONS.find(x => x.id === meta.f);
+  if (!f) return null;
+  return { x: f.x + meta.dx, y: f.y + meta.dy };
+}
+
+function renderFactionBg() {
+  return FACTIONS.map(f => {
+    // 派閥領域を半透明の背景円で示す
+    const r = 150;
+    return `<circle cx="${f.x}" cy="${f.y + 30}" r="${r}" fill="${f.color}" fill-opacity="0.06" stroke="${f.color}" stroke-opacity="0.25" stroke-width="1.5" stroke-dasharray="4,4"/>`;
+  }).join('');
+}
+
+function renderFactionLabels() {
+  return FACTIONS.map(f => {
+    return `<text x="${f.x}" y="${f.y - 95}" text-anchor="middle" fill="${f.color}" font-size="20" font-weight="700" letter-spacing="2" style="text-shadow: 0 0 8px rgba(0,0,0,0.8)">${f.label}</text>`;
+  }).join('');
+}
+
+function renderRelationLines() {
+  const lines = [];
+  for (const r of RELATIONS) {
+    const pa = getCharPos(r.a);
+    const pb = getCharPos(r.b);
+    if (!pa || !pb) continue;
+    const style = REL_STYLE[r.type] || REL_STYLE.fellow;
+    const dash = style.dash !== 'none' ? `stroke-dasharray="${style.dash}"` : '';
+    lines.push(`<line x1="${pa.x}" y1="${pa.y}" x2="${pb.x}" y2="${pb.y}" stroke="${style.color}" stroke-opacity="0.65" stroke-width="${style.w}" ${dash}/>`);
+    // ラベル (中央)
+    const mx = (pa.x + pb.x) / 2;
+    const my = (pa.y + pb.y) / 2;
+    lines.push(`<text x="${mx}" y="${my - 4}" text-anchor="middle" fill="${style.color}" font-size="11" font-weight="600" style="text-shadow: 0 0 4px rgba(0,0,0,0.9)">${r.label}</text>`);
+  }
+  return lines.join('');
+}
+
+function renderCharNodes() {
+  const nodes = [];
+  for (const [name, meta] of Object.entries(CHAR_FACTION)) {
+    if (name.endsWith('_acad')) continue; // ダミーキー除外
+    const c = getCharByName(name);
+    if (!c) continue;
+    const pos = getCharPos(name);
+    if (!pos) continue;
+    const unlocked = isUnlocked(c);
+    const tierColor = TIER_COLORS[c.tier][0];
+    const r = c.tier === 'LR' ? 36 : c.tier === 'UR' ? 32 : c.tier === 'SSR' ? 28 : 24;
+    const opacity = unlocked ? 1 : 0.3;
+    const cursor = unlocked ? 'pointer' : 'default';
+    // 画像を clipPath で円形クリップ
+    const clipId = `clip-${name.replace(/[\s ]/g, '_')}`;
+    nodes.push(`
+      <g data-char-name="${name}" style="cursor:${cursor}; opacity:${opacity}">
+        <defs>
+          <clipPath id="${clipId}"><circle cx="${pos.x}" cy="${pos.y}" r="${r}"/></clipPath>
+        </defs>
+        <circle cx="${pos.x}" cy="${pos.y}" r="${r + 3}" fill="${tierColor}" stroke="${tierColor}" stroke-width="2"/>
+        ${unlocked ? `<image href="${c.img}" x="${pos.x - r}" y="${pos.y - r}" width="${r*2}" height="${r*2}" clip-path="url(#${clipId})" preserveAspectRatio="xMidYMid slice"/>`
+                    : `<circle cx="${pos.x}" cy="${pos.y}" r="${r}" fill="#222"/><text x="${pos.x}" y="${pos.y + 6}" text-anchor="middle" fill="#888" font-size="16">?</text>`}
+        <text x="${pos.x}" y="${pos.y + r + 16}" text-anchor="middle" fill="#fff" font-size="12" font-weight="700" style="text-shadow: 0 0 6px rgba(0,0,0,1), 0 0 4px rgba(0,0,0,1)">${unlocked ? name : '???'}</text>
+      </g>`);
+  }
+  return nodes.join('');
+}
+
 // ───── 画像拡大 (ズーム/パン対応) ─────
 let zoomScale = 1, zoomTx = 0, zoomTy = 0;
 let zoomDragging = false, zoomStartX = 0, zoomStartY = 0, zoomBaseTx = 0, zoomBaseTy = 0;
@@ -1904,6 +2141,8 @@ $("#btn-reset").addEventListener("click", () => {
 $("#result-close").addEventListener("click", closeResult);
 $("#result").addEventListener("click", e => { if (e.target.id === "result") closeResult(); });
 $("#btn-gallery").addEventListener("click", openGallery);
+$("#btn-relations").addEventListener("click", openRelations);
+$("#relations").addEventListener("click", e => { if (e.target.id === "relations") closeRelations(); });
 $("#gallery").addEventListener("click", e => { if (e.target.id === "gallery") closeGallery(); });
 $("#char-detail").addEventListener("click", e => { if (e.target.id === "char-detail") closeCharDetail(); });
 
@@ -1948,6 +2187,10 @@ document.addEventListener("keydown", e => {
   }
   if ($("#gallery").classList.contains("active")) {
     if (e.key === "Escape") { e.preventDefault(); closeGallery(); }
+    return;
+  }
+  if ($("#relations").classList.contains("active")) {
+    if (e.key === "Escape") { e.preventDefault(); closeRelations(); }
     return;
   }
   if (stage.classList.contains("active") && (e.key === " " || e.key === "Escape")) {
