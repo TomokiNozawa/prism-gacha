@@ -599,13 +599,37 @@ function showSummonTypeBadge(letter) {
   setTimeout(() => b.remove(), 2500);
 }
 
+// セリフを日本語的に自然な位置で改行する (句読点優先 + 中央寄り)
+function breakQuoteText(text) {
+  // 12文字以下は単行
+  if (text.length <= 12) return text;
+  // 句読点候補 (優先順位高→低)
+  const breakChars = ['。', '？', '！', '、', ' ', '　'];
+  const mid = text.length / 2;
+  let bestIdx = -1, bestScore = Infinity;
+  for (let i = 1; i < text.length - 1; i++) {
+    const ch = text[i];
+    const pri = breakChars.indexOf(ch);
+    if (pri === -1) continue;
+    // スコア = 中央からの距離 + 優先順位ペナルティ (低いほど良い)
+    const score = Math.abs(i - mid) + pri * 2;
+    if (score < bestScore) { bestScore = score; bestIdx = i; }
+  }
+  if (bestIdx < 0) return text; // 句読点なし → CSS の text-wrap:balance に任せる
+  // 句読点の直後で改行 (句読点は前行に残す)
+  return text.slice(0, bestIdx + 1) + '\n' + text.slice(bestIdx + 1).trimStart();
+}
+
 // キャラセリフをシネマティック表示 (UR/LR共通)
 function showQuote(text) {
   const q = document.createElement("div");
   q.className = "fx-quote show";
-  q.textContent = `「${text}」`;
+  const broken = breakQuoteText(text);
+  q.textContent = `「${broken}」`;
+  // \n を実際の改行として表示
+  q.style.whiteSpace = 'pre-line';
   stageVfx.appendChild(q);
-  setTimeout(() => q.remove(), 4200); // CSS quote-fade(3.2s開始+0.7s) + 余裕
+  setTimeout(() => q.remove(), 4200);
   return q;
 }
 
