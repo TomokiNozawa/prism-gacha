@@ -7,7 +7,7 @@
 - **Prism Defense URL**: https://tomokinozawa.github.io/prism-gacha/td/
 - **排出率**: R 65% / SR 25% / SSR 7% / UR 3%
 - **天井**: 180連
-- **操作**: Space=単発 / Enter=10連 / Gキー=図鑑 / Sキー=神モード(SSR率100%)
+- **操作**: Space=単発 / Enter=10連 / Gキー=図鑑
 - **保存**: ブラウザの localStorage
 
 ## 世界観

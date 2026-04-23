@@ -257,7 +257,6 @@ function loadState() {
       total: raw.total || 0,
       ur: raw.ur || 0,
       pity: raw.pity || 0,
-      god: raw.god || false,
       history: raw.history || [],
       galleryViewed: raw.galleryViewed || {},
       unlockedSet: raw.unlockedSet || {},  // "UR_セラフィエル": true （永続）
@@ -269,7 +268,7 @@ function loadState() {
     }
     return s;
   } catch {
-    return { total:0, ur:0, pity:0, god:false, history:[], galleryViewed:{}, unlockedSet:{} };
+    return { total:0, ur:0, pity:0, history:[], galleryViewed:{}, unlockedSet:{} };
   }
 }
 function saveState() {
@@ -278,8 +277,6 @@ function saveState() {
 
 // ────────────── Rolling ──────────────
 function rollOne() {
-  // 神モード: 全部 UR
-  if (state.god) return pickTier("UR");
   // 天井: UR確定(LRではなく)
   if (state.pity >= PITY - 1) return pickTier("UR");
   const r = Math.random();
@@ -367,8 +364,6 @@ function updateHUD() {
   $("#stat-total").textContent = state.total.toLocaleString();
   $("#stat-ur").textContent = state.ur.toLocaleString();
   $("#stat-pity").textContent = Math.max(0, PITY - state.pity);
-  $("#btn-god").classList.toggle("on", state.god);
-  $("#btn-god").textContent = "神モード " + (state.god ? "ON" : "OFF");
 
   // background tier
   document.body.classList.remove("t-100", "t-500", "t-1000");
@@ -2212,7 +2207,6 @@ function closeCharDetail() {
 // ────────────── Bindings ──────────────
 $("#btn-single").addEventListener("click", doSingle);
 $("#btn-ten").addEventListener("click", doTen);
-$("#btn-god").addEventListener("click", () => { state.god = !state.god; saveState(); updateHUD(); });
 $("#btn-reset").addEventListener("click", () => {
   if (!confirm("累計・履歴をリセットしますか?")) return;
   Object.assign(state, { total:0, ur:0, pity:0, history:[] });
@@ -2284,7 +2278,6 @@ document.addEventListener("keydown", e => {
   if (busy) return;
   if (e.key === " ") { e.preventDefault(); doSingle(); }
   else if (e.key === "Enter") { e.preventDefault(); doTen(); }
-  else if (e.key === "s" || e.key === "S") { state.god = !state.god; saveState(); updateHUD(); }
   else if (e.key === "g" || e.key === "G") { e.preventDefault(); openGallery(); }
 });
 
