@@ -2342,6 +2342,108 @@ $("#btn-relations").addEventListener("click", openRelations);
 const STORY_FILES = {
   s1c1: { title: '序: 七座の使命', meta: 'Season 1 — 第1章', file: 'STORY/s1c1.md' },
 };
+
+function escapeHtml(s) {
+  return String(s).replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// 固有名詞ふりがな辞書 (キーは長い順に処理する)
+const FURIGANA = {
+  // 世界観の根源
+  '虹霊界': 'こうれいかい',
+  '原虹': 'げんそう',
+  '虹脈': 'こうみゃく',
+  '影喰い': 'かげくい',
+  '観測者': 'かんそくしゃ',
+  '七座': 'しちざ',
+  '三柱': 'みはしら',
+  '大紀': 'たいき',
+  '共観': 'きょうかん',
+  // 派閥
+  '夜焔郷': 'やえんごう',
+  '紅翼皇家': 'こうよくこうか',
+  '紫竜王国': 'しりゅうおうこく',
+  '月牙狼族': 'げつがろうぞく',
+  '深緑樹海': 'しんりょくじゅかい',
+  '銀霜王国': 'ぎんそうおうこく',
+  '黒曜塔': 'こくようとう',
+  '白焔教会': 'はくえんきょうかい',
+  '第七天': 'だいしちてん',
+  '星霊学院': 'せいれいがくいん',
+  '雪月神殿': 'せつげつしんでん',
+  '影衆': 'かげしゅう',
+  // 称号・キャラ系
+  '虹意': 'こうい',
+  '千夜姫': 'せんやひめ',
+  '焔帝': 'えんてい',
+  '龍帝': 'りゅうてい',
+  '影刃': 'えいじん',
+  '黒猫': 'くろねこ',
+  '焔舞': 'えんぶ',
+  '仮面騎士': 'かめんきし',
+  '詠聖': 'えいせい',
+  '紅翼': 'こうよく',
+  '黒刃': 'くろは',
+  '竜爵': 'りゅうしゃく',
+  '獣牙': 'じゅうが',
+  '聖巫騎士': 'せいふきし',
+  '皇家': 'こうか',
+  '皇帝': 'こうてい',
+  // 武器・固有物
+  '始源': 'げんそう',
+  '虹天': 'こうてん',
+  '紫雷': 'しらい',
+  '月牙': 'げつが',
+  '紅月': 'こうげつ',
+  '誓盾': 'せいとん',
+  '裁罰': 'さいばつ',
+  // 他
+  '紅蓮': 'ぐれん',
+  '九尾': 'きゅうび',
+  '六翼': 'ろくよく',
+  '剣術科': 'けんじゅつか',
+  '弓術科': 'きゅうじゅつか',
+  '魔術科': 'まじゅつか',
+  '盾術': 'じゅんじゅつ',
+  '魔導士': 'まどうし',
+  '聖騎士': 'せいきし',
+};
+
+// HTMLの中のテキストノードだけにふりがなを適用 (タグ内属性は対象外)
+function applyFurigana(html) {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  const keys = Object.keys(FURIGANA).sort((a, b) => b.length - a.length);
+  function walk(node) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      let text = node.textContent;
+      let changed = false;
+      for (const term of keys) {
+        if (text.includes(term)) {
+          text = text.split(term).join(` RUBY${term} `);
+          changed = true;
+        }
+      }
+      if (changed) {
+        let html = text;
+        for (const term of keys) {
+          const yomi = FURIGANA[term];
+          html = html.split(` RUBY${term} `).join(`<ruby>${term}<rt>${yomi}</rt></ruby>`);
+        }
+        const span = document.createElement('span');
+        span.innerHTML = html;
+        const frag = document.createDocumentFragment();
+        while (span.firstChild) frag.appendChild(span.firstChild);
+        node.parentNode.replaceChild(frag, node);
+      }
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      if (node.tagName === 'RUBY' || node.tagName === 'CODE' || node.tagName === 'PRE') return;
+      Array.from(node.childNodes).forEach(walk);
+    }
+  }
+  walk(tmp);
+  return tmp.innerHTML;
+}
 let storyOpenedAt = 0;
 const STORY_KEY_GUARD_MS = 300;
 let storyScenes = [];     // [{label, title, contentMd, bg}, ...]
@@ -2443,14 +2545,18 @@ function renderScene() {
   $("#story-progress").textContent = `${storyIdx + 1} / ${storyScenes.length}`;
   $("#story-scene-label").textContent = scene.label || '';
   $("#story-scene-label").style.display = scene.label ? '' : 'none';
-  $("#story-scene-title").textContent = scene.title;
+  // タイトルにもふりがな
+  const titleEl = $("#story-scene-title");
+  titleEl.innerHTML = applyFurigana(escapeHtml(scene.title));
+  let bodyHtml;
   if (typeof marked !== 'undefined' && scene.contentMd) {
-    $("#story-scene-content").innerHTML = marked.parse(scene.contentMd);
+    bodyHtml = marked.parse(scene.contentMd);
   } else {
-    $("#story-scene-content").innerHTML = scene.contentMd
+    bodyHtml = scene.contentMd
       ? '<p>' + scene.contentMd.replace(/\n\n+/g, '</p><p>').replace(/\n/g, '<br>') + '</p>'
       : '';
   }
+  $("#story-scene-content").innerHTML = applyFurigana(bodyHtml);
   $("#story-bg").className = 'story-bg bg-' + (scene.bg || 'default');
   $("#story-prev").disabled = storyIdx === 0;
   $("#story-next").disabled = storyIdx === storyScenes.length - 1;
