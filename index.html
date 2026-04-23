@@ -120,8 +120,16 @@
 </div>
 
 <!-- Image Zoom Overlay -->
-<div id="char-img-zoom" class="char-img-zoom" onclick="toggleCharImgZoom()">
+<div id="char-img-zoom" class="char-img-zoom">
   <img id="char-img-zoom-img" src="" alt="">
+  <div class="char-img-zoom-controls">
+    <button onclick="zoomImg(1)" title="拡大">＋</button>
+    <span id="char-img-zoom-level">1.0x</span>
+    <button onclick="zoomImg(-1)" title="縮小">－</button>
+    <button onclick="zoomImg(0)" title="リセット">⟲</button>
+    <button onclick="closeImgZoom()" title="閉じる">×</button>
+  </div>
+  <div class="char-img-zoom-hint">タップで拡大 / ドラッグで移動 / 滑車でズーム</div>
 </div>
 
 <audio id="se-summon" preload="auto"></audio>

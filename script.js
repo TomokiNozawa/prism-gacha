@@ -625,7 +625,7 @@ function showQuote(text) {
   const q = document.createElement("div");
   q.className = "fx-quote show";
   const broken = breakQuoteText(text);
-  q.textContent = `「${broken}」`;
+  q.textContent = broken;
   // \n を実際の改行として表示
   q.style.whiteSpace = 'pre-line';
   stageVfx.appendChild(q);
@@ -1784,8 +1784,107 @@ function navCharDetail(delta) {
   renderCharDetail(detailUnlockedList[detailIdx]);
 }
 
+// ───── 画像拡大 (ズーム/パン対応) ─────
+let zoomScale = 1, zoomTx = 0, zoomTy = 0;
+let zoomDragging = false, zoomStartX = 0, zoomStartY = 0, zoomBaseTx = 0, zoomBaseTy = 0;
+const ZOOM_LEVELS = [1, 1.5, 2.5, 4];
+
+function applyZoomTransform() {
+  const img = $("#char-img-zoom-img");
+  img.style.transform = `translate(${zoomTx}px, ${zoomTy}px) scale(${zoomScale})`;
+  img.style.cursor = zoomScale > 1 ? "grab" : "zoom-in";
+  $("#char-img-zoom-level").textContent = zoomScale.toFixed(1) + "x";
+}
+
+function resetZoom() {
+  zoomScale = 1; zoomTx = 0; zoomTy = 0;
+  applyZoomTransform();
+}
+
 function toggleCharImgZoom() {
-  $("#char-img-zoom").classList.toggle("active");
+  const z = $("#char-img-zoom");
+  if (z.classList.contains("active")) {
+    closeImgZoom();
+  } else {
+    resetZoom();
+    z.classList.add("active");
+  }
+}
+
+function closeImgZoom() {
+  $("#char-img-zoom").classList.remove("active");
+  resetZoom();
+}
+
+// dir: 1=拡大段階, -1=縮小段階, 0=リセット
+function zoomImg(dir) {
+  if (dir === 0) { resetZoom(); return; }
+  const cur = ZOOM_LEVELS.findIndex(l => Math.abs(l - zoomScale) < 0.05);
+  let nextIdx;
+  if (cur >= 0) {
+    nextIdx = Math.max(0, Math.min(ZOOM_LEVELS.length - 1, cur + dir));
+  } else {
+    // 連続ズームの中間値からは最も近い段に飛ばす
+    nextIdx = ZOOM_LEVELS.findIndex(l => l > zoomScale);
+    if (nextIdx === -1) nextIdx = ZOOM_LEVELS.length - 1;
+    if (dir < 0) nextIdx = Math.max(0, nextIdx - 1);
+  }
+  zoomScale = ZOOM_LEVELS[nextIdx];
+  // リセット位置に戻す (中央揃え)
+  if (zoomScale === 1) { zoomTx = 0; zoomTy = 0; }
+  applyZoomTransform();
+}
+
+// 画像クリックで段階ズーム (デスクトップ/モバイル共通)
+function onZoomImgClick(e) {
+  e.stopPropagation();
+  if (zoomDragging) return;
+  // 1x→1.5x→2.5x→4x→1x ループ
+  const cur = ZOOM_LEVELS.findIndex(l => Math.abs(l - zoomScale) < 0.05);
+  const nextIdx = (cur + 1) % ZOOM_LEVELS.length;
+  zoomScale = ZOOM_LEVELS[nextIdx];
+  if (zoomScale === 1) { zoomTx = 0; zoomTy = 0; }
+  applyZoomTransform();
+}
+
+// ドラッグで移動
+function onZoomDragStart(e) {
+  if (zoomScale <= 1) return;
+  zoomDragging = false; // クリックとの判別: 移動量で判定
+  const isTouch = e.type === 'touchstart';
+  const x = isTouch ? e.touches[0].clientX : e.clientX;
+  const y = isTouch ? e.touches[0].clientY : e.clientY;
+  zoomStartX = x; zoomStartY = y;
+  zoomBaseTx = zoomTx; zoomBaseTy = zoomTy;
+  $("#char-img-zoom-img").style.cursor = "grabbing";
+}
+function onZoomDragMove(e) {
+  if (zoomScale <= 1) return;
+  const isTouch = e.type === 'touchmove';
+  const x = isTouch ? e.touches[0].clientX : e.clientX;
+  const y = isTouch ? e.touches[0].clientY : e.clientY;
+  const dx = x - zoomStartX, dy = y - zoomStartY;
+  if (Math.abs(dx) > 4 || Math.abs(dy) > 4) zoomDragging = true;
+  if (zoomDragging) {
+    zoomTx = zoomBaseTx + dx;
+    zoomTy = zoomBaseTy + dy;
+    applyZoomTransform();
+    if (isTouch) e.preventDefault();
+  }
+}
+function onZoomDragEnd() {
+  $("#char-img-zoom-img").style.cursor = zoomScale > 1 ? "grab" : "zoom-in";
+  setTimeout(() => { zoomDragging = false; }, 30);
+}
+
+// 滑車ズーム
+function onZoomWheel(e) {
+  e.preventDefault();
+  const dir = e.deltaY < 0 ? 0.15 : -0.15;
+  const newScale = Math.max(1, Math.min(6, zoomScale + dir));
+  zoomScale = newScale;
+  if (zoomScale === 1) { zoomTx = 0; zoomTy = 0; }
+  applyZoomTransform();
 }
 
 function closeCharDetail() {
@@ -1807,6 +1906,27 @@ $("#result").addEventListener("click", e => { if (e.target.id === "result") clos
 $("#btn-gallery").addEventListener("click", openGallery);
 $("#gallery").addEventListener("click", e => { if (e.target.id === "gallery") closeGallery(); });
 $("#char-detail").addEventListener("click", e => { if (e.target.id === "char-detail") closeCharDetail(); });
+
+// 画像ズームのイベント
+(function bindZoom(){
+  const zoom = document.getElementById('char-img-zoom');
+  const img = document.getElementById('char-img-zoom-img');
+  if (!zoom || !img) return;
+  // 背景クリックで閉じる
+  zoom.addEventListener('click', e => { if (e.target === zoom) closeImgZoom(); });
+  // 画像クリックで段階ズーム
+  img.addEventListener('click', onZoomImgClick);
+  // ドラッグ
+  img.addEventListener('mousedown', onZoomDragStart);
+  document.addEventListener('mousemove', onZoomDragMove);
+  document.addEventListener('mouseup', onZoomDragEnd);
+  // タッチ
+  img.addEventListener('touchstart', onZoomDragStart, {passive: true});
+  document.addEventListener('touchmove', onZoomDragMove, {passive: false});
+  document.addEventListener('touchend', onZoomDragEnd);
+  // 滑車
+  zoom.addEventListener('wheel', onZoomWheel, {passive: false});
+})();
 
 document.addEventListener("keydown", e => {
   if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
