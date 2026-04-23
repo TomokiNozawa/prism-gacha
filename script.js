@@ -1434,10 +1434,13 @@ async function doTen() {
   showTenIntro();
   play("se-summon");
   await sleep(1100);
-  // skip 中でも SSR以上 (前9体含む) があれば演出を見せるため、ここでは return しない。
-  // SSR以上の有無を判定し、無ければ即終了。
+  // 一度クリックしたら 10連終了まで「スキップモード」を維持。
+  // SSR以上だけは演出を完走するが、終了後も skip モードは保持し、後続R/SRは飛ばす。
+  let tenSkipMode = false;
+  if (checkSkip()) tenSkipMode = true;
+  // SSR以上が一切無いなら即終了
   const hasHighRareInSequence = sequenced.some(r => order[r.tier] >= 2);
-  if (checkSkip() && !hasHighRareInSequence) {
+  if (tenSkipMode && !hasHighRareInSequence) {
     closeStage(); showResult(results, best); busy = false; return;
   }
 
@@ -1446,16 +1449,19 @@ async function doTen() {
   for (let i = 0; i < sequenced.length - 1; i++) {
     clearStage();
     canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    // ループ中にクリックされたら以降ずっと skip モード
+    if (skipRequested) tenSkipMode = true;
     const t = sequenced[i].tier;
     const isHighRare = order[t] >= 2;  // SSR以上
     if (isHighRare) {
       // 高レア演出は skip 状態を一時クリアして完走させる
       skipRequested = false;
       await summonOne(sequenced[i], { showLadder: false });
-      skipRequested = false;  // 演出終了で skip 状態リセット (次からは通常進行)
+      skipRequested = false;  // 内部 short-circuit 用フラグだけリセット
+      // tenSkipMode は維持 → 後続R/SRも飛ばし続ける
     } else {
-      // R/SR: skip 中なら summonOne を呼ばず即座に次へ (キャラ出現演出すら出さない)
-      if (skipRequested) continue;
+      // R/SR: skip モード中なら summonOne を呼ばず即座に次へ
+      if (tenSkipMode) continue;
       await summonOne(sequenced[i], { showLadder: false });
     }
   }
