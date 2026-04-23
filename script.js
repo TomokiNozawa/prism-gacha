@@ -1746,14 +1746,18 @@ function renderCharDetail(c) {
   const tierEl = $("#char-detail-tier");
   tierEl.textContent = c.tier;
   tierEl.className = "char-detail-tier " + c.tier.toLowerCase();
+  // 名前はそのまま (ふりがな無しの方針)
   $("#char-detail-name").textContent = c.name;
-  $("#char-detail-title").textContent = c.title || "";
-  $("#char-detail-title").style.display = c.title ? "" : "none";
-  const cap = c.caption ? "「" + c.caption + "」" : "";
-  $("#char-detail-caption").textContent = cap;
-  $("#char-detail-caption").style.display = cap ? "" : "none";
-  const desc = c.desc || "（ストーリーはまだ記されていない…）";
-  $("#char-detail-desc").textContent = desc;
+  // 称号・セリフ・説明にはふりがな自動適用
+  const titleEl = $("#char-detail-title");
+  titleEl.innerHTML = applyFurigana(escapeHtml(c.title || ""));
+  titleEl.style.display = c.title ? "" : "none";
+  const capText = c.caption ? "「" + c.caption + "」" : "";
+  const capEl = $("#char-detail-caption");
+  capEl.innerHTML = applyFurigana(escapeHtml(capText));
+  capEl.style.display = capText ? "" : "none";
+  const descText = c.desc || "（ストーリーはまだ記されていない…）";
+  $("#char-detail-desc").innerHTML = applyFurigana(escapeHtml(descText));
   // ナビゲーションカウンタ
   if (detailUnlockedList.length > 0) {
     $("#char-detail-counter").textContent = `${detailIdx + 1} / ${detailUnlockedList.length}`;
