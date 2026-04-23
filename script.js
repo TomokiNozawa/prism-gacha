@@ -1434,28 +1434,28 @@ async function doTen() {
   showTenIntro();
   play("se-summon");
   await sleep(1100);
-  // skip 中でも SR以上 (前9体含む) があれば演出を見せるため、ここでは return しない。
-  // SR以上の有無を判定し、無ければ即終了。
-  const hasHighRareInSequence = sequenced.some(r => order[r.tier] >= 1);
+  // skip 中でも SSR以上 (前9体含む) があれば演出を見せるため、ここでは return しない。
+  // SSR以上の有無を判定し、無ければ即終了。
+  const hasHighRareInSequence = sequenced.some(r => order[r.tier] >= 2);
   if (checkSkip() && !hasHighRareInSequence) {
     closeStage(); showResult(results, best); busy = false; return;
   }
 
   // 前9体: showLadder=false (昇格演出なし、装飾のみ)
-  //   skip中でも SR以上は演出を見せる (R のみ skip 対象)
+  //   skip中でも SSR以上は演出を見せる (R/SR は skip 対象)
   for (let i = 0; i < sequenced.length - 1; i++) {
     clearStage();
     canvas.width = window.innerWidth; canvas.height = window.innerHeight;
     const t = sequenced[i].tier;
-    const isHighRare = order[t] >= 1;  // SR以上
+    const isHighRare = order[t] >= 2;  // SSR以上
     if (isHighRare) {
       // 高レア演出は skip 状態を一時クリアして完走させる
       skipRequested = false;
       await summonOne(sequenced[i], { showLadder: false });
       skipRequested = false;  // 演出終了で skip 状態リセット (次からは通常進行)
     } else {
-      // R: skipRequested=true なら summonOne 内で short-circuit、未press時は通常演出
-      // skip 状態を維持 → 後続の R も飛ばし続ける
+      // R/SR: skipRequested=true なら summonOne 内で short-circuit、未press時は通常演出
+      // skip 状態を維持 → 後続の R/SR も飛ばし続ける
       await summonOne(sequenced[i], { showLadder: false });
     }
   }
