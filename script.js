@@ -1226,11 +1226,11 @@ function pickSummonType(tier, opts) {
   if (tier === "R") return "Z";
   if (tier === "SR") return "Z";
   // SSR: 軽量寄りミックス。E(金portal) と Z(柱+粒子) は SSR 専用。F はレア度高すぎるため除外
-  if (tier === "SSR") return pickWeighted({ A: 2, B: 1, C: 1, D: 2, E: 2, Z: 2 });
+  if (tier === "SSR") return pickWeighted({ A: 2, B: 1, C: 1, D: 4, E: 2, Z: 2 });  // D=33%
   // UR: E/Z (SSR専用) を除外
-  if (tier === "UR") return pickWeighted({ A: 1, B: 2, C: 2, D: 2, F: 1 });
+  if (tier === "UR") return pickWeighted({ A: 1, B: 2, C: 2, D: 4, F: 1 });  // D=40%
   // LR: E/Z (SSR専用) を除外
-  if (tier === "LR") return pickWeighted({ A: 1, B: 2, C: 3, D: 2, F: 1 });
+  if (tier === "LR") return pickWeighted({ A: 1, B: 2, C: 3, D: 4, F: 1 });  // D=36%
   return "Z";
 }
 
