@@ -1830,19 +1830,20 @@ function navCharDetail(delta) {
 
 // ═════════════ 相関図 ═════════════
 // 派閥 (faction) ごとに島状配置。座標は SVG viewBox 2000x1400 内の絶対座標
+// yomi: ふりがな (派閥名上に小さく表示)
 const FACTIONS = [
-  { id: 'genso',   label: '原虹・観測者',     x: 1000, y:  170, color: '#fff8d4' },
-  { id: 'rulers',  label: '十国の覇者',       x: 1000, y:  500, color: '#ffd97a' },
-  { id: 'church',  label: '白焔教会',          x:  280, y:  260, color: '#e3f0ff' },
-  { id: 'dragon',  label: '紫竜王国',          x:  280, y:  600, color: '#d6c5ff' },
-  { id: 'redwing', label: '紅翼皇家',          x:  280, y:  970, color: '#ffc0c0' },
-  { id: 'yakai',   label: '夜焔郷・影衆',      x: 1720, y:  260, color: '#ffaaaa' },
-  { id: 'wolf',    label: '月牙狼族',          x: 1720, y:  520, color: '#cccccc' },
-  { id: 'forest',  label: '深緑樹海',          x: 1720, y:  760, color: '#b8e0b0' },
-  { id: 'silver',  label: '銀霜王国',          x: 1720, y: 1010, color: '#cce0ff' },
-  { id: 'tower',   label: '黒曜塔',            x:  600, y: 1230, color: '#a0a0c0' },
-  { id: 'seventh', label: '第七天',            x: 1000, y:  830, color: '#ffb070' },
-  { id: 'academy', label: '星霊学院',          x: 1400, y: 1230, color: '#b0d0ff' },
+  { id: 'genso',   label: '原虹・観測者',     yomi: 'げんそう・かんそくしゃ', x: 1000, y:  170, color: '#fff8d4' },
+  { id: 'rulers',  label: '十国の覇者',       yomi: 'じっこくのはしゃ',     x: 1000, y:  500, color: '#ffd97a' },
+  { id: 'church',  label: '白焔教会',          yomi: 'はくえんきょうかい',   x:  280, y:  260, color: '#e3f0ff' },
+  { id: 'dragon',  label: '紫竜王国',          yomi: 'しりゅうおうこく',     x:  280, y:  600, color: '#d6c5ff' },
+  { id: 'redwing', label: '紅翼皇家',          yomi: 'こうよくこうか',       x:  280, y:  970, color: '#ffc0c0' },
+  { id: 'yakai',   label: '夜焔郷・影衆',      yomi: 'やえんごう・かげしゅう', x: 1720, y:  260, color: '#ffaaaa' },
+  { id: 'wolf',    label: '月牙狼族',          yomi: 'げつがろうぞく',       x: 1720, y:  520, color: '#cccccc' },
+  { id: 'forest',  label: '深緑樹海',          yomi: 'しんりょくじゅかい',   x: 1720, y:  760, color: '#b8e0b0' },
+  { id: 'silver',  label: '銀霜王国',          yomi: 'ぎんそうおうこく',     x: 1720, y: 1010, color: '#cce0ff' },
+  { id: 'tower',   label: '黒曜塔',            yomi: 'こくようとう',         x:  600, y: 1230, color: '#a0a0c0' },
+  { id: 'seventh', label: '第七天',            yomi: 'だいしちてん',         x: 1000, y:  830, color: '#ffb070' },
+  { id: 'academy', label: '星霊学院',          yomi: 'せいれいがくいん',     x: 1400, y: 1230, color: '#b0d0ff' },
 ];
 
 // キャラの所属派閥マップ (name → factionId, dx, dy: 派閥中心からの相対オフセット)
@@ -2083,7 +2084,10 @@ function renderFactionBg() {
 
 function renderFactionLabels() {
   return FACTIONS.map(f => {
-    return `<text x="${f.x}" y="${f.y - 115}" text-anchor="middle" fill="${f.color}" font-size="22" font-weight="700" letter-spacing="2" style="text-shadow: 0 0 8px rgba(0,0,0,0.8)">${f.label}</text>`;
+    const yomiTxt = f.yomi
+      ? `<text x="${f.x}" y="${f.y - 137}" text-anchor="middle" fill="${f.color}" font-size="11" letter-spacing="2" opacity="0.7" style="text-shadow: 0 0 6px rgba(0,0,0,0.8)">${f.yomi}</text>`
+      : '';
+    return `${yomiTxt}<text x="${f.x}" y="${f.y - 115}" text-anchor="middle" fill="${f.color}" font-size="22" font-weight="700" letter-spacing="2" style="text-shadow: 0 0 8px rgba(0,0,0,0.8)">${f.label}</text>`;
   }).join('');
 }
 
@@ -2108,6 +2112,7 @@ function renderRelationLines() {
   });
 
   for (const [, rels] of Object.entries(pairGroups)) {
+    const hasDirectional = rels.some(r => (REL_STYLE[r.type] || {}).directed);
     rels.forEach((r, i) => {
       const pa = getCharPos(r.a);
       const pb = getCharPos(r.b);
@@ -2115,18 +2120,13 @@ function renderRelationLines() {
       const style = REL_STYLE[r.type] || REL_STYLE.fellow;
       const dash = style.dash !== 'none' ? `stroke-dasharray="${style.dash}"` : '';
 
-      // 同ペアの複数関係を ±方向に振り分け (i=0:+1, i=1:-1, i=2:+2, ...)
-      const sideSign = (i % 2 === 0) ? 1 : -1;
-      const sideStack = Math.floor(i / 2);
-
       // 線の方向ベクトル + 垂直単位ベクトル
       const dxL = pb.x - pa.x, dyL = pb.y - pa.y;
       const lineLen = Math.hypot(dxL, dyL) || 1;
       const px = -dyL / lineLen, py = dxL / lineLen;
 
-      // 線分の垂直オフセット (同ペア複数線を分離)
-      const lineShift = (rels.length > 1 ? sideSign * (4 + sideStack * 8) : 0);
-
+      // 同ペアでも線そのものは中央のまま (Lineが分散してると関係性が分かりにくい)
+      const lineShift = 0;
       let x1 = pa.x + px * lineShift, y1 = pa.y + py * lineShift;
       let x2 = pb.x + px * lineShift, y2 = pb.y + py * lineShift;
       if (style.directed) {
@@ -2137,18 +2137,19 @@ function renderRelationLines() {
       const marker = style.directed ? `marker-end="url(#arrow-${r.type})"` : '';
       lines.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${style.color}" stroke-opacity="0.65" stroke-width="${style.w}" ${dash} ${marker}/>`);
 
-      // ラベル: 短い線では大きめ垂直オフセット、長い線では控えめ
-      // 同ペア複数なら更に外側へずらす
-      const baseOffset = lineLen < 200 ? 24 : 14;
-      const labelPerp = sideSign * (baseOffset + sideStack * 22);
+      // ラベル位置の計算
+      const baseOffset = lineLen < 200 ? 26 : 14;
       const minMargin = Math.min(0.45, Math.max(0.32, 80 / lineLen));
 
-      if (r.aRole || r.bRole) {
+      if (style.directed && (r.aRole || r.bRole)) {
+        // 方向性ラベル: a/bを線の両側に振り分け (横線なら a=上/b=下)
+        // 同ペア複数なら i に応じて回転 (内側スタックが大きくなり過ぎないよう±制御)
+        const sideSign = (i % 2 === 0) ? 1 : -1;
+        const sideStack = Math.floor(i / 2);
+        const dirOffset = sideSign * (baseOffset + sideStack * 30);
         const tA = minMargin, tB = 1 - minMargin;
-        // 方向性ラベルは矢印の両側に振り分け (a=片側, b=逆側)
-        // → 横線なら a=上/b=下、縦線なら a=右/b=左、被りを大幅に減らす
-        const aPerp = labelPerp;
-        const bPerp = -labelPerp;
+        const aPerp = dirOffset;
+        const bPerp = -dirOffset;
         let ax = pa.x + dxL * tA + px * aPerp;
         let ay = pa.y + dyL * tA + py * aPerp;
         let bx = pa.x + dxL * tB + px * bPerp;
@@ -2156,8 +2157,17 @@ function renderRelationLines() {
         if (r.aRole) lines.push(relLabel(ax, ay, r.aRole, style.color));
         if (r.bRole) lines.push(relLabel(bx, by, r.bRole, style.color));
       } else if (r.label) {
-        let mx = (pa.x + pb.x) / 2 + px * labelPerp;
-        let my = (pa.y + pb.y) / 2 + py * labelPerp;
+        // 双方向単一ラベル: 中央 + 垂直オフセット
+        // 同ペアに方向性関係がある場合、その aPerp/bPerp と被らないよう更に外側へ
+        const sideSign = (i % 2 === 0) ? 1 : -1;
+        const sideStack = Math.floor(i / 2);
+        let perp = sideSign * (baseOffset + sideStack * 30);
+        if (hasDirectional) {
+          // directionalの ±baseOffset と被らないよう更に外側 (+36)
+          perp = sideSign * (baseOffset + 40 + sideStack * 30);
+        }
+        let mx = (pa.x + pb.x) / 2 + px * perp;
+        let my = (pa.y + pb.y) / 2 + py * perp;
         lines.push(relLabel(mx, my, r.label, style.color));
       }
     });
@@ -2561,6 +2571,8 @@ function renderScene() {
       : '';
   }
   $("#story-scene-content").innerHTML = applyFurigana(bodyHtml);
+  // 登場キャラ立ち絵
+  renderSceneChars(scene);
   $("#story-bg").className = 'story-bg bg-' + (scene.bg || 'default');
   $("#story-prev").disabled = storyIdx === 0;
   $("#story-next").disabled = storyIdx === storyScenes.length - 1;
@@ -2569,6 +2581,68 @@ function renderScene() {
   if (scroll) scroll.scrollTop = 0;
   // 進捗保存
   saveStoryProgress(currentStoryId, storyIdx);
+}
+
+// シーン本文に登場するキャラを自動検出して下部に立ち絵を並べる
+function renderSceneChars(scene) {
+  const container = $("#story-scene-chars");
+  if (!container) return;
+  const text = (scene.title || '') + '\n' + (scene.contentMd || '');
+  const found = [];
+  const seen = new Set();
+  for (const tier of ['LR','UR','SSR','SR','R']) {
+    for (const c of POOL[tier]) {
+      const fullName = c.name;
+      // フルネーム or 末尾の固有名 (例: '竜爵 ヴィル' → 'ヴィル')
+      const shortName = fullName.split(/[\s ]/).pop();
+      // descに繰り返し出るような自己説明部分を避けるため、単純に本文中の出現数で判定
+      let hits = 0;
+      // 全角半角スペース両方を考慮
+      const re = new RegExp(escapeRegExp(shortName), 'g');
+      const m = text.match(re);
+      if (m) hits = m.length;
+      if (hits > 0 && !seen.has(fullName)) {
+        seen.add(fullName);
+        found.push({ ...c, tier, hits });
+      }
+    }
+  }
+  // 出現回数多い順、最大8体まで
+  found.sort((a, b) => b.hits - a.hits);
+  const top = found.slice(0, 8);
+  if (top.length === 0) {
+    container.innerHTML = '';
+    container.style.display = 'none';
+    return;
+  }
+  container.style.display = '';
+  container.innerHTML = `
+    <div class="story-chars-label">このシーンに登場</div>
+    <div class="story-chars-list">
+      ${top.map(c => `
+        <div class="story-char-thumb ${c.tier.toLowerCase()}" data-name="${escapeHtml(c.name)}" title="${escapeHtml(c.name)}">
+          <div class="story-char-img" style="background-image:url('${c.img}')"></div>
+          <div class="story-char-name">${escapeHtml(c.name.split(/[\s ]/).pop())}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  container.querySelectorAll('.story-char-thumb').forEach(el => {
+    el.addEventListener('click', () => {
+      const name = el.dataset.name;
+      const c = getCharByName(name);
+      if (c && isUnlocked(c)) {
+        // ストーリー閉じてキャラ詳細へ
+        if (detailUnlockedList.length === 0) {
+          detailUnlockedList = getAllCharactersWithTier().filter(x => isUnlocked(x));
+        }
+        showCharDetail(c);
+      }
+    });
+  });
+}
+function escapeRegExp(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 function storyNext() {
