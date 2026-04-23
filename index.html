@@ -159,17 +159,32 @@
   <div id="relations-canvas" class="relations-canvas"></div>
 </div>
 
-<!-- Story Modal -->
+<!-- Story Modal (紙芝居風) -->
 <div id="story-modal" class="story-modal">
   <div class="story-inner">
     <header class="story-header">
-      <div>
+      <div class="story-header-meta">
         <div class="story-meta" id="story-meta">Season 1 — 第1章</div>
         <h2 id="story-title">序: 七座の使命</h2>
       </div>
-      <button class="story-close" onclick="closeStory()" title="閉じる (Esc)">×</button>
+      <div class="story-header-controls">
+        <span class="story-progress" id="story-progress">- / -</span>
+        <button class="story-close" onclick="closeStory()" title="閉じる (Esc)">×</button>
+      </div>
     </header>
-    <div id="story-content" class="story-content"></div>
+    <div class="story-stage" id="story-stage">
+      <div class="story-bg" id="story-bg"></div>
+      <div class="story-scene-wrap">
+        <div class="story-scene-label" id="story-scene-label"></div>
+        <h3 class="story-scene-title" id="story-scene-title"></h3>
+        <div class="story-scene-content" id="story-scene-content"></div>
+      </div>
+    </div>
+    <div class="story-nav">
+      <button class="story-nav-btn" onclick="storyPrev()" id="story-prev">‹ 戻る</button>
+      <div class="story-nav-hint" id="story-nav-hint">タップ / → / Enter で次へ</div>
+      <button class="story-nav-btn primary" onclick="storyNext()" id="story-next">次へ ›</button>
+    </div>
   </div>
 </div>
 

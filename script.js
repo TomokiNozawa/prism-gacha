@@ -1899,9 +1899,9 @@ const CHAR_FACTION = {
 // 方向あり: aRole/bRole を各端のキャラ寄りに表示
 const RELATIONS = [
   // 観測者三姉妹
-  { a: 'セラフィエル',    b: '千夜姫 カグヤ',     type: 'fellow', label: '三姉妹' },
-  { a: '千夜姫 カグヤ',   b: '星海のノクス',      type: 'fellow', label: '三姉妹' },
-  { a: 'セラフィエル',    b: '星海のノクス',      type: 'fellow', label: '三姉妹' },
+  { a: 'セラフィエル',    b: '千夜姫 カグヤ',     type: 'fellow', label: '三柱' },
+  { a: '千夜姫 カグヤ',   b: '星海のノクス',      type: 'fellow', label: '三柱' },
+  { a: 'セラフィエル',    b: '星海のノクス',      type: 'fellow', label: '三柱' },
   // プリズマ → セラフィエル
   { a: '虹意 プリズマ',   b: 'セラフィエル',      type: 'master', aRole: '主', bRole: '我が羽' },
   // 二大覇者
@@ -2320,40 +2320,163 @@ $("#result").addEventListener("click", e => { if (e.target.id === "result") clos
 $("#btn-gallery").addEventListener("click", openGallery);
 $("#btn-relations").addEventListener("click", openRelations);
 
-// ───── ストーリービューワー ─────
+// ───── ストーリービューワー (紙芝居風) ─────
 const STORY_FILES = {
   s1c1: { title: '序: 七座の使命', meta: 'Season 1 — 第1章', file: 'STORY/s1c1.md' },
 };
 let storyOpenedAt = 0;
 const STORY_KEY_GUARD_MS = 300;
+let storyScenes = [];     // [{label, title, contentMd, bg}, ...]
+let storyIdx = 0;
+let currentStoryId = null;
 
 async function openStory(storyId) {
   const info = STORY_FILES[storyId];
   if (!info) return;
+  currentStoryId = storyId;
   $("#story-meta").textContent = info.meta;
   $("#story-title").textContent = info.title;
-  const content = $("#story-content");
-  content.innerHTML = '<div class="story-loading">読み込み中…</div>';
+  $("#story-scene-content").innerHTML = '<div class="story-loading">読み込み中…</div>';
   $("#story-modal").classList.add("active");
   storyOpenedAt = Date.now();
   try {
-    const resp = await fetch(info.file + '?v=' + Date.now()); // キャッシュバスター
+    const resp = await fetch(info.file + '?v=' + Date.now());
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const md = await resp.text();
-    if (typeof marked !== 'undefined') {
-      content.innerHTML = marked.parse(md);
-    } else {
-      // marked.js 読込失敗時のフォールバック
-      content.innerHTML = '<pre>' + md.replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c])) + '</pre>';
-    }
-    content.scrollTop = 0;
+    storyScenes = parseStoryToScenes(md);
+    storyIdx = restoreStoryProgress(storyId, storyScenes.length);
+    renderScene();
   } catch (e) {
-    content.innerHTML = '<div class="story-error">読み込みに失敗しました: ' + e.message + '</div>';
+    $("#story-scene-content").innerHTML = '<div class="story-error">読み込みに失敗しました: ' + e.message + '</div>';
+  }
+}
+
+// markdown を「シーン」配列に分解
+// シーン = ## または ### の見出しから次の見出しまで
+// # (h1) は章タイトルで「冒頭ページ」「終了ページ」に使う
+function parseStoryToScenes(md) {
+  const scenes = [];
+  const lines = md.split('\n');
+  let current = null;
+  let preludeLines = [];
+
+  function flushCurrent() {
+    if (current && current.contentLines.length > 0) {
+      scenes.push({
+        label: current.label,
+        title: current.title,
+        contentMd: current.contentLines.join('\n').trim(),
+        bg: current.bg,
+      });
+    }
+  }
+
+  for (const line of lines) {
+    const h1 = line.match(/^# (.+)/);
+    const h2 = line.match(/^## (.+)/);
+    const h3 = line.match(/^### (.+)/);
+    if (h1) {
+      flushCurrent();
+      current = null;
+      // 章タイトルや「終」は表紙/終ページとして単独シーン化
+      if (line.includes('終')) {
+        scenes.push({ label: '', title: h1[1].trim(), contentMd: '*— 第1章 完 —*\n\n次章をお楽しみに。', bg: 'finale' });
+      } else {
+        scenes.push({ label: '', title: h1[1].trim(), contentMd: '', bg: 'cover', isCover: true });
+      }
+      preludeLines = [];
+    } else if (h2) {
+      flushCurrent();
+      current = { label: '', title: h2[1].trim(), contentLines: [], bg: detectBg(h2[1]) };
+    } else if (h3) {
+      flushCurrent();
+      // ### 1-1: 寮の二段ベッド → label="1-1", title="寮の二段ベッド"
+      const m = h3[1].match(/^([\d\-]+):\s*(.+)/);
+      const label = m ? m[1] : '';
+      const title = m ? m[2] : h3[1];
+      current = { label, title: title.trim(), contentLines: [], bg: detectBg(title) };
+    } else if (current) {
+      current.contentLines.push(line);
+    } else {
+      // 見出し前 = プロローグ前のメタ情報など、捨てる
+    }
+  }
+  flushCurrent();
+  return scenes;
+}
+
+// シーンタイトル/内容から背景を推定
+function detectBg(text) {
+  const t = String(text);
+  if (/(プロローグ|序)/.test(t)) return 'prologue';
+  if (/(エピローグ|月夜|宇宙|教会|プリズマ|黄昏)/.test(t)) return 'rainbow';
+  if (/(影喰い|裂け目|戦闘|襲来|絶望)/.test(t)) return 'shadow';
+  if (/(屋上|学院|寮|食堂|朝)/.test(t)) return 'academy';
+  if (/(白い光|降臨|聖|イザベル)/.test(t)) return 'holy';
+  if (/(朱音|焔|紅蓮|ひなた)/.test(t)) return 'flame';
+  if (/(覚醒|虹色|プリズマ)/.test(t)) return 'rainbow';
+  return 'default';
+}
+
+function renderScene() {
+  if (!storyScenes.length) return;
+  storyIdx = Math.max(0, Math.min(storyIdx, storyScenes.length - 1));
+  const scene = storyScenes[storyIdx];
+  $("#story-progress").textContent = `${storyIdx + 1} / ${storyScenes.length}`;
+  $("#story-scene-label").textContent = scene.label || '';
+  $("#story-scene-label").style.display = scene.label ? '' : 'none';
+  $("#story-scene-title").textContent = scene.title;
+  if (typeof marked !== 'undefined' && scene.contentMd) {
+    $("#story-scene-content").innerHTML = marked.parse(scene.contentMd);
+  } else {
+    $("#story-scene-content").innerHTML = scene.contentMd
+      ? '<p>' + scene.contentMd.replace(/\n\n+/g, '</p><p>').replace(/\n/g, '<br>') + '</p>'
+      : '';
+  }
+  $("#story-bg").className = 'story-bg bg-' + (scene.bg || 'default');
+  $("#story-prev").disabled = storyIdx === 0;
+  $("#story-next").disabled = storyIdx === storyScenes.length - 1;
+  // スクロール位置リセット
+  const stage = $("#story-stage");
+  if (stage) stage.scrollTop = 0;
+  // 進捗保存
+  saveStoryProgress(currentStoryId, storyIdx);
+}
+
+function storyNext() {
+  if (storyIdx < storyScenes.length - 1) {
+    storyIdx++;
+    renderScene();
+  }
+}
+function storyPrev() {
+  if (storyIdx > 0) {
+    storyIdx--;
+    renderScene();
   }
 }
 function closeStory() {
   $("#story-modal").classList.remove("active");
 }
+
+// 進捗保存 (localStorage)
+function saveStoryProgress(storyId, idx) {
+  if (!storyId) return;
+  try {
+    const all = JSON.parse(localStorage.getItem('prism-story-progress') || '{}');
+    all[storyId] = idx;
+    localStorage.setItem('prism-story-progress', JSON.stringify(all));
+  } catch {}
+}
+function restoreStoryProgress(storyId, total) {
+  try {
+    const all = JSON.parse(localStorage.getItem('prism-story-progress') || '{}');
+    const idx = all[storyId];
+    if (typeof idx === 'number' && idx >= 0 && idx < total) return idx;
+  } catch {}
+  return 0;
+}
+
 // ストーリーカードクリック
 document.querySelectorAll('.story-card[data-story]').forEach(card => {
   card.addEventListener('click', () => openStory(card.dataset.story));
@@ -2361,6 +2484,11 @@ document.querySelectorAll('.story-card[data-story]').forEach(card => {
 // 背景クリックで閉じる
 $("#story-modal").addEventListener('click', e => {
   if (e.target.id === 'story-modal') closeStory();
+});
+// stageクリックで次へ (ボタン以外)
+$("#story-stage").addEventListener('click', e => {
+  if (e.target.closest('.story-nav') || e.target.closest('button')) return;
+  storyNext();
 });
 
 // BGM トグル (ホーム画面用ループ再生)
@@ -2449,6 +2577,12 @@ document.addEventListener("keydown", e => {
   if ($("#story-modal").classList.contains("active")) {
     if (Date.now() - storyOpenedAt < STORY_KEY_GUARD_MS) return;
     if (e.key === "Escape") { e.preventDefault(); closeStory(); }
+    else if (e.key === "Enter" || e.key === " " || e.key === "ArrowRight") {
+      e.preventDefault(); storyNext();
+    }
+    else if (e.key === "ArrowLeft") {
+      e.preventDefault(); storyPrev();
+    }
     return;
   }
   if (stage.classList.contains("active") && (e.key === " " || e.key === "Escape")) {
