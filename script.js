@@ -2099,46 +2099,64 @@ function renderArrowMarkers() {
 
 function renderRelationLines() {
   const lines = [];
-  for (const r of RELATIONS) {
-    const pa = getCharPos(r.a);
-    const pb = getCharPos(r.b);
-    if (!pa || !pb) continue;
-    const style = REL_STYLE[r.type] || REL_STYLE.fellow;
-    const dash = style.dash !== 'none' ? `stroke-dasharray="${style.dash}"` : '';
-    // 方向性ありなら矢印マーカー、線分は円ノード手前で止める
-    let x1 = pa.x, y1 = pa.y, x2 = pb.x, y2 = pb.y;
-    if (style.directed) {
-      const dx = x2 - x1, dy = y2 - y1;
-      const len = Math.hypot(dx, dy) || 1;
-      const trim = 36;
-      x2 = x2 - (dx / len) * trim;
-      y2 = y2 - (dy / len) * trim;
-    }
-    const marker = style.directed ? `marker-end="url(#arrow-${r.type})"` : '';
-    lines.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${style.color}" stroke-opacity="0.65" stroke-width="${style.w}" ${dash} ${marker}/>`);
+  // 同じペア(a,b)を持つ関係をグループ化 → 上下に振り分けて重なり回避
+  const pairGroups = {};
+  RELATIONS.forEach((r, idx) => {
+    const key = [r.a, r.b].sort().join('|');
+    if (!pairGroups[key]) pairGroups[key] = [];
+    pairGroups[key].push({ ...r, _idx: idx });
+  });
 
-    // ラベル位置: 線分上の補間 + 線に対して垂直方向に小オフセット (アイコン被り回避)
-    const dxL = pb.x - pa.x, dyL = pb.y - pa.y;
-    const lineLen = Math.hypot(dxL, dyL) || 1;
-    // 垂直単位ベクトル (±90度回転)
-    const px = -dyL / lineLen, py = dxL / lineLen;
-    const perpOffset = 14; // 線から ±14px 浮かす
-    const minMargin = Math.min(0.45, Math.max(0.30, 70 / lineLen));
-    if (r.aRole || r.bRole) {
-      const tA = minMargin, tB = 1 - minMargin;
-      let ax = pa.x + dxL * tA, ay = pa.y + dyL * tA;
-      let bx = pa.x + dxL * tB, by = pa.y + dyL * tB;
-      // 垂直オフセット (線の上側に寄せる)
-      ax += px * perpOffset; ay += py * perpOffset;
-      bx += px * perpOffset; by += py * perpOffset;
-      if (r.aRole) lines.push(relLabel(ax, ay, r.aRole, style.color));
-      if (r.bRole) lines.push(relLabel(bx, by, r.bRole, style.color));
-    } else if (r.label) {
-      let mx = (pa.x + pb.x) / 2;
-      let my = (pa.y + pb.y) / 2;
-      mx += px * perpOffset; my += py * perpOffset;
-      lines.push(relLabel(mx, my, r.label, style.color));
-    }
+  for (const [, rels] of Object.entries(pairGroups)) {
+    rels.forEach((r, i) => {
+      const pa = getCharPos(r.a);
+      const pb = getCharPos(r.b);
+      if (!pa || !pb) return;
+      const style = REL_STYLE[r.type] || REL_STYLE.fellow;
+      const dash = style.dash !== 'none' ? `stroke-dasharray="${style.dash}"` : '';
+
+      // 同ペアの複数関係を ±方向に振り分け (i=0:+1, i=1:-1, i=2:+2, ...)
+      const sideSign = (i % 2 === 0) ? 1 : -1;
+      const sideStack = Math.floor(i / 2);
+
+      // 線の方向ベクトル + 垂直単位ベクトル
+      const dxL = pb.x - pa.x, dyL = pb.y - pa.y;
+      const lineLen = Math.hypot(dxL, dyL) || 1;
+      const px = -dyL / lineLen, py = dxL / lineLen;
+
+      // 線分の垂直オフセット (同ペア複数線を分離)
+      const lineShift = (rels.length > 1 ? sideSign * (4 + sideStack * 8) : 0);
+
+      let x1 = pa.x + px * lineShift, y1 = pa.y + py * lineShift;
+      let x2 = pb.x + px * lineShift, y2 = pb.y + py * lineShift;
+      if (style.directed) {
+        const trim = 36;
+        x2 = x2 - (dxL / lineLen) * trim;
+        y2 = y2 - (dyL / lineLen) * trim;
+      }
+      const marker = style.directed ? `marker-end="url(#arrow-${r.type})"` : '';
+      lines.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${style.color}" stroke-opacity="0.65" stroke-width="${style.w}" ${dash} ${marker}/>`);
+
+      // ラベル: 短い線では大きめ垂直オフセット、長い線では控えめ
+      // 同ペア複数なら更に外側へずらす
+      const baseOffset = lineLen < 200 ? 24 : 14;
+      const labelPerp = sideSign * (baseOffset + sideStack * 22);
+      const minMargin = Math.min(0.45, Math.max(0.32, 80 / lineLen));
+
+      if (r.aRole || r.bRole) {
+        const tA = minMargin, tB = 1 - minMargin;
+        let ax = pa.x + dxL * tA + px * labelPerp;
+        let ay = pa.y + dyL * tA + py * labelPerp;
+        let bx = pa.x + dxL * tB + px * labelPerp;
+        let by = pa.y + dyL * tB + py * labelPerp;
+        if (r.aRole) lines.push(relLabel(ax, ay, r.aRole, style.color));
+        if (r.bRole) lines.push(relLabel(bx, by, r.bRole, style.color));
+      } else if (r.label) {
+        let mx = (pa.x + pb.x) / 2 + px * labelPerp;
+        let my = (pa.y + pb.y) / 2 + py * labelPerp;
+        lines.push(relLabel(mx, my, r.label, style.color));
+      }
+    });
   }
   return lines.join('');
 }
