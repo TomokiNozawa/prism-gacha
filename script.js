@@ -2628,11 +2628,11 @@ function renderSceneChars(scene) {
     </div>
   `;
   container.querySelectorAll('.story-char-thumb').forEach(el => {
-    el.addEventListener('click', () => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation(); // ステージクリックの「次へ」を発火させない
       const name = el.dataset.name;
       const c = getCharByName(name);
       if (c && isUnlocked(c)) {
-        // ストーリー閉じてキャラ詳細へ
         if (detailUnlockedList.length === 0) {
           detailUnlockedList = getAllCharactersWithTier().filter(x => isUnlocked(x));
         }
@@ -2687,9 +2687,13 @@ document.querySelectorAll('.story-card[data-story]').forEach(card => {
 $("#story-modal").addEventListener('click', e => {
   if (e.target.id === 'story-modal') closeStory();
 });
-// stageクリックで次へ (ボタン以外)
+// stageクリックで次へ (ボタン/キャラサムネ等は除外)
 $("#story-stage").addEventListener('click', e => {
   if (e.target.closest('.story-nav') || e.target.closest('button')) return;
+  if (e.target.closest('.story-scene-chars')) return;
+  // テキスト選択中(マウスドラッグでハイライト)は誤発火させない
+  const sel = window.getSelection && window.getSelection();
+  if (sel && sel.toString().length > 0) return;
   storyNext();
 });
 
