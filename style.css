@@ -1921,18 +1921,18 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 }
 .story-error { color: #ff8888; }
 
-/* 登場キャラ立ち絵 */
+/* 登場キャラ立ち絵 (シーンタイトル直下) */
 .story-scene-chars {
-  margin-top: 36px;
-  padding: 18px 20px;
-  background: rgba(0,0,0,0.4);
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.08);
+  margin: 0 0 24px;
+  padding: 14px 16px;
+  background: rgba(0,0,0,0.45);
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.1);
 }
 .story-chars-label {
-  font-size: 11px; letter-spacing: 0.2em;
-  color: rgba(255,255,255,0.6);
-  margin-bottom: 12px;
+  font-size: 10px; letter-spacing: 0.2em;
+  color: rgba(255,255,255,0.55);
+  margin-bottom: 10px;
   text-transform: uppercase;
 }
 .story-chars-list {
@@ -2027,7 +2027,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   .story-nav-hint { font-size: 9px; }
   .story-card { padding: 14px 16px; }
   .story-card-title { font-size: 16px; }
-  .story-scene-chars { padding: 14px 14px; margin-top: 24px; }
+  .story-scene-chars { padding: 10px 12px; margin-bottom: 18px; }
   .story-chars-list { gap: 8px; }
   .story-char-thumb { width: 60px; }
   .story-char-img { width: 48px; height: 48px; }
