@@ -2455,8 +2455,8 @@ function renderScene() {
   $("#story-prev").disabled = storyIdx === 0;
   $("#story-next").disabled = storyIdx === storyScenes.length - 1;
   // スクロール位置リセット
-  const stage = $("#story-stage");
-  if (stage) stage.scrollTop = 0;
+  const scroll = $("#story-scroll");
+  if (scroll) scroll.scrollTop = 0;
   // 進捗保存
   saveStoryProgress(currentStoryId, storyIdx);
 }
