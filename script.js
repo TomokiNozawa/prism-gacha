@@ -1829,69 +1829,68 @@ function navCharDetail(delta) {
 }
 
 // ═════════════ 相関図 ═════════════
-// 派閥 (faction) ごとに島状配置。座標は SVG viewBox 1600x1100 内の % ではなく絶対座標
+// 派閥 (faction) ごとに島状配置。座標は SVG viewBox 2000x1400 内の絶対座標
 const FACTIONS = [
-  { id: 'genso',   label: '原虹・観測者',     x:  800, y: 130, color: '#fff8d4' },
-  { id: 'rulers',  label: '十国の覇者',       x:  800, y: 320, color: '#ffd97a' },
-  { id: 'church',  label: '白焔教会',          x:  220, y: 200, color: '#e3f0ff' },
-  { id: 'dragon',  label: '紫竜王国',          x:  220, y: 470, color: '#d6c5ff' },
-  { id: 'redwing', label: '紅翼皇家',          x:  220, y: 770, color: '#ffc0c0' },
-  { id: 'yakai',   label: '夜焔郷・影衆',      x: 1380, y: 200, color: '#ffaaaa' },
-  { id: 'wolf',    label: '月牙狼族',          x: 1380, y: 410, color: '#cccccc' },
-  { id: 'forest',  label: '深緑樹海',          x: 1380, y: 600, color: '#b8e0b0' },
-  { id: 'silver',  label: '銀霜王国',          x: 1380, y: 800, color: '#cce0ff' },
-  { id: 'tower',   label: '黒曜塔',            x:  500, y: 950, color: '#a0a0c0' },
-  { id: 'seventh', label: '第七天',            x:  800, y: 600, color: '#ffb070' },
-  { id: 'academy', label: '星霊学院',          x: 1100, y: 950, color: '#b0d0ff' },
+  { id: 'genso',   label: '原虹・観測者',     x: 1000, y:  170, color: '#fff8d4' },
+  { id: 'rulers',  label: '十国の覇者',       x: 1000, y:  500, color: '#ffd97a' },
+  { id: 'church',  label: '白焔教会',          x:  280, y:  260, color: '#e3f0ff' },
+  { id: 'dragon',  label: '紫竜王国',          x:  280, y:  600, color: '#d6c5ff' },
+  { id: 'redwing', label: '紅翼皇家',          x:  280, y:  970, color: '#ffc0c0' },
+  { id: 'yakai',   label: '夜焔郷・影衆',      x: 1720, y:  260, color: '#ffaaaa' },
+  { id: 'wolf',    label: '月牙狼族',          x: 1720, y:  520, color: '#cccccc' },
+  { id: 'forest',  label: '深緑樹海',          x: 1720, y:  760, color: '#b8e0b0' },
+  { id: 'silver',  label: '銀霜王国',          x: 1720, y: 1010, color: '#cce0ff' },
+  { id: 'tower',   label: '黒曜塔',            x:  600, y: 1230, color: '#a0a0c0' },
+  { id: 'seventh', label: '第七天',            x: 1000, y:  830, color: '#ffb070' },
+  { id: 'academy', label: '星霊学院',          x: 1400, y: 1230, color: '#b0d0ff' },
 ];
 
 // キャラの所属派閥マップ (name → factionId, dx, dy: 派閥中心からの相対オフセット)
 const CHAR_FACTION = {
   // 原虹・観測者
   '虹意 プリズマ':   { f: 'genso',   dx:    0, dy:    0 },
-  'セラフィエル':    { f: 'genso',   dx: -110, dy:   60 },
-  '千夜姫 カグヤ':   { f: 'genso',   dx:  110, dy:   60 },
-  '星海のノクス':    { f: 'genso',   dx:    0, dy:  100 },
+  'セラフィエル':    { f: 'genso',   dx: -130, dy:   80 },
+  '千夜姫 カグヤ':   { f: 'genso',   dx:  130, dy:   80 },
+  '星海のノクス':    { f: 'genso',   dx:    0, dy:  130 },
   // 十国の覇者
-  '龍帝 アルテミス': { f: 'rulers',  dx:  -75, dy:    0 },
-  '焔帝 ヒノオウ':   { f: 'rulers',  dx:   75, dy:    0 },
+  '龍帝 アルテミス': { f: 'rulers',  dx:  -90, dy:    0 },
+  '焔帝 ヒノオウ':   { f: 'rulers',  dx:   90, dy:    0 },
   // 白焔教会
-  'イザベル':        { f: 'church',  dx:    0, dy:  -50 },
-  'セラフィ':        { f: 'church',  dx:  -85, dy:   50 },
-  'メイリ':          { f: 'church',  dx:    0, dy:   80 },
-  '詠聖 ベル':       { f: 'church',  dx:   85, dy:   50 },
+  'イザベル':        { f: 'church',  dx:    0, dy:  -60 },
+  'セラフィ':        { f: 'church',  dx: -100, dy:   60 },
+  'メイリ':          { f: 'church',  dx:    0, dy:  100 },
+  '詠聖 ベル':       { f: 'church',  dx:  100, dy:   60 },
   // 紫竜王国
-  '竜爵 ヴィル':     { f: 'dragon',  dx:  -50, dy:    0 },
-  'リリム':          { f: 'dragon',  dx:   50, dy:   60 },
+  '竜爵 ヴィル':     { f: 'dragon',  dx:  -60, dy:    0 },
+  'リリム':          { f: 'dragon',  dx:   60, dy:   80 },
   // 紅翼皇家
-  'ひなた':          { f: 'redwing', dx:    0, dy:  -60 },
-  '紅翼 ツキ':       { f: 'redwing', dx:  -90, dy:   30 },
-  '薫音':            { f: 'redwing', dx:   90, dy:   30 },
-  '黒刃 玄':         { f: 'redwing', dx:    0, dy:  100 },
+  'ひなた':          { f: 'redwing', dx:    0, dy:  -70 },
+  '紅翼 ツキ':       { f: 'redwing', dx: -110, dy:   40 },
+  '薫音':            { f: 'redwing', dx:  110, dy:   40 },
+  '黒刃 玄':         { f: 'redwing', dx:    0, dy:  120 },
   // 夜焔郷
-  '朱音':            { f: 'yakai',   dx:    0, dy:  -50 },
-  '影刃 シン':       { f: 'yakai',   dx:  -75, dy:   60 },
-  'こはね':          { f: 'yakai',   dx:   75, dy:   60 },
+  '朱音':            { f: 'yakai',   dx:    0, dy:  -60 },
+  '影刃 シン':       { f: 'yakai',   dx:  -90, dy:   80 },
+  'こはね':          { f: 'yakai',   dx:   90, dy:   80 },
   // 月牙狼族
   '獣牙 ガルド':     { f: 'wolf',    dx:    0, dy:    0 },
   // 深緑樹海
-  '森の射手 リナエ': { f: 'forest',  dx:  -55, dy:    0 },
-  'ヴィオラ':        { f: 'forest',  dx:   55, dy:   60 },
+  '森の射手 リナエ': { f: 'forest',  dx:  -70, dy:    0 },
+  'ヴィオラ':        { f: 'forest',  dx:   70, dy:   70 },
   // 銀霜王国
-  '仮面騎士 シオン': { f: 'silver',  dx:  -55, dy:    0 },
-  'ルミナ':          { f: 'silver',  dx:   55, dy:   60 },
+  '仮面騎士 シオン': { f: 'silver',  dx:  -70, dy:    0 },
+  'ルミナ':          { f: 'silver',  dx:   70, dy:   70 },
   // 黒曜塔
   '黒猫 ノア':       { f: 'tower',   dx:    0, dy:    0 },
   // 第七天
   '焔舞 ヒナカ':     { f: 'seventh', dx:    0, dy:    0 },
   // 星霊学院
-  'ちさと':          { f: 'academy', dx:  -90, dy:  -40 },
-  'カイ':            { f: 'academy', dx:    0, dy:  -60 },
-  'こはね_acad':     { f: 'academy', dx:   90, dy:  -40 }, // こはね は 夜焔/影衆 として配置 (重複なし)
-  'アルス':          { f: 'academy', dx:  -55, dy:   45 },
-  'ミレイア':        { f: 'academy', dx:   55, dy:   45 },
+  'ちさと':          { f: 'academy', dx: -100, dy:  -50 },
+  'カイ':            { f: 'academy', dx:    0, dy:  -75 },
+  'アルス':          { f: 'academy', dx:  -65, dy:   60 },
+  'ミレイア':        { f: 'academy', dx:   75, dy:   60 },
 };
-// 注: こはね は 夜焔郷 配置で、星霊学院との関連は線で表現
+// 注: こはね は 夜焔郷 配置 (1か所のみ)。星霊学院との関連は線で表現
 
 // 関係性データ
 // type: fellow(戦友,双方向) / master(a=師→b=弟子) / blood(血縁,双方向) / childhood(幼馴染,双方向)
@@ -1946,6 +1945,13 @@ const RELATIONS = [
   { a: '黒刃 玄',         b: 'ミレイア',          type: 'master', aRole: '師(非公式)', bRole: '弟子' },
   { a: 'アルス',          b: '黒猫 ノア',         type: 'admire', aRole: '崇拝', bRole: '憧れの人' },
   { a: 'カイ',            b: '森の射手 リナエ',   type: 'admire', aRole: '目標', bRole: '憧れの人' },
+  // 学院四人組+α (代表線のみ、密度抑制)
+  { a: 'カイ',            b: 'アルス',            type: 'fellow', label: '四人組' },
+  { a: 'アルス',          b: 'ミレイア',          type: 'fellow', label: '四人組' },
+  // desc点検追加
+  { a: 'ルミナ',          b: 'イザベル',          type: 'fellow', label: '情報交換' },
+  { a: '詠聖 ベル',       b: 'メイリ',            type: 'fellow', label: '親友' },
+  { a: '影刃 シン',       b: '朱音',              type: 'fellow', label: '別組織協力' },
 ];
 
 const REL_STYLE = {
@@ -1969,7 +1975,7 @@ function getCharByName(name) {
 function openRelations() {
   const canvas = document.getElementById('relations-canvas');
   // SVG構築
-  const W = 1600, H = 1100;
+  const W = 2000, H = 1400;
   const svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
     <defs>${renderArrowMarkers()}</defs>
     ${renderFactionBg()}
@@ -2069,15 +2075,15 @@ function getCharPos(name) {
 
 function renderFactionBg() {
   return FACTIONS.map(f => {
-    // 派閥領域を半透明の背景円で示す
-    const r = 150;
-    return `<circle cx="${f.x}" cy="${f.y + 30}" r="${r}" fill="${f.color}" fill-opacity="0.06" stroke="${f.color}" stroke-opacity="0.25" stroke-width="1.5" stroke-dasharray="4,4"/>`;
+    // 派閥領域を半透明の背景円で示す (新スケールに合わせ半径175)
+    const r = 175;
+    return `<circle cx="${f.x}" cy="${f.y + 40}" r="${r}" fill="${f.color}" fill-opacity="0.06" stroke="${f.color}" stroke-opacity="0.25" stroke-width="1.5" stroke-dasharray="4,4"/>`;
   }).join('');
 }
 
 function renderFactionLabels() {
   return FACTIONS.map(f => {
-    return `<text x="${f.x}" y="${f.y - 95}" text-anchor="middle" fill="${f.color}" font-size="20" font-weight="700" letter-spacing="2" style="text-shadow: 0 0 8px rgba(0,0,0,0.8)">${f.label}</text>`;
+    return `<text x="${f.x}" y="${f.y - 115}" text-anchor="middle" fill="${f.color}" font-size="22" font-weight="700" letter-spacing="2" style="text-shadow: 0 0 8px rgba(0,0,0,0.8)">${f.label}</text>`;
   }).join('');
 }
 
@@ -2111,23 +2117,26 @@ function renderRelationLines() {
     const marker = style.directed ? `marker-end="url(#arrow-${r.type})"` : '';
     lines.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${style.color}" stroke-opacity="0.65" stroke-width="${style.w}" ${dash} ${marker}/>`);
 
-    // ラベル: 方向性 (aRole/bRole) なら各端寄り、双方向 (label) なら中央
-    // 短い線では中央に寄せ、長い線では端寄りに置く (アイコン被り対策)
-    const lineLen = Math.hypot(pb.x - pa.x, pb.y - pa.y);
-    // ノード半径(~36)+余白(~14) = 50px 以内には置かない
-    // ラベル端位置: pa から margin*lineLen の所、最低 t = 50/lineLen
-    const minMargin = Math.min(0.45, Math.max(0.30, 60 / lineLen));
+    // ラベル位置: 線分上の補間 + 線に対して垂直方向に小オフセット (アイコン被り回避)
+    const dxL = pb.x - pa.x, dyL = pb.y - pa.y;
+    const lineLen = Math.hypot(dxL, dyL) || 1;
+    // 垂直単位ベクトル (±90度回転)
+    const px = -dyL / lineLen, py = dxL / lineLen;
+    const perpOffset = 14; // 線から ±14px 浮かす
+    const minMargin = Math.min(0.45, Math.max(0.30, 70 / lineLen));
     if (r.aRole || r.bRole) {
-      const tA = minMargin;
-      const tB = 1 - minMargin;
-      const dx = pb.x - pa.x, dy = pb.y - pa.y;
-      const ax = pa.x + dx * tA, ay = pa.y + dy * tA;
-      const bx = pa.x + dx * tB, by = pa.y + dy * tB;
+      const tA = minMargin, tB = 1 - minMargin;
+      let ax = pa.x + dxL * tA, ay = pa.y + dyL * tA;
+      let bx = pa.x + dxL * tB, by = pa.y + dyL * tB;
+      // 垂直オフセット (線の上側に寄せる)
+      ax += px * perpOffset; ay += py * perpOffset;
+      bx += px * perpOffset; by += py * perpOffset;
       if (r.aRole) lines.push(relLabel(ax, ay, r.aRole, style.color));
       if (r.bRole) lines.push(relLabel(bx, by, r.bRole, style.color));
     } else if (r.label) {
-      const mx = (pa.x + pb.x) / 2;
-      const my = (pa.y + pb.y) / 2;
+      let mx = (pa.x + pb.x) / 2;
+      let my = (pa.y + pb.y) / 2;
+      mx += px * perpOffset; my += py * perpOffset;
       lines.push(relLabel(mx, my, r.label, style.color));
     }
   }

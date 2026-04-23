@@ -1730,10 +1730,11 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   padding: 20px;
   cursor: grab;
   user-select: none;
+  -webkit-overflow-scrolling: touch;
 }
 .relations-canvas:active { cursor: grabbing; }
 .relations-canvas svg {
-  width: 1600px; height: 1100px;
+  width: 2000px; height: 1400px;
   flex-shrink: 0;
   pointer-events: auto;
 }
@@ -1745,9 +1746,32 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 }
 
 @media (max-width: 720px) {
-  .relations-header { padding: 10px 14px; gap: 8px; flex-direction: column; align-items: stretch; }
-  .relations-header h2 { font-size: 18px; }
-  .relations-legend { justify-content: center; gap: 8px; font-size: 11px; }
+  .relations-header { padding: 8px 10px; gap: 6px; flex-direction: column; align-items: stretch; }
+  .relations-header h2 { font-size: 16px; margin: 0; text-align: center; }
+  .relations-legend { justify-content: center; gap: 6px; font-size: 10px; }
+  .relations-legend .leg-line { width: 18px; height: 2px; margin-right: 2px; }
+  .relations-header .close { font-size: 11px; padding: 6px 10px; align-self: center; }
+}
+/* 関連キャラパネルのモバイル調整 */
+@media (max-width: 720px) {
+  .char-detail-relations { margin-top: 10px; padding-top: 10px; }
+  .char-detail-relations .rel-list { gap: 6px; }
+  .char-detail-relations .rel-item { padding: 4px 8px 4px 4px; gap: 6px; }
+  .char-detail-relations .rel-thumb { width: 30px; height: 30px; }
+  .char-detail-relations .rel-role { font-size: 9px; }
+  .char-detail-relations .rel-name { font-size: 11px; }
+}
+/* 結果画面アクションボタンのモバイル */
+@media (max-width: 600px) {
+  .result-actions { flex-direction: column; gap: 8px; margin-top: 12px; }
+  .result-btn { width: 100%; padding: 12px 20px; font-size: 14px; }
+}
+/* 画像ズームコントロールのモバイル */
+@media (max-width: 600px) {
+  .char-img-zoom-controls { bottom: 16px; padding: 6px 10px; gap: 6px; }
+  .char-img-zoom-controls button { width: 32px; height: 32px; font-size: 16px; }
+  #char-img-zoom-level { font-size: 12px; min-width: 32px; }
+  .char-img-zoom-hint { top: 12px; font-size: 10px; padding: 4px 10px; }
 }
 
 /* 画像拡大オーバーレイ */
