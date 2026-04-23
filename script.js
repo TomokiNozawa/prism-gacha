@@ -1063,12 +1063,13 @@ const ORB_COLOR = { R: "#6fa8ff", SR: "#c87dff", SSR: "#ffd96a", UR: "#ff5faa", 
 async function summonTypeZ(result, tier) {
   setStageTier(tier);
   showPillar(tier);
-  particleBurst(TIER_COLORS[tier], {
-    n: tier === "SR" ? 35 : 18,
-    speed: tier === "SR" ? 8 : 6,
-  });
-  if (tier === "SR") flash("soft");
-  await sleep(320);
+  // SSR は軽量演出枠としても使うので粒子&flashを少し強めに
+  const n = tier === "SSR" ? 60 : tier === "SR" ? 35 : 18;
+  const speed = tier === "SSR" ? 10 : tier === "SR" ? 8 : 6;
+  particleBurst(TIER_COLORS[tier], { n, speed });
+  if (tier === "SSR") flash("mid");
+  else if (tier === "SR") flash("soft");
+  await sleep(tier === "SSR" ? 420 : 320);
 }
 
 // Type A: オーブ昇格 (シンプル・テンポ良)
@@ -1224,12 +1225,12 @@ function pickSummonType(tier, opts) {
   // R/SR (通常時) は脳汁演出なし、直接登場タイプ
   if (tier === "R") return "Z";
   if (tier === "SR") return "Z";
-  // SSR: 6種ランダム (forceSlow=Cの強制解除、毎回違う演出を出す)
-  if (tier === "SSR") return pickWeighted({ A: 1, B: 1, C: 1, D: 2, E: 2, F: 2 });
-  // UR: 全6種 (A/F 追加、forceSlow=C 解除)
-  if (tier === "UR") return pickWeighted({ A: 1, B: 2, C: 2, D: 2, E: 3, F: 1 });
-  // LR: 全6種から重み付き (常にCをやめてバリエーション化、Cはやや重め)
-  if (tier === "LR") return pickWeighted({ A: 1, B: 2, C: 3, D: 2, E: 2, F: 1 });
+  // SSR: 軽量寄りミックス。E(金portal) と Z(柱+粒子) は SSR 専用。F はレア度高すぎるため除外
+  if (tier === "SSR") return pickWeighted({ A: 2, B: 1, C: 1, D: 2, E: 2, Z: 2 });
+  // UR: E/Z (SSR専用) を除外
+  if (tier === "UR") return pickWeighted({ A: 1, B: 2, C: 2, D: 2, F: 1 });
+  // LR: E/Z (SSR専用) を除外
+  if (tier === "LR") return pickWeighted({ A: 1, B: 2, C: 3, D: 2, F: 1 });
   return "Z";
 }
 
@@ -1258,7 +1259,7 @@ async function summonOne(result, opts = {}) {
     const type = pickSummonType(tier, opts);
     console.log(`[Summon] tier=${tier} type=${type} ladder=on`);
     showSummonTypeBadge(type);
-    const fn = { A: summonTypeA, B: summonTypeB, C: summonTypeC, D: summonTypeD, E: summonTypeE, F: summonTypeF }[type] || summonTypeA;
+    const fn = { A: summonTypeA, B: summonTypeB, C: summonTypeC, D: summonTypeD, E: summonTypeE, F: summonTypeF, Z: summonTypeZ }[type] || summonTypeA;
     await fn(result, tier);
     if (checkSkip()) return finalize(result);
     // LR確定なら昇格後に画面を砕く(超レア感の決定打)
