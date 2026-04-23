@@ -102,8 +102,11 @@
 <div id="char-detail" class="char-detail">
   <div class="char-detail-inner">
     <button class="close-detail" onclick="closeCharDetail()">×</button>
-    <div class="char-detail-img-wrap">
+    <button class="char-detail-nav prev" onclick="navCharDetail(-1)" aria-label="前">‹</button>
+    <button class="char-detail-nav next" onclick="navCharDetail(1)" aria-label="次">›</button>
+    <div class="char-detail-img-wrap" onclick="toggleCharImgZoom()">
       <img id="char-detail-img" src="" alt="">
+      <div class="char-detail-zoom-hint">タップで拡大</div>
     </div>
     <div class="char-detail-info">
       <div class="char-detail-tier" id="char-detail-tier"></div>
@@ -111,8 +114,14 @@
       <div class="char-detail-title" id="char-detail-title"></div>
       <div class="char-detail-caption" id="char-detail-caption"></div>
       <div class="char-detail-desc" id="char-detail-desc"></div>
+      <div class="char-detail-counter" id="char-detail-counter"></div>
     </div>
   </div>
+</div>
+
+<!-- Image Zoom Overlay -->
+<div id="char-img-zoom" class="char-img-zoom" onclick="toggleCharImgZoom()">
+  <img id="char-img-zoom-img" src="" alt="">
 </div>
 
 <audio id="se-summon" preload="auto"></audio>

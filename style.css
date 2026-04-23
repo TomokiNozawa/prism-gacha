@@ -559,7 +559,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   pointer-events: none;
 }
 .fx-quote.show {
-  animation: quote-in 0.7s cubic-bezier(.2,.7,.3,1) forwards, quote-fade 0.6s ease-in 2.4s forwards;
+  animation: quote-in 0.7s cubic-bezier(.2,.7,.3,1) forwards, quote-fade 0.7s ease-in 3.2s forwards;
 }
 @keyframes quote-in {
   0%   { opacity: 0; transform: translate(-50%, -40%); letter-spacing: 0.5em; filter: blur(10px); }
@@ -1573,11 +1573,66 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 }
 .close-detail:hover { background: rgba(255,255,255,0.15); }
 
+/* prev/next ナビ */
+.char-detail-nav {
+  position: absolute;
+  top: 50%; transform: translateY(-50%);
+  width: 52px; height: 52px;
+  background: rgba(0,0,0,0.55);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff; cursor: pointer;
+  border-radius: 50%; font-size: 32px; line-height: 1;
+  font-family: inherit;
+  z-index: 3;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0; padding-bottom: 4px;
+  transition: background 0.15s, transform 0.15s;
+}
+.char-detail-nav.prev { left: 14px; }
+.char-detail-nav.next { right: 14px; }
+.char-detail-nav:hover { background: rgba(255,255,255,0.18); transform: translateY(-50%) scale(1.08); }
+
+/* ズーム用ヒント */
+.char-detail-img-wrap { position: relative; cursor: zoom-in; }
+.char-detail-zoom-hint {
+  position: absolute; bottom: 8px; right: 8px;
+  font-size: 11px; color: rgba(255,255,255,0.7);
+  background: rgba(0,0,0,0.5); padding: 4px 10px;
+  border-radius: 4px; pointer-events: none;
+  letter-spacing: 0.1em;
+}
+
+/* カウンタ表示 */
+.char-detail-counter {
+  font-size: 12px; color: var(--muted);
+  text-align: right; letter-spacing: 0.15em;
+  margin-top: auto; padding-top: 6px;
+}
+
+/* 画像拡大オーバーレイ */
+.char-img-zoom {
+  position: fixed; inset: 0; z-index: 250;
+  background: rgba(0,0,0,0.96);
+  display: none;
+  align-items: center; justify-content: center;
+  cursor: zoom-out;
+  padding: 20px;
+}
+.char-img-zoom.active { display: flex; }
+.char-img-zoom img {
+  max-width: 96vw; max-height: 96vh;
+  object-fit: contain;
+  filter: drop-shadow(0 0 60px rgba(255,255,255,0.4));
+}
+
 /* responsive */
 @media (max-width: 720px) {
   .char-detail-inner { grid-template-columns: 1fr; padding: 16px; gap: 16px; overflow-y: auto; }
   .char-detail-img-wrap img { max-height: 45vh; }
   .char-detail-name { font-size: 22px; }
+  .char-detail-nav { width: 42px; height: 42px; font-size: 26px; }
+  .char-detail-nav.prev { left: 6px; }
+  .char-detail-nav.next { right: 6px; }
 }
 
 @media (max-width: 640px) {

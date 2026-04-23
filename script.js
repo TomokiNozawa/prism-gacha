@@ -599,13 +599,13 @@ function showSummonTypeBadge(letter) {
   setTimeout(() => b.remove(), 2500);
 }
 
-// キャラセリフをシネマティック表示 (Type B 用)
+// キャラセリフをシネマティック表示 (UR/LR共通)
 function showQuote(text) {
   const q = document.createElement("div");
   q.className = "fx-quote show";
   q.textContent = `「${text}」`;
   stageVfx.appendChild(q);
-  setTimeout(() => q.remove(), 3000);
+  setTimeout(() => q.remove(), 4200); // CSS quote-fade(3.2s開始+0.7s) + 余裕
   return q;
 }
 
@@ -1127,10 +1127,10 @@ async function summonTypeB(result, tier) {
     : "貴方に、見えるだろうか";
   const quote = (result && result.caption) ? result.caption : fallback;
   showQuote(quote);
-  await sleep(2400); // セリフをじっくり読ませる
+  await sleep(3000); // セリフをじっくり読ませる
   if (checkSkip()) { orbBurst(orb); return; }
   // セリフ後の静寂 (破壊直前の溜め)
-  await sleep(450);
+  await sleep(550);
   if (checkSkip()) { orbBurst(orb); return; }
   // 破壊
   play("se-crack");
@@ -1300,6 +1300,12 @@ async function summonOne(result, opts = {}) {
     const fn = { A: summonTypeA, B: summonTypeB, C: summonTypeC, D: summonTypeD, E: summonTypeE, F: summonTypeF, Z: summonTypeZ }[type] || summonTypeA;
     await fn(result, tier);
     if (checkSkip()) return finalize(result);
+    // UR/LR は B 以外でもキャラセリフを表示 (Bは内部で表示済み)
+    if ((tier === "UR" || tier === "LR") && type !== "B" && result && result.caption) {
+      showQuote(result.caption);
+      await sleep(2800); // セリフをじっくり読ませる
+      if (checkSkip()) return finalize(result);
+    }
     // LR確定なら昇格後に画面を砕く(超レア感の決定打)
     if (tier === "LR") {
       await showLegendShatter();
@@ -1653,12 +1659,18 @@ function isNewUnlocked(c) {
   return !state.galleryViewed[galleryKey(c)];
 }
 
+// 詳細画面ナビ用: 解放済みキャラの順序リストと現在index
+let detailUnlockedList = [];
+let detailIdx = 0;
+
 function openGallery() {
   const grid = $("#gallery-grid");
   grid.innerHTML = "";
   const all = getAllCharactersWithTier();
   const unlockedByTier = { LR: 0, UR: 0, SSR: 0, SR: 0, R: 0 };
   const totalByTier = { LR: POOL.LR.length, UR: POOL.UR.length, SSR: POOL.SSR.length, SR: POOL.SR.length, R: POOL.R.length };
+  // 解放済みキャラのみ詳細ナビ対象 (グリッド表示順と同じ)
+  detailUnlockedList = all.filter(c => isUnlocked(c));
   for (const c of all) {
     const unlocked = isUnlocked(c);
     if (unlocked) unlockedByTier[c.tier]++;
@@ -1703,8 +1715,21 @@ function closeGallery() {
 }
 
 function showCharDetail(c) {
+  // 詳細リスト未構築の場合 (履歴等から呼ばれた時) は解放済み全件で構築
+  if (detailUnlockedList.length === 0) {
+    detailUnlockedList = getAllCharactersWithTier().filter(x => isUnlocked(x));
+  }
+  // 渡されたキャラのindexを特定
+  const idx = detailUnlockedList.findIndex(x => galleryKey(x) === galleryKey(c));
+  detailIdx = idx >= 0 ? idx : 0;
+  renderCharDetail(c);
+  $("#char-detail").classList.add("active");
+}
+
+function renderCharDetail(c) {
   $("#char-detail-img").src = c.img;
   $("#char-detail-img").alt = c.name;
+  $("#char-img-zoom-img").src = c.img; // 拡大用も同期
   const tierEl = $("#char-detail-tier");
   tierEl.textContent = c.tier;
   tierEl.className = "char-detail-tier " + c.tier.toLowerCase();
@@ -1716,14 +1741,32 @@ function showCharDetail(c) {
   $("#char-detail-caption").style.display = cap ? "" : "none";
   const desc = c.desc || "（ストーリーはまだ記されていない…）";
   $("#char-detail-desc").textContent = desc;
-  $("#char-detail").classList.add("active");
+  // ナビゲーションカウンタと無効化
+  if (detailUnlockedList.length > 0) {
+    $("#char-detail-counter").textContent = `${detailIdx + 1} / ${detailUnlockedList.length}`;
+  } else {
+    $("#char-detail-counter").textContent = "";
+  }
+  // 詳細画面を開いたら拡大は解除
+  $("#char-img-zoom").classList.remove("active");
   // 閲覧マーク(NEWを消す)
   state.galleryViewed[galleryKey(c)] = true;
   saveState();
 }
 
+function navCharDetail(delta) {
+  if (detailUnlockedList.length === 0) return;
+  detailIdx = (detailIdx + delta + detailUnlockedList.length) % detailUnlockedList.length;
+  renderCharDetail(detailUnlockedList[detailIdx]);
+}
+
+function toggleCharImgZoom() {
+  $("#char-img-zoom").classList.toggle("active");
+}
+
 function closeCharDetail() {
   $("#char-detail").classList.remove("active");
+  $("#char-img-zoom").classList.remove("active");
 }
 
 // ────────────── Bindings ──────────────
@@ -1745,7 +1788,18 @@ document.addEventListener("keydown", e => {
   if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
   // キャラ詳細 > 図鑑 > 結果 > ステージ の優先順で Esc処理
   if ($("#char-detail").classList.contains("active")) {
-    if (e.key === "Escape") { e.preventDefault(); closeCharDetail(); }
+    if (e.key === "Escape") {
+      // 拡大中なら拡大だけ閉じる、そうでなければ詳細閉じる
+      if ($("#char-img-zoom").classList.contains("active")) {
+        e.preventDefault(); $("#char-img-zoom").classList.remove("active");
+      } else {
+        e.preventDefault(); closeCharDetail();
+      }
+    } else if (e.key === "ArrowLeft") {
+      e.preventDefault(); navCharDetail(-1);
+    } else if (e.key === "ArrowRight") {
+      e.preventDefault(); navCharDetail(1);
+    }
     return;
   }
   if ($("#gallery").classList.contains("active")) {
