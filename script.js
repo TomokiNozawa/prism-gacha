@@ -1754,17 +1754,72 @@ function renderCharDetail(c) {
   $("#char-detail-caption").style.display = cap ? "" : "none";
   const desc = c.desc || "（ストーリーはまだ記されていない…）";
   $("#char-detail-desc").textContent = desc;
-  // ナビゲーションカウンタと無効化
+  // ナビゲーションカウンタ
   if (detailUnlockedList.length > 0) {
     $("#char-detail-counter").textContent = `${detailIdx + 1} / ${detailUnlockedList.length}`;
   } else {
     $("#char-detail-counter").textContent = "";
   }
+  // 関連キャラ表示
+  renderCharRelations(c);
   // 詳細画面を開いたら拡大は解除
   $("#char-img-zoom").classList.remove("active");
   // 閲覧マーク(NEWを消す)
   state.galleryViewed[galleryKey(c)] = true;
   saveState();
+}
+
+function renderCharRelations(c) {
+  const container = $("#char-detail-relations");
+  const related = []; // { other, otherRole, color, relType }
+  for (const r of RELATIONS) {
+    let other = null, otherRole = '';
+    if (r.a === c.name) {
+      other = r.b;
+      // 相手(b)の役割 → directionalならbRole、双方向ならlabel
+      otherRole = r.bRole || r.label || '';
+    } else if (r.b === c.name) {
+      other = r.a;
+      otherRole = r.aRole || r.label || '';
+    } else continue;
+    const otherChar = getCharByName(other);
+    if (!otherChar) continue;
+    const style = REL_STYLE[r.type] || REL_STYLE.fellow;
+    related.push({ otherChar, otherRole, color: style.color, type: r.type });
+  }
+  if (related.length === 0) {
+    container.innerHTML = '';
+    container.style.display = 'none';
+    return;
+  }
+  container.style.display = '';
+  container.innerHTML = `
+    <div class="rel-head">関連するキャラ</div>
+    <div class="rel-list">
+      ${related.map(rel => {
+        const unlocked = isUnlocked(rel.otherChar);
+        const img = unlocked ? rel.otherChar.img : '';
+        const name = unlocked ? rel.otherChar.name : '???';
+        const clickable = unlocked ? 'clickable' : 'locked';
+        return `<div class="rel-item ${clickable}" data-name="${rel.otherChar.name}">
+          <div class="rel-thumb ${rel.otherChar.tier.toLowerCase()}" ${img ? `style="background-image:url('${img}')"` : ''}>
+            ${!unlocked ? '<span>?</span>' : ''}
+          </div>
+          <div class="rel-info">
+            <div class="rel-role" style="color:${rel.color}">${rel.otherRole}</div>
+            <div class="rel-name">${name}</div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+  container.querySelectorAll('.rel-item.clickable').forEach(el => {
+    el.addEventListener('click', () => {
+      const name = el.dataset.name;
+      const c = getCharByName(name);
+      if (c && isUnlocked(c)) showCharDetail(c);
+    });
+  });
 }
 
 function navCharDetail(delta) {
@@ -2247,6 +2302,11 @@ $("#btn-reset").addEventListener("click", () => {
   saveState(); updateHUD();
 });
 $("#result-close").addEventListener("click", closeResult);
+$("#result-again-ten").addEventListener("click", () => {
+  closeResult();
+  // アニメ遷移の直後にdoTen呼出 (closeResult内で busy もクリア前提)
+  setTimeout(() => doTen(), 100);
+});
 $("#result").addEventListener("click", e => { if (e.target.id === "result") closeResult(); });
 $("#btn-gallery").addEventListener("click", openGallery);
 $("#btn-relations").addEventListener("click", openRelations);
@@ -2309,6 +2369,10 @@ document.addEventListener("keydown", e => {
   if ($("#result").classList.contains("active")) {
     if (Date.now() - resultOpenedAt < RESULT_KEY_GUARD_MS) return;
     if (e.key === "Enter" || e.key === "Escape") { e.preventDefault(); closeResult(); }
+    else if (e.key === "r" || e.key === "R") {
+      e.preventDefault(); closeResult();
+      setTimeout(() => doTen(), 100);
+    }
     return;
   }
   if (busy) return;
