@@ -1209,10 +1209,15 @@ async function summonTypeD(result, tier) {
   showRing();
   await sleep(1000);
   if (checkSkip()) return;
-  // ため (静寂と画面震え) — カード出現直前の溜め
+  // ため (静寂と画面震え) — セリフを同時表示して脳汁ピーク前の溜めとする
   stage.classList.add("charge-up");
   play("se-summon");
-  await sleep(1100);
+  if (result && result.caption) {
+    showQuote(result.caption);
+    await sleep(2800); // セリフをじっくり読ませる (charge-up と同時進行)
+  } else {
+    await sleep(1100);
+  }
   stage.classList.remove("charge-up");
   if (checkSkip()) return;
   // 中央衝突 (爆発)
@@ -1250,10 +1255,15 @@ async function summonTypeF(result, tier) {
   const bars = showCutin(c1, c2 || c1);
   await sleep(900); // バーが画面中央でホールド
   if (checkSkip()) { cutinExit(bars); return; }
-  // ため (バーが交差した状態で静寂、charge-up)
+  // ため (バーが交差した状態で静寂、charge-up) — UR/LR ならセリフ同期
   stage.classList.add("charge-up");
   play("se-summon");
-  await sleep(800);
+  if ((tier === "UR" || tier === "LR") && result && result.caption) {
+    showQuote(result.caption);
+    await sleep(2800);
+  } else {
+    await sleep(800);
+  }
   stage.classList.remove("charge-up");
   if (checkSkip()) { cutinExit(bars); return; }
   // 衝突 flash + shake (大)
@@ -1324,12 +1334,7 @@ async function summonOne(result, opts = {}) {
     const fn = { A: summonTypeA, B: summonTypeB, C: summonTypeC, D: summonTypeD, E: summonTypeE, F: summonTypeF, Z: summonTypeZ }[type] || summonTypeA;
     await fn(result, tier);
     if (checkSkip()) return finalize(result);
-    // UR/LR は B 以外でもキャラセリフを表示 (Bは内部で表示済み)
-    if ((tier === "UR" || tier === "LR") && type !== "B" && result && result.caption) {
-      showQuote(result.caption);
-      await sleep(2800); // セリフをじっくり読ませる
-      if (checkSkip()) return finalize(result);
-    }
+    // UR/LR のセリフは各 summonType の charge-up タイミングで表示済み (B/D/F)
     // LR確定なら昇格後に画面を砕く(超レア感の決定打)
     if (tier === "LR") {
       await showLegendShatter();
@@ -2023,6 +2028,7 @@ function renderCharNodes() {
 
 // ───── 画像拡大 (ズーム/パン対応) ─────
 let zoomScale = 1, zoomTx = 0, zoomTy = 0;
+let zoomMouseDown = false;
 let zoomDragging = false, zoomStartX = 0, zoomStartY = 0, zoomBaseTx = 0, zoomBaseTy = 0;
 const ZOOM_LEVELS = [1, 1.5, 2.5, 4];
 
@@ -2084,10 +2090,13 @@ function onZoomImgClick(e) {
   applyZoomTransform();
 }
 
-// ドラッグで移動
+// ドラッグで移動 (mousedown/touchstart で初めて有効化)
 function onZoomDragStart(e) {
   if (zoomScale <= 1) return;
-  zoomDragging = false; // クリックとの判別: 移動量で判定
+  // 左クリックのみ反応 (右クリック等を弾く)
+  if (e.type === 'mousedown' && e.button !== 0) return;
+  zoomMouseDown = true;
+  zoomDragging = false;
   const isTouch = e.type === 'touchstart';
   const x = isTouch ? e.touches[0].clientX : e.clientX;
   const y = isTouch ? e.touches[0].clientY : e.clientY;
@@ -2096,6 +2105,7 @@ function onZoomDragStart(e) {
   $("#char-img-zoom-img").style.cursor = "grabbing";
 }
 function onZoomDragMove(e) {
+  if (!zoomMouseDown) return;       // ★ 押されてない時は無視
   if (zoomScale <= 1) return;
   const isTouch = e.type === 'touchmove';
   const x = isTouch ? e.touches[0].clientX : e.clientX;
@@ -2110,6 +2120,7 @@ function onZoomDragMove(e) {
   }
 }
 function onZoomDragEnd() {
+  zoomMouseDown = false;
   $("#char-img-zoom-img").style.cursor = zoomScale > 1 ? "grab" : "zoom-in";
   setTimeout(() => { zoomDragging = false; }, 30);
 }
