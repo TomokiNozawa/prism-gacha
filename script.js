@@ -1839,54 +1839,56 @@ const CHAR_FACTION = {
 // 関係性データ
 // type: fellow(戦友,双方向) / master(a=師→b=弟子) / blood(血縁,双方向) / childhood(幼馴染,双方向)
 //       / admire(a=憧れる人→b=憧れられる人) / rival(好敵手,双方向) / sister(a=姉→b=妹分)
+// 双方向: label を1つ (中央表示)
+// 方向あり: aRole/bRole を各端のキャラ寄りに表示
 const RELATIONS = [
   // 観測者三姉妹
   { a: 'セラフィエル',    b: '千夜姫 カグヤ',     type: 'fellow', label: '三姉妹' },
   { a: '千夜姫 カグヤ',   b: '星海のノクス',      type: 'fellow', label: '三姉妹' },
   { a: 'セラフィエル',    b: '星海のノクス',      type: 'fellow', label: '三姉妹' },
-  // プリズマ → セラフィエル (プリズマは分身と呼ぶ、master相当の上下関係)
-  { a: '虹意 プリズマ',   b: 'セラフィエル',      type: 'master', label: '我が羽と呼ぶ' },
+  // プリズマ → セラフィエル
+  { a: '虹意 プリズマ',   b: 'セラフィエル',      type: 'master', aRole: '主', bRole: '我が羽' },
   // 二大覇者
   { a: '龍帝 アルテミス', b: '焔帝 ヒノオウ',     type: 'fellow', label: '戦友' },
   // 白焔教会
-  { a: 'イザベル',        b: 'セラフィエル',      type: 'admire', label: '仰ぐ' },
-  { a: 'イザベル',        b: 'メイリ',            type: 'sister', label: '姉→妹' },
+  { a: 'イザベル',        b: 'セラフィエル',      type: 'admire', aRole: '仰ぐ', bRole: '我が神' },
+  { a: 'イザベル',        b: 'メイリ',            type: 'sister', aRole: '姉', bRole: '妹' },
   { a: 'セラフィ',        b: 'メイリ',            type: 'fellow', label: '同期' },
   { a: 'セラフィ',        b: '詠聖 ベル',         type: 'fellow', label: '相方' },
   // 紫竜
-  { a: '竜爵 ヴィル',     b: 'リリム',            type: 'master', label: '指導' },
+  { a: '竜爵 ヴィル',     b: 'リリム',            type: 'master', aRole: '師', bRole: '弟子' },
   { a: '竜爵 ヴィル',     b: 'リリム',            type: 'blood',  label: '従姉妹' },
   { a: '龍帝 アルテミス', b: '竜爵 ヴィル',       type: 'blood',  label: '遠縁' },
   { a: '龍帝 アルテミス', b: 'リリム',            type: 'blood',  label: '遠縁' },
   // 紅翼皇家
-  { a: '紅翼 ツキ',       b: 'ひなた',            type: 'sister', label: '姉→妹' },
-  { a: '薫音',            b: 'ひなた',            type: 'master', label: '剣師' },
-  { a: '薫音',            b: '紅翼 ツキ',         type: 'master', label: '剣師' },
+  { a: '紅翼 ツキ',       b: 'ひなた',            type: 'sister', aRole: '姉', bRole: '末妹' },
+  { a: '薫音',            b: 'ひなた',            type: 'master', aRole: '剣師', bRole: '弟子' },
+  { a: '薫音',            b: '紅翼 ツキ',         type: 'master', aRole: '剣師', bRole: '弟子' },
   { a: '黒刃 玄',         b: '薫音',              type: 'fellow', label: '兄弟子' },
-  { a: 'ひなた',          b: '龍帝 アルテミス',   type: 'admire', label: '慕う(一方的)' },
+  { a: 'ひなた',          b: '龍帝 アルテミス',   type: 'admire', aRole: '慕う', bRole: 'おにーさま' },
   // 夜焔郷
-  { a: '朱音',            b: 'こはね',            type: 'sister', label: '拾い妹' },
-  { a: '影刃 シン',       b: 'こはね',            type: 'master', label: '先輩' },
+  { a: '朱音',            b: 'こはね',            type: 'sister', aRole: '姉', bRole: '拾い妹' },
+  { a: '影刃 シン',       b: 'こはね',            type: 'master', aRole: '先輩', bRole: '後輩' },
   { a: '千夜姫 カグヤ',   b: '朱音',              type: 'blood',  label: '九尾' },
   // 月牙
   { a: '獣牙 ガルド',     b: '竜爵 ヴィル',       type: 'fellow', label: '戦友' },
   // 深緑
-  { a: '森の射手 リナエ', b: 'ヴィオラ',          type: 'master', label: '指導' },
+  { a: '森の射手 リナエ', b: 'ヴィオラ',          type: 'master', aRole: '師', bRole: '後輩' },
   { a: '森の射手 リナエ', b: '影刃 シン',         type: 'rival',  label: '好敵手' },
   // 銀霜
   { a: 'イザベル',        b: '仮面騎士 シオン',   type: 'childhood', label: '幼馴染' },
   // 黒曜塔
-  { a: '黒猫 ノア',       b: '星海のノクス',      type: 'admire', label: '憧れ(一方的)' },
-  { a: '黒猫 ノア',       b: 'こはね',            type: 'sister', label: '獣人姉妹' },
+  { a: '黒猫 ノア',       b: '星海のノクス',      type: 'admire', aRole: '憧れ', bRole: '師と仰ぐ' },
+  { a: '黒猫 ノア',       b: 'こはね',            type: 'sister', aRole: '姉分', bRole: '妹分' },
   // 第七天
-  { a: '焔帝 ヒノオウ',   b: '焔舞 ヒナカ',       type: 'master', label: '愛弟子' },
+  { a: '焔帝 ヒノオウ',   b: '焔舞 ヒナカ',       type: 'master', aRole: '師', bRole: '愛弟子' },
   { a: '朱音',            b: '焔舞 ヒナカ',       type: 'fellow', label: '焔姉妹' },
   // 星霊学院
-  { a: 'カイ',            b: 'ちさと',            type: 'admire', label: '想い(一方的)' },
+  { a: 'カイ',            b: 'ちさと',            type: 'admire', aRole: '想い', bRole: '想い人' },
   { a: 'ちさと',          b: 'ミレイア',          type: 'fellow', label: '同期' },
-  { a: '黒刃 玄',         b: 'ミレイア',          type: 'master', label: '非公式' },
-  { a: 'アルス',          b: '黒猫 ノア',         type: 'admire', label: '崇拝(一方的)' },
-  { a: 'カイ',            b: '森の射手 リナエ',   type: 'admire', label: '目標' },
+  { a: '黒刃 玄',         b: 'ミレイア',          type: 'master', aRole: '師(非公式)', bRole: '弟子' },
+  { a: 'アルス',          b: '黒猫 ノア',         type: 'admire', aRole: '崇拝', bRole: '憧れの人' },
+  { a: 'カイ',            b: '森の射手 リナエ',   type: 'admire', aRole: '目標', bRole: '憧れの人' },
 ];
 
 const REL_STYLE = {
@@ -2043,7 +2045,6 @@ function renderRelationLines() {
     // 方向性ありなら矢印マーカー、線分は円ノード手前で止める
     let x1 = pa.x, y1 = pa.y, x2 = pb.x, y2 = pb.y;
     if (style.directed) {
-      // 矢印が円に被らないよう b 端を 32px 手前で止める
       const dx = x2 - x1, dy = y2 - y1;
       const len = Math.hypot(dx, dy) || 1;
       const trim = 36;
@@ -2052,11 +2053,24 @@ function renderRelationLines() {
     }
     const marker = style.directed ? `marker-end="url(#arrow-${r.type})"` : '';
     lines.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${style.color}" stroke-opacity="0.65" stroke-width="${style.w}" ${dash} ${marker}/>`);
-    // ラベル (中央) — 方向性ありなら矢印付きで方向感を補強
-    const mx = (pa.x + pb.x) / 2;
-    const my = (pa.y + pb.y) / 2;
-    const arrow = style.directed ? ' →' : '';
-    lines.push(`<text x="${mx}" y="${my - 4}" text-anchor="middle" fill="${style.color}" font-size="11" font-weight="600" style="text-shadow: 0 0 4px rgba(0,0,0,0.9)">${r.label}${arrow}</text>`);
+
+    // ラベル: 方向性 (aRole/bRole) なら各端寄り、双方向 (label) なら中央
+    if (r.aRole || r.bRole) {
+      // 各端から線方向に向かって 30% の位置に配置
+      const dx = pb.x - pa.x, dy = pb.y - pa.y;
+      const ax = pa.x + dx * 0.30, ay = pa.y + dy * 0.30;
+      const bx = pa.x + dx * 0.70, by = pa.y + dy * 0.70;
+      if (r.aRole) {
+        lines.push(`<text x="${ax}" y="${ay - 4}" text-anchor="middle" fill="${style.color}" font-size="11" font-weight="600" style="text-shadow: 0 0 4px rgba(0,0,0,0.95)">${r.aRole}</text>`);
+      }
+      if (r.bRole) {
+        lines.push(`<text x="${bx}" y="${by - 4}" text-anchor="middle" fill="${style.color}" font-size="11" font-weight="600" style="text-shadow: 0 0 4px rgba(0,0,0,0.95)">${r.bRole}</text>`);
+      }
+    } else if (r.label) {
+      const mx = (pa.x + pb.x) / 2;
+      const my = (pa.y + pb.y) / 2;
+      lines.push(`<text x="${mx}" y="${my - 4}" text-anchor="middle" fill="${style.color}" font-size="11" font-weight="600" style="text-shadow: 0 0 4px rgba(0,0,0,0.9)">${r.label}</text>`);
+    }
   }
   return lines.join('');
 }
