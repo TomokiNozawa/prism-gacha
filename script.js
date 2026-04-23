@@ -1245,12 +1245,12 @@ function pickSummonType(tier, opts) {
   // R/SR (通常時) は脳汁演出なし、直接登場タイプ
   if (tier === "R") return "Z";
   if (tier === "SR") return "Z";
-  // SSR: 軽量寄りミックス。E(金portal)/Z(柱) は SSR 専用。B/D/F は UR/LR 専用
-  if (tier === "SSR") return pickWeighted({ A: 3, C: 1, E: 3, Z: 2 });
-  // UR: B(キャラセリフ)/D(流星)/F(カットイン) のフルセット
-  if (tier === "UR") return pickWeighted({ A: 1, B: 2, C: 2, D: 2, F: 1 });
+  // SSR: 軽量寄りミックス。E(金portal)/Z(柱) は SSR 専用。A/C も SSR 用
+  if (tier === "SSR") return pickWeighted({ A: 3, C: 2, E: 3, Z: 2 });
+  // UR: B(キャラセリフ)/D(ため流星)/F(カットイン) の3種ローテ
+  if (tier === "UR") return pickWeighted({ B: 2, D: 2, F: 1 });
   // LR: 同上
-  if (tier === "LR") return pickWeighted({ A: 1, B: 2, C: 3, D: 2, F: 1 });
+  if (tier === "LR") return pickWeighted({ B: 2, D: 2, F: 1 });
   return "Z";
 }
 
