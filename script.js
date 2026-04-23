@@ -2145,10 +2145,14 @@ function renderRelationLines() {
 
       if (r.aRole || r.bRole) {
         const tA = minMargin, tB = 1 - minMargin;
-        let ax = pa.x + dxL * tA + px * labelPerp;
-        let ay = pa.y + dyL * tA + py * labelPerp;
-        let bx = pa.x + dxL * tB + px * labelPerp;
-        let by = pa.y + dyL * tB + py * labelPerp;
+        // 方向性ラベルは矢印の両側に振り分け (a=片側, b=逆側)
+        // → 横線なら a=上/b=下、縦線なら a=右/b=左、被りを大幅に減らす
+        const aPerp = labelPerp;
+        const bPerp = -labelPerp;
+        let ax = pa.x + dxL * tA + px * aPerp;
+        let ay = pa.y + dyL * tA + py * aPerp;
+        let bx = pa.x + dxL * tB + px * bPerp;
+        let by = pa.y + dyL * tB + py * bPerp;
         if (r.aRole) lines.push(relLabel(ax, ay, r.aRole, style.color));
         if (r.bRole) lines.push(relLabel(bx, by, r.bRole, style.color));
       } else if (r.label) {
@@ -2700,12 +2704,30 @@ document.addEventListener("keydown", e => {
   }
   if ($("#story-modal").classList.contains("active")) {
     if (Date.now() - storyOpenedAt < STORY_KEY_GUARD_MS) return;
+    const scrollEl = $("#story-scroll");
     if (e.key === "Escape") { e.preventDefault(); closeStory(); }
-    else if (e.key === "Enter" || e.key === " " || e.key === "ArrowRight") {
+    else if (e.key === "Enter" || e.key === "ArrowRight") {
       e.preventDefault(); storyNext();
     }
     else if (e.key === "ArrowLeft") {
       e.preventDefault(); storyPrev();
+    }
+    else if (e.key === " " || e.key === "ArrowDown") {
+      // Space / ↓ で下スクロール (シーン送りではなく)
+      e.preventDefault();
+      if (scrollEl) scrollEl.scrollBy({ top: 120, behavior: 'smooth' });
+    }
+    else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (scrollEl) scrollEl.scrollBy({ top: -120, behavior: 'smooth' });
+    }
+    else if (e.key === "PageDown") {
+      e.preventDefault();
+      if (scrollEl) scrollEl.scrollBy({ top: scrollEl.clientHeight * 0.85, behavior: 'smooth' });
+    }
+    else if (e.key === "PageUp") {
+      e.preventDefault();
+      if (scrollEl) scrollEl.scrollBy({ top: -scrollEl.clientHeight * 0.85, behavior: 'smooth' });
     }
     return;
   }
