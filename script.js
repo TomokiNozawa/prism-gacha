@@ -1104,6 +1104,7 @@ async function summonTypeA(result, tier) {
 
 // Type B: フェイク破壊 (UR/LR専用) — キャラのセリフを表示
 async function summonTypeB(result, tier) {
+  await sleep(300); // 開始ため
   const ladder = ["R", "SR", "SSR", "UR", "LR"];
   const stopIdx = ladder.indexOf(tier);
   const fakeIdx = Math.max(1, stopIdx - 1);
@@ -1112,30 +1113,38 @@ async function summonTypeB(result, tier) {
     const t = ladder[i];
     orbTier(orb, t);
     setStageTier(t);
-    await sleep(420);
+    await sleep(520); // ladder 1段あたり長め
     if (checkSkip()) { orbBurst(orb); return; }
   }
+  // 偽位置で停滞 (脳汁ピーク前の静寂)
+  stage.classList.add("charge-up");
+  await sleep(600);
+  stage.classList.remove("charge-up");
+  if (checkSkip()) { orbBurst(orb); return; }
   // キャラのセリフ表示 (caption が無ければ汎用セリフ)
   const fallback = tier === "LR"
     ? "光は、まだ消えていない"
     : "貴方に、見えるだろうか";
   const quote = (result && result.caption) ? result.caption : fallback;
   showQuote(quote);
-  await sleep(1700);
+  await sleep(2400); // セリフをじっくり読ませる
+  if (checkSkip()) { orbBurst(orb); return; }
+  // セリフ後の静寂 (破壊直前の溜め)
+  await sleep(450);
   if (checkSkip()) { orbBurst(orb); return; }
   // 破壊
   play("se-crack");
   showCrack();
   stage.classList.add("shake");
   orb.remove();
-  await sleep(500);
+  await sleep(700);
   stage.classList.remove("shake");
   // 本tier爆発
   setStageTier(tier);
   showPillar(tier);
-  particleBurst(TIER_COLORS[tier], { n: 160, speed: 17 });
+  particleBurst(TIER_COLORS[tier], { n: 200, speed: 19 });
   flash(tier === "UR" ? "hard" : "mid");
-  await sleep(600);
+  await sleep(750);
 }
 
 // Type C: スロー溜め (オーブが各色で脈動)
@@ -1161,34 +1170,35 @@ async function summonTypeC(result, tier) {
 // Type D: 流星群 (UR/LR専用)
 async function summonTypeD(result, tier) {
   setStageTier("SR"); // 前半は抑えめ背景
+  await sleep(300); // 開始ため
   // 1wave目: ランダム流星3本 (前兆)
   showMeteors(3, TIER_COLORS[tier][0]);
-  await sleep(550);
+  await sleep(750);
   if (checkSkip()) return;
   // 2wave目: tier色で多め
   setStageTier(tier);
   showMeteors(tier === "LR" ? 14 : 12, TIER_COLORS[tier][0]);
-  await sleep(750);
+  await sleep(1000);
   if (checkSkip()) return;
   // 3wave目: 白い大流星 + リング (ため開始)
   showMeteors(tier === "LR" ? 22 : 18, "#ffffff");
   showRing();
-  await sleep(700);
+  await sleep(1000);
   if (checkSkip()) return;
   // ため (静寂と画面震え) — カード出現直前の溜め
   stage.classList.add("charge-up");
   play("se-summon");
-  await sleep(700);
+  await sleep(1100);
   stage.classList.remove("charge-up");
   if (checkSkip()) return;
   // 中央衝突 (爆発)
   showPillar(tier);
-  particleBurst(TIER_COLORS[tier], { n: 200, speed: 18 });
+  particleBurst(TIER_COLORS[tier], { n: 220, speed: 19 });
   flash(tier === "UR" ? "hard" : "mid");
   stage.classList.add("shake");
-  await sleep(500);
+  await sleep(550);
   stage.classList.remove("shake");
-  await sleep(350);
+  await sleep(450);
 }
 
 // Type E: ポータル開扉
@@ -1211,20 +1221,28 @@ async function summonTypeE(result, tier) {
 // Type F: カットイン
 async function summonTypeF(result, tier) {
   setStageTier(tier);
+  await sleep(350); // 開始ため
   const [c1, c2] = TIER_COLORS[tier];
   const bars = showCutin(c1, c2 || c1);
-  await sleep(520);
+  await sleep(900); // バーが画面中央でホールド
   if (checkSkip()) { cutinExit(bars); return; }
-  // 衝突 flash
+  // ため (バーが交差した状態で静寂、charge-up)
+  stage.classList.add("charge-up");
+  play("se-summon");
+  await sleep(800);
+  stage.classList.remove("charge-up");
+  if (checkSkip()) { cutinExit(bars); return; }
+  // 衝突 flash + shake (大)
   flash(tier === "UR" ? "hard" : "mid");
   stage.classList.add("shake");
-  await sleep(250);
+  await sleep(450);
   stage.classList.remove("shake");
   cutinExit(bars);
   // 本tier昇格
   showPillar(tier);
-  particleBurst(TIER_COLORS[tier], { n: 150, speed: 15 });
-  await sleep(500);
+  particleBurst(TIER_COLORS[tier], { n: 200, speed: 17 });
+  flash(tier === "UR" ? "hard" : "mid");
+  await sleep(700);
 }
 
 // ────────────── Router ──────────────
