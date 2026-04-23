@@ -1149,26 +1149,37 @@ async function summonTypeC(result, tier) {
   await sleep(650);
 }
 
-// Type D: 流星群
+// Type D: 流星群 (UR/LR専用)
 async function summonTypeD(result, tier) {
-  setStageTier(tier === "UR" ? "SR" : "R"); // 前半は抑えめ背景
-  // 1wave目: ランダム流星3本
+  setStageTier("SR"); // 前半は抑えめ背景
+  // 1wave目: ランダム流星3本 (前兆)
   showMeteors(3, TIER_COLORS[tier][0]);
-  await sleep(500);
+  await sleep(550);
   if (checkSkip()) return;
   // 2wave目: tier色で多め
   setStageTier(tier);
-  showMeteors(tier === "UR" ? 12 : tier === "SSR" ? 8 : 5, TIER_COLORS[tier][0]);
-  await sleep(650);
+  showMeteors(tier === "LR" ? 14 : 12, TIER_COLORS[tier][0]);
+  await sleep(750);
   if (checkSkip()) return;
-  // 中央衝突
+  // 3wave目: 白い大流星 + リング (ため開始)
+  showMeteors(tier === "LR" ? 22 : 18, "#ffffff");
+  showRing();
+  await sleep(700);
+  if (checkSkip()) return;
+  // ため (静寂と画面震え) — カード出現直前の溜め
+  stage.classList.add("charge-up");
+  play("se-summon");
+  await sleep(700);
+  stage.classList.remove("charge-up");
+  if (checkSkip()) return;
+  // 中央衝突 (爆発)
   showPillar(tier);
-  particleBurst(TIER_COLORS[tier], { n: 160, speed: 16 });
+  particleBurst(TIER_COLORS[tier], { n: 200, speed: 18 });
   flash(tier === "UR" ? "hard" : "mid");
   stage.classList.add("shake");
-  await sleep(400);
+  await sleep(500);
   stage.classList.remove("shake");
-  await sleep(300);
+  await sleep(350);
 }
 
 // Type E: ポータル開扉
@@ -1225,11 +1236,11 @@ function pickSummonType(tier, opts) {
   // R/SR (通常時) は脳汁演出なし、直接登場タイプ
   if (tier === "R") return "Z";
   if (tier === "SR") return "Z";
-  // SSR: 軽量寄りミックス。E(金portal) と Z(柱+粒子) は SSR 専用。F はレア度高すぎるため除外
-  if (tier === "SSR") return pickWeighted({ A: 2, B: 1, C: 1, D: 4, E: 2, Z: 2 });  // D=33%
-  // UR: E/Z (SSR専用) を除外
+  // SSR: 軽量寄りミックス。E(金portal) と Z(柱+粒子) は SSR 専用。D/F は UR/LR 専用
+  if (tier === "SSR") return pickWeighted({ A: 3, B: 1, C: 1, E: 3, Z: 2 });
+  // UR: E/Z (SSR専用) を除外、D は UR/LR 専用
   if (tier === "UR") return pickWeighted({ A: 1, B: 2, C: 2, D: 4, F: 1 });  // D=40%
-  // LR: E/Z (SSR専用) を除外
+  // LR: E/Z (SSR専用) を除外、D は UR/LR 専用
   if (tier === "LR") return pickWeighted({ A: 1, B: 2, C: 3, D: 4, F: 1 });  // D=36%
   return "Z";
 }
