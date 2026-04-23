@@ -1209,17 +1209,17 @@ function pickWeighted(weights) {
 }
 
 function pickSummonType(tier, opts) {
-  // 10連のforceSlow時は C 必須 (SSR以上、LR含む)
-  if (opts.forceSlow && (tier === "LR" || tier === "UR" || tier === "SSR")) return "C";
-  // R/SR は脳汁演出なし、直接登場タイプ
+  // 10連目 (tenFlag) で R/SR の場合は Type A (オーブ昇格、シンプル) で華を持たせる
+  if (opts.tenFlag && (tier === "R" || tier === "SR")) return "A";
+  // R/SR (通常時) は脳汁演出なし、直接登場タイプ
   if (tier === "R") return "Z";
   if (tier === "SR") return "Z";
-  // SSRは脳汁（6種ランダム）
+  // SSR: 6種ランダム (forceSlow=Cの強制解除、毎回違う演出を出す)
   if (tier === "SSR") return pickWeighted({ A: 1, B: 1, C: 1, D: 2, E: 2, F: 2 });
-  // URは超脳汁
-  if (tier === "UR") return pickWeighted({ B: 3, C: 3, D: 3, E: 4 });
-  // LR は常にスロー溜め(最長の昇格演出)
-  if (tier === "LR") return "C";
+  // UR: 全6種 (A/F 追加、forceSlow=C 解除)
+  if (tier === "UR") return pickWeighted({ A: 1, B: 2, C: 2, D: 2, E: 3, F: 1 });
+  // LR: 全6種から重み付き (常にCをやめてバリエーション化、Cはやや重め)
+  if (tier === "LR") return pickWeighted({ A: 1, B: 2, C: 3, D: 2, E: 2, F: 1 });
   return "Z";
 }
 
@@ -1262,8 +1262,12 @@ async function summonOne(result, opts = {}) {
     particleBurst(TIER_COLORS[tier], { n: tier === "UR" ? 120 : 80, speed: tier === "UR" ? 15 : 12 });
     flash(tier === "UR" ? "hard" : "mid");
     await sleep(400);
+  } else if (showLadder && opts.tenFlag && (tier === "R" || tier === "SR")) {
+    // 10連目が R/SR の場合は Type A (オーブ昇格) で華やかに
+    console.log(`[Summon] tier=${tier} type=A (10連目フィナーレ)`);
+    await summonTypeA(result, tier);
   } else {
-    // R/SR: Type Z (シンプル登場)
+    // R/SR (通常): Type Z (シンプル登場)
     await summonTypeZ(result, tier);
   }
   if (checkSkip()) return finalize(result);
