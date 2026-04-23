@@ -46,15 +46,6 @@
       </button>
     </div>
 
-    <a href="td/index.html" class="td-cta" id="td-cta">
-      <span class="td-cta-icon">⚔</span>
-      <span class="td-cta-body">
-        <span class="td-cta-title">Prism Defense</span>
-        <span class="td-cta-sub">影喰いから原虹を守れ — タワーディフェンス</span>
-      </span>
-      <span class="td-cta-arrow">→</span>
-    </a>
-
     <div class="story-section">
       <h3 class="story-section-title">📖 ストーリー</h3>
       <div class="story-list">
@@ -71,6 +62,12 @@
         </div>
       </div>
     </div>
+
+    <a href="td/index.html" class="td-cta-sub" id="td-cta">
+      <span class="td-cta-sub-icon">⚔</span>
+      <span class="td-cta-sub-text">Prism Defense (タワーディフェンス)</span>
+      <span class="td-cta-sub-arrow">→</span>
+    </a>
   </section>
 
   <section class="history">
@@ -169,9 +166,17 @@
       </div>
       <div class="story-header-controls">
         <span class="story-progress" id="story-progress">- / -</span>
+        <button class="story-toc-btn" onclick="toggleStoryToc()" title="目次 (T)">📑</button>
         <button class="story-close" onclick="closeStory()" title="閉じる (Esc)">×</button>
       </div>
     </header>
+    <div id="story-toc" class="story-toc">
+      <div class="story-toc-header">
+        <h3>目次</h3>
+        <button class="story-toc-close" onclick="toggleStoryToc()">×</button>
+      </div>
+      <div id="story-toc-list" class="story-toc-list"></div>
+    </div>
     <div class="story-stage" id="story-stage">
       <div class="story-bg" id="story-bg"></div>
       <div class="story-scroll" id="story-scroll">

@@ -2415,7 +2415,7 @@ const FURIGANA = {
   '紅月': 'こうげつ',
   '誓盾': 'せいとん',
   '裁罰': 'さいばつ',
-  // 他
+  // 他 (S1で出る固有名詞・難読語)
   '紅蓮': 'ぐれん',
   '九尾': 'きゅうび',
   '六翼': 'ろくよく',
@@ -2425,7 +2425,87 @@ const FURIGANA = {
   '盾術': 'じゅんじゅつ',
   '魔導士': 'まどうし',
   '聖騎士': 'せいきし',
+  '鈴宮': 'すずみや',
+  '影衣': 'かげごろも',
+  '遊芸師': 'ゆうげいし',
+  '鳳凰': 'ほうおう',
+  '詠唱': 'えいしょう',
+  '聖槍': 'せいそう',
+  '七色': 'しちしき',
+  '黒月': 'こくげつ',
+  // 将来章で登場予定 (Season 2 以降)
+  '焔国': 'えんこく',
+  '龍国': 'りゅうこく',
+  '黎明祠': 'れいめいし',
+  '巫女連邦': 'みこれんぽう',
+  '異界の塔': 'いかいのとう',
+  '古機文明': 'こきぶんめい',
+  '海淵都市': 'かいえんとし',
+  '古龍砂漠': 'こりゅうさばく',
+  '氷霊王国': 'ひょうれいおうこく',
+  '空挺城': 'くうていじょう',
+  '地底市': 'ちていし',
+  '黒月衆': 'こくげつしゅう',
+  '沈黙の塔': 'ちんもくのとう',
 };
+
+// HTMLテキストノード内のキャラ名を <a class="char-link"> でラップ
+// 詳細画面オープン用。長い候補から処理して短い名前の誤マッチ回避。
+function linkifyCharNames(html) {
+  if (typeof POOL === 'undefined') return html;
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  // 候補構築 (story-scene-charsと同じロジック、長い順)
+  const candidates = [];
+  for (const tier of ['LR','UR','SSR','SR','R']) {
+    for (const c of POOL[tier]) {
+      const fullName = c.name;
+      const tokens = fullName.split(/[\s ]/);
+      const lastToken = tokens[tokens.length - 1];
+      const katakanaMatch = fullName.match(/[ァ-ヶー]+$/);
+      const katakanaTail = katakanaMatch ? katakanaMatch[0] : null;
+      const seenCands = new Set();
+      const add = (s) => { if (s && s.length >= 2 && !seenCands.has(s)) { seenCands.add(s); candidates.push({ name: s, char: { ...c, tier } }); } };
+      add(fullName);
+      if (lastToken !== fullName) add(lastToken);
+      if (katakanaTail && katakanaTail !== lastToken) add(katakanaTail);
+    }
+  }
+  candidates.sort((a, b) => b.name.length - a.name.length);
+
+  function walk(node) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      let text = node.textContent;
+      // 長い候補から、まずプレースホルダーに置換
+      const placeholders = [];
+      for (const cand of candidates) {
+        let parts = text.split(cand.name);
+        if (parts.length === 1) continue;
+        // 既にプレースホルダー(__CL_N__)と被るところはスキップしたいが、indexOfで管理
+        const ph = `__CL_${placeholders.length}__`;
+        placeholders.push(`<a class="char-link" data-name="${escapeHtml(cand.char.name)}">${escapeHtml(cand.name)}</a>`);
+        text = parts.join(ph);
+      }
+      if (placeholders.length === 0) return;
+      let html = escapeHtml(text);
+      placeholders.forEach((p, i) => {
+        html = html.split(`__CL_${i}__`).join(p);
+      });
+      const span = document.createElement('span');
+      span.innerHTML = html;
+      const frag = document.createDocumentFragment();
+      while (span.firstChild) frag.appendChild(span.firstChild);
+      node.parentNode.replaceChild(frag, node);
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      // ruby/code/pre/aの中はスキップ
+      const tag = node.tagName;
+      if (tag === 'RUBY' || tag === 'CODE' || tag === 'PRE' || tag === 'A') return;
+      Array.from(node.childNodes).forEach(walk);
+    }
+  }
+  walk(tmp);
+  return tmp.innerHTML;
+}
 
 // HTMLの中のテキストノードだけにふりがなを適用 (タグ内属性は対象外)
 function applyFurigana(html) {
@@ -2568,9 +2648,9 @@ function renderScene() {
   $("#story-progress").textContent = `${storyIdx + 1} / ${storyScenes.length}`;
   $("#story-scene-label").textContent = scene.label || '';
   $("#story-scene-label").style.display = scene.label ? '' : 'none';
-  // タイトルにもふりがな
+  // タイトル: キャラ名リンク化 + ふりがな
   const titleEl = $("#story-scene-title");
-  titleEl.innerHTML = applyFurigana(escapeHtml(scene.title));
+  titleEl.innerHTML = applyFurigana(linkifyCharNames(escapeHtml(scene.title)));
   let bodyHtml;
   if (typeof marked !== 'undefined' && scene.contentMd) {
     bodyHtml = marked.parse(scene.contentMd);
@@ -2579,7 +2659,39 @@ function renderScene() {
       ? '<p>' + scene.contentMd.replace(/\n\n+/g, '</p><p>').replace(/\n/g, '<br>') + '</p>'
       : '';
   }
-  $("#story-scene-content").innerHTML = applyFurigana(bodyHtml);
+  // 本文: キャラ名リンク化 → ふりがな
+  bodyHtml = linkifyCharNames(bodyHtml);
+  bodyHtml = applyFurigana(bodyHtml);
+  $("#story-scene-content").innerHTML = bodyHtml;
+  // キャラ名リンクのクリックハンドラ
+  $("#story-scene-content").querySelectorAll('.char-link').forEach(a => {
+    a.addEventListener('click', e => {
+      e.stopPropagation();
+      e.preventDefault();
+      const name = a.dataset.name;
+      const c = getCharByName(name);
+      if (c && isUnlocked(c)) {
+        if (detailUnlockedList.length === 0) {
+          detailUnlockedList = getAllCharactersWithTier().filter(x => isUnlocked(x));
+        }
+        showCharDetail(c);
+      }
+    });
+  });
+  $("#story-scene-title").querySelectorAll('.char-link').forEach(a => {
+    a.addEventListener('click', e => {
+      e.stopPropagation();
+      e.preventDefault();
+      const name = a.dataset.name;
+      const c = getCharByName(name);
+      if (c && isUnlocked(c)) {
+        if (detailUnlockedList.length === 0) {
+          detailUnlockedList = getAllCharactersWithTier().filter(x => isUnlocked(x));
+        }
+        showCharDetail(c);
+      }
+    });
+  });
   // 登場キャラ立ち絵
   renderSceneChars(scene);
   $("#story-bg").className = 'story-bg bg-' + (scene.bg || 'default');
@@ -2695,6 +2807,40 @@ function escapeRegExp(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+function toggleStoryToc() {
+  const toc = $("#story-toc");
+  if (toc.classList.contains('active')) {
+    toc.classList.remove('active');
+  } else {
+    renderStoryToc();
+    toc.classList.add('active');
+  }
+}
+function renderStoryToc() {
+  const list = $("#story-toc-list");
+  if (!storyScenes || storyScenes.length === 0) { list.innerHTML = ''; return; }
+  list.innerHTML = storyScenes.map((scene, i) => {
+    const isCurrent = i === storyIdx;
+    const isCover = !!scene.isCover;
+    const labelHtml = scene.label ? `<span class="story-toc-label">${escapeHtml(scene.label)}</span>` : '';
+    const titleHtml = applyFurigana(escapeHtml(scene.title || ''));
+    const tag = isCover ? '<span class="story-toc-tag">表紙</span>' : '';
+    return `<button class="story-toc-item ${isCurrent ? 'current' : ''}" data-idx="${i}">
+      ${labelHtml}<span class="story-toc-title">${titleHtml}</span>${tag}
+    </button>`;
+  }).join('');
+  list.querySelectorAll('.story-toc-item').forEach(el => {
+    el.addEventListener('click', () => {
+      storyIdx = parseInt(el.dataset.idx);
+      renderScene();
+      toggleStoryToc();
+    });
+  });
+  // 現在のシーンを可視位置にスクロール
+  const cur = list.querySelector('.story-toc-item.current');
+  if (cur) cur.scrollIntoView({ block: 'center' });
+}
+
 function storyNext() {
   if (storyIdx < storyScenes.length - 1) {
     storyIdx++;
@@ -2737,10 +2883,11 @@ document.querySelectorAll('.story-card[data-story]').forEach(card => {
 $("#story-modal").addEventListener('click', e => {
   if (e.target.id === 'story-modal') closeStory();
 });
-// stageクリックで次へ (ボタン/キャラサムネ等は除外)
+// stageクリックで次へ (ボタン/キャラサムネ/キャラ名リンク等は除外)
 $("#story-stage").addEventListener('click', e => {
   if (e.target.closest('.story-nav') || e.target.closest('button')) return;
   if (e.target.closest('.story-scene-chars')) return;
+  if (e.target.closest('.char-link')) return;
   // テキスト選択中(マウスドラッグでハイライト)は誤発火させない
   const sel = window.getSelection && window.getSelection();
   if (sel && sel.toString().length > 0) return;
@@ -2833,6 +2980,11 @@ document.addEventListener("keydown", e => {
   if ($("#story-modal").classList.contains("active")) {
     if (Date.now() - storyOpenedAt < STORY_KEY_GUARD_MS) return;
     const scrollEl = $("#story-scroll");
+    // 目次が開いているなら Esc で目次だけ閉じる
+    if ($("#story-toc").classList.contains("active")) {
+      if (e.key === "Escape") { e.preventDefault(); toggleStoryToc(); return; }
+    }
+    if (e.key === "t" || e.key === "T") { e.preventDefault(); toggleStoryToc(); return; }
     if (e.key === "Escape") { e.preventDefault(); closeStory(); }
     else if (e.key === "Enter" || e.key === "ArrowRight") {
       e.preventDefault(); storyNext();
