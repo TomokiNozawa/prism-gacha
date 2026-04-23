@@ -2368,8 +2368,8 @@ document.addEventListener("keydown", e => {
   }
   if ($("#result").classList.contains("active")) {
     if (Date.now() - resultOpenedAt < RESULT_KEY_GUARD_MS) return;
-    if (e.key === "Enter" || e.key === "Escape") { e.preventDefault(); closeResult(); }
-    else if (e.key === "r" || e.key === "R") {
+    if (e.key === "Escape") { e.preventDefault(); closeResult(); }
+    else if (e.key === "Enter") {
       e.preventDefault(); closeResult();
       setTimeout(() => doTen(), 100);
     }
