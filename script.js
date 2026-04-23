@@ -2320,6 +2320,49 @@ $("#result").addEventListener("click", e => { if (e.target.id === "result") clos
 $("#btn-gallery").addEventListener("click", openGallery);
 $("#btn-relations").addEventListener("click", openRelations);
 
+// ───── ストーリービューワー ─────
+const STORY_FILES = {
+  s1c1: { title: '序: 七座の使命', meta: 'Season 1 — 第1章', file: 'STORY/s1c1.md' },
+};
+let storyOpenedAt = 0;
+const STORY_KEY_GUARD_MS = 300;
+
+async function openStory(storyId) {
+  const info = STORY_FILES[storyId];
+  if (!info) return;
+  $("#story-meta").textContent = info.meta;
+  $("#story-title").textContent = info.title;
+  const content = $("#story-content");
+  content.innerHTML = '<div class="story-loading">読み込み中…</div>';
+  $("#story-modal").classList.add("active");
+  storyOpenedAt = Date.now();
+  try {
+    const resp = await fetch(info.file + '?v=' + Date.now()); // キャッシュバスター
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const md = await resp.text();
+    if (typeof marked !== 'undefined') {
+      content.innerHTML = marked.parse(md);
+    } else {
+      // marked.js 読込失敗時のフォールバック
+      content.innerHTML = '<pre>' + md.replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c])) + '</pre>';
+    }
+    content.scrollTop = 0;
+  } catch (e) {
+    content.innerHTML = '<div class="story-error">読み込みに失敗しました: ' + e.message + '</div>';
+  }
+}
+function closeStory() {
+  $("#story-modal").classList.remove("active");
+}
+// ストーリーカードクリック
+document.querySelectorAll('.story-card[data-story]').forEach(card => {
+  card.addEventListener('click', () => openStory(card.dataset.story));
+});
+// 背景クリックで閉じる
+$("#story-modal").addEventListener('click', e => {
+  if (e.target.id === 'story-modal') closeStory();
+});
+
 // BGM トグル (ホーム画面用ループ再生)
 const bgmAudio = document.getElementById("bgm-home");
 let bgmEnabled = localStorage.getItem("prism-bgm") === "on";
@@ -2401,6 +2444,11 @@ document.addEventListener("keydown", e => {
   }
   if ($("#relations").classList.contains("active")) {
     if (e.key === "Escape") { e.preventDefault(); closeRelations(); }
+    return;
+  }
+  if ($("#story-modal").classList.contains("active")) {
+    if (Date.now() - storyOpenedAt < STORY_KEY_GUARD_MS) return;
+    if (e.key === "Escape") { e.preventDefault(); closeStory(); }
     return;
   }
   if (stage.classList.contains("active") && (e.key === " " || e.key === "Escape")) {

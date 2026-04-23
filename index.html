@@ -54,6 +54,23 @@
       </span>
       <span class="td-cta-arrow">→</span>
     </a>
+
+    <div class="story-section">
+      <h3 class="story-section-title">📖 ストーリー</h3>
+      <div class="story-list">
+        <button class="story-card" data-story="s1c1" data-title="序: 七座の使命">
+          <span class="story-card-meta">Season 1 — 第1章</span>
+          <span class="story-card-title">序: 七座の使命</span>
+          <span class="story-card-desc">星霊学院新入生・鈴宮ちさとが、自らの虹脈に出会う物語</span>
+          <span class="story-card-volume">約14,800字 / POV: ちさと</span>
+        </button>
+        <div class="story-card disabled">
+          <span class="story-card-meta">Season 1 — 第2章</span>
+          <span class="story-card-title">南方海域の異変</span>
+          <span class="story-card-desc">Coming Soon...</span>
+        </div>
+      </div>
+    </div>
   </section>
 
   <section class="history">
@@ -142,6 +159,20 @@
   <div id="relations-canvas" class="relations-canvas"></div>
 </div>
 
+<!-- Story Modal -->
+<div id="story-modal" class="story-modal">
+  <div class="story-inner">
+    <header class="story-header">
+      <div>
+        <div class="story-meta" id="story-meta">Season 1 — 第1章</div>
+        <h2 id="story-title">序: 七座の使命</h2>
+      </div>
+      <button class="story-close" onclick="closeStory()" title="閉じる (Esc)">×</button>
+    </header>
+    <div id="story-content" class="story-content"></div>
+  </div>
+</div>
+
 <!-- Image Zoom Overlay -->
 <div id="char-img-zoom" class="char-img-zoom">
   <img id="char-img-zoom-img" src="" alt="" draggable="false">
@@ -160,6 +191,7 @@
 <audio id="se-crack" preload="auto"></audio>
 <audio id="bgm-home" src="assets/bgm/home.mp3" preload="auto" loop></audio>
 
+<script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
 <script src="script.js"></script>
 </body>
 </html>
