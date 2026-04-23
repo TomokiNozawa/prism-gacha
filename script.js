@@ -1454,8 +1454,8 @@ async function doTen() {
       await summonOne(sequenced[i], { showLadder: false });
       skipRequested = false;  // 演出終了で skip 状態リセット (次からは通常進行)
     } else {
-      // R/SR: skipRequested=true なら summonOne 内で short-circuit、未press時は通常演出
-      // skip 状態を維持 → 後続の R/SR も飛ばし続ける
+      // R/SR: skip 中なら summonOne を呼ばず即座に次へ (キャラ出現演出すら出さない)
+      if (skipRequested) continue;
       await summonOne(sequenced[i], { showLadder: false });
     }
   }
