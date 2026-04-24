@@ -3171,6 +3171,7 @@ const EMAIL_DOMAIN = '@prism-gacha.internal';
 let fbApp = null, fbAuth = null, fbDb = null, authUser = null;
 let pendingCloudState = null, pendingLocalState = null;
 let signupInProgress = false;
+let initialAuthCheckDone = false;
 
 try {
   if (typeof firebase !== 'undefined') {
@@ -3183,7 +3184,22 @@ try {
       authUser = user;
       updateAccountButton();
       if (user && !signupInProgress) { await onAuthReady(user); }
+      // 初回auth state確定後(login or ゲスト)にprompt表示判定
+      if (!initialAuthCheckDone) {
+        initialAuthCheckDone = true;
+        setTimeout(() => maybeShowAccountPrompt(), 1500);
+      }
     });
+    // Firebase SDK が読めていない等でonAuthStateChangedが発火しなくても最終フォールバック
+    setTimeout(() => {
+      if (!initialAuthCheckDone) {
+        initialAuthCheckDone = true;
+        maybeShowAccountPrompt();
+      }
+    }, 4000);
+  } else {
+    // Firebase SDK未読込: それでも既存ゲストには案内(ただしFirebase動かないので案内意味ないが念のため)
+    setTimeout(() => maybeShowAccountPrompt(), 2000);
   }
 } catch (e) {
   console.error('Firebase init error:', e);
@@ -3541,6 +3557,38 @@ function updateAccountButton() {
   const label = $('#account-label');
   if (!label) return;
   label.textContent = authUser ? (authUser.displayName || 'アカウント') : 'ゲスト';
+}
+
+// ────────────── Account Prompt (既存ゲスト進捗ありユーザーへの案内) ──────────────
+const ACCOUNT_PROMPT_KEY = 'pg_account_prompt_dismissed';
+
+function maybeShowAccountPrompt() {
+  // 以下すべて満たす場合のみ表示:
+  // - 未ログイン (authUser == null)
+  // - localStorage進捗あり (total > 0 かつ unlockedSet に1つ以上)
+  // - 「後で」で過去に dismiss していない
+  if (authUser) return;
+  if (localStorage.getItem(ACCOUNT_PROMPT_KEY) === 'true') return;
+  const hasProgress = (state.total || 0) > 0 && Object.keys(state.unlockedSet || {}).length > 0;
+  if (!hasProgress) return;
+  const modal = document.getElementById('account-prompt');
+  if (!modal) return;
+  modal.classList.add('active');
+}
+
+function dismissAccountPrompt() {
+  localStorage.setItem(ACCOUNT_PROMPT_KEY, 'true');
+  const modal = document.getElementById('account-prompt');
+  if (modal) modal.classList.remove('active');
+}
+
+function acceptAccountPrompt() {
+  const modal = document.getElementById('account-prompt');
+  if (modal) modal.classList.remove('active');
+  // アカウントモーダルの新規登録タブを開く
+  showAccountModal();
+  switchAccountTab('signup');
+  setTimeout(() => { const el = $('#signup-nickname'); if (el) el.focus(); }, 50);
 }
 
 // 簡易トースト (他で showToast 未定義の場合のみ定義)

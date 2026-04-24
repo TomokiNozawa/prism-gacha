@@ -2710,3 +2710,75 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   .account-title, .collision-title { font-size: 18px; }
   #account-label { display: none; }
 }
+
+/* ============ Account Prompt (既存ゲスト進捗ありユーザーへの案内) ============ */
+.account-prompt {
+  position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75);
+  display: none; align-items: center; justify-content: center;
+  z-index: 11800; padding: 20px;
+  backdrop-filter: blur(6px);
+  animation: ap-fadein 0.35s ease;
+}
+.account-prompt.active { display: flex; }
+@keyframes ap-fadein {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.account-prompt-inner {
+  background: linear-gradient(180deg, rgba(45, 32, 80, 0.98), rgba(25, 18, 48, 0.98));
+  border: 1px solid rgba(200, 180, 255, 0.4);
+  border-radius: 20px; padding: 28px 26px 24px;
+  width: 100%; max-width: 380px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), 0 0 60px rgba(200, 125, 255, 0.35);
+  animation: ap-pop 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.4);
+}
+@keyframes ap-pop {
+  from { transform: scale(0.85); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.account-prompt-icon {
+  font-size: 42px; margin-bottom: 10px;
+  filter: drop-shadow(0 0 20px rgba(200, 125, 255, 0.6));
+}
+.account-prompt-title {
+  font-size: 17px; margin: 0 0 14px; color: #fff;
+  line-height: 1.4; letter-spacing: 0.02em;
+  font-weight: 600;
+}
+.account-prompt-text {
+  font-size: 15px; color: rgba(255, 255, 255, 0.9);
+  margin: 0 0 6px;
+}
+.account-prompt-sub {
+  font-size: 12px; color: rgba(255, 255, 255, 0.55);
+  margin: 0 0 20px;
+}
+.account-prompt-actions {
+  display: flex; gap: 8px;
+}
+.account-prompt-btn {
+  flex: 1; padding: 13px 16px;
+  font-size: 14px; font-weight: 600;
+  border: none; border-radius: 10px;
+  cursor: pointer; font-family: inherit;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.account-prompt-btn.primary {
+  background: linear-gradient(135deg, #8b5cf6, #c084fc);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.4);
+}
+.account-prompt-btn.primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 22px rgba(139, 92, 246, 0.55);
+}
+.account-prompt-btn.secondary {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.85);
+}
+.account-prompt-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.3);
+}
