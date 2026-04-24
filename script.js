@@ -3496,10 +3496,13 @@ function showAccountModal() {
     $('#account-logged-view').style.display = '';
     $('#account-info-nickname').textContent = authUser.displayName || '-';
     $('#account-info-total').textContent = state.total || 0;
-    $('#account-info-ur').textContent = state.ur || 0;
-    let lrCount = 0;
-    for (const k of Object.keys(state.unlockedSet || {})) if (k.startsWith('LR_')) lrCount++;
-    $('#account-info-lr').textContent = lrCount;
+    let urCount = 0, lrCount = 0;
+    for (const k of Object.keys(state.unlockedSet || {})) {
+      if (k.startsWith('UR_')) urCount++;
+      else if (k.startsWith('LR_')) lrCount++;
+    }
+    $('#account-info-ur').textContent = `${urCount}/5`;
+    $('#account-info-lr').textContent = `${lrCount}/1`;
     $('#account-info-sync').textContent = authUser.metadata && authUser.metadata.lastSignInTime
       ? new Date(authUser.metadata.lastSignInTime).toLocaleString('ja-JP')
       : '-';
