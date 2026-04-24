@@ -963,28 +963,80 @@ function envGain(ctx, dest, attack, release, peak = 0.6) {
   return g;
 }
 
-// 低音→中音のドンっ(summon)
+// 虹霊の召喚ベル: クリスタルpentatonic上昇+倍音+残響+shimmer
 function seSummon() {
   const ctx = getCtx();
   const out = ctx.destination;
-  // bass drop
-  const o = ctx.createOscillator();
-  o.type = "sine";
-  o.frequency.value = 80;
-  o.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.25);
-  const g = envGain(ctx, out, 0.01, 0.35, 0.55);
-  o.connect(g);
-  o.start();
-  o.stop(ctx.currentTime + 0.4);
-  // shimmer on top
-  const o2 = ctx.createOscillator();
-  o2.type = "triangle";
-  o2.frequency.value = 880;
-  o2.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.2);
-  const g2 = envGain(ctx, out, 0.01, 0.25, 0.15);
-  o2.connect(g2);
-  o2.start();
-  o2.stop(ctx.currentTime + 0.3);
+
+  // Master ゲイン
+  const master = ctx.createGain();
+  master.gain.value = 0.5;
+  master.connect(out);
+
+  // 残響代わりの feedback delay (神秘的な空間感)
+  const delay = ctx.createDelay(1.0);
+  delay.delayTime.value = 0.18;
+  const fb = ctx.createGain();
+  fb.gain.value = 0.32;
+  const delayWet = ctx.createGain();
+  delayWet.gain.value = 0.6;
+  delay.connect(fb).connect(delay);
+  delay.connect(delayWet).connect(master);
+
+  // 低域ドローン(原虹の震え)
+  const drone = ctx.createOscillator();
+  drone.type = "sine";
+  drone.frequency.value = 110;
+  const droneG = ctx.createGain();
+  droneG.gain.setValueAtTime(0, ctx.currentTime);
+  droneG.gain.linearRampToValueAtTime(0.12, ctx.currentTime + 0.08);
+  droneG.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.9);
+  drone.connect(droneG).connect(master);
+  drone.start();
+  drone.stop(ctx.currentTime + 1.0);
+
+  // ベルのpentatonic上昇 (C5, E5, G5, B5) — 崇高・神秘
+  const notes = [523.25, 659.25, 783.99, 987.77];
+  notes.forEach((freq, i) => {
+    const t = ctx.currentTime + i * 0.06;
+    // Fundamental (sine)
+    const o1 = ctx.createOscillator();
+    o1.type = "sine";
+    o1.frequency.value = freq;
+    const g1 = ctx.createGain();
+    g1.gain.setValueAtTime(0, t);
+    g1.gain.linearRampToValueAtTime(0.22, t + 0.004);
+    g1.gain.exponentialRampToValueAtTime(0.001, t + 1.1);
+    o1.connect(g1);
+    g1.connect(master);
+    g1.connect(delay); // 残響へも送る
+    o1.start(t);
+    o1.stop(t + 1.2);
+    // Bell inharmonic overtone (2.76x は本物のbell倍音)
+    const o2 = ctx.createOscillator();
+    o2.type = "sine";
+    o2.frequency.value = freq * 2.76;
+    const g2 = ctx.createGain();
+    g2.gain.setValueAtTime(0, t);
+    g2.gain.linearRampToValueAtTime(0.07, t + 0.004);
+    g2.gain.exponentialRampToValueAtTime(0.001, t + 0.75);
+    o2.connect(g2).connect(master);
+    o2.start(t);
+    o2.stop(t + 0.8);
+  });
+
+  // Shimmer air (虹光の粒)
+  const shimmer = ctx.createOscillator();
+  shimmer.type = "triangle";
+  shimmer.frequency.value = 2800;
+  shimmer.frequency.linearRampToValueAtTime(3800, ctx.currentTime + 0.35);
+  const shimG = ctx.createGain();
+  shimG.gain.setValueAtTime(0, ctx.currentTime);
+  shimG.gain.linearRampToValueAtTime(0.05, ctx.currentTime + 0.08);
+  shimG.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.65);
+  shimmer.connect(shimG).connect(master);
+  shimmer.start();
+  shimmer.stop(ctx.currentTime + 0.7);
 }
 
 // 高音キラ＋和音(fanfare for SSR/UR)
