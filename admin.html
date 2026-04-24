@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Prism Gacha 管理画面</title>
+<title>Prismaera 管理画面</title>
 <link rel="icon" href="images/favicon.png" type="image/png">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -241,7 +241,7 @@ body {
 <body>
 
 <div class="header">
-  <h1>✦ Prism Gacha <span class="tag">ADMIN</span></h1>
+  <h1>✦ Prismaera <span class="tag">ADMIN</span></h1>
   <div class="header-actions">
     <a href="index.html" class="header-btn">← ガチャに戻る</a>
     <button class="header-btn" id="refresh-btn">🔄 更新</button>
@@ -292,7 +292,7 @@ const FIREBASE_CONFIG = {
   appId: "1:174442724697:web:06ac83b275780717c06048"
 };
 
-// Prism Gacha と同じ名前付きappでsession共有
+// Prismaera と同じ名前付きappでsession共有
 const app = firebase.initializeApp(FIREBASE_CONFIG, 'prism-gacha-admin');
 const auth = app.auth();
 const db = app.database();

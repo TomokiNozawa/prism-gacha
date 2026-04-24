@@ -1,9 +1,9 @@
-# Prism Gacha
+# Prismaera
 
-課金なしで「脳汁体験」だけを浴びるブラウザガチャシミュ。
+課金なしで「脳汁体験」だけを浴びるブラウザガチャ+物語シミュ(旧称: Prism Gacha)。
 + タワーディフェンスゲーム **Prism Defense** も同梱。
 
-- **Prism Gacha URL**: https://tomokinozawa.github.io/prism-gacha/
+- **Prismaera URL**: https://tomokinozawa.github.io/prism-gacha/ (GitHub Pagesパスは旧リポ名のまま)
 - **Prism Defense URL**: https://tomokinozawa.github.io/prism-gacha/td/
 - **排出率**: R 65% / SR 25% / SSR 7% / UR 3% / LR 0.5%
 - **天井**: 180連
