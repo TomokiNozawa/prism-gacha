@@ -3101,6 +3101,16 @@ function loadBgmSrc(id) {
   if (bgmAudio.dataset.loadedId !== track.id) {
     bgmAudio.src = track.file;
     bgmAudio.dataset.loadedId = track.id;
+    // リロード復帰: 同じ曲なら保存された位置から再開
+    const savedId = localStorage.getItem('prism-bgm-last-id');
+    const savedTime = parseFloat(localStorage.getItem('prism-bgm-last-time') || '0');
+    if (savedId === track.id && savedTime > 0.5) {
+      bgmAudio.addEventListener('loadedmetadata', function seekOnce() {
+        if (isFinite(bgmAudio.duration) && savedTime < bgmAudio.duration - 1) {
+          try { bgmAudio.currentTime = savedTime; } catch (e) {}
+        }
+      }, { once: true });
+    }
   }
   bgmAudio.loop = (bgmMode === 'repeat');
 }
@@ -3164,8 +3174,21 @@ function toggleBgmChecked(id) {
 }
 
 bgmAudio.addEventListener('ended', () => {
+  // 終了時は保存位置をリセット (次回リロード時に曲頭から)
+  localStorage.setItem('prism-bgm-last-time', '0');
   if (bgmMode === 'repeat') { bgmAudio.play().catch(() => {}); return; }
   bgmNext();
+});
+
+// 再生位置を 1秒throttle で保存 (リロード復帰用)
+let bgmLastSaveAt = 0;
+bgmAudio.addEventListener('timeupdate', () => {
+  const now = Date.now();
+  if (now - bgmLastSaveAt >= 1000) {
+    bgmLastSaveAt = now;
+    localStorage.setItem('prism-bgm-last-id', bgmCurrentId);
+    localStorage.setItem('prism-bgm-last-time', String(Math.round(bgmAudio.currentTime * 10) / 10));
+  }
 });
 
 function updateBgmHeaderBtn() {
