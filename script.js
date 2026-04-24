@@ -305,6 +305,7 @@ function loadState() {
       galleryViewed: raw.galleryViewed || {},
       unlockedSet: raw.unlockedSet || {},  // "UR_セラフィエル": true （永続）
       dupCounts: raw.dupCounts || {},       // "UR_セラフィエル": 凸数 (初回0)
+      storyProgress: raw.storyProgress || {}, // {s1c1: {lastSceneIndex, totalScenes, lastReadAt, completed}}
     };
     // マイグレーション: 既存 history からunlockedSetを補完 (旧セーブデータ救済)
     for (const h of s.history) {
@@ -313,11 +314,12 @@ function loadState() {
     }
     return s;
   } catch {
-    return { total:0, ur:0, pity:0, history:[], galleryViewed:{}, unlockedSet:{}, dupCounts:{} };
+    return { total:0, ur:0, pity:0, history:[], galleryViewed:{}, unlockedSet:{}, dupCounts:{}, storyProgress:{} };
   }
 }
 function saveState() {
   localStorage.setItem("prism-gacha", JSON.stringify(state));
+  if (typeof scheduleCloudSync === 'function') scheduleCloudSync();
 }
 
 // ────────────── Rolling ──────────────
@@ -3152,3 +3154,424 @@ document.addEventListener("keydown", e => {
 
 // Init
 updateHUD();
+
+// ============================================================
+// Firebase Auth & Cloud Sync (Prism Gacha アカウントシステム)
+// ============================================================
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBFSjOheMb_epwOXCjviAA_FLQFPNiED6g",
+  authDomain: "task-board-fbf1e.firebaseapp.com",
+  databaseURL: "https://task-board-fbf1e-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "task-board-fbf1e",
+  storageBucket: "task-board-fbf1e.firebasestorage.app",
+  messagingSenderId: "174442724697",
+  appId: "1:174442724697:web:06ac83b275780717c06048"
+};
+const EMAIL_DOMAIN = '@prism-gacha.internal';
+let fbApp = null, fbAuth = null, fbDb = null, authUser = null;
+let pendingCloudState = null, pendingLocalState = null;
+
+try {
+  if (typeof firebase !== 'undefined') {
+    fbApp = firebase.initializeApp(FIREBASE_CONFIG);
+    fbAuth = firebase.auth();
+    fbDb = firebase.database();
+    fbAuth.onAuthStateChanged(async (user) => {
+      authUser = user;
+      updateAccountButton();
+      if (user) { await onAuthReady(user); }
+    });
+  }
+} catch (e) {
+  console.error('Firebase init error:', e);
+}
+
+// ────────────── nickname ↔ email 変換 ──────────────
+function nicknameToEmail(nickname) {
+  // 日本語nicknameを Base64URL に変換して RFC5321 compliant な email にする
+  const bytes = new TextEncoder().encode(nickname);
+  let bin = '';
+  for (const b of bytes) bin += String.fromCharCode(b);
+  const b64 = btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  return 'u-' + b64 + EMAIL_DOMAIN;
+}
+
+function validateNickname(n) {
+  if (!n) return 'nicknameを入力してください';
+  if (n.length < 1 || n.length > 20) return '1〜20文字で入力してください';
+  if (/[\x00-\x1f\x7f]/.test(n)) return '制御文字は使えません';
+  if (/[@\/\\.#$\[\]]/.test(n)) return '@ . / \\ # $ [ ] は使えません';
+  return null;
+}
+
+function validatePassphrase(pp) {
+  if (!pp) return '合言葉を入力してください';
+  if (pp.length < 4) return '合言葉は4文字以上にしてください';
+  if (pp.length > 15) return '合言葉は15文字以下にしてください';
+  return null;
+}
+
+// ────────────── アカウント操作 ──────────────
+async function doAccountSignup() {
+  const nickname = $('#signup-nickname').value.trim();
+  const pp1 = $('#signup-passphrase').value;
+  const pp2 = $('#signup-passphrase2').value;
+  const errEl = $('#signup-error');
+  errEl.textContent = '';
+
+  const e1 = validateNickname(nickname);
+  if (e1) { errEl.textContent = e1; return; }
+  const e2 = validatePassphrase(pp1);
+  if (e2) { errEl.textContent = e2; return; }
+  if (pp1 !== pp2) { errEl.textContent = '合言葉が一致しません'; return; }
+
+  if (!fbAuth) { errEl.textContent = 'Firebase未初期化'; return; }
+
+  const btn = document.querySelector('#account-signup .account-submit');
+  btn.disabled = true; btn.textContent = '登録中…';
+
+  try {
+    // nickname重複チェック
+    const indexSnap = await fbDb.ref('prism-gacha/_meta/userIndex/' + nickname).once('value');
+    if (indexSnap.exists()) {
+      errEl.textContent = 'このnicknameは既に使われています';
+      return;
+    }
+
+    const email = nicknameToEmail(nickname);
+    const cred = await fbAuth.createUserWithEmailAndPassword(email, pp1);
+    await cred.user.updateProfile({ displayName: nickname });
+
+    // userIndex登録
+    await fbDb.ref('prism-gacha/_meta/userIndex/' + nickname).set(cred.user.uid);
+
+    // ゲスト進捗(localStorage state)を無言でcloudへ移行
+    const now = Date.now();
+    await fbDb.ref('prism-gacha/users/' + cred.user.uid).set({
+      displayName: nickname,
+      createdAt: now,
+      lastLoginAt: now,
+      state: sanitizeStateForCloud(state),
+    });
+
+    closeAccountModal();
+    showToast('新規登録が完了しました');
+  } catch (e) {
+    const code = e.code || '';
+    if (code.includes('email-already-in-use')) {
+      errEl.textContent = 'このnicknameは既に使われています';
+    } else if (code.includes('weak-password')) {
+      errEl.textContent = '合言葉が弱すぎます (6文字以上推奨)';
+    } else {
+      errEl.textContent = e.message || '登録に失敗しました';
+    }
+    console.error(e);
+  } finally {
+    btn.disabled = false; btn.textContent = '新規登録';
+  }
+}
+
+async function doAccountLogin() {
+  const nickname = $('#login-nickname').value.trim();
+  const pp = $('#login-passphrase').value;
+  const errEl = $('#login-error');
+  errEl.textContent = '';
+
+  const e1 = validateNickname(nickname);
+  if (e1) { errEl.textContent = e1; return; }
+  const e2 = validatePassphrase(pp);
+  if (e2) { errEl.textContent = e2; return; }
+
+  if (!fbAuth) { errEl.textContent = 'Firebase未初期化'; return; }
+
+  const btn = document.querySelector('#account-login .account-submit');
+  btn.disabled = true; btn.textContent = 'ログイン中…';
+
+  try {
+    const email = nicknameToEmail(nickname);
+    await fbAuth.signInWithEmailAndPassword(email, pp);
+    closeAccountModal();
+    showToast('ログインしました');
+  } catch (e) {
+    const code = e.code || '';
+    if (code.includes('user-not-found') || code.includes('wrong-password') || code.includes('invalid-credential') || code.includes('invalid-login-credentials')) {
+      errEl.textContent = 'nicknameまたは合言葉が違います';
+    } else {
+      errEl.textContent = e.message || 'ログインに失敗しました';
+    }
+    console.error(e);
+  } finally {
+    btn.disabled = false; btn.textContent = 'ログイン';
+  }
+}
+
+async function doAccountLogout() {
+  try {
+    await fbAuth.signOut();
+    showToast('ゲストに戻りました (進捗はこのブラウザに残ります)');
+    closeAccountModal();
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+// ────────────── Cloud Sync ──────────────
+let cloudSyncDebounceTimer = null;
+const CLOUD_SYNC_DEBOUNCE = 800;
+
+function sanitizeStateForCloud(s) {
+  return {
+    total: s.total || 0,
+    ur: s.ur || 0,
+    pity: s.pity || 0,
+    history: (Array.isArray(s.history) ? s.history : []).slice(-120),
+    unlockedSet: s.unlockedSet || {},
+    dupCounts: s.dupCounts || {},
+    galleryViewed: s.galleryViewed || {},
+    storyProgress: s.storyProgress || {},
+    updatedAt: Date.now(),
+  };
+}
+
+async function saveStateCloud() {
+  if (!authUser || !fbDb) return;
+  try {
+    await fbDb.ref('prism-gacha/users/' + authUser.uid + '/state').set(sanitizeStateForCloud(state));
+  } catch (e) {
+    console.error('saveStateCloud error:', e);
+  }
+}
+
+function scheduleCloudSync() {
+  if (!authUser) return;
+  if (cloudSyncDebounceTimer) clearTimeout(cloudSyncDebounceTimer);
+  cloudSyncDebounceTimer = setTimeout(() => {
+    saveStateCloud();
+  }, CLOUD_SYNC_DEBOUNCE);
+}
+
+async function onAuthReady(user) {
+  if (!fbDb) return;
+  try {
+    const snap = await fbDb.ref('prism-gacha/users/' + user.uid).once('value');
+    const cloudData = snap.val();
+
+    if (!cloudData) {
+      // 新規ユーザー(Auth作成済だがデータ未生成): localStorage state をcloudへ送信
+      await fbDb.ref('prism-gacha/users/' + user.uid).set({
+        displayName: user.displayName || 'Unknown',
+        createdAt: Date.now(),
+        lastLoginAt: Date.now(),
+        state: sanitizeStateForCloud(state),
+      });
+      return;
+    }
+
+    const cloudState = cloudData.state || {};
+    const localHasProgress = (state.total || 0) > 0 && Object.keys(state.unlockedSet || {}).length > 0;
+    const cloudTotal = cloudState.total || 0;
+    const collision = localHasProgress && cloudTotal > 0 && !statesEqual(state, cloudState);
+
+    if (collision) {
+      pendingCloudState = cloudState;
+      pendingLocalState = JSON.parse(JSON.stringify(state));
+      showCollisionModal(state, cloudState);
+      return;
+    }
+
+    // 衝突なし → cloud が優位 (cloudが空ならlocalを送る)
+    if (cloudTotal > 0) {
+      applyCloudState(cloudState);
+    } else {
+      await saveStateCloud();
+    }
+
+    try { await fbDb.ref('prism-gacha/users/' + user.uid + '/lastLoginAt').set(Date.now()); } catch (e) {}
+  } catch (e) {
+    console.error('onAuthReady error:', e);
+  }
+}
+
+function statesEqual(a, b) {
+  return (a.total || 0) === (b.total || 0)
+    && Object.keys(a.unlockedSet || {}).length === Object.keys(b.unlockedSet || {}).length;
+}
+
+function applyCloudState(cs) {
+  state.total = cs.total || 0;
+  state.ur = cs.ur || 0;
+  state.pity = cs.pity || 0;
+  state.history = Array.isArray(cs.history) ? cs.history : [];
+  state.galleryViewed = cs.galleryViewed || {};
+  state.unlockedSet = cs.unlockedSet || {};
+  state.dupCounts = cs.dupCounts || {};
+  state.storyProgress = cs.storyProgress || {};
+  localStorage.setItem("prism-gacha", JSON.stringify(state));
+  updateHUD();
+  if (typeof renderHistory === 'function') renderHistory();
+}
+
+function mergeStates(local, cloud) {
+  const merged = {
+    total: Math.max(local.total || 0, cloud.total || 0),
+    ur: Math.max(local.ur || 0, cloud.ur || 0),
+    pity: Math.max(local.pity || 0, cloud.pity || 0),
+    history: [],
+    unlockedSet: { ...(cloud.unlockedSet || {}), ...(local.unlockedSet || {}) },
+    dupCounts: {},
+    galleryViewed: { ...(cloud.galleryViewed || {}), ...(local.galleryViewed || {}) },
+    storyProgress: {},
+  };
+  const allDupKeys = new Set([...Object.keys(local.dupCounts || {}), ...Object.keys(cloud.dupCounts || {})]);
+  for (const k of allDupKeys) {
+    merged.dupCounts[k] = Math.max((local.dupCounts && local.dupCounts[k]) || 0, (cloud.dupCounts && cloud.dupCounts[k]) || 0);
+  }
+  const combined = [...(cloud.history || []), ...(local.history || [])];
+  merged.history = combined.slice(-120);
+  const spKeys = new Set([...Object.keys(local.storyProgress || {}), ...Object.keys(cloud.storyProgress || {})]);
+  for (const k of spKeys) {
+    const l = (local.storyProgress && local.storyProgress[k]) || {};
+    const c = (cloud.storyProgress && cloud.storyProgress[k]) || {};
+    merged.storyProgress[k] = {
+      lastSceneIndex: Math.max(l.lastSceneIndex || 0, c.lastSceneIndex || 0),
+      totalScenes: Math.max(l.totalScenes || 0, c.totalScenes || 0),
+      lastReadAt: Math.max(l.lastReadAt || 0, c.lastReadAt || 0),
+      completed: !!(l.completed || c.completed),
+    };
+  }
+  return merged;
+}
+
+function resolveCollision(choice) {
+  if (!pendingCloudState || !pendingLocalState) {
+    closeCollisionModal();
+    return;
+  }
+  if (choice === 'merge') {
+    const merged = mergeStates(pendingLocalState, pendingCloudState);
+    applyCloudState(merged);
+    saveStateCloud();
+    showToast('合算して保存しました');
+  } else if (choice === 'cloud') {
+    applyCloudState(pendingCloudState);
+    showToast('アカウントの進捗を使います');
+  }
+  pendingCloudState = null;
+  pendingLocalState = null;
+  closeCollisionModal();
+}
+
+// ────────────── UI handlers ──────────────
+function showAccountModal() {
+  const modal = $('#account-modal');
+  if (!modal) return;
+  if (authUser) {
+    $('#account-guest-view').style.display = 'none';
+    $('#account-logged-view').style.display = '';
+    $('#account-info-nickname').textContent = authUser.displayName || '-';
+    $('#account-info-total').textContent = state.total || 0;
+    $('#account-info-ur').textContent = state.ur || 0;
+    let lrCount = 0;
+    for (const k of Object.keys(state.unlockedSet || {})) if (k.startsWith('LR_')) lrCount++;
+    $('#account-info-lr').textContent = lrCount;
+    $('#account-info-sync').textContent = authUser.metadata && authUser.metadata.lastSignInTime
+      ? new Date(authUser.metadata.lastSignInTime).toLocaleString('ja-JP')
+      : '-';
+  } else {
+    $('#account-guest-view').style.display = '';
+    $('#account-logged-view').style.display = 'none';
+    switchAccountTab('login');
+    setTimeout(() => { const el = $('#login-nickname'); if (el) el.focus(); }, 50);
+  }
+  modal.classList.add('active');
+}
+
+function closeAccountModal() {
+  const modal = $('#account-modal');
+  if (!modal) return;
+  modal.classList.remove('active');
+  const le = $('#login-error'); if (le) le.textContent = '';
+  const se = $('#signup-error'); if (se) se.textContent = '';
+  const lp = $('#login-passphrase'); if (lp) lp.value = '';
+  const sp = $('#signup-passphrase'); if (sp) sp.value = '';
+  const sp2 = $('#signup-passphrase2'); if (sp2) sp2.value = '';
+}
+
+function switchAccountTab(tab) {
+  document.querySelectorAll('.account-tab').forEach(el => el.classList.toggle('active', el.dataset.tab === tab));
+  const login = $('#account-login'); if (login) login.style.display = tab === 'login' ? '' : 'none';
+  const signup = $('#account-signup'); if (signup) signup.style.display = tab === 'signup' ? '' : 'none';
+}
+
+function showCollisionModal(local, cloud) {
+  const col = (s) => {
+    const ur = s.ur || 0;
+    let lr = 0;
+    for (const k of Object.keys(s.unlockedSet || {})) if (k.startsWith('LR_')) lr++;
+    const dup = Object.values(s.dupCounts || {}).reduce((a, b) => a + b, 0);
+    return `<div class="cs-row"><span>ガチャ</span><b>${s.total || 0} 回</b></div>
+            <div class="cs-row"><span>UR</span><b>${ur} 体</b></div>
+            <div class="cs-row"><span>LR</span><b>${lr} 体</b></div>
+            <div class="cs-row"><span>凸合計</span><b>${dup}</b></div>`;
+  };
+  const localEl = $('#collision-local');
+  const cloudEl = $('#collision-cloud');
+  if (localEl) localEl.innerHTML = col(local);
+  if (cloudEl) cloudEl.innerHTML = col(cloud);
+  $('#collision-modal').classList.add('active');
+}
+
+function closeCollisionModal() {
+  const m = $('#collision-modal');
+  if (m) m.classList.remove('active');
+}
+
+function updateAccountButton() {
+  const label = $('#account-label');
+  if (!label) return;
+  label.textContent = authUser ? (authUser.displayName || 'アカウント') : 'ゲスト';
+}
+
+// 簡易トースト (他で showToast 未定義の場合のみ定義)
+if (typeof window.showToast !== 'function') {
+  window.showToast = function(msg) {
+    let t = document.getElementById('_ptoast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = '_ptoast';
+      t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(20,16,40,0.95);color:#fff;padding:12px 20px;border-radius:10px;font-size:14px;z-index:20000;border:1px solid rgba(200,180,255,0.3);box-shadow:0 8px 30px rgba(0,0,0,0.4);opacity:0;transition:opacity 0.3s;pointer-events:none;';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.opacity = '1';
+    clearTimeout(t._h);
+    t._h = setTimeout(() => { t.style.opacity = '0'; }, 2800);
+  };
+}
+
+// アカウント・衝突モーダルのEnter/Escape対応
+document.addEventListener('keydown', e => {
+  const accountModal = document.getElementById('account-modal');
+  const collisionModal = document.getElementById('collision-modal');
+  if (collisionModal && collisionModal.classList.contains('active')) {
+    if (e.key === 'Escape') { e.stopPropagation(); e.preventDefault(); resolveCollision('merge'); }
+    else if (e.key === 'Enter') { e.stopPropagation(); e.preventDefault(); resolveCollision('merge'); }
+    return;
+  }
+  if (accountModal && accountModal.classList.contains('active')) {
+    if (e.key === 'Escape') { e.stopPropagation(); e.preventDefault(); closeAccountModal(); }
+    else if (e.key === 'Enter') {
+      const signup = $('#account-signup');
+      if (signup && signup.style.display !== 'none') { e.stopPropagation(); e.preventDefault(); doAccountSignup(); }
+      else { e.stopPropagation(); e.preventDefault(); doAccountLogin(); }
+    }
+  }
+}, true);
+
+// account-modal の背景クリックで閉じる
+document.addEventListener('DOMContentLoaded', () => {
+  const am = document.getElementById('account-modal');
+  if (am) am.addEventListener('click', e => { if (e.target === am) closeAccountModal(); });
+  const cm = document.getElementById('collision-modal');
+  if (cm) cm.addEventListener('click', e => { if (e.target === cm) { /* 合算をデフォルトとしては閉じるだけに */ } });
+});
