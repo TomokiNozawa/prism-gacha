@@ -449,12 +449,12 @@ function renderUsers(users, uidToNickname) {
     body.appendChild(row);
   });
 
-  const users = entries.length;
-  $('#sum-users').textContent = users;
+  const userCount = entries.length;
+  $('#sum-users').textContent = userCount;
   $('#sum-total').textContent = sumTotal;
-  $('#sum-ur').textContent = users ? `${sumUR}/${users * TIER_MAX.UR}` : '-';
-  $('#sum-lr-holders').textContent = users ? `${lrHolders}/${users}` : '-';
-  $('#sum-story-done').textContent = users ? `${storyDone}/${users}` : '-';
+  $('#sum-ur').textContent = userCount ? `${sumUR}/${userCount * TIER_MAX.UR}` : '-';
+  $('#sum-lr-holders').textContent = userCount ? `${lrHolders}/${userCount}` : '-';
+  $('#sum-story-done').textContent = userCount ? `${storyDone}/${userCount}` : '-';
 }
 
 function buildDetail(u, s) {
