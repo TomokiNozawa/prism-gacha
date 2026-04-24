@@ -7,7 +7,7 @@
 (function applyThemeFromQuery() {
   try {
     const theme = new URLSearchParams(location.search).get('theme');
-    const VALID = ['cosmic', 'dawn', 'aurora', 'pearl'];
+    const VALID = ['cosmic', 'dawn', 'aurora', 'pearl', 'prismatic'];
     if (theme && VALID.includes(theme)) {
       document.body.dataset.theme = theme;
       localStorage.setItem('prism-theme', theme);

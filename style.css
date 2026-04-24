@@ -50,27 +50,30 @@ body.t-1000 #bg-layer {
 
 /* ============ テーマ切替 (URL ?theme=cosmic|dawn|aurora) ============ */
 
-/* A. Cosmic — 濃い紫ベース + 強めオーロラリング */
+/* A. Cosmic — 濃い紫+はっきり見えるオーロラリング */
 body[data-theme="cosmic"] {
   background: #1a0f3a;
 }
 body[data-theme="cosmic"] #bg-layer {
   background:
-    radial-gradient(ellipse at 50% 22%, rgba(200, 125, 255, 0.45) 0%, transparent 40%),
+    radial-gradient(ellipse at 50% 22%, rgba(200, 125, 255, 0.6) 0%, transparent 50%),
+    radial-gradient(ellipse at 30% 70%, rgba(95, 255, 212, 0.25) 0%, transparent 45%),
+    radial-gradient(ellipse at 75% 60%, rgba(255, 95, 170, 0.25) 0%, transparent 45%),
     radial-gradient(ellipse at 50% 35%, #2a1a5a 0%, #1a0f3a 50%, #0a051a 100%);
 }
 body[data-theme="cosmic"]::after {
-  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: -1;
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
   background: conic-gradient(from 0deg at 50% 40%,
-    rgba(255, 95, 170, 0.14),
-    rgba(255, 216, 77, 0.14),
-    rgba(95, 255, 212, 0.14),
-    rgba(126, 168, 255, 0.14),
-    rgba(200, 125, 255, 0.14),
-    rgba(255, 95, 170, 0.14)
+    rgba(255, 95, 170, 0.28),
+    rgba(255, 216, 77, 0.28),
+    rgba(95, 255, 212, 0.28),
+    rgba(126, 168, 255, 0.28),
+    rgba(200, 125, 255, 0.28),
+    rgba(255, 95, 170, 0.28)
   );
-  animation: slow-spin 120s linear infinite;
-  filter: blur(40px);
+  animation: slow-spin 60s linear infinite;
+  filter: blur(20px);
+  mix-blend-mode: screen;
 }
 
 /* D. Pearl — 白+薄紫+金アクセント (ライトテーマ) */
@@ -113,18 +116,54 @@ body[data-theme="dawn"] #bg-layer {
     linear-gradient(180deg, #3a1f5f 0%, #6b2a50 35%, #2a1540 65%, #0a0a1f 100%);
 }
 
-/* C. Aurora — 既存ダーク + 薄いオーロラレイヤー (控えめ) */
+/* C. Aurora — 既存ダーク + オーロラ層(見える強さ) */
+body[data-theme="aurora"] {
+  background: #05060d;
+}
 body[data-theme="aurora"] #bg-layer {
+  background: radial-gradient(ellipse at 50% 30%, #121a36 0%, #05060d 50%, #000 100%);
+}
+body[data-theme="aurora"]::after {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
   background:
-    conic-gradient(from 90deg at 50% 50%,
-      rgba(200, 125, 255, 0.08),
-      rgba(95, 255, 212, 0.08),
-      rgba(126, 168, 255, 0.08),
-      rgba(255, 95, 170, 0.08),
-      rgba(200, 125, 255, 0.08)),
-    radial-gradient(ellipse at 50% 30%, #121a36 0%, #05060d 50%, #000 100%);
-  animation: slow-spin 180s linear infinite;
-  filter: blur(40px);
+    linear-gradient(120deg,
+      transparent 0%,
+      rgba(95, 255, 212, 0.22) 25%,
+      rgba(200, 125, 255, 0.28) 45%,
+      rgba(255, 95, 170, 0.22) 65%,
+      transparent 90%);
+  transform: skewY(-8deg);
+  animation: aurora-drift 18s ease-in-out infinite alternate;
+  mix-blend-mode: screen;
+  filter: blur(30px);
+}
+@keyframes aurora-drift {
+  0%   { transform: skewY(-8deg) translateX(-10%); opacity: 0.9; }
+  50%  { transform: skewY(-6deg) translateX(5%);   opacity: 1; }
+  100% { transform: skewY(-10deg) translateX(-5%); opacity: 0.85; }
+}
+
+/* E. Prismatic — 全体に虹スペクトル */
+body[data-theme="prismatic"] {
+  background: #0a0a1f;
+}
+body[data-theme="prismatic"] #bg-layer {
+  background:
+    conic-gradient(from 0deg at 50% 50%,
+      #ff5faa 0deg,
+      #ff9a4a 60deg,
+      #ffd84d 120deg,
+      #5fffd4 180deg,
+      #7ea8ff 240deg,
+      #c87dff 300deg,
+      #ff5faa 360deg);
+  filter: saturate(1.4) brightness(0.45) blur(60px);
+  animation: slow-spin 80s linear infinite;
+  opacity: 0.95;
+}
+body[data-theme="prismatic"]::after {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background: radial-gradient(ellipse at 50% 40%, transparent 30%, rgba(0,0,15,0.55) 85%);
 }
 
 /* starfield */
