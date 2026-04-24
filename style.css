@@ -48,6 +48,56 @@ body.t-1000 #bg-layer {
 }
 @keyframes slow-spin { to { transform: rotate(360deg); } }
 
+/* ============ テーマ切替 (URL ?theme=cosmic|dawn|aurora) ============ */
+
+/* A. Cosmic — 深インディゴ + オーロラリング + 既存星屑 */
+body[data-theme="cosmic"] {
+  background: #0a0a1f;
+}
+body[data-theme="cosmic"] #bg-layer {
+  background:
+    radial-gradient(ellipse at 50% 25%, rgba(200, 125, 255, 0.22) 0%, transparent 45%),
+    radial-gradient(ellipse at 50% 30%, #1a0f3a 0%, #0a0a1f 60%, #000 100%);
+}
+body[data-theme="cosmic"]::after {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: -1;
+  background: conic-gradient(from 0deg at 50% 40%,
+    rgba(255, 95, 170, 0.06),
+    rgba(255, 216, 77, 0.06),
+    rgba(95, 255, 212, 0.06),
+    rgba(126, 168, 255, 0.06),
+    rgba(200, 125, 255, 0.06),
+    rgba(255, 95, 170, 0.06)
+  );
+  animation: slow-spin 120s linear infinite;
+  filter: blur(50px);
+}
+
+/* B. Dawn — 黄昏/朝焼けグラデーション */
+body[data-theme="dawn"] {
+  background: linear-gradient(180deg, #3a1f5f 0%, #6b2a50 35%, #2a1540 65%, #0a0a1f 100%);
+  background-attachment: fixed;
+}
+body[data-theme="dawn"] #bg-layer {
+  background:
+    radial-gradient(ellipse at 50% 10%, rgba(255, 180, 120, 0.15) 0%, transparent 45%),
+    linear-gradient(180deg, #3a1f5f 0%, #6b2a50 35%, #2a1540 65%, #0a0a1f 100%);
+}
+
+/* C. Aurora — 既存ダーク + 薄いオーロラレイヤー (控えめ) */
+body[data-theme="aurora"] #bg-layer {
+  background:
+    conic-gradient(from 90deg at 50% 50%,
+      rgba(200, 125, 255, 0.08),
+      rgba(95, 255, 212, 0.08),
+      rgba(126, 168, 255, 0.08),
+      rgba(255, 95, 170, 0.08),
+      rgba(200, 125, 255, 0.08)),
+    radial-gradient(ellipse at 50% 30%, #121a36 0%, #05060d 50%, #000 100%);
+  animation: slow-spin 180s linear infinite;
+  filter: blur(40px);
+}
+
 /* starfield */
 body::before {
   content: ""; position: fixed; inset: 0; pointer-events: none; z-index: -1;

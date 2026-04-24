@@ -3,6 +3,22 @@
    ============================================================ */
 "use strict";
 
+// テーマ切替: URL ?theme=cosmic|dawn|aurora で <body data-theme="..."> 付与
+(function applyThemeFromQuery() {
+  try {
+    const theme = new URLSearchParams(location.search).get('theme');
+    if (theme && ['cosmic', 'dawn', 'aurora'].includes(theme)) {
+      document.body.dataset.theme = theme;
+      localStorage.setItem('prism-theme', theme);
+    } else {
+      const saved = localStorage.getItem('prism-theme');
+      if (saved && ['cosmic', 'dawn', 'aurora'].includes(saved)) {
+        document.body.dataset.theme = saved;
+      }
+    }
+  } catch (e) {}
+})();
+
 // ────────────── Character Pool ──────────────
 // 世界観「虹霊界(こうれいかい)」:
 //   世界の中心にある原虹(げんこう)の結晶がすべての光と生命の源。
