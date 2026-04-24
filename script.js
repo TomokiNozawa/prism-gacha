@@ -963,80 +963,107 @@ function envGain(ctx, dest, attack, release, peak = 0.6) {
   return g;
 }
 
-// 虹霊の召喚ベル: クリスタルpentatonic上昇+倍音+残響+shimmer
-function seSummon() {
+// tier別の召喚音 (R=単音 → LR=オクターブpenta+choir+drone+長残響)
+function seSummon(tier) {
   const ctx = getCtx();
   const out = ctx.destination;
 
-  // Master ゲイン
+  // tier別パラメータ (C5=523.25 起点の pentatonic C/E/G/B)
+  const CONFIG = {
+    LR:  { notes: [523.25, 659.25, 783.99, 987.77, 1046.5], drone: true, shimmer: true, pad: true,  delay: 0.08, release: 1.5, fb: 0.45, droneVol: 0.14, masterVol: 0.55 },
+    UR:  { notes: [523.25, 659.25, 783.99, 987.77],          drone: true, shimmer: true, pad: false, delay: 0.06, release: 1.2, fb: 0.35, droneVol: 0.12, masterVol: 0.50 },
+    SSR: { notes: [523.25, 659.25, 783.99],                   drone: false,shimmer: false,pad: false, delay: 0.06, release: 0.95,fb: 0.28, droneVol: 0,    masterVol: 0.45 },
+    SR:  { notes: [523.25, 659.25],                           drone: false,shimmer: false,pad: false, delay: 0.05, release: 0.75,fb: 0.22, droneVol: 0,    masterVol: 0.42 },
+    R:   { notes: [523.25],                                    drone: false,shimmer: false,pad: false, delay: 0,    release: 0.55,fb: 0.15, droneVol: 0,    masterVol: 0.40 },
+  };
+  const cfg = CONFIG[tier] || CONFIG.R;
+
+  // Master
   const master = ctx.createGain();
-  master.gain.value = 0.5;
+  master.gain.value = cfg.masterVol;
   master.connect(out);
 
-  // 残響代わりの feedback delay (神秘的な空間感)
+  // feedback delay (残響)
   const delay = ctx.createDelay(1.0);
   delay.delayTime.value = 0.18;
-  const fb = ctx.createGain();
-  fb.gain.value = 0.32;
-  const delayWet = ctx.createGain();
-  delayWet.gain.value = 0.6;
+  const fb = ctx.createGain(); fb.gain.value = cfg.fb;
+  const delayWet = ctx.createGain(); delayWet.gain.value = 0.6;
   delay.connect(fb).connect(delay);
   delay.connect(delayWet).connect(master);
 
-  // 低域ドローン(原虹の震え)
-  const drone = ctx.createOscillator();
-  drone.type = "sine";
-  drone.frequency.value = 110;
-  const droneG = ctx.createGain();
-  droneG.gain.setValueAtTime(0, ctx.currentTime);
-  droneG.gain.linearRampToValueAtTime(0.12, ctx.currentTime + 0.08);
-  droneG.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.9);
-  drone.connect(droneG).connect(master);
-  drone.start();
-  drone.stop(ctx.currentTime + 1.0);
+  // 低域drone (UR/LR)
+  if (cfg.drone) {
+    const drone = ctx.createOscillator();
+    drone.type = "sine";
+    drone.frequency.value = 110;
+    const dg = ctx.createGain();
+    dg.gain.setValueAtTime(0, ctx.currentTime);
+    dg.gain.linearRampToValueAtTime(cfg.droneVol, ctx.currentTime + 0.08);
+    dg.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (tier === 'LR' ? 1.2 : 0.9));
+    drone.connect(dg).connect(master);
+    drone.start();
+    drone.stop(ctx.currentTime + 1.3);
+  }
 
-  // ベルのpentatonic上昇 (C5, E5, G5, B5) — 崇高・神秘
-  const notes = [523.25, 659.25, 783.99, 987.77];
-  notes.forEach((freq, i) => {
-    const t = ctx.currentTime + i * 0.06;
-    // Fundamental (sine)
+  // choir-like pad (LRのみ)
+  if (cfg.pad) {
+    const pad = ctx.createOscillator();
+    pad.type = "sawtooth";
+    pad.frequency.value = 261.63; // C4
+    const padFilt = ctx.createBiquadFilter();
+    padFilt.type = "lowpass";
+    padFilt.frequency.value = 900;
+    const padG = ctx.createGain();
+    padG.gain.setValueAtTime(0, ctx.currentTime);
+    padG.gain.linearRampToValueAtTime(0.06, ctx.currentTime + 0.15);
+    padG.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.9);
+    pad.connect(padFilt).connect(padG).connect(master);
+    pad.start();
+    pad.stop(ctx.currentTime + 2.0);
+  }
+
+  // ベル (fundamental + inharmonic overtone)
+  const peak = tier === 'R' ? 0.28 : 0.22;
+  cfg.notes.forEach((freq, i) => {
+    const t = ctx.currentTime + i * cfg.delay;
     const o1 = ctx.createOscillator();
     o1.type = "sine";
     o1.frequency.value = freq;
     const g1 = ctx.createGain();
     g1.gain.setValueAtTime(0, t);
-    g1.gain.linearRampToValueAtTime(0.22, t + 0.004);
-    g1.gain.exponentialRampToValueAtTime(0.001, t + 1.1);
+    g1.gain.linearRampToValueAtTime(peak, t + 0.004);
+    g1.gain.exponentialRampToValueAtTime(0.001, t + cfg.release);
     o1.connect(g1);
     g1.connect(master);
-    g1.connect(delay); // 残響へも送る
+    g1.connect(delay);
     o1.start(t);
-    o1.stop(t + 1.2);
-    // Bell inharmonic overtone (2.76x は本物のbell倍音)
+    o1.stop(t + cfg.release + 0.05);
     const o2 = ctx.createOscillator();
     o2.type = "sine";
     o2.frequency.value = freq * 2.76;
     const g2 = ctx.createGain();
     g2.gain.setValueAtTime(0, t);
-    g2.gain.linearRampToValueAtTime(0.07, t + 0.004);
-    g2.gain.exponentialRampToValueAtTime(0.001, t + 0.75);
+    g2.gain.linearRampToValueAtTime(0.06, t + 0.004);
+    g2.gain.exponentialRampToValueAtTime(0.001, t + cfg.release * 0.7);
     o2.connect(g2).connect(master);
     o2.start(t);
-    o2.stop(t + 0.8);
+    o2.stop(t + cfg.release * 0.8);
   });
 
-  // Shimmer air (虹光の粒)
-  const shimmer = ctx.createOscillator();
-  shimmer.type = "triangle";
-  shimmer.frequency.value = 2800;
-  shimmer.frequency.linearRampToValueAtTime(3800, ctx.currentTime + 0.35);
-  const shimG = ctx.createGain();
-  shimG.gain.setValueAtTime(0, ctx.currentTime);
-  shimG.gain.linearRampToValueAtTime(0.05, ctx.currentTime + 0.08);
-  shimG.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.65);
-  shimmer.connect(shimG).connect(master);
-  shimmer.start();
-  shimmer.stop(ctx.currentTime + 0.7);
+  // shimmer (UR/LR)
+  if (cfg.shimmer) {
+    const shimmer = ctx.createOscillator();
+    shimmer.type = "triangle";
+    shimmer.frequency.value = 2800;
+    shimmer.frequency.linearRampToValueAtTime(3800, ctx.currentTime + 0.35);
+    const shimG = ctx.createGain();
+    shimG.gain.setValueAtTime(0, ctx.currentTime);
+    shimG.gain.linearRampToValueAtTime(0.05, ctx.currentTime + 0.08);
+    shimG.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.65);
+    shimmer.connect(shimG).connect(master);
+    shimmer.start();
+    shimmer.stop(ctx.currentTime + 0.7);
+  }
 }
 
 // 高音キラ＋和音(fanfare for SSR/UR)
@@ -1096,9 +1123,9 @@ function seCrack() {
   o.stop(ctx.currentTime + 0.3);
 }
 
-function play(kind) {
+function play(kind, tier) {
   try {
-    if (kind === "se-summon") seSummon();
+    if (kind === "se-summon") seSummon(tier);
     else if (kind === "se-fanfare") seFanfare();
     else if (kind === "se-crack") seCrack();
   } catch (e) { console.warn("sound err", e); }
@@ -1310,7 +1337,7 @@ async function summonTypeD(result, tier) {
   if (checkSkip()) return;
   // ため (静寂と画面震え) — セリフを同時表示して脳汁ピーク前の溜めとする
   stage.classList.add("charge-up");
-  play("se-summon");
+  play("se-summon", tier);
   if (result && result.caption) {
     showQuote(result.caption);
     await sleep(2800); // セリフをじっくり読ませる (charge-up と同時進行)
@@ -1356,7 +1383,7 @@ async function summonTypeF(result, tier) {
   if (checkSkip()) { cutinExit(bars); return; }
   // ため (バーが交差した状態で静寂、charge-up) — UR/LR ならセリフ同期
   stage.classList.add("charge-up");
-  play("se-summon");
+  play("se-summon", tier);
   if ((tier === "UR" || tier === "LR") && result && result.caption) {
     showQuote(result.caption);
     await sleep(2800);
@@ -1415,12 +1442,12 @@ async function summonOne(result, opts = {}) {
   // ─ 溜め: SSR/UR/LRは長めの沈黙で期待感 ─
   if (isHigh) {
     stage.classList.add("charge-up");
-    play("se-summon");
+    play("se-summon", tier);
     await sleep(tier === "LR" ? 1200 : tier === "UR" ? 850 : 600);
     stage.classList.remove("charge-up");
     if (checkSkip()) return finalize(result);
   } else {
-    play("se-summon");
+    play("se-summon", tier);
     await sleep(150);
     if (checkSkip()) return finalize(result);
   }
@@ -1619,7 +1646,7 @@ async function doTen() {
   // 10連イントロ「× 10」
   setStageTier(best.tier);
   showTenIntro();
-  play("se-summon");
+  play("se-summon", best.tier);
   await sleep(1100);
   // 一度クリックしたら 10連終了まで「スキップモード」を維持。
   // SSR以上だけは演出を完走するが、終了後も skip モードは保持し、後続R/SRは飛ばす。
