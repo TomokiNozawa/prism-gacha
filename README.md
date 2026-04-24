@@ -1,16 +1,18 @@
 # Prismaera
 
-課金なしで「脳汁体験」だけを浴びるブラウザガチャ+物語シミュ(旧称: Prism Gacha)。
+課金なし・ブラウザ完結のガチャ+物語シミュ(旧称: Prism Gacha)。
 + タワーディフェンスゲーム **Prism Defense** も同梱。
 
 ## バージョニング
 
-`v{Season}.{公開済み章数}[.patch]`
+現在のバージョン: **v1.1.1** (Season 1 第1章公開 + patch 1)
 
-- **v1.1** = Season 1 の第1章まで公開 (現在地)
-- **v1.2** = Season 1 の第2章追加
-- **v2.1** = Season 2 第1章 (新シーズン突入時はSeasonを繰り上げ、章カウントを1からリセット)
-- **v1.1.1** 等の3段目 = 章追加を伴わないマイナーアップデート(バグ修正/UI改善/新機能)
+`v{Season}.{公開済み章数}.{patch}` — 詳細ルールは [`VERSIONING.md`](VERSIONING.md) を参照。
+
+- Season桁 bump = 新Season突入 (章リセット)
+- 章桁 bump = 新章追加
+- patch桁 bump = バグ修正/UI改善/新機能(章追加なし)
+- 更新は `python scripts/bump_version.py {patch|chapter|season} --note "..."` で自動同期
 
 Prism Defense はサブブランドとして独自バージョン(v1.0〜)で管理。
 
@@ -41,11 +43,15 @@ Prism Defense はサブブランドとして独自バージョン(v1.0〜)で管
 ```
 gacha-sim/
 ├── DESIGN.md           設計書 (全体方針)
+├── VERSIONING.md       バージョン管理ルール
 ├── README.md           この資料
-├── prompts.md          画像生成プロンプト集
+├── version.json        バージョン情報 (単一ソース、更新通知で使用)
 ├── index.html          エントリポイント
 ├── script.js           ゲームロジック
 ├── style.css           スタイル
+│
+├── scripts/
+│   └── bump_version.py  バージョン自動bumpスクリプト
 ├── .gitignore
 ├── .nojekyll           GitHub Pages 用
 │
@@ -69,7 +75,10 @@ gacha-sim/
 │
 ├── STORY/              ストーリー文書
 │   ├── outline.md      21章アウトライン
-│   └── s1c1.md         Season1 第1章本文
+│   ├── s1c1.md         Season1 第1章本文
+│   └── prompts/
+│       ├── _common.md  画像プロンプト共通テンプレ
+│       └── s1c1.md     第1章 画像プロンプト集 (旧 /prompts.md から移行)
 │
 └── td/                 Prism Defense (TDゲーム)
     ├── index.html

@@ -1,0 +1,30 @@
+{
+  "version": "1.1.1",
+  "releasedAt": "2026-04-25",
+  "changelog": [
+    {
+      "version": "1.1.1",
+      "date": "2026-04-25",
+      "type": "patch",
+      "notes": [
+        "アプリ名を「Prismaera」に統一(内部表記整理)",
+        "起動時に最新バージョンを自動検知して通知するようにしました",
+        "バージョン管理ルールを整備(VERSIONING.md / scripts/bump_version.py)"
+      ]
+    },
+    {
+      "version": "1.1.0",
+      "date": "2026-04-24",
+      "type": "major",
+      "notes": [
+        "Prism Gacha → Prismaera にリブランド",
+        "アカウント機能を追加(nickname + 合言葉でどの端末からでもデータ引き継ぎ)",
+        "管理画面を追加(野沢専用)",
+        "PWA対応(ホーム画面に追加可能)",
+        "BGM切替UI追加(Prism Dawn / Prism Watch の2曲)",
+        "aurora テーマに統一",
+        "ガチャ音をキャラレア度別に刷新(R=単音〜LR=5音+choir pad)"
+      ]
+    }
+  ]
+}

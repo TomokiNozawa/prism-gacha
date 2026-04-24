@@ -1,7 +1,8 @@
 {
   "name": "Prismaera",
   "short_name": "Prismaera",
-  "description": "虹霊界の物語とガチャとタワーディフェンスが融合した脳汁体験",
+  "description": "虹霊界の物語とガチャとタワーディフェンスが融合したブラウザ体験",
+  "version": "1.1.1",
   "start_url": "/prism-gacha/",
   "scope": "/prism-gacha/",
   "display": "standalone",

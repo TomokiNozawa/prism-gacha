@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.1 — 脳汁ロジック (Season 1 第1章)
+   Prismaera v1.1.1 — 演出&ゲームロジック (Season 1 第1章)
    ============================================================ */
 "use strict";
 
@@ -1223,7 +1223,7 @@ const ORB_COLOR = { R: "#6fa8ff", SR: "#c87dff", SSR: "#ffd96a", UR: "#ff5faa", 
 
 // ────────────── Summon 各タイプ ──────────────
 
-// Type Z: R/SR専用 直接登場 (脳汁演出なし、粒子少量 + 軽flash)
+// Type Z: R/SR専用 直接登場 (過剰演出なし、粒子少量 + 軽flash)
 async function summonTypeZ(result, tier) {
   setStageTier(tier);
   showPillar(tier);
@@ -1270,7 +1270,7 @@ async function summonTypeB(result, tier) {
     await sleep(520); // ladder 1段あたり長め
     if (checkSkip()) { orbBurst(orb); return; }
   }
-  // 偽位置で停滞 (脳汁ピーク前の静寂)
+  // 偽位置で停滞 (演出ピーク前の静寂)
   stage.classList.add("charge-up");
   await sleep(600);
   stage.classList.remove("charge-up");
@@ -1339,7 +1339,7 @@ async function summonTypeD(result, tier) {
   showRing();
   await sleep(1000);
   if (checkSkip()) return;
-  // ため (静寂と画面震え) — セリフを同時表示して脳汁ピーク前の溜めとする
+  // ため (静寂と画面震え) — セリフを同時表示して演出ピーク前の溜めとする
   stage.classList.add("charge-up");
   play("se-summon", tier);
   if (result && result.caption) {
@@ -1424,7 +1424,7 @@ function pickWeighted(weights) {
 function pickSummonType(tier, opts) {
   // 10連目 (tenFlag) で R/SR の場合は Type A (オーブ昇格、シンプル) で華を持たせる
   if (opts.tenFlag && (tier === "R" || tier === "SR")) return "A";
-  // R/SR (通常時) は脳汁演出なし、直接登場タイプ
+  // R/SR (通常時) は過剰演出なし、直接登場タイプ
   if (tier === "R") return "Z";
   if (tier === "SR") return "Z";
   // SSR: 軽量寄りミックス。E(金portal)/Z(柱) は SSR 専用。A/C も SSR 用
@@ -1488,7 +1488,7 @@ async function summonOne(result, opts = {}) {
 
   // ────────── レア度別の追加派手演出 ──────────
   if (tier === "LR") {
-    // ━━━ 超超脳汁 LEGEND 専用フルコース ━━━
+    // ━━━ 最上級 LEGEND 専用フルコース ━━━
     // UR と似るがすべての時間と量を増幅、さらに LEGEND テロップ
     showRainbowBg(7500);
     showGodRays(true, 7500);
@@ -1525,7 +1525,7 @@ async function summonOne(result, opts = {}) {
     setTimeout(() => stage.classList.remove("zoom-in"), 1400);
     await sleep(700);
   } else if (tier === "UR") {
-    // ━━━ 超脳汁フルコース ━━━
+    // ━━━ UR専用フルコース ━━━
     // 1. 全面虹背景 + 虹ゴッドレイ（長め）
     showRainbowBg(5500);
     showGodRays(true, 5500);
@@ -3873,3 +3873,120 @@ document.addEventListener('DOMContentLoaded', () => {
   const am = document.getElementById('account-modal');
   if (am) am.addEventListener('click', e => { if (e.target === am) closeAccountModal(); });
 });
+
+// ============================================================
+// バージョン通知: version.json と localStorage を比較して
+// 差分があれば更新モーダルを表示 (初回アクセスは通知スキップ)
+// ============================================================
+const PRISMAERA_VERSION_LS_KEY = 'prismaera-last-seen-version';
+let _prismaeraChangelogCache = null;
+let _prismaeraTargetVersion = null;
+
+async function checkPrismaeraVersion() {
+  try {
+    const res = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
+    if (!res.ok) return;
+    const data = await res.json();
+    const currentVer = data.version;
+    const changelog = Array.isArray(data.changelog) ? data.changelog : [];
+    _prismaeraChangelogCache = changelog;
+
+    // ヘッダーのバージョン表記を version.json で上書き
+    const verEl = document.getElementById('app-version');
+    if (verEl) verEl.textContent = 'v' + currentVer;
+
+    let lastSeen = null;
+    try { lastSeen = localStorage.getItem(PRISMAERA_VERSION_LS_KEY); } catch (e) {}
+
+    // 初回アクセスは通知せず現バージョンを保存 (スパム防止)
+    if (!lastSeen) {
+      try { localStorage.setItem(PRISMAERA_VERSION_LS_KEY, currentVer); } catch (e) {}
+      return;
+    }
+    if (lastSeen === currentVer) return;
+
+    showPrismaeraUpdateModal(lastSeen, currentVer, changelog);
+  } catch (e) {
+    console.warn('[prismaera] version check failed', e);
+  }
+}
+
+function showPrismaeraUpdateModal(fromVer, toVer, changelog) {
+  const modal = document.getElementById('update-modal');
+  if (!modal) return;
+
+  _prismaeraTargetVersion = toVer;
+
+  const fromEl = document.getElementById('update-from');
+  const toEl = document.getElementById('update-to');
+  if (fromEl) fromEl.textContent = 'v' + fromVer;
+  if (toEl) toEl.textContent = 'v' + toVer;
+
+  const notesUl = document.getElementById('update-notes');
+  if (notesUl) {
+    notesUl.innerHTML = '';
+    const latest = changelog.find(c => c && c.version === toVer) || changelog[0];
+    const notes = latest && Array.isArray(latest.notes) ? latest.notes : [];
+    notes.forEach(n => {
+      const li = document.createElement('li');
+      li.textContent = n;
+      notesUl.appendChild(li);
+    });
+  }
+
+  const histEl = document.getElementById('update-history');
+  if (histEl) {
+    histEl.innerHTML = '';
+    histEl.style.display = 'none';
+    changelog.forEach(entry => {
+      if (!entry) return;
+      const section = document.createElement('div');
+      section.className = 'update-history-entry';
+      const h = document.createElement('div');
+      h.className = 'update-history-head';
+      h.textContent = 'v' + entry.version + ' (' + (entry.date || '') + ')';
+      section.appendChild(h);
+      const ul = document.createElement('ul');
+      (entry.notes || []).forEach(n => {
+        const li = document.createElement('li');
+        li.textContent = n;
+        ul.appendChild(li);
+      });
+      section.appendChild(ul);
+      histEl.appendChild(section);
+    });
+  }
+
+  modal.style.display = 'flex';
+  document.body.classList.add('modal-open');
+}
+
+function dismissUpdateModal(reload) {
+  const modal = document.getElementById('update-modal');
+  if (!modal) return;
+  try {
+    if (_prismaeraTargetVersion) {
+      localStorage.setItem(PRISMAERA_VERSION_LS_KEY, _prismaeraTargetVersion);
+    }
+  } catch (e) {}
+  modal.style.display = 'none';
+  document.body.classList.remove('modal-open');
+  if (reload) {
+    // PWA/ServiceWorkerキャッシュ破棄目的で location.reload(true)
+    // (引数は新ブラウザで非対応でも location.reload() に fallback)
+    try { location.reload(true); } catch (e) { location.reload(); }
+  }
+}
+
+function toggleUpdateHistory() {
+  const hist = document.getElementById('update-history');
+  if (!hist) return;
+  hist.style.display = (hist.style.display === 'none') ? 'block' : 'none';
+}
+
+// 起動時に version.json をチェック
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', checkPrismaeraVersion);
+} else {
+  checkPrismaeraVersion();
+}

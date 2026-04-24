@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.1 — 脳汁演出 (Season 1 第1章)
+   Prismaera v1.1.1 — 演出スタイル (Season 1 第1章)
    ============================================================ */
 :root {
   --bg: #05060d;
@@ -574,7 +574,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 @keyframes flash-mid  { 0%{opacity:0;} 25%{opacity:0.6;}  100%{opacity:0;} }
 @keyframes flash-hard { 0%{opacity:0;} 20%{opacity:0.85;} 100%{opacity:0;} }
 
-/* ======= 脳汁強化VFX ======= */
+/* ======= 強化VFX ======= */
 
 /* 煽りテキスト: 「SR確定...?」など沈黙中の表示 */
 .fx-taunt {
@@ -1008,7 +1008,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   100% { opacity: 1; transform: scale(1.05); }
 }
 
-/* ───── UR超脳汁: 紙吹雪 / 虹大円環 / MIRACLEテロップ ───── */
+/* ───── UR超演出: 紙吹雪 / 虹大円環 / MIRACLEテロップ ───── */
 
 .fx-confetti {
   position: absolute; inset: 0;
@@ -2982,4 +2982,131 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 .account-prompt-btn.secondary:hover {
   background: rgba(255, 255, 255, 0.14);
   border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* ───── Update Notification Modal ───── */
+.update-modal {
+  position: fixed; inset: 0;
+  display: none;
+  align-items: center; justify-content: center;
+  background: rgba(5, 6, 13, 0.88);
+  backdrop-filter: blur(6px);
+  z-index: 10000;
+  padding: 16px;
+}
+.update-inner {
+  width: min(92vw, 480px);
+  max-height: 88vh;
+  overflow-y: auto;
+  background: linear-gradient(165deg, rgba(25, 18, 48, 0.96), rgba(10, 10, 31, 0.98));
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  border-radius: 18px;
+  padding: 28px 24px 24px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(139, 92, 246, 0.15) inset;
+  color: #e8e8ff;
+}
+.update-badge {
+  display: inline-block;
+  font-size: 11px; letter-spacing: 0.12em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #8b5cf6, #ec4899);
+  color: #fff;
+  margin-bottom: 10px;
+}
+.update-title {
+  font-size: 18px;
+  margin: 0 0 14px;
+  color: #fff;
+}
+.update-version {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 14px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+.update-version #update-from { color: rgba(255, 255, 255, 0.5); }
+.update-arrow { color: rgba(255, 255, 255, 0.4); }
+.update-to {
+  color: #fff;
+  font-weight: 600;
+  background: linear-gradient(90deg, #c4b5fd, #f9a8d4);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.update-section-label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 6px;
+}
+.update-notes {
+  margin: 0 0 20px;
+  padding-left: 1.1em;
+  line-height: 1.7;
+  font-size: 14px;
+}
+.update-notes li { margin-bottom: 4px; }
+.update-actions {
+  display: flex; gap: 10px;
+  margin-bottom: 12px;
+}
+.update-btn {
+  flex: 1;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 14px; font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+}
+.update-btn.secondary {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.85);
+}
+.update-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+.update-btn.primary {
+  background: linear-gradient(90deg, #8b5cf6, #ec4899);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.35);
+}
+.update-btn.primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+}
+.update-history-toggle { text-align: center; }
+.update-history-btn {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px 10px;
+}
+.update-history-btn:hover { color: #fff; }
+.update-history {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  max-height: 40vh;
+  overflow-y: auto;
+}
+.update-history-entry { margin-bottom: 14px; }
+.update-history-head {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(196, 181, 253, 0.95);
+  margin-bottom: 4px;
+}
+.update-history ul {
+  margin: 0; padding-left: 1.1em;
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.75);
 }

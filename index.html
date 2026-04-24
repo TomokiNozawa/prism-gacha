@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Prismaera — 脳汁体験</title>
+<title>Prismaera</title>
 <meta name="description" content="Prismaera — 虹霊界の物語とガチャとタワーディフェンス">
 <meta property="og:title" content="Prismaera">
 <meta property="og:description" content="虹霊界の物語とガチャの複合体験">
@@ -24,7 +24,7 @@
 <div id="bg-layer"></div>
 
 <header class="topbar">
-  <div class="title">✦ Prismaera <span class="ver">v1.1</span></div>
+  <div class="title">✦ Prismaera <span class="ver" id="app-version">v1.1.1</span></div>
   <div class="stats">
     <span class="stat" title="累計ガチャ回数">累計 <b id="stat-total">0</b></span>
     <span class="stat" title="虹(UR)出現数">🌈 <b id="stat-ur">0</b></span>
@@ -304,6 +304,29 @@
     </div>
     <div class="bgm-section-label">再生候補 (チェックを付けた曲がローテーション対象)</div>
     <div class="bgm-list" id="bgm-list"></div>
+  </div>
+</div>
+
+<!-- Update Notification Modal -->
+<div id="update-modal" class="update-modal" style="display:none">
+  <div class="update-inner">
+    <div class="update-badge">✨ アップデート</div>
+    <h2 class="update-title">新しいバージョンが届きました</h2>
+    <div class="update-version">
+      <span id="update-from">v-.-.-.</span>
+      <span class="update-arrow">→</span>
+      <span id="update-to" class="update-to">v-.-.-.</span>
+    </div>
+    <div class="update-section-label">変更内容</div>
+    <ul id="update-notes" class="update-notes"></ul>
+    <div class="update-actions">
+      <button class="update-btn secondary" onclick="dismissUpdateModal(false)">あとで見る</button>
+      <button class="update-btn primary" onclick="dismissUpdateModal(true)">今すぐ最新版で遊ぶ</button>
+    </div>
+    <div class="update-history-toggle">
+      <button class="update-history-btn" onclick="toggleUpdateHistory()">📜 履歴をすべて見る</button>
+    </div>
+    <div id="update-history" class="update-history" style="display:none"></div>
   </div>
 </div>
 

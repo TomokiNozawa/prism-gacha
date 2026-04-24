@@ -249,7 +249,19 @@
 
 ---
 
-## 13. 確定済みUI仕様
+## 13. バージョン管理
+
+詳細ルールは `VERSIONING.md` を参照。
+
+- 形式: `v{Season}.{公開章数}.{patch}` (例: v1.1.1)
+- 単一ソース: `/version.json` (他ファイルはここから同期)
+- 自動bump: `scripts/bump_version.py`
+- 更新通知: 起動時に `version.json` を fetch → `localStorage` の `prismaera-last-seen-version` と比較 → 差分あれば更新モーダル表示
+- 2端末編集時は必ず片PCで `git pull` → bump → push → もう片方も即pull
+
+---
+
+## 14. 確定済みUI仕様
 
 ### ガチャ演出
 - 7種類 (Z/A/B/C/D/E/F) — 軽量〜重量
