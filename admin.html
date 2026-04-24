@@ -304,6 +304,9 @@ let currentUid = null;
 let isAdmin = false;
 const $ = s => document.querySelector(s);
 
+// Season1 定員 (キャラマスター)
+const TIER_MAX = { LR: 1, UR: 5, SSR: 8, SR: 10, R: 6 };
+
 function nicknameToEmail(nickname) {
   const bytes = new TextEncoder().encode(nickname);
   let bin = '';
@@ -417,13 +420,23 @@ function renderUsers(users, uidToNickname) {
     if (sp.s1c1 && sp.s1c1.completed) storyDone++;
 
     const isMe = u.uid === currentUid;
+    // 所持種別カウント
+    let ssrOwn = 0, srOwn = 0, rOwn = 0;
+    for (const k of Object.keys(s.unlockedSet || {})) {
+      if (k.startsWith('SSR_')) ssrOwn++;
+      else if (k.startsWith('SR_')) srOwn++;
+      else if (k.startsWith('R_')) rOwn++;
+    }
+    const allOwn = ur + lr + ssrOwn + srOwn + rOwn;
+    const allMax = TIER_MAX.LR + TIER_MAX.UR + TIER_MAX.SSR + TIER_MAX.SR + TIER_MAX.R;
+
     const row = document.createElement('div');
     row.className = 'users-row';
     row.innerHTML = `
       <div class="u-nickname ${isMe ? 'me' : ''}">${escapeHtml(nickname)}</div>
       <div class="u-count ${total === 0 ? 'dim' : ''}">${total}</div>
-      <div class="u-count col-ur ${ur === 0 ? 'dim' : ''}">${ur}</div>
-      <div class="u-count col-lr ${lr === 0 ? 'dim' : ''}">${lr}</div>
+      <div class="u-count col-ur ${ur === 0 ? 'dim' : ''}">${ur}/${TIER_MAX.UR}</div>
+      <div class="u-count col-lr ${lr === 0 ? 'dim' : ''}">${lr}/${TIER_MAX.LR}</div>
       <div class="u-count col-dup ${dup === 0 ? 'dim' : ''}">${dup}</div>
       <div class="u-lastlogin col-lastlogin">${lastAt}</div>
     `;
@@ -435,11 +448,12 @@ function renderUsers(users, uidToNickname) {
     body.appendChild(row);
   });
 
-  $('#sum-users').textContent = entries.length;
+  const users = entries.length;
+  $('#sum-users').textContent = users;
   $('#sum-total').textContent = sumTotal;
-  $('#sum-ur').textContent = sumUR;
-  $('#sum-lr-holders').textContent = lrHolders;
-  $('#sum-story-done').textContent = storyDone;
+  $('#sum-ur').textContent = users ? `${sumUR}/${users * TIER_MAX.UR}` : '-';
+  $('#sum-lr-holders').textContent = users ? `${lrHolders}/${users}` : '-';
+  $('#sum-story-done').textContent = users ? `${storyDone}/${users}` : '-';
 }
 
 function buildDetail(u, s) {
@@ -448,10 +462,16 @@ function buildDetail(u, s) {
   const createdAt = u.createdAt ? new Date(u.createdAt).toLocaleString('ja-JP') : '-';
   const lastAt = u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleString('ja-JP') : '-';
   const updatedAt = s.updatedAt ? new Date(s.updatedAt).toLocaleString('ja-JP') : '-';
-  let lrNames = [];
-  for (const k of Object.keys(s.unlockedSet || {})) if (k.startsWith('LR_')) lrNames.push(k.replace('LR_', ''));
-  let urNames = [];
-  for (const k of Object.keys(s.unlockedSet || {})) if (k.startsWith('UR_')) urNames.push(k.replace('UR_', ''));
+  let lrNames = [], urNames = [], ssrCount = 0, srCount = 0, rCount = 0;
+  for (const k of Object.keys(s.unlockedSet || {})) {
+    if (k.startsWith('LR_')) lrNames.push(k.replace('LR_', ''));
+    else if (k.startsWith('UR_')) urNames.push(k.replace('UR_', ''));
+    else if (k.startsWith('SSR_')) ssrCount++;
+    else if (k.startsWith('SR_')) srCount++;
+    else if (k.startsWith('R_')) rCount++;
+  }
+  const totalOwn = lrNames.length + urNames.length + ssrCount + srCount + rCount;
+  const totalMax = TIER_MAX.LR + TIER_MAX.UR + TIER_MAX.SSR + TIER_MAX.SR + TIER_MAX.R;
 
   let storyHtml = '';
   const sp = s.storyProgress || {};
@@ -475,8 +495,12 @@ function buildDetail(u, s) {
     <div class="detail-row"><span>最終ログイン</span><b>${lastAt}</b></div>
     <div class="detail-row"><span>最終state同期</span><b>${updatedAt}</b></div>
     <div class="detail-row"><span>天井カウント</span><b>${s.pity || 0} / 180</b></div>
-    <div class="detail-row"><span>獲得LR</span><b>${lrNames.length ? lrNames.join(', ') : '-'}</b></div>
-    <div class="detail-row"><span>獲得UR</span><b>${urNames.length ? urNames.join(', ') : '-'}</b></div>
+    <div class="detail-row"><span>所持キャラ総数</span><b>${totalOwn}/${totalMax}</b></div>
+    <div class="detail-row"><span>LR (${lrNames.length}/${TIER_MAX.LR})</span><b>${lrNames.length ? lrNames.join(', ') : '-'}</b></div>
+    <div class="detail-row"><span>UR (${urNames.length}/${TIER_MAX.UR})</span><b>${urNames.length ? urNames.join(', ') : '-'}</b></div>
+    <div class="detail-row"><span>SSR</span><b>${ssrCount}/${TIER_MAX.SSR}</b></div>
+    <div class="detail-row"><span>SR</span><b>${srCount}/${TIER_MAX.SR}</b></div>
+    <div class="detail-row"><span>R</span><b>${rCount}/${TIER_MAX.R}</b></div>
     <h4 style="margin-top:12px">ストーリー進捗</h4>
     <div class="detail-story-list">${storyHtml}</div>
   `;
