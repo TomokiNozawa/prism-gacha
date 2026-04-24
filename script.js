@@ -1657,6 +1657,8 @@ function showResult(results, best) {
     const c = document.createElement("div");
     c.className = "rcard " + r.tier.toLowerCase();
     c.style.backgroundImage = `url('${r.img}')`;
+    c.style.cursor = 'pointer';
+    c.addEventListener('click', () => showCharDetail(r));
     if (r.isNew) {
       const nb = document.createElement("div");
       nb.className = "rcard-new";
