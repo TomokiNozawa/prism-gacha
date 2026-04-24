@@ -3261,13 +3261,21 @@ $("#bgm-panel").addEventListener('click', e => { if (e.target.id === 'bgm-panel'
 loadBgmSrc(bgmCurrentId);
 updateBgmHeaderBtn();
 
-// 初回ユーザー操作で enabled 復活再生
+// 初回ユーザー操作で enabled 復活再生 (ブラウザautoplay制約回避)
+// click/pointerdown/touchstart/keydown/scroll どれか1つでも発火したら起動
 if (bgmEnabled) {
-  document.addEventListener("click", function startBgmOnce() {
-    if (bgmEnabled) bgmAudio.play().catch(() => {});
+  const bgmAutoplayEvents = ['click', 'pointerdown', 'touchstart', 'keydown', 'scroll'];
+  function startBgmOnce() {
+    if (bgmEnabled && bgmAudio.paused) {
+      bgmAudio.play().catch(() => {});
+    }
     updateBgmHeaderBtn();
-    document.removeEventListener("click", startBgmOnce);
-  }, { once: true });
+    renderBgmPanel();
+    bgmAutoplayEvents.forEach(ev => document.removeEventListener(ev, startBgmOnce, true));
+  }
+  bgmAutoplayEvents.forEach(ev => {
+    document.addEventListener(ev, startBgmOnce, { once: true, passive: true, capture: true });
+  });
 }
 $("#relations").addEventListener("click", e => { if (e.target.id === "relations") closeRelations(); });
 $("#gallery").addEventListener("click", e => { if (e.target.id === "gallery") closeGallery(); });
