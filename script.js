@@ -3179,6 +3179,8 @@ try {
       authUser = user;
       updateAccountButton();
       if (user && !signupInProgress) { await onAuthReady(user); }
+      // admin判定も並列で (失敗してもUIには影響しない)
+      checkPrismAdmin();
       // 初回auth state確定後(login or ゲスト)にprompt表示判定
       if (!initialAuthCheckDone) {
         initialAuthCheckDone = true;
@@ -3552,6 +3554,23 @@ function updateAccountButton() {
   const label = $('#account-label');
   if (!label) return;
   label.textContent = authUser ? (authUser.displayName || 'アカウント') : 'ゲスト';
+  // Admin リンクは authUser & admin判定済みの場合のみ表示
+  const adminBtn = document.getElementById('btn-admin');
+  if (adminBtn) {
+    adminBtn.style.display = (authUser && isPrismAdmin) ? '' : 'none';
+  }
+}
+
+let isPrismAdmin = false;
+async function checkPrismAdmin() {
+  if (!authUser || !fbDb) { isPrismAdmin = false; return; }
+  try {
+    const snap = await fbDb.ref('prism-gacha/_meta/admins/' + authUser.uid).once('value');
+    isPrismAdmin = !!snap.val();
+  } catch (e) {
+    isPrismAdmin = false;
+  }
+  updateAccountButton();
 }
 
 // ────────────── Account Prompt (既存ゲスト進捗ありユーザーへの案内) ──────────────
