@@ -3166,7 +3166,6 @@ const FIREBASE_CONFIG = {
 };
 const EMAIL_DOMAIN = '@prism-gacha.internal';
 let fbApp = null, fbAuth = null, fbDb = null, authUser = null;
-let pendingCloudState = null, pendingLocalState = null;
 let signupInProgress = false;
 let initialAuthCheckDone = false;
 
@@ -3399,9 +3398,12 @@ async function onAuthReady(user) {
     const collision = localHasProgress && cloudTotal > 0 && !statesEqual(state, cloudState);
 
     if (collision) {
-      pendingCloudState = cloudState;
-      pendingLocalState = JSON.parse(JSON.stringify(state));
-      showCollisionModal(state, cloudState);
+      // 差分あり → 無言で合算 (両者のmax/unionを取り、損失なし)
+      const merged = mergeStates(state, cloudState);
+      applyCloudState(merged);
+      await saveStateCloud();
+      showToast('データを最新化しました');
+      try { await fbDb.ref('prism-gacha/users/' + user.uid + '/lastLoginAt').set(Date.now()); } catch (e) {}
       return;
     }
 
@@ -3468,24 +3470,7 @@ function mergeStates(local, cloud) {
   return merged;
 }
 
-function resolveCollision(choice) {
-  if (!pendingCloudState || !pendingLocalState) {
-    closeCollisionModal();
-    return;
-  }
-  if (choice === 'merge') {
-    const merged = mergeStates(pendingLocalState, pendingCloudState);
-    applyCloudState(merged);
-    saveStateCloud();
-    showToast('合算して保存しました');
-  } else if (choice === 'cloud') {
-    applyCloudState(pendingCloudState);
-    showToast('アカウントの進捗を使います');
-  }
-  pendingCloudState = null;
-  pendingLocalState = null;
-  closeCollisionModal();
-}
+// (衝突モーダル廃止: ログイン時に差分あれば自動合算→トースト表示)
 
 // ────────────── UI handlers ──────────────
 function showAccountModal() {
@@ -3532,28 +3517,7 @@ function switchAccountTab(tab) {
   const signup = $('#account-signup'); if (signup) signup.style.display = tab === 'signup' ? '' : 'none';
 }
 
-function showCollisionModal(local, cloud) {
-  const col = (s) => {
-    const ur = s.ur || 0;
-    let lr = 0;
-    for (const k of Object.keys(s.unlockedSet || {})) if (k.startsWith('LR_')) lr++;
-    const dup = Object.values(s.dupCounts || {}).reduce((a, b) => a + b, 0);
-    return `<div class="cs-row"><span>ガチャ</span><b>${s.total || 0} 回</b></div>
-            <div class="cs-row"><span>UR</span><b>${ur} 体</b></div>
-            <div class="cs-row"><span>LR</span><b>${lr} 体</b></div>
-            <div class="cs-row"><span>凸合計</span><b>${dup}</b></div>`;
-  };
-  const localEl = $('#collision-local');
-  const cloudEl = $('#collision-cloud');
-  if (localEl) localEl.innerHTML = col(local);
-  if (cloudEl) cloudEl.innerHTML = col(cloud);
-  $('#collision-modal').classList.add('active');
-}
-
-function closeCollisionModal() {
-  const m = $('#collision-modal');
-  if (m) m.classList.remove('active');
-}
+// (showCollisionModal / closeCollisionModal は廃止)
 
 function updateAccountButton() {
   const label = $('#account-label');
@@ -3627,15 +3591,9 @@ if (typeof window.showToast !== 'function') {
   };
 }
 
-// アカウント・衝突モーダルのEnter/Escape対応
+// アカウントモーダルのEnter/Escape対応
 document.addEventListener('keydown', e => {
   const accountModal = document.getElementById('account-modal');
-  const collisionModal = document.getElementById('collision-modal');
-  if (collisionModal && collisionModal.classList.contains('active')) {
-    if (e.key === 'Escape') { e.stopPropagation(); e.preventDefault(); resolveCollision('merge'); }
-    else if (e.key === 'Enter') { e.stopPropagation(); e.preventDefault(); resolveCollision('merge'); }
-    return;
-  }
   if (accountModal && accountModal.classList.contains('active')) {
     if (e.key === 'Escape') { e.stopPropagation(); e.preventDefault(); closeAccountModal(); }
     else if (e.key === 'Enter') {
@@ -3650,6 +3608,4 @@ document.addEventListener('keydown', e => {
 document.addEventListener('DOMContentLoaded', () => {
   const am = document.getElementById('account-modal');
   if (am) am.addEventListener('click', e => { if (e.target === am) closeAccountModal(); });
-  const cm = document.getElementById('collision-modal');
-  if (cm) cm.addEventListener('click', e => { if (e.target === cm) { /* 合算をデフォルトとしては閉じるだけに */ } });
 });

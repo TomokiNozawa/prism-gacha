@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Prism Gacha — 脳汁体験</title>
-<link rel="stylesheet" href="style.css?v=20260424o">
+<link rel="stylesheet" href="style.css?v=20260424p">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -272,35 +272,12 @@
   </div>
 </div>
 
-<!-- Collision Modal (Cloud ↔ Local 衝突時) -->
-<div id="collision-modal" class="collision-modal">
-  <div class="collision-inner">
-    <h2 class="collision-title">このブラウザにも進捗があります</h2>
-    <p class="collision-hint">どちらを使いますか？</p>
-    <div class="collision-compare">
-      <div class="collision-col">
-        <div class="collision-label">このブラウザ</div>
-        <div class="collision-stats" id="collision-local"></div>
-      </div>
-      <div class="collision-divider">vs</div>
-      <div class="collision-col">
-        <div class="collision-label">アカウント</div>
-        <div class="collision-stats" id="collision-cloud"></div>
-      </div>
-    </div>
-    <div class="collision-actions">
-      <button class="collision-btn primary" onclick="resolveCollision('merge')">合算して保存 (おすすめ)</button>
-      <button class="collision-btn secondary" onclick="resolveCollision('cloud')">アカウントの進捗を使う</button>
-    </div>
-  </div>
-</div>
-
 <audio id="se-summon" preload="auto"></audio>
 <audio id="se-fanfare" preload="auto"></audio>
 <audio id="se-crack" preload="auto"></audio>
 <audio id="bgm-home" src="assets/bgm/home.mp3" preload="auto" loop></audio>
 
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
-<script src="script.js?v=20260424o"></script>
+<script src="script.js?v=20260424p"></script>
 </body>
 </html>
