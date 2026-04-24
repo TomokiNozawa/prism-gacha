@@ -1529,9 +1529,10 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 .char-detail.active { display: flex; }
 .char-detail-inner {
   max-width: 1000px; width: 100%;
-  max-height: 92vh;
+  height: min(92vh, 900px);
   display: grid;
   grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr;
   gap: 30px;
   background: rgba(15,20,40,0.98);
   border: 1px solid rgba(255,255,255,0.12);
@@ -1543,8 +1544,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 .char-detail-img-wrap {
   display: flex; align-items: flex-start; justify-content: center;
   overflow: hidden;
-  position: sticky; top: 0;
-  align-self: start;
+  min-height: 0;
 }
 .char-detail-img-wrap img {
   max-width: 100%; max-height: 80vh;
@@ -1554,6 +1554,8 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 .char-detail-info {
   display: flex; flex-direction: column; gap: 14px;
   overflow-y: auto; padding-right: 6px;
+  min-height: 0;
+  height: 100%;
 }
 .char-detail-tier {
   display: inline-block; padding: 5px 18px; border-radius: 999px;
