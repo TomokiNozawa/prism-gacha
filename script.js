@@ -3,46 +3,9 @@
    ============================================================ */
 "use strict";
 
-// テーマ切替 (URL?theme= or ボタン) の VALID リスト
-const THEME_VALID = ['cosmic', 'dawn', 'aurora', 'pearl', 'prismatic'];
-(function applyThemeFromQuery() {
-  try {
-    const theme = new URLSearchParams(location.search).get('theme');
-    if (theme && THEME_VALID.includes(theme)) {
-      document.body.dataset.theme = theme;
-      localStorage.setItem('prism-theme', theme);
-    } else {
-      const saved = localStorage.getItem('prism-theme');
-      if (saved && THEME_VALID.includes(saved)) {
-        document.body.dataset.theme = saved;
-      }
-    }
-  } catch (e) {}
-})();
-
-// 切替UI
-function toggleThemeSwitcher() {
-  const el = document.getElementById('theme-switcher');
-  if (el) el.classList.toggle('active');
-}
-function setThemeFromSwitcher(theme) {
-  if (theme && THEME_VALID.includes(theme)) {
-    document.body.dataset.theme = theme;
-    localStorage.setItem('prism-theme', theme);
-  } else {
-    delete document.body.dataset.theme;
-    localStorage.removeItem('prism-theme');
-  }
-  toggleThemeSwitcher();
-}
-// 外側クリックで閉じる
-document.addEventListener('click', e => {
-  const sw = document.getElementById('theme-switcher');
-  const btn = document.getElementById('btn-theme');
-  if (!sw || !sw.classList.contains('active')) return;
-  if (sw.contains(e.target) || (btn && btn.contains(e.target))) return;
-  sw.classList.remove('active');
-}, true);
+// テーマはauroraで確定 (CSS側でデフォルト適用)
+// 過去の prism-theme localStorage キーは掃除
+try { localStorage.removeItem('prism-theme'); } catch (e) {}
 
 // ────────────── Character Pool ──────────────
 // 世界観「虹霊界(こうれいかい)」:

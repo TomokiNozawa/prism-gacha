@@ -15,7 +15,7 @@
 <link rel="icon" href="images/icons/icon-16.png" type="image/png" sizes="16x16">
 <link rel="apple-touch-icon" href="images/icons/icon-180.png">
 <link rel="manifest" href="manifest.json">
-<link rel="stylesheet" href="style.css?v=20260425b">
+<link rel="stylesheet" href="style.css?v=20260425c">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -33,7 +33,6 @@
     <button id="btn-relations" class="gallery-btn" title="相関図">🌐 相関図</button>
     <button id="btn-bgm" class="gallery-btn" title="BGM ON/OFF">🔇</button>
     <a id="btn-admin" class="gallery-btn" href="admin.html" title="管理画面 (gengor専用)" style="display:none;text-decoration:none">🛠️ Admin</a>
-    <button id="btn-theme" class="gallery-btn" title="テーマ切替" onclick="toggleThemeSwitcher()">🎨</button>
     <button id="btn-account" class="gallery-btn" title="アカウント" onclick="showAccountModal()">👤 <span id="account-label">ゲスト</span></button>
   </div>
 </header>
@@ -226,18 +225,6 @@
   <div class="char-img-zoom-hint">タップで拡大 / ドラッグで移動 / 滑車でズーム</div>
 </div>
 
-<!-- Theme Switcher (一時的UI、確定後削除) -->
-<div id="theme-switcher" class="theme-switcher">
-  <div class="theme-switcher-title">テーマ切替</div>
-  <button onclick="setThemeFromSwitcher('')">Default (現状)</button>
-  <button onclick="setThemeFromSwitcher('cosmic')">A. Cosmic (濃紫+オーロラ)</button>
-  <button onclick="setThemeFromSwitcher('dawn')">B. Dawn (黄昏)</button>
-  <button onclick="setThemeFromSwitcher('aurora')">C. Aurora (オーロラ帯)</button>
-  <button onclick="setThemeFromSwitcher('pearl')">D. Pearl (白+薄紫)</button>
-  <button onclick="setThemeFromSwitcher('prismatic')">E. Prismatic (虹)</button>
-  <div class="theme-switcher-hint">選択は保存されます</div>
-</div>
-
 <!-- Account Modal -->
 <div id="account-modal" class="account-modal">
   <div class="account-inner">
@@ -326,6 +313,6 @@
 <audio id="bgm-home" preload="auto"></audio>
 
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
-<script src="script.js?v=20260425b"></script>
+<script src="script.js?v=20260425c"></script>
 </body>
 </html>
