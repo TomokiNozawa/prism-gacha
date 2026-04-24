@@ -319,17 +319,24 @@ auth.onAuthStateChanged(async user => {
     return;
   }
   currentUid = user.uid;
+  console.log('[admin] signed in as uid:', user.uid, 'email:', user.email);
   // admin判定
+  let adminVal = null;
+  let adminErr = null;
   try {
     const snap = await db.ref('prism-gacha/_meta/admins/' + user.uid).once('value');
-    isAdmin = !!snap.val();
+    adminVal = snap.val();
+    console.log('[admin] admins/' + user.uid + ' =', adminVal);
+    isAdmin = !!adminVal;
   } catch (e) {
+    adminErr = e;
+    console.error('[admin] admin check error:', e);
     isAdmin = false;
   }
   if (!isAdmin) {
     $('#login-gate').style.display = '';
     $('#app').style.display = 'none';
-    $('#gate-error').textContent = 'このアカウントは管理者ではありません';
+    $('#gate-error').textContent = 'このアカウントは管理者ではありません (uid=' + user.uid.slice(0, 8) + '... val=' + adminVal + (adminErr ? ' err=' + adminErr.code : '') + ')';
     try { await auth.signOut(); } catch(e){}
     return;
   }
