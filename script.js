@@ -3170,16 +3170,19 @@ const FIREBASE_CONFIG = {
 const EMAIL_DOMAIN = '@prism-gacha.internal';
 let fbApp = null, fbAuth = null, fbDb = null, authUser = null;
 let pendingCloudState = null, pendingLocalState = null;
+let signupInProgress = false;
 
 try {
   if (typeof firebase !== 'undefined') {
-    fbApp = firebase.initializeApp(FIREBASE_CONFIG);
-    fbAuth = firebase.auth();
-    fbDb = firebase.database();
+    // 名前付きインスタンスで認証セッションを他のダッシュボードから分離
+    // (同じapiKey/projectでも appName 違えば localStorage keyが分離される)
+    fbApp = firebase.initializeApp(FIREBASE_CONFIG, 'prism-gacha');
+    fbAuth = fbApp.auth();
+    fbDb = fbApp.database();
     fbAuth.onAuthStateChanged(async (user) => {
       authUser = user;
       updateAccountButton();
-      if (user) { await onAuthReady(user); }
+      if (user && !signupInProgress) { await onAuthReady(user); }
     });
   }
 } catch (e) {
@@ -3229,18 +3232,24 @@ async function doAccountSignup() {
 
   const btn = document.querySelector('#account-signup .account-submit');
   btn.disabled = true; btn.textContent = '登録中…';
+  signupInProgress = true;
 
   try {
-    // nickname重複チェック
-    const indexSnap = await fbDb.ref('prism-gacha/_meta/userIndex/' + nickname).once('value');
-    if (indexSnap.exists()) {
-      errEl.textContent = 'このnicknameは既に使われています';
-      return;
-    }
-
+    // nickname重複チェック (Auth前だが未認証では読めないため、Auth後に再度チェック)
     const email = nicknameToEmail(nickname);
     const cred = await fbAuth.createUserWithEmailAndPassword(email, pp1);
     await cred.user.updateProfile({ displayName: nickname });
+    await cred.user.reload();
+    authUser = fbAuth.currentUser;
+
+    // nickname重複再チェック (Auth後)
+    const indexSnap = await fbDb.ref('prism-gacha/_meta/userIndex/' + nickname).once('value');
+    if (indexSnap.exists() && indexSnap.val() !== cred.user.uid) {
+      // 重複: Auth user を削除して中止
+      try { await cred.user.delete(); } catch(e){}
+      errEl.textContent = 'このnicknameは既に使われています';
+      return;
+    }
 
     // userIndex登録
     await fbDb.ref('prism-gacha/_meta/userIndex/' + nickname).set(cred.user.uid);
@@ -3254,6 +3263,7 @@ async function doAccountSignup() {
       state: sanitizeStateForCloud(state),
     });
 
+    updateAccountButton();
     closeAccountModal();
     showToast('新規登録が完了しました');
   } catch (e) {
@@ -3268,6 +3278,7 @@ async function doAccountSignup() {
     console.error(e);
   } finally {
     btn.disabled = false; btn.textContent = '新規登録';
+    signupInProgress = false;
   }
 }
 
