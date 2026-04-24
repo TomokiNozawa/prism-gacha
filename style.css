@@ -50,28 +50,57 @@ body.t-1000 #bg-layer {
 
 /* ============ テーマ切替 (URL ?theme=cosmic|dawn|aurora) ============ */
 
-/* A. Cosmic — 深インディゴ + オーロラリング + 既存星屑 */
+/* A. Cosmic — 濃い紫ベース + 強めオーロラリング */
 body[data-theme="cosmic"] {
-  background: #0a0a1f;
+  background: #1a0f3a;
 }
 body[data-theme="cosmic"] #bg-layer {
   background:
-    radial-gradient(ellipse at 50% 25%, rgba(200, 125, 255, 0.22) 0%, transparent 45%),
-    radial-gradient(ellipse at 50% 30%, #1a0f3a 0%, #0a0a1f 60%, #000 100%);
+    radial-gradient(ellipse at 50% 22%, rgba(200, 125, 255, 0.45) 0%, transparent 40%),
+    radial-gradient(ellipse at 50% 35%, #2a1a5a 0%, #1a0f3a 50%, #0a051a 100%);
 }
 body[data-theme="cosmic"]::after {
   content: ""; position: fixed; inset: 0; pointer-events: none; z-index: -1;
   background: conic-gradient(from 0deg at 50% 40%,
-    rgba(255, 95, 170, 0.06),
-    rgba(255, 216, 77, 0.06),
-    rgba(95, 255, 212, 0.06),
-    rgba(126, 168, 255, 0.06),
-    rgba(200, 125, 255, 0.06),
-    rgba(255, 95, 170, 0.06)
+    rgba(255, 95, 170, 0.14),
+    rgba(255, 216, 77, 0.14),
+    rgba(95, 255, 212, 0.14),
+    rgba(126, 168, 255, 0.14),
+    rgba(200, 125, 255, 0.14),
+    rgba(255, 95, 170, 0.14)
   );
   animation: slow-spin 120s linear infinite;
-  filter: blur(50px);
+  filter: blur(40px);
 }
+
+/* D. Pearl — 白+薄紫+金アクセント (ライトテーマ) */
+body[data-theme="pearl"] {
+  background: linear-gradient(180deg, #f8f2ff 0%, #ece2ff 40%, #d9c7f0 100%);
+  background-attachment: fixed;
+  color: #2a1f45;
+}
+body[data-theme="pearl"] #bg-layer {
+  background:
+    radial-gradient(ellipse at 50% 15%, rgba(255, 220, 180, 0.5) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 70%, rgba(200, 125, 255, 0.2) 0%, transparent 55%),
+    linear-gradient(180deg, #f8f2ff 0%, #ece2ff 40%, #d9c7f0 100%);
+}
+body[data-theme="pearl"] .muted { color: #6a5890; }
+body[data-theme="pearl"] .hero h1 { color: #3a2560; text-shadow: 0 2px 20px rgba(200, 125, 255, 0.3); }
+body[data-theme="pearl"] .hero p { color: #4a3070; }
+body[data-theme="pearl"] .history h3 { color: #3a2560; }
+body[data-theme="pearl"] .topbar .title { color: #3a2560; }
+body[data-theme="pearl"] .stat { color: #3a2560; background: rgba(255,255,255,0.4); }
+body[data-theme="pearl"] .gallery-btn { color: #3a2560; background: rgba(255,255,255,0.4); border-color: rgba(200,125,255,0.4); }
+body[data-theme="pearl"] .gallery-btn:hover { background: rgba(255,255,255,0.7); }
+body[data-theme="pearl"] .summon { color: #fff; }
+body[data-theme="pearl"] .story-card { background: rgba(255,255,255,0.55); border-color: rgba(200,125,255,0.35); color: #2a1f45; backdrop-filter: blur(10px); }
+body[data-theme="pearl"] .story-card:hover { background: rgba(255,255,255,0.8); }
+body[data-theme="pearl"] .story-card-meta { color: #6a4a90; }
+body[data-theme="pearl"] .story-card-title { color: #2a1f45; }
+body[data-theme="pearl"] .story-card-desc { color: #4a3070; }
+body[data-theme="pearl"] .story-card-volume { color: #8a6aa8; }
+body[data-theme="pearl"] .rate span { color: #3a2560; background: rgba(255,255,255,0.4); }
 
 /* B. Dawn — 黄昏/朝焼けグラデーション */
 body[data-theme="dawn"] {

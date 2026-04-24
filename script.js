@@ -7,12 +7,13 @@
 (function applyThemeFromQuery() {
   try {
     const theme = new URLSearchParams(location.search).get('theme');
-    if (theme && ['cosmic', 'dawn', 'aurora'].includes(theme)) {
+    const VALID = ['cosmic', 'dawn', 'aurora', 'pearl'];
+    if (theme && VALID.includes(theme)) {
       document.body.dataset.theme = theme;
       localStorage.setItem('prism-theme', theme);
     } else {
       const saved = localStorage.getItem('prism-theme');
-      if (saved && ['cosmic', 'dawn', 'aurora'].includes(saved)) {
+      if (saved && VALID.includes(saved)) {
         document.body.dataset.theme = saved;
       }
     }
