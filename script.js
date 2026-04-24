@@ -3014,33 +3014,183 @@ $("#story-stage").addEventListener('click', e => {
   storyNext();
 });
 
-// BGM トグル (ホーム画面用ループ再生)
+// ============ BGM プレイヤー (複数曲ローテ) ============
+const BGM_LIST = [
+  { id: 'dawn',  title: 'Prism Dawn',  desc: '夜明けの希望', file: 'assets/bgm/home.mp3' },
+  { id: 'watch', title: 'Prism Watch', desc: '三柱の夜警',   file: 'assets/bgm/prism-watch.mp3' },
+];
 const bgmAudio = document.getElementById("bgm-home");
 let bgmEnabled = localStorage.getItem("prism-bgm") === "on";
-function updateBgmBtn() {
-  const btn = $("#btn-bgm");
-  btn.textContent = bgmEnabled ? "🔊" : "🔇";
-  btn.title = bgmEnabled ? "BGM OFF" : "BGM ON";
+let bgmCurrentId = localStorage.getItem("prism-bgm-current") || BGM_LIST[0].id;
+let bgmMode = localStorage.getItem("prism-bgm-mode") || 'sequence'; // sequence|random|repeat
+let bgmPlaylist = {};
+try {
+  bgmPlaylist = JSON.parse(localStorage.getItem("prism-bgm-playlist") || '{}');
+} catch (e) { bgmPlaylist = {}; }
+// 未登録曲はデフォルト チェックON
+BGM_LIST.forEach(b => { if (bgmPlaylist[b.id] === undefined) bgmPlaylist[b.id] = true; });
+
+function saveBgmState() {
+  localStorage.setItem("prism-bgm", bgmEnabled ? "on" : "off");
+  localStorage.setItem("prism-bgm-current", bgmCurrentId);
+  localStorage.setItem("prism-bgm-mode", bgmMode);
+  localStorage.setItem("prism-bgm-playlist", JSON.stringify(bgmPlaylist));
 }
-function setBgm(on) {
-  bgmEnabled = on;
-  localStorage.setItem("prism-bgm", on ? "on" : "off");
-  if (on) {
-    bgmAudio.volume = 0.4;
-    bgmAudio.play().catch(() => {/* ユーザー操作ないと play 拒否されるが想定内 */});
-  } else {
-    bgmAudio.pause();
+
+function bgmFindById(id) { return BGM_LIST.find(b => b.id === id); }
+
+function bgmCheckedList() {
+  return BGM_LIST.filter(b => bgmPlaylist[b.id]);
+}
+
+function loadBgmSrc(id) {
+  const track = bgmFindById(id) || BGM_LIST[0];
+  bgmCurrentId = track.id;
+  if (bgmAudio.dataset.loadedId !== track.id) {
+    bgmAudio.src = track.file;
+    bgmAudio.dataset.loadedId = track.id;
   }
-  updateBgmBtn();
+  bgmAudio.loop = (bgmMode === 'repeat');
 }
-$("#btn-bgm").addEventListener("click", () => setBgm(!bgmEnabled));
-updateBgmBtn();
-// 設定が ON でも初回はブラウザポリシーで自動再生不可。次クリックで開始
-if (bgmEnabled) {
-  // ボリュームだけ準備、play は最初のユーザー操作で
+
+function playBgm(id) {
+  loadBgmSrc(id);
   bgmAudio.volume = 0.4;
+  bgmEnabled = true;
+  bgmAudio.play().catch(() => {/* autoplay拒否は想定内 */});
+  saveBgmState();
+  updateBgmHeaderBtn();
+  renderBgmPanel();
+}
+
+function pauseBgm() {
+  bgmEnabled = false;
+  bgmAudio.pause();
+  saveBgmState();
+  updateBgmHeaderBtn();
+  renderBgmPanel();
+}
+
+function bgmToggle() {
+  if (bgmEnabled && !bgmAudio.paused) pauseBgm();
+  else playBgm(bgmCurrentId);
+}
+
+function bgmNext() {
+  const list = bgmCheckedList();
+  if (!list.length) return;
+  if (bgmMode === 'random') {
+    const others = list.filter(b => b.id !== bgmCurrentId);
+    const pick = (others.length ? others : list)[Math.floor(Math.random() * (others.length || list.length))];
+    playBgm(pick.id);
+  } else { // sequence or repeat(手動nextは次へ)
+    const idx = list.findIndex(b => b.id === bgmCurrentId);
+    const nextIdx = (idx + 1) % list.length;
+    playBgm(list[nextIdx].id);
+  }
+}
+
+function bgmPrev() {
+  const list = bgmCheckedList();
+  if (!list.length) return;
+  const idx = list.findIndex(b => b.id === bgmCurrentId);
+  const prevIdx = (idx - 1 + list.length) % list.length;
+  playBgm(list[prevIdx].id);
+}
+
+function setBgmMode(mode) {
+  bgmMode = mode;
+  bgmAudio.loop = (mode === 'repeat');
+  saveBgmState();
+  renderBgmPanel();
+}
+
+function toggleBgmChecked(id) {
+  bgmPlaylist[id] = !bgmPlaylist[id];
+  saveBgmState();
+  renderBgmPanel();
+}
+
+bgmAudio.addEventListener('ended', () => {
+  if (bgmMode === 'repeat') { bgmAudio.play().catch(() => {}); return; }
+  bgmNext();
+});
+
+function updateBgmHeaderBtn() {
+  const btn = $("#btn-bgm");
+  if (!btn) return;
+  btn.textContent = (bgmEnabled && !bgmAudio.paused) ? "🔊" : "🔇";
+  btn.title = "BGM";
+}
+
+function openBgmPanel() {
+  renderBgmPanel();
+  $("#bgm-panel").classList.add('active');
+}
+function closeBgmPanel() {
+  $("#bgm-panel").classList.remove('active');
+}
+
+function renderBgmPanel() {
+  const cur = bgmFindById(bgmCurrentId);
+  const t = $("#bgm-current-title");
+  if (t) t.textContent = cur ? cur.title : '-';
+  const pt = $("#bgm-play-toggle");
+  if (pt) pt.textContent = (bgmEnabled && !bgmAudio.paused) ? "⏸" : "▶";
+  // モードボタン active
+  document.querySelectorAll('.bgm-mode-btn').forEach(el => {
+    el.classList.toggle('active', el.dataset.mode === bgmMode);
+  });
+  // 曲リスト
+  const list = $("#bgm-list");
+  if (!list) return;
+  list.innerHTML = '';
+  BGM_LIST.forEach(b => {
+    const row = document.createElement('div');
+    row.className = 'bgm-row' + (b.id === bgmCurrentId ? ' now' : '');
+    const checked = bgmPlaylist[b.id] ? 'checked' : '';
+    row.innerHTML = `
+      <label class="bgm-check">
+        <input type="checkbox" ${checked} data-bgm-id="${b.id}">
+        <span class="bgm-check-box"></span>
+      </label>
+      <div class="bgm-info" data-play-id="${b.id}">
+        <div class="bgm-row-title">${escapeHtml(b.title)}</div>
+        <div class="bgm-row-desc">${escapeHtml(b.desc || '')}</div>
+      </div>
+      <button class="bgm-row-play" data-play-id="${b.id}" title="再生">▶</button>
+    `;
+    list.appendChild(row);
+  });
+  // event binding
+  list.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', () => toggleBgmChecked(cb.dataset.bgmId));
+  });
+  list.querySelectorAll('[data-play-id]').forEach(el => {
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      playBgm(el.dataset.playId);
+    });
+  });
+}
+
+// (escapeHtml は他で定義済み)
+
+// ヘッダー 🔇 ボタン → パネル開 (長押しで直接toggleは廃止)
+$("#btn-bgm").addEventListener("click", openBgmPanel);
+
+// bgm-panel 背景クリックで閉じる
+$("#bgm-panel").addEventListener('click', e => { if (e.target.id === 'bgm-panel') closeBgmPanel(); });
+
+// 初期ロード
+loadBgmSrc(bgmCurrentId);
+updateBgmHeaderBtn();
+
+// 初回ユーザー操作で enabled 復活再生
+if (bgmEnabled) {
   document.addEventListener("click", function startBgmOnce() {
     if (bgmEnabled) bgmAudio.play().catch(() => {});
+    updateBgmHeaderBtn();
     document.removeEventListener("click", startBgmOnce);
   }, { once: true });
 }
