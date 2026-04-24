@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Prism Gacha 管理画面</title>
+<link rel="icon" href="images/favicon.png" type="image/png">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", sans-serif;
+  background: linear-gradient(180deg, #0a0a1f 0%, #1a1035 100%);
+  color: #e6edf3;
+  min-height: 100vh;
+  padding: 24px 16px 40px;
+  line-height: 1.5;
+}
+.header {
+  max-width: 1000px; margin: 0 auto 24px;
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 12px; flex-wrap: wrap;
+}
+.header h1 {
+  font-size: 20px; font-weight: 600;
+  color: #fff; letter-spacing: 0.04em;
+  display: flex; align-items: center; gap: 8px;
+}
+.header h1 .tag {
+  font-size: 10px; padding: 2px 8px;
+  background: rgba(200, 125, 255, 0.25);
+  border: 1px solid rgba(200, 125, 255, 0.4);
+  border-radius: 6px;
+  color: #d4b5ff;
+  letter-spacing: 0.05em;
+}
+.header-actions { display: flex; gap: 8px; }
+.header-btn {
+  padding: 8px 14px; font-size: 13px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff; border-radius: 8px;
+  cursor: pointer; font-family: inherit;
+  transition: all 0.15s;
+  text-decoration: none;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.header-btn:hover {
+  background: rgba(200, 125, 255, 0.15);
+  border-color: rgba(200, 125, 255, 0.4);
+}
+
+.summary {
+  max-width: 1000px; margin: 0 auto 24px;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;
+}
+.summary-card {
+  background: linear-gradient(180deg, rgba(30, 24, 56, 0.85), rgba(20, 16, 40, 0.85));
+  border: 1px solid rgba(200, 180, 255, 0.2);
+  border-radius: 12px; padding: 14px 16px;
+}
+.summary-label {
+  font-size: 11px; color: rgba(200, 180, 255, 0.7);
+  letter-spacing: 0.08em; margin-bottom: 4px;
+}
+.summary-value {
+  font-size: 22px; font-weight: 600; color: #fff;
+  letter-spacing: 0.02em;
+}
+
+.notice {
+  max-width: 1000px; margin: 0 auto 16px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  font-size: 14px;
+  display: none;
+}
+.notice.error {
+  display: block;
+  background: rgba(255, 80, 100, 0.12);
+  border: 1px solid rgba(255, 80, 100, 0.35);
+  color: #ffb0bb;
+}
+.notice.info {
+  display: block;
+  background: rgba(120, 170, 255, 0.1);
+  border: 1px solid rgba(120, 170, 255, 0.3);
+  color: #b8d4ff;
+}
+.notice.loading {
+  display: block;
+  background: rgba(200, 180, 255, 0.08);
+  border: 1px solid rgba(200, 180, 255, 0.25);
+  color: rgba(255, 255, 255, 0.75);
+  text-align: center;
+}
+
+.users-table {
+  max-width: 1000px; margin: 0 auto;
+  background: rgba(20, 16, 40, 0.6);
+  border: 1px solid rgba(200, 180, 255, 0.15);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.users-row {
+  display: grid;
+  grid-template-columns: 2fr 1.1fr 0.9fr 0.9fr 0.9fr 1.4fr;
+  gap: 8px;
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(200, 180, 255, 0.08);
+  align-items: center;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.users-row:hover:not(.users-head) { background: rgba(200, 125, 255, 0.06); }
+.users-row:last-child { border-bottom: none; }
+.users-head {
+  background: rgba(0, 0, 0, 0.35);
+  color: rgba(200, 180, 255, 0.8);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: default;
+  position: sticky; top: 0;
+}
+.u-nickname {
+  color: #fff; font-weight: 600; font-size: 14px;
+  display: flex; align-items: center; gap: 6px;
+  overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+}
+.u-nickname.me::after {
+  content: '自分';
+  font-size: 10px; padding: 2px 6px;
+  background: rgba(139, 92, 246, 0.25);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  border-radius: 4px;
+  color: #d4b5ff;
+}
+.u-count {
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+}
+.u-count.dim { color: rgba(255, 255, 255, 0.4); }
+.u-lastlogin {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.user-detail {
+  grid-column: 1 / -1;
+  margin-top: 10px; padding: 14px 16px;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 10px;
+  font-size: 13px;
+  display: none;
+}
+.user-detail.active { display: block; }
+.user-detail h4 {
+  font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: rgba(200, 180, 255, 0.7);
+  margin-bottom: 8px;
+}
+.detail-row {
+  display: flex; justify-content: space-between; gap: 12px;
+  padding: 4px 0;
+  color: rgba(255, 255, 255, 0.85);
+}
+.detail-row span:first-child { color: rgba(255, 255, 255, 0.55); }
+.detail-row b { color: #fff; font-weight: 600; font-variant-numeric: tabular-nums; }
+.detail-story-list { margin-top: 6px; }
+.detail-story-item {
+  padding: 6px 0;
+  display: flex; justify-content: space-between;
+  color: rgba(255, 255, 255, 0.85);
+}
+.detail-story-item .prog-bar {
+  display: inline-block; width: 100px; height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  margin-left: 10px;
+  overflow: hidden;
+}
+.detail-story-item .prog-bar-inner {
+  height: 100%;
+  background: linear-gradient(90deg, #8b5cf6, #c084fc);
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+.detail-story-complete {
+  color: #3fb950;
+  font-size: 11px; margin-left: 6px;
+}
+
+.login-gate {
+  max-width: 420px; margin: 80px auto;
+  padding: 28px 24px; text-align: center;
+  background: linear-gradient(180deg, rgba(30, 24, 56, 0.98), rgba(20, 16, 40, 0.98));
+  border: 1px solid rgba(200, 180, 255, 0.3);
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+.login-gate h2 { font-size: 18px; color: #fff; margin-bottom: 8px; }
+.login-gate p { color: rgba(255, 255, 255, 0.7); margin-bottom: 20px; font-size: 13px; }
+.login-gate input {
+  width: 100%; padding: 11px 14px; font-size: 14px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(200, 180, 255, 0.2);
+  border-radius: 8px; color: #fff;
+  font-family: inherit;
+  margin-bottom: 8px;
+}
+.login-gate button {
+  width: 100%; padding: 12px;
+  background: linear-gradient(135deg, #8b5cf6, #c084fc);
+  color: #fff; border: none; border-radius: 10px;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  font-family: inherit;
+  margin-top: 8px;
+}
+.login-gate .gate-error {
+  color: #ff6b8a; font-size: 13px;
+  min-height: 18px; margin: 8px 0 0;
+}
+
+@media (max-width: 720px) {
+  .users-row {
+    grid-template-columns: 1.8fr 1fr 1fr;
+    font-size: 12px;
+    gap: 6px;
+  }
+  .users-row .col-lr, .users-row .col-dup, .users-row .col-lastlogin { display: none; }
+  .users-head .col-ur::after { content: '/ログイン'; display: block; font-size: 9px; color: rgba(200,180,255,0.4); }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>✦ Prism Gacha <span class="tag">ADMIN</span></h1>
+  <div class="header-actions">
+    <a href="index.html" class="header-btn">← ガチャに戻る</a>
+    <button class="header-btn" id="refresh-btn">🔄 更新</button>
+  </div>
+</div>
+
+<div id="login-gate" class="login-gate" style="display:none">
+  <h2>管理画面ログイン</h2>
+  <p>gengor 専用</p>
+  <input id="gate-nickname" placeholder="nickname" autocomplete="username">
+  <input id="gate-passphrase" type="password" placeholder="合言葉" autocomplete="current-password">
+  <button id="gate-btn">ログイン</button>
+  <div id="gate-error" class="gate-error"></div>
+</div>
+
+<div id="app" style="display:none">
+  <div class="summary">
+    <div class="summary-card"><div class="summary-label">ユーザー数</div><div class="summary-value" id="sum-users">-</div></div>
+    <div class="summary-card"><div class="summary-label">累計ガチャ</div><div class="summary-value" id="sum-total">-</div></div>
+    <div class="summary-card"><div class="summary-label">UR合計</div><div class="summary-value" id="sum-ur">-</div></div>
+    <div class="summary-card"><div class="summary-label">LR所持者</div><div class="summary-value" id="sum-lr-holders">-</div></div>
+    <div class="summary-card"><div class="summary-label">S1C1読了</div><div class="summary-value" id="sum-story-done">-</div></div>
+  </div>
+
+  <div id="notice" class="notice"></div>
+
+  <div class="users-table" id="users-table">
+    <div class="users-row users-head">
+      <div>NICKNAME</div>
+      <div>ガチャ</div>
+      <div class="col-ur">UR</div>
+      <div class="col-lr">LR</div>
+      <div class="col-dup">凸</div>
+      <div class="col-lastlogin">最終ログイン</div>
+    </div>
+    <div id="users-body"></div>
+  </div>
+</div>
+
+<script>
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBFSjOheMb_epwOXCjviAA_FLQFPNiED6g",
+  authDomain: "task-board-fbf1e.firebaseapp.com",
+  databaseURL: "https://task-board-fbf1e-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "task-board-fbf1e",
+  storageBucket: "task-board-fbf1e.firebasestorage.app",
+  messagingSenderId: "174442724697",
+  appId: "1:174442724697:web:06ac83b275780717c06048"
+};
+
+// Prism Gacha と同じ名前付きappでsession共有
+const app = firebase.initializeApp(FIREBASE_CONFIG, 'prism-gacha-admin');
+const auth = app.auth();
+const db = app.database();
+
+// 他のタブで prism-gacha セッションを持っていればそれと共有するため、
+// 同じapiKey/projectで別名appでもauth.onAuthStateChanged はこのインスタンスのみ監視
+// → 自前で nickname+合言葉入力ゲートにする
+
+let currentUid = null;
+let isAdmin = false;
+const $ = s => document.querySelector(s);
+
+function nicknameToEmail(nickname) {
+  const bytes = new TextEncoder().encode(nickname);
+  let bin = '';
+  for (const b of bytes) bin += String.fromCharCode(b);
+  const b64 = btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  return 'u-' + b64 + '@prism-gacha.internal';
+}
+
+auth.onAuthStateChanged(async user => {
+  if (!user) {
+    $('#app').style.display = 'none';
+    $('#login-gate').style.display = '';
+    return;
+  }
+  currentUid = user.uid;
+  // admin判定
+  try {
+    const snap = await db.ref('prism-gacha/_meta/admins/' + user.uid).once('value');
+    isAdmin = !!snap.val();
+  } catch (e) {
+    isAdmin = false;
+  }
+  if (!isAdmin) {
+    $('#login-gate').style.display = '';
+    $('#app').style.display = 'none';
+    $('#gate-error').textContent = 'このアカウントは管理者ではありません';
+    try { await auth.signOut(); } catch(e){}
+    return;
+  }
+  $('#login-gate').style.display = 'none';
+  $('#app').style.display = '';
+  await loadAll();
+});
+
+$('#gate-btn').addEventListener('click', doGateLogin);
+$('#gate-passphrase').addEventListener('keydown', e => { if (e.key === 'Enter') doGateLogin(); });
+
+async function doGateLogin() {
+  const nickname = $('#gate-nickname').value.trim();
+  const pp = $('#gate-passphrase').value;
+  const err = $('#gate-error');
+  err.textContent = '';
+  if (!nickname || !pp) { err.textContent = 'nicknameと合言葉を入力してください'; return; }
+  const btn = $('#gate-btn');
+  btn.disabled = true; btn.textContent = 'ログイン中…';
+  try {
+    await auth.signInWithEmailAndPassword(nicknameToEmail(nickname), pp);
+  } catch (e) {
+    err.textContent = 'nicknameまたは合言葉が違います';
+    console.error(e);
+  } finally {
+    btn.disabled = false; btn.textContent = 'ログイン';
+  }
+}
+
+async function loadAll() {
+  const notice = $('#notice');
+  notice.className = 'notice loading';
+  notice.textContent = '読み込み中…';
+  try {
+    const [usersSnap, indexSnap] = await Promise.all([
+      db.ref('prism-gacha/users').once('value'),
+      db.ref('prism-gacha/_meta/userIndex').once('value'),
+    ]);
+    const users = usersSnap.val() || {};
+    const nameIndex = indexSnap.val() || {}; // nickname → uid
+    const uidToNickname = {};
+    for (const [nickname, uid] of Object.entries(nameIndex)) {
+      if (typeof uid === 'string') uidToNickname[uid] = nickname;
+    }
+    renderUsers(users, uidToNickname);
+    notice.className = 'notice';
+    notice.textContent = '';
+  } catch (e) {
+    notice.className = 'notice error';
+    notice.textContent = '読み込みエラー: ' + (e.message || e);
+    console.error(e);
+  }
+}
+
+function renderUsers(users, uidToNickname) {
+  const entries = Object.entries(users).map(([uid, u]) => ({ uid, ...u }));
+  // 最終ログイン降順
+  entries.sort((a, b) => (b.lastLoginAt || 0) - (a.lastLoginAt || 0));
+
+  let sumTotal = 0, sumUR = 0, lrHolders = 0, storyDone = 0;
+  const body = $('#users-body');
+  body.innerHTML = '';
+  entries.forEach(u => {
+    const s = u.state || {};
+    const nickname = u.displayName || uidToNickname[u.uid] || '(名前未設定)';
+    const total = s.total || 0;
+    const ur = s.ur || 0;
+    let lr = 0;
+    for (const k of Object.keys(s.unlockedSet || {})) if (k.startsWith('LR_')) lr++;
+    const dup = Object.values(s.dupCounts || {}).reduce((a, b) => a + b, 0);
+    const lastAt = u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleString('ja-JP', { year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '-';
+    sumTotal += total;
+    sumUR += ur;
+    if (lr > 0) lrHolders++;
+    const sp = s.storyProgress || {};
+    if (sp.s1c1 && sp.s1c1.completed) storyDone++;
+
+    const isMe = u.uid === currentUid;
+    const row = document.createElement('div');
+    row.className = 'users-row';
+    row.innerHTML = `
+      <div class="u-nickname ${isMe ? 'me' : ''}">${escapeHtml(nickname)}</div>
+      <div class="u-count ${total === 0 ? 'dim' : ''}">${total}</div>
+      <div class="u-count col-ur ${ur === 0 ? 'dim' : ''}">${ur}</div>
+      <div class="u-count col-lr ${lr === 0 ? 'dim' : ''}">${lr}</div>
+      <div class="u-count col-dup ${dup === 0 ? 'dim' : ''}">${dup}</div>
+      <div class="u-lastlogin col-lastlogin">${lastAt}</div>
+    `;
+    const detail = buildDetail(u, s);
+    row.appendChild(detail);
+    row.addEventListener('click', e => {
+      detail.classList.toggle('active');
+    });
+    body.appendChild(row);
+  });
+
+  $('#sum-users').textContent = entries.length;
+  $('#sum-total').textContent = sumTotal;
+  $('#sum-ur').textContent = sumUR;
+  $('#sum-lr-holders').textContent = lrHolders;
+  $('#sum-story-done').textContent = storyDone;
+}
+
+function buildDetail(u, s) {
+  const detail = document.createElement('div');
+  detail.className = 'user-detail';
+  const createdAt = u.createdAt ? new Date(u.createdAt).toLocaleString('ja-JP') : '-';
+  const lastAt = u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleString('ja-JP') : '-';
+  const updatedAt = s.updatedAt ? new Date(s.updatedAt).toLocaleString('ja-JP') : '-';
+  let lrNames = [];
+  for (const k of Object.keys(s.unlockedSet || {})) if (k.startsWith('LR_')) lrNames.push(k.replace('LR_', ''));
+  let urNames = [];
+  for (const k of Object.keys(s.unlockedSet || {})) if (k.startsWith('UR_')) urNames.push(k.replace('UR_', ''));
+
+  let storyHtml = '';
+  const sp = s.storyProgress || {};
+  if (Object.keys(sp).length === 0) {
+    storyHtml = '<div style="color:rgba(255,255,255,0.4);padding:6px 0;">まだストーリー未読</div>';
+  } else {
+    for (const [sid, v] of Object.entries(sp)) {
+      const idx = v.lastSceneIndex || 0;
+      const total = v.totalScenes || 0;
+      const pct = total ? Math.round((idx + 1) / total * 100) : 0;
+      const completeBadge = v.completed ? '<span class="detail-story-complete">✓ 読了</span>' : '';
+      const lastRead = v.lastReadAt ? new Date(v.lastReadAt).toLocaleString('ja-JP', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '-';
+      storyHtml += `<div class="detail-story-item"><span>${sid}: ${idx + 1}/${total}<span class="prog-bar"><span class="prog-bar-inner" style="width:${pct}%"></span></span>${completeBadge}</span><span style="color:rgba(255,255,255,0.5);font-size:11px">${lastRead}</span></div>`;
+    }
+  }
+
+  detail.innerHTML = `
+    <h4>詳細</h4>
+    <div class="detail-row"><span>uid</span><b style="font-size:11px;font-family:monospace">${u.uid}</b></div>
+    <div class="detail-row"><span>登録日</span><b>${createdAt}</b></div>
+    <div class="detail-row"><span>最終ログイン</span><b>${lastAt}</b></div>
+    <div class="detail-row"><span>最終state同期</span><b>${updatedAt}</b></div>
+    <div class="detail-row"><span>天井カウント</span><b>${s.pity || 0} / 180</b></div>
+    <div class="detail-row"><span>獲得LR</span><b>${lrNames.length ? lrNames.join(', ') : '-'}</b></div>
+    <div class="detail-row"><span>獲得UR</span><b>${urNames.length ? urNames.join(', ') : '-'}</b></div>
+    <h4 style="margin-top:12px">ストーリー進捗</h4>
+    <div class="detail-story-list">${storyHtml}</div>
+  `;
+  return detail;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+$('#refresh-btn').addEventListener('click', () => { if (isAdmin) loadAll(); });
+
+</script>
+</body>
+</html>
