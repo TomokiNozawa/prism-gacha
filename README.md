@@ -3,6 +3,17 @@
 課金なしで「脳汁体験」だけを浴びるブラウザガチャ+物語シミュ(旧称: Prism Gacha)。
 + タワーディフェンスゲーム **Prism Defense** も同梱。
 
+## バージョニング
+
+`v{Season}.{公開済み章数}[.patch]`
+
+- **v1.1** = Season 1 の第1章まで公開 (現在地)
+- **v1.2** = Season 1 の第2章追加
+- **v2.1** = Season 2 第1章 (新シーズン突入時はSeasonを繰り上げ、章カウントを1からリセット)
+- **v1.1.1** 等の3段目 = 章追加を伴わないマイナーアップデート(バグ修正/UI改善/新機能)
+
+Prism Defense はサブブランドとして独自バージョン(v1.0〜)で管理。
+
 - **Prismaera URL**: https://tomokinozawa.github.io/prism-gacha/ (GitHub Pagesパスは旧リポ名のまま)
 - **Prism Defense URL**: https://tomokinozawa.github.io/prism-gacha/td/
 - **排出率**: R 65% / SR 25% / SSR 7% / UR 3% / LR 0.5%
