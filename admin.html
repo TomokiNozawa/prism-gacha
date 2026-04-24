@@ -403,9 +403,11 @@ function renderUsers(users, uidToNickname) {
     const s = u.state || {};
     const nickname = u.displayName || uidToNickname[u.uid] || '(名前未設定)';
     const total = s.total || 0;
-    const ur = s.ur || 0;
-    let lr = 0;
-    for (const k of Object.keys(s.unlockedSet || {})) if (k.startsWith('LR_')) lr++;
+    let ur = 0, lr = 0;
+    for (const k of Object.keys(s.unlockedSet || {})) {
+      if (k.startsWith('UR_')) ur++;
+      else if (k.startsWith('LR_')) lr++;
+    }
     const dup = Object.values(s.dupCounts || {}).reduce((a, b) => a + b, 0);
     const lastAt = u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleString('ja-JP', { year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '-';
     sumTotal += total;
