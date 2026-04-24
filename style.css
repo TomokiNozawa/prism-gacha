@@ -48,6 +48,49 @@ body.t-1000 #bg-layer {
 }
 @keyframes slow-spin { to { transform: rotate(360deg); } }
 
+/* ============ テーマ切替UI (一時的) ============ */
+.theme-switcher {
+  position: fixed; top: 58px; right: 14px;
+  z-index: 13000;
+  display: none; flex-direction: column;
+  gap: 4px;
+  background: rgba(20, 16, 40, 0.97);
+  border: 1px solid rgba(200, 180, 255, 0.4);
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.6), 0 0 20px rgba(200,125,255,0.15);
+  backdrop-filter: blur(10px);
+  min-width: 220px;
+}
+.theme-switcher.active { display: flex; }
+.theme-switcher-title {
+  font-size: 11px; letter-spacing: 0.1em;
+  color: rgba(200, 180, 255, 0.7);
+  padding: 2px 4px 6px;
+  border-bottom: 1px solid rgba(200, 180, 255, 0.15);
+  margin-bottom: 4px;
+}
+.theme-switcher button {
+  padding: 9px 12px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #fff; font-size: 12px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: all 0.12s;
+}
+.theme-switcher button:hover {
+  background: rgba(200, 125, 255, 0.25);
+  border-color: rgba(200, 125, 255, 0.5);
+}
+.theme-switcher-hint {
+  font-size: 10px; color: rgba(255,255,255,0.35);
+  padding: 4px 4px 0;
+  letter-spacing: 0.05em;
+}
+
 /* ============ テーマ切替 (URL ?theme=cosmic|dawn|aurora) ============ */
 
 /* A. Cosmic — 濃い紫+はっきり見えるオーロラリング */
