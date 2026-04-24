@@ -2464,11 +2464,6 @@ function closeCharDetail() {
 // ────────────── Bindings ──────────────
 $("#btn-single").addEventListener("click", doSingle);
 $("#btn-ten").addEventListener("click", doTen);
-$("#btn-reset").addEventListener("click", () => {
-  if (!confirm("累計・履歴をリセットしますか?")) return;
-  Object.assign(state, { total:0, ur:0, pity:0, history:[] });
-  saveState(); updateHUD();
-});
 $("#result-close").addEventListener("click", closeResult);
 $("#result-again-ten").addEventListener("click", () => {
   closeResult();
