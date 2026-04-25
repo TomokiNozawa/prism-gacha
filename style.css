@@ -5759,3 +5759,157 @@ body {
   .welcome-features li { font-size: 12px; }
 }
 /* ===== END ===== */
+
+/* ===== STORY READ BADGE (#10) ===== */
+.story-card-readbadge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: linear-gradient(90deg, #10b981, #34d399);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.06em;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+  z-index: 2;
+}
+.story-card { position: relative; }
+
+/* ===== SETTINGS MODAL (#11) ===== */
+.settings-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9985;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.settings-modal.active { display: flex; }
+.settings-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 0, 18, 0.88);
+  backdrop-filter: blur(8px);
+}
+.settings-card {
+  position: relative;
+  width: min(440px, 92vw);
+  max-height: 92vh;
+  overflow-y: auto;
+  background: linear-gradient(180deg, #14012c, #2a0a4a);
+  border: 1px solid rgba(167, 139, 250, 0.5);
+  border-radius: 16px;
+  padding: 28px 24px 22px;
+  color: #fff;
+  box-shadow: 0 0 48px rgba(167, 139, 250, 0.3);
+}
+.settings-close {
+  position: absolute; top: 10px; right: 16px;
+  background: transparent; border: none; color: #fff;
+  font-size: 26px; cursor: pointer;
+}
+.settings-close:hover { color: #fcd34d; }
+.settings-title {
+  font-size: 20px; font-weight: 800;
+  text-align: center;
+  margin-bottom: 20px;
+  background: linear-gradient(90deg, #fbbf24, #c4b5fd, #fbbf24);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.settings-section {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.settings-section:last-of-type { border-bottom: none; }
+.settings-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #d4dfff;
+}
+/* トグルスイッチ */
+.settings-toggle { position: relative; display: inline-block; width: 50px; height: 26px; cursor: pointer; }
+.settings-toggle input { opacity: 0; width: 0; height: 0; }
+.settings-toggle-track {
+  position: absolute; inset: 0;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  transition: background 0.2s;
+}
+.settings-toggle-track::before {
+  content: '';
+  position: absolute; top: 3px; left: 3px;
+  width: 20px; height: 20px;
+  background: #fff; border-radius: 50%;
+  transition: transform 0.2s;
+}
+.settings-toggle input:checked + .settings-toggle-track {
+  background: linear-gradient(90deg, #fbbf24, #ec4899);
+}
+.settings-toggle input:checked + .settings-toggle-track::before {
+  transform: translateX(24px);
+}
+/* レンジ */
+.settings-range {
+  flex: 1;
+  max-width: 180px;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.15);
+  outline: none;
+}
+.settings-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fbbf24, #ec4899);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(236, 72, 153, 0.4);
+}
+.settings-val {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fcd34d;
+  min-width: 30px;
+  text-align: right;
+}
+/* 文字サイズボタン群 */
+.settings-fontsize-group {
+  display: flex; gap: 6px;
+}
+.settings-fontsize-btn {
+  background: rgba(255, 255, 255, 0.06);
+  color: #d4dfff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  padding: 6px 14px;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+}
+.settings-fontsize-btn.active {
+  background: linear-gradient(90deg, #fbbf24, #ec4899);
+  color: #fff;
+  border-color: #fcd34d;
+  font-weight: 700;
+}
+.settings-note {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.45);
+  text-align: center;
+  margin-top: 16px;
+}
+
+/* 文字サイズ適用 (本文系のみ、 タイトルは固定) */
+html[data-fontsize="small"] .story-scene-content,
+html[data-fontsize="small"] .char-detail-desc,
+html[data-fontsize="small"] .gasshuku-story-body { font-size: 13px; }
+html[data-fontsize="large"] .story-scene-content,
+html[data-fontsize="large"] .char-detail-desc,
+html[data-fontsize="large"] .gasshuku-story-body { font-size: 17px; }
+/* ===== END ===== */

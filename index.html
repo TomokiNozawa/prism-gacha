@@ -24,7 +24,7 @@
 <link rel="icon" href="/images/icons/icon-16.png" type="image/png" sizes="16x16">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
 <link rel="manifest" href="/manifest.json?v=20260425g25">
-<link rel="stylesheet" href="/style.css?v=20260425g35">
+<link rel="stylesheet" href="/style.css?v=20260425g36">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -41,6 +41,7 @@
     <button id="btn-history" class="gallery-btn" title="ガチャ履歴">📜 履歴</button>
     <button id="btn-mute-master" class="gallery-btn master-mute-btn" title="全音ミュート切替 (BGM+ガチャ音)">🔊</button>
     <button id="btn-bgm" class="gallery-btn" title="BGM詳細">🎵</button>
+    <button id="btn-settings" class="gallery-btn" title="設定" onclick="openSettingsModal()">⚙️</button>
     <a id="btn-admin" class="gallery-btn" href="admin.html" title="管理画面 (gengor専用)" style="display:none;text-decoration:none">🛠️ Admin</a>
     <button id="btn-account" class="gallery-btn" title="アカウント" onclick="showAccountModal()">👤 <span id="account-label">ゲスト</span></button>
   </div>
@@ -458,7 +459,7 @@
 <audio id="bgm-home" preload="auto"></audio>
 
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
-<script src="/script.js?v=20260425g34"></script>
+<script src="/script.js?v=20260425g35"></script>
 <script src="/gasshuku.js?v=20260425g32"></script>
 </body>
 </html>

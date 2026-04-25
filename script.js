@@ -3572,7 +3572,27 @@ document.querySelectorAll('.story-card[data-story]').forEach(card => {
   card.addEventListener('click', () => openStory(card.dataset.story));
 });
 // ストーリー一覧モーダル
+// #10 ストーリー既読マーク (読了済み章カードに ✅ バッジ)
+function refreshStoryReadBadges() {
+  const sp = (state && state.storyProgress) || {};
+  document.querySelectorAll('.story-card[data-story]').forEach(card => {
+    const id = card.dataset.story;
+    const completed = sp[id] && sp[id].completed;
+    let badge = card.querySelector('.story-card-readbadge');
+    if (completed) {
+      if (!badge) {
+        badge = document.createElement('span');
+        badge.className = 'story-card-readbadge';
+        badge.textContent = '✅ 読了';
+        card.appendChild(badge);
+      }
+    } else if (badge) {
+      badge.remove();
+    }
+  });
+}
 function openStoryList() {
+  refreshStoryReadBadges(); // 開く度に最新状態
   const m = document.getElementById('story-list-modal');
   if (m) m.removeAttribute('hidden');
 }
@@ -4658,6 +4678,104 @@ if (document.readyState === 'loading') {
 } else {
   checkPrismaeraVersion();
 }
+
+// ====== #11 設定モーダル ======
+const SETTINGS_KEY = 'prism-settings';
+function loadSettings() {
+  try { return JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}') || {}; }
+  catch { return {}; }
+}
+function saveSettings(s) {
+  try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); } catch {}
+  applySettings(s);
+}
+function applySettings(s) {
+  // 文字サイズ (大/中/小)
+  const root = document.documentElement;
+  root.dataset.fontsize = s.fontSize || 'medium';
+}
+function openSettingsModal() {
+  let m = document.getElementById('settings-modal');
+  if (!m) {
+    m = document.createElement('div');
+    m.id = 'settings-modal';
+    m.className = 'settings-modal';
+    m.innerHTML = `
+      <div class="settings-backdrop"></div>
+      <div class="settings-card">
+        <button class="settings-close" aria-label="閉じる">×</button>
+        <div class="settings-title">⚙️ 設定</div>
+        <div class="settings-section">
+          <div class="settings-label">🔊 全音ミュート</div>
+          <label class="settings-toggle">
+            <input type="checkbox" id="settings-mute">
+            <span class="settings-toggle-track"></span>
+          </label>
+        </div>
+        <div class="settings-section">
+          <div class="settings-label">🎵 BGM音量</div>
+          <input type="range" id="settings-bgm-volume" min="0" max="100" step="5" class="settings-range">
+          <span id="settings-bgm-volume-val" class="settings-val">70</span>
+        </div>
+        <div class="settings-section">
+          <div class="settings-label">📝 文字サイズ</div>
+          <div class="settings-fontsize-group">
+            <button class="settings-fontsize-btn" data-size="small">小</button>
+            <button class="settings-fontsize-btn" data-size="medium">中</button>
+            <button class="settings-fontsize-btn" data-size="large">大</button>
+          </div>
+        </div>
+        <div class="settings-note">設定はこの端末に保存されます (アカウント連携対象外)</div>
+      </div>
+    `;
+    document.body.appendChild(m);
+    m.querySelector('.settings-close').addEventListener('click', closeSettingsModal);
+    m.querySelector('.settings-backdrop').addEventListener('click', closeSettingsModal);
+    // 全音ミュート (既存BGM masterMuted と連動)
+    const muteEl = m.querySelector('#settings-mute');
+    muteEl.addEventListener('change', () => {
+      const s = loadSettings(); s.muted = muteEl.checked; saveSettings(s);
+      // 既存のmasterMute toggleを呼ぶ (gasshukuと共通)
+      try {
+        if (typeof toggleMasterMute === 'function') {
+          if ((typeof masterMuted !== 'undefined' && masterMuted) !== muteEl.checked) toggleMasterMute();
+        }
+      } catch {}
+    });
+    // BGM音量
+    const volEl = m.querySelector('#settings-bgm-volume');
+    const volValEl = m.querySelector('#settings-bgm-volume-val');
+    volEl.addEventListener('input', () => {
+      const v = parseInt(volEl.value, 10);
+      volValEl.textContent = v;
+      const s = loadSettings(); s.bgmVolume = v; saveSettings(s);
+      try { if (typeof setBgmVolume === 'function') setBgmVolume(v); } catch {}
+    });
+    // 文字サイズ
+    m.querySelectorAll('.settings-fontsize-btn').forEach(b => {
+      b.addEventListener('click', () => {
+        const sz = b.dataset.size;
+        const s = loadSettings(); s.fontSize = sz; saveSettings(s);
+        m.querySelectorAll('.settings-fontsize-btn').forEach(bb => bb.classList.toggle('active', bb.dataset.size === sz));
+      });
+    });
+  }
+  // 現在値を反映
+  const s = loadSettings();
+  m.querySelector('#settings-mute').checked = !!s.muted;
+  const vol = (typeof s.bgmVolume === 'number') ? s.bgmVolume : 70;
+  m.querySelector('#settings-bgm-volume').value = vol;
+  m.querySelector('#settings-bgm-volume-val').textContent = vol;
+  const fs = s.fontSize || 'medium';
+  m.querySelectorAll('.settings-fontsize-btn').forEach(b => b.classList.toggle('active', b.dataset.size === fs));
+  m.classList.add('active');
+}
+function closeSettingsModal() {
+  const m = document.getElementById('settings-modal');
+  if (m) m.classList.remove('active');
+}
+// 起動時に設定適用
+applySettings(loadSettings());
 
 // ====== ようこそモーダル (初回アクセス時のアカウント登録案内) ======
 const WELCOME_KEY = 'prism-welcome-shown';
