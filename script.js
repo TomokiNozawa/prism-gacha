@@ -3493,6 +3493,9 @@ function escapeRegExp(s) {
 // 命名規則: 通常 prisma.png + 瞬き prisma_blink.png を同フォルダに配置
 // 検出: <name>_blink.png が 200 OK で読めれば瞬き有効化、そうでなければ静止
 // 適用範囲: ストーリーシーンの登場キャラサムネイル中、現状LRのみ(プロト段階)
+const BLINK_INTERVAL_MIN = 1800;   // ms (最短間隔)
+const BLINK_INTERVAL_RANGE = 1700; // ms (ランダムレンジ)  → 1.8〜3.5秒
+const BLINK_DURATION = 180;        // ms (目を閉じている時間)
 const _blinkImageCache = new Map(); // url → 'ok' | 'ng'
 let _blinkTimers = [];
 function clearBlinkTimers() {
@@ -3521,7 +3524,7 @@ function setupCharBlinkAnimations() {
 function _startBlinkLoop(imgEl, normalUrl, blinkUrl) {
   function next() {
     // 4-7秒のランダム間隔でばらける (複数キャラが同時に瞬かないように)
-    const delay = 4000 + Math.random() * 3000;
+    const delay = BLINK_INTERVAL_MIN + Math.random() * BLINK_INTERVAL_RANGE;
     const t1 = setTimeout(() => {
       // 要素がDOMから外れていれば停止
       if (!document.body.contains(imgEl)) return;
@@ -3530,7 +3533,7 @@ function _startBlinkLoop(imgEl, normalUrl, blinkUrl) {
         if (!document.body.contains(imgEl)) return;
         imgEl.style.backgroundImage = `url('${normalUrl}')`;
         next();
-      }, 180); // 瞬きの長さ 180ms
+      }, BLINK_DURATION); // 瞬きの長さ
       _blinkTimers.push(t2);
     }, delay);
     _blinkTimers.push(t1);
@@ -3635,7 +3638,7 @@ function setupCutinBlinks() {
 }
 function _startCutinBlinkLoop(imgEl, normalUrl, blinkUrl) {
   function next() {
-    const delay = 4000 + Math.random() * 3000;
+    const delay = BLINK_INTERVAL_MIN + Math.random() * BLINK_INTERVAL_RANGE;
     const t1 = setTimeout(() => {
       if (!document.body.contains(imgEl)) return;
       imgEl.src = blinkUrl;
@@ -3643,7 +3646,7 @@ function _startCutinBlinkLoop(imgEl, normalUrl, blinkUrl) {
         if (!document.body.contains(imgEl)) return;
         imgEl.src = normalUrl;
         next();
-      }, 180);
+      }, BLINK_DURATION);
       _cutinBlinkTimers.push(t2);
     }, delay);
     _cutinBlinkTimers.push(t1);
@@ -3653,7 +3656,7 @@ function _startCutinBlinkLoop(imgEl, normalUrl, blinkUrl) {
 
 function _startDetailBlinkLoop(imgEl, zoomEl, normalUrl, blinkUrl) {
   function next() {
-    const delay = 4000 + Math.random() * 3000;
+    const delay = BLINK_INTERVAL_MIN + Math.random() * BLINK_INTERVAL_RANGE;
     _detailBlinkTimer = setTimeout(() => {
       // 詳細モーダルが閉じていれば停止
       const modal = document.getElementById('char-detail');
@@ -3665,7 +3668,7 @@ function _startDetailBlinkLoop(imgEl, zoomEl, normalUrl, blinkUrl) {
         imgEl.src = normalUrl;
         if (zoomEl) zoomEl.src = normalUrl;
         next();
-      }, 180);
+      }, BLINK_DURATION);
     }, delay);
   }
   next();
