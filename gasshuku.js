@@ -448,6 +448,31 @@
       });
     });
     renderGasshukuGallery();
+    // Esc で合宿モーダルを閉じる (lightbox → detail → result の順で1つだけ閉じる)
+    if (!document.body.dataset.gasshukuEscBound) {
+      document.body.dataset.gasshukuEscBound = '1';
+      document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        const lb = document.getElementById('gasshuku-lightbox');
+        if (lb && lb.classList.contains('active')) {
+          closeLightbox();
+          e.stopPropagation();
+          return;
+        }
+        const dm = document.getElementById('gasshuku-detail-modal');
+        if (dm && dm.classList.contains('active')) {
+          closeDetail();
+          e.stopPropagation();
+          return;
+        }
+        const rm = document.getElementById('gasshuku-result-modal');
+        if (rm && rm.classList.contains('active')) {
+          closeResultModal();
+          e.stopPropagation();
+          return;
+        }
+      });
+    }
   }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
