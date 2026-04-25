@@ -195,6 +195,7 @@
     }
     closeDetail();
     document.body.classList.remove('gasshuku-modal-open');
+    document.body.classList.remove('modal-open'); // 既存 lock class も念のため除去
   }
   function closeDetail() {
     const d = document.getElementById('gasshuku-detail');
