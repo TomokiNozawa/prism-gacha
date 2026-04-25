@@ -128,6 +128,10 @@
   };
   let currentDetail = null;
   let currentDetailMode = 'fantasy';
+  function isCollected(c, mode) {
+    const d = loadCollected();
+    return !!d[`${c.id}_${mode}`];
+  }
   function ensureDetailModal() {
     let m = document.getElementById('gasshuku-detail-modal');
     if (m) return m;
@@ -139,8 +143,9 @@
       <div class="gasshuku-detail-backdrop"></div>
       <div class="gasshuku-detail-card">
         <button class="gasshuku-detail-close" aria-label="閉じる">×</button>
-        <div class="gasshuku-detail-img-wrap">
+        <div class="gasshuku-detail-img-wrap" id="gasshuku-detail-img-wrap">
           <img class="gasshuku-detail-img" id="gasshuku-detail-img" alt="">
+          <div class="gasshuku-detail-zoom-hint">🔍 タップで拡大</div>
         </div>
         <div class="gasshuku-detail-meta">
           <div class="gasshuku-detail-tier">UR</div>
@@ -153,6 +158,7 @@
             <button class="gasshuku-detail-tbtn" data-mode="fantasy">🌈 ファンタジー</button>
             <button class="gasshuku-detail-tbtn" data-mode="real">📷 本人</button>
           </div>
+          <div class="gasshuku-detail-locknote" id="gasshuku-detail-locknote" hidden></div>
         </div>
       </div>
     `;
@@ -162,19 +168,26 @@
     m.querySelectorAll('.gasshuku-detail-tbtn').forEach(b => {
       b.addEventListener('click', () => switchDetailImage(b.dataset.mode));
     });
+    m.querySelector('#gasshuku-detail-img-wrap').addEventListener('click', () => {
+      if (currentDetail) openLightbox(currentDetail, currentDetailMode);
+    });
     return m;
   }
   function switchDetailImage(mode) {
     if (!currentDetail) return;
+    // 未獲得モードへの切替は阻止
+    if (!isCollected(currentDetail, mode)) {
+      const note = document.getElementById('gasshuku-detail-locknote');
+      if (note) {
+        note.hidden = false;
+        note.textContent = `🔒 ${mode === 'fantasy' ? '🌈 ファンタジー' : '📷 本人'} 版はまだ召喚していません`;
+        setTimeout(() => { note.hidden = true; }, 2200);
+      }
+      return;
+    }
     currentDetailMode = mode;
     const img = document.getElementById('gasshuku-detail-img');
-    img.src = imgPath(currentDetail, mode) + '?v=' + Date.now();
-    img.onerror = () => {
-      if (mode === 'fantasy') {
-        img.onerror = null;
-        img.src = imgPath(currentDetail, 'real');
-      }
-    };
+    img.src = imgPath(currentDetail, mode);
     document.querySelectorAll('.gasshuku-detail-tbtn').forEach(b => {
       b.classList.toggle('active', b.dataset.mode === mode);
     });
@@ -191,13 +204,58 @@
     fac.style.color = FACTION_COLOR[c.faction] || '#fff';
     document.getElementById('gasshuku-detail-skill').textContent = `🌟 ${c.skill}`;
     document.getElementById('gasshuku-detail-voice').textContent = `「${c.voice}」`;
-    switchDetailImage(defaultMode || 'fantasy');
+    // トグルボタンの獲得状態を反映 (未獲得は鍵マーク+disabled風)
+    document.querySelectorAll('.gasshuku-detail-tbtn').forEach(b => {
+      const got = isCollected(c, b.dataset.mode);
+      b.classList.toggle('locked', !got);
+      const baseLabel = b.dataset.mode === 'fantasy' ? '🌈 ファンタジー' : '📷 本人';
+      b.textContent = got ? baseLabel : `🔒 ${baseLabel}`;
+    });
+    const note = document.getElementById('gasshuku-detail-locknote');
+    if (note) note.hidden = true;
+    // defaultMode が未獲得なら獲得済みモードにフォールバック
+    let openMode = defaultMode || 'fantasy';
+    if (!isCollected(c, openMode)) {
+      const alt = openMode === 'fantasy' ? 'real' : 'fantasy';
+      if (isCollected(c, alt)) openMode = alt;
+    }
+    switchDetailImage(openMode);
   }
   function closeDetail() {
     const m = document.getElementById('gasshuku-detail-modal');
     if (m) {
       m.classList.remove('active');
       m.setAttribute('hidden', '');
+    }
+  }
+
+  // ====== 画像拡大ライトボックス ======
+  function ensureLightbox() {
+    let lb = document.getElementById('gasshuku-lightbox');
+    if (lb) return lb;
+    lb = document.createElement('div');
+    lb.id = 'gasshuku-lightbox';
+    lb.className = 'gasshuku-lightbox';
+    lb.setAttribute('hidden', '');
+    lb.innerHTML = `
+      <button class="gasshuku-lightbox-close" aria-label="閉じる">×</button>
+      <img class="gasshuku-lightbox-img" id="gasshuku-lightbox-img" alt="">
+    `;
+    document.body.appendChild(lb);
+    lb.addEventListener('click', closeLightbox);
+    return lb;
+  }
+  function openLightbox(c, mode) {
+    const lb = ensureLightbox();
+    lb.removeAttribute('hidden');
+    lb.classList.add('active');
+    document.getElementById('gasshuku-lightbox-img').src = imgPath(c, mode);
+  }
+  function closeLightbox() {
+    const lb = document.getElementById('gasshuku-lightbox');
+    if (lb) {
+      lb.classList.remove('active');
+      lb.setAttribute('hidden', '');
     }
   }
 

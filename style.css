@@ -4790,3 +4790,91 @@ body.gasshuku-modal-open {
   transition: all 0.15s;
 }
 /* ===== END ===== */
+
+/* ===== GASSHUKU DETAIL: lock & zoom ===== */
+.gasshuku-detail-modal .gasshuku-detail-img-wrap {
+  position: relative;
+  cursor: zoom-in;
+  transition: filter 0.15s;
+}
+.gasshuku-detail-modal .gasshuku-detail-img-wrap:hover {
+  filter: brightness(1.05);
+}
+.gasshuku-detail-zoom-hint {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fcd34d;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  pointer-events: none;
+}
+
+.gasshuku-detail-modal .gasshuku-detail-tbtn.locked {
+  background: rgba(80, 60, 100, 0.4);
+  color: rgba(255, 255, 255, 0.55);
+  border-color: rgba(150, 130, 180, 0.35);
+  cursor: not-allowed;
+}
+.gasshuku-detail-modal .gasshuku-detail-tbtn.locked:hover {
+  background: rgba(80, 60, 100, 0.4);
+  filter: none;
+}
+.gasshuku-detail-locknote {
+  background: rgba(239, 68, 68, 0.18);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #fecaca;
+  text-align: center;
+  margin-top: 6px;
+}
+
+/* ===== LIGHTBOX ===== */
+.gasshuku-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 10010;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
+  padding: 30px;
+}
+.gasshuku-lightbox[hidden],
+.gasshuku-lightbox:not(.active) {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+.gasshuku-lightbox-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  box-shadow: 0 0 60px rgba(251, 191, 36, 0.3);
+  border-radius: 8px;
+}
+.gasshuku-lightbox-close {
+  position: absolute;
+  top: 16px;
+  right: 22px;
+  background: rgba(20, 1, 44, 0.7);
+  border: 1px solid rgba(251, 191, 36, 0.5);
+  color: #fff;
+  font-size: 28px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.gasshuku-lightbox-close:hover { color: #fcd34d; }
+/* ===== END ===== */
