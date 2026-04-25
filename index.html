@@ -24,7 +24,7 @@
 <link rel="icon" href="/images/icons/icon-16.png" type="image/png" sizes="16x16">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
 <link rel="manifest" href="/manifest.json?v=20260425g25">
-<link rel="stylesheet" href="/style.css?v=20260425g27">
+<link rel="stylesheet" href="/style.css?v=20260425g28">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -70,30 +70,6 @@
       </button>
     </div>
 
-    <div class="story-section">
-      <h3 class="story-section-title">📖 ストーリー <span class="story-section-sub">— 本編を読む</span></h3>
-      <div class="story-list">
-        <button class="story-card" data-story="s1c1" data-title="序: 七座の使命">
-          <span class="story-card-meta">Season 1 — 第1章</span>
-          <span class="story-card-title">序: 七座の使命</span>
-          <span class="story-card-desc">星霊学院新入生・鈴宮ちさとが、自らの虹脈に出会う物語</span>
-          <span class="story-card-volume">約14,800字 / POV: ちさと</span>
-        </button>
-        <button class="story-card" data-story="s1c2" data-title="南方海域の異変">
-          <span class="story-card-meta">Season 1 — 第2章</span>
-          <span class="story-card-title">南方海域の異変</span>
-          <span class="story-card-desc">白焔教会聖巫騎士・イザベルが、海淵都市アクアシスへ派遣される物語</span>
-          <span class="story-card-volume">約10,000字 / POV: イザベル</span>
-        </button>
-        <div class="story-card disabled">
-          <span class="story-card-meta">Season 1 — 第3章</span>
-          <span class="story-card-title">砂塵の隊商</span>
-          <span class="story-card-desc">紫竜王国の第三王女・ヴィルが、古龍砂漠サハールで「血ではなく時間が家族を作る」と知る物語</span>
-          <span class="story-card-volume">Coming Soon… / POV: ヴィル</span>
-        </div>
-      </div>
-    </div>
-
     <div class="gasshuku-cta-block">
       <div class="gasshuku-cta-heading">🎌 DIK合宿ガチャ <span class="gasshuku-cta-sub">期間限定 / 全員UR確定</span></div>
       <div class="gasshuku-cta-grid">
@@ -120,7 +96,45 @@
       </div>
     </div>
 
+    <div class="story-entry-block">
+      <button class="story-entry-btn" id="btn-story-list">
+        <span class="story-entry-icon">📖</span>
+        <span class="story-entry-label">ストーリーを読む</span>
+        <span class="story-entry-arrow">→</span>
+      </button>
+    </div>
+
   </section>
+
+  <!-- ストーリー一覧モーダル -->
+  <div id="story-list-modal" class="story-list-modal" hidden>
+    <div class="story-list-backdrop"></div>
+    <div class="story-list-card">
+      <button class="story-list-close" aria-label="閉じる">×</button>
+      <div class="story-list-title">📖 Prismaera Stories</div>
+      <div class="story-list-sub">Season 1 各章を選んでお読みください</div>
+      <div class="story-list-grid">
+        <button class="story-card" data-story="s1c1" data-title="序: 七座の使命">
+          <span class="story-card-meta">Season 1 — 第1章</span>
+          <span class="story-card-title">序: 七座の使命</span>
+          <span class="story-card-desc">星霊学院新入生・鈴宮ちさとが、自らの虹脈に出会う物語</span>
+          <span class="story-card-volume">約14,800字 / POV: ちさと</span>
+        </button>
+        <button class="story-card" data-story="s1c2" data-title="南方海域の異変">
+          <span class="story-card-meta">Season 1 — 第2章</span>
+          <span class="story-card-title">南方海域の異変</span>
+          <span class="story-card-desc">白焔教会聖巫騎士・イザベルが、海淵都市アクアシスへ派遣される物語</span>
+          <span class="story-card-volume">約10,000字 / POV: イザベル</span>
+        </button>
+        <div class="story-card disabled">
+          <span class="story-card-meta">Season 1 — 第3章</span>
+          <span class="story-card-title">砂塵の隊商</span>
+          <span class="story-card-desc">紫竜王国の第三王女・ヴィルが、古龍砂漠サハールで「血ではなく時間が家族を作る」と知る物語</span>
+          <span class="story-card-volume">Coming Soon… / POV: ヴィル</span>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <section class="home-gallery gasshuku-gallery-section">
     <h3 class="home-gallery-head">
@@ -430,7 +444,7 @@
 <audio id="bgm-home" preload="auto"></audio>
 
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
-<script src="/script.js?v=20260425g26"></script>
-<script src="/gasshuku.js?v=20260425g26"></script>
+<script src="/script.js?v=20260425g27"></script>
+<script src="/gasshuku.js?v=20260425g27"></script>
 </body>
 </html>

@@ -5352,3 +5352,112 @@ body {
   border-top: 1px solid rgba(167, 139, 250, 0.18);
 }
 /* ===== END ===== */
+
+/* ===== STORY ENTRY (ホーム画面の入口ボタン) ===== */
+.story-entry-block {
+  margin-top: 14px;
+}
+.story-entry-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(167, 139, 250, 0.25));
+  border: 1px solid rgba(167, 139, 250, 0.55);
+  border-radius: 12px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: transform 0.15s, filter 0.15s, box-shadow 0.15s;
+}
+.story-entry-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.12);
+  box-shadow: 0 6px 20px rgba(167, 139, 250, 0.35);
+}
+.story-entry-icon { font-size: 22px; }
+.story-entry-label {
+  background: linear-gradient(90deg, #fff, #c4b5fd, #fff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.story-entry-arrow {
+  font-size: 18px;
+  color: #fcd34d;
+}
+
+/* ===== STORY LIST MODAL (章一覧) ===== */
+.story-list-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 240;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.story-list-modal[hidden] {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+.story-list-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 0, 18, 0.92);
+  backdrop-filter: blur(10px);
+}
+.story-list-card {
+  position: relative;
+  width: min(900px, 96vw);
+  max-height: 92vh;
+  overflow-y: auto;
+  background: linear-gradient(180deg, #14012c, #1a0438);
+  border: 1px solid rgba(167, 139, 250, 0.5);
+  border-radius: 18px;
+  padding: 32px 28px 28px;
+  box-shadow: 0 0 60px rgba(167, 139, 250, 0.3);
+}
+.story-list-close {
+  position: absolute;
+  top: 12px;
+  right: 18px;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 28px;
+  cursor: pointer;
+}
+.story-list-close:hover { color: #fcd34d; }
+.story-list-title {
+  text-align: center;
+  font-size: 26px;
+  font-weight: 800;
+  background: linear-gradient(90deg, #fbbf24, #c4b5fd, #fbbf24);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 6px;
+}
+.story-list-sub {
+  text-align: center;
+  color: #c0c4d0;
+  font-size: 13px;
+  margin-bottom: 22px;
+}
+.story-list-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+@media (max-width: 600px) {
+  .story-list-card { padding: 22px 14px 18px; }
+  .story-list-title { font-size: 20px; }
+  .story-list-grid { grid-template-columns: 1fr; }
+}
+/* ===== END ===== */

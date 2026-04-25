@@ -3544,9 +3544,25 @@ function restoreStoryProgress(storyId, total) {
   return 0;
 }
 
-// ストーリーカードクリック
+// ストーリーカードクリック (モーダル内も含む)
 document.querySelectorAll('.story-card[data-story]').forEach(card => {
   card.addEventListener('click', () => openStory(card.dataset.story));
+});
+// ストーリー一覧モーダル
+function openStoryList() {
+  const m = document.getElementById('story-list-modal');
+  if (m) m.removeAttribute('hidden');
+}
+function closeStoryList() {
+  const m = document.getElementById('story-list-modal');
+  if (m) m.setAttribute('hidden', '');
+}
+document.getElementById('btn-story-list')?.addEventListener('click', openStoryList);
+document.querySelector('#story-list-modal .story-list-close')?.addEventListener('click', closeStoryList);
+document.querySelector('#story-list-modal .story-list-backdrop')?.addEventListener('click', closeStoryList);
+// 一覧モーダル内の章カードを押したらモーダル閉じてからストーリー開く
+document.querySelectorAll('#story-list-modal .story-card[data-story]').forEach(card => {
+  card.addEventListener('click', closeStoryList);
 });
 // 背景クリックで閉じる
 $("#story-modal").addEventListener('click', e => {
