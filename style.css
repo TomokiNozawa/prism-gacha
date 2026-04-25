@@ -4309,3 +4309,91 @@ body.gasshuku-modal-open {
   visibility: hidden !important;
 }
 /* ===== GASSHUKU CLOSE GUARD END ===== */
+
+/* ===== GASSHUKU MODE SELECT ===== */
+.gasshuku-mode-select {
+  padding: 28px 8px 12px;
+}
+.gasshuku-mode-heading {
+  text-align: center;
+  font-size: 18px;
+  color: #fcd34d;
+  margin-bottom: 22px;
+  letter-spacing: 0.08em;
+}
+.gasshuku-mode-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+.gasshuku-mode-btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 24px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(125, 211, 252, 0.5);
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.18), rgba(99, 102, 241, 0.20));
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s, filter 0.15s;
+  min-height: 130px;
+  overflow: hidden;
+}
+.gasshuku-mode-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at top, rgba(56, 189, 248, 0.25) 0%, transparent 60%);
+  pointer-events: none;
+}
+.gasshuku-mode-btn.fantasy {
+  border-color: rgba(251, 191, 36, 0.55);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.22), rgba(236, 72, 153, 0.22));
+}
+.gasshuku-mode-btn.fantasy::before {
+  background: radial-gradient(ellipse at top, rgba(251, 191, 36, 0.3) 0%, transparent 60%);
+}
+.gasshuku-mode-btn:hover {
+  transform: translateY(-3px);
+  filter: brightness(1.12);
+  box-shadow: 0 10px 30px rgba(56, 189, 248, 0.3);
+}
+.gasshuku-mode-btn.fantasy:hover {
+  box-shadow: 0 10px 30px rgba(251, 191, 36, 0.35);
+}
+.gasshuku-mode-icon {
+  font-size: 32px;
+  position: relative;
+  z-index: 1;
+}
+.gasshuku-mode-label {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+.gasshuku-mode-sub {
+  font-size: 12px;
+  color: #e2e8f0;
+  letter-spacing: 0.05em;
+  position: relative;
+  z-index: 1;
+  opacity: 0.95;
+}
+
+@media (max-width: 600px) {
+  .gasshuku-mode-grid { gap: 10px; }
+  .gasshuku-mode-btn { min-height: 100px; padding: 16px 10px; }
+  .gasshuku-mode-icon { font-size: 26px; }
+  .gasshuku-mode-label { font-size: 18px; }
+  .gasshuku-mode-sub { font-size: 10px; }
+}
+/* ===== GASSHUKU MODE SELECT END ===== */

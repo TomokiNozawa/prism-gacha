@@ -115,9 +115,10 @@
     '独立勢力': '#a3e635'
   };
 
-  // ガチャ実行: 12人を全員1回ずつ、シャッフル順で
-  function rollAll() {
-    return [...POOL].sort(() => Math.random() - 0.5);
+  // ガチャ実行: count=12 で全員シャッフル、count=1 で1人ランダム
+  function rollAll(count = 12) {
+    const shuffled = [...POOL].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, Math.max(1, Math.min(count, POOL.length)));
   }
 
   // ===== UI =====
@@ -133,11 +134,36 @@
       <div class="gasshuku-stage">
         <button class="gasshuku-close" aria-label="閉じる">×</button>
         <div class="gasshuku-title">🎌 DIK合宿ガチャ 2026.04.25</div>
-        <div class="gasshuku-subtitle">全員UR確定・12連 / Prismaera 期間限定</div>
+        <div class="gasshuku-subtitle">全員UR確定 / Prismaera 期間限定</div>
+        <div class="gasshuku-mode-select" id="gasshuku-mode-select">
+          <div class="gasshuku-mode-heading">引き方を選んでください</div>
+          <div class="gasshuku-mode-grid">
+            <button class="gasshuku-mode-btn" data-imgmode="real" data-count="1">
+              <span class="gasshuku-mode-icon">📷</span>
+              <span class="gasshuku-mode-label">単発</span>
+              <span class="gasshuku-mode-sub">本人写真</span>
+            </button>
+            <button class="gasshuku-mode-btn" data-imgmode="real" data-count="12">
+              <span class="gasshuku-mode-icon">📷</span>
+              <span class="gasshuku-mode-label">12連</span>
+              <span class="gasshuku-mode-sub">本人写真 / 全員召喚</span>
+            </button>
+            <button class="gasshuku-mode-btn fantasy" data-imgmode="fantasy" data-count="1">
+              <span class="gasshuku-mode-icon">🌈</span>
+              <span class="gasshuku-mode-label">単発</span>
+              <span class="gasshuku-mode-sub">ファンタジー</span>
+            </button>
+            <button class="gasshuku-mode-btn fantasy" data-imgmode="fantasy" data-count="12">
+              <span class="gasshuku-mode-icon">🌈</span>
+              <span class="gasshuku-mode-label">12連</span>
+              <span class="gasshuku-mode-sub">ファンタジー / 全員召喚</span>
+            </button>
+          </div>
+        </div>
         <div class="gasshuku-cutscene" id="gasshuku-cutscene"></div>
         <div class="gasshuku-grid" id="gasshuku-grid"></div>
-        <div class="gasshuku-footer">
-          <button class="gasshuku-replay" id="gasshuku-replay">🎲 もう一度引く</button>
+        <div class="gasshuku-footer" id="gasshuku-footer" hidden>
+          <button class="gasshuku-replay" id="gasshuku-replay">🎲 別の引き方を選ぶ</button>
         </div>
       </div>
       <div class="gasshuku-detail" id="gasshuku-detail" hidden>
@@ -166,13 +192,20 @@
     // close handlers
     m.querySelector('.gasshuku-close').addEventListener('click', closeModal);
     m.querySelector('.gasshuku-backdrop').addEventListener('click', closeModal);
-    m.querySelector('#gasshuku-replay').addEventListener('click', startRoll);
+    m.querySelector('#gasshuku-replay').addEventListener('click', showModeSelect);
     m.querySelector('.gasshuku-detail-close').addEventListener('click', closeDetail);
     m.querySelector('#gasshuku-detail').addEventListener('click', (e) => {
       if (e.target.id === 'gasshuku-detail') closeDetail();
     });
     m.querySelectorAll('.gasshuku-toggle-btn').forEach(btn => {
       btn.addEventListener('click', () => switchImage(btn.dataset.mode));
+    });
+    m.querySelectorAll('.gasshuku-mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const imgMode = btn.dataset.imgmode;
+        const count = parseInt(btn.dataset.count, 10);
+        startRoll(imgMode, count);
+      });
     });
     return m;
   }
@@ -182,7 +215,17 @@
     m.removeAttribute('hidden');
     m.classList.add('active');
     document.body.classList.add('gasshuku-modal-open');
-    startRoll();
+    showModeSelect();
+  }
+  function showModeSelect() {
+    const sel = document.getElementById('gasshuku-mode-select');
+    const cs = document.getElementById('gasshuku-cutscene');
+    const grid = document.getElementById('gasshuku-grid');
+    const footer = document.getElementById('gasshuku-footer');
+    if (sel) sel.style.display = '';
+    if (cs) { cs.innerHTML = ''; cs.style.display = 'none'; }
+    if (grid) { grid.innerHTML = ''; grid.style.display = 'none'; }
+    if (footer) footer.hidden = true;
   }
   function closeModal() {
     const m = document.getElementById('gasshuku-modal');
@@ -229,7 +272,7 @@
       b.classList.toggle('active', b.dataset.mode === mode);
     });
   }
-  function openDetail(c) {
+  function openDetail(c, defaultMode = 'fantasy') {
     currentDetail = c;
     const d = document.getElementById('gasshuku-detail');
     document.getElementById('gasshuku-detail-name').textContent = c.name;
@@ -239,39 +282,51 @@
     fac.style.color = FACTION_COLOR[c.faction] || '#fff';
     document.getElementById('gasshuku-detail-skill').textContent = `🌟 ${c.skill}`;
     document.getElementById('gasshuku-detail-voice').textContent = `「${c.voice}」`;
+    d.removeAttribute('hidden');
     d.hidden = false;
-    switchImage('fantasy');
+    switchImage(defaultMode);
   }
 
-  async function startRoll() {
-    const result = rollAll();
+  async function startRoll(imgMode = 'fantasy', count = 12) {
+    const result = rollAll(count);
+    const sel = document.getElementById('gasshuku-mode-select');
     const cutscene = document.getElementById('gasshuku-cutscene');
     const grid = document.getElementById('gasshuku-grid');
+    const footer = document.getElementById('gasshuku-footer');
+    if (sel) sel.style.display = 'none';
     cutscene.innerHTML = '';
     grid.innerHTML = '';
     cutscene.classList.remove('done');
     cutscene.style.display = '';
     grid.style.display = 'none';
-    document.getElementById('gasshuku-replay').disabled = true;
+    if (footer) footer.hidden = true;
 
-    // skip control + counter
+    const primaryMode = imgMode === 'real' ? 'real' : 'fantasy';
+    const fallbackMode = primaryMode === 'fantasy' ? 'real' : null;
+
+    // skip control + counter (12連の時のみカウンター)
     const skipBtn = document.createElement('button');
     skipBtn.textContent = '⏩ スキップ';
     skipBtn.className = 'gasshuku-skip';
     cutscene.appendChild(skipBtn);
-    const counter = document.createElement('div');
-    counter.className = 'gasshuku-counter';
-    cutscene.appendChild(counter);
+    let counter = null;
+    if (count > 1) {
+      counter = document.createElement('div');
+      counter.className = 'gasshuku-counter';
+      cutscene.appendChild(counter);
+    }
     let skipped = false;
     skipBtn.addEventListener('click', () => { skipped = true; });
 
     // Pre-roll fanfare
     const fanfare = document.createElement('div');
     fanfare.className = 'gasshuku-fanfare';
+    const headline = count === 1 ? '単発 UR確定' : `${count}連 UR確定`;
+    const subline = (primaryMode === 'real' ? '📷 本人写真モード' : '🌈 ファンタジーモード') + ' / DIK合宿2026 限定召喚';
     fanfare.innerHTML = `
       <div class="gasshuku-fanfare-rainbow"></div>
-      <div class="gasshuku-fanfare-text">12連 UR確定</div>
-      <div class="gasshuku-fanfare-sub">DIK合宿2026 限定召喚</div>
+      <div class="gasshuku-fanfare-text">${headline}</div>
+      <div class="gasshuku-fanfare-sub">${subline}</div>
     `;
     cutscene.appendChild(fanfare);
     await new Promise(r => setTimeout(r, 1400));
@@ -282,9 +337,12 @@
     for (let i = 0; i < result.length; i++) {
       if (skipped) break;
       const c = result[i];
-      counter.textContent = `${i + 1} / ${result.length}`;
+      if (counter) counter.textContent = `${i + 1} / ${result.length}`;
       const slot = document.createElement('div');
       slot.className = 'gasshuku-slot';
+      const fallbackAttr = fallbackMode
+        ? `onerror="this.onerror=null;this.src='${imgPath(c, fallbackMode)}'"`
+        : '';
       slot.innerHTML = `
         <div class="gasshuku-rainbow-bg"></div>
         <div class="gasshuku-flash"></div>
@@ -301,7 +359,7 @@
             <span class="gasshuku-banner-spark">✦</span>
           </div>
           <div class="gasshuku-slot-glow" style="background: radial-gradient(circle, ${FACTION_COLOR[c.faction]}cc 0%, transparent 70%)"></div>
-          <img class="gasshuku-slot-img" src="${imgPath(c, 'fantasy')}" onerror="this.onerror=null;this.src='${imgPath(c, 'real')}'" alt="${c.name}">
+          <img class="gasshuku-slot-img" src="${imgPath(c, primaryMode)}" ${fallbackAttr} alt="${c.name}">
           <div class="gasshuku-slot-info">
             <div class="gasshuku-slot-name">${c.name}</div>
             <div class="gasshuku-slot-real">${c.real} — ${c.role}</div>
@@ -311,34 +369,39 @@
         </div>
       `;
       cutscene.appendChild(slot);
-      // wait 2.6s
-      await new Promise(r => setTimeout(r, 2600));
+      // wait 2.6s (single roll has slightly longer 3.2s for emphasis)
+      await new Promise(r => setTimeout(r, count === 1 ? 3200 : 2600));
       slot.classList.add('exit');
       await new Promise(r => setTimeout(r, 350));
       slot.remove();
     }
     skipBtn.remove();
-    counter.remove();
+    if (counter) counter.remove();
 
     cutscene.classList.add('done');
     cutscene.style.display = 'none';
     grid.style.display = '';
 
-    // grid display: 12 thumbnails
+    // grid display: 出現キャラのサムネイル（モード反映）
     result.forEach(c => {
       const card = document.createElement('div');
       card.className = 'gasshuku-card';
+      const fallbackAttr = fallbackMode
+        ? `onerror="this.onerror=null;this.src='${imgPath(c, fallbackMode)}'"`
+        : '';
       card.innerHTML = `
         <div class="gasshuku-card-glow" style="background: radial-gradient(ellipse at top, ${FACTION_COLOR[c.faction]}55 0%, transparent 60%)"></div>
-        <img class="gasshuku-card-img" src="${imgPath(c, 'fantasy')}" onerror="this.onerror=null;this.src='${imgPath(c, 'real')}'" alt="${c.name}">
+        <img class="gasshuku-card-img" src="${imgPath(c, primaryMode)}" ${fallbackAttr} alt="${c.name}">
         <div class="gasshuku-card-tier">UR</div>
         <div class="gasshuku-card-name">${c.name}</div>
         <div class="gasshuku-card-real">${c.real}</div>
       `;
-      card.addEventListener('click', () => openDetail(c));
+      card.addEventListener('click', () => openDetail(c, primaryMode));
       grid.appendChild(card);
     });
-    document.getElementById('gasshuku-replay').disabled = false;
+    if (footer) footer.hidden = false;
+    const replayBtn = document.getElementById('gasshuku-replay');
+    if (replayBtn) replayBtn.disabled = false;
   }
 
   // Hook up button on DOM ready
