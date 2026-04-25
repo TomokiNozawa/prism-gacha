@@ -3149,18 +3149,25 @@ function linkifyCharNames(html) {
   }
   candidates.sort((a, b) => b.name.length - a.name.length);
 
+  // 名前内の半角/全角スペース位置に「、」「,」「・」も許容する正規表現を生成
+  const escapeRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const buildFlexRe = name => new RegExp(name.split(/[\s ]+/).map(escapeRe).join('[\\s 、,・]?'), 'g');
+
   function walk(node) {
     if (node.nodeType === Node.TEXT_NODE) {
       let text = node.textContent;
       // 長い候補から、まずプレースホルダーに置換
       const placeholders = [];
       for (const cand of candidates) {
-        let parts = text.split(cand.name);
-        if (parts.length === 1) continue;
-        // 既にプレースホルダー(__CL_N__)と被るところはスキップしたいが、indexOfで管理
-        const ph = `__CL_${placeholders.length}__`;
-        placeholders.push(`<a class="char-link" data-name="${escapeHtml(cand.char.name)}">${escapeHtml(cand.name)}</a>`);
-        text = parts.join(ph);
+        const re = buildFlexRe(cand.name);
+        if (!re.test(text)) continue;
+        re.lastIndex = 0;
+        text = text.replace(re, (matched) => {
+          if (matched.startsWith('__CL_')) return matched; // プレースホルダーは触らない
+          const i = placeholders.length;
+          placeholders.push(`<a class="char-link" data-name="${escapeHtml(cand.char.name)}">${escapeHtml(matched)}</a>`);
+          return `__CL_${i}__`;
+        });
       }
       if (placeholders.length === 0) return;
       let html = escapeHtml(text);
@@ -3277,11 +3284,17 @@ function parseStoryToScenes(md) {
     if (h1) {
       flushCurrent();
       current = null;
+      const h1title = h1[1].trim();
+      // メタ情報 (編集メモ・編集後記等) はストーリー本編から除外
+      if (/^(編集メモ|編集後記|メモ|奥付|索引)$/.test(h1title)) {
+        // 以降の本文は捨てる (current=nullのまま)
+        continue;
+      }
       // 章タイトルや「終」は表紙/終ページとして単独シーン化
       if (line.includes('終')) {
-        scenes.push({ label: '', title: h1[1].trim(), contentMd: '*— 第1章 完 —*\n\n次章をお楽しみに。', bg: 'finale' });
+        scenes.push({ label: '', title: h1title, contentMd: '*— 第1章 完 —*\n\n次章をお楽しみに。', bg: 'finale' });
       } else {
-        scenes.push({ label: '', title: h1[1].trim(), contentMd: '', bg: 'cover', isCover: true });
+        scenes.push({ label: '', title: h1title, contentMd: '', bg: 'cover', isCover: true });
       }
       preludeLines = [];
     } else if (h2) {
@@ -3397,7 +3410,11 @@ function renderSceneChars(scene) {
     container.style.display = 'none';
     return;
   }
-  const text = (scene.title || '') + '\n' + (scene.contentMd || '');
+  // 「、」「,」「・」を半角スペースに正規化 (本文の表記ゆれ対策)
+  // 例: 「波紋の聖女、イザベル」もPOOL名「波紋の聖女 イザベル」とマッチさせる
+  // 文字数は変わらないので matched index は元と一致する
+  const _rawText = (scene.title || '') + '\n' + (scene.contentMd || '');
+  const text = _rawText.replace(/[、,・]/g, ' ');
 
   // 検索候補を構築 (各キャラごとに複数の検索語)
   // 例: '竜爵 ヴィル' → ['竜爵 ヴィル', 'ヴィル']
