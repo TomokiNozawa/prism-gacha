@@ -3610,8 +3610,9 @@ $("#story-stage").addEventListener('click', e => {
 // ============ v1.1.3: Master Mute + BGM プレイヤー (拡張版) ============
 // BGM_LIST: labelは「メインテーマ」「第1章テーマ」など使用場面を表記、descは原曲名
 const BGM_LIST = [
-  { id: 'dawn',  label: 'メインテーマ', desc: 'Prism Dawn (夜明けの希望)',  file: 'assets/bgm/home.mp3' },
-  { id: 'watch', label: '第1章テーマ',  desc: 'Prism Watch (三柱の夜警)',   file: 'assets/bgm/prism-watch.mp3' },
+  { id: 'dawn',  label: 'メインテーマ', desc: 'Prism Dawn (夜明けの希望)',  file: '/assets/bgm/home.mp3' },
+  { id: 'watch', label: '第1章テーマ',  desc: 'Prism Watch (三柱の夜警)',   file: '/assets/bgm/prism-watch.mp3' },
+  { id: 'tide',  label: '第2章テーマ',  desc: 'Prism Tide (虹の潮)',         file: '/assets/bgm/prism-tide.mp3' },
 ];
 const bgmAudio = document.getElementById("bgm-home");
 
