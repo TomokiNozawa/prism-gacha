@@ -5074,15 +5074,20 @@ async function submitFeedback() {
   if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = '送信中…'; }
   try {
     if (!fbDb) throw new Error('Firebase未接続');
-    await fbDb.ref('prism-gacha/feedback').push({
+    // ServerValue.TIMESTAMP を使う(クライアント時計ズレでルール検証失敗を回避)
+    const TS = (typeof firebase !== 'undefined' && firebase.database && firebase.database.ServerValue)
+      ? firebase.database.ServerValue.TIMESTAMP : Date.now();
+    const payload = {
       category: cat,
       text: text,
       uid: authUser.uid,
-      name: authUser.displayName || null,
-      createdAt: Date.now(),
+      createdAt: TS,
       read: false,
-      origin: location.origin + location.pathname,
-    });
+      origin: (location.origin + location.pathname).slice(0, 200),
+    };
+    if (authUser.displayName) payload.name = String(authUser.displayName).slice(0, 30);
+    console.debug('[feedback] sending payload:', payload);
+    await fbDb.ref('prism-gacha/feedback').push(payload);
     showToast('✓ 送信しました。ありがとうございます!');
     closeFeedbackModal();
   } catch (e) {

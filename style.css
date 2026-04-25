@@ -2333,6 +2333,37 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   .story-char-name { font-size: 10px; }
 }
 
+/* ───── ホーム上部 2列レイアウト (合宿ガチャ ⇄ Story+Feedback) ───── */
+.home-actions-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  align-items: stretch;
+  margin: 16px 0;
+}
+.home-actions-row > .gasshuku-cta-block,
+.home-actions-row > .story-side-stack {
+  display: flex; flex-direction: column;
+  height: 100%;
+  margin: 0;
+}
+.story-side-stack {
+  gap: 12px;
+}
+.story-side-stack > .story-entry-block,
+.story-side-stack > .home-feedback {
+  flex: 1; margin: 0; padding: 0; max-width: none;
+}
+.story-side-stack > .story-entry-block .story-entry-btn,
+.story-side-stack > .home-feedback .home-feedback-card {
+  height: 100%;
+}
+@media (max-width: 700px) {
+  .home-actions-row { grid-template-columns: 1fr; gap: 14px; }
+  .story-side-stack > .story-entry-block .story-entry-btn,
+  .story-side-stack > .home-feedback .home-feedback-card { height: auto; }
+}
+
 /* ───── ホーム画面の要望カード ───── */
 .home-feedback {
   margin: 24px auto 32px;

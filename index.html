@@ -24,7 +24,7 @@
 <link rel="icon" href="/images/icons/icon-16.png" type="image/png" sizes="16x16">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
 <link rel="manifest" href="/manifest.json?v=20260425g25">
-<link rel="stylesheet" href="/style.css?v=20260426b0">
+<link rel="stylesheet" href="/style.css?v=20260426b1">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -71,64 +71,68 @@
       </button>
     </div>
 
-    <div class="gasshuku-cta-block">
-      <div class="gasshuku-cta-heading">🎌 DIK合宿ガチャ <span class="gasshuku-cta-sub">期間限定 / 全員UR確定</span></div>
-      <div class="gasshuku-cta-grid">
-        <button class="gasshuku-cta-btn" data-imgmode="real" data-count="1">
-          <span class="gasshuku-cta-icon">📷</span>
-          <span class="gasshuku-cta-label">単発</span>
-          <span class="gasshuku-cta-sublabel">本人写真</span>
-        </button>
-        <button class="gasshuku-cta-btn" data-imgmode="real" data-count="10">
-          <span class="gasshuku-cta-icon">📷</span>
-          <span class="gasshuku-cta-label">10連</span>
-          <span class="gasshuku-cta-sublabel">本人写真 / 重複あり</span>
-        </button>
-        <button class="gasshuku-cta-btn fantasy" data-imgmode="fantasy" data-count="1">
-          <span class="gasshuku-cta-icon">🌈</span>
-          <span class="gasshuku-cta-label">単発</span>
-          <span class="gasshuku-cta-sublabel">ファンタジー</span>
-        </button>
-        <button class="gasshuku-cta-btn fantasy" data-imgmode="fantasy" data-count="10">
-          <span class="gasshuku-cta-icon">🌈</span>
-          <span class="gasshuku-cta-label">10連</span>
-          <span class="gasshuku-cta-sublabel">ファンタジー / 重複あり</span>
-        </button>
+    <div class="home-actions-row">
+      <div class="gasshuku-cta-block">
+        <div class="gasshuku-cta-heading">🎌 DIK合宿ガチャ <span class="gasshuku-cta-sub">期間限定 / 全員UR確定</span></div>
+        <div class="gasshuku-cta-grid">
+          <button class="gasshuku-cta-btn" data-imgmode="real" data-count="1">
+            <span class="gasshuku-cta-icon">📷</span>
+            <span class="gasshuku-cta-label">単発</span>
+            <span class="gasshuku-cta-sublabel">本人写真</span>
+          </button>
+          <button class="gasshuku-cta-btn" data-imgmode="real" data-count="10">
+            <span class="gasshuku-cta-icon">📷</span>
+            <span class="gasshuku-cta-label">10連</span>
+            <span class="gasshuku-cta-sublabel">本人写真 / 重複あり</span>
+          </button>
+          <button class="gasshuku-cta-btn fantasy" data-imgmode="fantasy" data-count="1">
+            <span class="gasshuku-cta-icon">🌈</span>
+            <span class="gasshuku-cta-label">単発</span>
+            <span class="gasshuku-cta-sublabel">ファンタジー</span>
+          </button>
+          <button class="gasshuku-cta-btn fantasy" data-imgmode="fantasy" data-count="10">
+            <span class="gasshuku-cta-icon">🌈</span>
+            <span class="gasshuku-cta-label">10連</span>
+            <span class="gasshuku-cta-sublabel">ファンタジー / 重複あり</span>
+          </button>
+        </div>
       </div>
-    </div>
 
-    <div class="story-entry-block">
-      <button class="story-entry-btn" id="btn-story-list">
-        <div class="story-entry-aurora"></div>
-        <div class="story-entry-stars">
-          <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-        </div>
-        <div class="story-entry-badge">✨ 新章公開中</div>
-        <div class="story-entry-content">
-          <div class="story-entry-icon-large">📖</div>
-          <div class="story-entry-text">
-            <div class="story-entry-headline">Prismaera Stories</div>
-            <div class="story-entry-tagline">虹霊界に眠る、七つの物語</div>
-            <div class="story-entry-meta">
-              <span class="story-entry-meta-tag">Season 1 公開中</span>
-              <span class="story-entry-meta-sep">・</span>
-              <span class="story-entry-meta-tag">2 / 7章 解放</span>
+      <div class="story-side-stack">
+        <div class="story-entry-block">
+          <button class="story-entry-btn" id="btn-story-list">
+            <div class="story-entry-aurora"></div>
+            <div class="story-entry-stars">
+              <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
             </div>
-          </div>
-          <div class="story-entry-arrow">▶</div>
+            <div class="story-entry-badge">✨ 新章公開中</div>
+            <div class="story-entry-content">
+              <div class="story-entry-icon-large">📖</div>
+              <div class="story-entry-text">
+                <div class="story-entry-headline">Prismaera Stories</div>
+                <div class="story-entry-tagline">虹霊界に眠る、七つの物語</div>
+                <div class="story-entry-meta">
+                  <span class="story-entry-meta-tag">Season 1 公開中</span>
+                  <span class="story-entry-meta-sep">・</span>
+                  <span class="story-entry-meta-tag">2 / 7章 解放</span>
+                </div>
+              </div>
+              <div class="story-entry-arrow">▶</div>
+            </div>
+          </button>
         </div>
-      </button>
-    </div>
 
-    <div class="home-feedback">
-      <button type="button" class="home-feedback-card" onclick="openFeedbackModal()">
-        <div class="home-feedback-icon">📨</div>
-        <div class="home-feedback-text">
-          <div class="home-feedback-title">ご意見・ご要望</div>
-          <div class="home-feedback-sub">Prismaeraをもっと良くするため、声を聞かせてください</div>
+        <div class="home-feedback">
+          <button type="button" class="home-feedback-card" onclick="openFeedbackModal()">
+            <div class="home-feedback-icon">📨</div>
+            <div class="home-feedback-text">
+              <div class="home-feedback-title">ご意見・ご要望</div>
+              <div class="home-feedback-sub">Prismaeraをもっと良くするため、声を聞かせてください</div>
+            </div>
+            <div class="home-feedback-arrow">→</div>
+          </button>
         </div>
-        <div class="home-feedback-arrow">→</div>
-      </button>
+      </div>
     </div>
 
   </section>
@@ -506,7 +510,7 @@
 <audio id="bgm-home" preload="auto"></audio>
 
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
-<script src="/script.js?v=20260426b0"></script>
+<script src="/script.js?v=20260426b1"></script>
 <script src="/gasshuku.js?v=20260425g32"></script>
 </body>
 </html>
