@@ -551,7 +551,7 @@ function renderUsers(users, uidToNickname, guestDevices) {
 async function loadGasshukuStats() {
   try {
     // 全日 totalRolls/totalSummons + 全期間 devices 集計
-    const snap = await fbDb.ref('prism-gacha/gasshukuStats').once('value');
+    const snap = await db.ref('prism-gacha/gasshukuStats').once('value');
     const all = snap.val() || {};
     let totalRolls = 0, totalSummons = 0;
     const allDevices = new Set();

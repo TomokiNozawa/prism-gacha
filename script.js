@@ -3370,7 +3370,7 @@ function renderScene() {
   const scroll = $("#story-scroll");
   if (scroll) scroll.scrollTop = 0;
   // 進捗保存
-  saveStoryProgress(currentStoryId, storyIdx);
+  saveStoryProgress(currentStoryId, storyIdx, storyScenes.length);
 }
 
 // シーン本文に登場するキャラを自動検出して下部に立ち絵を並べる
@@ -3527,13 +3527,30 @@ function closeStory() {
 }
 
 // 進捗保存 (localStorage)
-function saveStoryProgress(storyId, idx) {
+function saveStoryProgress(storyId, idx, totalScenes) {
   if (!storyId) return;
+  // localStorage (旧形式・後方互換)
   try {
     const all = JSON.parse(localStorage.getItem('prism-story-progress') || '{}');
     all[storyId] = idx;
     localStorage.setItem('prism-story-progress', JSON.stringify(all));
   } catch {}
+  // state.storyProgress (Firebase 同期対象、 admin画面の S1C1読了 で集計される)
+  try {
+    if (typeof state === 'object' && state) {
+      state.storyProgress = state.storyProgress || {};
+      const total = totalScenes || (state.storyProgress[storyId] && state.storyProgress[storyId].totalScenes) || 0;
+      const wasCompleted = state.storyProgress[storyId] && state.storyProgress[storyId].completed;
+      state.storyProgress[storyId] = {
+        lastSceneIndex: idx,
+        totalScenes: total,
+        lastReadAt: Date.now(),
+        // 最終シーンに到達したら completed: true (一度立てたら戻さない)
+        completed: wasCompleted || (total > 0 && idx >= total - 1),
+      };
+      if (typeof saveState === 'function') saveState();
+    }
+  } catch (e) { console.warn('[story] saveStoryProgress state failed:', e); }
 }
 function restoreStoryProgress(storyId, total) {
   try {
