@@ -3464,6 +3464,7 @@ function renderSceneChars(scene) {
       `).join('')}
     </div>
   `;
+  setupCharBlinkAnimations();
   container.querySelectorAll('.story-char-thumb').forEach(el => {
     el.addEventListener('click', (e) => {
       e.stopPropagation(); // ステージクリックの「次へ」を発火させない
@@ -3480,6 +3481,55 @@ function renderSceneChars(scene) {
 }
 function escapeRegExp(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// ────────────── キャラ瞬きアニメーション (Live2D風プロト) ──────────────
+// 命名規則: 通常 prisma.png + 瞬き prisma_blink.png を同フォルダに配置
+// 検出: <name>_blink.png が 200 OK で読めれば瞬き有効化、そうでなければ静止
+// 適用範囲: ストーリーシーンの登場キャラサムネイル中、現状LRのみ(プロト段階)
+const _blinkImageCache = new Map(); // url → 'ok' | 'ng'
+let _blinkTimers = [];
+function clearBlinkTimers() {
+  _blinkTimers.forEach(id => clearTimeout(id));
+  _blinkTimers = [];
+}
+function setupCharBlinkAnimations() {
+  clearBlinkTimers();
+  // プロト: LRのみ対象
+  document.querySelectorAll('.story-char-thumb.lr .story-char-img').forEach(imgEl => {
+    const bg = imgEl.style.backgroundImage || '';
+    const m = bg.match(/url\(['"]?([^'")]+)['"]?\)/);
+    if (!m) return;
+    const normalUrl = m[1];
+    const blinkUrl = normalUrl.replace(/\.(png|jpg|jpeg|webp)$/i, '_blink.$1');
+    const cached = _blinkImageCache.get(blinkUrl);
+    if (cached === 'ng') return; // 過去に存在しないと判明した
+    if (cached === 'ok') { _startBlinkLoop(imgEl, normalUrl, blinkUrl); return; }
+    // 初回は preload で存在確認
+    const probe = new Image();
+    probe.onload = () => { _blinkImageCache.set(blinkUrl, 'ok'); _startBlinkLoop(imgEl, normalUrl, blinkUrl); };
+    probe.onerror = () => { _blinkImageCache.set(blinkUrl, 'ng'); };
+    probe.src = blinkUrl;
+  });
+}
+function _startBlinkLoop(imgEl, normalUrl, blinkUrl) {
+  function next() {
+    // 4-7秒のランダム間隔でばらける (複数キャラが同時に瞬かないように)
+    const delay = 4000 + Math.random() * 3000;
+    const t1 = setTimeout(() => {
+      // 要素がDOMから外れていれば停止
+      if (!document.body.contains(imgEl)) return;
+      imgEl.style.backgroundImage = `url('${blinkUrl}')`;
+      const t2 = setTimeout(() => {
+        if (!document.body.contains(imgEl)) return;
+        imgEl.style.backgroundImage = `url('${normalUrl}')`;
+        next();
+      }, 180); // 瞬きの長さ 180ms
+      _blinkTimers.push(t2);
+    }, delay);
+    _blinkTimers.push(t1);
+  }
+  next();
 }
 
 function toggleStoryToc() {
