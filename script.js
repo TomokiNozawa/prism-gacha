@@ -5089,6 +5089,10 @@ async function submitFeedback() {
     if (authUser.displayName) payload.name = String(authUser.displayName).slice(0, 30);
     console.debug('[feedback] sending payload:', payload);
     await fbDb.ref('prism-gacha/feedback').push(payload);
+    // 未読カウンタ +1 (NozaBoardバッジ用、 _meta配下で公開読取可)
+    try {
+      await fbDb.ref('prism-gacha/_meta/feedback_unread_count').transaction(c => (c || 0) + 1);
+    } catch (e) { console.warn('[feedback] counter incr failed:', e); }
     showToast('✓ 送信しました。ありがとうございます!');
     closeFeedbackModal();
   } catch (e) {

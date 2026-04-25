@@ -749,6 +749,11 @@ async function loadFeedback() {
     snap.forEach(child => { items.push({ id: child.key, ...(child.val() || {}) }); });
     items.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
     feedbackItems = items;
+    // 未読カウンタを実数で再同期 (累計ズレ防止のため refresh 時に true-up)
+    const actualUnread = items.filter(f => !f.read).length;
+    try {
+      await db.ref('prism-gacha/_meta/feedback_unread_count').set(actualUnread);
+    } catch (e) { console.warn('[feedback] counter resync failed:', e); }
     renderFeedback();
   } catch (e) {
     console.error('[feedback] load failed:', e);
@@ -813,10 +818,16 @@ function renderFeedback() {
 
 async function toggleFeedbackRead(id, currentRead) {
   try {
-    await db.ref('prism-gacha/feedback/' + id + '/read').set(!currentRead);
+    const newRead = !currentRead;
+    await db.ref('prism-gacha/feedback/' + id + '/read').set(newRead);
+    // 未読カウンタ調整 (read:true→false で +1、 false→true で -1)
+    const delta = newRead ? -1 : 1;
+    try {
+      await db.ref('prism-gacha/_meta/feedback_unread_count').transaction(c => Math.max(0, (c || 0) + delta));
+    } catch (e) { console.warn('[feedback] counter adjust failed:', e); }
     // ローカル更新+再描画 (再fetchより速い)
     const item = feedbackItems.find(f => f.id === id);
-    if (item) item.read = !currentRead;
+    if (item) item.read = newRead;
     renderFeedback();
   } catch (e) {
     console.error('[feedback] toggle read failed:', e);
