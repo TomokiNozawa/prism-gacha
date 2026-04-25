@@ -542,7 +542,7 @@
             <li>💾 ブラウザ消去しても記録が残る</li>
             <li>🌟 通常版「Prismaera」の本編ストーリーや相関図も遊べる</li>
           </ul>
-          <p class="gasshuku-invite-note">※ ニックネーム＋合言葉だけでOK・無料・1分で完了</p>
+          <p class="gasshuku-invite-note">※ ニックネーム＋合言葉だけでOK・無料・30秒で完了</p>
         </div>
         <div class="gasshuku-invite-actions">
           <button class="gasshuku-invite-btn primary" id="gasshuku-invite-signup">✨ アカウントを作る</button>

@@ -4673,7 +4673,7 @@ function ensureWelcomeModal() {
         <ul class="welcome-features">
           <li>📱 別端末からも進捗を引き継げます</li>
           <li>💾 ブラウザを消しても記録が残ります</li>
-          <li>⚡ 1分で完了・無料・課金なし</li>
+          <li>⚡ 30秒で完了・無料・課金なし</li>
         </ul>
       </div>
       <div class="welcome-actions">
