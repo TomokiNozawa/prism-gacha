@@ -3127,6 +3127,11 @@ function linkifyCharNames(html) {
   const tmp = document.createElement('div');
   tmp.innerHTML = html;
   // 候補構築 (story-scene-charsと同じロジック、長い順)
+  // 短名衝突回避: 短名(lastToken/katakanaTail)が他キャラのfullNameと一致する場合は追加しない
+  const allFullNames = new Set();
+  for (const tier of ['LR','UR','SSR','SR','R']) {
+    for (const c of POOL[tier]) allFullNames.add(c.name);
+  }
   const candidates = [];
   for (const tier of ['LR','UR','SSR','SR','R']) {
     for (const c of POOL[tier]) {
@@ -3138,8 +3143,8 @@ function linkifyCharNames(html) {
       const seenCands = new Set();
       const add = (s) => { if (s && s.length >= 2 && !seenCands.has(s)) { seenCands.add(s); candidates.push({ name: s, char: { ...c, tier } }); } };
       add(fullName);
-      if (lastToken !== fullName) add(lastToken);
-      if (katakanaTail && katakanaTail !== lastToken) add(katakanaTail);
+      if (lastToken !== fullName && !allFullNames.has(lastToken)) add(lastToken);
+      if (katakanaTail && katakanaTail !== lastToken && !allFullNames.has(katakanaTail)) add(katakanaTail);
     }
   }
   candidates.sort((a, b) => b.name.length - a.name.length);
@@ -3397,6 +3402,13 @@ function renderSceneChars(scene) {
   // 検索候補を構築 (各キャラごとに複数の検索語)
   // 例: '竜爵 ヴィル' → ['竜爵 ヴィル', 'ヴィル']
   // 例: '星海のノクス' → ['星海のノクス', 'ノクス'] (末尾カタカナ列も追加)
+  // 短名(lastToken/katakanaTail) が他キャラのfullNameと衝突する場合は追加しない
+  // (例: UR『波紋の聖女 イザベル』の短名『イザベル』は、 SSR『イザベル』の専有とする
+  //  → 本文の単独『イザベル』はSSRに、 『波紋の聖女 イザベル』の出現はURに紐づく)
+  const allFullNames = new Set();
+  for (const tier of ['LR','UR','SSR','SR','R']) {
+    for (const c of POOL[tier]) allFullNames.add(c.name);
+  }
   const candidates = [];
   for (const tier of ['LR','UR','SSR','SR','R']) {
     for (const c of POOL[tier]) {
@@ -3408,8 +3420,8 @@ function renderSceneChars(scene) {
       const seenCands = new Set();
       const add = (s) => { if (s && s.length >= 2 && !seenCands.has(s)) { seenCands.add(s); candidates.push({ name: s, len: s.length, char: { ...c, tier } }); } };
       add(fullName);
-      if (lastToken !== fullName) add(lastToken);
-      if (katakanaTail && katakanaTail !== lastToken) add(katakanaTail);
+      if (lastToken !== fullName && !allFullNames.has(lastToken)) add(lastToken);
+      if (katakanaTail && katakanaTail !== lastToken && !allFullNames.has(katakanaTail)) add(katakanaTail);
     }
   }
   // 長い候補を先に処理 (短い候補が長い候補の一部にマッチする誤検出を防ぐ)
