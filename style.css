@@ -4879,11 +4879,12 @@ body.gasshuku-modal-open {
 .gasshuku-lightbox-close:hover { color: #fcd34d; }
 /* ===== END ===== */
 
-/* ===== GASSHUKU OVERLAY HIDE (合宿モード中だけ既存テロップ非表示) =====
- * キャラ画像内に既に名前/派閥/セリフUIが描画済みのため、被って見づらい。 */
-body.gasshuku-running .hcard-name,
-body.gasshuku-running .fx-charname,
-body.gasshuku-running .fx-win {
+/* ===== GASSHUKU OVERLAY HIDE (ファンタジーモードのみ) =====
+ * ファンタジー画像には名前/派閥/セリフUIが描画済みなので非表示にする。
+ * 本人写真モードは画像内に文字が無いので既存テロップ(キャラ名/セリフ/UR OBTAINED)を表示する。 */
+body.gasshuku-mode-fantasy .hcard-name,
+body.gasshuku-mode-fantasy .fx-charname,
+body.gasshuku-mode-fantasy .fx-win {
   display: none !important;
 }
 /* ===== END ===== */

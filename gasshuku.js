@@ -358,6 +358,7 @@
     gasshukuBusy = true;
     setGachaBtnsDisabled(true);
     document.body.classList.add('gasshuku-running');
+    document.body.classList.add('gasshuku-mode-' + (imgMode === 'real' ? 'real' : 'fantasy'));
 
     const cv = document.getElementById('canvas') || document.querySelector('canvas');
     const resizeCanvas = () => {
@@ -397,10 +398,11 @@
         if (typeof play === 'function') play('se-summon', 'UR');
         await new Promise(r => setTimeout(r, 1100));
 
-        // 前9体: showLadder=false
+        // 前9体: showLadder=false (各キャラ前に skipRequested を必ずリセット)
         for (let i = 0; i < sequenced.length - 1; i++) {
           if (typeof clearStage === 'function') clearStage();
           resizeCanvas();
+          if (typeof skipRequested !== 'undefined') skipRequested = false;
           await summonOne(sequenced[i], { showLadder: false });
         }
 
@@ -425,6 +427,8 @@
     } finally {
       if (typeof closeStage === 'function') closeStage();
       document.body.classList.remove('gasshuku-running');
+      document.body.classList.remove('gasshuku-mode-real');
+      document.body.classList.remove('gasshuku-mode-fantasy');
       gasshukuBusy = false;
       setGachaBtnsDisabled(false);
       // 結果モーダル表示 (10連時のみ。単発はキャラ自体が画面いっぱいに見えるため不要)
