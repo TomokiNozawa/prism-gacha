@@ -67,6 +67,107 @@
     return `images/gasshuku/${c.id}_${c.slug}_${mode === 'real' ? 'real' : 'fantasy'}.png`;
   }
 
+  // ====== 合宿図鑑 (独立 localStorage) ======
+  const COLLECT_KEY = 'prism-gasshuku-collected';
+  function loadCollected() {
+    try { return JSON.parse(localStorage.getItem(COLLECT_KEY) || '{}') || {}; }
+    catch (e) { return {}; }
+  }
+  function saveCollected(d) {
+    try { localStorage.setItem(COLLECT_KEY, JSON.stringify(d)); } catch (e) {}
+  }
+  function recordCollected(c, mode) {
+    const d = loadCollected();
+    const k = `${c.id}_${mode}`;
+    if (!d[k]) {
+      d[k] = true;
+      saveCollected(d);
+    }
+    renderGasshukuGallery();
+  }
+  function renderGasshukuGallery() {
+    const grid = document.getElementById('gasshuku-gallery-grid');
+    const cntEl = document.getElementById('gasshuku-gallery-count');
+    if (!grid) return;
+    const d = loadCollected();
+    grid.innerHTML = '';
+    let count = 0;
+    POOL.forEach(c => {
+      ['real', 'fantasy'].forEach(mode => {
+        const k = `${c.id}_${mode}`;
+        const got = !!d[k];
+        if (got) count++;
+        const cell = document.createElement('div');
+        cell.className = 'gasshuku-gallery-cell' + (got ? ' got' : ' locked');
+        cell.title = `${c.name} (${c.real}) — ${mode === 'real' ? '本人' : 'ファンタジー'}`;
+        if (got) {
+          cell.innerHTML = `
+            <img src="${imgPath(c, mode)}" alt="${c.name}">
+            <div class="gasshuku-cell-mode">${mode === 'real' ? '📷' : '🌈'}</div>
+          `;
+        } else {
+          cell.innerHTML = `
+            <div class="gasshuku-cell-silhouette">?</div>
+            <div class="gasshuku-cell-mode">${mode === 'real' ? '📷' : '🌈'}</div>
+          `;
+        }
+        grid.appendChild(cell);
+      });
+    });
+    if (cntEl) cntEl.textContent = String(count);
+  }
+
+  // ====== 結果モーダル (合宿用、独立) ======
+  function ensureResultModal() {
+    let m = document.getElementById('gasshuku-result-modal');
+    if (m) return m;
+    m = document.createElement('div');
+    m.id = 'gasshuku-result-modal';
+    m.className = 'gasshuku-result-modal';
+    m.setAttribute('hidden', '');
+    m.innerHTML = `
+      <div class="gasshuku-result-backdrop"></div>
+      <div class="gasshuku-result-stage">
+        <button class="gasshuku-result-close" aria-label="閉じる">×</button>
+        <div class="gasshuku-result-title">🎌 合宿ガチャ結果</div>
+        <div class="gasshuku-result-summary" id="gasshuku-result-summary"></div>
+        <div class="gasshuku-result-grid" id="gasshuku-result-grid"></div>
+      </div>
+    `;
+    document.body.appendChild(m);
+    m.querySelector('.gasshuku-result-close').addEventListener('click', closeResultModal);
+    m.querySelector('.gasshuku-result-backdrop').addEventListener('click', closeResultModal);
+    return m;
+  }
+  function showResultModal(results, imgMode) {
+    const m = ensureResultModal();
+    m.removeAttribute('hidden');
+    m.classList.add('active');
+    const summary = document.getElementById('gasshuku-result-summary');
+    const grid = document.getElementById('gasshuku-result-grid');
+    summary.textContent = `🌈 UR ×${results.length} 確定 / ${imgMode === 'real' ? '📷 本人モード' : '🌈 ファンタジーモード'}`;
+    grid.innerHTML = '';
+    results.forEach(r => {
+      const card = document.createElement('div');
+      card.className = 'gasshuku-result-card';
+      card.innerHTML = `
+        <img class="gasshuku-result-img" src="${r.img}" alt="${r.name}">
+        <div class="gasshuku-result-tier">UR</div>
+        <div class="gasshuku-result-name">${r.name}</div>
+        <div class="gasshuku-result-real">${r._gasshukuReal || ''}</div>
+      `;
+      // クリックは無効 (既存の showCharDetail に絡めない)
+      grid.appendChild(card);
+    });
+  }
+  function closeResultModal() {
+    const m = document.getElementById('gasshuku-result-modal');
+    if (m) {
+      m.classList.remove('active');
+      m.setAttribute('hidden', '');
+    }
+  }
+
   function rollAll(count) {
     // 確率は一律、重複OK
     const out = [];
@@ -92,7 +193,10 @@
       dupCount: 0,
       dupMax: 0,
       dupGained: null,
-      _gasshuku: true
+      _gasshuku: true,
+      _gasshukuChar: c,
+      _gasshukuMode: mode,
+      _gasshukuReal: c.real
     };
   }
 
@@ -125,6 +229,10 @@
 
       const chars = rollAll(count);
       const results = chars.map(c => buildResult(c, imgMode));
+      window.__gasshukuLastResults = results;
+      window.__gasshukuLastImgMode = imgMode;
+      // 図鑑記録 (重複なし keyで)
+      results.forEach(r => recordCollected(r._gasshukuChar, r._gasshukuMode));
 
       if (count === 1 || results.length === 1) {
         // 単発: doSingle 風
@@ -174,10 +282,18 @@
       if (typeof closeStage === 'function') closeStage();
       gasshukuBusy = false;
       setGachaBtnsDisabled(false);
+      // 結果モーダル表示 (10連時のみ。単発はキャラ自体が画面いっぱいに見えるため不要)
+      if (typeof window !== 'undefined') {
+        try {
+          if (window.__gasshukuLastResults && window.__gasshukuLastResults.length > 1) {
+            showResultModal(window.__gasshukuLastResults, window.__gasshukuLastImgMode);
+          }
+        } catch (e) {}
+      }
     }
   }
 
-  // CTA ボタンに listener を bind
+  // CTA ボタンに listener を bind + 図鑑初期描画
   function init() {
     document.querySelectorAll('.gasshuku-cta-btn').forEach(btn => {
       if (btn.dataset.bound) return;
@@ -188,6 +304,7 @@
         startGasshukuRoll(imgMode, count);
       });
     });
+    renderGasshukuGallery();
   }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
