@@ -2813,7 +2813,7 @@ function applyFurigana(html) {
       let changed = false;
       for (const term of keys) {
         if (text.includes(term)) {
-          text = text.split(term).join(` RUBY${term} `);
+          text = text.split(term).join(`RUBY${term}`);
           changed = true;
         }
       }
@@ -2821,7 +2821,7 @@ function applyFurigana(html) {
         let html = text;
         for (const term of keys) {
           const yomi = FURIGANA[term];
-          html = html.split(` RUBY${term} `).join(`<ruby>${term}<rt>${yomi}</rt></ruby>`);
+          html = html.split(`RUBY${term}`).join(`<ruby>${term}<rt>${yomi}</rt></ruby>`);
         }
         const span = document.createElement('span');
         span.innerHTML = html;
@@ -3876,4 +3876,331 @@ async function onAuthReady(user) {
     const collision = localHasProgress && cloudTotal > 0 && !statesEqual(state, cloudState);
 
     if (collision) {
-      // 差分あり → 無言で合算 (両者のm
+      // 差分あり → 無言で合算 (両者のmax/unionを取り、損失なし)
+      const merged = mergeStates(state, cloudState);
+      applyCloudState(merged);
+      await saveStateCloud();
+      showToast('データを最新化しました');
+      try { await fbDb.ref('prism-gacha/users/' + user.uid + '/lastLoginAt').set(Date.now()); } catch (e) {}
+      return;
+    }
+
+    // 衝突なし → cloud が優位 (cloudが空ならlocalを送る)
+    if (cloudTotal > 0) {
+      applyCloudState(cloudState);
+    } else {
+      await saveStateCloud();
+    }
+
+    try { await fbDb.ref('prism-gacha/users/' + user.uid + '/lastLoginAt').set(Date.now()); } catch (e) {}
+  } catch (e) {
+    console.error('onAuthReady error:', e);
+  }
+}
+
+function statesEqual(a, b) {
+  return (a.total || 0) === (b.total || 0)
+    && Object.keys(a.unlockedSet || {}).length === Object.keys(b.unlockedSet || {}).length;
+}
+
+function applyCloudState(cs) {
+  state.total = cs.total || 0;
+  state.ur = cs.ur || 0;
+  state.pity = cs.pity || 0;
+  state.history = Array.isArray(cs.history) ? cs.history : [];
+  state.galleryViewed = cs.galleryViewed || {};
+  state.unlockedSet = cs.unlockedSet || {};
+  state.dupCounts = cs.dupCounts || {};
+  state.storyProgress = cs.storyProgress || {};
+  localStorage.setItem("prism-gacha", JSON.stringify(state));
+  updateHUD();
+  if (typeof renderHistory === 'function') renderHistory();
+}
+
+function mergeStates(local, cloud) {
+  const merged = {
+    total: Math.max(local.total || 0, cloud.total || 0),
+    ur: Math.max(local.ur || 0, cloud.ur || 0),
+    pity: Math.max(local.pity || 0, cloud.pity || 0),
+    history: [],
+    unlockedSet: { ...(cloud.unlockedSet || {}), ...(local.unlockedSet || {}) },
+    dupCounts: {},
+    galleryViewed: { ...(cloud.galleryViewed || {}), ...(local.galleryViewed || {}) },
+    storyProgress: {},
+  };
+  const allDupKeys = new Set([...Object.keys(local.dupCounts || {}), ...Object.keys(cloud.dupCounts || {})]);
+  for (const k of allDupKeys) {
+    merged.dupCounts[k] = Math.max((local.dupCounts && local.dupCounts[k]) || 0, (cloud.dupCounts && cloud.dupCounts[k]) || 0);
+  }
+  const combined = [...(cloud.history || []), ...(local.history || [])];
+  merged.history = combined.slice(-120);
+  const spKeys = new Set([...Object.keys(local.storyProgress || {}), ...Object.keys(cloud.storyProgress || {})]);
+  for (const k of spKeys) {
+    const l = (local.storyProgress && local.storyProgress[k]) || {};
+    const c = (cloud.storyProgress && cloud.storyProgress[k]) || {};
+    merged.storyProgress[k] = {
+      lastSceneIndex: Math.max(l.lastSceneIndex || 0, c.lastSceneIndex || 0),
+      totalScenes: Math.max(l.totalScenes || 0, c.totalScenes || 0),
+      lastReadAt: Math.max(l.lastReadAt || 0, c.lastReadAt || 0),
+      completed: !!(l.completed || c.completed),
+    };
+  }
+  return merged;
+}
+
+// (衝突モーダル廃止: ログイン時に差分あれば自動合算→トースト表示)
+
+// ────────────── UI handlers ──────────────
+function showAccountModal() {
+  const modal = $('#account-modal');
+  if (!modal) return;
+  if (authUser) {
+    $('#account-guest-view').style.display = 'none';
+    $('#account-logged-view').style.display = '';
+    $('#account-info-nickname').textContent = authUser.displayName || '-';
+    $('#account-info-total').textContent = state.total || 0;
+    let urCount = 0, lrCount = 0;
+    for (const k of Object.keys(state.unlockedSet || {})) {
+      if (k.startsWith('UR_')) urCount++;
+      else if (k.startsWith('LR_')) lrCount++;
+    }
+    $('#account-info-ur').textContent = `${urCount}/5`;
+    $('#account-info-lr').textContent = `${lrCount}/1`;
+    $('#account-info-sync').textContent = authUser.metadata && authUser.metadata.lastSignInTime
+      ? new Date(authUser.metadata.lastSignInTime).toLocaleString('ja-JP')
+      : '-';
+  } else {
+    $('#account-guest-view').style.display = '';
+    $('#account-logged-view').style.display = 'none';
+    switchAccountTab('login');
+    setTimeout(() => { const el = $('#login-nickname'); if (el) el.focus(); }, 50);
+  }
+  modal.classList.add('active');
+}
+
+function closeAccountModal() {
+  const modal = $('#account-modal');
+  if (!modal) return;
+  modal.classList.remove('active');
+  const le = $('#login-error'); if (le) le.textContent = '';
+  const se = $('#signup-error'); if (se) se.textContent = '';
+  const lp = $('#login-passphrase'); if (lp) lp.value = '';
+  const sp = $('#signup-passphrase'); if (sp) sp.value = '';
+  const sp2 = $('#signup-passphrase2'); if (sp2) sp2.value = '';
+}
+
+function switchAccountTab(tab) {
+  document.querySelectorAll('.account-tab').forEach(el => el.classList.toggle('active', el.dataset.tab === tab));
+  const login = $('#account-login'); if (login) login.style.display = tab === 'login' ? '' : 'none';
+  const signup = $('#account-signup'); if (signup) signup.style.display = tab === 'signup' ? '' : 'none';
+}
+
+// (showCollisionModal / closeCollisionModal は廃止)
+
+function updateAccountButton() {
+  const label = $('#account-label');
+  if (!label) return;
+  label.textContent = authUser ? (authUser.displayName || 'アカウント') : 'ゲスト';
+  // Admin リンクは authUser & admin判定済みの場合のみ表示
+  const adminBtn = document.getElementById('btn-admin');
+  if (adminBtn) {
+    adminBtn.style.display = (authUser && isPrismAdmin) ? '' : 'none';
+  }
+}
+
+let isPrismAdmin = false;
+async function checkPrismAdmin() {
+  if (!authUser || !fbDb) { isPrismAdmin = false; return; }
+  try {
+    const snap = await fbDb.ref('prism-gacha/_meta/admins/' + authUser.uid).once('value');
+    isPrismAdmin = !!snap.val();
+  } catch (e) {
+    isPrismAdmin = false;
+  }
+  updateAccountButton();
+}
+
+// ────────────── Account Prompt (既存ゲスト進捗ありユーザーへの案内) ──────────────
+const ACCOUNT_PROMPT_KEY = 'pg_account_prompt_dismissed';
+
+function maybeShowAccountPrompt() {
+  // 以下すべて満たす場合のみ表示:
+  // - 未ログイン (authUser == null)
+  // - localStorage進捗あり (total > 0 かつ unlockedSet に1つ以上)
+  // - 「後で」で過去に dismiss していない
+  if (authUser) return;
+  if (localStorage.getItem(ACCOUNT_PROMPT_KEY) === 'true') return;
+  const hasProgress = (state.total || 0) > 0 && Object.keys(state.unlockedSet || {}).length > 0;
+  if (!hasProgress) return;
+  const modal = document.getElementById('account-prompt');
+  if (!modal) return;
+  modal.classList.add('active');
+}
+
+function dismissAccountPrompt() {
+  localStorage.setItem(ACCOUNT_PROMPT_KEY, 'true');
+  const modal = document.getElementById('account-prompt');
+  if (modal) modal.classList.remove('active');
+}
+
+function acceptAccountPrompt() {
+  const modal = document.getElementById('account-prompt');
+  if (modal) modal.classList.remove('active');
+  // アカウントモーダルの新規登録タブを開く
+  showAccountModal();
+  switchAccountTab('signup');
+  setTimeout(() => { const el = $('#signup-nickname'); if (el) el.focus(); }, 50);
+}
+
+// 簡易トースト (他で showToast 未定義の場合のみ定義)
+if (typeof window.showToast !== 'function') {
+  window.showToast = function(msg) {
+    let t = document.getElementById('_ptoast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = '_ptoast';
+      t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(20,16,40,0.95);color:#fff;padding:12px 20px;border-radius:10px;font-size:14px;z-index:20000;border:1px solid rgba(200,180,255,0.3);box-shadow:0 8px 30px rgba(0,0,0,0.4);opacity:0;transition:opacity 0.3s;pointer-events:none;';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.opacity = '1';
+    clearTimeout(t._h);
+    t._h = setTimeout(() => { t.style.opacity = '0'; }, 2800);
+  };
+}
+
+// アカウントモーダルのEnter/Escape対応
+document.addEventListener('keydown', e => {
+  const accountModal = document.getElementById('account-modal');
+  if (accountModal && accountModal.classList.contains('active')) {
+    if (e.key === 'Escape') { e.stopPropagation(); e.preventDefault(); closeAccountModal(); }
+    else if (e.key === 'Enter') {
+      const signup = $('#account-signup');
+      if (signup && signup.style.display !== 'none') { e.stopPropagation(); e.preventDefault(); doAccountSignup(); }
+      else { e.stopPropagation(); e.preventDefault(); doAccountLogin(); }
+    }
+  }
+}, true);
+
+// account-modal の背景クリックで閉じる
+document.addEventListener('DOMContentLoaded', () => {
+  const am = document.getElementById('account-modal');
+  if (am) am.addEventListener('click', e => { if (e.target === am) closeAccountModal(); });
+});
+
+// ============================================================
+// バージョン通知: version.json と localStorage を比較して
+// 差分があれば更新モーダルを表示 (初回アクセスは通知スキップ)
+// ============================================================
+const PRISMAERA_VERSION_LS_KEY = 'prismaera-last-seen-version';
+let _prismaeraChangelogCache = null;
+let _prismaeraTargetVersion = null;
+
+async function checkPrismaeraVersion() {
+  try {
+    const res = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
+    if (!res.ok) return;
+    const data = await res.json();
+    const currentVer = data.version;
+    const changelog = Array.isArray(data.changelog) ? data.changelog : [];
+    _prismaeraChangelogCache = changelog;
+
+    // ヘッダーのバージョン表記を version.json で上書き
+    const verEl = document.getElementById('app-version');
+    if (verEl) verEl.textContent = 'v' + currentVer;
+
+    let lastSeen = null;
+    try { lastSeen = localStorage.getItem(PRISMAERA_VERSION_LS_KEY); } catch (e) {}
+
+    // 初回アクセスは通知せず現バージョンを保存 (スパム防止)
+    if (!lastSeen) {
+      try { localStorage.setItem(PRISMAERA_VERSION_LS_KEY, currentVer); } catch (e) {}
+      return;
+    }
+    if (lastSeen === currentVer) return;
+
+    showPrismaeraUpdateModal(lastSeen, currentVer, changelog);
+  } catch (e) {
+    console.warn('[prismaera] version check failed', e);
+  }
+}
+
+function showPrismaeraUpdateModal(fromVer, toVer, changelog) {
+  const modal = document.getElementById('update-modal');
+  if (!modal) return;
+
+  _prismaeraTargetVersion = toVer;
+
+  const fromEl = document.getElementById('update-from');
+  const toEl = document.getElementById('update-to');
+  if (fromEl) fromEl.textContent = 'v' + fromVer;
+  if (toEl) toEl.textContent = 'v' + toVer;
+
+  const notesUl = document.getElementById('update-notes');
+  if (notesUl) {
+    notesUl.innerHTML = '';
+    const latest = changelog.find(c => c && c.version === toVer) || changelog[0];
+    const notes = latest && Array.isArray(latest.notes) ? latest.notes : [];
+    notes.forEach(n => {
+      const li = document.createElement('li');
+      li.textContent = n;
+      notesUl.appendChild(li);
+    });
+  }
+
+  const histEl = document.getElementById('update-history');
+  if (histEl) {
+    histEl.innerHTML = '';
+    histEl.style.display = 'none';
+    changelog.forEach(entry => {
+      if (!entry) return;
+      const section = document.createElement('div');
+      section.className = 'update-history-entry';
+      const h = document.createElement('div');
+      h.className = 'update-history-head';
+      h.textContent = 'v' + entry.version + ' (' + (entry.date || '') + ')';
+      section.appendChild(h);
+      const ul = document.createElement('ul');
+      (entry.notes || []).forEach(n => {
+        const li = document.createElement('li');
+        li.textContent = n;
+        ul.appendChild(li);
+      });
+      section.appendChild(ul);
+      histEl.appendChild(section);
+    });
+  }
+
+  modal.style.display = 'flex';
+  document.body.classList.add('modal-open');
+}
+
+function dismissUpdateModal(reload) {
+  const modal = document.getElementById('update-modal');
+  if (!modal) return;
+  try {
+    if (_prismaeraTargetVersion) {
+      localStorage.setItem(PRISMAERA_VERSION_LS_KEY, _prismaeraTargetVersion);
+    }
+  } catch (e) {}
+  modal.style.display = 'none';
+  document.body.classList.remove('modal-open');
+  if (reload) {
+    // PWA/ServiceWorkerキャッシュ破棄目的で location.reload(true)
+    // (引数は新ブラウザで非対応でも location.reload() に fallback)
+    try { location.reload(true); } catch (e) { location.reload(); }
+  }
+}
+
+function toggleUpdateHistory() {
+  const hist = document.getElementById('update-history');
+  if (!hist) return;
+  hist.style.display = (hist.style.display === 'none') ? 'block' : 'none';
+}
+
+// 起動時に version.json をチェック
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', checkPrismaeraVersion);
+} else {
+  checkPrismaeraVersion();
+}
