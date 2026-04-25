@@ -1868,10 +1868,10 @@ async function summonOne(result, opts = {}) {
     await sleep(250);
   }
 
-  return finalize(result);
+  return finalize(result, opts);
 }
 
-async function finalize(result) {
+async function finalize(result, opts = {}) {
   const isHigh = result.tier === "UR" || result.tier === "SSR";
   const isLow = result.tier === "R" || result.tier === "SR";
   revealChar(result);
@@ -1889,10 +1889,13 @@ async function finalize(result) {
     await sleep(200);
     showWin("SSR");
   }
-  // 余韻: SSR/URは表示しっぱなし→キー押下で進行
-  if (isHigh) {
+  // 余韻
+  // - SSR/UR/LR (常時): 表示しっぱなし→キー押下で進行
+  // - opts.requireTap (単発): レア度問わず押下待ち (じっくり見たい)
+  // - その他 (10連途中のR/SR): 自動で次へ
+  if (isHigh || opts.requireTap) {
     // 最低限の余韻は確保（テロップ類が落ち着くまで）
-    await sleep(result.tier === "LR" ? 1800 : result.tier === "UR" ? 1400 : 1000);
+    await sleep(result.tier === "LR" ? 1800 : result.tier === "UR" ? 1400 : isHigh ? 1000 : 500);
     showContinueHint();
     await waitForKey();
   } else {
@@ -1912,7 +1915,8 @@ async function doSingle() {
   stage.classList.add("active");
   clearStage();
   canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-  await summonOne(result);
+  // 単発はレア度に関係なくクリック/タップ待ち (じっくり見たい)
+  await summonOne(result, { requireTap: true });
   closeStage();
   busy = false;
 }
@@ -3342,34 +3346,27 @@ function renderScene() {
     bodyHtml = '<div class="story-cover-hint"><span class="story-cover-spark">❖</span><div class="story-cover-tap">タップで次へ</div><span class="story-cover-spark">❖</span></div>';
   }
   $("#story-scene-content").innerHTML = bodyHtml;
-  // キャラ名リンクのクリックハンドラ
+  // キャラ名リンクのクリックハンドラ (本文 + タイトル共通)
+  function _storyCharLinkClick(e, a) {
+    e.stopPropagation();
+    e.preventDefault();
+    const name = a.dataset.name;
+    const c = getCharByName(name);
+    if (!c) return;
+    if (!isUnlocked(c)) {
+      showToast('🔒 ' + name + ' はまだ未解放です。ガチャで引いてからご覧ください');
+      return;
+    }
+    if (detailUnlockedList.length === 0) {
+      detailUnlockedList = getAllCharactersWithTier().filter(x => isUnlocked(x));
+    }
+    showCharDetail(c);
+  }
   $("#story-scene-content").querySelectorAll('.char-link').forEach(a => {
-    a.addEventListener('click', e => {
-      e.stopPropagation();
-      e.preventDefault();
-      const name = a.dataset.name;
-      const c = getCharByName(name);
-      if (c && isUnlocked(c)) {
-        if (detailUnlockedList.length === 0) {
-          detailUnlockedList = getAllCharactersWithTier().filter(x => isUnlocked(x));
-        }
-        showCharDetail(c);
-      }
-    });
+    a.addEventListener('click', e => _storyCharLinkClick(e, a));
   });
   $("#story-scene-title").querySelectorAll('.char-link').forEach(a => {
-    a.addEventListener('click', e => {
-      e.stopPropagation();
-      e.preventDefault();
-      const name = a.dataset.name;
-      const c = getCharByName(name);
-      if (c && isUnlocked(c)) {
-        if (detailUnlockedList.length === 0) {
-          detailUnlockedList = getAllCharactersWithTier().filter(x => isUnlocked(x));
-        }
-        showCharDetail(c);
-      }
-    });
+    a.addEventListener('click', e => _storyCharLinkClick(e, a));
   });
   // 登場キャラ立ち絵
   renderSceneChars(scene);
@@ -3476,6 +3473,10 @@ function renderSceneChars(scene) {
       e.stopPropagation(); // ステージクリックの「次へ」を発火させない
       const name = el.dataset.name;
       const c = getCharByName(name);
+      if (c && !isUnlocked(c)) {
+        showToast('🔒 ' + name + ' はまだ未解放です。ガチャで引いてからご覧ください');
+        return;
+      }
       if (c && isUnlocked(c)) {
         if (detailUnlockedList.length === 0) {
           detailUnlockedList = getAllCharactersWithTier().filter(x => isUnlocked(x));
