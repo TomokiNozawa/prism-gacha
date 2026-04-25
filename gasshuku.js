@@ -192,7 +192,7 @@
     // close handlers
     m.querySelector('.gasshuku-close').addEventListener('click', closeModal);
     m.querySelector('.gasshuku-backdrop').addEventListener('click', closeModal);
-    m.querySelector('#gasshuku-replay').addEventListener('click', showModeSelect);
+    m.querySelector('#gasshuku-replay').addEventListener('click', replayRoll);
     m.querySelector('.gasshuku-detail-close').addEventListener('click', closeDetail);
     m.querySelector('#gasshuku-detail').addEventListener('click', (e) => {
       if (e.target.id === 'gasshuku-detail') closeDetail();
@@ -204,18 +204,26 @@
       btn.addEventListener('click', () => {
         const imgMode = btn.dataset.imgmode;
         const count = parseInt(btn.dataset.count, 10);
+        lastRoll = { imgMode, count };
         startRoll(imgMode, count);
       });
     });
     return m;
   }
 
-  function openModal() {
+  let lastRoll = null;
+  function openModal(imgMode, count) {
     const m = ensureModal();
     m.removeAttribute('hidden');
     m.classList.add('active');
     document.body.classList.add('gasshuku-modal-open');
-    showModeSelect();
+    // 引数あれば直接 startRoll、無ければモード選択画面（互換性のため残す）
+    if (imgMode && count) {
+      lastRoll = { imgMode, count };
+      startRoll(imgMode, count);
+    } else {
+      showModeSelect();
+    }
   }
   function showModeSelect() {
     const sel = document.getElementById('gasshuku-mode-select');
@@ -226,6 +234,13 @@
     if (cs) { cs.innerHTML = ''; cs.style.display = 'none'; }
     if (grid) { grid.innerHTML = ''; grid.style.display = 'none'; }
     if (footer) footer.hidden = true;
+  }
+  function replayRoll() {
+    if (lastRoll) {
+      startRoll(lastRoll.imgMode, lastRoll.count);
+    } else {
+      showModeSelect();
+    }
   }
   function closeModal() {
     const m = document.getElementById('gasshuku-modal');
@@ -404,12 +419,22 @@
     if (replayBtn) replayBtn.disabled = false;
   }
 
-  // Hook up button on DOM ready
+  // Hook up CTA buttons on DOM ready
   function init() {
-    const btn = document.getElementById('gasshuku-btn');
-    if (btn && !btn.dataset.bound) {
+    document.querySelectorAll('.gasshuku-cta-btn').forEach(btn => {
+      if (btn.dataset.bound) return;
       btn.dataset.bound = '1';
-      btn.addEventListener('click', openModal);
+      btn.addEventListener('click', () => {
+        const imgMode = btn.dataset.imgmode;
+        const count = parseInt(btn.dataset.count, 10);
+        openModal(imgMode, count);
+      });
+    });
+    // 互換: 旧 #gasshuku-btn が DOM 上にあれば従来どおり機能（モード選択モーダル経由）
+    const legacyBtn = document.getElementById('gasshuku-btn');
+    if (legacyBtn && !legacyBtn.dataset.bound) {
+      legacyBtn.dataset.bound = '1';
+      legacyBtn.addEventListener('click', () => openModal());
     }
   }
   if (document.readyState === 'loading') {

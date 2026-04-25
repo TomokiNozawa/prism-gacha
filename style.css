@@ -4397,3 +4397,92 @@ body.gasshuku-modal-open {
   .gasshuku-mode-sub { font-size: 10px; }
 }
 /* ===== GASSHUKU MODE SELECT END ===== */
+
+/* ===== GASSHUKU CTA (ヒーローエリアに直配置) ===== */
+.gasshuku-cta-block {
+  margin-top: 14px;
+  padding: 14px 16px 16px;
+  background: linear-gradient(180deg, rgba(20, 5, 40, 0.65), rgba(40, 10, 60, 0.55));
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  border-radius: 14px;
+  box-shadow: 0 0 24px rgba(251, 146, 60, 0.18);
+}
+.gasshuku-cta-heading {
+  text-align: center;
+  font-size: 16px;
+  font-weight: 800;
+  background: linear-gradient(90deg, #fbbf24, #ec4899, #fbbf24);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: 0.06em;
+  margin-bottom: 2px;
+}
+.gasshuku-cta-sub {
+  font-size: 11px;
+  color: #fcd34d;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  margin-left: 6px;
+  -webkit-text-fill-color: #fcd34d;
+}
+.gasshuku-cta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+.gasshuku-cta-btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 12px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(125, 211, 252, 0.55);
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.22), rgba(99, 102, 241, 0.22));
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.12s, filter 0.12s;
+  min-height: 78px;
+  font-family: inherit;
+}
+.gasshuku-cta-btn.fantasy {
+  border-color: rgba(251, 191, 36, 0.55);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.22), rgba(236, 72, 153, 0.22));
+}
+.gasshuku-cta-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.12);
+  box-shadow: 0 6px 18px rgba(56, 189, 248, 0.35);
+}
+.gasshuku-cta-btn.fantasy:hover {
+  box-shadow: 0 6px 18px rgba(251, 191, 36, 0.4);
+}
+.gasshuku-cta-icon {
+  font-size: 20px;
+}
+.gasshuku-cta-label {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+.gasshuku-cta-sublabel {
+  font-size: 10px;
+  color: #e2e8f0;
+  letter-spacing: 0.04em;
+  opacity: 0.92;
+}
+
+@media (max-width: 600px) {
+  .gasshuku-cta-block { padding: 10px 12px 12px; }
+  .gasshuku-cta-heading { font-size: 14px; }
+  .gasshuku-cta-grid { gap: 6px; }
+  .gasshuku-cta-btn { min-height: 64px; padding: 8px 6px; }
+  .gasshuku-cta-label { font-size: 14px; }
+  .gasshuku-cta-icon { font-size: 17px; }
+  .gasshuku-cta-sublabel { font-size: 9px; }
+}
+/* ===== GASSHUKU CTA END ===== */
