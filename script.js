@@ -2537,7 +2537,7 @@ function getCharByName(name) {
 function openRelations() {
   const canvas = document.getElementById('relations-canvas');
   // SVG構築
-  const W = 2000, H = 1400;
+  const W = 2000, H = 1600;  // S1C2 で底辺派閥追加 (aquasis y:1320, crimson y:1330) のため余裕を1400→1600に
   const svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
     <defs>${renderArrowMarkers()}</defs>
     ${renderFactionBg()}
