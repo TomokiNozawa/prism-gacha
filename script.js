@@ -4000,10 +4000,41 @@ if (_btnHistory) _btnHistory.addEventListener("click", openHistoryModal);
 
 document.addEventListener("keydown", e => {
   if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
-  // ようこそモーダル (最上位優先)
+  // === 最上位モーダル (1つでも開いてれば Esc で閉じる) ===
+  // ようこそモーダル
   const _wm = document.getElementById('welcome-modal');
   if (_wm && _wm.classList.contains('active')) {
     if (e.key === "Escape") { e.preventDefault(); dismissWelcomeModal(false); }
+    return;
+  }
+  // 設定モーダル (#11)
+  const _sm = document.getElementById('settings-modal');
+  if (_sm && _sm.classList.contains('active')) {
+    if (e.key === "Escape") { e.preventDefault(); closeSettingsModal(); }
+    return;
+  }
+  // アップデート通知モーダル (リロード実行モーダル)
+  const _um = document.getElementById('update-modal');
+  if (_um && _um.style.display && _um.style.display !== 'none') {
+    if (e.key === "Escape") { e.preventDefault(); dismissUpdateModal(false); }
+    return;
+  }
+  // アカウント案内 (account-prompt)
+  const _ap = document.getElementById('account-prompt');
+  if (_ap && _ap.classList.contains('active')) {
+    if (e.key === "Escape") { e.preventDefault(); if (typeof dismissAccountPrompt === 'function') dismissAccountPrompt(); }
+    return;
+  }
+  // アカウントモーダル (signup/login フォーム)
+  const _am = document.getElementById('account-modal');
+  if (_am && _am.classList.contains('active')) {
+    if (e.key === "Escape") { e.preventDefault(); if (typeof closeAccountModal === 'function') closeAccountModal(); }
+    return;
+  }
+  // 旧URL移行モーダル (legacy: pages.dev では発火しないが念のため)
+  const _mm = document.getElementById('migration-modal');
+  if (_mm && _mm.classList.contains('active')) {
+    if (e.key === "Escape") { e.preventDefault(); _mm.classList.remove('active'); }
     return;
   }
   // ストーリー一覧モーダル
