@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.1.1 — 演出&ゲームロジック (Season 1 第1章)
+   Prismaera v1.1.2 — 演出&ゲームロジック (Season 1 第1章)
    ============================================================ */
 "use strict";
 
@@ -425,9 +425,13 @@ function computeTenRollRarity(results) {
 const $ = s => document.querySelector(s);
 
 function updateHUD() {
-  $("#stat-total").textContent = state.total.toLocaleString();
-  $("#stat-ur").textContent = state.ur.toLocaleString();
-  $("#stat-pity").textContent = Math.max(0, PITY - state.pity);
+  const totEl = $("#stat-total");
+  if (totEl) totEl.textContent = state.total.toLocaleString();
+  // 🌈UR数/天井まで表示は v1.1.2 で削除 (要素があれば念のため更新)
+  const urEl = $("#stat-ur");
+  if (urEl) urEl.textContent = state.ur.toLocaleString();
+  const pityEl = $("#stat-pity");
+  if (pityEl) pityEl.textContent = Math.max(0, PITY - state.pity);
 
   // background tier
   document.body.classList.remove("t-100", "t-500", "t-1000");
@@ -435,7 +439,8 @@ function updateHUD() {
   else if (state.total >= 500) document.body.classList.add("t-500");
   else if (state.total >= 100) document.body.classList.add("t-100");
 
-  renderHistory();
+  // v1.1.3: ホーム下側は履歴→図鑑表示に変更 (renderHomeGalleryが存在するタイミングで呼ぶ)
+  if (typeof renderHomeGallery === 'function') renderHomeGallery();
 }
 
 // 履歴・図鑑で古いセーブデータのimgパスを最新POOLから引き直す
@@ -445,22 +450,99 @@ function resolveCharImg(tier, name, fallback) {
   return c ? c.img : (fallback || "");
 }
 
+// v1.1.3: 履歴モーダル用 (ヘッダーの📜ボタンから開く)
 function renderHistory() {
-  const grid = $("#history");
+  const grid = $("#history-grid");
+  if (!grid) return;
   grid.innerHTML = "";
-  state.history.slice(0, 30).forEach(h => {
+  // v1.1.3: hcardも<img>化
+  state.history.slice(0, 120).forEach(h => {
     const c = document.createElement("div");
     c.className = "hcard " + h.tier.toLowerCase();
-    const img = document.createElement("div");
-    img.className = "hcard-img";
-    // 旧パス履歴にも対応するため POOL から最新imgを引き直す
-    img.style.backgroundImage = `url('${resolveCharImg(h.tier, h.name, h.img)}')`;
-    c.appendChild(img);
+    const imgEl = document.createElement("img");
+    imgEl.className = "hcard-img";
+    imgEl.src = resolveCharImg(h.tier, h.name, h.img);
+    imgEl.alt = h.name;
+    imgEl.loading = "lazy";
+    imgEl.decoding = "async";
+    imgEl.draggable = false;
+    c.appendChild(imgEl);
     const nm = document.createElement("div");
     nm.className = "hcard-name"; nm.textContent = h.name;
     c.appendChild(nm);
     grid.appendChild(c);
   });
+}
+
+function openHistoryModal() {
+  renderHistory();
+  const modal = $("#history-modal");
+  if (modal) {
+    modal.classList.add('active');
+    document.body.classList.add('modal-open');
+  }
+}
+
+function closeHistoryModal() {
+  const modal = $("#history-modal");
+  if (modal) {
+    modal.classList.remove('active');
+    document.body.classList.remove('modal-open');
+  }
+}
+
+window.openHistoryModal = openHistoryModal;
+window.closeHistoryModal = closeHistoryModal;
+
+// v1.1.3: ホーム下側の図鑑表示 (直近履歴→全キャラ図鑑、未解放はシルエット)
+function renderHomeGallery() {
+  const grid = $("#home-gallery-grid");
+  if (!grid) return;
+  grid.innerHTML = "";
+  const all = (typeof getAllCharactersWithTier === 'function') ? getAllCharactersWithTier() : [];
+  let unlockedCount = 0;
+  for (const c of all) {
+    const unlocked = (typeof isUnlocked === 'function') ? isUnlocked(c) : false;
+    if (unlocked) unlockedCount++;
+    const card = document.createElement('div');
+    card.className = 'hgcard ' + c.tier.toLowerCase() + (unlocked ? '' : ' locked');
+
+    const img = document.createElement('img');
+    img.className = 'hgcard-img';
+    img.alt = unlocked ? c.name : '未解放';
+    img.src = c.img;
+    img.loading = 'lazy';
+    img.decoding = 'async';
+    img.draggable = false;
+    card.appendChild(img);
+
+    const tierBadge = document.createElement('div');
+    tierBadge.className = 'hgcard-tier';
+    tierBadge.textContent = c.tier;
+    card.appendChild(tierBadge);
+
+    if (unlocked) {
+      const nm = document.createElement('div');
+      nm.className = 'hgcard-name';
+      nm.textContent = c.name;
+      card.appendChild(nm);
+      if (typeof isNewUnlocked === 'function' && isNewUnlocked(c)) {
+        const newB = document.createElement('div');
+        newB.className = 'hgcard-new';
+        newB.textContent = 'NEW';
+        card.appendChild(newB);
+      }
+      card.addEventListener('click', () => { if (typeof showCharDetail === 'function') showCharDetail(c); });
+    } else {
+      // 未解放: クリックで大モーダル開く (シルエットでも開く)
+      card.addEventListener('click', () => { if (typeof openGallery === 'function') openGallery(); });
+    }
+    grid.appendChild(card);
+  }
+  const cEl = $("#home-gallery-count");
+  const tEl = $("#home-gallery-total");
+  if (cEl) cEl.textContent = unlockedCount;
+  if (tEl) tEl.textContent = all.length;
 }
 
 // ────────────── Stage / VFX ──────────────
@@ -1128,6 +1210,8 @@ function seCrack() {
 }
 
 function play(kind, tier) {
+  // マスターミュート時はSEを再生しない (BGM と一緒に一括ミュート)
+  if (typeof masterMuted !== 'undefined' && masterMuted) return;
   try {
     if (kind === "se-summon") seSummon(tier);
     else if (kind === "se-fanfare") seFanfare();
@@ -1739,7 +1823,15 @@ function showResult(results, best) {
   sorted.forEach(r => {
     const c = document.createElement("div");
     c.className = "rcard " + r.tier.toLowerCase();
-    c.style.backgroundImage = `url('${r.img}')`;
+    // v1.1.3: 画像を<img>化 — 高DPR縮小時の補間品質とtransition中の再描画精度を改善
+    const imgEl = document.createElement("img");
+    imgEl.className = "rcard-img";
+    imgEl.src = r.img;
+    imgEl.alt = r.name;
+    imgEl.loading = "eager";
+    imgEl.decoding = "async";
+    imgEl.draggable = false;
+    c.appendChild(imgEl);
     c.style.cursor = 'pointer';
     c.addEventListener('click', () => showCharDetail(r));
     if (r.isNew) {
@@ -3097,33 +3189,61 @@ $("#story-stage").addEventListener('click', e => {
   storyNext();
 });
 
-// ============ BGM プレイヤー (複数曲ローテ) ============
+// ============ v1.1.3: Master Mute + BGM プレイヤー (拡張版) ============
+// BGM_LIST: labelは「メインテーマ」「第1章テーマ」など使用場面を表記、descは原曲名
 const BGM_LIST = [
-  { id: 'dawn',  title: 'Prism Dawn',  desc: '夜明けの希望', file: 'assets/bgm/home.mp3' },
-  { id: 'watch', title: 'Prism Watch', desc: '三柱の夜警',   file: 'assets/bgm/prism-watch.mp3' },
+  { id: 'dawn',  label: 'メインテーマ', desc: 'Prism Dawn (夜明けの希望)',  file: 'assets/bgm/home.mp3' },
+  { id: 'watch', label: '第1章テーマ',  desc: 'Prism Watch (三柱の夜警)',   file: 'assets/bgm/prism-watch.mp3' },
 ];
 const bgmAudio = document.getElementById("bgm-home");
-let bgmEnabled = localStorage.getItem("prism-bgm") === "on";
+
+// ───── master mute (BGM+SE一括) ─────
+let masterMuted = localStorage.getItem('prism-master-mute') === 'on';
+
+// ───── BGM state ─────
+let bgmEnabled = localStorage.getItem("prism-bgm-enabled") === "on";
 let bgmCurrentId = localStorage.getItem("prism-bgm-current") || BGM_LIST[0].id;
-let bgmMode = localStorage.getItem("prism-bgm-mode") || 'sequence'; // sequence|random|repeat
+// v1.1.3: bgmMode (sequence/random/repeat) は shuffle(bool) + repeat('off'|'all'|'one') に分離
+let bgmShuffle = localStorage.getItem("prism-bgm-shuffle") === "on";
+let bgmRepeat = localStorage.getItem("prism-bgm-repeat") || 'off'; // 'off'|'all'|'one'
+let bgmVolume = Math.max(0, Math.min(100, parseInt(localStorage.getItem("prism-bgm-volume") || '40', 10)));
 let bgmPlaylist = {};
 try {
   bgmPlaylist = JSON.parse(localStorage.getItem("prism-bgm-playlist") || '{}');
 } catch (e) { bgmPlaylist = {}; }
-// 未登録曲はデフォルト チェックON
 BGM_LIST.forEach(b => { if (bgmPlaylist[b.id] === undefined) bgmPlaylist[b.id] = true; });
 
+// ───── 旧設定からのmigration (v1.1.2以前→v1.1.3) ─────
+// 旧 prism-bgm ("on"/"off") → 新 prism-bgm-enabled
+const _oldBgmFlag = localStorage.getItem('prism-bgm');
+if (_oldBgmFlag !== null && localStorage.getItem('prism-bgm-enabled') === null) {
+  bgmEnabled = _oldBgmFlag === 'on';
+  localStorage.setItem('prism-bgm-enabled', bgmEnabled ? 'on' : 'off');
+}
+// 旧 prism-bgm-mode (sequence/random/repeat) → shuffle+repeat
+const _oldBgmMode = localStorage.getItem('prism-bgm-mode');
+if (_oldBgmMode && localStorage.getItem('prism-bgm-shuffle') === null) {
+  bgmShuffle = (_oldBgmMode === 'random');
+  bgmRepeat = (_oldBgmMode === 'repeat') ? 'one' : 'off';
+  localStorage.setItem('prism-bgm-shuffle', bgmShuffle ? 'on' : 'off');
+  localStorage.setItem('prism-bgm-repeat', bgmRepeat);
+}
+
 function saveBgmState() {
-  localStorage.setItem("prism-bgm", bgmEnabled ? "on" : "off");
+  localStorage.setItem("prism-bgm-enabled", bgmEnabled ? "on" : "off");
   localStorage.setItem("prism-bgm-current", bgmCurrentId);
-  localStorage.setItem("prism-bgm-mode", bgmMode);
+  localStorage.setItem("prism-bgm-shuffle", bgmShuffle ? "on" : "off");
+  localStorage.setItem("prism-bgm-repeat", bgmRepeat);
+  localStorage.setItem("prism-bgm-volume", String(bgmVolume));
   localStorage.setItem("prism-bgm-playlist", JSON.stringify(bgmPlaylist));
 }
 
 function bgmFindById(id) { return BGM_LIST.find(b => b.id === id); }
+function bgmCheckedList() { return BGM_LIST.filter(b => bgmPlaylist[b.id]); }
 
-function bgmCheckedList() {
-  return BGM_LIST.filter(b => bgmPlaylist[b.id]);
+function _applyVolumeToAudio() {
+  const vol = masterMuted ? 0 : (bgmVolume / 100);
+  try { bgmAudio.volume = vol; } catch (e) {}
 }
 
 function loadBgmSrc(id) {
@@ -3143,16 +3263,26 @@ function loadBgmSrc(id) {
       }, { once: true });
     }
   }
-  bgmAudio.loop = (bgmMode === 'repeat');
+  bgmAudio.loop = (bgmRepeat === 'one');
 }
 
 function playBgm(id) {
+  if (masterMuted) {
+    // ミュート中は再生要求だけ保持(enabled=true)、実際の再生はmute解除時
+    bgmCurrentId = id;
+    bgmEnabled = true;
+    loadBgmSrc(id);
+    saveBgmState();
+    updateMasterMuteBtn();
+    renderBgmPanel();
+    return;
+  }
   loadBgmSrc(id);
-  bgmAudio.volume = 0.4;
+  _applyVolumeToAudio();
   bgmEnabled = true;
   bgmAudio.play().catch(() => {/* autoplay拒否は想定内 */});
   saveBgmState();
-  updateBgmHeaderBtn();
+  updateMasterMuteBtn();
   renderBgmPanel();
 }
 
@@ -3160,7 +3290,7 @@ function pauseBgm() {
   bgmEnabled = false;
   bgmAudio.pause();
   saveBgmState();
-  updateBgmHeaderBtn();
+  updateMasterMuteBtn();
   renderBgmPanel();
 }
 
@@ -3169,33 +3299,43 @@ function bgmToggle() {
   else playBgm(bgmCurrentId);
 }
 
-function bgmNext() {
+function _bgmPickNext(direction) {
   const list = bgmCheckedList();
-  if (!list.length) return;
-  if (bgmMode === 'random') {
+  if (!list.length) return null;
+  if (bgmShuffle) {
+    if (list.length === 1) return list[0];
     const others = list.filter(b => b.id !== bgmCurrentId);
-    const pick = (others.length ? others : list)[Math.floor(Math.random() * (others.length || list.length))];
-    playBgm(pick.id);
-  } else { // sequence or repeat(手動nextは次へ)
-    const idx = list.findIndex(b => b.id === bgmCurrentId);
-    const nextIdx = (idx + 1) % list.length;
-    playBgm(list[nextIdx].id);
+    return others[Math.floor(Math.random() * others.length)];
   }
-}
-
-function bgmPrev() {
-  const list = bgmCheckedList();
-  if (!list.length) return;
   const idx = list.findIndex(b => b.id === bgmCurrentId);
-  const prevIdx = (idx - 1 + list.length) % list.length;
-  playBgm(list[prevIdx].id);
+  if (idx < 0) return list[0];
+  const nextIdx = (idx + direction + list.length) % list.length;
+  return list[nextIdx];
 }
 
-function setBgmMode(mode) {
-  bgmMode = mode;
-  bgmAudio.loop = (mode === 'repeat');
+function bgmNext() { const t = _bgmPickNext(+1); if (t) playBgm(t.id); }
+function bgmPrev() { const t = _bgmPickNext(-1); if (t) playBgm(t.id); }
+
+function toggleBgmShuffle() {
+  bgmShuffle = !bgmShuffle;
   saveBgmState();
   renderBgmPanel();
+}
+
+function cycleBgmRepeat() {
+  // off → all → one → off
+  bgmRepeat = (bgmRepeat === 'off') ? 'all' : (bgmRepeat === 'all') ? 'one' : 'off';
+  bgmAudio.loop = (bgmRepeat === 'one');
+  saveBgmState();
+  renderBgmPanel();
+}
+
+function setBgmVolume(val) {
+  bgmVolume = Math.max(0, Math.min(100, Math.round(val)));
+  _applyVolumeToAudio();
+  saveBgmState();
+  const v = $("#bgm-volume-value");
+  if (v) v.textContent = bgmVolume + '%';
 }
 
 function toggleBgmChecked(id) {
@@ -3204,11 +3344,40 @@ function toggleBgmChecked(id) {
   renderBgmPanel();
 }
 
+// ───── Master Mute ─────
+function toggleMasterMute() {
+  masterMuted = !masterMuted;
+  localStorage.setItem('prism-master-mute', masterMuted ? 'on' : 'off');
+  _applyVolumeToAudio();
+  if (masterMuted) {
+    try { bgmAudio.pause(); } catch (e) {}
+  } else if (bgmEnabled) {
+    try { bgmAudio.play().catch(() => {}); } catch (e) {}
+  }
+  updateMasterMuteBtn();
+  renderBgmPanel();
+}
+
+function updateMasterMuteBtn() {
+  const btn = $('#btn-mute-master');
+  if (btn) {
+    btn.textContent = masterMuted ? '🔇' : '🔊';
+    btn.classList.toggle('muted', masterMuted);
+    btn.title = masterMuted ? '全音ミュート中 (クリックで解除)' : '全音ミュート切替 (BGM+ガチャ音)';
+  }
+  // 🎵ボタン (BGM詳細) はアイコン固定
+  const bgmBtn = $('#btn-bgm');
+  if (bgmBtn) { bgmBtn.textContent = '🎵'; bgmBtn.title = 'BGM詳細'; }
+}
+
+// ───── Audio event handlers ─────
 bgmAudio.addEventListener('ended', () => {
-  // 終了時は保存位置をリセット (次回リロード時に曲頭から)
   localStorage.setItem('prism-bgm-last-time', '0');
-  if (bgmMode === 'repeat') { bgmAudio.play().catch(() => {}); return; }
-  bgmNext();
+  if (bgmRepeat === 'one') { try { bgmAudio.play().catch(() => {}); } catch (e) {} return; }
+  if (bgmRepeat === 'all') { bgmNext(); return; }
+  // repeat=off: 次曲は自動で流さない(ただしプレイリストに複数曲あれば次へ)
+  if (bgmCheckedList().length > 1) bgmNext();
+  else pauseBgm();
 });
 
 // 再生位置を 1秒throttle で保存 (リロード復帰用)
@@ -3222,31 +3391,51 @@ bgmAudio.addEventListener('timeupdate', () => {
   }
 });
 
-function updateBgmHeaderBtn() {
-  const btn = $("#btn-bgm");
-  if (!btn) return;
-  btn.textContent = (bgmEnabled && !bgmAudio.paused) ? "🔊" : "🔇";
-  btn.title = "BGM";
-}
-
+// ───── BGM Panel ─────
 function openBgmPanel() {
   renderBgmPanel();
   $("#bgm-panel").classList.add('active');
+  document.body.classList.add('modal-open');
 }
 function closeBgmPanel() {
   $("#bgm-panel").classList.remove('active');
+  document.body.classList.remove('modal-open');
 }
 
 function renderBgmPanel() {
   const cur = bgmFindById(bgmCurrentId);
   const t = $("#bgm-current-title");
-  if (t) t.textContent = cur ? cur.title : '-';
+  if (t) t.textContent = cur ? cur.label : '-';
   const pt = $("#bgm-play-toggle");
   if (pt) pt.textContent = (bgmEnabled && !bgmAudio.paused) ? "⏸" : "▶";
-  // モードボタン active
-  document.querySelectorAll('.bgm-mode-btn').forEach(el => {
-    el.classList.toggle('active', el.dataset.mode === bgmMode);
-  });
+
+  // volume
+  const vs = $("#bgm-volume");
+  if (vs && vs.value !== String(bgmVolume)) vs.value = String(bgmVolume);
+  const vv = $("#bgm-volume-value");
+  if (vv) vv.textContent = bgmVolume + '%';
+
+  // shuffle
+  const sh = $("#bgm-shuffle");
+  if (sh) sh.checked = bgmShuffle;
+
+  // repeat button
+  const rb = $("#bgm-repeat-btn");
+  const ri = $("#bgm-repeat-icon");
+  const rl = $("#bgm-repeat-label");
+  if (rb && ri && rl) {
+    rb.classList.remove('active-all', 'active-one');
+    if (bgmRepeat === 'all') {
+      rb.classList.add('active-all');
+      ri.textContent = '🔁'; rl.textContent = '全曲リピート';
+    } else if (bgmRepeat === 'one') {
+      rb.classList.add('active-one');
+      ri.textContent = '🔂'; rl.textContent = '1曲リピート';
+    } else {
+      ri.textContent = '➡'; rl.textContent = 'リピートなし';
+    }
+  }
+
   // 曲リスト
   const list = $("#bgm-list");
   if (!list) return;
@@ -3255,20 +3444,18 @@ function renderBgmPanel() {
     const row = document.createElement('div');
     row.className = 'bgm-row' + (b.id === bgmCurrentId ? ' now' : '');
     const checked = bgmPlaylist[b.id] ? 'checked' : '';
-    row.innerHTML = `
-      <label class="bgm-check">
-        <input type="checkbox" ${checked} data-bgm-id="${b.id}">
-        <span class="bgm-check-box"></span>
-      </label>
-      <div class="bgm-info" data-play-id="${b.id}">
-        <div class="bgm-row-title">${escapeHtml(b.title)}</div>
-        <div class="bgm-row-desc">${escapeHtml(b.desc || '')}</div>
-      </div>
-      <button class="bgm-row-play" data-play-id="${b.id}" title="再生">▶</button>
-    `;
+    row.innerHTML =
+      '<label class="bgm-check">' +
+        '<input type="checkbox" ' + checked + ' data-bgm-id="' + b.id + '">' +
+        '<span class="bgm-check-box"></span>' +
+      '</label>' +
+      '<div class="bgm-info" data-play-id="' + b.id + '">' +
+        '<div class="bgm-row-title">' + escapeHtml(b.label) + '</div>' +
+        '<div class="bgm-row-desc">' + escapeHtml(b.desc || '') + '</div>' +
+      '</div>' +
+      '<button class="bgm-row-play" data-play-id="' + b.id + '" title="再生">▶</button>';
     list.appendChild(row);
   });
-  // event binding
   list.querySelectorAll('input[type="checkbox"]').forEach(cb => {
     cb.addEventListener('change', () => toggleBgmChecked(cb.dataset.bgmId));
   });
@@ -3280,27 +3467,35 @@ function renderBgmPanel() {
   });
 }
 
-// (escapeHtml は他で定義済み)
-
-// ヘッダー 🔇 ボタン → パネル開 (長押しで直接toggleは廃止)
+// ───── ヘッダーボタンと panel 内コントロール配線 ─────
 $("#btn-bgm").addEventListener("click", openBgmPanel);
-
-// bgm-panel 背景クリックで閉じる
 $("#bgm-panel").addEventListener('click', e => { if (e.target.id === 'bgm-panel') closeBgmPanel(); });
+
+const _btnMuteMaster = $("#btn-mute-master");
+if (_btnMuteMaster) _btnMuteMaster.addEventListener('click', toggleMasterMute);
+
+const _bgmVolumeSlider = $("#bgm-volume");
+if (_bgmVolumeSlider) _bgmVolumeSlider.addEventListener('input', e => setBgmVolume(parseInt(e.target.value, 10) || 0));
+
+const _bgmShuffleToggle = $("#bgm-shuffle");
+if (_bgmShuffleToggle) _bgmShuffleToggle.addEventListener('change', toggleBgmShuffle);
 
 // 初期ロード
 loadBgmSrc(bgmCurrentId);
-updateBgmHeaderBtn();
+_applyVolumeToAudio();
+updateMasterMuteBtn();
 
-// 初回ユーザー操作で enabled 復活再生 (ブラウザautoplay制約回避)
-// click/pointerdown/touchstart/keydown/scroll どれか1つでも発火したら起動
-if (bgmEnabled) {
+// 初回ユーザー操作で enabled=true なら再生再開 (autoplay制約回避)
+// bgmEnabled=true かつ masterMuted=false の時のみ試行。
+// A-3: 「リロード前に再生していたらそのまま流す」— 起動時に即試行も仕込む
+if (bgmEnabled && !masterMuted) {
+  // 即試行 (DOMロード済み前提、ユーザー操作無くてもブラウザによっては通ることも)
+  setTimeout(() => { if (bgmEnabled && !masterMuted && bgmAudio.paused) bgmAudio.play().catch(() => {}); }, 100);
+  // 駄目だった場合は interaction フォールバック
   const bgmAutoplayEvents = ['click', 'pointerdown', 'touchstart', 'keydown', 'scroll'];
   function startBgmOnce() {
-    if (bgmEnabled && bgmAudio.paused) {
-      bgmAudio.play().catch(() => {});
-    }
-    updateBgmHeaderBtn();
+    if (bgmEnabled && !masterMuted && bgmAudio.paused) bgmAudio.play().catch(() => {});
+    updateMasterMuteBtn();
     renderBgmPanel();
     bgmAutoplayEvents.forEach(ev => document.removeEventListener(ev, startBgmOnce, true));
   }
@@ -3311,6 +3506,12 @@ if (bgmEnabled) {
 $("#relations").addEventListener("click", e => { if (e.target.id === "relations") closeRelations(); });
 $("#gallery").addEventListener("click", e => { if (e.target.id === "gallery") closeGallery(); });
 $("#char-detail").addEventListener("click", e => { if (e.target.id === "char-detail") closeCharDetail(); });
+
+// v1.1.3: 履歴モーダル
+const _historyModal = $("#history-modal");
+if (_historyModal) _historyModal.addEventListener("click", e => { if (e.target.id === "history-modal") closeHistoryModal(); });
+const _btnHistory = $("#btn-history");
+if (_btnHistory) _btnHistory.addEventListener("click", openHistoryModal);
 
 // 画像ズームのイベント
 (function bindZoom(){
@@ -3359,6 +3560,11 @@ document.addEventListener("keydown", e => {
   }
   if ($("#relations").classList.contains("active")) {
     if (e.key === "Escape") { e.preventDefault(); closeRelations(); }
+    return;
+  }
+  const _hm = $("#history-modal");
+  if (_hm && _hm.classList.contains("active")) {
+    if (e.key === "Escape") { e.preventDefault(); closeHistoryModal(); }
     return;
   }
   if ($("#story-modal").classList.contains("active")) {
@@ -3447,21 +3653,29 @@ try {
       // admin判定も並列で (失敗してもUIには影響しない)
       checkPrismAdmin();
       // 初回auth state確定後(login or ゲスト)にprompt表示判定
+      // migration notice (旧URL限定) → account prompt の順で判定 (session flagで排他)
       if (!initialAuthCheckDone) {
         initialAuthCheckDone = true;
-        setTimeout(() => maybeShowAccountPrompt(), 1500);
+        setTimeout(() => {
+          maybeShowMigrationNotice();
+          maybeShowAccountPrompt();
+        }, 1500);
       }
     });
     // Firebase SDK が読めていない等でonAuthStateChangedが発火しなくても最終フォールバック
     setTimeout(() => {
       if (!initialAuthCheckDone) {
         initialAuthCheckDone = true;
+        maybeShowMigrationNotice();
         maybeShowAccountPrompt();
       }
     }, 4000);
   } else {
     // Firebase SDK未読込: それでも既存ゲストには案内(ただしFirebase動かないので案内意味ないが念のため)
-    setTimeout(() => maybeShowAccountPrompt(), 2000);
+    setTimeout(() => {
+      maybeShowMigrationNotice();
+      maybeShowAccountPrompt();
+    }, 2000);
   }
 } catch (e) {
   console.error('Firebase init error:', e);
@@ -3662,331 +3876,4 @@ async function onAuthReady(user) {
     const collision = localHasProgress && cloudTotal > 0 && !statesEqual(state, cloudState);
 
     if (collision) {
-      // 差分あり → 無言で合算 (両者のmax/unionを取り、損失なし)
-      const merged = mergeStates(state, cloudState);
-      applyCloudState(merged);
-      await saveStateCloud();
-      showToast('データを最新化しました');
-      try { await fbDb.ref('prism-gacha/users/' + user.uid + '/lastLoginAt').set(Date.now()); } catch (e) {}
-      return;
-    }
-
-    // 衝突なし → cloud が優位 (cloudが空ならlocalを送る)
-    if (cloudTotal > 0) {
-      applyCloudState(cloudState);
-    } else {
-      await saveStateCloud();
-    }
-
-    try { await fbDb.ref('prism-gacha/users/' + user.uid + '/lastLoginAt').set(Date.now()); } catch (e) {}
-  } catch (e) {
-    console.error('onAuthReady error:', e);
-  }
-}
-
-function statesEqual(a, b) {
-  return (a.total || 0) === (b.total || 0)
-    && Object.keys(a.unlockedSet || {}).length === Object.keys(b.unlockedSet || {}).length;
-}
-
-function applyCloudState(cs) {
-  state.total = cs.total || 0;
-  state.ur = cs.ur || 0;
-  state.pity = cs.pity || 0;
-  state.history = Array.isArray(cs.history) ? cs.history : [];
-  state.galleryViewed = cs.galleryViewed || {};
-  state.unlockedSet = cs.unlockedSet || {};
-  state.dupCounts = cs.dupCounts || {};
-  state.storyProgress = cs.storyProgress || {};
-  localStorage.setItem("prism-gacha", JSON.stringify(state));
-  updateHUD();
-  if (typeof renderHistory === 'function') renderHistory();
-}
-
-function mergeStates(local, cloud) {
-  const merged = {
-    total: Math.max(local.total || 0, cloud.total || 0),
-    ur: Math.max(local.ur || 0, cloud.ur || 0),
-    pity: Math.max(local.pity || 0, cloud.pity || 0),
-    history: [],
-    unlockedSet: { ...(cloud.unlockedSet || {}), ...(local.unlockedSet || {}) },
-    dupCounts: {},
-    galleryViewed: { ...(cloud.galleryViewed || {}), ...(local.galleryViewed || {}) },
-    storyProgress: {},
-  };
-  const allDupKeys = new Set([...Object.keys(local.dupCounts || {}), ...Object.keys(cloud.dupCounts || {})]);
-  for (const k of allDupKeys) {
-    merged.dupCounts[k] = Math.max((local.dupCounts && local.dupCounts[k]) || 0, (cloud.dupCounts && cloud.dupCounts[k]) || 0);
-  }
-  const combined = [...(cloud.history || []), ...(local.history || [])];
-  merged.history = combined.slice(-120);
-  const spKeys = new Set([...Object.keys(local.storyProgress || {}), ...Object.keys(cloud.storyProgress || {})]);
-  for (const k of spKeys) {
-    const l = (local.storyProgress && local.storyProgress[k]) || {};
-    const c = (cloud.storyProgress && cloud.storyProgress[k]) || {};
-    merged.storyProgress[k] = {
-      lastSceneIndex: Math.max(l.lastSceneIndex || 0, c.lastSceneIndex || 0),
-      totalScenes: Math.max(l.totalScenes || 0, c.totalScenes || 0),
-      lastReadAt: Math.max(l.lastReadAt || 0, c.lastReadAt || 0),
-      completed: !!(l.completed || c.completed),
-    };
-  }
-  return merged;
-}
-
-// (衝突モーダル廃止: ログイン時に差分あれば自動合算→トースト表示)
-
-// ────────────── UI handlers ──────────────
-function showAccountModal() {
-  const modal = $('#account-modal');
-  if (!modal) return;
-  if (authUser) {
-    $('#account-guest-view').style.display = 'none';
-    $('#account-logged-view').style.display = '';
-    $('#account-info-nickname').textContent = authUser.displayName || '-';
-    $('#account-info-total').textContent = state.total || 0;
-    let urCount = 0, lrCount = 0;
-    for (const k of Object.keys(state.unlockedSet || {})) {
-      if (k.startsWith('UR_')) urCount++;
-      else if (k.startsWith('LR_')) lrCount++;
-    }
-    $('#account-info-ur').textContent = `${urCount}/5`;
-    $('#account-info-lr').textContent = `${lrCount}/1`;
-    $('#account-info-sync').textContent = authUser.metadata && authUser.metadata.lastSignInTime
-      ? new Date(authUser.metadata.lastSignInTime).toLocaleString('ja-JP')
-      : '-';
-  } else {
-    $('#account-guest-view').style.display = '';
-    $('#account-logged-view').style.display = 'none';
-    switchAccountTab('login');
-    setTimeout(() => { const el = $('#login-nickname'); if (el) el.focus(); }, 50);
-  }
-  modal.classList.add('active');
-}
-
-function closeAccountModal() {
-  const modal = $('#account-modal');
-  if (!modal) return;
-  modal.classList.remove('active');
-  const le = $('#login-error'); if (le) le.textContent = '';
-  const se = $('#signup-error'); if (se) se.textContent = '';
-  const lp = $('#login-passphrase'); if (lp) lp.value = '';
-  const sp = $('#signup-passphrase'); if (sp) sp.value = '';
-  const sp2 = $('#signup-passphrase2'); if (sp2) sp2.value = '';
-}
-
-function switchAccountTab(tab) {
-  document.querySelectorAll('.account-tab').forEach(el => el.classList.toggle('active', el.dataset.tab === tab));
-  const login = $('#account-login'); if (login) login.style.display = tab === 'login' ? '' : 'none';
-  const signup = $('#account-signup'); if (signup) signup.style.display = tab === 'signup' ? '' : 'none';
-}
-
-// (showCollisionModal / closeCollisionModal は廃止)
-
-function updateAccountButton() {
-  const label = $('#account-label');
-  if (!label) return;
-  label.textContent = authUser ? (authUser.displayName || 'アカウント') : 'ゲスト';
-  // Admin リンクは authUser & admin判定済みの場合のみ表示
-  const adminBtn = document.getElementById('btn-admin');
-  if (adminBtn) {
-    adminBtn.style.display = (authUser && isPrismAdmin) ? '' : 'none';
-  }
-}
-
-let isPrismAdmin = false;
-async function checkPrismAdmin() {
-  if (!authUser || !fbDb) { isPrismAdmin = false; return; }
-  try {
-    const snap = await fbDb.ref('prism-gacha/_meta/admins/' + authUser.uid).once('value');
-    isPrismAdmin = !!snap.val();
-  } catch (e) {
-    isPrismAdmin = false;
-  }
-  updateAccountButton();
-}
-
-// ────────────── Account Prompt (既存ゲスト進捗ありユーザーへの案内) ──────────────
-const ACCOUNT_PROMPT_KEY = 'pg_account_prompt_dismissed';
-
-function maybeShowAccountPrompt() {
-  // 以下すべて満たす場合のみ表示:
-  // - 未ログイン (authUser == null)
-  // - localStorage進捗あり (total > 0 かつ unlockedSet に1つ以上)
-  // - 「後で」で過去に dismiss していない
-  if (authUser) return;
-  if (localStorage.getItem(ACCOUNT_PROMPT_KEY) === 'true') return;
-  const hasProgress = (state.total || 0) > 0 && Object.keys(state.unlockedSet || {}).length > 0;
-  if (!hasProgress) return;
-  const modal = document.getElementById('account-prompt');
-  if (!modal) return;
-  modal.classList.add('active');
-}
-
-function dismissAccountPrompt() {
-  localStorage.setItem(ACCOUNT_PROMPT_KEY, 'true');
-  const modal = document.getElementById('account-prompt');
-  if (modal) modal.classList.remove('active');
-}
-
-function acceptAccountPrompt() {
-  const modal = document.getElementById('account-prompt');
-  if (modal) modal.classList.remove('active');
-  // アカウントモーダルの新規登録タブを開く
-  showAccountModal();
-  switchAccountTab('signup');
-  setTimeout(() => { const el = $('#signup-nickname'); if (el) el.focus(); }, 50);
-}
-
-// 簡易トースト (他で showToast 未定義の場合のみ定義)
-if (typeof window.showToast !== 'function') {
-  window.showToast = function(msg) {
-    let t = document.getElementById('_ptoast');
-    if (!t) {
-      t = document.createElement('div');
-      t.id = '_ptoast';
-      t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(20,16,40,0.95);color:#fff;padding:12px 20px;border-radius:10px;font-size:14px;z-index:20000;border:1px solid rgba(200,180,255,0.3);box-shadow:0 8px 30px rgba(0,0,0,0.4);opacity:0;transition:opacity 0.3s;pointer-events:none;';
-      document.body.appendChild(t);
-    }
-    t.textContent = msg;
-    t.style.opacity = '1';
-    clearTimeout(t._h);
-    t._h = setTimeout(() => { t.style.opacity = '0'; }, 2800);
-  };
-}
-
-// アカウントモーダルのEnter/Escape対応
-document.addEventListener('keydown', e => {
-  const accountModal = document.getElementById('account-modal');
-  if (accountModal && accountModal.classList.contains('active')) {
-    if (e.key === 'Escape') { e.stopPropagation(); e.preventDefault(); closeAccountModal(); }
-    else if (e.key === 'Enter') {
-      const signup = $('#account-signup');
-      if (signup && signup.style.display !== 'none') { e.stopPropagation(); e.preventDefault(); doAccountSignup(); }
-      else { e.stopPropagation(); e.preventDefault(); doAccountLogin(); }
-    }
-  }
-}, true);
-
-// account-modal の背景クリックで閉じる
-document.addEventListener('DOMContentLoaded', () => {
-  const am = document.getElementById('account-modal');
-  if (am) am.addEventListener('click', e => { if (e.target === am) closeAccountModal(); });
-});
-
-// ============================================================
-// バージョン通知: version.json と localStorage を比較して
-// 差分があれば更新モーダルを表示 (初回アクセスは通知スキップ)
-// ============================================================
-const PRISMAERA_VERSION_LS_KEY = 'prismaera-last-seen-version';
-let _prismaeraChangelogCache = null;
-let _prismaeraTargetVersion = null;
-
-async function checkPrismaeraVersion() {
-  try {
-    const res = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
-    if (!res.ok) return;
-    const data = await res.json();
-    const currentVer = data.version;
-    const changelog = Array.isArray(data.changelog) ? data.changelog : [];
-    _prismaeraChangelogCache = changelog;
-
-    // ヘッダーのバージョン表記を version.json で上書き
-    const verEl = document.getElementById('app-version');
-    if (verEl) verEl.textContent = 'v' + currentVer;
-
-    let lastSeen = null;
-    try { lastSeen = localStorage.getItem(PRISMAERA_VERSION_LS_KEY); } catch (e) {}
-
-    // 初回アクセスは通知せず現バージョンを保存 (スパム防止)
-    if (!lastSeen) {
-      try { localStorage.setItem(PRISMAERA_VERSION_LS_KEY, currentVer); } catch (e) {}
-      return;
-    }
-    if (lastSeen === currentVer) return;
-
-    showPrismaeraUpdateModal(lastSeen, currentVer, changelog);
-  } catch (e) {
-    console.warn('[prismaera] version check failed', e);
-  }
-}
-
-function showPrismaeraUpdateModal(fromVer, toVer, changelog) {
-  const modal = document.getElementById('update-modal');
-  if (!modal) return;
-
-  _prismaeraTargetVersion = toVer;
-
-  const fromEl = document.getElementById('update-from');
-  const toEl = document.getElementById('update-to');
-  if (fromEl) fromEl.textContent = 'v' + fromVer;
-  if (toEl) toEl.textContent = 'v' + toVer;
-
-  const notesUl = document.getElementById('update-notes');
-  if (notesUl) {
-    notesUl.innerHTML = '';
-    const latest = changelog.find(c => c && c.version === toVer) || changelog[0];
-    const notes = latest && Array.isArray(latest.notes) ? latest.notes : [];
-    notes.forEach(n => {
-      const li = document.createElement('li');
-      li.textContent = n;
-      notesUl.appendChild(li);
-    });
-  }
-
-  const histEl = document.getElementById('update-history');
-  if (histEl) {
-    histEl.innerHTML = '';
-    histEl.style.display = 'none';
-    changelog.forEach(entry => {
-      if (!entry) return;
-      const section = document.createElement('div');
-      section.className = 'update-history-entry';
-      const h = document.createElement('div');
-      h.className = 'update-history-head';
-      h.textContent = 'v' + entry.version + ' (' + (entry.date || '') + ')';
-      section.appendChild(h);
-      const ul = document.createElement('ul');
-      (entry.notes || []).forEach(n => {
-        const li = document.createElement('li');
-        li.textContent = n;
-        ul.appendChild(li);
-      });
-      section.appendChild(ul);
-      histEl.appendChild(section);
-    });
-  }
-
-  modal.style.display = 'flex';
-  document.body.classList.add('modal-open');
-}
-
-function dismissUpdateModal(reload) {
-  const modal = document.getElementById('update-modal');
-  if (!modal) return;
-  try {
-    if (_prismaeraTargetVersion) {
-      localStorage.setItem(PRISMAERA_VERSION_LS_KEY, _prismaeraTargetVersion);
-    }
-  } catch (e) {}
-  modal.style.display = 'none';
-  document.body.classList.remove('modal-open');
-  if (reload) {
-    // PWA/ServiceWorkerキャッシュ破棄目的で location.reload(true)
-    // (引数は新ブラウザで非対応でも location.reload() に fallback)
-    try { location.reload(true); } catch (e) { location.reload(); }
-  }
-}
-
-function toggleUpdateHistory() {
-  const hist = document.getElementById('update-history');
-  if (!hist) return;
-  hist.style.display = (hist.style.display === 'none') ? 'block' : 'none';
-}
-
-// 起動時に version.json をチェック
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', checkPrismaeraVersion);
-} else {
-  checkPrismaeraVersion();
-}
+      // 差分あり → 無言で合算 (両者のm
