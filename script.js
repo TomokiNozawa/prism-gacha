@@ -3244,14 +3244,18 @@ function parseStoryToScenes(md) {
   let preludeLines = [];
 
   function flushCurrent() {
-    if (current && current.contentLines.length > 0) {
-      scenes.push({
-        label: current.label,
-        title: current.title,
-        contentMd: current.contentLines.join('\n').trim(),
-        bg: current.bg,
-      });
-    }
+    if (!current) return;
+    const trimmed = current.contentLines.join('\n').trim();
+    // 中表紙判定: 本文がほぼ空 (空行のみ) の h2 = 「第○幕」のような幕タイトル
+    const isAct = trimmed.length === 0 && !current.label;
+    if (trimmed.length === 0 && !isAct) return; // h3 で本文なしは捨てる
+    scenes.push({
+      label: current.label,
+      title: current.title,
+      contentMd: trimmed,
+      bg: current.bg,
+      isAct,
+    });
   }
 
   for (const line of lines) {
@@ -3327,9 +3331,11 @@ function renderScene() {
   // 本文: キャラ名リンク化 → ふりがな
   bodyHtml = linkifyCharNames(bodyHtml);
   bodyHtml = applyFurigana(bodyHtml);
-  // #6 表紙シーン (isCover=true) は「タップで開幕」を明示してロードでない事を伝える
+  // #6 表紙シーン (isCover) と中表紙 (isAct) は「タップで開幕」を明示
   if (scene.isCover) {
     bodyHtml = '<div class="story-cover-hint"><span class="story-cover-spark">✦</span><div class="story-cover-tap">タップで開幕</div><span class="story-cover-spark">✦</span></div>';
+  } else if (scene.isAct) {
+    bodyHtml = '<div class="story-cover-hint"><span class="story-cover-spark">❖</span><div class="story-cover-tap">タップで次へ</div><span class="story-cover-spark">❖</span></div>';
   }
   $("#story-scene-content").innerHTML = bodyHtml;
   // キャラ名リンクのクリックハンドラ
