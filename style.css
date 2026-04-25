@@ -1422,11 +1422,13 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 16px;
   padding: 24px;
+  position: relative;
 }
 .gallery-header {
   display: flex; justify-content: space-between; align-items: center;
   flex-wrap: wrap; gap: 14px;
   margin-bottom: 20px; padding-bottom: 14px;
+  padding-right: 110px;
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 .gallery-header h2 {
@@ -1449,6 +1451,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 .gallery-stats .g-sr   { color: var(--sr); }
 .gallery-stats .g-r    { color: var(--r); }
 .gallery-inner .close {
+  position: absolute; top: 14px; right: 14px; z-index: 10;
   font-family: inherit; font-size: 11px;
   padding: 6px 12px; border-radius: 6px; cursor: pointer;
   background: rgba(255,255,255,0.08); color: var(--text);
@@ -2551,11 +2554,11 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 
   /* 図鑑ヘッダー */
   .gallery-inner { padding: 16px; }
-  .gallery-header { gap: 8px; padding-bottom: 10px; margin-bottom: 14px; }
+  .gallery-header { gap: 8px; padding-bottom: 10px; margin-bottom: 14px; padding-right: 90px; }
   .gallery-header h2 { font-size: 18px; width: 100%; }
   .gallery-stats { font-size: 10px; width: 100%; }
   .gallery-stats span { padding: 4px 7px; }
-  .gallery-inner .close { font-size: 10px; padding: 5px 10px; }
+  .gallery-inner .close { top: 10px; right: 10px; font-size: 10px; padding: 5px 10px; }
 
   /* キャラ詳細 */
   .char-detail-name { font-size: 20px; }
