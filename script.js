@@ -20,7 +20,7 @@ const SEASON_META = {
   1: { name: "Season 1 — 原虹の誕生", released: "2026-04-22" },
   // 2: { name: "Season 2 — ...", released: "..." },
 };
-const S1 = "images/characters/season1";
+const S1 = "/images/characters/season1";
 
 const POOL = {
   LR: [
@@ -886,11 +886,11 @@ const TIER_COLORS = {
   LR:  ["#ffffff", "#ffd84d", "#ff5faa", "#5fffd4", "#7ea8ff", "#c87dff"],
 };
 const TIER_PILLAR = {
-  R:   "images/fx/pillar_blue.png",
-  SR:  "images/fx/pillar_purple.png",
-  SSR: "images/fx/pillar_gold.png",
-  UR:  "images/fx/rainbow_pillar.png",
-  LR:  "images/fx/rainbow_pillar.png",
+  R:   "/images/fx/pillar_blue.png",
+  SR:  "/images/fx/pillar_purple.png",
+  SSR: "/images/fx/pillar_gold.png",
+  UR:  "/images/fx/rainbow_pillar.png",
+  LR:  "/images/fx/rainbow_pillar.png",
 };
 
 // フラッシュ強度: "soft"(R/SR段階用), "mid"(SSR用), "hard"(UR用)
@@ -917,7 +917,7 @@ function showPillar(tier) {
 function showCrack() {
   const c = document.createElement("div");
   c.className = "fx-crack show";
-  c.style.backgroundImage = "url('images/fx/crack_burst.png')";
+  c.style.backgroundImage = "url('/images/fx/crack_burst.png')";
   stageVfx.appendChild(c);
   setTimeout(() => c.remove(), 700);
 }

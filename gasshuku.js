@@ -148,7 +148,7 @@
   ];
 
   function imgPath(c, mode) {
-    return `images/gasshuku/${c.id}_${c.slug}_${mode === 'real' ? 'real' : 'fantasy'}.png`;
+    return `/images/gasshuku/${c.id}_${c.slug}_${mode === 'real' ? 'real' : 'fantasy'}.png`;
   }
 
   // ====== 合宿図鑑 + 凸システム (localStorage + Firebase で端末間連携) ======
