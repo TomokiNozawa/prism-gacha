@@ -472,6 +472,7 @@ function renderUsers(users, uidToNickname, guestDevices) {
 
     const row = document.createElement('div');
     row.className = 'users-row';
+    row.dataset.lastAt = u.lastLoginAt || 0;
     row.innerHTML = `
       <div class="u-nickname ${isMe ? 'me' : ''}">${escapeHtml(nickname)}</div>
       <div class="u-count ${total === 0 ? 'dim' : ''}">${total}</div>
@@ -503,6 +504,7 @@ function renderUsers(users, uidToNickname, guestDevices) {
       const row = document.createElement('div');
       row.className = 'users-row guest-row';
       row.style.opacity = '0.78';
+      row.dataset.lastAt = g.lastAt || 0;
       row.innerHTML = `
         <div class="u-nickname dim">🎌 ゲスト #${idShort}${tag}</div>
         <div class="u-count dim">—</div>
@@ -529,6 +531,11 @@ function renderUsers(users, uidToNickname, guestDevices) {
       body.appendChild(row);
     });
   }
+
+  // ゲスト+ユーザー混合で 最終操作時刻 降順に並び替え (DOMソート)
+  const allRows = Array.from(body.children);
+  allRows.sort((a, b) => (parseInt(b.dataset.lastAt) || 0) - (parseInt(a.dataset.lastAt) || 0));
+  allRows.forEach(r => body.appendChild(r));
 
   const userCount = entries.length;
   const totalRows = userCount + guestCount;
