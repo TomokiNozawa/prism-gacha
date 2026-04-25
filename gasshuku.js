@@ -378,6 +378,107 @@
       m.classList.remove('active');
       m.setAttribute('hidden', '');
     }
+    // 結果閉じたタイミングで未ログインならアカウント案内
+    setTimeout(() => maybeShowGasshukuAccountInvite(), 200);
+  }
+
+  // ====== 合宿用アカウント案内モーダル (Aパート) ======
+  function ensureAccountInviteModal() {
+    let m = document.getElementById('gasshuku-account-invite');
+    if (m) return m;
+    m = document.createElement('div');
+    m.id = 'gasshuku-account-invite';
+    m.className = 'gasshuku-account-invite';
+    m.setAttribute('hidden', '');
+    m.innerHTML = `
+      <div class="gasshuku-invite-backdrop"></div>
+      <div class="gasshuku-invite-card">
+        <button class="gasshuku-invite-close" aria-label="閉じる">×</button>
+        <div class="gasshuku-invite-icon">🌈</div>
+        <div class="gasshuku-invite-title">合宿の思い出を、ずっと残しませんか？</div>
+        <div class="gasshuku-invite-body">
+          <p>今日引いた合宿ガチャの結果は、<br><strong>このブラウザを閉じる/別端末では消えてしまいます</strong>。</p>
+          <p>アカウントを作ると…</p>
+          <ul>
+            <li>📱 別端末（スマホ・自宅PC）からも図鑑が見られる</li>
+            <li>💾 ブラウザ消去しても記録が残る</li>
+            <li>🌟 通常版「Prismaera」の本編ストーリーや相関図も遊べる</li>
+          </ul>
+          <p class="gasshuku-invite-note">※ ニックネーム＋合言葉だけでOK・無料・1分で完了</p>
+        </div>
+        <div class="gasshuku-invite-actions">
+          <button class="gasshuku-invite-btn primary" id="gasshuku-invite-signup">✨ アカウントを作る</button>
+          <button class="gasshuku-invite-btn ghost" id="gasshuku-invite-later">あとで</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(m);
+    m.querySelector('.gasshuku-invite-close').addEventListener('click', closeAccountInvite);
+    m.querySelector('.gasshuku-invite-backdrop').addEventListener('click', closeAccountInvite);
+    m.querySelector('#gasshuku-invite-later').addEventListener('click', closeAccountInvite);
+    m.querySelector('#gasshuku-invite-signup').addEventListener('click', () => {
+      closeAccountInvite();
+      // 既存のアカウントモーダルを開いて signup タブへ
+      try {
+        if (typeof showAccountModal === 'function') showAccountModal();
+        if (typeof switchAccountTab === 'function') switchAccountTab('signup');
+      } catch (e) { console.warn(e); }
+    });
+    return m;
+  }
+  function maybeShowGasshukuAccountInvite() {
+    const uid = getCurrentUid();
+    if (uid) return; // ログイン済なら案内不要
+    const m = ensureAccountInviteModal();
+    m.removeAttribute('hidden');
+    m.classList.add('active');
+  }
+  function closeAccountInvite() {
+    const m = document.getElementById('gasshuku-account-invite');
+    if (m) {
+      m.classList.remove('active');
+      m.setAttribute('hidden', '');
+    }
+  }
+
+  // ====== 合宿ガチャ実行統計 (B2パート: 集計のみ) ======
+  const DEVICE_ID_KEY = 'prism-gasshuku-device-id';
+  function getDeviceId() {
+    let id = null;
+    try { id = localStorage.getItem(DEVICE_ID_KEY); } catch (e) {}
+    if (!id) {
+      id = 'dev_' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+      try { localStorage.setItem(DEVICE_ID_KEY, id); } catch (e) {}
+    }
+    return id;
+  }
+  function todayKey() {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+  async function logRollToStats(count) {
+    const app = getFbApp();
+    if (!app) return;
+    try {
+      const day = todayKey();
+      const dev = getDeviceId();
+      const db = app.database();
+      const dayRef = db.ref('prism-gacha/gasshukuStats/' + day);
+      // 集計増分 (transaction で安全に increment)
+      dayRef.child('totalRolls').transaction(c => (c || 0) + 1);
+      dayRef.child('totalSummons').transaction(c => (c || 0) + count);
+      // device エントリ
+      const devRef = dayRef.child('devices/' + dev);
+      devRef.child('totalRolls').transaction(c => (c || 0) + 1);
+      devRef.child('lastRollAt').set(Date.now());
+      const uid = getCurrentUid();
+      if (uid) devRef.child('uid').set(uid);
+    } catch (e) {
+      console.warn('[gasshuku] stats log failed:', e);
+    }
   }
 
   function rollAll(count) {
@@ -447,6 +548,8 @@
       window.__gasshukuLastImgMode = imgMode;
       // 図鑑記録 (重複なし keyで)
       results.forEach(r => recordCollected(r._gasshukuChar, r._gasshukuMode));
+      // 統計ログ (Firebase 公開パス)
+      logRollToStats(count);
 
       if (count === 1 || results.length === 1) {
         // 単発: doSingle 風
@@ -501,12 +604,18 @@
       gasshukuBusy = false;
       setGachaBtnsDisabled(false);
       // 結果モーダル表示 (10連時のみ。単発はキャラ自体が画面いっぱいに見えるため不要)
+      let showedResult = false;
       if (typeof window !== 'undefined') {
         try {
           if (window.__gasshukuLastResults && window.__gasshukuLastResults.length > 1) {
             showResultModal(window.__gasshukuLastResults, window.__gasshukuLastImgMode);
+            showedResult = true;
           }
         } catch (e) {}
+      }
+      // 単発の場合は結果モーダル無いので、ここで直接アカウント案内
+      if (!showedResult) {
+        setTimeout(() => maybeShowGasshukuAccountInvite(), 400);
       }
     }
   }
@@ -545,6 +654,12 @@
         const rm = document.getElementById('gasshuku-result-modal');
         if (rm && rm.classList.contains('active')) {
           closeResultModal();
+          e.stopPropagation();
+          return;
+        }
+        const im = document.getElementById('gasshuku-account-invite');
+        if (im && im.classList.contains('active')) {
+          closeAccountInvite();
           e.stopPropagation();
           return;
         }
