@@ -24,7 +24,7 @@
 <link rel="icon" href="/images/icons/icon-16.png" type="image/png" sizes="16x16">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
 <link rel="manifest" href="/manifest.json?v=20260425g25">
-<link rel="stylesheet" href="/style.css?v=20260426a9">
+<link rel="stylesheet" href="/style.css?v=20260426b0">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -120,6 +120,17 @@
       </button>
     </div>
 
+    <div class="home-feedback">
+      <button type="button" class="home-feedback-card" onclick="openFeedbackModal()">
+        <div class="home-feedback-icon">📨</div>
+        <div class="home-feedback-text">
+          <div class="home-feedback-title">ご意見・ご要望</div>
+          <div class="home-feedback-sub">Prismaeraをもっと良くするため、声を聞かせてください</div>
+        </div>
+        <div class="home-feedback-arrow">→</div>
+      </button>
+    </div>
+
   </section>
 
   <!-- ストーリー一覧モーダル -->
@@ -170,17 +181,6 @@
       </span>
     </h3>
     <div id="home-gallery-grid" class="home-gallery-grid"></div>
-  </section>
-
-  <section class="home-feedback">
-    <button type="button" class="home-feedback-card" onclick="openFeedbackModal()">
-      <div class="home-feedback-icon">📨</div>
-      <div class="home-feedback-text">
-        <div class="home-feedback-title">ご意見・ご要望</div>
-        <div class="home-feedback-sub">Prismaeraをもっと良くするため、声を聞かせてください</div>
-      </div>
-      <div class="home-feedback-arrow">→</div>
-    </button>
   </section>
 </main>
 
@@ -506,7 +506,7 @@
 <audio id="bgm-home" preload="auto"></audio>
 
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
-<script src="/script.js?v=20260426a9"></script>
+<script src="/script.js?v=20260426b0"></script>
 <script src="/gasshuku.js?v=20260425g32"></script>
 </body>
 </html>
