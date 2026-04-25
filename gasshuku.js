@@ -398,12 +398,12 @@
         if (typeof play === 'function') play('se-summon', 'UR');
         await new Promise(r => setTimeout(r, 1100));
 
-        // 前9体: showLadder=false (各キャラ前に skipRequested を必ずリセット)
+        // 全員UR確定なので全キャラ showLadder=true でフル演出 (本家10連は前9体軽量だが合宿版は全員派手)
         for (let i = 0; i < sequenced.length - 1; i++) {
           if (typeof clearStage === 'function') clearStage();
           resizeCanvas();
           if (typeof skipRequested !== 'undefined') skipRequested = false;
-          await summonOne(sequenced[i], { showLadder: false });
+          await summonOne(sequenced[i], { showLadder: true });
         }
 
         // 最後の1体: フル演出
