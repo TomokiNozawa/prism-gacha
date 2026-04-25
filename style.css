@@ -5309,3 +5309,30 @@ body.gasshuku-mode-fantasy .fx-win {
   font-style: italic;
 }
 /* ===== END ===== */
+
+/* ===== PWA SAFE AREA (iOS notch / Dynamic Island / ホームバー対応) ===== */
+body {
+  /* iOS PWA standalone 時、 ステータスバー領域を避ける */
+  padding-top: env(safe-area-inset-top, 0);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  padding-left: env(safe-area-inset-left, 0);
+  padding-right: env(safe-area-inset-right, 0);
+}
+/* PWA standalone モード時の追加調整 */
+@media (display-mode: standalone) {
+  body { background: #0a0a1f; }
+  /* fixed要素の上下にも safe-area を反映 */
+  .gasshuku-modal,
+  .gasshuku-result-modal,
+  .gasshuku-detail-modal,
+  .gasshuku-account-invite,
+  .gasshuku-lightbox,
+  #stage,
+  #relations,
+  #story-modal,
+  #char-detail {
+    padding-top: env(safe-area-inset-top, 0);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+}
+/* ===== END ===== */
