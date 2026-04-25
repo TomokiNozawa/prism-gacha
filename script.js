@@ -3956,6 +3956,12 @@ if (_btnHistory) _btnHistory.addEventListener("click", openHistoryModal);
 
 document.addEventListener("keydown", e => {
   if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+  // ストーリー一覧モーダル (最上位優先)
+  const _slm = document.getElementById('story-list-modal');
+  if (_slm && !_slm.hasAttribute('hidden')) {
+    if (e.key === "Escape") { e.preventDefault(); closeStoryList(); }
+    return;
+  }
   // キャラ詳細 > 図鑑 > 結果 > ステージ の優先順で Esc処理
   if ($("#char-detail").classList.contains("active")) {
     if (e.key === "Escape") {
