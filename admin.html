@@ -240,6 +240,89 @@ body {
   .users-row .col-lr, .users-row .col-dup, .users-row .col-lastlogin { display: none; }
   .users-head .col-ur::after { content: '/ログイン'; display: block; font-size: 9px; color: rgba(200,180,255,0.4); }
 }
+
+/* ───── 要望タブ ───── */
+.section-title {
+  max-width: 1000px; margin: 32px auto 12px;
+  font-size: 16px; font-weight: 600; letter-spacing: 0.05em;
+  display: flex; align-items: center; gap: 10px;
+  color: #fff;
+}
+.fb-unread-pill {
+  font-size: 11px; padding: 3px 9px; border-radius: 999px;
+  background: linear-gradient(90deg, #ff5faa, #ff8a5f);
+  color: #fff; font-weight: 700; letter-spacing: 0.04em;
+}
+.feedback-section { max-width: 1000px; margin: 0 auto; }
+.feedback-filter {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin-bottom: 12px;
+}
+.fb-fbtn {
+  padding: 6px 12px; border-radius: 8px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.78);
+  font-size: 12px; cursor: pointer; font-family: inherit;
+}
+.fb-fbtn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+.fb-fbtn.active {
+  background: linear-gradient(90deg, rgba(95,255,212,0.25), rgba(200,125,255,0.25));
+  border-color: rgba(95,255,212,0.5);
+  color: #fff; font-weight: 700;
+}
+.fb-list { display: flex; flex-direction: column; gap: 10px; }
+.fb-item {
+  background: linear-gradient(180deg, rgba(30,24,56,0.85), rgba(20,16,40,0.85));
+  border: 1px solid rgba(200,180,255,0.18);
+  border-radius: 12px;
+  padding: 14px 16px;
+  transition: border-color 0.15s ease;
+}
+.fb-item.unread {
+  border-left: 4px solid #ff5faa;
+  border-color: rgba(255,95,170,0.45);
+}
+.fb-item-head {
+  display: flex; align-items: center; gap: 10px;
+  flex-wrap: wrap; margin-bottom: 8px;
+}
+.fb-cat {
+  font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.fb-cat.bug { background: rgba(255,107,138,0.2); color: #ffb3c5; border: 1px solid rgba(255,107,138,0.4); }
+.fb-cat.request { background: rgba(255,217,77,0.18); color: #ffe69e; border: 1px solid rgba(255,217,77,0.4); }
+.fb-cat.praise { background: rgba(255,154,212,0.18); color: #ffc8e3; border: 1px solid rgba(255,154,212,0.4); }
+.fb-cat.other { background: rgba(150,200,255,0.18); color: #b6d8ff; border: 1px solid rgba(150,200,255,0.4); }
+.fb-name { font-size: 13px; color: #fff; font-weight: 600; }
+.fb-time { font-size: 11px; color: rgba(255,255,255,0.5); margin-left: auto; }
+.fb-toggle {
+  font-size: 11px; padding: 4px 10px;
+  background: rgba(95,255,212,0.18); color: #b8ffe5;
+  border: 1px solid rgba(95,255,212,0.4); border-radius: 6px;
+  cursor: pointer; font-family: inherit;
+}
+.fb-toggle.read-state { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.5); border-color: rgba(255,255,255,0.12); }
+.fb-toggle:hover { filter: brightness(1.15); }
+.fb-text {
+  font-size: 14px; color: #e6edf3; line-height: 1.6;
+  white-space: pre-wrap; word-break: break-word;
+  padding: 8px 0; border-top: 1px solid rgba(255,255,255,0.06);
+}
+.fb-meta {
+  font-size: 11px; color: rgba(255,255,255,0.45);
+  display: flex; flex-wrap: wrap; gap: 14px;
+  margin-top: 6px;
+}
+.fb-meta code { font-family: monospace; }
+.fb-empty {
+  text-align: center; padding: 30px; color: rgba(255,255,255,0.4);
+  font-size: 13px;
+}
+@media (max-width: 720px) {
+  .fb-time { margin-left: 0; width: 100%; }
+}
 </style>
 </head>
 <body>
@@ -271,6 +354,7 @@ body {
     <div class="summary-card" style="border-color:rgba(251,191,36,0.4)"><div class="summary-label">🎌 合宿ガチャ実行</div><div class="summary-value" id="sum-gasshuku-rolls">-</div></div>
     <div class="summary-card" style="border-color:rgba(251,191,36,0.4)"><div class="summary-label">🎌 合宿ガチャ召喚数</div><div class="summary-value" id="sum-gasshuku-summons">-</div></div>
     <div class="summary-card" style="border-color:rgba(251,191,36,0.4)"><div class="summary-label">🎌 合宿端末数</div><div class="summary-value" id="sum-gasshuku-devices">-</div></div>
+    <div class="summary-card" style="border-color:rgba(255,95,170,0.4)"><div class="summary-label">📨 未読要望</div><div class="summary-value" id="sum-feedback-unread">-</div></div>
   </div>
 
   <div id="notice" class="notice"></div>
@@ -285,6 +369,19 @@ body {
       <div class="col-lastlogin">最終ログイン</div>
     </div>
     <div id="users-body"></div>
+  </div>
+
+  <h2 class="section-title">📨 ご意見・ご要望 <span class="fb-unread-pill" id="fb-unread-pill" style="display:none">0 未読</span></h2>
+  <div class="feedback-section">
+    <div class="feedback-filter">
+      <button class="fb-fbtn active" data-filter="all">全て (<span id="fb-cnt-all">0</span>)</button>
+      <button class="fb-fbtn" data-filter="unread">未読 (<span id="fb-cnt-unread">0</span>)</button>
+      <button class="fb-fbtn" data-filter="bug">🐛 バグ (<span id="fb-cnt-bug">0</span>)</button>
+      <button class="fb-fbtn" data-filter="request">✨ 要望 (<span id="fb-cnt-request">0</span>)</button>
+      <button class="fb-fbtn" data-filter="praise">💖 感想 (<span id="fb-cnt-praise">0</span>)</button>
+      <button class="fb-fbtn" data-filter="other">💬 その他 (<span id="fb-cnt-other">0</span>)</button>
+    </div>
+    <div id="fb-list" class="fb-list"></div>
   </div>
 </div>
 
@@ -639,6 +736,109 @@ function escapeHtml(s) {
 }
 
 $('#refresh-btn').addEventListener('click', () => { if (isAdmin) loadAll(); });
+
+// ────────── 要望タブ ──────────
+let feedbackItems = [];
+let fbFilter = 'all';
+const FB_CAT_LABEL = { bug: '🐛 バグ', request: '✨ 要望', praise: '💖 感想', other: '💬 その他' };
+
+async function loadFeedback() {
+  try {
+    const snap = await db.ref('prism-gacha/feedback').once('value');
+    const items = [];
+    snap.forEach(child => { items.push({ id: child.key, ...(child.val() || {}) }); });
+    items.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+    feedbackItems = items;
+    renderFeedback();
+  } catch (e) {
+    console.error('[feedback] load failed:', e);
+    document.getElementById('fb-list').innerHTML = '<div class="fb-empty">読み込みエラー: ' + escapeHtml(e.message || String(e)) + '</div>';
+  }
+}
+
+function renderFeedback() {
+  const list = document.getElementById('fb-list');
+  // カウント集計
+  const cnt = { all: feedbackItems.length, unread: 0, bug: 0, request: 0, praise: 0, other: 0 };
+  feedbackItems.forEach(f => {
+    if (!f.read) cnt.unread++;
+    if (cnt[f.category] != null) cnt[f.category]++;
+  });
+  for (const k of Object.keys(cnt)) {
+    const el = document.getElementById('fb-cnt-' + k);
+    if (el) el.textContent = cnt[k];
+  }
+  // サマリー連動
+  const sumEl = document.getElementById('sum-feedback-unread');
+  if (sumEl) sumEl.textContent = cnt.unread;
+  // 未読 pill
+  const pill = document.getElementById('fb-unread-pill');
+  if (pill) {
+    if (cnt.unread > 0) { pill.style.display = ''; pill.textContent = cnt.unread + ' 未読'; }
+    else pill.style.display = 'none';
+  }
+  // フィルタ
+  let filtered = feedbackItems;
+  if (fbFilter === 'unread') filtered = feedbackItems.filter(f => !f.read);
+  else if (fbFilter !== 'all') filtered = feedbackItems.filter(f => f.category === fbFilter);
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="fb-empty">該当する要望はありません</div>';
+    return;
+  }
+  list.innerHTML = filtered.map(f => {
+    const date = f.createdAt ? new Date(f.createdAt).toLocaleString('ja-JP', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '-';
+    const catLbl = FB_CAT_LABEL[f.category] || f.category || '?';
+    const name = f.name ? escapeHtml(f.name) : '<span style="color:rgba(255,255,255,0.4)">(名前なし)</span>';
+    const isDev = f.origin && f.origin.indexOf('dev.') !== -1;
+    const originLbl = isDev ? '<span style="color:#fbbf24">[dev]</span>' : '';
+    const uidShort = (f.uid || '').slice(0, 8) + '…';
+    return `
+      <div class="fb-item ${f.read ? 'read' : 'unread'}" data-id="${f.id}">
+        <div class="fb-item-head">
+          <span class="fb-cat ${f.category}">${catLbl}</span>
+          <span class="fb-name">${name}</span>
+          <span class="fb-time">${date} ${originLbl}</span>
+          <button class="fb-toggle ${f.read ? 'read-state' : ''}" onclick="toggleFeedbackRead('${f.id}', ${f.read ? 'true' : 'false'})">${f.read ? '未読に戻す' : '既読にする'}</button>
+        </div>
+        <div class="fb-text">${escapeHtml(f.text || '')}</div>
+        <div class="fb-meta">
+          <span>uid: <code>${escapeHtml(uidShort)}</code></span>
+          ${f.origin ? '<span>origin: <code>' + escapeHtml(f.origin) + '</code></span>' : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function toggleFeedbackRead(id, currentRead) {
+  try {
+    await db.ref('prism-gacha/feedback/' + id + '/read').set(!currentRead);
+    // ローカル更新+再描画 (再fetchより速い)
+    const item = feedbackItems.find(f => f.id === id);
+    if (item) item.read = !currentRead;
+    renderFeedback();
+  } catch (e) {
+    console.error('[feedback] toggle read failed:', e);
+    alert('既読切替失敗: ' + (e.message || e));
+  }
+}
+
+document.querySelectorAll('.fb-fbtn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.fb-fbtn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    fbFilter = btn.dataset.filter;
+    renderFeedback();
+  });
+});
+
+// loadAll に統合 (refresh時に一緒にfetch)
+const _origLoadAll = loadAll;
+loadAll = async function() {
+  await _origLoadAll();
+  await loadFeedback();
+};
 
 </script>
 </body>
