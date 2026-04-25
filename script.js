@@ -2867,6 +2867,7 @@ $("#btn-relations").addEventListener("click", openRelations);
 // ───── ストーリービューワー (紙芝居風) ─────
 const STORY_FILES = {
   s1c1: { title: '序: 七座の使命', meta: 'Season 1 — 第1章', file: 'STORY/s1c1.md' },
+  s1c2: { title: '南方海域の異変', meta: 'Season 1 — 第2章', file: 'STORY/s1c2.md' },
 };
 
 function escapeHtml(s) {
