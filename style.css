@@ -4878,3 +4878,12 @@ body.gasshuku-modal-open {
 }
 .gasshuku-lightbox-close:hover { color: #fcd34d; }
 /* ===== END ===== */
+
+/* ===== GASSHUKU OVERLAY HIDE (合宿モード中だけ既存テロップ非表示) =====
+ * キャラ画像内に既に名前/派閥/セリフUIが描画済みのため、被って見づらい。 */
+body.gasshuku-running .hcard-name,
+body.gasshuku-running .fx-charname,
+body.gasshuku-running .fx-win {
+  display: none !important;
+}
+/* ===== END ===== */

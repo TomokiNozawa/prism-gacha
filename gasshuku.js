@@ -357,6 +357,7 @@
     if (typeof window.busy !== 'undefined' && window.busy) return;
     gasshukuBusy = true;
     setGachaBtnsDisabled(true);
+    document.body.classList.add('gasshuku-running');
 
     const cv = document.getElementById('canvas') || document.querySelector('canvas');
     const resizeCanvas = () => {
@@ -423,6 +424,7 @@
       console.error('[gasshuku] roll error:', e);
     } finally {
       if (typeof closeStage === 'function') closeStage();
+      document.body.classList.remove('gasshuku-running');
       gasshukuBusy = false;
       setGachaBtnsDisabled(false);
       // 結果モーダル表示 (10連時のみ。単発はキャラ自体が画面いっぱいに見えるため不要)
