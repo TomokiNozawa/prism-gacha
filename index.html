@@ -24,7 +24,7 @@
 <link rel="icon" href="/images/icons/icon-16.png" type="image/png" sizes="16x16">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
 <link rel="manifest" href="/manifest.json?v=20260425g25">
-<link rel="stylesheet" href="/style.css?v=20260426b5">
+<link rel="stylesheet" href="/style.css?v=20260426c0">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -33,7 +33,7 @@
 <div id="bg-layer"></div>
 
 <header class="topbar">
-  <div class="title">✦ Prismaera <span class="title-kana">-プリズマエラ-</span> <span class="ver" id="app-version">v1.2.0</span></div>
+  <div class="title">✦ Prismaera <span class="title-kana">-プリズマエラ-</span> <span class="ver" id="app-version">v1.2.1</span></div>
   <div class="stats">
     <span class="stat" title="累計ガチャ回数">累計ガチャ回数 <b id="stat-total">0</b></span>
     <button id="btn-gallery" class="gallery-btn" title="図鑑 (Gキー)">📖 図鑑</button>
@@ -375,8 +375,13 @@
 <div id="account-prompt" class="account-prompt">
   <div class="account-prompt-inner">
     <div class="account-prompt-icon">✨</div>
-    <h2 class="account-prompt-title">データ保存ができるようになりました</h2>
-    <p class="account-prompt-text">アカウントを作成しますか？</p>
+    <h2 class="account-prompt-title">アカウントを作成しませんか？</h2>
+    <p class="account-prompt-text">作成すると以下の機能が使えます</p>
+    <ul class="account-prompt-benefits">
+      <li>📱 別の端末からも同じデータで遊べます</li>
+      <li>💾 ガチャ進捗・図鑑・凸数がクラウドに保存されます</li>
+      <li>📨 ご意見・ご要望をフォームから送れます</li>
+    </ul>
     <p class="account-prompt-sub">※現在のデータはそのまま引き継がれます</p>
     <div class="account-prompt-actions">
       <button class="account-prompt-btn secondary" onclick="dismissAccountPrompt()">後で</button>
@@ -510,7 +515,7 @@
 <audio id="bgm-home" preload="auto"></audio>
 
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
-<script src="/script.js?v=20260426b5"></script>
+<script src="/script.js?v=20260426c0"></script>
 <script src="/gasshuku.js?v=20260425g32"></script>
 </body>
 </html>

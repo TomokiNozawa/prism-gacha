@@ -3281,7 +3281,18 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 }
 .account-prompt-text {
   font-size: 15px; color: rgba(255, 255, 255, 0.9);
-  margin: 0 0 6px;
+  margin: 0 0 12px;
+}
+.account-prompt-benefits {
+  list-style: none; padding: 0;
+  margin: 0 0 14px;
+  text-align: left;
+  display: inline-block;
+}
+.account-prompt-benefits li {
+  font-size: 13px; color: rgba(255, 255, 255, 0.85);
+  padding: 6px 0;
+  line-height: 1.55;
 }
 .account-prompt-sub {
   font-size: 12px; color: rgba(255, 255, 255, 0.55);
