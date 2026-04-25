@@ -3579,3 +3579,398 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   will-change: auto;
 }
 /* hcardはhoverのみで動くのでwill-changeなしでOK */
+
+/* ===== GASSHUKU START (2026-04-25 合宿用・即削除可) ===== */
+.gasshuku-launch {
+  background: linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #ec4899 100%) !important;
+  color: #fff !important;
+  font-weight: 700;
+  border: 1px solid #fcd34d !important;
+  box-shadow: 0 0 16px rgba(251, 146, 60, 0.5);
+}
+.gasshuku-launch:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 0 24px rgba(251, 146, 60, 0.7);
+}
+
+body.gasshuku-modal-open {
+  overflow: hidden;
+}
+
+.gasshuku-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+}
+.gasshuku-modal.active {
+  display: flex;
+}
+.gasshuku-backdrop {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(15, 5, 30, 0.9) 0%, rgba(0, 0, 0, 0.97) 80%);
+  backdrop-filter: blur(8px);
+}
+.gasshuku-stage {
+  position: relative;
+  width: min(1200px, 96vw);
+  max-height: 92vh;
+  overflow-y: auto;
+  background: linear-gradient(180deg, #14012c 0%, #1a0438 100%);
+  border: 1px solid rgba(251, 146, 60, 0.4);
+  border-radius: 18px;
+  padding: 28px 24px 24px;
+  box-shadow: 0 0 60px rgba(251, 146, 60, 0.25), 0 0 120px rgba(236, 72, 153, 0.15);
+}
+.gasshuku-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: transparent;
+  color: #fff;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  line-height: 1;
+  z-index: 2;
+}
+.gasshuku-close:hover { color: #fcd34d; }
+
+.gasshuku-title {
+  text-align: center;
+  font-size: 28px;
+  font-weight: 800;
+  background: linear-gradient(90deg, #fbbf24, #ec4899, #a78bfa, #38bdf8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 4px;
+}
+.gasshuku-subtitle {
+  text-align: center;
+  color: #fcd34d;
+  font-size: 13px;
+  margin-bottom: 22px;
+  letter-spacing: 0.06em;
+}
+
+/* === Cutscene === */
+.gasshuku-cutscene {
+  position: relative;
+  min-height: 480px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.gasshuku-skip {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  z-index: 5;
+}
+.gasshuku-skip:hover { background: rgba(255, 255, 255, 0.2); }
+
+.gasshuku-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  animation: gasshukuPop 1.0s ease;
+  position: relative;
+}
+.gasshuku-slot.exit { animation: gasshukuFade 0.2s forwards; }
+@keyframes gasshukuPop {
+  0%   { opacity: 0; transform: scale(0.6) translateY(40px); filter: blur(8px); }
+  60%  { opacity: 1; transform: scale(1.06) translateY(-8px); filter: blur(0); }
+  100% { transform: scale(1.0) translateY(0); }
+}
+@keyframes gasshukuFade {
+  to { opacity: 0; transform: scale(0.95); }
+}
+.gasshuku-slot-glow {
+  position: absolute;
+  width: 480px;
+  height: 480px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  animation: gasshukuPulse 1.4s ease infinite;
+  filter: blur(2px);
+}
+@keyframes gasshukuPulse {
+  0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+  50%      { opacity: 1.0; transform: translate(-50%, -50%) scale(1.1); }
+}
+.gasshuku-slot-img {
+  position: relative;
+  z-index: 1;
+  width: 360px;
+  max-height: 360px;
+  object-fit: contain;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 40px rgba(251, 191, 36, 0.4);
+  background: rgba(0, 0, 0, 0.3);
+}
+.gasshuku-slot-info {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  color: #fff;
+}
+.gasshuku-slot-tier {
+  display: inline-block;
+  font-weight: 800;
+  background: linear-gradient(90deg, #fbbf24, #ec4899);
+  color: #fff;
+  padding: 2px 12px;
+  border-radius: 999px;
+  font-size: 14px;
+  margin-bottom: 8px;
+  letter-spacing: 0.1em;
+}
+.gasshuku-slot-name {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+}
+.gasshuku-slot-real {
+  font-size: 13px;
+  color: #fcd34d;
+  margin-bottom: 8px;
+}
+.gasshuku-slot-voice {
+  font-size: 14px;
+  color: #c0c4d0;
+  font-style: italic;
+}
+
+/* === Grid === */
+.gasshuku-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+  padding: 8px 0;
+}
+.gasshuku-card {
+  position: relative;
+  background: rgba(20, 5, 40, 0.6);
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  border-radius: 12px;
+  padding: 12px 10px;
+  cursor: pointer;
+  transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s;
+  overflow: hidden;
+  text-align: center;
+}
+.gasshuku-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 24px rgba(251, 191, 36, 0.3);
+  border-color: #fcd34d;
+}
+.gasshuku-card-glow {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.gasshuku-card-img {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  background: rgba(0, 0, 0, 0.3);
+}
+.gasshuku-card-tier {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  background: linear-gradient(90deg, #fbbf24, #ec4899);
+  color: #fff;
+  font-weight: 800;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}
+.gasshuku-card-name {
+  position: relative;
+  z-index: 1;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 2px;
+  line-height: 1.3;
+}
+.gasshuku-card-real {
+  position: relative;
+  z-index: 1;
+  font-size: 11px;
+  color: #fcd34d;
+}
+
+.gasshuku-footer {
+  margin-top: 18px;
+  text-align: center;
+}
+.gasshuku-replay {
+  background: linear-gradient(135deg, #f59e0b, #ec4899);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 28px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.4);
+}
+.gasshuku-replay:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.gasshuku-replay:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+/* === Detail modal === */
+.gasshuku-detail {
+  position: fixed;
+  inset: 0;
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(6px);
+}
+.gasshuku-detail[hidden] { display: none; }
+.gasshuku-detail-card {
+  position: relative;
+  width: min(720px, 92vw);
+  max-height: 92vh;
+  overflow-y: auto;
+  background: linear-gradient(180deg, #14012c, #2a0a4a);
+  border: 1px solid rgba(251, 191, 36, 0.5);
+  border-radius: 16px;
+  padding: 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+@media (max-width: 600px) {
+  .gasshuku-detail-card { grid-template-columns: 1fr; }
+}
+.gasshuku-detail-close {
+  position: absolute;
+  top: 8px;
+  right: 14px;
+  background: transparent;
+  color: #fff;
+  border: none;
+  font-size: 26px;
+  cursor: pointer;
+  z-index: 2;
+}
+.gasshuku-detail-close:hover { color: #fcd34d; }
+.gasshuku-detail-img-wrap {
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+  overflow: hidden;
+}
+.gasshuku-detail-img {
+  width: 100%;
+  max-height: 420px;
+  object-fit: contain;
+}
+.gasshuku-detail-meta {
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.gasshuku-tier {
+  display: inline-block;
+  align-self: flex-start;
+  background: linear-gradient(90deg, #fbbf24, #ec4899);
+  padding: 3px 14px;
+  border-radius: 999px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  font-size: 13px;
+}
+.gasshuku-detail-name {
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.3;
+}
+.gasshuku-detail-real {
+  font-size: 13px;
+  color: #fcd34d;
+}
+.gasshuku-detail-faction {
+  font-size: 13px;
+  font-weight: 600;
+}
+.gasshuku-detail-skill {
+  font-size: 16px;
+  color: #a78bfa;
+  font-weight: 600;
+}
+.gasshuku-detail-voice {
+  font-size: 15px;
+  color: #c0c4d0;
+  font-style: italic;
+  border-left: 3px solid #fcd34d;
+  padding-left: 10px;
+  margin-top: 4px;
+}
+.gasshuku-toggle {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+}
+.gasshuku-toggle-btn {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.gasshuku-toggle-btn:hover { background: rgba(255, 255, 255, 0.15); }
+.gasshuku-toggle-btn.active {
+  background: linear-gradient(90deg, #fbbf24, #ec4899);
+  border-color: #fcd34d;
+  font-weight: 700;
+}
+
+@media (max-width: 600px) {
+  .gasshuku-stage { padding: 18px 12px; }
+  .gasshuku-title { font-size: 20px; }
+  .gasshuku-slot-img { width: 240px; max-height: 240px; }
+  .gasshuku-slot-glow { width: 320px; height: 320px; }
+  .gasshuku-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+}
+/* ===== GASSHUKU END ===== */
