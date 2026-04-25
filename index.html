@@ -5,6 +5,10 @@
 <!-- 旧URL (github.io) アクセス時は新URL (Cloudflare Pages) へ即リダイレクト。Cloudflare Pages では no-op -->
 <script>if (/github\.io$/i.test(location.host)) { location.replace('https://prismaera.pages.dev' + location.pathname.replace(/^\/prism-gacha\/?/, '/') + location.search + location.hash); }</script>
 <noscript><meta http-equiv="refresh" content="0;url=https://prismaera.pages.dev/"></noscript>
+<!-- PWA/ブラウザでHTMLキャッシュを抑制し、起動時に必ず最新を取得する -->
+<meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="pragma" content="no-cache">
+<meta http-equiv="expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Prismaera</title>
 <meta name="description" content="Prismaera — 虹霊界の物語とガチャとタワーディフェンス">
@@ -18,7 +22,7 @@
 <link rel="icon" href="images/icons/icon-16.png" type="image/png" sizes="16x16">
 <link rel="apple-touch-icon" href="images/icons/icon-180.png">
 <link rel="manifest" href="manifest.json">
-<link rel="stylesheet" href="style.css?v=20260425g17">
+<link rel="stylesheet" href="style.css?v=20260425g19">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>

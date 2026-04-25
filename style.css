@@ -2479,8 +2479,26 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 
 /* responsive */
 @media (max-width: 720px) {
-  .char-detail-inner { grid-template-columns: 1fr; padding: 16px; gap: 16px; overflow-y: auto; }
-  .char-detail-img-wrap img { max-height: 45vh; }
+  .char-detail-inner {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;  /* 画像 / 情報 を縦並び・高さauto */
+    padding: 16px; gap: 16px;
+    overflow-y: auto;
+    height: auto;                    /* min(92vh, 900px) を解除して内容に合わせる */
+    max-height: 92vh;
+  }
+  .char-detail-img-wrap {
+    min-height: 240px;               /* 画像領域を必ず確保 */
+    align-items: center;
+  }
+  .char-detail-img-wrap img {
+    width: 100%;                     /* 横幅100% を明示 */
+    height: auto;                    /* アスペクト保持 */
+    max-height: 50vh;
+    object-fit: contain;
+    display: block;
+  }
+  .char-detail-info { height: auto; min-height: 0; }
   .char-detail-name { font-size: 22px; }
   .char-detail-nav { width: 42px; height: 42px; font-size: 26px; }
   .char-detail-nav.prev { left: 6px; }
