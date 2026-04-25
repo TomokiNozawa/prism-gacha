@@ -3974,3 +3974,324 @@ body.gasshuku-modal-open {
   .gasshuku-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
 }
 /* ===== GASSHUKU END ===== */
+
+/* ===== GASSHUKU UR EFFECTS (v2 派手版) ===== */
+
+/* Pre-roll fanfare */
+.gasshuku-fanfare {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  z-index: 3;
+  animation: gasshukuFanfareIn 0.6s ease;
+}
+.gasshuku-fanfare.exit { animation: gasshukuFanfareOut 0.4s forwards; }
+@keyframes gasshukuFanfareIn {
+  from { opacity: 0; transform: scale(0.8); }
+  to   { opacity: 1; transform: scale(1.0); }
+}
+@keyframes gasshukuFanfareOut {
+  to { opacity: 0; transform: scale(1.3); }
+}
+.gasshuku-fanfare-rainbow {
+  position: absolute;
+  inset: -10%;
+  background: conic-gradient(from 0deg,
+    #ef4444, #f59e0b, #fbbf24, #84cc16, #22d3ee, #6366f1, #a855f7, #ec4899, #ef4444);
+  filter: blur(60px);
+  opacity: 0.55;
+  animation: gasshukuRainbowSpin 4s linear infinite;
+  z-index: 0;
+}
+@keyframes gasshukuRainbowSpin {
+  to { transform: rotate(360deg); }
+}
+.gasshuku-fanfare-text {
+  position: relative;
+  z-index: 1;
+  font-size: 56px;
+  font-weight: 900;
+  background: linear-gradient(90deg, #fff, #fbbf24, #ec4899, #fff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: 0.18em;
+  text-shadow: 0 0 30px rgba(251, 191, 36, 0.6);
+  animation: gasshukuTextPulse 1.0s ease-out;
+}
+.gasshuku-fanfare-sub {
+  position: relative;
+  z-index: 1;
+  font-size: 16px;
+  color: #fff;
+  letter-spacing: 0.2em;
+  opacity: 0.9;
+}
+@keyframes gasshukuTextPulse {
+  0%   { transform: scale(0.5); opacity: 0; filter: blur(10px); }
+  60%  { transform: scale(1.1); opacity: 1; filter: blur(0); }
+  100% { transform: scale(1.0); }
+}
+
+/* Counter */
+.gasshuku-counter {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 5;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  color: #fcd34d;
+  font-weight: 800;
+  padding: 4px 12px;
+  font-size: 14px;
+  letter-spacing: 0.1em;
+}
+
+/* Slot enhanced UR effect */
+.gasshuku-slot {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: none; /* override */
+}
+.gasshuku-slot.exit { animation: gasshukuSlotExit 0.35s forwards; }
+@keyframes gasshukuSlotExit {
+  to { opacity: 0; transform: scale(1.15); filter: blur(8px); }
+}
+.gasshuku-slot-inner {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  animation: gasshukuSlotIn 0.9s cubic-bezier(0.2, 1, 0.3, 1);
+}
+@keyframes gasshukuSlotIn {
+  0%   { opacity: 0; transform: scale(0.4) translateY(60px); filter: blur(12px); }
+  55%  { opacity: 1; transform: scale(1.08) translateY(-10px); filter: blur(0); }
+  100% { transform: scale(1.0) translateY(0); }
+}
+
+/* Rainbow background overlay */
+.gasshuku-rainbow-bg {
+  position: absolute;
+  inset: -20%;
+  background: conic-gradient(from 0deg,
+    rgba(239, 68, 68, 0.5), rgba(245, 158, 11, 0.5), rgba(132, 204, 22, 0.5),
+    rgba(34, 211, 238, 0.5), rgba(99, 102, 241, 0.5), rgba(236, 72, 153, 0.5),
+    rgba(239, 68, 68, 0.5));
+  filter: blur(80px);
+  opacity: 0;
+  z-index: 0;
+  animation: gasshukuBgIn 0.6s ease forwards, gasshukuRainbowSpin 6s linear infinite 0.6s;
+}
+@keyframes gasshukuBgIn {
+  to { opacity: 0.7; }
+}
+
+/* Flash burst */
+.gasshuku-flash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.95) 0%, transparent 60%);
+  z-index: 2;
+  pointer-events: none;
+  animation: gasshukuFlash 0.8s ease-out;
+}
+@keyframes gasshukuFlash {
+  0%   { opacity: 0; transform: scale(0.3); }
+  20%  { opacity: 1; transform: scale(1.0); }
+  100% { opacity: 0; transform: scale(1.4); }
+}
+
+/* Light rays */
+.gasshuku-rays {
+  position: absolute;
+  width: 800px;
+  height: 800px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background:
+    repeating-conic-gradient(from 0deg,
+      rgba(255, 255, 255, 0.15) 0deg 8deg,
+      transparent 8deg 24deg);
+  z-index: 1;
+  opacity: 0;
+  animation: gasshukuRaysIn 1.0s ease-out forwards, gasshukuRaysSpin 12s linear infinite 0.6s;
+  pointer-events: none;
+}
+@keyframes gasshukuRaysIn {
+  0% { opacity: 0; }
+  40% { opacity: 0.85; }
+  100% { opacity: 0.4; }
+}
+@keyframes gasshukuRaysSpin {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Particles */
+.gasshuku-particles {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+.gasshuku-particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  background: var(--c, #fcd34d);
+  box-shadow: 0 0 12px var(--c, #fcd34d), 0 0 24px var(--c, #fcd34d);
+  animation: gasshukuParticleBurst 1.4s ease-out forwards;
+  animation-delay: calc(var(--i) * 0.04s + 0.4s);
+  --angle: calc(var(--i) * 20deg);
+  --dist: 280px;
+}
+@keyframes gasshukuParticleBurst {
+  0%   { opacity: 0; transform: translate(-50%, -50%) rotate(var(--angle)) translateY(0); }
+  20%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(-1 * var(--dist))); }
+}
+
+/* Tier banner */
+.gasshuku-tier-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: linear-gradient(90deg,
+    transparent, rgba(251, 191, 36, 0.3),
+    rgba(236, 72, 153, 0.4), rgba(251, 191, 36, 0.3), transparent);
+  padding: 6px 36px;
+  border-top: 1px solid rgba(251, 191, 36, 0.6);
+  border-bottom: 1px solid rgba(251, 191, 36, 0.6);
+  animation: gasshukuBannerIn 0.6s ease;
+}
+@keyframes gasshukuBannerIn {
+  from { opacity: 0; transform: translateY(-20px) scaleX(0.6); }
+  to   { opacity: 1; transform: translateY(0) scaleX(1); }
+}
+.gasshuku-banner-spark {
+  font-size: 22px;
+  color: #fcd34d;
+  text-shadow: 0 0 10px #fcd34d;
+  animation: gasshukuSparkSpin 2s linear infinite;
+  display: inline-block;
+}
+@keyframes gasshukuSparkSpin {
+  to { transform: rotate(360deg); }
+}
+.gasshuku-banner-tier {
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: 0.3em;
+  background: linear-gradient(90deg, #fff, #fbbf24, #ec4899, #fff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 30px rgba(251, 191, 36, 0.7);
+}
+
+/* Slot image enhanced */
+.gasshuku-slot-glow {
+  position: absolute;
+  width: 540px;
+  height: 540px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  animation: gasshukuPulse 1.6s ease infinite;
+  filter: blur(4px);
+  pointer-events: none;
+}
+.gasshuku-slot-img {
+  position: relative;
+  z-index: 2;
+  width: 380px;
+  max-height: 380px;
+  object-fit: contain;
+  border-radius: 18px;
+  box-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.7),
+    0 0 60px rgba(251, 191, 36, 0.55),
+    0 0 120px rgba(236, 72, 153, 0.35);
+  background: rgba(0, 0, 0, 0.35);
+  border: 2px solid rgba(251, 191, 36, 0.6);
+  animation: gasshukuImgFloat 3.2s ease-in-out infinite;
+}
+@keyframes gasshukuImgFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+
+/* Slot info enhanced */
+.gasshuku-slot-info {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  color: #fff;
+  animation: gasshukuInfoSlide 0.7s 0.3s both ease-out;
+}
+@keyframes gasshukuInfoSlide {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.gasshuku-slot-name {
+  font-size: 30px;
+  font-weight: 900;
+  margin-bottom: 4px;
+  text-shadow:
+    0 2px 12px rgba(0, 0, 0, 0.9),
+    0 0 24px rgba(251, 191, 36, 0.6);
+  background: linear-gradient(90deg, #fff, #fcd34d, #fff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: 0.04em;
+}
+.gasshuku-slot-real {
+  font-size: 14px;
+  color: #fcd34d;
+  margin-bottom: 8px;
+  letter-spacing: 0.06em;
+}
+.gasshuku-slot-skill {
+  font-size: 18px;
+  font-weight: 700;
+  color: #a78bfa;
+  margin-bottom: 6px;
+  text-shadow: 0 0 14px rgba(167, 139, 250, 0.6);
+}
+.gasshuku-slot-voice {
+  font-size: 16px;
+  color: #e2e8f0;
+  font-style: italic;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
+}
+
+/* Mobile UR effect tweaks */
+@media (max-width: 600px) {
+  .gasshuku-fanfare-text { font-size: 34px; }
+  .gasshuku-banner-tier { font-size: 24px; letter-spacing: 0.2em; }
+  .gasshuku-tier-banner { padding: 4px 22px; }
+  .gasshuku-slot-glow { width: 360px; height: 360px; }
+  .gasshuku-slot-img { width: 260px; max-height: 260px; }
+  .gasshuku-slot-name { font-size: 22px; }
+  .gasshuku-slot-skill { font-size: 14px; }
+  .gasshuku-slot-voice { font-size: 13px; }
+  .gasshuku-rays { width: 600px; height: 600px; }
+}
+/* ===== GASSHUKU UR EFFECTS END ===== */

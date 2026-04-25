@@ -241,37 +241,71 @@
     grid.style.display = 'none';
     document.getElementById('gasshuku-replay').disabled = true;
 
-    // simple cutscene: each char fade-in 1.4s, 12 = ~17s; user can skip
+    // skip control + counter
     const skipBtn = document.createElement('button');
     skipBtn.textContent = '⏩ スキップ';
     skipBtn.className = 'gasshuku-skip';
     cutscene.appendChild(skipBtn);
+    const counter = document.createElement('div');
+    counter.className = 'gasshuku-counter';
+    cutscene.appendChild(counter);
     let skipped = false;
     skipBtn.addEventListener('click', () => { skipped = true; });
+
+    // Pre-roll fanfare
+    const fanfare = document.createElement('div');
+    fanfare.className = 'gasshuku-fanfare';
+    fanfare.innerHTML = `
+      <div class="gasshuku-fanfare-rainbow"></div>
+      <div class="gasshuku-fanfare-text">12連 UR確定</div>
+      <div class="gasshuku-fanfare-sub">DIK合宿2026 限定召喚</div>
+    `;
+    cutscene.appendChild(fanfare);
+    await new Promise(r => setTimeout(r, 1400));
+    fanfare.classList.add('exit');
+    await new Promise(r => setTimeout(r, 400));
+    fanfare.remove();
 
     for (let i = 0; i < result.length; i++) {
       if (skipped) break;
       const c = result[i];
+      counter.textContent = `${i + 1} / ${result.length}`;
       const slot = document.createElement('div');
       slot.className = 'gasshuku-slot';
       slot.innerHTML = `
-        <div class="gasshuku-slot-glow" style="background: radial-gradient(circle, ${FACTION_COLOR[c.faction]}88 0%, transparent 70%)"></div>
-        <img class="gasshuku-slot-img" src="${imgPath(c, 'fantasy')}" onerror="this.onerror=null;this.src='${imgPath(c, 'real')}'" alt="${c.name}">
-        <div class="gasshuku-slot-info">
-          <div class="gasshuku-slot-tier">UR</div>
-          <div class="gasshuku-slot-name">${c.name}</div>
-          <div class="gasshuku-slot-real">${c.real}</div>
-          <div class="gasshuku-slot-voice">「${c.voice}」</div>
+        <div class="gasshuku-rainbow-bg"></div>
+        <div class="gasshuku-flash"></div>
+        <div class="gasshuku-rays"></div>
+        <div class="gasshuku-particles">
+          ${Array.from({length: 18}, (_, k) =>
+            `<span class="gasshuku-particle" style="--i:${k};--c:${FACTION_COLOR[c.faction]}"></span>`
+          ).join('')}
+        </div>
+        <div class="gasshuku-slot-inner">
+          <div class="gasshuku-tier-banner">
+            <span class="gasshuku-banner-spark">✦</span>
+            <span class="gasshuku-banner-tier">UR</span>
+            <span class="gasshuku-banner-spark">✦</span>
+          </div>
+          <div class="gasshuku-slot-glow" style="background: radial-gradient(circle, ${FACTION_COLOR[c.faction]}cc 0%, transparent 70%)"></div>
+          <img class="gasshuku-slot-img" src="${imgPath(c, 'fantasy')}" onerror="this.onerror=null;this.src='${imgPath(c, 'real')}'" alt="${c.name}">
+          <div class="gasshuku-slot-info">
+            <div class="gasshuku-slot-name">${c.name}</div>
+            <div class="gasshuku-slot-real">${c.real} — ${c.role}</div>
+            <div class="gasshuku-slot-skill">🌟 ${c.skill}</div>
+            <div class="gasshuku-slot-voice">「${c.voice}」</div>
+          </div>
         </div>
       `;
       cutscene.appendChild(slot);
-      // wait 1.2s
-      await new Promise(r => setTimeout(r, 1200));
+      // wait 2.6s
+      await new Promise(r => setTimeout(r, 2600));
       slot.classList.add('exit');
-      await new Promise(r => setTimeout(r, 200));
+      await new Promise(r => setTimeout(r, 350));
       slot.remove();
     }
     skipBtn.remove();
+    counter.remove();
 
     cutscene.classList.add('done');
     cutscene.style.display = 'none';
