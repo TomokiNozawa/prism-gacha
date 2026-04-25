@@ -4034,7 +4034,7 @@ document.addEventListener("keydown", e => {
   // 旧URL移行モーダル (legacy: pages.dev では発火しないが念のため)
   const _mm = document.getElementById('migration-modal');
   if (_mm && _mm.classList.contains('active')) {
-    if (e.key === "Escape") { e.preventDefault(); _mm.classList.remove('active'); }
+    if (e.key === "Escape") { e.preventDefault(); closeMigrationNotice(); }
     return;
   }
   // ストーリー一覧モーダル
@@ -4523,6 +4523,37 @@ async function checkPrismAdmin() {
     isPrismAdmin = false;
   }
   updateAccountButton();
+}
+
+// ────────────── Migration Notice (旧URL→新URL案内) ──────────────
+// 通常 index.html 冒頭の redirect script が github.io アクセスを pages.dev へ自動遷移するため
+// ここに到達するのはJS無効環境やredirectが何らかの理由で失敗した場合のみ
+function maybeShowMigrationNotice() {
+  if (!/github\.io$/i.test(location.host)) return;
+  const modal = document.getElementById('migration-modal');
+  if (!modal) return;
+  const body = document.getElementById('migration-body');
+  if (body) {
+    body.innerHTML =
+      '<p>Prismaera は新URL <b>prismaera.pages.dev</b> へ完全移行しました。</p>' +
+      '<p>このURLは <b>2026-05-10</b> 以降、更新が止まります。引き続きお楽しみいただくには新URLへの移行をお願いします。</p>' +
+      '<p>アカウント機能(ニックネーム+合言葉)を使えば、新URLでも同じ進捗で遊べます。</p>';
+  }
+  const actions = document.getElementById('migration-actions');
+  if (actions) {
+    actions.innerHTML =
+      '<button class="migration-btn secondary" onclick="closeMigrationNotice()">あとで</button>' +
+      '<button class="migration-btn primary" onclick="location.replace(\'https://prismaera.pages.dev/\')">新URLへ移動 →</button>';
+  }
+  modal.classList.add('active');
+  document.body.classList.add('modal-open');
+}
+
+function closeMigrationNotice() {
+  const modal = document.getElementById('migration-modal');
+  if (!modal) return;
+  modal.classList.remove('active');
+  document.body.classList.remove('modal-open');
 }
 
 // ────────────── Account Prompt (既存ゲスト進捗ありユーザーへの案内) ──────────────
