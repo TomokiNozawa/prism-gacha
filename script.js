@@ -4229,6 +4229,12 @@ document.addEventListener("keydown", e => {
     if (e.key === "Escape") { e.preventDefault(); closeMigrationNotice(); }
     return;
   }
+  // 要望フォーム
+  const _fbm = document.getElementById('feedback-modal');
+  if (_fbm && _fbm.classList.contains('active')) {
+    if (e.key === "Escape") { e.preventDefault(); closeFeedbackModal(); }
+    return;
+  }
   // ストーリー一覧モーダル
   const _slm = document.getElementById('story-list-modal');
   if (_slm && !_slm.hasAttribute('hidden')) {
@@ -4979,6 +4985,9 @@ function openSettingsModal() {
             <button class="settings-fontsize-btn" data-size="large">大</button>
           </div>
         </div>
+        <div class="settings-section">
+          <button type="button" class="settings-feedback-link" onclick="closeSettingsModal();openFeedbackModal()">📨 ご意見・ご要望を送る</button>
+        </div>
         <div class="settings-note">設定はこの端末に保存されます (アカウント連携対象外)</div>
       </div>
     `;
@@ -5030,6 +5039,66 @@ function closeSettingsModal() {
 }
 // 起動時に設定適用
 applySettings(loadSettings());
+
+// ====== ご意見・ご要望モーダル ======
+function openFeedbackModal() {
+  const m = document.getElementById('feedback-modal');
+  if (!m) return;
+  const loggedIn = !!authUser;
+  m.querySelector('#feedback-login-required').style.display = loggedIn ? 'none' : '';
+  m.querySelector('#feedback-form-body').style.display = loggedIn ? '' : 'none';
+  if (loggedIn) {
+    m.querySelector('#feedback-text').value = '';
+    const cnt = m.querySelector('#feedback-text-count'); if (cnt) cnt.textContent = '0';
+    m.querySelectorAll('input[name="fb-cat"]').forEach(r => r.checked = (r.value === 'request'));
+  }
+  m.classList.add('active');
+  document.body.classList.add('modal-open');
+  if (loggedIn) setTimeout(() => { const ta = m.querySelector('#feedback-text'); if (ta) ta.focus(); }, 50);
+}
+function closeFeedbackModal() {
+  const m = document.getElementById('feedback-modal');
+  if (!m) return;
+  m.classList.remove('active');
+  document.body.classList.remove('modal-open');
+}
+async function submitFeedback() {
+  if (!authUser) { showToast('ログインが必要です'); return; }
+  const m = document.getElementById('feedback-modal');
+  if (!m) return;
+  const cat = (m.querySelector('input[name="fb-cat"]:checked') || {}).value || 'other';
+  const text = (m.querySelector('#feedback-text').value || '').trim();
+  if (!text) { showToast('内容を入力してください'); return; }
+  if (text.length > 500) { showToast('500字以内で入力してください'); return; }
+  const submitBtn = m.querySelector('#feedback-submit');
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = '送信中…'; }
+  try {
+    if (!fbDb) throw new Error('Firebase未接続');
+    await fbDb.ref('prism-gacha/feedback').push({
+      category: cat,
+      text: text,
+      uid: authUser.uid,
+      name: authUser.displayName || null,
+      createdAt: Date.now(),
+      read: false,
+      origin: location.origin + location.pathname,
+    });
+    showToast('✓ 送信しました。ありがとうございます!');
+    closeFeedbackModal();
+  } catch (e) {
+    console.error('[feedback] submit failed:', e);
+    showToast('送信失敗: ' + (e.message || e));
+  } finally {
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = '✉ 送信する'; }
+  }
+}
+// 文字数カウンタ (delegated)
+document.addEventListener('input', e => {
+  if (e.target && e.target.id === 'feedback-text') {
+    const el = document.getElementById('feedback-text-count');
+    if (el) el.textContent = String(e.target.value.length);
+  }
+});
 
 // ====== ようこそモーダル (初回アクセス時のアカウント登録案内) ======
 const WELCOME_KEY = 'prism-welcome-shown';

@@ -2333,6 +2333,193 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   .story-char-name { font-size: 10px; }
 }
 
+/* ───── ホーム画面の要望カード ───── */
+.home-feedback {
+  margin: 24px auto 32px;
+  max-width: 640px;
+  padding: 0 16px;
+}
+.home-feedback-card {
+  width: 100%;
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(95,255,212,0.08), rgba(200,125,255,0.08));
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--text);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.home-feedback-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255,255,255,0.28);
+  box-shadow: 0 4px 24px rgba(95,255,212,0.18), 0 2px 12px rgba(200,125,255,0.18);
+}
+.home-feedback-icon {
+  font-size: 26px; line-height: 1;
+  filter: drop-shadow(0 0 6px rgba(255,255,255,0.3));
+}
+.home-feedback-text {
+  flex: 1; min-width: 0;
+}
+.home-feedback-title {
+  font-size: 15px; font-weight: 700; letter-spacing: 0.05em;
+  background: linear-gradient(90deg, #5fffd4, #c87dff);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.home-feedback-sub {
+  font-size: 12px; color: rgba(255,255,255,0.65);
+  margin-top: 3px; line-height: 1.5;
+}
+.home-feedback-arrow {
+  font-size: 20px; color: rgba(255,255,255,0.5);
+  transition: transform 0.15s ease;
+}
+.home-feedback-card:hover .home-feedback-arrow {
+  transform: translateX(3px); color: #fff;
+}
+@media (max-width: 600px) {
+  .home-feedback-card { padding: 13px 14px; gap: 11px; }
+  .home-feedback-icon { font-size: 22px; }
+  .home-feedback-title { font-size: 14px; }
+  .home-feedback-sub { font-size: 11px; }
+}
+
+/* ───── 要望フォームモーダル ───── */
+.feedback-modal {
+  position: fixed; inset: 0; z-index: 280;
+  display: none; align-items: center; justify-content: center;
+}
+.feedback-modal.active { display: flex; }
+.feedback-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.78); backdrop-filter: blur(6px);
+}
+.feedback-card {
+  position: relative;
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  background: linear-gradient(180deg, rgba(20,24,48,0.98), rgba(12,16,32,0.98));
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 16px;
+  padding: 24px 22px;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.6), 0 0 64px rgba(95,255,212,0.08);
+  animation: fb-in 0.18s ease-out;
+}
+@keyframes fb-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.feedback-close {
+  position: absolute; top: 12px; right: 12px;
+  width: 32px; height: 32px;
+  background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.85);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 8px;
+  font-size: 18px; line-height: 1; cursor: pointer;
+  font-family: inherit;
+}
+.feedback-close:hover { background: rgba(255,255,255,0.16); color: #fff; }
+.feedback-title {
+  font-size: 18px; font-weight: 700; letter-spacing: 0.08em;
+  margin-bottom: 18px; padding-right: 36px;
+  background: linear-gradient(90deg, #ffd84d, #5fffd4, #c87dff);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.feedback-section {
+  margin-bottom: 18px;
+}
+.feedback-label {
+  font-size: 12px; font-weight: 700; letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.78);
+  margin-bottom: 8px;
+  display: flex; align-items: baseline; justify-content: space-between;
+}
+.feedback-counter { font-size: 11px; color: rgba(255,255,255,0.5); font-weight: 400; letter-spacing: 0; }
+.feedback-cat-group {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
+.feedback-cat {
+  position: relative; cursor: pointer;
+  padding: 10px 12px;
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 10px;
+  font-size: 13px;
+  background: rgba(255,255,255,0.03);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.feedback-cat input { position: absolute; opacity: 0; pointer-events: none; }
+.feedback-cat span { display: block; }
+.feedback-cat:has(input:checked) {
+  background: linear-gradient(135deg, rgba(95,255,212,0.18), rgba(200,125,255,0.16));
+  border-color: rgba(95,255,212,0.5);
+}
+#feedback-text {
+  width: 100%; box-sizing: border-box;
+  padding: 12px 14px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 10px;
+  color: var(--text); font-family: inherit; font-size: 14px;
+  resize: vertical; min-height: 110px;
+  line-height: 1.6;
+}
+#feedback-text:focus { outline: none; border-color: rgba(95,255,212,0.55); box-shadow: 0 0 0 3px rgba(95,255,212,0.12); }
+.feedback-actions {
+  display: flex; gap: 10px; justify-content: flex-end;
+  margin-top: 18px;
+}
+.feedback-btn {
+  padding: 9px 18px;
+  border-radius: 9px;
+  font-size: 13px; font-weight: 700; letter-spacing: 0.08em;
+  font-family: inherit; cursor: pointer;
+  border: 1px solid transparent;
+  transition: filter 0.15s ease;
+}
+.feedback-btn.secondary {
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.85);
+  border-color: rgba(255,255,255,0.14);
+}
+.feedback-btn.secondary:hover { background: rgba(255,255,255,0.16); color: #fff; }
+.feedback-btn.primary {
+  background: linear-gradient(135deg, #5fffd4, #c87dff);
+  color: #111;
+}
+.feedback-btn.primary:hover { filter: brightness(1.1); }
+.feedback-btn:disabled { opacity: 0.5; cursor: wait; }
+.feedback-login-required {
+  text-align: center; padding: 6px 0;
+}
+.feedback-login-required p {
+  margin: 0 0 8px; color: rgba(255,255,255,0.85); font-size: 14px;
+}
+.feedback-login-sub { font-size: 12px !important; color: rgba(255,255,255,0.55) !important; }
+@media (max-width: 600px) {
+  .feedback-card { padding: 20px 16px; }
+  .feedback-cat-group { grid-template-columns: 1fr; }
+  .feedback-actions { flex-direction: column-reverse; }
+  .feedback-btn { width: 100%; }
+}
+
+/* 設定モーダル内の要望リンクボタン */
+.settings-feedback-link {
+  width: 100%;
+  padding: 11px 14px;
+  background: linear-gradient(135deg, rgba(95,255,212,0.10), rgba(200,125,255,0.10));
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 10px;
+  color: var(--text); font-family: inherit; font-size: 14px; font-weight: 700;
+  letter-spacing: 0.06em; cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.settings-feedback-link:hover {
+  background: linear-gradient(135deg, rgba(95,255,212,0.20), rgba(200,125,255,0.20));
+  border-color: rgba(95,255,212,0.4);
+}
+
 /* ───── ストーリー本文中のキャラ初登場カットイン (B3+C1) ───── */
 .story-cutin {
   margin: 28px auto;
