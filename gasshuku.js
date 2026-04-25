@@ -127,14 +127,29 @@
     return `images/gasshuku/${c.id}_${c.slug}_${mode === 'real' ? 'real' : 'fantasy'}.png`;
   }
 
-  // ====== 合宿図鑑 (localStorage + Firebase で端末間連携) ======
+  // ====== 合宿図鑑 + 凸システム (localStorage + Firebase で端末間連携) ======
   const COLLECT_KEY = 'prism-gasshuku-collected';
+  const DUP_KEY = 'prism-gasshuku-dups';
   function loadCollected() {
     try { return JSON.parse(localStorage.getItem(COLLECT_KEY) || '{}') || {}; }
     catch (e) { return {}; }
   }
   function saveCollected(d) {
     try { localStorage.setItem(COLLECT_KEY, JSON.stringify(d)); } catch (e) {}
+  }
+  function loadDups() {
+    try { return JSON.parse(localStorage.getItem(DUP_KEY) || '{}') || {}; }
+    catch (e) { return {}; }
+  }
+  function saveDups(d) {
+    try { localStorage.setItem(DUP_KEY, JSON.stringify(d)); } catch (e) {}
+  }
+  function getDup(charId) { return loadDups()[charId] || 0; }
+  function recordDup(charId) {
+    const d = loadDups();
+    d[charId] = (d[charId] || 0) + 1;
+    saveDups(d);
+    scheduleCloudSync();
   }
   function recordCollected(c, mode) {
     const d = loadCollected();
@@ -163,20 +178,29 @@
     const app = getFbApp();
     if (!uid || !app) return;
     try {
-      const snap = await app.database()
-        .ref('prism-gacha/users/' + uid + '/gasshukuCollected').once('value');
-      const cloud = snap.val() || {};
-      const local = loadCollected();
-      // OR マージ (両方にあれば true 維持)
-      const merged = { ...cloud, ...local };
-      saveCollected(merged);
+      const db = app.database();
+      // 合宿図鑑 (collected)
+      const snap1 = await db.ref('prism-gacha/users/' + uid + '/gasshukuCollected').once('value');
+      const cloudCol = snap1.val() || {};
+      const localCol = loadCollected();
+      const mergedCol = { ...cloudCol, ...localCol };
+      saveCollected(mergedCol);
       renderGasshukuGallery();
-      // local に新規があれば cloud にも反映
-      const localOnly = Object.keys(local).some(k => !cloud[k]);
-      if (localOnly) {
-        await app.database()
-          .ref('prism-gacha/users/' + uid + '/gasshukuCollected').set(merged);
+      // 凸 (dups) - max マージ
+      const snap2 = await db.ref('prism-gacha/users/' + uid + '/gasshukuDups').once('value');
+      const cloudDup = snap2.val() || {};
+      const localDup = loadDups();
+      const mergedDup = {};
+      const allKeys = new Set([...Object.keys(cloudDup), ...Object.keys(localDup)]);
+      for (const k of allKeys) {
+        mergedDup[k] = Math.max(cloudDup[k] || 0, localDup[k] || 0);
       }
+      saveDups(mergedDup);
+      // local に変化があれば cloud にも反映
+      const colDirty = Object.keys(localCol).some(k => !cloudCol[k]);
+      const dupDirty = Object.keys(mergedDup).some(k => (cloudDup[k] || 0) !== mergedDup[k]);
+      if (colDirty) await db.ref('prism-gacha/users/' + uid + '/gasshukuCollected').set(mergedCol);
+      if (dupDirty) await db.ref('prism-gacha/users/' + uid + '/gasshukuDups').set(mergedDup);
     } catch (e) {
       console.warn('[gasshuku] cloud sync (read) failed:', e);
     }
@@ -189,8 +213,9 @@
       const app = getFbApp();
       if (!uid || !app) return;
       try {
-        await app.database()
-          .ref('prism-gacha/users/' + uid + '/gasshukuCollected').set(loadCollected());
+        const db = app.database();
+        await db.ref('prism-gacha/users/' + uid + '/gasshukuCollected').set(loadCollected());
+        await db.ref('prism-gacha/users/' + uid + '/gasshukuDups').set(loadDups());
       } catch (e) {
         console.warn('[gasshuku] cloud sync (write) failed:', e);
       }
@@ -334,19 +359,30 @@
     fac.style.color = FACTION_COLOR[c.faction] || '#fff';
     document.getElementById('gasshuku-detail-skill').textContent = `🌟 ${c.skill}`;
     document.getElementById('gasshuku-detail-voice').textContent = `「${c.voice}」`;
-    // 凸秘話セクション
+    // 凸秘話セクション (凸数に応じて公開、未開放はロック表示)
     const storiesEl = document.getElementById('gasshuku-detail-stories');
     if (storiesEl) {
       const stories = Array.isArray(c.stories) ? c.stories : [];
       if (stories.length === 0) {
         storiesEl.innerHTML = '';
       } else {
-        let h = '<div class="gasshuku-stories-head">✦ 秘話</div>';
+        const dups = getDup(c.id); // 0=初回(Lv.1のみ), 1=Lv.2解放, 2=Lv.3解放...
+        const unlockedCount = Math.min(stories.length, Math.max(1, dups + 1));
+        let h = `<div class="gasshuku-stories-head">✦ 秘話 <span class="gasshuku-stories-progress">${unlockedCount}/${stories.length} 解放 (現在 ${dups}凸)</span></div>`;
         stories.forEach((s, i) => {
-          h += `<div class="gasshuku-story">
-            <div class="gasshuku-story-title"><span class="gasshuku-story-lv">Lv.${i + 1}</span>${s.title}</div>
-            <div class="gasshuku-story-body">${s.body}</div>
-          </div>`;
+          const lv = i + 1;
+          if (lv <= unlockedCount) {
+            h += `<div class="gasshuku-story">
+              <div class="gasshuku-story-title"><span class="gasshuku-story-lv">Lv.${lv}</span>${s.title}</div>
+              <div class="gasshuku-story-body">${s.body}</div>
+            </div>`;
+          } else {
+            const need = i; // Lv.2 → 1凸、 Lv.3 → 2凸
+            h += `<div class="gasshuku-story locked">
+              <div class="gasshuku-story-title"><span class="gasshuku-story-lv locked">🔒 Lv.${lv}</span>${need}凸で解放</div>
+              <div class="gasshuku-story-body locked">??????????????</div>
+            </div>`;
+          }
         });
         storiesEl.innerHTML = h;
       }
@@ -652,8 +688,11 @@
       const results = chars.map(c => buildResult(c, imgMode));
       window.__gasshukuLastResults = results;
       window.__gasshukuLastImgMode = imgMode;
-      // 図鑑記録 (重複なし keyで)
-      results.forEach(r => recordCollected(r._gasshukuChar, r._gasshukuMode));
+      // 図鑑記録 (重複なし keyで) + 凸記録 (重複あり、 同じキャラ複数引きで凸増加)
+      results.forEach(r => {
+        recordCollected(r._gasshukuChar, r._gasshukuMode);
+        recordDup(r._gasshukuChar.id);
+      });
       // 統計ログ (Firebase 公開パス)
       logRollToStats(count);
 

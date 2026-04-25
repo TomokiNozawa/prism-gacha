@@ -5285,3 +5285,27 @@ body.gasshuku-mode-fantasy .fx-win {
   overflow-y: auto;
 }
 /* ===== END ===== */
+
+/* ===== GASSHUKU STORY LOCK (凸で解放) ===== */
+.gasshuku-stories-progress {
+  font-size: 11px;
+  color: #a3b8d8;
+  font-weight: 400;
+  margin-left: 8px;
+  letter-spacing: 0.04em;
+}
+.gasshuku-story.locked {
+  opacity: 0.55;
+  background: rgba(80, 60, 100, 0.18);
+  border-color: rgba(150, 130, 180, 0.3);
+}
+.gasshuku-story-lv.locked {
+  background: rgba(150, 130, 180, 0.4);
+  color: rgba(255, 255, 255, 0.6);
+}
+.gasshuku-story-body.locked {
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 0.2em;
+  font-style: italic;
+}
+/* ===== END ===== */
