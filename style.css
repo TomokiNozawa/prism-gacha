@@ -4295,3 +4295,17 @@ body.gasshuku-modal-open {
   .gasshuku-rays { width: 600px; height: 600px; }
 }
 /* ===== GASSHUKU UR EFFECTS END ===== */
+
+/* ===== GASSHUKU CLOSE GUARD (閉じた時は完全に消す/クリック吸収しない) ===== */
+.gasshuku-modal:not(.active),
+.gasshuku-modal[hidden] {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+.gasshuku-detail[hidden] {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+/* ===== GASSHUKU CLOSE GUARD END ===== */

@@ -127,6 +127,7 @@
     m = document.createElement('div');
     m.id = 'gasshuku-modal';
     m.className = 'gasshuku-modal';
+    m.setAttribute('hidden', '');
     m.innerHTML = `
       <div class="gasshuku-backdrop"></div>
       <div class="gasshuku-stage">
@@ -178,18 +179,29 @@
 
   function openModal() {
     const m = ensureModal();
+    m.removeAttribute('hidden');
     m.classList.add('active');
     document.body.classList.add('gasshuku-modal-open');
     startRoll();
   }
   function closeModal() {
     const m = document.getElementById('gasshuku-modal');
-    if (m) m.classList.remove('active');
+    if (m) {
+      m.classList.remove('active');
+      m.setAttribute('hidden', '');
+      // 念のため進行中のカットシーンを止めて DOM もクリア
+      const cs = m.querySelector('#gasshuku-cutscene');
+      if (cs) cs.innerHTML = '';
+    }
+    closeDetail();
     document.body.classList.remove('gasshuku-modal-open');
   }
   function closeDetail() {
     const d = document.getElementById('gasshuku-detail');
-    if (d) d.hidden = true;
+    if (d) {
+      d.hidden = true;
+      d.setAttribute('hidden', '');
+    }
   }
 
   let currentDetail = null; // {char}
