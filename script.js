@@ -3511,11 +3511,11 @@ function setupCharBlinkAnimations() {
     const cached = _blinkImageCache.get(blinkUrl);
     if (cached === 'ng') return; // 過去に存在しないと判明した
     if (cached === 'ok') { _startBlinkLoop(imgEl, normalUrl, blinkUrl); return; }
-    // 初回は preload で存在確認
+    // 初回は preload で存在確認 (404キャッシュ対策で cache buster 付与)
     const probe = new Image();
     probe.onload = () => { _blinkImageCache.set(blinkUrl, 'ok'); _startBlinkLoop(imgEl, normalUrl, blinkUrl); };
     probe.onerror = () => { _blinkImageCache.set(blinkUrl, 'ng'); };
-    probe.src = blinkUrl;
+    probe.src = blinkUrl + (blinkUrl.includes('?') ? '&' : '?') + '_p=' + Date.now();
   });
 }
 function _startBlinkLoop(imgEl, normalUrl, blinkUrl) {
@@ -3555,8 +3555,9 @@ function setupCharDetailBlink(c) {
   if (cached === 'ok') { _startDetailBlinkLoop(imgEl, zoomEl, normalUrl, blinkUrl); return; }
   const probe = new Image();
   probe.onload = () => { _blinkImageCache.set(blinkUrl, 'ok'); _startDetailBlinkLoop(imgEl, zoomEl, normalUrl, blinkUrl); };
-  probe.onerror = () => { _blinkImageCache.set(blinkUrl, 'ng'); };
-  probe.src = blinkUrl;
+  probe.onerror = () => { _blinkImageCache.set(blinkUrl, 'ng'); console.debug('[blink-detail] not found:', blinkUrl); };
+  // ブラウザの404キャッシュ対策: 初回probeのみcache busterを付ける(成功後の本番swapはキャッシュ効かせる)
+  probe.src = blinkUrl + (blinkUrl.includes('?') ? '&' : '?') + '_p=' + Date.now();
 }
 // ────────── ストーリー本文中のキャラ初登場カットイン (B3+C1: 中央表示・LRのみ) ──────────
 let _firstAppearanceMap = new Map(); // charName → 初出シーンindex
@@ -3629,7 +3630,7 @@ function setupCutinBlinks() {
     const probe = new Image();
     probe.onload = () => { _blinkImageCache.set(blinkUrl, 'ok'); _startCutinBlinkLoop(imgEl, normalUrl, blinkUrl); };
     probe.onerror = () => { _blinkImageCache.set(blinkUrl, 'ng'); };
-    probe.src = blinkUrl;
+    probe.src = blinkUrl + (blinkUrl.includes('?') ? '&' : '?') + '_p=' + Date.now();
   });
 }
 function _startCutinBlinkLoop(imgEl, normalUrl, blinkUrl) {
