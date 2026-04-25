@@ -382,9 +382,11 @@ async function loadAll() {
   notice.className = 'notice loading';
   notice.textContent = '読み込み中…';
   try {
-    const [usersSnap, indexSnap] = await Promise.all([
+    // 合宿統計の全日データも取得 (ゲスト集計用)
+    const [usersSnap, indexSnap, statsSnap] = await Promise.all([
       db.ref('prism-gacha/users').once('value'),
       db.ref('prism-gacha/_meta/userIndex').once('value'),
+      db.ref('prism-gacha/gasshukuStats').once('value'),
     ]);
     const users = usersSnap.val() || {};
     const nameIndex = indexSnap.val() || {}; // nickname → uid
@@ -392,7 +394,35 @@ async function loadAll() {
     for (const [nickname, uid] of Object.entries(nameIndex)) {
       if (typeof uid === 'string') uidToNickname[uid] = nickname;
     }
-    renderUsers(users, uidToNickname);
+    // gasshukuStats から全 device を集約 (uid 持ちは ログインユーザーと結合、 uid 無しはゲストエントリ)
+    const allStats = statsSnap.val() || {}; // {YYYY-MM-DD: {totalRolls, devices: {deviceId: {...}}}}
+    const guestDevices = {}; // deviceId -> {totalRolls, firstAt, lastAt, days}
+    for (const [day, dayData] of Object.entries(allStats)) {
+      const devices = dayData?.devices || {};
+      for (const [devId, devData] of Object.entries(devices)) {
+        if (!guestDevices[devId]) {
+          guestDevices[devId] = {
+            deviceId: devId,
+            totalRolls: 0,
+            uid: null,
+            firstAt: Number.POSITIVE_INFINITY,
+            lastAt: 0,
+            days: new Set(),
+            retroactive: false,
+          };
+        }
+        const g = guestDevices[devId];
+        g.totalRolls += (devData.totalRolls || 0);
+        if (devData.uid) g.uid = devData.uid;
+        if (devData.lastRollAt) g.lastAt = Math.max(g.lastAt, devData.lastRollAt);
+        if (devData.retroactiveAt) {
+          g.lastAt = Math.max(g.lastAt, devData.retroactiveAt);
+          g.retroactive = true;
+        }
+        g.days.add(day);
+      }
+    }
+    renderUsers(users, uidToNickname, guestDevices);
     notice.className = 'notice';
     notice.textContent = '';
   } catch (e) {
@@ -402,10 +432,12 @@ async function loadAll() {
   }
 }
 
-function renderUsers(users, uidToNickname) {
+function renderUsers(users, uidToNickname, guestDevices) {
   const entries = Object.entries(users).map(([uid, u]) => ({ uid, ...u }));
   // 最終ログイン降順
   entries.sort((a, b) => (b.lastLoginAt || 0) - (a.lastLoginAt || 0));
+  // ログイン済 uid セット (gasshukuStats の uid と突合用)
+  const loggedInUids = new Set(entries.map(e => e.uid));
 
   let sumTotal = 0, sumUR = 0, lrHolders = 0, storyDone = 0;
   const body = $('#users-body');
@@ -456,8 +488,51 @@ function renderUsers(users, uidToNickname) {
     body.appendChild(row);
   });
 
+  // ===== ゲスト (gasshukuStats/devices で uid なし or 未登録) を行追加 =====
+  let guestCount = 0;
+  if (guestDevices) {
+    // 未ログイン or 未登録 uid のデバイスを抽出
+    const guestEntries = Object.values(guestDevices).filter(g => !g.uid || !loggedInUids.has(g.uid));
+    // 最終操作降順
+    guestEntries.sort((a, b) => (b.lastAt || 0) - (a.lastAt || 0));
+    guestEntries.forEach((g, i) => {
+      guestCount++;
+      const lastAt = g.lastAt ? new Date(g.lastAt).toLocaleString('ja-JP', { year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '-';
+      const idShort = g.deviceId.slice(-6);
+      const tag = g.retroactive ? ' <span style="font-size:10px;color:#fcd34d">過去</span>' : '';
+      const row = document.createElement('div');
+      row.className = 'users-row guest-row';
+      row.style.opacity = '0.78';
+      row.innerHTML = `
+        <div class="u-nickname dim">🎌 ゲスト #${idShort}${tag}</div>
+        <div class="u-count dim">—</div>
+        <div class="u-count col-ur dim">合宿×${g.totalRolls || 0}</div>
+        <div class="u-count col-lr dim">—</div>
+        <div class="u-count col-dup dim">—</div>
+        <div class="u-lastlogin col-lastlogin">${lastAt}</div>
+      `;
+      // ゲストの詳細 (簡易)
+      const detail = document.createElement('div');
+      detail.className = 'user-detail';
+      detail.innerHTML = `
+        <div style="padding:14px 18px;color:#c0c4d0;font-size:13px">
+          <div><b>device_id</b>: <code style="font-size:11px">${g.deviceId}</code></div>
+          <div><b>合宿ガチャ実行回数</b>: ${g.totalRolls || 0}</div>
+          <div><b>プレイ日数</b>: ${g.days.size}日 (${[...g.days].sort().join(', ')})</div>
+          <div><b>最終操作</b>: ${lastAt}</div>
+          ${g.retroactive ? '<div style="color:#fcd34d;margin-top:6px">※ 過去ゲスト遡及アップロード</div>' : ''}
+          <div style="margin-top:8px;color:rgba(255,255,255,0.5);font-size:11px">アカウント未登録のためキャラ獲得情報は端末ローカルのみで保持されています</div>
+        </div>
+      `;
+      row.appendChild(detail);
+      row.addEventListener('click', () => detail.classList.toggle('active'));
+      body.appendChild(row);
+    });
+  }
+
   const userCount = entries.length;
-  $('#sum-users').textContent = userCount;
+  const totalRows = userCount + guestCount;
+  $('#sum-users').textContent = guestCount > 0 ? `${userCount} +${guestCount}🎌` : userCount;
   $('#sum-total').textContent = sumTotal;
   $('#sum-ur').textContent = userCount ? `${sumUR}/${userCount * TIER_MAX.UR}` : '-';
   $('#sum-lr-holders').textContent = userCount ? `${lrHolders}/${userCount}` : '-';
