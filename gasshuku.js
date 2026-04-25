@@ -68,8 +68,12 @@
   }
 
   function rollAll(count) {
-    const shuffled = [...POOL].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, Math.max(1, Math.min(count, POOL.length)));
+    // 確率は一律、重複OK
+    const out = [];
+    for (let i = 0; i < count; i++) {
+      out.push(POOL[Math.floor(Math.random() * POOL.length)]);
+    }
+    return out;
   }
 
   // 既存 summonOne 互換の result オブジェクトを構築
@@ -102,29 +106,67 @@
 
   async function startGasshukuRoll(imgMode, count) {
     if (gasshukuBusy) return;
-    // 既存ガチャ実行中なら待たせる
+    // 既存ガチャ実行中なら無視
     if (typeof window.busy !== 'undefined' && window.busy) return;
     gasshukuBusy = true;
     setGachaBtnsDisabled(true);
 
+    const cv = document.getElementById('canvas') || document.querySelector('canvas');
+    const resizeCanvas = () => {
+      if (cv) { cv.width = window.innerWidth; cv.height = window.innerHeight; }
+    };
+
     try {
-      // 既存と同じ stage 起動シーケンス
       if (typeof skipRequested !== 'undefined') skipRequested = false;
       const stageEl = document.getElementById('stage');
       if (stageEl) stageEl.classList.add('active');
       if (typeof clearStage === 'function') clearStage();
-      const cv = document.getElementById('canvas') || document.querySelector('canvas');
-      if (cv) { cv.width = window.innerWidth; cv.height = window.innerHeight; }
+      resizeCanvas();
 
       const chars = rollAll(count);
-      for (const c of chars) {
-        const result = buildResult(c, imgMode);
-        if (typeof summonOne === 'function') {
-          await summonOne(result);
-        } else {
-          console.warn('[gasshuku] summonOne not found, abort');
-          break;
+      const results = chars.map(c => buildResult(c, imgMode));
+
+      if (count === 1 || results.length === 1) {
+        // 単発: doSingle 風
+        await summonOne(results[0]);
+      } else {
+        // 10連: doTen 風 — 各召喚で clearStage、最後にフル演出
+        const bestIdx = Math.floor(Math.random() * results.length);
+        const best = results[bestIdx];
+        const sequenced = [
+          ...results.slice(0, bestIdx),
+          ...results.slice(bestIdx + 1),
+          best
+        ];
+
+        // 10連イントロ「× 10」
+        if (typeof setStageTier === 'function') setStageTier('UR');
+        if (typeof showTenIntro === 'function') showTenIntro();
+        if (typeof play === 'function') play('se-summon', 'UR');
+        await new Promise(r => setTimeout(r, 1100));
+
+        // 前9体: showLadder=false
+        for (let i = 0; i < sequenced.length - 1; i++) {
+          if (typeof clearStage === 'function') clearStage();
+          resizeCanvas();
+          await summonOne(sequenced[i], { showLadder: false });
         }
+
+        // 最後の1体: フル演出
+        if (typeof clearStage === 'function') clearStage();
+        resizeCanvas();
+        if (typeof skipRequested !== 'undefined') skipRequested = false;
+        await new Promise(r => setTimeout(r, 250));
+        await summonOne(best, { showLadder: true, forceSlow: true, tenFlag: true });
+
+        // タップ待ち (最後の余韻)
+        if (typeof showHintTap === 'function') showHintTap();
+        const start = Date.now();
+        while (typeof skipRequested !== 'undefined' && !skipRequested) {
+          await new Promise(r => setTimeout(r, 80));
+          if (Date.now() - start > 30000) break; // 安全弁
+        }
+        if (typeof hideHintTap === 'function') hideHintTap();
       }
     } catch (e) {
       console.error('[gasshuku] roll error:', e);
