@@ -5463,6 +5463,7 @@ body {
   color: transparent;
   letter-spacing: 0.04em;
   line-height: 1.2;
+  padding-right: 96px;  /* バッジが被らないように右余白 */
 }
 .story-entry-tagline {
   font-size: 13px;
@@ -5498,7 +5499,7 @@ body {
 }
 @media (max-width: 600px) {
   .story-entry-icon-large { font-size: 34px; }
-  .story-entry-headline { font-size: 17px; }
+  .story-entry-headline { font-size: 17px; padding-right: 84px; }
   .story-entry-tagline { font-size: 12px; }
   .story-entry-meta { font-size: 10px; }
   .story-entry-arrow { font-size: 18px; }
