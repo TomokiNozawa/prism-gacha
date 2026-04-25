@@ -3957,7 +3957,13 @@ if (_btnHistory) _btnHistory.addEventListener("click", openHistoryModal);
 
 document.addEventListener("keydown", e => {
   if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
-  // ストーリー一覧モーダル (最上位優先)
+  // ようこそモーダル (最上位優先)
+  const _wm = document.getElementById('welcome-modal');
+  if (_wm && _wm.classList.contains('active')) {
+    if (e.key === "Escape") { e.preventDefault(); dismissWelcomeModal(false); }
+    return;
+  }
+  // ストーリー一覧モーダル
   const _slm = document.getElementById('story-list-modal');
   if (_slm && !_slm.hasAttribute('hidden')) {
     if (e.key === "Escape") { e.preventDefault(); closeStoryList(); }
@@ -4629,3 +4635,70 @@ if (document.readyState === 'loading') {
 } else {
   checkPrismaeraVersion();
 }
+
+// ====== ようこそモーダル (初回アクセス時のアカウント登録案内) ======
+const WELCOME_KEY = 'prism-welcome-shown';
+function maybeShowWelcomeModal() {
+  // ログイン済はスキップ
+  if (typeof authUser !== 'undefined' && authUser) return;
+  try {
+    if (localStorage.getItem(WELCOME_KEY) === '1') return;
+  } catch (e) {}
+  ensureWelcomeModal();
+}
+function ensureWelcomeModal() {
+  let m = document.getElementById('welcome-modal');
+  if (m) { m.classList.add('active'); return m; }
+  m = document.createElement('div');
+  m.id = 'welcome-modal';
+  m.className = 'welcome-modal active';
+  m.innerHTML = `
+    <div class="welcome-backdrop"></div>
+    <div class="welcome-card">
+      <div class="welcome-aurora"></div>
+      <div class="welcome-stars">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <div class="welcome-sparkle">✦</div>
+      <div class="welcome-title">ようこそ、Prismaera へ</div>
+      <div class="welcome-subtitle">虹霊界の物語と、君だけのガチャの旅</div>
+      <div class="welcome-body">
+        <p>このサイトは <strong>ニックネーム + 合言葉</strong> だけで遊べる、 虹霊界の物語ガチャです。</p>
+        <ul class="welcome-features">
+          <li>📖 7章構成のオリジナルストーリー</li>
+          <li>🌈 LR/UR/SSR キャラ + 凸秘話</li>
+          <li>🌐 派閥相関図 + キャラ詳細</li>
+        </ul>
+        <p class="welcome-cta-line">👉 <strong>アカウントを作ると…</strong></p>
+        <ul class="welcome-features">
+          <li>📱 別端末からも進捗を引き継げます</li>
+          <li>💾 ブラウザを消しても記録が残ります</li>
+          <li>⚡ 1分で完了・無料・課金なし</li>
+        </ul>
+      </div>
+      <div class="welcome-actions">
+        <button class="welcome-btn primary" onclick="dismissWelcomeModal(true)">✨ アカウントを作る</button>
+        <button class="welcome-btn ghost" onclick="dismissWelcomeModal(false)">まずはゲストで遊ぶ</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(m);
+  m.querySelector('.welcome-backdrop')?.addEventListener('click', () => dismissWelcomeModal(false));
+  return m;
+}
+function dismissWelcomeModal(openSignup) {
+  try { localStorage.setItem(WELCOME_KEY, '1'); } catch (e) {}
+  const m = document.getElementById('welcome-modal');
+  if (m) m.classList.remove('active');
+  setTimeout(() => { if (m && m.parentNode) m.parentNode.removeChild(m); }, 300);
+  if (openSignup) {
+    if (typeof showAccountModal === 'function') showAccountModal();
+    if (typeof switchAccountTab === 'function') switchAccountTab('signup');
+    setTimeout(() => { const el = document.getElementById('signup-nickname'); if (el) el.focus(); }, 100);
+  }
+}
+
+// 起動時に表示 (他のmodal/UIの後に少し遅延)
+window.addEventListener('load', () => {
+  setTimeout(maybeShowWelcomeModal, 1500);
+});
