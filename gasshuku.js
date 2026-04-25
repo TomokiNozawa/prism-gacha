@@ -67,7 +67,7 @@
     return `images/gasshuku/${c.id}_${c.slug}_${mode === 'real' ? 'real' : 'fantasy'}.png`;
   }
 
-  // ====== 合宿図鑑 (独立 localStorage) ======
+  // ====== 合宿図鑑 (localStorage + Firebase で端末間連携) ======
   const COLLECT_KEY = 'prism-gasshuku-collected';
   function loadCollected() {
     try { return JSON.parse(localStorage.getItem(COLLECT_KEY) || '{}') || {}; }
@@ -82,8 +82,77 @@
     if (!d[k]) {
       d[k] = true;
       saveCollected(d);
+      scheduleCloudSync();
     }
     renderGasshukuGallery();
+  }
+
+  // ===== Firebase 同期 (既存 'prism-gacha' app 流用、独立パス /gasshukuCollected) =====
+  function getFbApp() {
+    if (typeof firebase === 'undefined' || !firebase.apps) return null;
+    try { return firebase.app('prism-gacha'); } catch (e) { return null; }
+  }
+  function getCurrentUid() {
+    const app = getFbApp();
+    if (!app) return null;
+    try { const u = app.auth().currentUser; return u ? u.uid : null; }
+    catch (e) { return null; }
+  }
+  async function syncFromCloud() {
+    const uid = getCurrentUid();
+    const app = getFbApp();
+    if (!uid || !app) return;
+    try {
+      const snap = await app.database()
+        .ref('prism-gacha/users/' + uid + '/gasshukuCollected').once('value');
+      const cloud = snap.val() || {};
+      const local = loadCollected();
+      // OR マージ (両方にあれば true 維持)
+      const merged = { ...cloud, ...local };
+      saveCollected(merged);
+      renderGasshukuGallery();
+      // local に新規があれば cloud にも反映
+      const localOnly = Object.keys(local).some(k => !cloud[k]);
+      if (localOnly) {
+        await app.database()
+          .ref('prism-gacha/users/' + uid + '/gasshukuCollected').set(merged);
+      }
+    } catch (e) {
+      console.warn('[gasshuku] cloud sync (read) failed:', e);
+    }
+  }
+  let __saveTimer = null;
+  function scheduleCloudSync() {
+    if (__saveTimer) clearTimeout(__saveTimer);
+    __saveTimer = setTimeout(async () => {
+      const uid = getCurrentUid();
+      const app = getFbApp();
+      if (!uid || !app) return;
+      try {
+        await app.database()
+          .ref('prism-gacha/users/' + uid + '/gasshukuCollected').set(loadCollected());
+      } catch (e) {
+        console.warn('[gasshuku] cloud sync (write) failed:', e);
+      }
+    }, 800);
+  }
+  function watchAuth() {
+    const app = getFbApp();
+    if (!app) {
+      // Firebase SDK 未初期化 → 1秒後に再試行 (最大30回)
+      if (!watchAuth.tries) watchAuth.tries = 0;
+      if (++watchAuth.tries < 30) setTimeout(watchAuth, 1000);
+      return;
+    }
+    try {
+      app.auth().onAuthStateChanged(user => {
+        if (user) syncFromCloud();
+      });
+      // 初回 (もし既にログイン済なら即同期)
+      if (app.auth().currentUser) syncFromCloud();
+    } catch (e) {
+      console.warn('[gasshuku] watchAuth failed:', e);
+    }
   }
   function renderGasshukuGallery() {
     const grid = document.getElementById('gasshuku-gallery-grid');
@@ -454,6 +523,8 @@
       });
     });
     renderGasshukuGallery();
+    // Firebase 認証監視を開始 (ログイン中ならクラウドから同期)
+    watchAuth();
     // Esc で合宿モーダルを閉じる (lightbox → detail → result の順で1つだけ閉じる)
     if (!document.body.dataset.gasshukuEscBound) {
       document.body.dataset.gasshukuEscBound = '1';
