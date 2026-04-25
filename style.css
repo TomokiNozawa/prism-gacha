@@ -4649,3 +4649,144 @@ body.gasshuku-modal-open {
   margin-top: 2px;
 }
 /* ===== END ===== */
+
+/* ===== GASSHUKU DETAIL MODAL v2 (合宿用キャラ詳細・独立) ===== */
+.gasshuku-detail-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.gasshuku-detail-modal[hidden],
+.gasshuku-detail-modal:not(.active) {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+.gasshuku-detail-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 0, 18, 0.88);
+  backdrop-filter: blur(8px);
+}
+.gasshuku-detail-modal .gasshuku-detail-card {
+  position: relative;
+  width: min(720px, 92vw);
+  max-height: 92vh;
+  overflow-y: auto;
+  background: linear-gradient(180deg, #14012c, #2a0a4a);
+  border: 1px solid rgba(251, 191, 36, 0.55);
+  border-radius: 16px;
+  padding: 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  box-shadow: 0 0 60px rgba(251, 146, 60, 0.3);
+}
+@media (max-width: 600px) {
+  .gasshuku-detail-modal .gasshuku-detail-card { grid-template-columns: 1fr; padding: 18px 14px; }
+}
+.gasshuku-detail-modal .gasshuku-detail-close {
+  position: absolute;
+  top: 8px;
+  right: 14px;
+  background: transparent;
+  color: #fff;
+  border: none;
+  font-size: 26px;
+  cursor: pointer;
+  z-index: 2;
+}
+.gasshuku-detail-modal .gasshuku-detail-close:hover { color: #fcd34d; }
+.gasshuku-detail-modal .gasshuku-detail-img-wrap {
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+  overflow: hidden;
+}
+.gasshuku-detail-modal .gasshuku-detail-img {
+  width: 100%;
+  max-height: 460px;
+  object-fit: contain;
+}
+.gasshuku-detail-modal .gasshuku-detail-meta {
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.gasshuku-detail-modal .gasshuku-detail-tier {
+  display: inline-block;
+  align-self: flex-start;
+  background: linear-gradient(90deg, #fbbf24, #ec4899);
+  padding: 3px 14px;
+  border-radius: 999px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  font-size: 13px;
+}
+.gasshuku-detail-modal .gasshuku-detail-name {
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.3;
+}
+.gasshuku-detail-modal .gasshuku-detail-real {
+  font-size: 13px;
+  color: #fcd34d;
+}
+.gasshuku-detail-modal .gasshuku-detail-faction {
+  font-size: 13px;
+  font-weight: 600;
+}
+.gasshuku-detail-modal .gasshuku-detail-skill {
+  font-size: 16px;
+  color: #a78bfa;
+  font-weight: 600;
+}
+.gasshuku-detail-modal .gasshuku-detail-voice {
+  font-size: 15px;
+  color: #c0c4d0;
+  font-style: italic;
+  border-left: 3px solid #fcd34d;
+  padding-left: 10px;
+  margin-top: 4px;
+}
+.gasshuku-detail-modal .gasshuku-detail-toggle {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+}
+.gasshuku-detail-modal .gasshuku-detail-tbtn {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.gasshuku-detail-modal .gasshuku-detail-tbtn:hover { background: rgba(255, 255, 255, 0.15); }
+.gasshuku-detail-modal .gasshuku-detail-tbtn.active {
+  background: linear-gradient(90deg, #fbbf24, #ec4899);
+  border-color: #fcd34d;
+  font-weight: 700;
+}
+.gasshuku-gallery-cell.got:hover {
+  transform: scale(1.05);
+  border-color: #fcd34d;
+  box-shadow: 0 0 14px rgba(251, 191, 36, 0.45);
+  transition: all 0.15s;
+}
+.gasshuku-result-card:hover {
+  transform: translateY(-2px);
+  border-color: #fcd34d;
+  box-shadow: 0 6px 16px rgba(251, 191, 36, 0.3);
+  transition: all 0.15s;
+}
+/* ===== END ===== */

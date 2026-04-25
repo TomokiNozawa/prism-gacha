@@ -105,6 +105,8 @@
             <img src="${imgPath(c, mode)}" alt="${c.name}">
             <div class="gasshuku-cell-mode">${mode === 'real' ? '📷' : '🌈'}</div>
           `;
+          cell.style.cursor = 'pointer';
+          cell.addEventListener('click', () => openDetail(c, mode));
         } else {
           cell.innerHTML = `
             <div class="gasshuku-cell-silhouette">?</div>
@@ -115,6 +117,88 @@
       });
     });
     if (cntEl) cntEl.textContent = String(count);
+  }
+
+  // ====== 詳細モーダル (合宿用、独立) ======
+  const FACTION_COLOR = {
+    '星霊学院': '#7dd3fc',
+    '五大国':   '#fcd34d',
+    '原虹':     '#f472b6',
+    '独立勢力': '#a3e635'
+  };
+  let currentDetail = null;
+  let currentDetailMode = 'fantasy';
+  function ensureDetailModal() {
+    let m = document.getElementById('gasshuku-detail-modal');
+    if (m) return m;
+    m = document.createElement('div');
+    m.id = 'gasshuku-detail-modal';
+    m.className = 'gasshuku-detail-modal';
+    m.setAttribute('hidden', '');
+    m.innerHTML = `
+      <div class="gasshuku-detail-backdrop"></div>
+      <div class="gasshuku-detail-card">
+        <button class="gasshuku-detail-close" aria-label="閉じる">×</button>
+        <div class="gasshuku-detail-img-wrap">
+          <img class="gasshuku-detail-img" id="gasshuku-detail-img" alt="">
+        </div>
+        <div class="gasshuku-detail-meta">
+          <div class="gasshuku-detail-tier">UR</div>
+          <div class="gasshuku-detail-name" id="gasshuku-detail-name"></div>
+          <div class="gasshuku-detail-real" id="gasshuku-detail-real"></div>
+          <div class="gasshuku-detail-faction" id="gasshuku-detail-faction"></div>
+          <div class="gasshuku-detail-skill" id="gasshuku-detail-skill"></div>
+          <div class="gasshuku-detail-voice" id="gasshuku-detail-voice"></div>
+          <div class="gasshuku-detail-toggle">
+            <button class="gasshuku-detail-tbtn" data-mode="fantasy">🌈 ファンタジー</button>
+            <button class="gasshuku-detail-tbtn" data-mode="real">📷 本人</button>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(m);
+    m.querySelector('.gasshuku-detail-close').addEventListener('click', closeDetail);
+    m.querySelector('.gasshuku-detail-backdrop').addEventListener('click', closeDetail);
+    m.querySelectorAll('.gasshuku-detail-tbtn').forEach(b => {
+      b.addEventListener('click', () => switchDetailImage(b.dataset.mode));
+    });
+    return m;
+  }
+  function switchDetailImage(mode) {
+    if (!currentDetail) return;
+    currentDetailMode = mode;
+    const img = document.getElementById('gasshuku-detail-img');
+    img.src = imgPath(currentDetail, mode) + '?v=' + Date.now();
+    img.onerror = () => {
+      if (mode === 'fantasy') {
+        img.onerror = null;
+        img.src = imgPath(currentDetail, 'real');
+      }
+    };
+    document.querySelectorAll('.gasshuku-detail-tbtn').forEach(b => {
+      b.classList.toggle('active', b.dataset.mode === mode);
+    });
+  }
+  function openDetail(c, defaultMode) {
+    currentDetail = c;
+    const m = ensureDetailModal();
+    m.removeAttribute('hidden');
+    m.classList.add('active');
+    document.getElementById('gasshuku-detail-name').textContent = c.name;
+    document.getElementById('gasshuku-detail-real').textContent = `本人: ${c.real}（${c.role}）`;
+    const fac = document.getElementById('gasshuku-detail-faction');
+    fac.textContent = `所属: ${c.faction}`;
+    fac.style.color = FACTION_COLOR[c.faction] || '#fff';
+    document.getElementById('gasshuku-detail-skill').textContent = `🌟 ${c.skill}`;
+    document.getElementById('gasshuku-detail-voice').textContent = `「${c.voice}」`;
+    switchDetailImage(defaultMode || 'fantasy');
+  }
+  function closeDetail() {
+    const m = document.getElementById('gasshuku-detail-modal');
+    if (m) {
+      m.classList.remove('active');
+      m.setAttribute('hidden', '');
+    }
   }
 
   // ====== 結果モーダル (合宿用、独立) ======
@@ -156,7 +240,8 @@
         <div class="gasshuku-result-name">${r.name}</div>
         <div class="gasshuku-result-real">${r._gasshukuReal || ''}</div>
       `;
-      // クリックは無効 (既存の showCharDetail に絡めない)
+      card.style.cursor = 'pointer';
+      card.addEventListener('click', () => openDetail(r._gasshukuChar, r._gasshukuMode));
       grid.appendChild(card);
     });
   }
