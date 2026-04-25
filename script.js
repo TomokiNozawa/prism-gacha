@@ -3357,6 +3357,10 @@ function renderScene() {
   bodyHtml = linkifyCharNames(bodyHtml);
   bodyHtml = applyFurigana(bodyHtml);
   bodyHtml = injectStoryCutins(bodyHtml, storyIdx);
+  // 最終シーン: 次章/一覧ナビゲーションを末尾に追加
+  if (storyIdx === storyScenes.length - 1) {
+    bodyHtml += buildEndNavHtml(currentStoryId);
+  }
   // #6 表紙シーン (isCover) と中表紙 (isAct) は「タップで開幕」を明示
   if (scene.isCover) {
     bodyHtml = '<div class="story-cover-hint"><span class="story-cover-spark">✦</span><div class="story-cover-tap">タップで開幕</div><span class="story-cover-spark">✦</span></div>';
@@ -3517,6 +3521,21 @@ function renderSceneChars(scene) {
 }
 function escapeRegExp(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// 最終シーン用ナビゲーション (次章 / ストーリー一覧)
+function buildEndNavHtml(storyId) {
+  const ids = Object.keys(STORY_FILES);
+  const idx = ids.indexOf(storyId);
+  const nextId = idx >= 0 && idx < ids.length - 1 ? ids[idx + 1] : null;
+  let html = '<div class="story-end-nav">';
+  if (nextId) {
+    const next = STORY_FILES[nextId];
+    html += `<button type="button" class="story-end-nav-btn primary" onclick="openStory('${nextId}')">次の章を読む: ${escapeHtml(next.title)} <span class="story-end-nav-arrow">→</span></button>`;
+  }
+  html += `<button type="button" class="story-end-nav-btn secondary" onclick="closeStory();openStoryList()">📖 ストーリー一覧へ</button>`;
+  html += '</div>';
+  return html;
 }
 
 // ────────────── キャラ瞬きアニメーション (Live2D風プロト) ──────────────
