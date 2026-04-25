@@ -313,7 +313,7 @@ let isAdmin = false;
 const $ = s => document.querySelector(s);
 
 // Season1 定員 (キャラマスター)
-const TIER_MAX = { LR: 1, UR: 5, SSR: 8, SR: 10, R: 6 };
+const TIER_MAX = { LR: 1, UR: 7, SSR: 11, SR: 15, R: 11 };  // S1C2 (v1.2.0) 反映: UR+2, SSR+3, SR+5, R+5
 
 function nicknameToEmail(nickname) {
   const bytes = new TextEncoder().encode(nickname);
@@ -550,19 +550,36 @@ function renderUsers(users, uidToNickname, guestDevices) {
 
 async function loadGasshukuStats() {
   try {
-    const d = new Date();
-    const day = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    const snap = await fbDb.ref('prism-gacha/gasshukuStats/' + day).once('value');
-    const v = snap.val() || {};
-    $('#sum-gasshuku-rolls').textContent = v.totalRolls || 0;
-    $('#sum-gasshuku-summons').textContent = v.totalSummons || 0;
-    const devCount = v.devices ? Object.keys(v.devices).length : 0;
-    $('#sum-gasshuku-devices').textContent = devCount;
+    // 全日 totalRolls/totalSummons + 全期間 devices 集計
+    const snap = await fbDb.ref('prism-gacha/gasshukuStats').once('value');
+    const all = snap.val() || {};
+    let totalRolls = 0, totalSummons = 0;
+    const allDevices = new Set();
+    for (const day in all) {
+      const dayData = all[day] || {};
+      totalRolls += (dayData.totalRolls || 0);
+      totalSummons += (dayData.totalSummons || 0);
+      const devices = dayData.devices || {};
+      Object.keys(devices).forEach(devId => allDevices.add(devId));
+    }
+    $('#sum-gasshuku-rolls').textContent = totalRolls;
+    $('#sum-gasshuku-summons').textContent = totalSummons;
+    $('#sum-gasshuku-devices').textContent = allDevices.size;
   } catch (e) {
-    console.warn('[admin] gasshuku stats failed:', e);
-    $('#sum-gasshuku-rolls').textContent = '?';
-    $('#sum-gasshuku-summons').textContent = '?';
-    $('#sum-gasshuku-devices').textContent = '?';
+    console.error('[admin] gasshuku stats failed:', e);
+    $('#sum-gasshuku-rolls').textContent = '⚠';
+    $('#sum-gasshuku-summons').textContent = '⚠';
+    $('#sum-gasshuku-devices').textContent = '⚠';
+    // エラー詳細を画面下部に表示 (Firebase Rulesの問題切り分け用)
+    let errBox = document.getElementById('gasshuku-err-detail');
+    if (!errBox) {
+      errBox = document.createElement('div');
+      errBox.id = 'gasshuku-err-detail';
+      errBox.style.cssText = 'max-width:1000px;margin:12px auto;padding:14px 18px;background:rgba(255,80,100,0.12);border:1px solid rgba(255,80,100,0.35);border-radius:10px;color:#ffb0bb;font-size:13px;';
+      const summary = document.querySelector('.summary');
+      if (summary) summary.parentNode.insertBefore(errBox, summary.nextSibling);
+    }
+    errBox.innerHTML = '<b>🎌 合宿統計の取得失敗</b><br>' + (e.message || e) + '<br><small>Firebase Rules で gasshukuStats.read が admin判定 (auth.uid が _meta/admins に登録) を要求しています。 console (F12) でも詳細確認可能。</small>';
   }
 }
 
