@@ -2315,6 +2315,118 @@ function openRelations() {
   }, 0);
 
   bindRelationsPan(canvas);
+  // タブ初期化 (スマホはリストをデフォルト)
+  setupRelationsTabs();
+  const isMobile = window.matchMedia('(max-width: 720px)').matches;
+  setRelationsMode(isMobile ? 'list' : 'graph');
+}
+
+// #5 派閥別リスト表示
+let _relationsTabsBound = false;
+function setupRelationsTabs() {
+  if (_relationsTabsBound) return;
+  _relationsTabsBound = true;
+  document.querySelectorAll('.rel-tab').forEach(b => {
+    b.addEventListener('click', () => setRelationsMode(b.dataset.mode));
+  });
+}
+function setRelationsMode(mode) {
+  document.querySelectorAll('.rel-tab').forEach(b => {
+    b.classList.toggle('active', b.dataset.mode === mode);
+  });
+  const canvas = document.getElementById('relations-canvas');
+  const list = document.getElementById('relations-list');
+  if (mode === 'list') {
+    if (canvas) canvas.style.display = 'none';
+    if (list) {
+      list.style.display = '';
+      renderRelationsList(list);
+    }
+  } else {
+    if (canvas) canvas.style.display = '';
+    if (list) list.style.display = 'none';
+  }
+}
+function renderRelationsList(container) {
+  // 派閥ごとにキャラをグループ化
+  const byFaction = {}; // factionId -> [{name, char, relations}]
+  for (const facId in {}) {} // init
+  FACTIONS.forEach(f => { byFaction[f.id] = []; });
+  // CHAR_FACTION から各キャラの派閥を引く
+  for (const name in CHAR_FACTION) {
+    const f = CHAR_FACTION[name].f;
+    const c = getCharByName(name);
+    if (!c) continue;
+    if (!byFaction[f]) byFaction[f] = [];
+    byFaction[f].push({ name, char: c });
+  }
+  // 各キャラの relations を集約
+  function relsOf(charName) {
+    const out = [];
+    RELATIONS.forEach(r => {
+      if (r.a === charName) {
+        out.push({ other: r.b, type: r.type, role: r.aRole || r.label || '', isMyEnd: 'a' });
+      } else if (r.b === charName) {
+        out.push({ other: r.a, type: r.type, role: r.bRole || r.label || '', isMyEnd: 'b' });
+      }
+    });
+    return out;
+  }
+  const TYPE_LABEL = {
+    fellow: '🤝 戦友', master: '🎓 師弟', blood: '🩸 血縁',
+    childhood: '🌸 幼馴染', admire: '✨ 憧憬', rival: '⚔ 好敵手', sister: '🌷 姉妹'
+  };
+  let html = '';
+  FACTIONS.forEach(f => {
+    const list = byFaction[f.id] || [];
+    if (list.length === 0) return;
+    html += `<section class="rel-faction" style="--fac-color:${f.color}">`;
+    html += `<h3 class="rel-faction-head">${f.label} <span class="rel-faction-yomi">${f.yomi}</span> <span class="rel-faction-count">${list.length}名</span></h3>`;
+    list.forEach(({ name, char }) => {
+      const unlocked = isUnlocked(char);
+      const rels = relsOf(name);
+      html += `<div class="rel-char ${unlocked ? 'unlocked' : 'locked'}" data-char-name="${escapeHtml(name)}">`;
+      html += `<div class="rel-char-head">`;
+      html += `<span class="rel-char-tier rel-tier-${(char.tier || '').toLowerCase()}">${char.tier || ''}</span>`;
+      html += `<span class="rel-char-name">${escapeHtml(name)}</span>`;
+      if (char.title) html += `<span class="rel-char-title">${escapeHtml(char.title)}</span>`;
+      html += `</div>`;
+      if (rels.length === 0) {
+        html += `<div class="rel-char-empty">— 単独 —</div>`;
+      } else {
+        html += `<ul class="rel-list">`;
+        rels.forEach(r => {
+          const otherChar = getCharByName(r.other);
+          const tier = otherChar ? otherChar.tier : '?';
+          html += `<li class="rel-item" data-other="${escapeHtml(r.other)}">`;
+          html += `<span class="rel-type">${TYPE_LABEL[r.type] || r.type}</span>`;
+          if (r.role) html += `<span class="rel-role">[${escapeHtml(r.role)}]</span>`;
+          html += ` <span class="rel-other-tier rel-tier-${tier.toLowerCase()}">${tier}</span>`;
+          html += ` <span class="rel-other">${escapeHtml(r.other)}</span>`;
+          html += `</li>`;
+        });
+        html += `</ul>`;
+      }
+      html += `</div>`;
+    });
+    html += `</section>`;
+  });
+  container.innerHTML = html;
+  // クリックで詳細表示 (解放済みのみ)
+  container.querySelectorAll('.rel-char').forEach(el => {
+    el.addEventListener('click', e => {
+      // .rel-item の other クリックなら相手を開く、 head なら本人
+      const itemEl = e.target.closest('.rel-item');
+      const targetName = itemEl ? itemEl.dataset.other : el.dataset.charName;
+      const c = getCharByName(targetName);
+      if (c && isUnlocked(c)) {
+        if (detailUnlockedList.length === 0) {
+          detailUnlockedList = getAllCharactersWithTier().filter(x => isUnlocked(x));
+        }
+        showCharDetail(c);
+      }
+    });
+  });
 }
 
 // ドラッグでパン
@@ -2957,6 +3069,10 @@ function renderScene() {
   // 本文: キャラ名リンク化 → ふりがな
   bodyHtml = linkifyCharNames(bodyHtml);
   bodyHtml = applyFurigana(bodyHtml);
+  // #6 表紙シーン (isCover=true) は「タップで開幕」を明示してロードでない事を伝える
+  if (scene.isCover) {
+    bodyHtml = '<div class="story-cover-hint"><span class="story-cover-spark">✦</span><div class="story-cover-tap">タップで開幕</div><span class="story-cover-spark">✦</span></div>';
+  }
   $("#story-scene-content").innerHTML = bodyHtml;
   // キャラ名リンクのクリックハンドラ
   $("#story-scene-content").querySelectorAll('.char-link').forEach(a => {
@@ -3188,6 +3304,34 @@ $("#story-stage").addEventListener('click', e => {
   if (sel && sel.toString().length > 0) return;
   storyNext();
 });
+
+// スマホ: 左右スワイプで前後ページ (#4)
+(function setupStorySwipe() {
+  const stage = $("#story-stage");
+  if (!stage) return;
+  let touchStartX = 0, touchStartY = 0, touchStartT = 0;
+  stage.addEventListener('touchstart', (e) => {
+    if (e.touches.length !== 1) return;
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    touchStartT = Date.now();
+  }, { passive: true });
+  stage.addEventListener('touchend', (e) => {
+    if (e.changedTouches.length !== 1) return;
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    const dt = Date.now() - touchStartT;
+    // 横スワイプ: |dx| > 60px、縦は 50px以内、500ms以内
+    if (Math.abs(dx) > 60 && Math.abs(dy) < 50 && dt < 500) {
+      if (e.target.closest('button') || e.target.closest('.char-link')) return;
+      const sel = window.getSelection && window.getSelection();
+      if (sel && sel.toString().length > 0) return;
+      // 自然な感覚: 左スワイプ(dx<0) = 次へ、右スワイプ = 前へ
+      if (dx < 0) storyNext();
+      else storyPrev();
+    }
+  }, { passive: true });
+})();
 
 // ============ v1.1.3: Master Mute + BGM プレイヤー (拡張版) ============
 // BGM_LIST: labelは「メインテーマ」「第1章テーマ」など使用場面を表記、descは原曲名

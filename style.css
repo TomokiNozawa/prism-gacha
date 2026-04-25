@@ -5038,3 +5038,196 @@ body.gasshuku-mode-fantasy .fx-win {
   .gasshuku-invite-body { font-size: 13px; }
 }
 /* ===== END ===== */
+
+/* ===== STORY COVER HINT (#6 表紙UX、読み込み中ぽさを排除) ===== */
+.story-cover-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 60px 20px;
+  text-align: center;
+  animation: storyCoverFadeIn 0.6s ease;
+}
+@keyframes storyCoverFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.story-cover-spark {
+  font-size: 22px;
+  color: #fcd34d;
+  text-shadow: 0 0 14px #fcd34d;
+  animation: storyCoverSpin 3s linear infinite;
+}
+@keyframes storyCoverSpin {
+  to { transform: rotate(360deg); }
+}
+.story-cover-tap {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  background: linear-gradient(90deg, #fbbf24, #fff, #fbbf24);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: storyCoverPulse 1.5s ease-in-out infinite;
+}
+@keyframes storyCoverPulse {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+/* ===== END ===== */
+
+/* ===== RELATIONS LIST (#5 派閥別リスト表示) ===== */
+.relations-tabs {
+  display: flex;
+  gap: 6px;
+  margin: 0 14px;
+  flex-wrap: wrap;
+}
+.rel-tab {
+  background: rgba(255, 255, 255, 0.06);
+  color: #c0c4d0;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: 0.05em;
+}
+.rel-tab.active {
+  background: linear-gradient(90deg, #fbbf24, #ec4899);
+  color: #fff;
+  border-color: #fcd34d;
+  font-weight: 700;
+}
+.rel-tab:hover:not(.active) { background: rgba(255, 255, 255, 0.12); }
+.relations-list {
+  position: absolute;
+  inset: 80px 0 0 0;
+  overflow-y: auto;
+  padding: 16px 18px 60px;
+  background: rgba(15, 20, 40, 0.96);
+}
+.rel-faction {
+  margin-bottom: 22px;
+  padding: 12px 14px 10px;
+  background: rgba(20, 16, 40, 0.7);
+  border-left: 4px solid var(--fac-color, #888);
+  border-radius: 6px;
+}
+.rel-faction-head {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--fac-color, #fff);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.rel-faction-yomi {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 400;
+}
+.rel-faction-count {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.08);
+  padding: 2px 8px;
+  border-radius: 999px;
+  margin-left: auto;
+}
+.rel-char {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.rel-char.locked {
+  opacity: 0.45;
+  cursor: default;
+}
+.rel-char.unlocked:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+.rel-char-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+.rel-char-tier, .rel-other-tier {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 999px;
+  letter-spacing: 0.1em;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+.rel-tier-lr { background: linear-gradient(90deg, #ff5faa, #ffd84d, #5fffd4); color: #000; }
+.rel-tier-ur { background: linear-gradient(90deg, #ff5faa, #c87dff); color: #fff; }
+.rel-tier-ssr { background: #ffd97a; color: #000; }
+.rel-tier-sr { background: #c87dff; color: #fff; }
+.rel-tier-r { background: #6fa8ff; color: #fff; }
+.rel-char-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+}
+.rel-char-title {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+}
+.rel-char-empty {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.45);
+  padding-left: 8px;
+}
+.rel-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.rel-item {
+  font-size: 12px;
+  padding: 4px 0 4px 8px;
+  color: #c0d0e8;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  cursor: pointer;
+  border-radius: 4px;
+  padding-left: 8px;
+}
+.rel-item:hover {
+  background: rgba(251, 191, 36, 0.08);
+}
+.rel-type {
+  font-size: 11px;
+  color: #fcd34d;
+  letter-spacing: 0.04em;
+}
+.rel-role {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.55);
+}
+.rel-other {
+  color: #fff;
+  font-weight: 600;
+}
+
+@media (max-width: 720px) {
+  .relations-list { padding: 12px 10px 80px; }
+  .rel-faction { padding: 10px 12px 8px; }
+}
+/* ===== END ===== */
