@@ -2340,6 +2340,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   gap: 18px;
   align-items: stretch;
   margin: 16px 0;
+  grid-column: 1 / -1; /* hero(1fr auto)の全列スパン → 右端が通常10連と揃う */
 }
 .home-actions-row > .gasshuku-cta-block,
 .home-actions-row > .story-side-stack {
