@@ -481,6 +481,34 @@
     }
   }
 
+  // 過去ゲスト遡及アップロード: 起動時に localStorage 既存データを一度だけ Firebase に送る
+  const RETRO_FLAG = 'prism-gasshuku-retro-uploaded';
+  async function uploadRetroactiveStats() {
+    const app = getFbApp();
+    if (!app) return;
+    try {
+      if (localStorage.getItem(RETRO_FLAG) === '1') return;
+      const collected = loadCollected();
+      const entryCount = Object.keys(collected).length;
+      if (entryCount === 0) return; // 過去プレイなし → 何もしない
+      const day = todayKey();
+      const dev = getDeviceId();
+      const db = app.database();
+      const dayRef = db.ref('prism-gacha/gasshukuStats/' + day);
+      const devRef = dayRef.child('devices/' + dev);
+      // この端末を初回識別 (retroactive=true で「過去から復元」と分かる)
+      devRef.child('retroactive').set(true);
+      devRef.child('retroactiveCollectedCount').set(entryCount);
+      devRef.child('retroactiveAt').set(Date.now());
+      const uid = getCurrentUid();
+      if (uid) devRef.child('uid').set(uid);
+      localStorage.setItem(RETRO_FLAG, '1');
+      console.log('[gasshuku] retroactive upload OK (entries=' + entryCount + ')');
+    } catch (e) {
+      console.warn('[gasshuku] retro upload failed:', e);
+    }
+  }
+
   function rollAll(count) {
     // 確率は一律、重複OK
     const out = [];
@@ -634,6 +662,8 @@
     renderGasshukuGallery();
     // Firebase 認証監視を開始 (ログイン中ならクラウドから同期)
     watchAuth();
+    // 過去ゲスト遡及アップロード (Firebase初期化後に少し待ってから)
+    setTimeout(uploadRetroactiveStats, 1500);
     // Esc で合宿モーダルを閉じる (lightbox → detail → result の順で1つだけ閉じる)
     if (!document.body.dataset.gasshukuEscBound) {
       document.body.dataset.gasshukuEscBound = '1';
