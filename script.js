@@ -2226,6 +2226,8 @@ function renderCharDetail(c) {
   // 閲覧マーク(NEWを消す)
   state.galleryViewed[galleryKey(c)] = true;
   saveState();
+  // Live2D風瞬きアニメ (LRのみ、_blink.pngがあれば自動)
+  setupCharDetailBlink(c);
 }
 
 function renderCharDup(c) {
@@ -3528,6 +3530,46 @@ function _startBlinkLoop(imgEl, normalUrl, blinkUrl) {
       _blinkTimers.push(t2);
     }, delay);
     _blinkTimers.push(t1);
+  }
+  next();
+}
+
+// キャラ詳細モーダル用の瞬き (img.src スワップ版)
+let _detailBlinkTimer = null;
+function setupCharDetailBlink(c) {
+  if (_detailBlinkTimer) { clearTimeout(_detailBlinkTimer); _detailBlinkTimer = null; }
+  if (!c || !c.img) return;
+  // プロト段階: LRのみ
+  if (c.tier !== 'LR') return;
+  const imgEl = document.getElementById('char-detail-img');
+  const zoomEl = document.getElementById('char-img-zoom-img');
+  if (!imgEl) return;
+  const normalUrl = c.img;
+  const blinkUrl = normalUrl.replace(/\.(png|jpg|jpeg|webp)$/i, '_blink.$1');
+  const cached = _blinkImageCache.get(blinkUrl);
+  if (cached === 'ng') return;
+  if (cached === 'ok') { _startDetailBlinkLoop(imgEl, zoomEl, normalUrl, blinkUrl); return; }
+  const probe = new Image();
+  probe.onload = () => { _blinkImageCache.set(blinkUrl, 'ok'); _startDetailBlinkLoop(imgEl, zoomEl, normalUrl, blinkUrl); };
+  probe.onerror = () => { _blinkImageCache.set(blinkUrl, 'ng'); };
+  probe.src = blinkUrl;
+}
+function _startDetailBlinkLoop(imgEl, zoomEl, normalUrl, blinkUrl) {
+  function next() {
+    const delay = 4000 + Math.random() * 3000;
+    _detailBlinkTimer = setTimeout(() => {
+      // 詳細モーダルが閉じていれば停止
+      const modal = document.getElementById('char-detail');
+      if (!modal || !modal.classList.contains('active')) return;
+      imgEl.src = blinkUrl;
+      if (zoomEl) zoomEl.src = blinkUrl;
+      _detailBlinkTimer = setTimeout(() => {
+        if (!modal || !modal.classList.contains('active')) return;
+        imgEl.src = normalUrl;
+        if (zoomEl) zoomEl.src = normalUrl;
+        next();
+      }, 180);
+    }, delay);
   }
   next();
 }
