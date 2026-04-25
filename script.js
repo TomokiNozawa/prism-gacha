@@ -3229,6 +3229,7 @@ async function openStory(storyId) {
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const md = await resp.text();
     storyScenes = parseStoryToScenes(md);
+    precomputeFirstAppearances();
     storyIdx = restoreStoryProgress(storyId, storyScenes.length);
     renderScene();
   } catch (e) {
@@ -3330,9 +3331,10 @@ function renderScene() {
       ? '<p>' + scene.contentMd.replace(/\n\n+/g, '</p><p>').replace(/\n/g, '<br>') + '</p>'
       : '';
   }
-  // 本文: キャラ名リンク化 → ふりがな
+  // 本文: キャラ名リンク化 → ふりがな → 初登場キャラのカットイン挿入
   bodyHtml = linkifyCharNames(bodyHtml);
   bodyHtml = applyFurigana(bodyHtml);
+  bodyHtml = injectStoryCutins(bodyHtml, storyIdx);
   // #6 表紙シーン (isCover) と中表紙 (isAct) は「タップで開幕」を明示
   if (scene.isCover) {
     bodyHtml = '<div class="story-cover-hint"><span class="story-cover-spark">✦</span><div class="story-cover-tap">タップで開幕</div><span class="story-cover-spark">✦</span></div>';
@@ -3371,6 +3373,8 @@ function renderScene() {
   });
   // 登場キャラ立ち絵
   renderSceneChars(scene);
+  // カットイン画像の瞬きアニメ (LRのみ、 _blink.png があれば自動)
+  setupCutinBlinks();
   $("#story-bg").className = 'story-bg bg-' + (scene.bg || 'default');
   $("#story-prev").disabled = storyIdx === 0;
   $("#story-next").disabled = storyIdx === storyScenes.length - 1;
@@ -3554,6 +3558,98 @@ function setupCharDetailBlink(c) {
   probe.onerror = () => { _blinkImageCache.set(blinkUrl, 'ng'); };
   probe.src = blinkUrl;
 }
+// ────────── ストーリー本文中のキャラ初登場カットイン (B3+C1: 中央表示・LRのみ) ──────────
+let _firstAppearanceMap = new Map(); // charName → 初出シーンindex
+function precomputeFirstAppearances() {
+  _firstAppearanceMap.clear();
+  if (!storyScenes || storyScenes.length === 0) return;
+  // C1段階: LR のみ対象
+  const targets = (POOL && POOL.LR) || [];
+  for (let i = 0; i < storyScenes.length; i++) {
+    const s = storyScenes[i];
+    const text = (s.title || '') + '\n' + (s.contentMd || '');
+    for (const c of targets) {
+      if (_firstAppearanceMap.has(c.name)) continue;
+      const tokens = c.name.split(/[\s ]/);
+      const lastToken = tokens[tokens.length - 1];
+      if (text.includes(c.name) || (lastToken !== c.name && text.includes(lastToken))) {
+        _firstAppearanceMap.set(c.name, i);
+      }
+    }
+  }
+}
+function _buildCutinHtml(c) {
+  const tier = c.tier ? c.tier.toLowerCase() : 'lr';
+  return `<div class="story-cutin" data-tier="${tier}" data-name="${escapeHtml(c.name)}">` +
+    `<div class="story-cutin-newcomer">✦ 新登場</div>` +
+    `<img class="story-cutin-img" src="${c.img}" alt="${escapeHtml(c.name)}" loading="lazy">` +
+    `<div class="story-cutin-name">${escapeHtml(c.name)}</div>` +
+    (c.title ? `<div class="story-cutin-title">${escapeHtml(c.title)}</div>` : '') +
+    `</div>`;
+}
+function injectStoryCutins(bodyHtml, sceneIdx) {
+  const targets = (POOL && POOL.LR) || [];
+  const newcomers = targets
+    .filter(c => _firstAppearanceMap.get(c.name) === sceneIdx)
+    .map(c => ({ ...c, tier: 'LR' }));
+  if (newcomers.length === 0) return bodyHtml;
+  for (const c of newcomers) {
+    const tokens = c.name.split(/[\s ]/);
+    const lastToken = tokens[tokens.length - 1];
+    const candidates = [c.name, lastToken].filter((v, i, a) => v && a.indexOf(v) === i);
+    let injected = false;
+    for (const cand of candidates) {
+      const esc = cand.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const re = new RegExp(`<p[^>]*>(?:(?!<\\/p>).)*?${esc}`);
+      const m = bodyHtml.match(re);
+      if (m && m.index >= 0) {
+        bodyHtml = bodyHtml.slice(0, m.index) + _buildCutinHtml(c) + bodyHtml.slice(m.index);
+        injected = true;
+        break;
+      }
+    }
+    if (!injected) {
+      // 段落単位で見つからなければ本文先頭に挿入
+      bodyHtml = _buildCutinHtml(c) + bodyHtml;
+    }
+  }
+  return bodyHtml;
+}
+let _cutinBlinkTimers = [];
+function setupCutinBlinks() {
+  _cutinBlinkTimers.forEach(id => clearTimeout(id));
+  _cutinBlinkTimers = [];
+  document.querySelectorAll('.story-cutin[data-tier="lr"] .story-cutin-img').forEach(imgEl => {
+    const normalUrl = imgEl.getAttribute('src');
+    if (!normalUrl) return;
+    const blinkUrl = normalUrl.replace(/\.(png|jpg|jpeg|webp)$/i, '_blink.$1');
+    const cached = _blinkImageCache.get(blinkUrl);
+    if (cached === 'ng') return;
+    if (cached === 'ok') { _startCutinBlinkLoop(imgEl, normalUrl, blinkUrl); return; }
+    const probe = new Image();
+    probe.onload = () => { _blinkImageCache.set(blinkUrl, 'ok'); _startCutinBlinkLoop(imgEl, normalUrl, blinkUrl); };
+    probe.onerror = () => { _blinkImageCache.set(blinkUrl, 'ng'); };
+    probe.src = blinkUrl;
+  });
+}
+function _startCutinBlinkLoop(imgEl, normalUrl, blinkUrl) {
+  function next() {
+    const delay = 4000 + Math.random() * 3000;
+    const t1 = setTimeout(() => {
+      if (!document.body.contains(imgEl)) return;
+      imgEl.src = blinkUrl;
+      const t2 = setTimeout(() => {
+        if (!document.body.contains(imgEl)) return;
+        imgEl.src = normalUrl;
+        next();
+      }, 180);
+      _cutinBlinkTimers.push(t2);
+    }, delay);
+    _cutinBlinkTimers.push(t1);
+  }
+  next();
+}
+
 function _startDetailBlinkLoop(imgEl, zoomEl, normalUrl, blinkUrl) {
   function next() {
     const delay = 4000 + Math.random() * 3000;
