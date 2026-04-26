@@ -757,7 +757,7 @@
     const pool = POOL.filter(c => isLoggedIn || !c.accountOnly);
     const lrChars = pool.filter(c => c.tier === 'LR');
     const urChars = pool.filter(c => c.tier !== 'LR');
-    const LR_RATE_EACH = 0.015;
+    const LR_RATE_EACH = 0.01;  // 各1% (合計2%) — 2026-04-26 1.5%→1%に調整
     const out = [];
     for (let i = 0; i < count; i++) {
       const lrTotal = lrChars.length * LR_RATE_EACH;
@@ -839,9 +839,22 @@
       // 統計ログ (Firebase 公開パス)
       logRollToStats(count);
 
+      // LR排出時のタップ待ち (LR出現は希少なので必ず一度立ち止まらせる)
+      async function waitTapForLR(item) {
+        if (!item || item.tier !== 'LR') return;
+        if (typeof showHintTap === 'function') showHintTap();
+        if (typeof skipRequested !== 'undefined') skipRequested = false;
+        const start = Date.now();
+        while (typeof skipRequested !== 'undefined' && !skipRequested) {
+          await new Promise(r => setTimeout(r, 80));
+          if (Date.now() - start > 30000) break; // 安全弁
+        }
+        if (typeof hideHintTap === 'function') hideHintTap();
+      }
       if (count === 1 || results.length === 1) {
         // 単発: doSingle 風
         await summonOne(results[0]);
+        await waitTapForLR(results[0]);
       } else {
         // 10連: doTen 風 — 各召喚で clearStage、最後にフル演出
         const bestIdx = Math.floor(Math.random() * results.length);
@@ -864,6 +877,7 @@
           resizeCanvas();
           if (typeof skipRequested !== 'undefined') skipRequested = false;
           await summonOne(sequenced[i], { showLadder: true });
+          await waitTapForLR(sequenced[i]);
         }
 
         // 最後の1体: フル演出
