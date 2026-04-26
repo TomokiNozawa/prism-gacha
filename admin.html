@@ -162,7 +162,7 @@ body {
 }
 .users-row {
   display: grid;
-  grid-template-columns: minmax(140px, 1.8fr) 0.8fr 0.85fr 0.7fr 0.7fr 0.85fr 1.1fr 1.3fr;
+  grid-template-columns: minmax(140px, 1.6fr) 0.7fr 0.8fr 0.6fr 0.6fr 0.85fr 1.0fr 1.15fr 1.15fr;
   gap: 8px;
   padding: 14px 18px;
   border-bottom: 1px solid rgba(200, 180, 255, 0.08);
@@ -214,8 +214,8 @@ body {
     -webkit-overflow-scrolling: touch;
   }
   .users-row {
-    grid-template-columns: 140px 70px 80px 65px 60px 80px 100px 110px;
-    min-width: 805px;
+    grid-template-columns: 140px 60px 75px 55px 55px 80px 95px 100px 110px;
+    min-width: 870px;
   }
   .users-head { position: relative; }
   .admin-tab { padding: 8px 12px; font-size: 12px; }
@@ -469,6 +469,7 @@ body {
         <div class="col-dup" data-sort="dup">凸</div>
         <div class="col-gasshuku" data-sort="gasshuku">🎌召喚数</div>
         <div class="col-story" data-sort="story">📖物語</div>
+        <div class="col-registered" data-sort="registered">📅初回</div>
         <div class="col-lastlogin sort-desc" data-sort="lastlogin">最終ログイン</div>
       </div>
       <div id="users-body"></div>
@@ -622,6 +623,9 @@ async function loadAll() {
           };
         }
         const g = guestDevices[devId];
+        // firstAt 更新 (この日のday key を date に変換、 一番古い日付を保持)
+        const dayMs = new Date(day + 'T00:00:00+09:00').getTime();
+        if (!isNaN(dayMs)) g.firstAt = Math.min(g.firstAt, dayMs);
         g.totalRolls += (devData.totalRolls || 0);
         // 召喚数: 優先順位 → totalSummons (新規記録) > totalRolls × ratio (按分推定) > retroactiveCollectedCount (遡及記録の最低保証)
         let summons;
@@ -713,6 +717,7 @@ function renderUsers(users, uidToNickname, guestDevices) {
     }
     const dup = Object.values(s.dupCounts || {}).reduce((a, b) => a + b, 0);
     const lastAt = u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '-';
+    const registeredAt = u.createdAt ? new Date(u.createdAt).toLocaleString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '-';
     sumTotal += total;
     sumUR += ur;
     if (lr > 0) lrHolders++;
@@ -723,6 +728,7 @@ function renderUsers(users, uidToNickname, guestDevices) {
       uid: u.uid, nickname, nicknameDim, isMe: u.uid === currentUid,
       total, ur, lr, dup, gasshukuCnt, story,
       lastAt, lastAtTs: u.lastLoginAt || 0,
+      registeredAt, registeredAtTs: u.createdAt || 0,
       isGuest: false, _u: u, _s: s,
     });
   });
@@ -735,6 +741,9 @@ function renderUsers(users, uidToNickname, guestDevices) {
       guestCount++;
       const lastAt = g.lastAt ? new Date(g.lastAt).toLocaleString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '-';
       const idShort = g.deviceId.slice(-6);
+      const guestRegisteredAt = (g.firstAt && g.firstAt !== Number.POSITIVE_INFINITY)
+        ? new Date(g.firstAt).toLocaleString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+        : '-';
       userRowData.push({
         isGuest: true, deviceId: g.deviceId, idShort, retroactive: g.retroactive,
         nickname: `🎌 ゲスト #${idShort}`, nicknameDim: true,
@@ -742,6 +751,7 @@ function renderUsers(users, uidToNickname, guestDevices) {
         gasshukuCnt: g.totalSummons || 0,
         story: { text: '—', sortKey: -1, dim: true },
         lastAt, lastAtTs: g.lastAt || 0,
+        registeredAt: guestRegisteredAt, registeredAtTs: (g.firstAt && g.firstAt !== Number.POSITIVE_INFINITY) ? g.firstAt : 0,
         days: g.days,
       });
     });
@@ -760,6 +770,7 @@ function renderUsers(users, uidToNickname, guestDevices) {
       case 'dup': av = a.dup; bv = b.dup; break;
       case 'gasshuku': av = a.gasshukuCnt; bv = b.gasshukuCnt; break;
       case 'story': av = a.story.sortKey; bv = b.story.sortKey; break;
+      case 'registered': av = a.registeredAtTs; bv = b.registeredAtTs; break;
       case 'lastlogin': default: av = a.lastAtTs; bv = b.lastAtTs; break;
     }
     if (av < bv) return sortDir === 'asc' ? -1 : 1;
@@ -783,6 +794,7 @@ function renderUsers(users, uidToNickname, guestDevices) {
         <div class="u-count col-dup dim">—</div>
         <div class="u-count col-gasshuku ${d.gasshukuCnt === 0 ? 'dim' : ''}">${d.gasshukuCnt}</div>
         <div class="u-story dim">—</div>
+        <div class="u-lastlogin col-registered">${d.registeredAt}</div>
         <div class="u-lastlogin col-lastlogin">${d.lastAt}</div>
       `;
       const detail = document.createElement('div');
@@ -808,6 +820,7 @@ function renderUsers(users, uidToNickname, guestDevices) {
         <div class="u-count col-dup ${d.dup === 0 ? 'dim' : ''}">${d.dup}</div>
         <div class="u-count col-gasshuku ${d.gasshukuCnt === 0 ? 'dim' : ''}">${d.gasshukuCnt}</div>
         <div class="u-story ${d.story.dim ? 'dim' : ''}">${d.story.text}</div>
+        <div class="u-lastlogin col-registered">${d.registeredAt}</div>
         <div class="u-lastlogin col-lastlogin">${d.lastAt}</div>
       `;
       const detail = buildDetail(d._u, d._s);
