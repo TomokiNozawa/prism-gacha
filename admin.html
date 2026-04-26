@@ -637,21 +637,13 @@ async function loadAll() {
         g.days.add(day);
       }
     }
-    // uid別 合宿召喚数を集計 (登録ユーザー向け)
-    // device別 totalSummons があれば優先、 なければ day全体の totalSummons/totalRolls 比から device.totalRolls を按分推定
-    // (2026-04-27以前は device別 totalSummons 未記録、 day別比で推定救済)
+    // uid別 合宿召喚数: 各ユーザーの gasshukuDups の値合計 = 累計召喚数 (recordDupは引くたびに+1)
+    // recordDup の仕様より sum(dupCounts.values()) = 引き回数累計 = 召喚数そのもの (正確)
     const gasshukuByUid = {};
-    for (const dayData of Object.values(allStats)) {
-      const dayRolls = dayData?.totalRolls || 0;
-      const daySummons = dayData?.totalSummons || 0;
-      const ratio = dayRolls > 0 ? daySummons / dayRolls : 1;
-      for (const [devId, devData] of Object.entries(dayData?.devices || {})) {
-        if (!devData.uid) continue;
-        const summons = (devData.totalSummons !== undefined && devData.totalSummons !== null)
-          ? devData.totalSummons
-          : Math.round((devData.totalRolls || 0) * ratio);
-        gasshukuByUid[devData.uid] = (gasshukuByUid[devData.uid] || 0) + summons;
-      }
+    for (const [uid, u] of Object.entries(users)) {
+      const dups = u.gasshukuDups || {};
+      const sum = Object.values(dups).reduce((a, b) => a + (typeof b === 'number' ? b : 0), 0);
+      gasshukuByUid[uid] = sum;
     }
     window._gasshukuByUid = gasshukuByUid;
     window._lastRenderArgs = [users, uidToNickname, guestDevices];
