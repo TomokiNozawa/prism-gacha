@@ -1406,6 +1406,17 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   color: #111; font-weight: 700; letter-spacing: 0.05em;
   border: none;
 }
+/* 環境切替ボタン (devで本番へ / 本番でdevへ) */
+.gallery-btn.env-switch.env-prod {
+  background: linear-gradient(135deg, #ff9966, #ff5e62);
+  color: #fff;
+  box-shadow: 0 0 8px rgba(255, 94, 98, 0.55);
+}
+.gallery-btn.env-switch.env-dev {
+  background: linear-gradient(135deg, #5fbcff, #6e7bff);
+  color: #fff;
+  box-shadow: 0 0 8px rgba(95, 188, 255, 0.55);
+}
 
 .gallery-modal {
   position: fixed; inset: 0; z-index: 150;

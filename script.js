@@ -4758,6 +4758,13 @@ function updateAccountButton() {
   if (adminBtn) {
     adminBtn.style.display = (authUser && isPrismAdmin) ? '' : 'none';
   }
+  // 環境切替ボタン
+  const isDevEnv = /(^|\.)dev\.prismaera\.pages\.dev$/i.test(location.host);
+  const isProdEnv = location.host === 'prismaera.pages.dev';
+  const envProdBtn = document.getElementById('btn-env-prod');
+  const envDevBtn = document.getElementById('btn-env-dev');
+  if (envProdBtn) envProdBtn.style.display = isDevEnv ? '' : 'none';
+  if (envDevBtn) envDevBtn.style.display = (isProdEnv && authUser && isPrismAdmin) ? '' : 'none';
 }
 
 let isPrismAdmin = false;
