@@ -5188,6 +5188,29 @@ body.gasshuku-modal-open {
   flex-direction: column;
   gap: 8px;
 }
+/* 結果カード NEW + 凸バッジ */
+.gasshuku-result-new, .gasshuku-result-dup {
+  position: absolute;
+  top: 6px; right: 6px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  z-index: 2;
+  pointer-events: none;
+}
+.gasshuku-result-new {
+  background: linear-gradient(90deg, #34d399, #06b6d4);
+  color: #fff;
+  box-shadow: 0 0 8px rgba(52, 211, 153, 0.55);
+}
+.gasshuku-result-dup {
+  background: linear-gradient(90deg, #c87dff, #ff5e9a);
+  color: #fff;
+  box-shadow: 0 0 6px rgba(200, 125, 255, 0.5);
+}
+
 /* 結果モーダル下部 アクションボタン (もう一度引く + 閉じる) */
 .gasshuku-result-actions {
   display: flex; gap: 12px;

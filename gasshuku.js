@@ -623,9 +623,14 @@
     results.forEach(r => {
       const card = document.createElement('div');
       card.className = 'gasshuku-result-card' + (r.tier === 'LR' ? ' tier-lr' : '');
+      // NEW or 凸獲得バッジ (dupTotal: 1=初獲得=NEW, 2=1凸目, 3=2凸目, ...)
+      const dupBadge = r.isNew
+        ? '<div class="gasshuku-result-new">NEW</div>'
+        : (r.dupTotal && r.dupTotal >= 2 ? `<div class="gasshuku-result-dup">+${r.dupTotal - 1}凸</div>` : '');
       card.innerHTML = `
         <img class="gasshuku-result-img" src="${r.img}" alt="${r.name}">
         <div class="gasshuku-result-tier ${r.tier === 'LR' ? 'tier-lr' : ''}">${r.tier || 'UR'}</div>
+        ${dupBadge}
         <div class="gasshuku-result-name">${r.name}</div>
         <div class="gasshuku-result-real">${r._gasshukuReal || ''}</div>
       `;
@@ -856,9 +861,16 @@
       window.__gasshukuLastResults = results;
       window.__gasshukuLastImgMode = imgMode;
       // 図鑑記録 (重複なし keyで) + 凸記録 (重複あり、 同じキャラ複数引きで凸増加)
+      // 記録前に「初回かどうか」 (isNew) と「累計凸数」 (dupTotal) を保存して結果モーダルで表示
+      const beforeCollected = loadCollected();
       results.forEach(r => {
-        recordCollected(r._gasshukuChar, r._gasshukuMode);
-        recordDup(r._gasshukuChar.id);
+        const c = r._gasshukuChar;
+        const mode = r._gasshukuMode;
+        const k = `${c.id}_${mode}`;
+        r.isNew = !beforeCollected[k];
+        recordCollected(c, mode);
+        recordDup(c.id);
+        r.dupTotal = getDup(c.id); // 記録後の累計 (1=初獲得, 2=1凸目, 3=2凸目...)
       });
       // 統計ログ (Firebase 公開パス)
       logRollToStats(count);
