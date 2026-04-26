@@ -295,6 +295,7 @@
       });
     });
     if (cntEl) cntEl.textContent = String(count);
+    setTimeout(() => { try { setupGasshukuBlink(grid); } catch(e){} }, 100);
   }
 
   // ====== 詳細モーダル (合宿用、独立) ======
@@ -370,6 +371,7 @@
     document.querySelectorAll('.gasshuku-detail-tbtn').forEach(b => {
       b.classList.toggle('active', b.dataset.mode === mode);
     });
+    setTimeout(() => { try { setupGasshukuBlink(document.getElementById('gasshuku-detail-modal')); } catch(e){} }, 150);
   }
   function openDetail(c, defaultMode) {
     currentDetail = c;
@@ -457,6 +459,7 @@
     lb.removeAttribute('hidden');
     lb.classList.add('active');
     document.getElementById('gasshuku-lightbox-img').src = imgPath(c, mode);
+    setTimeout(() => { try { setupGasshukuBlink(lb); } catch(e){} }, 150);
   }
   function closeLightbox() {
     const lb = document.getElementById('gasshuku-lightbox');
@@ -509,6 +512,7 @@
       card.addEventListener('click', () => openDetail(r._gasshukuChar, r._gasshukuMode));
       grid.appendChild(card);
     });
+    setTimeout(() => { try { setupGasshukuBlink(grid); } catch(e){} }, 150);
   }
   function closeResultModal() {
     const m = document.getElementById('gasshuku-result-modal');
@@ -837,6 +841,68 @@
       });
     }
   }
+  // ────────────── キャラ瞬きアニメーション (合宿ガチャ用) ──────────────
+  // 命名規則: <id>_<slug>_fantasy.png + <id>_<slug>_fantasy_blink.png
+  // 検出: _blink.png が読めれば瞬き有効化、 そうでなければ静止
+  const _gasshukuBlinkCache = new Map();
+  const _gasshukuBlinkTimers = new Map();
+  function setupGasshukuBlink(rootEl) {
+    const root = rootEl || document;
+    const imgs = root.querySelectorAll('img[src*="/images/gasshuku/"]');
+    imgs.forEach(imgEl => {
+      const src = imgEl.getAttribute('src') || imgEl.src;
+      if (!src) return;
+      // _blink.png 自体は対象外
+      if (src.includes('_blink.')) return;
+      // 既setup&同src → skip
+      if (imgEl.dataset.blinkUrl === src) return;
+      // src変更時 → 古timer解除
+      if (_gasshukuBlinkTimers.has(imgEl)) {
+        clearTimeout(_gasshukuBlinkTimers.get(imgEl));
+        _gasshukuBlinkTimers.delete(imgEl);
+      }
+      imgEl.dataset.blinkUrl = src;
+      const blinkUrl = src.replace(/\.(png|jpg|jpeg|webp)$/i, '_blink.$1');
+      const cached = _gasshukuBlinkCache.get(blinkUrl);
+      if (cached === 'ng') return;
+      if (cached === 'ok') { _startGasshukuBlinkLoop(imgEl, src, blinkUrl); return; }
+      const probe = new Image();
+      probe.onload = () => {
+        _gasshukuBlinkCache.set(blinkUrl, 'ok');
+        if (imgEl.dataset.blinkUrl === src) {
+          _startGasshukuBlinkLoop(imgEl, src, blinkUrl);
+        }
+      };
+      probe.onerror = () => { _gasshukuBlinkCache.set(blinkUrl, 'ng'); };
+      probe.src = blinkUrl + (blinkUrl.includes('?') ? '&' : '?') + '_p=' + Date.now();
+    });
+  }
+  function _startGasshukuBlinkLoop(imgEl, normalUrl, blinkUrl) {
+    function next() {
+      const delay = 1800 + Math.random() * 1700; // 1.8〜3.5秒
+      const t1 = setTimeout(() => {
+        if (!document.body.contains(imgEl) || imgEl.dataset.blinkUrl !== normalUrl) {
+          _gasshukuBlinkTimers.delete(imgEl);
+          return;
+        }
+        imgEl.src = blinkUrl;
+        const t2 = setTimeout(() => {
+          if (!document.body.contains(imgEl) || imgEl.dataset.blinkUrl !== normalUrl) {
+            _gasshukuBlinkTimers.delete(imgEl);
+            return;
+          }
+          imgEl.src = normalUrl;
+          next();
+        }, 180);
+        _gasshukuBlinkTimers.set(imgEl, t2);
+      }, delay);
+      _gasshukuBlinkTimers.set(imgEl, t1);
+    }
+    next();
+  }
+  // expose for caller-side use (renderGallery等で参照)
+  window.__gasshukuSetupBlink = setupGasshukuBlink;
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
