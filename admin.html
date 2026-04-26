@@ -467,7 +467,7 @@ body {
         <div class="col-ur" data-sort="ur">UR</div>
         <div class="col-lr" data-sort="lr">LR</div>
         <div class="col-dup" data-sort="dup">凸</div>
-        <div class="col-gasshuku" data-sort="gasshuku">🎌合宿</div>
+        <div class="col-gasshuku" data-sort="gasshuku">🎌召喚数</div>
         <div class="col-story" data-sort="story">📖物語</div>
         <div class="col-lastlogin sort-desc" data-sort="lastlogin">最終ログイン</div>
       </div>
@@ -602,14 +602,18 @@ async function loadAll() {
     }
     // gasshukuStats から全 device を集約 (uid 持ちは ログインユーザーと結合、 uid 無しはゲストエントリ)
     const allStats = statsSnap.val() || {}; // {YYYY-MM-DD: {totalRolls, devices: {deviceId: {...}}}}
-    const guestDevices = {}; // deviceId -> {totalRolls, firstAt, lastAt, days}
+    const guestDevices = {}; // deviceId -> {totalRolls, totalSummons, firstAt, lastAt, days}
     for (const [day, dayData] of Object.entries(allStats)) {
+      const dayRolls = dayData?.totalRolls || 0;
+      const daySummons = dayData?.totalSummons || 0;
+      const ratio = dayRolls > 0 ? daySummons / dayRolls : 1;
       const devices = dayData?.devices || {};
       for (const [devId, devData] of Object.entries(devices)) {
         if (!guestDevices[devId]) {
           guestDevices[devId] = {
             deviceId: devId,
             totalRolls: 0,
+            totalSummons: 0,
             uid: null,
             firstAt: Number.POSITIVE_INFINITY,
             lastAt: 0,
@@ -619,6 +623,11 @@ async function loadAll() {
         }
         const g = guestDevices[devId];
         g.totalRolls += (devData.totalRolls || 0);
+        // 召喚数: device別記録あれば優先、 なければ day比で按分推定
+        const summons = (devData.totalSummons !== undefined && devData.totalSummons !== null)
+          ? devData.totalSummons
+          : Math.round((devData.totalRolls || 0) * ratio);
+        g.totalSummons += summons;
         if (devData.uid) g.uid = devData.uid;
         if (devData.lastRollAt) g.lastAt = Math.max(g.lastAt, devData.lastRollAt);
         if (devData.retroactiveAt) {
@@ -628,13 +637,20 @@ async function loadAll() {
         g.days.add(day);
       }
     }
-    // uid別 合宿ガチャ回数を集計 (登録ユーザー向け)
+    // uid別 合宿召喚数を集計 (登録ユーザー向け)
+    // device別 totalSummons があれば優先、 なければ day全体の totalSummons/totalRolls 比から device.totalRolls を按分推定
+    // (2026-04-27以前は device別 totalSummons 未記録、 day別比で推定救済)
     const gasshukuByUid = {};
     for (const dayData of Object.values(allStats)) {
+      const dayRolls = dayData?.totalRolls || 0;
+      const daySummons = dayData?.totalSummons || 0;
+      const ratio = dayRolls > 0 ? daySummons / dayRolls : 1;
       for (const [devId, devData] of Object.entries(dayData?.devices || {})) {
-        if (devData.uid) {
-          gasshukuByUid[devData.uid] = (gasshukuByUid[devData.uid] || 0) + (devData.totalRolls || 0);
-        }
+        if (!devData.uid) continue;
+        const summons = (devData.totalSummons !== undefined && devData.totalSummons !== null)
+          ? devData.totalSummons
+          : Math.round((devData.totalRolls || 0) * ratio);
+        gasshukuByUid[devData.uid] = (gasshukuByUid[devData.uid] || 0) + summons;
       }
     }
     window._gasshukuByUid = gasshukuByUid;
@@ -723,7 +739,7 @@ function renderUsers(users, uidToNickname, guestDevices) {
         isGuest: true, deviceId: g.deviceId, idShort, retroactive: g.retroactive,
         nickname: `🎌 ゲスト #${idShort}`, nicknameDim: true,
         total: 0, ur: 0, lr: 0, dup: 0,
-        gasshukuCnt: g.totalRolls || 0,
+        gasshukuCnt: g.totalSummons || 0,
         story: { text: '—', sortKey: -1, dim: true },
         lastAt, lastAtTs: g.lastAt || 0,
         days: g.days,
@@ -774,7 +790,7 @@ function renderUsers(users, uidToNickname, guestDevices) {
       detail.innerHTML = `
         <div style="padding:14px 18px;color:#c0c4d0;font-size:13px">
           <div><b>device_id</b>: <code style="font-size:11px">${d.deviceId}</code></div>
-          <div><b>合宿ガチャ実行回数</b>: ${d.gasshukuCnt}</div>
+          <div><b>合宿ガチャ召喚数</b>: ${d.gasshukuCnt}</div>
           <div><b>プレイ日数</b>: ${d.days ? d.days.size : 0}日 (${d.days ? [...d.days].sort().join(', ') : ''})</div>
           <div><b>最終操作</b>: ${d.lastAt}</div>
           ${d.retroactive ? '<div style="color:#fcd34d;margin-top:6px">※ 過去ゲスト遡及アップロード</div>' : ''}

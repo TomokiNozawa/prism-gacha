@@ -742,6 +742,7 @@
       // device エントリ
       const devRef = dayRef.child('devices/' + dev);
       devRef.child('totalRolls').transaction(c => (c || 0) + 1);
+      devRef.child('totalSummons').transaction(c => (c || 0) + count);  // 召喚数も記録 (2026-04-27 追加: admin集計用)
       devRef.child('lastRollAt').set(Date.now());
       const uid = getCurrentUid();
       if (uid) devRef.child('uid').set(uid);
