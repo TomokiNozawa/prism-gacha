@@ -3897,6 +3897,7 @@ const BGM_LIST = [
   { id: 'dawn',  label: 'メインテーマ', desc: 'Prism Dawn (夜明けの希望)',  file: '/assets/bgm/home.mp3' },
   { id: 'watch', label: '第1章テーマ',  desc: 'Prism Watch (三柱の夜警)',   file: '/assets/bgm/prism-watch.mp3' },
   { id: 'tide',  label: '第2章テーマ',  desc: 'Prism Tide (虹の潮)',         file: '/assets/bgm/prism-tide.mp3' },
+  { id: 'rift',  label: '戦闘テーマ',    desc: 'Prismatic Rift Overture (虹裂の序曲)', file: '/assets/bgm/Prismatic Rift Overture.mp3' },
 ];
 const bgmAudio = document.getElementById("bgm-home");
 
@@ -3967,6 +3968,32 @@ function loadBgmSrc(id) {
     }
   }
   bgmAudio.loop = (bgmRepeat === 'one');
+  // Media Session API: モバイルロック画面/PWAでの曲名表示
+  // タイトル表示形式: "Prismaera -[曲名]-"
+  if ('mediaSession' in navigator) {
+    try {
+      const songName = (track.desc || '').replace(/\s*\([^)]*\)\s*$/, '').trim() || track.label;
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: `Prismaera -${songName}-`,
+        artist: 'Prismaera',
+        album: '虹霊界の物語',
+        artwork: [
+          { src: '/images/icons/icon-180.png', sizes: '180x180', type: 'image/png' },
+          { src: '/images/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: '/images/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+        ],
+      });
+      // 一時停止/再生ハンドラもMedia Sessionに登録 (ロック画面の操作対応)
+      navigator.mediaSession.setActionHandler('play', () => { bgmAudio.play().catch(()=>{}); });
+      navigator.mediaSession.setActionHandler('pause', () => { bgmAudio.pause(); });
+      navigator.mediaSession.setActionHandler('nexttrack', () => {
+        if (typeof cycleBgm === 'function') cycleBgm(1);
+      });
+      navigator.mediaSession.setActionHandler('previoustrack', () => {
+        if (typeof cycleBgm === 'function') cycleBgm(-1);
+      });
+    } catch (e) { /* MediaMetadata 未対応環境は静かに無視 */ }
+  }
 }
 
 function playBgm(id) {
