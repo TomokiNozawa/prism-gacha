@@ -854,52 +854,73 @@
   const _gasshukuBlinkTimers = new Map();
   function setupGasshukuBlink(rootEl) {
     const root = rootEl || document;
-    const imgs = root.querySelectorAll('img[src*="/images/gasshuku/"]');
-    imgs.forEach(imgEl => {
-      const src = imgEl.getAttribute('src') || imgEl.src;
-      if (!src) return;
-      if (src.includes('_blink.')) return;
-      if (imgEl.dataset.blinkUrl === src) return;
-      if (_gasshukuBlinkTimers.has(imgEl)) {
-        clearTimeout(_gasshukuBlinkTimers.get(imgEl));
-        _gasshukuBlinkTimers.delete(imgEl);
-      }
-      imgEl.dataset.blinkUrl = src;
-      const blinkUrl = src.replace(/\.(png|jpg|jpeg|webp)$/i, '_blink.$1');
-      const cached = _gasshukuBlinkCache.get(blinkUrl);
-      if (cached === 'ng') return;
-      if (cached === 'ok') { _startGasshukuBlinkLoop(imgEl, src, blinkUrl); return; }
-      const probe = new Image();
-      probe.onload = () => {
-        _gasshukuBlinkCache.set(blinkUrl, 'ok');
-        if (imgEl.dataset.blinkUrl === src) {
-          _startGasshukuBlinkLoop(imgEl, src, blinkUrl);
-        }
-      };
-      probe.onerror = () => { _gasshukuBlinkCache.set(blinkUrl, 'ng'); };
-      probe.src = blinkUrl + (blinkUrl.includes('?') ? '&' : '?') + '_p=' + Date.now();
+    // <img> 要素 (図鑑/詳細/結果モーダル等)
+    root.querySelectorAll('img[src*="/images/gasshuku/"]').forEach(imgEl => {
+      _setupBlinkOne(imgEl, 'img');
+    });
+    // background-image を持つ要素 (ガチャ演出カード等、 div.style="background-image:url(...)")
+    root.querySelectorAll('[style*="/images/gasshuku/"]').forEach(bgEl => {
+      _setupBlinkOne(bgEl, 'bg');
     });
   }
-  function _startGasshukuBlinkLoop(imgEl, normalUrl, blinkUrl) {
+  function _setupBlinkOne(el, mode) {
+    let src;
+    if (mode === 'img') {
+      src = el.getAttribute('src') || el.src;
+    } else {
+      const m = (el.getAttribute('style') || '').match(/background-image\s*:\s*url\(['"]?([^'")]+)['"]?\)/);
+      if (!m) return;
+      src = m[1];
+    }
+    if (!src || src.includes('_blink.')) return;
+    if (el.dataset.blinkUrl === src) return;
+    if (_gasshukuBlinkTimers.has(el)) {
+      clearTimeout(_gasshukuBlinkTimers.get(el));
+      _gasshukuBlinkTimers.delete(el);
+    }
+    el.dataset.blinkUrl = src;
+    el.dataset.blinkMode = mode;
+    const blinkUrl = src.replace(/\.(png|jpg|jpeg|webp)$/i, '_blink.$1');
+    const cached = _gasshukuBlinkCache.get(blinkUrl);
+    if (cached === 'ng') return;
+    if (cached === 'ok') { _startGasshukuBlinkLoop(el, src, blinkUrl, mode); return; }
+    const probe = new Image();
+    probe.onload = () => {
+      _gasshukuBlinkCache.set(blinkUrl, 'ok');
+      if (el.dataset.blinkUrl === src) {
+        _startGasshukuBlinkLoop(el, src, blinkUrl, mode);
+      }
+    };
+    probe.onerror = () => { _gasshukuBlinkCache.set(blinkUrl, 'ng'); };
+    probe.src = blinkUrl + (blinkUrl.includes('?') ? '&' : '?') + '_p=' + Date.now();
+  }
+  function _applyBlinkSrc(el, url, mode) {
+    if (mode === 'img') {
+      el.src = url;
+    } else {
+      el.style.backgroundImage = `url('${url}')`;
+    }
+  }
+  function _startGasshukuBlinkLoop(el, normalUrl, blinkUrl, mode) {
     function next() {
       const delay = 1800 + Math.random() * 1700; // 1.8〜3.5秒
       const t1 = setTimeout(() => {
-        if (!document.body.contains(imgEl) || imgEl.dataset.blinkUrl !== normalUrl) {
-          _gasshukuBlinkTimers.delete(imgEl);
+        if (!document.body.contains(el) || el.dataset.blinkUrl !== normalUrl) {
+          _gasshukuBlinkTimers.delete(el);
           return;
         }
-        imgEl.src = blinkUrl;
+        _applyBlinkSrc(el, blinkUrl, mode);
         const t2 = setTimeout(() => {
-          if (!document.body.contains(imgEl) || imgEl.dataset.blinkUrl !== normalUrl) {
-            _gasshukuBlinkTimers.delete(imgEl);
+          if (!document.body.contains(el) || el.dataset.blinkUrl !== normalUrl) {
+            _gasshukuBlinkTimers.delete(el);
             return;
           }
-          imgEl.src = normalUrl;
+          _applyBlinkSrc(el, normalUrl, mode);
           next();
         }, 180);
-        _gasshukuBlinkTimers.set(imgEl, t2);
+        _gasshukuBlinkTimers.set(el, t2);
       }, delay);
-      _gasshukuBlinkTimers.set(imgEl, t1);
+      _gasshukuBlinkTimers.set(el, t1);
     }
     next();
   }
