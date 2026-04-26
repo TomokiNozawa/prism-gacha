@@ -4805,6 +4805,89 @@ body.gasshuku-modal-open {
   margin-left: 6px;
   -webkit-text-fill-color: #fcd34d;
 }
+/* 期間限定 カウントダウン (CTA内) */
+.gasshuku-countdown {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 8px;
+  background: linear-gradient(90deg, rgba(252,211,77,0.25), rgba(244,114,182,0.25));
+  border: 1px solid rgba(252,211,77,0.45);
+  border-radius: 999px;
+  color: #fff;
+  -webkit-text-fill-color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  animation: gasshuku-countdown-pulse 2.4s ease-in-out infinite;
+}
+@keyframes gasshuku-countdown-pulse {
+  0%,100% { box-shadow: 0 0 0 rgba(252,211,77,0.45); }
+  50%     { box-shadow: 0 0 10px rgba(252,211,77,0.65); }
+}
+.gasshuku-ended {
+  color: rgba(255,255,255,0.55);
+  -webkit-text-fill-color: rgba(255,255,255,0.55);
+  font-weight: 600;
+}
+.gasshuku-cta-btn.gasshuku-ended {
+  opacity: 0.4;
+  cursor: not-allowed;
+  filter: grayscale(0.6);
+}
+.gasshuku-cta-block.gasshuku-ended-block {
+  opacity: 0.7;
+  position: relative;
+}
+.gasshuku-cta-block.gasshuku-ended-block::after {
+  content: '🔒 終了したイベントです';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0,0,0,0.6);
+  color: #fcd34d;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(252,211,77,0.45);
+  font-size: 13px;
+  font-weight: 700;
+  pointer-events: none;
+}
+/* 図鑑 期間限定バッジ */
+.gasshuku-period-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 12px;
+  padding: 4px 12px;
+  background: linear-gradient(135deg, rgba(252,211,77,0.18), rgba(244,114,182,0.18));
+  border: 1px solid rgba(252,211,77,0.5);
+  border-radius: 999px;
+  font-size: 11px;
+  color: #fcd34d;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  animation: gasshuku-badge-shimmer 3.5s linear infinite;
+  background-size: 200% 100%;
+}
+.gasshuku-period-badge .gasshuku-period-end {
+  color: rgba(255,255,255,0.6);
+  font-weight: 400;
+  font-size: 10px;
+  margin-left: 4px;
+}
+.gasshuku-period-badge.ended {
+  background: rgba(0,0,0,0.4);
+  border-color: rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.5);
+  animation: none;
+}
+@keyframes gasshuku-badge-shimmer {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+@media (max-width: 600px) {
+  .gasshuku-period-badge { display: flex; margin: 6px 0 0 0; font-size: 10px; }
+}
 .gasshuku-cta-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

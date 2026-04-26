@@ -5203,6 +5203,7 @@ function ensureWelcomeModal() {
         </ul>
         <p class="welcome-cta-line">👉 <strong>アカウントを作ると…</strong></p>
         <ul class="welcome-features">
+          <li>🎌 <strong>合宿LR限定「シブヤ」「ホサカ」</strong>が排出対象に <span style="color:#fcd34d;font-size:11px">(〜4/30まで)</span></li>
           <li>📱 別端末からも進捗を引き継げます</li>
           <li>💾 ブラウザを消しても記録が残ります</li>
           <li>📨 ご意見・ご要望を運営に送れます</li>

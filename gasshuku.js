@@ -169,6 +169,54 @@
       ] }
   ];
 
+  // ===== 期間限定: 2026-05-01 00:00 JST で終了 =====
+  const GASSHUKU_END_AT = new Date('2026-05-01T00:00:00+09:00').getTime();
+  function isGasshukuActive() { return Date.now() < GASSHUKU_END_AT; }
+  function gasshukuTimeLeft() {
+    const ms = GASSHUKU_END_AT - Date.now();
+    if (ms <= 0) return null;
+    const d = Math.floor(ms / 86400000);
+    const h = Math.floor((ms % 86400000) / 3600000);
+    const m = Math.floor((ms % 3600000) / 60000);
+    if (d > 0) return `あと${d}日${h}時間`;
+    if (h > 0) return `あと${h}時間${m}分`;
+    return `あと${m}分`;
+  }
+  function updateGasshukuLimitedUI() {
+    const active = isGasshukuActive();
+    const timeLeft = gasshukuTimeLeft();
+    // CTAブロック サブ表示
+    const ctaSub = document.querySelector('.gasshuku-cta-sub');
+    if (ctaSub) {
+      ctaSub.innerHTML = active
+        ? `期間限定 / 全員UR確定 / <span class="gasshuku-countdown">⏰ ${timeLeft}</span>`
+        : `<span class="gasshuku-ended">🔒 終了 (4/30まででした)</span>`;
+    }
+    // CTAボタン disable + opacity
+    document.querySelectorAll('.gasshuku-cta-btn').forEach(btn => {
+      btn.disabled = !active;
+      btn.classList.toggle('gasshuku-ended', !active);
+    });
+    // CTAブロック全体に終了class
+    const ctaBlock = document.querySelector('.gasshuku-cta-block');
+    if (ctaBlock) ctaBlock.classList.toggle('gasshuku-ended-block', !active);
+    // 図鑑エリア期間限定バッジ
+    const galleryHead = document.querySelector('#gasshuku-gallery-head, .gasshuku-gallery-heading');
+    let badge = document.getElementById('gasshuku-period-badge');
+    if (!badge && galleryHead) {
+      badge = document.createElement('div');
+      badge.id = 'gasshuku-period-badge';
+      badge.className = 'gasshuku-period-badge';
+      galleryHead.appendChild(badge);
+    }
+    if (badge) {
+      badge.innerHTML = active
+        ? `🎌 <strong>期間限定 イベント</strong> ⏰ ${timeLeft} <span class="gasshuku-period-end">(〜4/30 23:59)</span>`
+        : `🔒 <strong>期間限定イベント終了</strong> <span class="gasshuku-period-end">図鑑記録は閲覧可能</span>`;
+      badge.classList.toggle('ended', !active);
+    }
+  }
+
   function imgPath(c, mode) {
     return `/images/gasshuku/${c.id}_${c.slug}_${mode === 'real' ? 'real' : 'fantasy'}.png`;
   }
@@ -591,9 +639,10 @@
           <p>今日引いた合宿ガチャの結果は、<br><strong>このブラウザを閉じる/別端末では消えてしまいます</strong>。</p>
           <p>アカウントを作ると…</p>
           <ul>
-            <li>📱 別端末（スマホ・自宅PC）からも図鑑が見られる</li>
+            <li>🌟 <strong>合宿LR限定キャラ「シブヤ」「ホサカ」</strong>が排出対象に (各1.5%)</li>
+            <li>📱 別端末(スマホ・自宅PC)からも図鑑が見られる</li>
             <li>💾 ブラウザ消去しても記録が残る</li>
-            <li>🌟 通常版「Prismaera」の本編ストーリーや相関図も遊べる</li>
+            <li>🌈 通常版「Prismaera」の本編ストーリーや相関図も遊べる</li>
           </ul>
           <p class="gasshuku-invite-note">※ ニックネーム＋合言葉だけでOK・無料・30秒で完了</p>
         </div>
@@ -866,11 +915,18 @@
       if (btn.dataset.bound) return;
       btn.dataset.bound = '1';
       btn.addEventListener('click', () => {
+        if (!isGasshukuActive()) {
+          alert('🎌 合宿ガチャは終了しました (4/30まででした)。 図鑑で記録は引き続き閲覧できます。');
+          return;
+        }
         const imgMode = btn.dataset.imgmode;
         const count = parseInt(btn.dataset.count, 10);
         startGasshukuRoll(imgMode, count);
       });
     });
+    // 期間限定UI更新 (CTAブロック + 図鑑エリア)
+    updateGasshukuLimitedUI();
+    setInterval(updateGasshukuLimitedUI, 60000); // 1分毎にカウントダウン更新
     renderGasshukuGallery();
     // Firebase 認証監視を開始 (ログイン中ならクラウドから同期)
     watchAuth();
