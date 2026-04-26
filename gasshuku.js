@@ -144,6 +144,28 @@
         { title: 'ベルギーとチェコの修行', body: '2024年5月、ベルギーとチェコで本格的な注ぎ修行。「同じビールでも、注ぎ方で味が変わる」——本場の職人たちから、その技を直接学んだ。トゥクトゥクで全国を回るアカイの一杯には、その修行の重みが、毎回静かに溶けている。' },
         { title: 'トゥクトゥクの旅路', body: 'トゥクトゥク・ビアを担いで、アカイは全国を回る。お祭り、結婚式、企業イベント。「移動するビアサーバー」という発想は、世界一周の旅で身につけた「持ち運ぶ思想」の延長。場所が変わると、ビールの味も変わる——客の表情と一緒に。' },
         { title: '黄金泡の伝道', body: '「注ぎたての樽生ビールを、文化に」——アカイの最終目標。一杯ごとに、誰かの人生の節目が刻まれる。結婚式の乾杯、転職祝い、ふとした再会の夜。彼の注ぐ一杯は、ただの飲み物ではない、記憶の触媒。物理学者が辿り着いた、最も人間的な仕事。' },
+      ] },
+    { id: '13', slug: 'shibuya',  real: '澁谷健登', tier: 'LR', accountOnly: true,
+      name: '修羅の軍師・シブヤ', faction: '五大国',
+      role: '戦国データ参謀', skill: '采配・分析の三段陣',
+      voice: '次の一陣、見えた。共に駆けよ。',
+      stories: [
+        { title: '戦国の智謀から、現代の戦略へ', body: '歴史探訪——特に戦国時代を愛するシブヤ。武田信玄の「動かざること山の如し」、上杉謙信の「義」、織田信長の「速さ」——三者三様の戦略を、現代のコンサルティングに翻訳できると気づいた時、シブヤの軍師としての道が定まった。' },
+        { title: '兜と軍配の覚悟', body: 'シブヤの心象には、いつも甲冑がある。会議の場でも、データ分析の最中でも——「これは戦である」と心を引き締める。軍配を振る瞬間に、すべての可能性が一本の道に収束する——その緊張感を、彼は愛している。' },
+        { title: 'テニスで磨いた瞬発判断', body: 'コートに立つと、シブヤは別人になる。次の一打、相手の崩し方——一瞬で複数の選択肢を秤にかける訓練を、もう何年も続けている。「データの軍師」が現場で素早い判断を下せるのは、ラケットを握り続けた日々があるから。' },
+        { title: '法人データ分析の三段陣', body: 'シブヤのデータ分析は三段構え——「現状把握」「仮説提示」「アクション提案」。武田信玄の三段戦法に倣ったわけではないが、結果的に同じ構造に辿り着いた。歴史と数字、両方に通じる者だけが見つけられる、戦の作法。' },
+        { title: 'Camp教材という戦記', body: 'ExcelCamp、PowerPointCamp、BotCamp——三つのCampの教材作成を担うシブヤ。「教材は戦記だ」と本人は言う。先人の智を整理し、次の世代が辿りやすい道を編む——それは戦国時代の軍記物を編纂する作業と、本質的に同じ。' },
+      ] },
+    { id: '14', slug: 'hosaka',   real: '保坂和久', tier: 'LR', accountOnly: true,
+      name: '百眼の観測者・ホサカ', faction: '五大国',
+      role: '執念の宰相', skill: '万象視・観察の網',
+      voice: '君のことは、ぜんぶ視ている。',
+      stories: [
+        { title: '視ているから、最善が分かる', body: 'ホサカの「観察」は常人離れしている。相手の眉の動き、声の微妙な揺れ、視線の往復——すべてを記録している。社内では「ストーカー気質」と冗談半分にいじられるが、本人にとっては「コンサルタントの基本作法」。視ていなければ、最善は分からない。' },
+        { title: 'IBMでの修練、Band10手前まで', body: '世界中で110年以上、ITで社会のスタンダードを創ってきたIBM。その中でホサカはBand10——パートナー職まであと二歩の地点まで上り詰めた。執念の観察力で、誰も気づかなかった顧客の本音を引き出してきた——それが評価の源泉。' },
+        { title: '東進チューター時代の原体験', body: '東進ハイスクールの予備校チューター時代。ホサカは受験生の小さなサインも見逃さなかった——「今日は集中できていない」「家で何かあった」。気づくたびに声をかけ、合格まで導いた。観察と支援、その両輪が彼のコンサル道の起点。' },
+        { title: '過労インターンの女性社長を救った日', body: '大学時代のインターン先——女性社長の顔色がいつもと違うことに、ホサカだけが気づいた。入院するほどの過労だと判明したのは、その数日後。社長から「あなたが視ていてくれた」と感謝された——その重みが、彼の人生を変えた。視ることが、人を救う。' },
+        { title: '福田さんの背中を、毎日視ている', body: 'DIK合流後、ホサカは福田さんの成長を毎日記録している。「自分で案件をとり、設計し、リードしている」——その変化を、誰よりも詳細に観察している。社内では「ホサカが視てるから福田は伸びる」と半ば本気で言われている。観測者としての矜持。' },
       ] }
   ];
 
@@ -270,25 +292,39 @@
     const d = loadCollected();
     grid.innerHTML = '';
     let count = 0;
+    const isLoggedIn = !!(typeof authUser !== 'undefined' && authUser);
     POOL.forEach(c => {
+      const accountLocked = c.accountOnly && !isLoggedIn;
       ['real', 'fantasy'].forEach(mode => {
         const k = `${c.id}_${mode}`;
         const got = !!d[k];
         if (got) count++;
         const cell = document.createElement('div');
-        cell.className = 'gasshuku-gallery-cell' + (got ? ' got' : ' locked');
-        cell.title = `${c.name} (${c.real}) — ${mode === 'real' ? '本人' : 'ファンタジー'}`;
-        if (got) {
+        cell.className = 'gasshuku-gallery-cell' + (got ? ' got' : ' locked') + (accountLocked ? ' account-locked' : '') + (c.tier === 'LR' ? ' tier-lr' : '');
+        const tierBadge = c.tier === 'LR' ? '🌟' : '';
+        cell.title = accountLocked
+          ? `🔒 アカウント限定キャラ (ログインで解放)`
+          : `${c.name} (${c.real}) — ${mode === 'real' ? '本人' : 'ファンタジー'}${c.tier === 'LR' ? ' [LR]' : ''}`;
+        if (accountLocked) {
+          cell.innerHTML = `
+            <div class="gasshuku-cell-silhouette">🔒</div>
+            <div class="gasshuku-cell-mode">${mode === 'real' ? '📷' : '🌈'}${tierBadge}</div>
+          `;
+          cell.style.cursor = 'pointer';
+          cell.addEventListener('click', () => {
+            if (typeof showAccountModal === 'function') showAccountModal();
+          });
+        } else if (got) {
           cell.innerHTML = `
             <img src="${imgPath(c, mode)}" alt="${c.name}">
-            <div class="gasshuku-cell-mode">${mode === 'real' ? '📷' : '🌈'}</div>
+            <div class="gasshuku-cell-mode">${mode === 'real' ? '📷' : '🌈'}${tierBadge}</div>
           `;
           cell.style.cursor = 'pointer';
           cell.addEventListener('click', () => openDetail(c, mode));
         } else {
           cell.innerHTML = `
             <div class="gasshuku-cell-silhouette">?</div>
-            <div class="gasshuku-cell-mode">${mode === 'real' ? '📷' : '🌈'}</div>
+            <div class="gasshuku-cell-mode">${mode === 'real' ? '📷' : '🌈'}${tierBadge}</div>
           `;
         }
         grid.appendChild(cell);
@@ -379,7 +415,13 @@
     m.removeAttribute('hidden');
     m.classList.add('active');
     document.getElementById('gasshuku-detail-name').textContent = c.name;
-    document.getElementById('gasshuku-detail-real').textContent = `本人: ${c.real}（${c.role}）`;
+    document.getElementById('gasshuku-detail-real').textContent = `本人: ${c.real}(${c.role})`;
+    // tierバッジ更新 (LRなら虹色グラデ + 'LR' 表記、 そうでなければ 'UR')
+    const tierEl = document.querySelector('#gasshuku-detail-modal .gasshuku-detail-tier');
+    if (tierEl) {
+      tierEl.textContent = c.tier || 'UR';
+      tierEl.classList.toggle('tier-lr', c.tier === 'LR');
+    }
     const fac = document.getElementById('gasshuku-detail-faction');
     fac.textContent = `所属: ${c.faction}`;
     fac.style.color = FACTION_COLOR[c.faction] || '#fff';
@@ -497,14 +539,19 @@
     m.classList.add('active');
     const summary = document.getElementById('gasshuku-result-summary');
     const grid = document.getElementById('gasshuku-result-grid');
-    summary.textContent = `🌈 UR ×${results.length} 確定 / ${imgMode === 'real' ? '📷 本人モード' : '🌈 ファンタジーモード'}`;
+    const lrCount = results.filter(r => r.tier === 'LR').length;
+    const urCount = results.length - lrCount;
+    const tierStr = lrCount > 0
+      ? (urCount > 0 ? `🌟 LR ×${lrCount} + 🌈 UR ×${urCount}` : `🌟 LR ×${lrCount}`)
+      : `🌈 UR ×${urCount}`;
+    summary.textContent = `${tierStr} 確定 / ${imgMode === 'real' ? '📷 本人モード' : '🌈 ファンタジーモード'}`;
     grid.innerHTML = '';
     results.forEach(r => {
       const card = document.createElement('div');
-      card.className = 'gasshuku-result-card';
+      card.className = 'gasshuku-result-card' + (r.tier === 'LR' ? ' tier-lr' : '');
       card.innerHTML = `
         <img class="gasshuku-result-img" src="${r.img}" alt="${r.name}">
-        <div class="gasshuku-result-tier">UR</div>
+        <div class="gasshuku-result-tier ${r.tier === 'LR' ? 'tier-lr' : ''}">${r.tier || 'UR'}</div>
         <div class="gasshuku-result-name">${r.name}</div>
         <div class="gasshuku-result-real">${r._gasshukuReal || ''}</div>
       `;
@@ -652,10 +699,12 @@
   }
 
   function rollAll(count) {
-    // 確率は一律、重複OK
+    // ゲスト時は accountOnly:true キャラを除外 (LR の シブヤ/ホサカ はアカウント限定)
+    const isLoggedIn = !!(typeof authUser !== 'undefined' && authUser);
+    const pool = POOL.filter(c => isLoggedIn || !c.accountOnly);
     const out = [];
     for (let i = 0; i < count; i++) {
-      out.push(POOL[Math.floor(Math.random() * POOL.length)]);
+      out.push(pool[Math.floor(Math.random() * pool.length)]);
     }
     return out;
   }
@@ -665,7 +714,7 @@
   function buildResult(c, imgMode) {
     const mode = imgMode === 'real' ? 'real' : 'fantasy';
     return {
-      tier: 'UR',
+      tier: c.tier || 'UR',
       season: 99,
       name: c.name,
       title: `${c.faction} / ${c.role}`,

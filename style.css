@@ -5105,6 +5105,37 @@ body.gasshuku-modal-open {
   flex-direction: column;
   gap: 8px;
 }
+/* LR (アカウント限定 = シブヤ/ホサカ) 用 虹色tierバッジ */
+.gasshuku-detail-tier.tier-lr,
+.gasshuku-result-tier.tier-lr {
+  background: linear-gradient(90deg, #c87dff, #ff5e9a, #fcd34d, #5fffd4, #c87dff) !important;
+  background-size: 300% 100% !important;
+  animation: gasshuku-lr-shimmer 3s linear infinite;
+  color: #fff !important;
+  text-shadow: 0 0 6px rgba(255,255,255,0.55);
+}
+@keyframes gasshuku-lr-shimmer {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+.gasshuku-gallery-cell.tier-lr {
+  border: 2px solid rgba(252, 211, 77, 0.7);
+  box-shadow: 0 0 10px rgba(252, 211, 77, 0.45);
+}
+.gasshuku-gallery-cell.account-locked {
+  cursor: pointer;
+  border: 1px dashed rgba(252, 211, 77, 0.5);
+  background: linear-gradient(180deg, rgba(252,211,77,0.08), rgba(200,125,255,0.06));
+}
+.gasshuku-gallery-cell.account-locked .gasshuku-cell-silhouette {
+  color: #fcd34d;
+  font-size: 28px;
+}
+.gasshuku-result-card.tier-lr {
+  border: 2px solid #fcd34d !important;
+  box-shadow: 0 0 14px rgba(252, 211, 77, 0.55) !important;
+}
+
 .gasshuku-detail-modal .gasshuku-detail-tier {
   display: inline-block;
   align-self: flex-start;
