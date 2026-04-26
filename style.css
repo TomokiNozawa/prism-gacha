@@ -5094,6 +5094,25 @@ body.gasshuku-modal-open {
   background: rgba(0, 0, 0, 0.3);
   margin-bottom: 6px;
 }
+/* リアル写真モード: 縦横比を統一 (3:4) + contain で写真全体を表示 + 派閥色グラデ背景で余白埋め */
+.gasshuku-result-card.mode-real .gasshuku-result-img {
+  aspect-ratio: 3 / 4;
+  height: auto;
+  object-fit: contain;
+  background: linear-gradient(160deg, rgba(0,0,0,0.45), rgba(0,0,0,0.65));
+}
+.gasshuku-result-card.mode-real.faction-五大国 .gasshuku-result-img {
+  background: linear-gradient(160deg, rgba(252, 211, 77, 0.55), rgba(120, 53, 15, 0.55));
+}
+.gasshuku-result-card.mode-real.faction-星霊学院 .gasshuku-result-img {
+  background: linear-gradient(160deg, rgba(125, 211, 252, 0.55), rgba(30, 64, 175, 0.55));
+}
+.gasshuku-result-card.mode-real.faction-原虹 .gasshuku-result-img {
+  background: linear-gradient(160deg, rgba(244, 114, 182, 0.55), rgba(131, 24, 67, 0.55));
+}
+.gasshuku-result-card.mode-real.faction-独立勢力 .gasshuku-result-img {
+  background: linear-gradient(160deg, rgba(163, 230, 53, 0.55), rgba(63, 98, 18, 0.55));
+}
 .gasshuku-result-tier {
   display: none; /* 画像内に表記済 */
   position: absolute;

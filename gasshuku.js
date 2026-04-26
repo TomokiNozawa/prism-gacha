@@ -622,7 +622,9 @@
     grid.innerHTML = '';
     results.forEach(r => {
       const card = document.createElement('div');
-      card.className = 'gasshuku-result-card' + (r.tier === 'LR' ? ' tier-lr' : '');
+      const facCls = (r._gasshukuChar && r._gasshukuChar.faction) ? ' faction-' + r._gasshukuChar.faction : '';
+      const modeCls = imgMode === 'real' ? ' mode-real' : ' mode-fantasy';
+      card.className = 'gasshuku-result-card' + (r.tier === 'LR' ? ' tier-lr' : '') + modeCls + facCls;
       // NEW or 凸獲得バッジ (dupTotal: 1=初獲得=NEW, 2=1凸目, 3=2凸目, ...)
       const dupBadge = r.isNew
         ? '<div class="gasshuku-result-new">NEW</div>'
