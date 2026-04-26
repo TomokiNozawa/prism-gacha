@@ -56,23 +56,75 @@ body {
   border-color: rgba(200, 125, 255, 0.4);
 }
 
-.summary {
+/* サマリーカード 2階層化 (重要4枚 大 + 補助4枚 小) */
+.summary-main {
+  max-width: 1000px; margin: 0 auto 12px;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;
+}
+.summary-sub {
   max-width: 1000px; margin: 0 auto 24px;
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px;
 }
 .summary-card {
   background: linear-gradient(180deg, rgba(30, 24, 56, 0.85), rgba(20, 16, 40, 0.85));
   border: 1px solid rgba(200, 180, 255, 0.2);
-  border-radius: 12px; padding: 14px 16px;
+  border-radius: 12px; padding: 16px 18px;
+}
+.summary-sub .summary-card {
+  padding: 10px 14px;
+  background: rgba(20, 16, 40, 0.5);
 }
 .summary-label {
   font-size: 11px; color: rgba(200, 180, 255, 0.7);
   letter-spacing: 0.08em; margin-bottom: 4px;
 }
+.summary-sub .summary-label { font-size: 10px; }
 .summary-value {
-  font-size: 22px; font-weight: 600; color: #fff;
+  font-size: 26px; font-weight: 600; color: #fff;
   letter-spacing: 0.02em;
 }
+.summary-sub .summary-value { font-size: 18px; }
+.summary-value .delta {
+  font-size: 14px; color: #fcd34d;
+  margin-left: 6px;
+  font-weight: 500;
+  cursor: help;
+}
+
+/* タブ切替 */
+.admin-tabs {
+  max-width: 1000px; margin: 0 auto 16px;
+  display: flex; gap: 4px;
+  border-bottom: 1px solid rgba(200, 180, 255, 0.2);
+  padding: 0 4px;
+}
+.admin-tab {
+  padding: 10px 20px;
+  background: transparent;
+  border: none;
+  color: rgba(200, 180, 255, 0.6);
+  cursor: pointer;
+  font-size: 14px;
+  font-family: inherit;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  display: flex; align-items: center; gap: 6px;
+}
+.admin-tab:hover { color: rgba(200, 180, 255, 0.9); }
+.admin-tab.active {
+  color: #d4b5ff;
+  border-bottom-color: #c87dff;
+}
+.admin-tab .tab-badge {
+  background: linear-gradient(135deg,#ff5e9a,#c87dff);
+  color: #fff;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+.admin-panel { display: none; }
+.admin-panel.active { display: block; }
 
 .notice {
   max-width: 1000px; margin: 0 auto 16px;
@@ -110,7 +162,7 @@ body {
 }
 .users-row {
   display: grid;
-  grid-template-columns: 2fr 1.1fr 0.9fr 0.9fr 0.9fr 1.4fr;
+  grid-template-columns: minmax(140px, 1.8fr) 0.8fr 0.85fr 0.7fr 0.7fr 0.85fr 1.1fr 1.3fr;
   gap: 8px;
   padding: 14px 18px;
   border-bottom: 1px solid rgba(200, 180, 255, 0.08);
@@ -129,6 +181,44 @@ body {
   text-transform: uppercase;
   cursor: default;
   position: sticky; top: 0;
+}
+.users-head > div {
+  cursor: pointer;
+  user-select: none;
+  display: flex; align-items: center; gap: 4px;
+}
+.users-head > div:hover { color: #d4b5ff; }
+.users-head > div.sort-asc::after { content: '▲'; font-size: 9px; color: #c87dff; }
+.users-head > div.sort-desc::after { content: '▼'; font-size: 9px; color: #c87dff; }
+.u-count.col-gasshuku { color: #fcd34d; }
+.u-story {
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  color: rgba(255,255,255,0.85);
+}
+.u-story.dim { color: rgba(255,255,255,0.35); }
+.u-story .story-done { color: #6ee7b7; font-size: 10px; margin-left: 3px; }
+.u-uid-fallback {
+  font-size: 11px; color: rgba(255,255,255,0.5);
+  font-family: 'SF Mono', Consolas, monospace;
+}
+
+/* モバイル対応: テーブル横スクロール + サマリ縦並び */
+@media (max-width: 768px) {
+  .summary-main { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .summary-sub { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .summary-value { font-size: 20px; }
+  .summary-sub .summary-value { font-size: 16px; }
+  .users-table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .users-row {
+    grid-template-columns: 140px 70px 80px 65px 60px 80px 100px 110px;
+    min-width: 805px;
+  }
+  .users-head { position: relative; }
+  .admin-tab { padding: 8px 12px; font-size: 12px; }
 }
 .u-nickname {
   color: #fff; font-weight: 600; font-size: 14px;
@@ -345,12 +435,15 @@ body {
 </div>
 
 <div id="app" style="display:none">
-  <div class="summary">
+  <!-- メインサマリー (重要4枚 大) -->
+  <div class="summary-main">
     <div class="summary-card"><div class="summary-label">ユーザー数</div><div class="summary-value" id="sum-users">-</div></div>
     <div class="summary-card"><div class="summary-label">累計ガチャ</div><div class="summary-value" id="sum-total">-</div></div>
     <div class="summary-card"><div class="summary-label">UR合計</div><div class="summary-value" id="sum-ur">-</div></div>
     <div class="summary-card"><div class="summary-label">LR所持者</div><div class="summary-value" id="sum-lr-holders">-</div></div>
-    <div class="summary-card"><div class="summary-label">S1C1読了</div><div class="summary-value" id="sum-story-done">-</div></div>
+  </div>
+  <!-- 補助サマリー (合宿+要望 小) -->
+  <div class="summary-sub">
     <div class="summary-card" style="border-color:rgba(251,191,36,0.4)"><div class="summary-label">🎌 合宿ガチャ実行</div><div class="summary-value" id="sum-gasshuku-rolls">-</div></div>
     <div class="summary-card" style="border-color:rgba(251,191,36,0.4)"><div class="summary-label">🎌 合宿ガチャ召喚数</div><div class="summary-value" id="sum-gasshuku-summons">-</div></div>
     <div class="summary-card" style="border-color:rgba(251,191,36,0.4)"><div class="summary-label">🎌 合宿端末数</div><div class="summary-value" id="sum-gasshuku-devices">-</div></div>
@@ -359,29 +452,43 @@ body {
 
   <div id="notice" class="notice"></div>
 
-  <div class="users-table" id="users-table">
-    <div class="users-row users-head">
-      <div>NICKNAME</div>
-      <div>ガチャ</div>
-      <div class="col-ur">UR</div>
-      <div class="col-lr">LR</div>
-      <div class="col-dup">凸</div>
-      <div class="col-lastlogin">最終ログイン</div>
-    </div>
-    <div id="users-body"></div>
+  <!-- タブ切替 -->
+  <div class="admin-tabs">
+    <button class="admin-tab active" data-panel="users">👥 ユーザー</button>
+    <button class="admin-tab" data-panel="feedback">📨 要望 <span class="tab-badge" id="tab-fb-badge" style="display:none">0</span></button>
   </div>
 
-  <h2 class="section-title">📨 ご意見・ご要望 <span class="fb-unread-pill" id="fb-unread-pill" style="display:none">0 未読</span></h2>
-  <div class="feedback-section">
-    <div class="feedback-filter">
-      <button class="fb-fbtn active" data-filter="all">全て (<span id="fb-cnt-all">0</span>)</button>
-      <button class="fb-fbtn" data-filter="unread">未読 (<span id="fb-cnt-unread">0</span>)</button>
-      <button class="fb-fbtn" data-filter="bug">🐛 バグ (<span id="fb-cnt-bug">0</span>)</button>
-      <button class="fb-fbtn" data-filter="request">✨ 要望 (<span id="fb-cnt-request">0</span>)</button>
-      <button class="fb-fbtn" data-filter="praise">💖 感想 (<span id="fb-cnt-praise">0</span>)</button>
-      <button class="fb-fbtn" data-filter="other">💬 その他 (<span id="fb-cnt-other">0</span>)</button>
+  <!-- ユーザータブ -->
+  <div class="admin-panel active" id="panel-users">
+    <div class="users-table" id="users-table">
+      <div class="users-row users-head">
+        <div data-sort="nickname">NICKNAME</div>
+        <div data-sort="total">ガチャ</div>
+        <div class="col-ur" data-sort="ur">UR</div>
+        <div class="col-lr" data-sort="lr">LR</div>
+        <div class="col-dup" data-sort="dup">凸</div>
+        <div class="col-gasshuku" data-sort="gasshuku">🎌合宿</div>
+        <div class="col-story" data-sort="story">📖物語</div>
+        <div class="col-lastlogin sort-desc" data-sort="lastlogin">最終ログイン</div>
+      </div>
+      <div id="users-body"></div>
     </div>
-    <div id="fb-list" class="fb-list"></div>
+  </div>
+
+  <!-- 要望タブ -->
+  <div class="admin-panel" id="panel-feedback">
+    <h2 class="section-title">📨 ご意見・ご要望 <span class="fb-unread-pill" id="fb-unread-pill" style="display:none">0 未読</span></h2>
+    <div class="feedback-section">
+      <div class="feedback-filter">
+        <button class="fb-fbtn active" data-filter="all">全て (<span id="fb-cnt-all">0</span>)</button>
+        <button class="fb-fbtn" data-filter="unread">未読 (<span id="fb-cnt-unread">0</span>)</button>
+        <button class="fb-fbtn" data-filter="bug">🐛 バグ (<span id="fb-cnt-bug">0</span>)</button>
+        <button class="fb-fbtn" data-filter="request">✨ 要望 (<span id="fb-cnt-request">0</span>)</button>
+        <button class="fb-fbtn" data-filter="praise">💖 感想 (<span id="fb-cnt-praise">0</span>)</button>
+        <button class="fb-fbtn" data-filter="other">💬 その他 (<span id="fb-cnt-other">0</span>)</button>
+      </div>
+      <div id="fb-list" class="fb-list"></div>
+    </div>
   </div>
 </div>
 
@@ -450,6 +557,8 @@ auth.onAuthStateChanged(async user => {
   }
   $('#login-gate').style.display = 'none';
   $('#app').style.display = '';
+  bindSortHeaders();
+  bindTabs();
   await loadAll();
 });
 
@@ -519,6 +628,17 @@ async function loadAll() {
         g.days.add(day);
       }
     }
+    // uid別 合宿ガチャ回数を集計 (登録ユーザー向け)
+    const gasshukuByUid = {};
+    for (const dayData of Object.values(allStats)) {
+      for (const [devId, devData] of Object.entries(dayData?.devices || {})) {
+        if (devData.uid) {
+          gasshukuByUid[devData.uid] = (gasshukuByUid[devData.uid] || 0) + (devData.totalRolls || 0);
+        }
+      }
+    }
+    window._gasshukuByUid = gasshukuByUid;
+    window._lastRenderArgs = [users, uidToNickname, guestDevices];
     renderUsers(users, uidToNickname, guestDevices);
     notice.className = 'notice';
     notice.textContent = '';
@@ -536,113 +656,195 @@ function renderUsers(users, uidToNickname, guestDevices) {
   // ログイン済 uid セット (gasshukuStats の uid と突合用)
   const loggedInUids = new Set(entries.map(e => e.uid));
 
-  let sumTotal = 0, sumUR = 0, lrHolders = 0, storyDone = 0;
+  let sumTotal = 0, sumUR = 0, lrHolders = 0;
   const body = $('#users-body');
   body.innerHTML = '';
+  // ストーリー進捗 → 表示用テキスト
+  function storyProgressText(sp) {
+    if (!sp || Object.keys(sp).length === 0) return { text: '未読', sortKey: 0, dim: true };
+    // 最新章を出す (s1c1, s1c2, ...) — id辞書順最終
+    const sids = Object.keys(sp).sort();
+    const lastSid = sids[sids.length - 1];
+    const v = sp[lastSid] || {};
+    const idx = (v.lastSceneIndex || 0) + 1;
+    const total = v.totalScenes || 0;
+    const sortNum = parseInt(lastSid.replace(/[^0-9]/g,'')) * 1000 + idx;
+    const label = lastSid.toUpperCase();
+    if (v.completed) return { text: `${label} <span class="story-done">✓</span>`, sortKey: sortNum + 9999, dim: false };
+    return { text: `${label} ${idx}/${total}`, sortKey: sortNum, dim: false };
+  }
+  // gasshukuStats から uid 別の合宿ガチャ回数 (キャッシュ後で参照)
+  const gasshukuByUid = window._gasshukuByUid || {};
+  // 一旦データを集計
+  const userRowData = [];
   entries.forEach(u => {
     const s = u.state || {};
-    const nickname = u.displayName || uidToNickname[u.uid] || '(名前未設定)';
+    let nickname = u.displayName || uidToNickname[u.uid];
+    let nicknameDim = false;
+    if (!nickname) {
+      // フォールバック: uid prefix で識別可能に (元 'Unknown')
+      nickname = `(unset) ${u.uid.slice(0,8)}…`;
+      nicknameDim = true;
+    }
     const total = s.total || 0;
-    let ur = 0, lr = 0;
+    let ur = 0, lr = 0, ssrOwn = 0, srOwn = 0, rOwn = 0;
     for (const k of Object.keys(s.unlockedSet || {})) {
       if (k.startsWith('UR_')) ur++;
       else if (k.startsWith('LR_')) lr++;
-    }
-    const dup = Object.values(s.dupCounts || {}).reduce((a, b) => a + b, 0);
-    const lastAt = u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleString('ja-JP', { year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '-';
-    sumTotal += total;
-    sumUR += ur;
-    if (lr > 0) lrHolders++;
-    const sp = s.storyProgress || {};
-    if (sp.s1c1 && sp.s1c1.completed) storyDone++;
-
-    const isMe = u.uid === currentUid;
-    // 所持種別カウント
-    let ssrOwn = 0, srOwn = 0, rOwn = 0;
-    for (const k of Object.keys(s.unlockedSet || {})) {
-      if (k.startsWith('SSR_')) ssrOwn++;
+      else if (k.startsWith('SSR_')) ssrOwn++;
       else if (k.startsWith('SR_')) srOwn++;
       else if (k.startsWith('R_')) rOwn++;
     }
-    const allOwn = ur + lr + ssrOwn + srOwn + rOwn;
-    const allMax = TIER_MAX.LR + TIER_MAX.UR + TIER_MAX.SSR + TIER_MAX.SR + TIER_MAX.R;
+    const dup = Object.values(s.dupCounts || {}).reduce((a, b) => a + b, 0);
+    const lastAt = u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '-';
+    sumTotal += total;
+    sumUR += ur;
+    if (lr > 0) lrHolders++;
+    const story = storyProgressText(s.storyProgress);
+    const gasshukuCnt = gasshukuByUid[u.uid] || 0;
 
-    const row = document.createElement('div');
-    row.className = 'users-row';
-    row.dataset.lastAt = u.lastLoginAt || 0;
-    row.innerHTML = `
-      <div class="u-nickname ${isMe ? 'me' : ''}">${escapeHtml(nickname)}</div>
-      <div class="u-count ${total === 0 ? 'dim' : ''}">${total}</div>
-      <div class="u-count col-ur ${ur === 0 ? 'dim' : ''}">${ur}/${TIER_MAX.UR}</div>
-      <div class="u-count col-lr ${lr === 0 ? 'dim' : ''}">${lr}/${TIER_MAX.LR}</div>
-      <div class="u-count col-dup ${dup === 0 ? 'dim' : ''}">${dup}</div>
-      <div class="u-lastlogin col-lastlogin">${lastAt}</div>
-    `;
-    const detail = buildDetail(u, s);
-    row.appendChild(detail);
-    row.addEventListener('click', e => {
-      detail.classList.toggle('active');
+    userRowData.push({
+      uid: u.uid, nickname, nicknameDim, isMe: u.uid === currentUid,
+      total, ur, lr, dup, gasshukuCnt, story,
+      lastAt, lastAtTs: u.lastLoginAt || 0,
+      isGuest: false, _u: u, _s: s,
     });
-    body.appendChild(row);
   });
 
-  // ===== ゲスト (gasshukuStats/devices で uid なし or 未登録) を行追加 =====
+  // ===== ゲスト (gasshukuStats/devices で uid なし or 未登録) =====
   let guestCount = 0;
   if (guestDevices) {
-    // 未ログイン or 未登録 uid のデバイスを抽出
     const guestEntries = Object.values(guestDevices).filter(g => !g.uid || !loggedInUids.has(g.uid));
-    // 最終操作降順
-    guestEntries.sort((a, b) => (b.lastAt || 0) - (a.lastAt || 0));
-    guestEntries.forEach((g, i) => {
+    guestEntries.forEach(g => {
       guestCount++;
-      const lastAt = g.lastAt ? new Date(g.lastAt).toLocaleString('ja-JP', { year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '-';
+      const lastAt = g.lastAt ? new Date(g.lastAt).toLocaleString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '-';
       const idShort = g.deviceId.slice(-6);
-      const tag = g.retroactive ? ' <span style="font-size:10px;color:#fcd34d">過去</span>' : '';
-      const row = document.createElement('div');
-      row.className = 'users-row guest-row';
-      row.style.opacity = '0.78';
-      row.dataset.lastAt = g.lastAt || 0;
+      userRowData.push({
+        isGuest: true, deviceId: g.deviceId, idShort, retroactive: g.retroactive,
+        nickname: `🎌 ゲスト #${idShort}`, nicknameDim: true,
+        total: 0, ur: 0, lr: 0, dup: 0,
+        gasshukuCnt: g.totalRolls || 0,
+        story: { text: '—', sortKey: -1, dim: true },
+        lastAt, lastAtTs: g.lastAt || 0,
+        days: g.days,
+      });
+    });
+  }
+
+  // ===== ソート =====
+  const sortKey = window._adminSortKey || 'lastlogin';
+  const sortDir = window._adminSortDir || 'desc';
+  const cmp = (a, b) => {
+    let av, bv;
+    switch (sortKey) {
+      case 'nickname': av = a.nickname.toLowerCase(); bv = b.nickname.toLowerCase(); break;
+      case 'total': av = a.total; bv = b.total; break;
+      case 'ur': av = a.ur; bv = b.ur; break;
+      case 'lr': av = a.lr; bv = b.lr; break;
+      case 'dup': av = a.dup; bv = b.dup; break;
+      case 'gasshuku': av = a.gasshukuCnt; bv = b.gasshukuCnt; break;
+      case 'story': av = a.story.sortKey; bv = b.story.sortKey; break;
+      case 'lastlogin': default: av = a.lastAtTs; bv = b.lastAtTs; break;
+    }
+    if (av < bv) return sortDir === 'asc' ? -1 : 1;
+    if (av > bv) return sortDir === 'asc' ? 1 : -1;
+    return 0;
+  };
+  userRowData.sort(cmp);
+
+  // ===== 描画 =====
+  userRowData.forEach(d => {
+    const row = document.createElement('div');
+    row.className = 'users-row' + (d.isGuest ? ' guest-row' : '');
+    if (d.isGuest) row.style.opacity = '0.78';
+    if (d.isGuest) {
+      const tag = d.retroactive ? ' <span style="font-size:10px;color:#fcd34d">過去</span>' : '';
       row.innerHTML = `
-        <div class="u-nickname dim">🎌 ゲスト #${idShort}${tag}</div>
+        <div class="u-nickname dim">${d.nickname}${tag}</div>
         <div class="u-count dim">—</div>
-        <div class="u-count col-ur dim">合宿×${g.totalRolls || 0}</div>
+        <div class="u-count col-ur dim">—</div>
         <div class="u-count col-lr dim">—</div>
         <div class="u-count col-dup dim">—</div>
-        <div class="u-lastlogin col-lastlogin">${lastAt}</div>
+        <div class="u-count col-gasshuku ${d.gasshukuCnt === 0 ? 'dim' : ''}">${d.gasshukuCnt}</div>
+        <div class="u-story dim">—</div>
+        <div class="u-lastlogin col-lastlogin">${d.lastAt}</div>
       `;
-      // ゲストの詳細 (簡易)
       const detail = document.createElement('div');
       detail.className = 'user-detail';
       detail.innerHTML = `
         <div style="padding:14px 18px;color:#c0c4d0;font-size:13px">
-          <div><b>device_id</b>: <code style="font-size:11px">${g.deviceId}</code></div>
-          <div><b>合宿ガチャ実行回数</b>: ${g.totalRolls || 0}</div>
-          <div><b>プレイ日数</b>: ${g.days.size}日 (${[...g.days].sort().join(', ')})</div>
-          <div><b>最終操作</b>: ${lastAt}</div>
-          ${g.retroactive ? '<div style="color:#fcd34d;margin-top:6px">※ 過去ゲスト遡及アップロード</div>' : ''}
+          <div><b>device_id</b>: <code style="font-size:11px">${d.deviceId}</code></div>
+          <div><b>合宿ガチャ実行回数</b>: ${d.gasshukuCnt}</div>
+          <div><b>プレイ日数</b>: ${d.days ? d.days.size : 0}日 (${d.days ? [...d.days].sort().join(', ') : ''})</div>
+          <div><b>最終操作</b>: ${d.lastAt}</div>
+          ${d.retroactive ? '<div style="color:#fcd34d;margin-top:6px">※ 過去ゲスト遡及アップロード</div>' : ''}
           <div style="margin-top:8px;color:rgba(255,255,255,0.5);font-size:11px">アカウント未登録のためキャラ獲得情報は端末ローカルのみで保持されています</div>
         </div>
       `;
       row.appendChild(detail);
       row.addEventListener('click', () => detail.classList.toggle('active'));
-      body.appendChild(row);
-    });
-  }
+    } else {
+      row.innerHTML = `
+        <div class="u-nickname ${d.isMe ? 'me' : ''} ${d.nicknameDim ? 'u-uid-fallback' : ''}">${escapeHtml(d.nickname)}</div>
+        <div class="u-count ${d.total === 0 ? 'dim' : ''}">${d.total}</div>
+        <div class="u-count col-ur ${d.ur === 0 ? 'dim' : ''}">${d.ur}/${TIER_MAX.UR}</div>
+        <div class="u-count col-lr ${d.lr === 0 ? 'dim' : ''}">${d.lr}/${TIER_MAX.LR}</div>
+        <div class="u-count col-dup ${d.dup === 0 ? 'dim' : ''}">${d.dup}</div>
+        <div class="u-count col-gasshuku ${d.gasshukuCnt === 0 ? 'dim' : ''}">${d.gasshukuCnt}</div>
+        <div class="u-story ${d.story.dim ? 'dim' : ''}">${d.story.text}</div>
+        <div class="u-lastlogin col-lastlogin">${d.lastAt}</div>
+      `;
+      const detail = buildDetail(d._u, d._s);
+      row.appendChild(detail);
+      row.addEventListener('click', () => detail.classList.toggle('active'));
+    }
+    body.appendChild(row);
+  });
 
-  // ゲスト+ユーザー混合で 最終操作時刻 降順に並び替え (DOMソート)
-  const allRows = Array.from(body.children);
-  allRows.sort((a, b) => (parseInt(b.dataset.lastAt) || 0) - (parseInt(a.dataset.lastAt) || 0));
-  allRows.forEach(r => body.appendChild(r));
+  // ヘッダにソート矢印 (現在のsortKey)
+  document.querySelectorAll('.users-head > div').forEach(h => {
+    h.classList.remove('sort-asc','sort-desc');
+    if (h.dataset.sort === sortKey) h.classList.add(sortDir === 'asc' ? 'sort-asc' : 'sort-desc');
+  });
 
   const userCount = entries.length;
-  const totalRows = userCount + guestCount;
-  $('#sum-users').textContent = guestCount > 0 ? `${userCount} +${guestCount}🎌` : userCount;
+  const tooltipDelta = `合宿ガチャ実行端末: ${guestCount}台 (アカウント未登録)`;
+  $('#sum-users').innerHTML = guestCount > 0 ? `${userCount} <span class="delta" title="${tooltipDelta}">+${guestCount}🎌</span>` : userCount;
   $('#sum-total').textContent = sumTotal;
   $('#sum-ur').textContent = userCount ? `${sumUR}/${userCount * TIER_MAX.UR}` : '-';
   $('#sum-lr-holders').textContent = userCount ? `${lrHolders}/${userCount}` : '-';
-  $('#sum-story-done').textContent = userCount ? `${storyDone}/${userCount}` : '-';
   // 合宿ガチャ統計 (今日)
   loadGasshukuStats();
+}
+
+// ヘッダクリックでソート (DOMContentLoaded後にbind)
+function bindSortHeaders() {
+  document.querySelectorAll('.users-head > div[data-sort]').forEach(h => {
+    h.addEventListener('click', () => {
+      const key = h.dataset.sort;
+      if (window._adminSortKey === key) {
+        window._adminSortDir = window._adminSortDir === 'asc' ? 'desc' : 'asc';
+      } else {
+        window._adminSortKey = key;
+        window._adminSortDir = (key === 'nickname') ? 'asc' : 'desc';
+      }
+      // 再描画
+      if (window._lastRenderArgs) {
+        renderUsers(...window._lastRenderArgs);
+      }
+    });
+  });
+}
+
+// タブ切替
+function bindTabs() {
+  document.querySelectorAll('.admin-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const target = tab.dataset.panel;
+      document.querySelectorAll('.admin-tab').forEach(t => t.classList.toggle('active', t === tab));
+      document.querySelectorAll('.admin-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + target));
+    });
+  });
 }
 
 async function loadGasshukuStats() {
@@ -781,6 +983,12 @@ function renderFeedback() {
   if (pill) {
     if (cnt.unread > 0) { pill.style.display = ''; pill.textContent = cnt.unread + ' 未読'; }
     else pill.style.display = 'none';
+  }
+  // タブバッジ連動
+  const tabBadge = document.getElementById('tab-fb-badge');
+  if (tabBadge) {
+    if (cnt.unread > 0) { tabBadge.style.display = ''; tabBadge.textContent = cnt.unread; }
+    else tabBadge.style.display = 'none';
   }
   // フィルタ
   let filtered = feedbackItems;
