@@ -776,11 +776,11 @@
       document.body.classList.remove('gasshuku-mode-fantasy');
       gasshukuBusy = false;
       setGachaBtnsDisabled(false);
-      // 結果モーダル表示 (10連時のみ。単発はキャラ自体が画面いっぱいに見えるため不要)
+      // 結果モーダル表示 (単発・10連 両方)
       let showedResult = false;
       if (typeof window !== 'undefined') {
         try {
-          if (window.__gasshukuLastResults && window.__gasshukuLastResults.length > 1) {
+          if (window.__gasshukuLastResults && window.__gasshukuLastResults.length >= 1) {
             showResultModal(window.__gasshukuLastResults, window.__gasshukuLastImgMode);
             showedResult = true;
           }
@@ -849,15 +849,11 @@
   function setupGasshukuBlink(rootEl) {
     const root = rootEl || document;
     const imgs = root.querySelectorAll('img[src*="/images/gasshuku/"]');
-    console.debug('[gasshuku-blink] setup called, imgs found:', imgs.length);
     imgs.forEach(imgEl => {
       const src = imgEl.getAttribute('src') || imgEl.src;
       if (!src) return;
       if (src.includes('_blink.')) return;
-      if (imgEl.dataset.blinkUrl === src) {
-        console.debug('[gasshuku-blink] already setup:', src);
-        return;
-      }
+      if (imgEl.dataset.blinkUrl === src) return;
       if (_gasshukuBlinkTimers.has(imgEl)) {
         clearTimeout(_gasshukuBlinkTimers.get(imgEl));
         _gasshukuBlinkTimers.delete(imgEl);
@@ -865,21 +861,16 @@
       imgEl.dataset.blinkUrl = src;
       const blinkUrl = src.replace(/\.(png|jpg|jpeg|webp)$/i, '_blink.$1');
       const cached = _gasshukuBlinkCache.get(blinkUrl);
-      console.debug('[gasshuku-blink] try:', blinkUrl, 'cached:', cached);
       if (cached === 'ng') return;
       if (cached === 'ok') { _startGasshukuBlinkLoop(imgEl, src, blinkUrl); return; }
       const probe = new Image();
       probe.onload = () => {
         _gasshukuBlinkCache.set(blinkUrl, 'ok');
-        console.debug('[gasshuku-blink] OK loaded:', blinkUrl);
         if (imgEl.dataset.blinkUrl === src) {
           _startGasshukuBlinkLoop(imgEl, src, blinkUrl);
         }
       };
-      probe.onerror = () => {
-        _gasshukuBlinkCache.set(blinkUrl, 'ng');
-        console.debug('[gasshuku-blink] NG (404 or net err):', blinkUrl);
-      };
+      probe.onerror = () => { _gasshukuBlinkCache.set(blinkUrl, 'ng'); };
       probe.src = blinkUrl + (blinkUrl.includes('?') ? '&' : '?') + '_p=' + Date.now();
     });
   }
