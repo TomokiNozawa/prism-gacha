@@ -4411,6 +4411,7 @@ try {
         setTimeout(() => {
           maybeShowMigrationNotice();
           maybeShowAccountPrompt();
+          maybeShowWelcomeModal();  // ログイン済ガード内蔵
         }, 1500);
       }
     });
@@ -4420,6 +4421,7 @@ try {
         initialAuthCheckDone = true;
         maybeShowMigrationNotice();
         maybeShowAccountPrompt();
+        maybeShowWelcomeModal();
       }
     }, 4000);
   } else {
@@ -4427,6 +4429,7 @@ try {
     setTimeout(() => {
       maybeShowMigrationNotice();
       maybeShowAccountPrompt();
+      maybeShowWelcomeModal();
     }, 2000);
   }
 } catch (e) {
@@ -5228,9 +5231,5 @@ function dismissWelcomeModal(openSignup) {
   }
 }
 
-// 起動時に表示 (DOM準備直後にすぐ。 重い画像/フォントの読込待ちはしない)
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => setTimeout(maybeShowWelcomeModal, 400));
-} else {
-  setTimeout(maybeShowWelcomeModal, 400);
-}
+// 起動時の表示は Firebase auth 確定後 (initialAuthCheckDone) に呼ばれる。
+// DOMContentLoaded起動だと authUser未確定で既ログインユーザーにも welcome 出てしまう問題あり (2026-04-26 修正)。
