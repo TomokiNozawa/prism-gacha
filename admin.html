@@ -623,10 +623,18 @@ async function loadAll() {
         }
         const g = guestDevices[devId];
         g.totalRolls += (devData.totalRolls || 0);
-        // 召喚数: device別記録あれば優先、 なければ day比で按分推定
-        const summons = (devData.totalSummons !== undefined && devData.totalSummons !== null)
-          ? devData.totalSummons
-          : Math.round((devData.totalRolls || 0) * ratio);
+        // 召喚数: 優先順位 → totalSummons (新規記録) > totalRolls × ratio (按分推定) > retroactiveCollectedCount (遡及記録の最低保証)
+        let summons;
+        if (devData.totalSummons !== undefined && devData.totalSummons !== null) {
+          summons = devData.totalSummons;
+        } else if (devData.totalRolls !== undefined && devData.totalRolls !== null) {
+          summons = Math.round((devData.totalRolls || 0) * ratio);
+        } else if (devData.retroactiveCollectedCount !== undefined && devData.retroactiveCollectedCount !== null) {
+          // uploadRetroactive で作成された entry: collected件数 = 最低召喚数 (重複引き分は不明)
+          summons = devData.retroactiveCollectedCount;
+        } else {
+          summons = 0;
+        }
         g.totalSummons += summons;
         if (devData.uid) g.uid = devData.uid;
         if (devData.lastRollAt) g.lastAt = Math.max(g.lastAt, devData.lastRollAt);
