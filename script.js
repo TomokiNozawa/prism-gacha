@@ -5195,6 +5195,7 @@ function ensureWelcomeModal() {
         <ul class="welcome-features">
           <li>📱 別端末からも進捗を引き継げます</li>
           <li>💾 ブラウザを消しても記録が残ります</li>
+          <li>📨 ご意見・ご要望を運営に送れます</li>
           <li>⚡ 30秒で完了・無料・課金なし</li>
         </ul>
       </div>
@@ -5220,7 +5221,9 @@ function dismissWelcomeModal(openSignup) {
   }
 }
 
-// 起動時に表示 (他のmodal/UIの後に少し遅延)
-window.addEventListener('load', () => {
-  setTimeout(maybeShowWelcomeModal, 1500);
-});
+// 起動時に表示 (DOM準備直後にすぐ。 重い画像/フォントの読込待ちはしない)
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => setTimeout(maybeShowWelcomeModal, 400));
+} else {
+  setTimeout(maybeShowWelcomeModal, 400);
+}
