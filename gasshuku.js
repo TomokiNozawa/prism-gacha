@@ -705,6 +705,11 @@
       if (cv) { cv.width = window.innerWidth; cv.height = window.innerHeight; }
     };
 
+    // ガチャ演出中も img 表示直後に瞬き有効化 (800ms毎走査)
+    const _gasshukuStageBlinkInterval = setInterval(() => {
+      try { setupGasshukuBlink(); } catch(e){}
+    }, 800);
+
     try {
       if (typeof skipRequested !== 'undefined') skipRequested = false;
       const stageEl = document.getElementById('stage');
@@ -770,6 +775,7 @@
     } catch (e) {
       console.error('[gasshuku] roll error:', e);
     } finally {
+      clearInterval(_gasshukuStageBlinkInterval);
       if (typeof closeStage === 'function') closeStage();
       document.body.classList.remove('gasshuku-running');
       document.body.classList.remove('gasshuku-mode-real');

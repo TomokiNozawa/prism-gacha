@@ -4979,11 +4979,18 @@ body.gasshuku-modal-open {
 }
 .gasshuku-result-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 180px));
   gap: 10px;
+  justify-content: center;
+}
+.gasshuku-result-grid:has(.gasshuku-result-card:only-child) {
+  grid-template-columns: minmax(0, 280px);
 }
 @media (max-width: 600px) {
-  .gasshuku-result-grid { grid-template-columns: repeat(2, 1fr); }
+  .gasshuku-result-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .gasshuku-result-grid:has(.gasshuku-result-card:only-child) {
+    grid-template-columns: minmax(0, 240px);
+  }
   .gasshuku-result-stage { padding: 18px 14px; }
   .gasshuku-result-title { font-size: 19px; }
 }
