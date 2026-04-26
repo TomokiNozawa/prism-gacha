@@ -700,11 +700,21 @@
 
   function rollAll(count) {
     // ゲスト時は accountOnly:true キャラを除外 (LR の シブヤ/ホサカ はアカウント限定)
+    // 確率: ログイン時 = LR各1.5% (2人=合計3%) / UR12人均等=残97%を均等(各8.083%)
+    //       ゲスト時 = UR12人均等(各8.33%)
     const isLoggedIn = !!(typeof authUser !== 'undefined' && authUser);
     const pool = POOL.filter(c => isLoggedIn || !c.accountOnly);
+    const lrChars = pool.filter(c => c.tier === 'LR');
+    const urChars = pool.filter(c => c.tier !== 'LR');
+    const LR_RATE_EACH = 0.015;
     const out = [];
     for (let i = 0; i < count; i++) {
-      out.push(pool[Math.floor(Math.random() * pool.length)]);
+      const lrTotal = lrChars.length * LR_RATE_EACH;
+      if (lrChars.length > 0 && Math.random() < lrTotal) {
+        out.push(lrChars[Math.floor(Math.random() * lrChars.length)]);
+      } else {
+        out.push(urChars[Math.floor(Math.random() * urChars.length)]);
+      }
     }
     return out;
   }
