@@ -886,6 +886,11 @@
     if (cached === 'ok') { _startGasshukuBlinkLoop(el, src, blinkUrl, mode); return; }
     const probe = new Image();
     probe.onload = () => {
+      // Cloudflare Pages のSPA fallbackで text/html が200返る場合、 naturalWidth=0 になる → 'ng' 扱い
+      if (!probe.naturalWidth || !probe.naturalHeight) {
+        _gasshukuBlinkCache.set(blinkUrl, 'ng');
+        return;
+      }
       _gasshukuBlinkCache.set(blinkUrl, 'ok');
       if (el.dataset.blinkUrl === src) {
         _startGasshukuBlinkLoop(el, src, blinkUrl, mode);
