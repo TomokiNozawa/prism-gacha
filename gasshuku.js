@@ -288,7 +288,9 @@
   function renderGasshukuGallery() {
     const grid = document.getElementById('gasshuku-gallery-grid');
     const cntEl = document.getElementById('gasshuku-gallery-count');
+    const totalEl = document.getElementById('gasshuku-gallery-total');
     if (!grid) return;
+    if (totalEl) totalEl.textContent = String(POOL.length * 2);
     const d = loadCollected();
     grid.innerHTML = '';
     let count = 0;
