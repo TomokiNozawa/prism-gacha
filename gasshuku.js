@@ -576,11 +576,26 @@
         <div class="gasshuku-result-title">🎌 合宿ガチャ結果</div>
         <div class="gasshuku-result-summary" id="gasshuku-result-summary"></div>
         <div class="gasshuku-result-grid" id="gasshuku-result-grid"></div>
+        <div class="gasshuku-result-actions">
+          <button class="gasshuku-result-again" id="gasshuku-result-again" type="button"></button>
+          <button class="gasshuku-result-close-btn" id="gasshuku-result-close-btn" type="button">閉じる</button>
+        </div>
       </div>
     `;
     document.body.appendChild(m);
     m.querySelector('.gasshuku-result-close').addEventListener('click', closeResultModal);
     m.querySelector('.gasshuku-result-backdrop').addEventListener('click', closeResultModal);
+    m.querySelector('#gasshuku-result-close-btn').addEventListener('click', closeResultModal);
+    m.querySelector('#gasshuku-result-again').addEventListener('click', () => {
+      const lastImgMode = window.__gasshukuLastImgMode || 'fantasy';
+      const lastCount = (window.__gasshukuLastResults && window.__gasshukuLastResults.length) || 1;
+      closeResultModal();
+      if (!isGasshukuActive()) {
+        alert('🎌 合宿ガチャは終了しました (4/30まででした)。');
+        return;
+      }
+      setTimeout(() => startGasshukuRoll(lastImgMode, lastCount), 150);
+    });
     return m;
   }
   function showResultModal(results, imgMode) {
@@ -595,6 +610,15 @@
       ? (urCount > 0 ? `🌟 LR ×${lrCount} + 🌈 UR ×${urCount}` : `🌟 LR ×${lrCount}`)
       : `🌈 UR ×${urCount}`;
     summary.textContent = `${tierStr} 確定 / ${imgMode === 'real' ? '📷 本人モード' : '🌈 ファンタジーモード'}`;
+    // 「もう一度引く」ボタンラベル更新
+    const againBtn = document.getElementById('gasshuku-result-again');
+    if (againBtn) {
+      const cnt = results.length;
+      const modeLabel = imgMode === 'real' ? '📷 本人' : '🌈 Fantasy';
+      againBtn.textContent = `🎌 もう一度 ${modeLabel} ${cnt === 1 ? '単発' : `×${cnt}`}`;
+      againBtn.disabled = !isGasshukuActive();
+      againBtn.classList.toggle('disabled', !isGasshukuActive());
+    }
     grid.innerHTML = '';
     results.forEach(r => {
       const card = document.createElement('div');
