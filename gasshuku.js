@@ -748,6 +748,11 @@
       devRef.child('lastRollAt').set(Date.now());
       const uid = getCurrentUid();
       if (uid) devRef.child('uid').set(uid);
+      // F1: 中央デバイス台帳に first/last gasshuku roll を記録 (Season超え集計用)
+      const centralDevRef = db.ref('prism-gacha/devices/' + dev);
+      centralDevRef.child('lastGasshukuRollAt').set(Date.now());
+      centralDevRef.child('firstGasshukuRollAt').transaction(c => c || Date.now());
+      if (uid) centralDevRef.child('lastUid').set(uid);
     } catch (e) {
       console.warn('[gasshuku] stats log failed:', e);
     }

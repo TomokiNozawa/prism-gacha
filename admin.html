@@ -162,7 +162,7 @@ body {
 }
 .users-row {
   display: grid;
-  grid-template-columns: minmax(140px, 1.6fr) 0.7fr 0.8fr 0.6fr 0.6fr 0.85fr 1.0fr 1.15fr 1.15fr;
+  grid-template-columns: minmax(140px, 1.6fr) 0.7fr 0.8fr 0.6fr 0.6fr 0.85fr 1.0fr 0.65fr 1.15fr 1.15fr;
   gap: 8px;
   padding: 14px 18px;
   border-bottom: 1px solid rgba(200, 180, 255, 0.08);
@@ -198,6 +198,14 @@ body {
 }
 .u-story.dim { color: rgba(255,255,255,0.35); }
 .u-story .story-done { color: #6ee7b7; font-size: 10px; margin-left: 3px; }
+.u-streak {
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  color: #fb923c;
+  text-align: center;
+}
+.u-streak.dim { color: rgba(255,255,255,0.35); }
+.u-streak .streak-max { color: rgba(255,255,255,0.45); font-size: 10px; margin-left: 2px; }
 .u-uid-fallback {
   font-size: 11px; color: rgba(255,255,255,0.5);
   font-family: 'SF Mono', Consolas, monospace;
@@ -214,8 +222,8 @@ body {
     -webkit-overflow-scrolling: touch;
   }
   .users-row {
-    grid-template-columns: 140px 60px 75px 55px 55px 80px 95px 100px 110px;
-    min-width: 870px;
+    grid-template-columns: 140px 60px 75px 55px 55px 80px 95px 60px 100px 110px;
+    min-width: 920px;
   }
   .users-head { position: relative; }
   .admin-tab { padding: 8px 12px; font-size: 12px; }
@@ -449,6 +457,13 @@ body {
     <div class="summary-card" style="border-color:rgba(251,191,36,0.4)"><div class="summary-label">🎌 合宿端末数</div><div class="summary-value" id="sum-gasshuku-devices">-</div></div>
     <div class="summary-card" style="border-color:rgba(255,95,170,0.4)"><div class="summary-label">📨 未読要望</div><div class="summary-value" id="sum-feedback-unread">-</div></div>
   </div>
+  <!-- アクティブユーザー (DAU/WAU/MAU) -->
+  <div class="summary-sub">
+    <div class="summary-card" style="border-color:rgba(110,231,183,0.4)"><div class="summary-label">📊 DAU (24時間)</div><div class="summary-value" id="sum-dau">-</div></div>
+    <div class="summary-card" style="border-color:rgba(110,231,183,0.4)"><div class="summary-label">📊 WAU (7日)</div><div class="summary-value" id="sum-wau">-</div></div>
+    <div class="summary-card" style="border-color:rgba(110,231,183,0.4)"><div class="summary-label">📊 MAU (30日)</div><div class="summary-value" id="sum-mau">-</div></div>
+    <div class="summary-card" style="border-color:rgba(251,146,60,0.4)"><div class="summary-label">🔥 連続最高(日)</div><div class="summary-value" id="sum-streak-max">-</div></div>
+  </div>
 
   <div id="notice" class="notice"></div>
 
@@ -469,6 +484,7 @@ body {
         <div class="col-dup" data-sort="dup">凸</div>
         <div class="col-gasshuku" data-sort="gasshuku">🎌召喚数</div>
         <div class="col-story" data-sort="story">📖物語</div>
+        <div class="col-streak" data-sort="streak">🔥連続</div>
         <div class="col-registered" data-sort="registered">📅初回</div>
         <div class="col-lastlogin sort-desc" data-sort="lastlogin">最終ログイン</div>
       </div>
@@ -589,11 +605,12 @@ async function loadAll() {
   notice.className = 'notice loading';
   notice.textContent = '読み込み中…';
   try {
-    // 合宿統計の全日データも取得 (ゲスト集計用)
-    const [usersSnap, indexSnap, statsSnap] = await Promise.all([
+    // 合宿統計の全日データ + 中央デバイス台帳も取得 (visit/streak/F1)
+    const [usersSnap, indexSnap, statsSnap, devicesSnap] = await Promise.all([
       db.ref('prism-gacha/users').once('value'),
       db.ref('prism-gacha/_meta/userIndex').once('value'),
       db.ref('prism-gacha/gasshukuStats').once('value'),
+      db.ref('prism-gacha/devices').once('value'),
     ]);
     const users = usersSnap.val() || {};
     const nameIndex = indexSnap.val() || {}; // nickname → uid
@@ -601,6 +618,9 @@ async function loadAll() {
     for (const [nickname, uid] of Object.entries(nameIndex)) {
       if (typeof uid === 'string') uidToNickname[uid] = nickname;
     }
+    // F1: 中央デバイス台帳 — firstVisitAt/lastVisitAt/firstGasshukuRollAt/lastGasshukuRollAt/lastUid
+    const centralDevices = devicesSnap.val() || {};
+    window._centralDevices = centralDevices;
     // gasshukuStats から全 device を集約 (uid 持ちは ログインユーザーと結合、 uid 無しはゲストエントリ)
     const allStats = statsSnap.val() || {}; // {YYYY-MM-DD: {totalRolls, devices: {deviceId: {...}}}}
     const guestDevices = {}; // deviceId -> {totalRolls, totalSummons, firstAt, lastAt, days}
@@ -658,6 +678,28 @@ async function loadAll() {
       gasshukuByUid[uid] = sum;
     }
     window._gasshukuByUid = gasshukuByUid;
+    // F1: 中央デバイス台帳から visit 情報を guest に merge (firstVisitAt は ms精度)
+    for (const [devId, devData] of Object.entries(centralDevices)) {
+      if (!guestDevices[devId]) {
+        // ガチャ未プレイで visit のみのゲスト
+        guestDevices[devId] = {
+          deviceId: devId,
+          totalRolls: 0,
+          totalSummons: 0,
+          uid: devData.lastUid || null,
+          firstAt: devData.firstVisitAt || Number.POSITIVE_INFINITY,
+          lastAt: devData.lastVisitAt || 0,
+          days: new Set(),
+          retroactive: false,
+          visitOnly: true,
+        };
+      } else {
+        // 既存 guestDevices に visit 情報を反映 (visit時刻をms精度で上書き)
+        if (devData.firstVisitAt) guestDevices[devId].firstAt = Math.min(guestDevices[devId].firstAt, devData.firstVisitAt);
+        if (devData.lastVisitAt) guestDevices[devId].lastAt = Math.max(guestDevices[devId].lastAt, devData.lastVisitAt);
+        if (devData.lastUid && !guestDevices[devId].uid) guestDevices[devId].uid = devData.lastUid;
+      }
+    }
     window._lastRenderArgs = [users, uidToNickname, guestDevices];
     renderUsers(users, uidToNickname, guestDevices);
     notice.className = 'notice';
@@ -729,6 +771,8 @@ function renderUsers(users, uidToNickname, guestDevices) {
       total, ur, lr, dup, gasshukuCnt, story,
       lastAt, lastAtTs: u.lastLoginAt || 0,
       registeredAt, registeredAtTs: u.createdAt || 0,
+      streakCur: u.streakCurrent || 0,
+      streakMax: u.streakMax || 0,
       isGuest: false, _u: u, _s: s,
     });
   });
@@ -770,6 +814,7 @@ function renderUsers(users, uidToNickname, guestDevices) {
       case 'dup': av = a.dup; bv = b.dup; break;
       case 'gasshuku': av = a.gasshukuCnt; bv = b.gasshukuCnt; break;
       case 'story': av = a.story.sortKey; bv = b.story.sortKey; break;
+      case 'streak': av = a.streakCur || 0; bv = b.streakCur || 0; break;
       case 'registered': av = a.registeredAtTs; bv = b.registeredAtTs; break;
       case 'lastlogin': default: av = a.lastAtTs; bv = b.lastAtTs; break;
     }
@@ -794,6 +839,7 @@ function renderUsers(users, uidToNickname, guestDevices) {
         <div class="u-count col-dup dim">—</div>
         <div class="u-count col-gasshuku ${d.gasshukuCnt === 0 ? 'dim' : ''}">${d.gasshukuCnt}</div>
         <div class="u-story dim">—</div>
+        <div class="u-streak dim col-streak">—</div>
         <div class="u-lastlogin col-registered">${d.registeredAt}</div>
         <div class="u-lastlogin col-lastlogin">${d.lastAt}</div>
       `;
@@ -820,6 +866,7 @@ function renderUsers(users, uidToNickname, guestDevices) {
         <div class="u-count col-dup ${d.dup === 0 ? 'dim' : ''}">${d.dup}</div>
         <div class="u-count col-gasshuku ${d.gasshukuCnt === 0 ? 'dim' : ''}">${d.gasshukuCnt}</div>
         <div class="u-story ${d.story.dim ? 'dim' : ''}">${d.story.text}</div>
+        <div class="u-streak col-streak ${d.streakCur === 0 ? 'dim' : ''}">${d.streakCur || 0}<span class="streak-max">/${d.streakMax || 0}</span></div>
         <div class="u-lastlogin col-registered">${d.registeredAt}</div>
         <div class="u-lastlogin col-lastlogin">${d.lastAt}</div>
       `;
@@ -842,6 +889,33 @@ function renderUsers(users, uidToNickname, guestDevices) {
   $('#sum-total').textContent = sumTotal;
   $('#sum-ur').textContent = userCount ? `${sumUR}/${userCount * TIER_MAX.UR}` : '-';
   $('#sum-lr-holders').textContent = userCount ? `${lrHolders}/${userCount}` : '-';
+  // F1: DAU/WAU/MAU 集計 (users.lastVisitAt or lastLoginAt + centralDevices.lastVisitAt の和集合、 uid持ちは重複排除)
+  const now = Date.now();
+  const T_24H = now - 86400000, T_7D = now - 7*86400000, T_30D = now - 30*86400000;
+  const dauUids = new Set(), wauUids = new Set(), mauUids = new Set();
+  const dauDevs = new Set(), wauDevs = new Set(), mauDevs = new Set();
+  for (const u of entries) {
+    const t = u.lastVisitAt || u.lastLoginAt || 0;
+    if (t >= T_24H) dauUids.add(u.uid);
+    if (t >= T_7D) wauUids.add(u.uid);
+    if (t >= T_30D) mauUids.add(u.uid);
+  }
+  const central = window._centralDevices || {};
+  for (const [devId, dev] of Object.entries(central)) {
+    const t = dev.lastVisitAt || dev.lastGasshukuRollAt || 0;
+    // ログイン済 uid に紐づく device は users 側でカウント済 → 除外
+    if (dev.lastUid && dauUids.has(dev.lastUid)) continue;  // 既カウント
+    if (t >= T_24H && (!dev.lastUid || !dauUids.has(dev.lastUid))) dauDevs.add(devId);
+    if (t >= T_7D && (!dev.lastUid || !wauUids.has(dev.lastUid))) wauDevs.add(devId);
+    if (t >= T_30D && (!dev.lastUid || !mauUids.has(dev.lastUid))) mauDevs.add(devId);
+  }
+  $('#sum-dau').textContent = `${dauUids.size + dauDevs.size}`;
+  $('#sum-wau').textContent = `${wauUids.size + wauDevs.size}`;
+  $('#sum-mau').textContent = `${mauUids.size + mauDevs.size}`;
+  // 連続最高 (全ユーザーの streakMax の最大値)
+  let maxStreak = 0;
+  for (const u of entries) { if ((u.streakMax || 0) > maxStreak) maxStreak = u.streakMax; }
+  $('#sum-streak-max').textContent = maxStreak > 0 ? `${maxStreak}日` : '-';
   // 合宿ガチャ統計 (今日)
   loadGasshukuStats();
 }

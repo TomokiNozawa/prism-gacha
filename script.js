@@ -4417,6 +4417,75 @@ const EMAIL_DOMAIN = '@prism-gacha.internal';
 let fbApp = null, fbAuth = null, fbDb = null, authUser = null;
 let signupInProgress = false;
 let initialAuthCheckDone = false;
+let visitLogged = false;  // F1: page load毎に1回だけ visit ログ
+
+// F1: 共通 device id (gasshuku.js と同じ key を使う)
+function getSharedDeviceId() {
+  const KEY = 'prism-gasshuku-device-id';
+  let id = null;
+  try { id = localStorage.getItem(KEY); } catch (e) {}
+  if (!id) {
+    id = 'dev_' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+    try { localStorage.setItem(KEY, id); } catch (e) {}
+  }
+  return id;
+}
+
+function jstDateString(ms) {
+  const d = new Date(ms);
+  // JST = UTC+9
+  const jstMs = d.getTime() + 9 * 3600 * 1000;
+  const j = new Date(jstMs);
+  const y = j.getUTCFullYear();
+  const m = String(j.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(j.getUTCDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+// F1: page load時に visit を記録 + ログイン済なら streak も更新
+async function logVisitAndStreak(user) {
+  if (!fbDb) return;
+  if (visitLogged) return;
+  visitLogged = true;
+  const now = Date.now();
+  const todayStr = jstDateString(now);
+  const dev = getSharedDeviceId();
+  try {
+    // 中央 device 台帳 (ゲスト/ログイン済 共通)
+    const devRef = fbDb.ref('prism-gacha/devices/' + dev);
+    devRef.child('lastVisitAt').set(now);
+    devRef.child('firstVisitAt').transaction(c => c || now);
+    if (user) devRef.child('lastUid').set(user.uid);
+  } catch (e) { console.warn('[visit] device log failed', e); }
+  if (!user) return;
+  // ログイン済: users[uid] にも firstVisitAt/lastVisitAt + streak
+  try {
+    const userRef = fbDb.ref('prism-gacha/users/' + user.uid);
+    userRef.child('lastVisitAt').set(now);
+    userRef.child('firstVisitAt').transaction(c => c || now);
+    const snap = await userRef.once('value');
+    const u = snap.val() || {};
+    const lastDate = u.lastLoginDate || '';
+    const yesterdayStr = jstDateString(now - 86400000);
+    let curStreak = u.streakCurrent || 0;
+    let maxStreak = u.streakMax || 0;
+    if (lastDate === todayStr) {
+      // 同日複数visit → 維持
+      if (curStreak === 0) curStreak = 1;
+    } else if (lastDate === yesterdayStr) {
+      curStreak = curStreak + 1;
+    } else {
+      // 1日以上空いた / 初回 → リセット
+      curStreak = 1;
+    }
+    if (curStreak > maxStreak) maxStreak = curStreak;
+    await userRef.update({
+      lastLoginDate: todayStr,
+      streakCurrent: curStreak,
+      streakMax: maxStreak,
+    });
+  } catch (e) { console.warn('[visit] user/streak log failed', e); }
+}
 
 try {
   if (typeof firebase !== 'undefined') {
@@ -4431,6 +4500,8 @@ try {
       if (user && !signupInProgress) { await onAuthReady(user); }
       // admin判定も並列で (失敗してもUIには影響しない)
       checkPrismAdmin();
+      // F1: visit/streak 記録 (page load毎に1回)
+      logVisitAndStreak(user);
       // 初回auth state確定後(login or ゲスト)にprompt表示判定
       // migration notice (旧URL限定) → account prompt の順で判定 (session flagで排他)
       if (!initialAuthCheckDone) {
@@ -4450,6 +4521,8 @@ try {
         maybeShowAccountPrompt();
         maybeShowWelcomeModal();
       }
+      // F1: 万一 onAuthStateChanged が発火していなくても visit ログだけは送る (ゲスト扱い)
+      if (!visitLogged) logVisitAndStreak(null);
     }, 4000);
   } else {
     // Firebase SDK未読込: それでも既存ゲストには案内(ただしFirebase動かないので案内意味ないが念のため)
