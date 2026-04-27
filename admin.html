@@ -740,12 +740,17 @@ async function loadAll() {
   notice.textContent = '読み込み中…';
   try {
     // 合宿統計の全日データ + 中央デバイス台帳 + イベント集計 (F4)
+    // F1/F4: devices/eventStats は新規パスでRules未設定の可能性 → 失敗を許容して空で続行
+    const safeOnce = (path) => db.ref(path).once('value').catch(e => {
+      console.warn(`[admin] ${path} fetch failed (rules?):`, e.message || e);
+      return { val: () => null };
+    });
     const [usersSnap, indexSnap, statsSnap, devicesSnap, eventsSnap] = await Promise.all([
       db.ref('prism-gacha/users').once('value'),
       db.ref('prism-gacha/_meta/userIndex').once('value'),
       db.ref('prism-gacha/gasshukuStats').once('value'),
-      db.ref('prism-gacha/devices').once('value'),
-      db.ref('prism-gacha/_meta/eventStats').once('value'),
+      safeOnce('prism-gacha/devices'),
+      safeOnce('prism-gacha/_meta/eventStats'),
     ]);
     window._eventStats = eventsSnap.val() || {};
     const users = usersSnap.val() || {};
