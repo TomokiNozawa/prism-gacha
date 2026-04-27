@@ -4463,7 +4463,59 @@ function isPWAStandalone() {
   return false;
 }
 
-// F1: page load時に visit を記録 + ログイン済なら streak も更新 (F3で deviceType + isPWA + visitDates 追加)
+// F4: 流入元 (referrer + UTM) — 初回訪問時のみ取得して devices/{deviceId} に保存
+function getInflowInfo() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    return {
+      referrer: document.referrer || '',
+      utm: {
+        source: params.get('utm_source') || '',
+        medium: params.get('utm_medium') || '',
+        campaign: params.get('utm_campaign') || '',
+      },
+      landingUrl: window.location.pathname + window.location.search,
+    };
+  } catch (e) { return null; }
+}
+
+// F4: エラー記録 (画像/BGM/その他、 重複抑止のため type+msg でハッシュ化、 同セッション同エラー1回まで)
+const __errorLoggedKeys = new Set();
+async function logErrorToFirebase(type, msg, extra) {
+  if (!fbDb) return;
+  const key = type + '::' + (msg || '').slice(0, 100);
+  if (__errorLoggedKeys.has(key)) return;
+  __errorLoggedKeys.add(key);
+  try {
+    const dev = getSharedDeviceId();
+    const ref = fbDb.ref('prism-gacha/_meta/eventStats/errors/' + type).push();
+    await ref.set({
+      ts: Date.now(),
+      msg: String(msg || '').slice(0, 300),
+      device: dev,
+      uid: authUser ? authUser.uid : null,
+      ua: (navigator.userAgent || '').slice(0, 200),
+      ...(extra || {}),
+    });
+  } catch (e) { console.warn('[error log] failed', e); }
+}
+
+// グローバルエラーフック (window.onerror + unhandledrejection)
+window.addEventListener('error', (e) => {
+  // <img> のロード失敗は ev.target が IMG/AUDIO 等
+  if (e.target && (e.target.tagName === 'IMG' || e.target.tagName === 'AUDIO')) {
+    const src = e.target.src || '';
+    logErrorToFirebase(e.target.tagName === 'IMG' ? 'imageLoadFailed' : 'audioLoadFailed', src);
+    return;
+  }
+  if (e.message) logErrorToFirebase('jsError', e.message, { line: e.lineno, col: e.colno });
+}, true);
+window.addEventListener('unhandledrejection', (e) => {
+  const msg = (e.reason && (e.reason.message || String(e.reason))) || 'unknown';
+  logErrorToFirebase('promiseRejection', msg);
+});
+
+// F1: page load時に visit を記録 + ログイン済なら streak も更新 (F3で deviceType + isPWA + visitDates 追加、 F4で流入元)
 async function logVisitAndStreak(user) {
   if (!fbDb) return;
   if (visitLogged) return;
@@ -4481,6 +4533,13 @@ async function logVisitAndStreak(user) {
     devRef.update(devUpd);
     devRef.child('firstVisitAt').transaction(c => c || now);
     devRef.child('visitDates/' + todayStr).set(now);  // F3: 30日ヒート用
+    // F4: 初回訪問時のみ 流入元 (referrer + UTM) を保存
+    const inflow = getInflowInfo();
+    if (inflow) {
+      devRef.child('referrer').transaction(c => c || inflow.referrer);
+      devRef.child('utm').transaction(c => c || inflow.utm);
+      devRef.child('landingUrl').transaction(c => c || inflow.landingUrl);
+    }
   } catch (e) { console.warn('[visit] device log failed', e); }
   if (!user) return;
   // ログイン済: users[uid] にも firstVisitAt/lastVisitAt + streak + deviceType履歴 + PWA flag

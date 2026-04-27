@@ -583,6 +583,12 @@ body {
     <div class="breakdown-grid" id="breakdown-device"></div>
   </div>
 
+  <!-- F4: 操作ログ + エラー -->
+  <div class="breakdown-section">
+    <div class="breakdown-title">🎬 操作 / 🚨 エラー</div>
+    <div class="breakdown-grid" id="breakdown-events"></div>
+  </div>
+
   <!-- F2: ガチャ種別ブレークダウン -->
   <div class="breakdown-section">
     <div class="breakdown-title">📊 ガチャ種別 ブレークダウン</div>
@@ -733,13 +739,15 @@ async function loadAll() {
   notice.className = 'notice loading';
   notice.textContent = '読み込み中…';
   try {
-    // 合宿統計の全日データ + 中央デバイス台帳も取得 (visit/streak/F1)
-    const [usersSnap, indexSnap, statsSnap, devicesSnap] = await Promise.all([
+    // 合宿統計の全日データ + 中央デバイス台帳 + イベント集計 (F4)
+    const [usersSnap, indexSnap, statsSnap, devicesSnap, eventsSnap] = await Promise.all([
       db.ref('prism-gacha/users').once('value'),
       db.ref('prism-gacha/_meta/userIndex').once('value'),
       db.ref('prism-gacha/gasshukuStats').once('value'),
       db.ref('prism-gacha/devices').once('value'),
+      db.ref('prism-gacha/_meta/eventStats').once('value'),
     ]);
+    window._eventStats = eventsSnap.val() || {};
     const users = usersSnap.val() || {};
     const nameIndex = indexSnap.val() || {}; // nickname → uid
     const uidToNickname = {};
@@ -1105,6 +1113,51 @@ function renderUsers(users, uidToNickname, guestDevices) {
     breakdownDevice.innerHTML = html;
   }
 
+  // F4: 操作ログ + エラー サマリ (eventStats + devices.referrer 集計)
+  const breakdownEvents = $('#breakdown-events');
+  if (breakdownEvents) {
+    const ev = window._eventStats || {};
+    const againClicks = ev.gasshukuAgainClicks || 0;
+    const modeReal = (ev.gasshukuRollsByMode && ev.gasshukuRollsByMode.real) || 0;
+    const modeFantasy = (ev.gasshukuRollsByMode && ev.gasshukuRollsByMode.fantasy) || 0;
+    const modeTotal = modeReal + modeFantasy;
+    const realPct = modeTotal ? Math.round(modeReal / modeTotal * 100) : 0;
+    // エラー件数 (各種別 + 合算)
+    const errors = ev.errors || {};
+    let totalErrors = 0;
+    const errBreakdown = {};
+    for (const [type, entries] of Object.entries(errors)) {
+      const c = (entries && typeof entries === 'object') ? Object.keys(entries).length : 0;
+      errBreakdown[type] = c;
+      totalErrors += c;
+    }
+    // 流入元: devices の referrer をユニーク集計
+    const refSet = new Set();
+    let utmCount = 0;
+    const central = window._centralDevices || {};
+    for (const d of Object.values(central)) {
+      if (d.referrer && d.referrer.length > 0) refSet.add(d.referrer);
+      if (d.utm && (d.utm.source || d.utm.medium || d.utm.campaign)) utmCount++;
+    }
+    const items = [
+      { lbl: '🔁 もう一度引く クリック', val: againClicks, sub: '回', color: '#fcd34d' },
+      { lbl: '📷 本人モード比', val: `${modeReal}`, sub: `/${modeTotal} (${realPct}%)`, color: '#f472b6' },
+      { lbl: '🌈 Fantasyモード', val: modeFantasy, sub: `/${modeTotal} (${100 - realPct}%)`, color: '#7dd3fc' },
+      { lbl: '🚨 エラー件数', val: totalErrors, sub: Object.keys(errBreakdown).length ? Object.entries(errBreakdown).map(([t,c])=>`${t}:${c}`).join(' / ') : '—', color: '#ff5e9a' },
+      { lbl: '🌐 流入元 (referrer種類)', val: refSet.size, sub: '個', color: '#a3e635' },
+      { lbl: '🏷️ UTMタグ訪問', val: utmCount, sub: '台', color: '#c87dff' },
+    ];
+    let html = '';
+    for (const it of items) {
+      html += `<div class="breakdown-item">
+        <div class="b-label">${it.lbl}</div>
+        <div class="b-value">${it.val}<span class="b-sub">${it.sub}</span></div>
+        <div class="b-bar"><div class="b-bar-inner" style="width:100%;background:${it.color}"></div></div>
+      </div>`;
+    }
+    breakdownEvents.innerHTML = html;
+  }
+
   // F2: 章別読了率 (全ユーザー storyProgress を集約)
   const breakdownStory = $('#breakdown-story');
   if (breakdownStory && userCount > 0) {
@@ -1302,6 +1355,8 @@ function buildDetail(u, s) {
     <div class="detail-row"><span>📱 デバイス</span><b>${deviceLabel}</b></div>
     <div class="detail-row"><span>📦 PWAインストール</span><b>${pwaLabel}</b></div>
     <div class="detail-row"><span>🌟 登録経路</span><b>${welcomeLabel}</b></div>
+    <div class="detail-row"><span>🔁 もう一度引くクリック</span><b>${u.againClickCount || 0} 回</b></div>
+    <div class="detail-row"><span>🎌 モード比 (本人/Fantasy)</span><b>${(u.rollsByMode && u.rollsByMode.real) || 0} / ${(u.rollsByMode && u.rollsByMode.fantasy) || 0}</b></div>
     <h4 style="margin-top:12px">📅 直近30日 訪問ヒート</h4>
     ${heatHtml}
     <div class="detail-row"><span>最終state同期</span><b>${updatedAt}</b></div>

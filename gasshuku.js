@@ -594,6 +594,16 @@
         alert('🎌 合宿ガチャは終了しました (4/30まででした)。');
         return;
       }
+      // F4: もう一度引く クリック数を記録 (グローバル + ユーザー個別)
+      try {
+        const app = getFbApp();
+        if (app) {
+          const db = app.database();
+          db.ref('prism-gacha/_meta/eventStats/gasshukuAgainClicks').transaction(c => (c || 0) + 1);
+          const uid = getCurrentUid();
+          if (uid) db.ref('prism-gacha/users/' + uid + '/againClickCount').transaction(c => (c || 0) + 1);
+        }
+      } catch (e) {}
       setTimeout(() => startGasshukuRoll(lastImgMode, lastCount), 150);
     });
     return m;
@@ -846,6 +856,17 @@
     setGachaBtnsDisabled(true);
     document.body.classList.add('gasshuku-running');
     document.body.classList.add('gasshuku-mode-' + (imgMode === 'real' ? 'real' : 'fantasy'));
+    // F4: ガチャモード使用カウンタ
+    try {
+      const app = getFbApp();
+      if (app) {
+        const mode = imgMode === 'real' ? 'real' : 'fantasy';
+        const db = app.database();
+        db.ref('prism-gacha/_meta/eventStats/gasshukuRollsByMode/' + mode).transaction(c => (c || 0) + 1);
+        const uid = getCurrentUid();
+        if (uid) db.ref('prism-gacha/users/' + uid + '/rollsByMode/' + mode).transaction(c => (c || 0) + 1);
+      }
+    } catch (e) {}
 
     const cv = document.getElementById('canvas') || document.querySelector('canvas');
     const resizeCanvas = () => {
