@@ -146,6 +146,28 @@ body {
   border-radius: 2px;
 }
 
+/* F3: 詳細モーダル 30日ヒートマップ */
+.heatmap-30 {
+  display: grid;
+  grid-template-columns: repeat(15, 1fr);
+  gap: 3px;
+  margin-top: 6px;
+  max-width: 480px;
+}
+.heatmap-cell {
+  aspect-ratio: 1 / 1;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  position: relative;
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.4);
+  display: flex; align-items: center; justify-content: center;
+}
+.heatmap-cell.visited { background: rgba(110, 231, 183, 0.5); color: #fff; }
+.heatmap-cell.played { background: linear-gradient(135deg, #fbbf24, #ec4899); color: #fff; }
+.heatmap-cell.today { outline: 2px solid #c87dff; outline-offset: -1px; }
+
 /* 詳細モーダル 凸ヒート */
 .detail-totsu-grid {
   display: grid;
@@ -554,6 +576,12 @@ body {
   </div>
 
   <div id="notice" class="notice"></div>
+
+  <!-- F3: デバイス分布 + PWA + Welcome→signup -->
+  <div class="breakdown-section">
+    <div class="breakdown-title">📱 デバイス分布 + 流入</div>
+    <div class="breakdown-grid" id="breakdown-device"></div>
+  </div>
 
   <!-- F2: ガチャ種別ブレークダウン -->
   <div class="breakdown-section">
@@ -1041,6 +1069,42 @@ function renderUsers(users, uidToNickname, guestDevices) {
     breakdownGacha.innerHTML = html;
   }
 
+  // F3: デバイス分布 + PWA + Welcome→signup コンバージョン
+  const breakdownDevice = $('#breakdown-device');
+  if (breakdownDevice) {
+    const central = window._centralDevices || {};
+    const allDevices = Object.values(central);
+    const devCnt = { pc: 0, mobile: 0, tablet: 0, unknown: 0 };
+    let pwaCount = 0;
+    for (const d of allDevices) {
+      const t = d.deviceType || 'unknown';
+      if (devCnt[t] !== undefined) devCnt[t]++; else devCnt.unknown++;
+      if (d.isPWA) pwaCount++;
+    }
+    const totalDev = allDevices.length;
+    const welcomeSignups = entries.filter(u => u.accountCreatedFromWelcome === true).length;
+    const totalSignups = entries.length;
+    const welcomePct = totalSignups ? Math.round(welcomeSignups / totalSignups * 100) : 0;
+    const devItems = [
+      { lbl: '💻 PC', cnt: devCnt.pc, color: '#7dd3fc' },
+      { lbl: '📱 モバイル', cnt: devCnt.mobile, color: '#f472b6' },
+      { lbl: '📲 タブレット', cnt: devCnt.tablet, color: '#a3e635' },
+      { lbl: '📦 PWAインストール', cnt: pwaCount, color: '#fcd34d' },
+      { lbl: '🌟 Welcome→新規', cnt: welcomeSignups, sub: `/${totalSignups} (${welcomePct}%)`, color: '#c87dff' },
+    ];
+    let html = '';
+    for (const it of devItems) {
+      const pct = totalDev ? Math.round(it.cnt / totalDev * 100) : 0;
+      const subStr = it.sub || `/${totalDev} (${pct}%)`;
+      html += `<div class="breakdown-item">
+        <div class="b-label">${it.lbl}</div>
+        <div class="b-value">${it.cnt}<span class="b-sub">${subStr}</span></div>
+        <div class="b-bar"><div class="b-bar-inner" style="width:${pct}%;background:${it.color}"></div></div>
+      </div>`;
+    }
+    breakdownDevice.innerHTML = html;
+  }
+
   // F2: 章別読了率 (全ユーザー storyProgress を集約)
   const breakdownStory = $('#breakdown-story');
   if (breakdownStory && userCount > 0) {
@@ -1205,6 +1269,28 @@ function buildDetail(u, s) {
   const lastVisit = u.lastVisitAt ? new Date(u.lastVisitAt).toLocaleString('ja-JP') : '-';
   const streakInfo = `${u.streakCurrent || 0}日 連続中 (最高 ${u.streakMax || 0}日)`;
 
+  // F3: デバイス情報 + Welcome経由 + 30日ヒート
+  const deviceTypes = Object.keys(u.deviceTypes || {});
+  const deviceLabel = deviceTypes.length ? deviceTypes.map(t => ({pc:'💻PC',mobile:'📱モバイル',tablet:'📲タブレット'}[t] || t)).join(' + ') : '-';
+  const pwaLabel = u.pwaInstalled ? '✅ あり' : '—';
+  const welcomeLabel = u.accountCreatedFromWelcome ? '🌟 Welcomeモーダル経由' : '直接登録';
+  // 30日ヒートマップ: visit dates と play dates (gasshukuStats から推定)
+  const visitDates = u.visitDates || {};
+  function jstDateStr(ms) {
+    const d = new Date(ms + 9*3600*1000);
+    return `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
+  }
+  const todayStr = jstDateStr(Date.now());
+  let heatHtml = '<div class="heatmap-30">';
+  for (let i = 29; i >= 0; i--) {
+    const dStr = jstDateStr(Date.now() - i * 86400000);
+    const cls = visitDates[dStr] ? 'visited' : '';
+    const today = (dStr === todayStr) ? ' today' : '';
+    const day = parseInt(dStr.slice(-2), 10);
+    heatHtml += `<div class="heatmap-cell ${cls}${today}" title="${dStr}${visitDates[dStr] ? ' (訪問あり)' : ''}">${day}</div>`;
+  }
+  heatHtml += '</div>';
+
   detail.innerHTML = `
     <h4>詳細</h4>
     <div class="detail-row"><span>uid</span><b style="font-size:11px;font-family:monospace">${u.uid}</b></div>
@@ -1213,6 +1299,11 @@ function buildDetail(u, s) {
     <div class="detail-row"><span>最終訪問</span><b>${lastVisit}</b></div>
     <div class="detail-row"><span>最終ログイン</span><b>${lastAt}</b></div>
     <div class="detail-row"><span>🔥 連続ログイン</span><b>${streakInfo}</b></div>
+    <div class="detail-row"><span>📱 デバイス</span><b>${deviceLabel}</b></div>
+    <div class="detail-row"><span>📦 PWAインストール</span><b>${pwaLabel}</b></div>
+    <div class="detail-row"><span>🌟 登録経路</span><b>${welcomeLabel}</b></div>
+    <h4 style="margin-top:12px">📅 直近30日 訪問ヒート</h4>
+    ${heatHtml}
     <div class="detail-row"><span>最終state同期</span><b>${updatedAt}</b></div>
     <div class="detail-row"><span>天井カウント</span><b>${s.pity || 0} / 180</b></div>
     <div class="detail-row"><span>所持キャラ総数</span><b>${totalOwn}/${totalMax}</b></div>

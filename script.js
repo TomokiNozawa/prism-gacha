@@ -4442,7 +4442,28 @@ function jstDateString(ms) {
   return `${y}-${m}-${day}`;
 }
 
-// F1: page load時に visit を記録 + ログイン済なら streak も更新
+// F3: デバイス種別判定
+function detectDeviceType() {
+  try {
+    const uad = navigator.userAgentData;
+    if (uad && uad.mobile === true) return 'mobile';
+    const ua = navigator.userAgent || '';
+    if (/iPad|Tablet|PlayBook/i.test(ua)) return 'tablet';
+    if (/Mobile|iPhone|Android.*Mobile|Opera Mini|IEMobile/i.test(ua)) return 'mobile';
+    if (/Android/i.test(ua)) return 'tablet';
+    return 'pc';
+  } catch (e) { return 'unknown'; }
+}
+// F3: PWA standalone (ホーム画面追加 起動)
+function isPWAStandalone() {
+  try {
+    if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) return true;
+    if (window.navigator && window.navigator.standalone === true) return true; // iOS Safari
+  } catch (e) {}
+  return false;
+}
+
+// F1: page load時に visit を記録 + ログイン済なら streak も更新 (F3で deviceType + isPWA + visitDates 追加)
 async function logVisitAndStreak(user) {
   if (!fbDb) return;
   if (visitLogged) return;
@@ -4450,19 +4471,27 @@ async function logVisitAndStreak(user) {
   const now = Date.now();
   const todayStr = jstDateString(now);
   const dev = getSharedDeviceId();
+  const deviceType = detectDeviceType();
+  const isPWA = isPWAStandalone();
   try {
     // 中央 device 台帳 (ゲスト/ログイン済 共通)
     const devRef = fbDb.ref('prism-gacha/devices/' + dev);
-    devRef.child('lastVisitAt').set(now);
+    const devUpd = { lastVisitAt: now, deviceType, isPWA };
+    if (user) devUpd.lastUid = user.uid;
+    devRef.update(devUpd);
     devRef.child('firstVisitAt').transaction(c => c || now);
-    if (user) devRef.child('lastUid').set(user.uid);
+    devRef.child('visitDates/' + todayStr).set(now);  // F3: 30日ヒート用
   } catch (e) { console.warn('[visit] device log failed', e); }
   if (!user) return;
-  // ログイン済: users[uid] にも firstVisitAt/lastVisitAt + streak
+  // ログイン済: users[uid] にも firstVisitAt/lastVisitAt + streak + deviceType履歴 + PWA flag
   try {
     const userRef = fbDb.ref('prism-gacha/users/' + user.uid);
-    userRef.child('lastVisitAt').set(now);
+    const userUpd = { lastVisitAt: now };
+    userRef.update(userUpd);
     userRef.child('firstVisitAt').transaction(c => c || now);
+    userRef.child('deviceTypes/' + deviceType).set(true);  // 複数デバイスの累積記録
+    if (isPWA) userRef.child('pwaInstalled').set(true);
+    userRef.child('visitDates/' + todayStr).set(now);  // F3: 30日ヒート用
     const snap = await userRef.once('value');
     const u = snap.val() || {};
     const lastDate = u.lastLoginDate || '';
@@ -4470,12 +4499,10 @@ async function logVisitAndStreak(user) {
     let curStreak = u.streakCurrent || 0;
     let maxStreak = u.streakMax || 0;
     if (lastDate === todayStr) {
-      // 同日複数visit → 維持
       if (curStreak === 0) curStreak = 1;
     } else if (lastDate === yesterdayStr) {
       curStreak = curStreak + 1;
     } else {
-      // 1日以上空いた / 初回 → リセット
       curStreak = 1;
     }
     if (curStreak > maxStreak) maxStreak = curStreak;
@@ -4603,10 +4630,17 @@ async function doAccountSignup() {
 
     // ゲスト進捗(localStorage state)を無言でcloudへ移行
     const now = Date.now();
+    // F3: Welcome経由かどうか判定 (24h以内に Welcome 表示されていれば true)
+    let fromWelcome = false;
+    try {
+      const ws = parseInt(localStorage.getItem('prism-welcome-shown-ts') || '0', 10);
+      if (ws && (now - ws) < 86400000) fromWelcome = true;
+    } catch (e) {}
     await fbDb.ref('prism-gacha/users/' + cred.user.uid).set({
       displayName: nickname,
       createdAt: now,
       lastLoginAt: now,
+      accountCreatedFromWelcome: fromWelcome,
       state: sanitizeStateForCloud(state),
     });
 
@@ -5281,6 +5315,8 @@ function maybeShowWelcomeModal() {
 function ensureWelcomeModal() {
   let m = document.getElementById('welcome-modal');
   if (m) { m.classList.add('active'); return m; }
+  // F3: Welcome表示時刻を localStorage に記録 (24h以内のsignupなら welcome経由扱い)
+  try { localStorage.setItem('prism-welcome-shown-ts', String(Date.now())); } catch (e) {}
   m = document.createElement('div');
   m.id = 'welcome-modal';
   m.className = 'welcome-modal active';
