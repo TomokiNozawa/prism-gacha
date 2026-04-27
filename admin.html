@@ -91,6 +91,94 @@ body {
   cursor: help;
 }
 
+/* F2: 章別読了率 + ガチャ種別ブレークダウン */
+.breakdown-section {
+  max-width: 1000px; margin: 0 auto 16px;
+  background: rgba(20, 16, 40, 0.55);
+  border: 1px solid rgba(200, 180, 255, 0.15);
+  border-radius: 12px;
+  padding: 14px 18px;
+}
+.breakdown-title {
+  font-size: 12px;
+  color: rgba(200, 180, 255, 0.85);
+  letter-spacing: 0.06em;
+  margin: 0 0 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+.breakdown-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 8px;
+}
+.breakdown-item {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+}
+.breakdown-item .b-label {
+  color: rgba(200, 180, 255, 0.7);
+  font-size: 11px;
+  margin-bottom: 2px;
+}
+.breakdown-item .b-value {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+}
+.breakdown-item .b-value .b-sub {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 11px;
+  font-weight: normal;
+  margin-left: 4px;
+}
+.breakdown-item .b-bar {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  margin-top: 4px;
+  overflow: hidden;
+}
+.breakdown-item .b-bar-inner {
+  height: 100%;
+  background: linear-gradient(90deg, #c87dff, #fcd34d);
+  border-radius: 2px;
+}
+
+/* 詳細モーダル 凸ヒート */
+.detail-totsu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 6px;
+  margin-top: 6px;
+}
+.totsu-cell {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 11px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 6px;
+}
+.totsu-cell .totsu-name {
+  color: rgba(255, 255, 255, 0.85);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.totsu-cell .totsu-cnt {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 999px;
+  font-size: 11px;
+}
+.totsu-cell.t0 .totsu-cnt { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); }
+.totsu-cell.t1 .totsu-cnt { background: rgba(252, 211, 77, 0.2); color: #fcd34d; }
+.totsu-cell.t3 .totsu-cnt { background: rgba(251, 146, 60, 0.25); color: #fb923c; }
+.totsu-cell.t5 .totsu-cnt { background: rgba(244, 114, 182, 0.3); color: #f472b6; }
+.totsu-cell.t10 .totsu-cnt { background: linear-gradient(90deg, #fbbf24, #ec4899); color: #fff; }
+
 /* タブ切替 */
 .admin-tabs {
   max-width: 1000px; margin: 0 auto 16px;
@@ -466,6 +554,18 @@ body {
   </div>
 
   <div id="notice" class="notice"></div>
+
+  <!-- F2: ガチャ種別ブレークダウン -->
+  <div class="breakdown-section">
+    <div class="breakdown-title">📊 ガチャ種別 ブレークダウン</div>
+    <div class="breakdown-grid" id="breakdown-gacha"></div>
+  </div>
+
+  <!-- F2: 章別読了率 -->
+  <div class="breakdown-section">
+    <div class="breakdown-title">📖 章別 読了率 (登録ユーザー基準)</div>
+    <div class="breakdown-grid" id="breakdown-story"></div>
+  </div>
 
   <!-- タブ切替 -->
   <div class="admin-tabs">
@@ -916,6 +1016,63 @@ function renderUsers(users, uidToNickname, guestDevices) {
   let maxStreak = 0;
   for (const u of entries) { if ((u.streakMax || 0) > maxStreak) maxStreak = u.streakMax; }
   $('#sum-streak-max').textContent = maxStreak > 0 ? `${maxStreak}日` : '-';
+
+  // F2: ガチャ種別ブレークダウン (将来 Season2,3 を追加時はキー定義に1行足すだけで増やせる)
+  const gachaTypes = [
+    { key: 'normal', label: '通常ガチャ', getRolls: u => u.state?.total || 0, getDups: u => Object.values(u.state?.dupCounts || {}).reduce((a,b)=>a+b,0), color: '#c87dff' },
+    { key: 'gasshuku', label: '🎌 合宿(2026春)', getRolls: u => Object.values(u.gasshukuDups || {}).reduce((a,b)=>a+b,0), getDups: u => null, color: '#fcd34d' },
+    // 将来: { key: 'season2', label: '...', getRolls: ... }
+  ];
+  const breakdownGacha = $('#breakdown-gacha');
+  if (breakdownGacha) {
+    let html = '';
+    let totalAcrossTypes = 0;
+    const typeRolls = gachaTypes.map(t => entries.reduce((sum, u) => sum + t.getRolls(u), 0));
+    totalAcrossTypes = typeRolls.reduce((a,b)=>a+b,0);
+    gachaTypes.forEach((t, i) => {
+      const rolls = typeRolls[i];
+      const pct = totalAcrossTypes ? Math.round(rolls / totalAcrossTypes * 100) : 0;
+      html += `<div class="breakdown-item">
+        <div class="b-label">${t.label}</div>
+        <div class="b-value">${rolls.toLocaleString()}<span class="b-sub">${pct}%</span></div>
+        <div class="b-bar"><div class="b-bar-inner" style="width:${pct}%;background:${t.color}"></div></div>
+      </div>`;
+    });
+    breakdownGacha.innerHTML = html;
+  }
+
+  // F2: 章別読了率 (全ユーザー storyProgress を集約)
+  const breakdownStory = $('#breakdown-story');
+  if (breakdownStory && userCount > 0) {
+    const chapterStats = {}; // sid -> {readers, completers, lastReadMax}
+    for (const u of entries) {
+      const sp = u.state?.storyProgress || {};
+      for (const [sid, v] of Object.entries(sp)) {
+        if (!chapterStats[sid]) chapterStats[sid] = { readers: 0, completers: 0, lastReadMax: 0 };
+        chapterStats[sid].readers++;
+        if (v.completed) chapterStats[sid].completers++;
+        if (v.lastReadAt) chapterStats[sid].lastReadMax = Math.max(chapterStats[sid].lastReadMax, v.lastReadAt);
+      }
+    }
+    const sids = Object.keys(chapterStats).sort();
+    if (sids.length === 0) {
+      breakdownStory.innerHTML = '<div style="color:rgba(255,255,255,0.4);font-size:12px">まだ誰も物語を開いていません</div>';
+    } else {
+      let html = '';
+      for (const sid of sids) {
+        const c = chapterStats[sid];
+        const compPct = userCount ? Math.round(c.completers / userCount * 100) : 0;
+        const readerPct = userCount ? Math.round(c.readers / userCount * 100) : 0;
+        html += `<div class="breakdown-item">
+          <div class="b-label">${sid.toUpperCase()}</div>
+          <div class="b-value">${c.completers}<span class="b-sub">/ ${c.readers}人 (${compPct}%完読)</span></div>
+          <div class="b-bar"><div class="b-bar-inner" style="width:${compPct}%"></div></div>
+        </div>`;
+      }
+      breakdownStory.innerHTML = html;
+    }
+  }
+
   // 合宿ガチャ統計 (今日)
   loadGasshukuStats();
 }
@@ -1017,11 +1174,45 @@ function buildDetail(u, s) {
     }
   }
 
+  // F2: 凸ヒート (通常+合宿)
+  function totsuClass(n) {
+    if (!n || n <= 0) return 't0';
+    if (n >= 10) return 't10';
+    if (n >= 5) return 't5';
+    if (n >= 3) return 't3';
+    return 't1';
+  }
+  function buildTotsuGrid(dups) {
+    const keys = Object.keys(dups || {});
+    if (keys.length === 0) return '<div style="color:rgba(255,255,255,0.4);font-size:11px">獲得なし</div>';
+    keys.sort((a,b) => (dups[b]||0) - (dups[a]||0));
+    let html = '<div class="detail-totsu-grid">';
+    for (const k of keys) {
+      const n = dups[k] || 0;
+      const cls = totsuClass(n);
+      // 表示名: prefix除去 (UR_xxx → xxx)、 合宿ガチャは生キー
+      const name = k.replace(/^(LR|UR|SSR|SR|R)_/, '');
+      html += `<div class="totsu-cell ${cls}"><span class="totsu-name">${escapeHtml(name)}</span><span class="totsu-cnt">${n}</span></div>`;
+    }
+    html += '</div>';
+    return html;
+  }
+  const normalTotsu = buildTotsuGrid(s.dupCounts || {});
+  const gasshukuTotsu = buildTotsuGrid(u.gasshukuDups || {});
+
+  // F1表示: visit/streak詳細
+  const firstVisit = u.firstVisitAt ? new Date(u.firstVisitAt).toLocaleString('ja-JP') : '-';
+  const lastVisit = u.lastVisitAt ? new Date(u.lastVisitAt).toLocaleString('ja-JP') : '-';
+  const streakInfo = `${u.streakCurrent || 0}日 連続中 (最高 ${u.streakMax || 0}日)`;
+
   detail.innerHTML = `
     <h4>詳細</h4>
     <div class="detail-row"><span>uid</span><b style="font-size:11px;font-family:monospace">${u.uid}</b></div>
     <div class="detail-row"><span>登録日</span><b>${createdAt}</b></div>
+    <div class="detail-row"><span>初回訪問</span><b>${firstVisit}</b></div>
+    <div class="detail-row"><span>最終訪問</span><b>${lastVisit}</b></div>
     <div class="detail-row"><span>最終ログイン</span><b>${lastAt}</b></div>
+    <div class="detail-row"><span>🔥 連続ログイン</span><b>${streakInfo}</b></div>
     <div class="detail-row"><span>最終state同期</span><b>${updatedAt}</b></div>
     <div class="detail-row"><span>天井カウント</span><b>${s.pity || 0} / 180</b></div>
     <div class="detail-row"><span>所持キャラ総数</span><b>${totalOwn}/${totalMax}</b></div>
@@ -1030,7 +1221,11 @@ function buildDetail(u, s) {
     <div class="detail-row"><span>SSR</span><b>${ssrCount}/${TIER_MAX.SSR}</b></div>
     <div class="detail-row"><span>SR</span><b>${srCount}/${TIER_MAX.SR}</b></div>
     <div class="detail-row"><span>R</span><b>${rCount}/${TIER_MAX.R}</b></div>
-    <h4 style="margin-top:12px">ストーリー進捗</h4>
+    <h4 style="margin-top:12px">🎲 通常ガチャ凸ヒート</h4>
+    ${normalTotsu}
+    <h4 style="margin-top:12px">🎌 合宿ガチャ凸ヒート</h4>
+    ${gasshukuTotsu}
+    <h4 style="margin-top:12px">📖 ストーリー進捗</h4>
     <div class="detail-story-list">${storyHtml}</div>
   `;
   return detail;
