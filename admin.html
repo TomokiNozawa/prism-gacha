@@ -1030,6 +1030,10 @@ function renderUsers(users, uidToNickname, guestDevices) {
   $('#sum-total').textContent = sumTotal;
   $('#sum-ur').textContent = userCount ? `${sumUR}/${userCount * TIER_MAX.UR}` : '-';
   $('#sum-lr-holders').textContent = userCount ? `${lrHolders}/${userCount}` : '-';
+  // 🎌合宿ガチャ召喚数 サマリは ユーザーテーブルと同じロジック (gasshukuDups合計+ゲストfallback) で集計
+  // (loadGasshukuStats の dayData.totalSummons集計だと 4/27以前の過去データが抜けるため)
+  const sumGasshukuSummons = userRowData.reduce((s, d) => s + (d.gasshukuCnt || 0), 0);
+  $('#sum-gasshuku-summons').textContent = sumGasshukuSummons;
   // F1: DAU/WAU/MAU 集計 (users.lastVisitAt or lastLoginAt + centralDevices.lastVisitAt の和集合、 uid持ちは重複排除)
   const now = Date.now();
   const T_24H = now - 86400000, T_7D = now - 7*86400000, T_30D = now - 30*86400000;
@@ -1231,25 +1235,23 @@ function bindTabs() {
 
 async function loadGasshukuStats() {
   try {
-    // 全日 totalRolls/totalSummons + 全期間 devices 集計
+    // 全日 totalRolls + 全期間 devices 集計 (totalSummons は renderUsers 側で正確値計算済のため触らない)
     const snap = await db.ref('prism-gacha/gasshukuStats').once('value');
     const all = snap.val() || {};
-    let totalRolls = 0, totalSummons = 0;
+    let totalRolls = 0;
     const allDevices = new Set();
     for (const day in all) {
       const dayData = all[day] || {};
       totalRolls += (dayData.totalRolls || 0);
-      totalSummons += (dayData.totalSummons || 0);
       const devices = dayData.devices || {};
       Object.keys(devices).forEach(devId => allDevices.add(devId));
     }
     $('#sum-gasshuku-rolls').textContent = totalRolls;
-    $('#sum-gasshuku-summons').textContent = totalSummons;
+    // sum-gasshuku-summons は renderUsers 側で users.gasshukuDups合計+ゲストfallback で正確値設定済 (こちらでは上書きしない)
     $('#sum-gasshuku-devices').textContent = allDevices.size;
   } catch (e) {
     console.error('[admin] gasshuku stats failed:', e);
     $('#sum-gasshuku-rolls').textContent = '⚠';
-    $('#sum-gasshuku-summons').textContent = '⚠';
     $('#sum-gasshuku-devices').textContent = '⚠';
     // エラー詳細を画面下部に表示 (Firebase Rulesの問題切り分け用)
     let errBox = document.getElementById('gasshuku-err-detail');
