@@ -4021,6 +4021,20 @@ function loadBgmSrc(id) {
       navigator.mediaSession.setActionHandler('previoustrack', () => {
         if (typeof cycleBgm === 'function') cycleBgm(-1);
       });
+      // iOS Now Playing 認識完成度を上げる: seek系 + stop ハンドラ。 Control Center widget の routing 信頼度に効く可能性
+      navigator.mediaSession.setActionHandler('seekbackward', (details) => {
+        const offset = (details && details.seekOffset) || 10;
+        try { bgmAudio.currentTime = Math.max(0, bgmAudio.currentTime - offset); } catch (e) {}
+      });
+      navigator.mediaSession.setActionHandler('seekforward', (details) => {
+        const offset = (details && details.seekOffset) || 10;
+        try { bgmAudio.currentTime = Math.min(bgmAudio.duration || 0, bgmAudio.currentTime + offset); } catch (e) {}
+      });
+      navigator.mediaSession.setActionHandler('seekto', (details) => {
+        if (details && details.fastSeek && 'fastSeek' in bgmAudio) { bgmAudio.fastSeek(details.seekTime); return; }
+        try { bgmAudio.currentTime = details.seekTime; } catch (e) {}
+      });
+      navigator.mediaSession.setActionHandler('stop', () => { pauseBgm(); });
     } catch (e) { /* MediaMetadata 未対応環境は静かに無視 */ }
   }
 }
@@ -4179,6 +4193,18 @@ bgmAudio.addEventListener('timeupdate', () => {
     bgmLastSaveAt = now;
     localStorage.setItem('prism-bgm-last-id', bgmCurrentId);
     localStorage.setItem('prism-bgm-last-time', String(Math.round(bgmAudio.currentTime * 10) / 10));
+    // iOS Now Playing に再生位置を伝える (Control Center widget の信頼度向上、 シークバー表示)
+    if ('mediaSession' in navigator && 'setPositionState' in navigator.mediaSession) {
+      try {
+        if (isFinite(bgmAudio.duration) && bgmAudio.duration > 0) {
+          navigator.mediaSession.setPositionState({
+            duration: bgmAudio.duration,
+            playbackRate: bgmAudio.playbackRate || 1,
+            position: Math.min(bgmAudio.currentTime, bgmAudio.duration),
+          });
+        }
+      } catch (e) {}
+    }
   }
 });
 
