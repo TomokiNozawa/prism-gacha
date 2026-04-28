@@ -3894,10 +3894,13 @@ $("#story-stage").addEventListener('click', e => {
 // ============ v1.1.3: Master Mute + BGM プレイヤー (拡張版) ============
 // BGM_LIST: labelは「メインテーマ」「第1章テーマ」など使用場面を表記、descは原曲名
 const BGM_LIST = [
-  { id: 'dawn',  label: 'メインテーマ', desc: 'Prism Dawn (夜明けの希望)',  file: '/assets/bgm/home.mp3' },
-  { id: 'watch', label: '第1章テーマ',  desc: 'Prism Watch (三柱の夜警)',   file: '/assets/bgm/prism-watch.mp3' },
-  { id: 'tide',  label: '第2章テーマ',  desc: 'Prism Tide (虹の潮)',         file: '/assets/bgm/prism-tide.mp3' },
-  { id: 'rift',  label: '戦闘テーマ',    desc: 'Prismatic Rift Overture (虹裂の序曲)', file: '/assets/bgm/Prismatic Rift Overture.mp3' },
+  { id: 'dawn',    label: 'メインテーマ',     desc: 'Prism Dawn (夜明けの希望)',         file: '/assets/bgm/home.mp3' },
+  { id: 'watch',   label: '第1章テーマ',      desc: 'Prism Watch (三柱の夜警)',          file: '/assets/bgm/prism-watch.mp3' },
+  { id: 'tide',    label: '第2章テーマ',      desc: 'Prism Tide (虹の潮)',                file: '/assets/bgm/prism-tide.mp3' },
+  { id: 'rift',    label: '戦闘テーマ',        desc: 'Prismatic Rift Overture (虹裂の序曲)', file: '/assets/bgm/Prismatic Rift Overture.mp3' },
+  { id: 'church',  label: '白焔教会テーマ',    desc: 'Prism Sanctus (白焔の祈り)',        file: '/assets/bgm/prism-church.mp3' },
+  { id: 'aquasis', label: 'アクアシステーマ',  desc: 'Prism Abyss (深海の宮)',            file: '/assets/bgm/prism-aquasis.mp3' },
+  { id: 'crimson', label: '紅玉海賊団テーマ',  desc: 'Prism Sailborn (紅潮の風)',         file: '/assets/bgm/prism-crimson.mp3' },
 ];
 const bgmAudio = document.getElementById("bgm-home");
 
