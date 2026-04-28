@@ -3914,6 +3914,10 @@ let bgmCurrentId = localStorage.getItem("prism-bgm-current") || BGM_LIST[0].id;
 // v1.1.3: bgmMode (sequence/random/repeat) は shuffle(bool) + repeat('off'|'all'|'one') に分離
 let bgmShuffle = localStorage.getItem("prism-bgm-shuffle") === "on";
 let bgmRepeat = localStorage.getItem("prism-bgm-repeat") || 'off'; // 'off'|'all'|'one'
+// v1.2.3: shuffle はキュー方式 (Fisher-Yates で全曲シャッフル → 順に消化 → 枯れたら再シャッフル)。直前曲との連続反復を構造的に防ぐ
+let bgmShuffleQueue = [];
+try { bgmShuffleQueue = JSON.parse(localStorage.getItem("prism-bgm-shuffle-queue") || '[]'); } catch (e) { bgmShuffleQueue = []; }
+if (!Array.isArray(bgmShuffleQueue)) bgmShuffleQueue = [];
 let bgmVolume = Math.max(0, Math.min(100, parseInt(localStorage.getItem("prism-bgm-volume") || '40', 10)));
 let bgmPlaylist = {};
 try {
@@ -3944,6 +3948,7 @@ function saveBgmState() {
   localStorage.setItem("prism-bgm-repeat", bgmRepeat);
   localStorage.setItem("prism-bgm-volume", String(bgmVolume));
   localStorage.setItem("prism-bgm-playlist", JSON.stringify(bgmPlaylist));
+  localStorage.setItem("prism-bgm-shuffle-queue", JSON.stringify(bgmShuffleQueue));
 }
 
 function bgmFindById(id) { return BGM_LIST.find(b => b.id === id); }
@@ -4001,6 +4006,8 @@ function loadBgmSrc(id) {
 }
 
 function playBgm(id) {
+  // shuffleキューから今再生する曲を除外 (直接クリック・next/prev 経由のいずれでも、 同じ曲が次に来ないように)
+  if (bgmShuffle) bgmShuffleQueue = bgmShuffleQueue.filter(qid => qid !== id);
   if (masterMuted) {
     // ミュート中は再生要求だけ保持(enabled=true)、実際の再生はmute解除時
     bgmCurrentId = id;
@@ -4033,13 +4040,32 @@ function bgmToggle() {
   else playBgm(bgmCurrentId);
 }
 
+// Fisher-Yates shuffle で id 配列をランダム並べ替え。avoidFirstId が先頭に来たら2番目と入替(連続反復防止)
+function _bgmGenShuffleQueue(list, avoidFirstId) {
+  const ids = list.map(b => b.id);
+  for (let i = ids.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [ids[i], ids[j]] = [ids[j], ids[i]];
+  }
+  if (avoidFirstId && ids.length > 1 && ids[0] === avoidFirstId) {
+    [ids[0], ids[1]] = [ids[1], ids[0]];
+  }
+  return ids;
+}
+
 function _bgmPickNext(direction) {
   const list = bgmCheckedList();
   if (!list.length) return null;
   if (bgmShuffle) {
     if (list.length === 1) return list[0];
-    const others = list.filter(b => b.id !== bgmCurrentId);
-    return others[Math.floor(Math.random() * others.length)];
+    const checkedIds = new Set(list.map(b => b.id));
+    bgmShuffleQueue = bgmShuffleQueue.filter(id => checkedIds.has(id));
+    if (bgmShuffleQueue.length === 0) {
+      bgmShuffleQueue = _bgmGenShuffleQueue(list, bgmCurrentId);
+    }
+    const nextId = bgmShuffleQueue.shift();
+    saveBgmState();
+    return bgmFindById(nextId) || list[0];
   }
   const idx = list.findIndex(b => b.id === bgmCurrentId);
   if (idx < 0) return list[0];
