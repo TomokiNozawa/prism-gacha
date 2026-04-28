@@ -4129,10 +4129,42 @@ function openBgmPanel() {
   renderBgmPanel();
   $("#bgm-panel").classList.add('active');
   document.body.classList.add('modal-open');
+  // 全曲のmetadataを並列取得 → loaded時にrender更新
+  fetchAllBgmDurations();
 }
 function closeBgmPanel() {
   $("#bgm-panel").classList.remove('active');
   document.body.classList.remove('modal-open');
+}
+
+// 曲時間 cache + 取得
+const bgmDurations = {};  // id -> seconds
+function fmtDuration(sec) {
+  if (!sec || isNaN(sec) || !isFinite(sec)) return '--:--';
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return m + ':' + String(s).padStart(2, '0');
+}
+function fetchBgmDuration(id, file) {
+  return new Promise(resolve => {
+    if (bgmDurations[id]) return resolve(bgmDurations[id]);
+    const a = new Audio();
+    a.preload = 'metadata';
+    a.addEventListener('loadedmetadata', () => {
+      bgmDurations[id] = a.duration;
+      resolve(a.duration);
+    }, { once: true });
+    a.addEventListener('error', () => resolve(null), { once: true });
+    a.src = file;
+  });
+}
+function fetchAllBgmDurations() {
+  const pending = BGM_LIST.filter(b => !bgmDurations[b.id]);
+  if (!pending.length) return;
+  Promise.all(pending.map(b => fetchBgmDuration(b.id, b.file))).then(() => {
+    // パネル表示中なら再描画して時間を反映
+    if ($("#bgm-panel").classList.contains('active')) renderBgmPanel();
+  });
 }
 
 function renderBgmPanel() {
@@ -4177,13 +4209,16 @@ function renderBgmPanel() {
     const row = document.createElement('div');
     row.className = 'bgm-row' + (b.id === bgmCurrentId ? ' now' : '');
     const checked = bgmPlaylist[b.id] ? 'checked' : '';
+    const dur = fmtDuration(bgmDurations[b.id]);
     row.innerHTML =
       '<label class="bgm-check">' +
         '<input type="checkbox" ' + checked + ' data-bgm-id="' + b.id + '">' +
         '<span class="bgm-check-box"></span>' +
       '</label>' +
       '<div class="bgm-info" data-play-id="' + b.id + '">' +
-        '<div class="bgm-row-title">' + escapeHtml(b.label) + '</div>' +
+        '<div class="bgm-row-title">' + escapeHtml(b.label) +
+          '<span class="bgm-row-duration">' + dur + '</span>' +
+        '</div>' +
         '<div class="bgm-row-desc">' + escapeHtml(b.desc || '') + '</div>' +
       '</div>' +
       '<button class="bgm-row-play" data-play-id="' + b.id + '" title="再生">▶</button>';
@@ -4312,6 +4347,12 @@ document.addEventListener("keydown", e => {
   const _fbm = document.getElementById('feedback-modal');
   if (_fbm && _fbm.classList.contains('active')) {
     if (e.key === "Escape") { e.preventDefault(); closeFeedbackModal(); }
+    return;
+  }
+  // BGMパネル
+  const _bgmp = document.getElementById('bgm-panel');
+  if (_bgmp && _bgmp.classList.contains('active')) {
+    if (e.key === "Escape") { e.preventDefault(); closeBgmPanel(); }
     return;
   }
   // ストーリー一覧モーダル
