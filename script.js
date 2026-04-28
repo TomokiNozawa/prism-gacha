@@ -3954,9 +3954,29 @@ function saveBgmState() {
 function bgmFindById(id) { return BGM_LIST.find(b => b.id === id); }
 function bgmCheckedList() { return BGM_LIST.filter(b => bgmPlaylist[b.id]); }
 
+// iOS Safari は HTMLMediaElement.volume を黙殺するため Web Audio API GainNode 経由で音量制御する。
+// AudioContext はユーザージェスチャー後にしか作れないので、 初回 playBgm 呼び出し時に lazy init。
+let bgmAudioCtx = null;
+let bgmGainNode = null;
+function _ensureBgmAudioGraph() {
+  if (bgmAudioCtx) return;
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    bgmAudioCtx = new Ctx();
+    const source = bgmAudioCtx.createMediaElementSource(bgmAudio);
+    bgmGainNode = bgmAudioCtx.createGain();
+    source.connect(bgmGainNode);
+    bgmGainNode.connect(bgmAudioCtx.destination);
+  } catch (e) { bgmAudioCtx = null; bgmGainNode = null; }
+}
+
 function _applyVolumeToAudio() {
   const vol = masterMuted ? 0 : (bgmVolume / 100);
   try { bgmAudio.volume = vol; } catch (e) {}
+  if (bgmGainNode) {
+    try { bgmGainNode.gain.value = vol; } catch (e) {}
+  }
 }
 
 function loadBgmSrc(id) {
@@ -4008,6 +4028,10 @@ function loadBgmSrc(id) {
 function playBgm(id) {
   // shuffleキューから今再生する曲を除外 (直接クリック・next/prev 経由のいずれでも、 同じ曲が次に来ないように)
   if (bgmShuffle) bgmShuffleQueue = bgmShuffleQueue.filter(qid => qid !== id);
+  _ensureBgmAudioGraph();
+  if (bgmAudioCtx && bgmAudioCtx.state === 'suspended') {
+    try { bgmAudioCtx.resume(); } catch (e) {}
+  }
   if (masterMuted) {
     // ミュート中は再生要求だけ保持(enabled=true)、実際の再生はmute解除時
     bgmCurrentId = id;
