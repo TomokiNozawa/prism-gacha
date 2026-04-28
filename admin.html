@@ -539,6 +539,7 @@ body {
   <h1>✦ Prismaera <span class="tag">ADMIN</span></h1>
   <div class="header-actions">
     <a href="index.html" class="header-btn">← ガチャに戻る</a>
+    <button class="header-btn" id="toggle-show-owners" title="自分のデバイス (admin uid または 手動マーク済) を一覧/集計に含めるか切替"></button>
     <button class="header-btn" id="refresh-btn">🔄 更新</button>
   </div>
 </div>
@@ -745,13 +746,17 @@ async function loadAll() {
       console.warn(`[admin] ${path} fetch failed (rules?):`, e.message || e);
       return { val: () => null };
     });
-    const [usersSnap, indexSnap, statsSnap, devicesSnap, eventsSnap] = await Promise.all([
+    const [usersSnap, indexSnap, statsSnap, devicesSnap, eventsSnap, adminsSnap, ownerDevSnap] = await Promise.all([
       db.ref('prism-gacha/users').once('value'),
       db.ref('prism-gacha/_meta/userIndex').once('value'),
       db.ref('prism-gacha/gasshukuStats').once('value'),
       safeOnce('prism-gacha/devices'),
       safeOnce('prism-gacha/_meta/eventStats'),
+      safeOnce('prism-gacha/_meta/admins'),
+      safeOnce('prism-gacha/_meta/ownerDevices'),
     ]);
+    window._adminUids = new Set(Object.keys(adminsSnap.val() || {}));
+    window._ownerDeviceIds = new Set(Object.keys(ownerDevSnap.val() || {}).filter(k => (ownerDevSnap.val() || {})[k] === true));
     window._eventStats = eventsSnap.val() || {};
     const users = usersSnap.val() || {};
     const nameIndex = indexSnap.val() || {}; // nickname → uid
@@ -853,6 +858,25 @@ async function loadAll() {
 }
 
 function renderUsers(users, uidToNickname, guestDevices) {
+  // owner判定用: admin uid (= _meta/admins 登録済) と 手動マーク済 deviceId (= _meta/ownerDevices)
+  const adminUids = window._adminUids || new Set();
+  const ownerDeviceIds = window._ownerDeviceIds || new Set();
+  const showOwners = localStorage.getItem('prism-admin-show-owners') === 'on';
+  // owner判定関数
+  const isUserOwner = (uid) => adminUids.has(uid);
+  const isDeviceOwner = (devId, dev) => ownerDeviceIds.has(devId) || (dev && dev.uid && adminUids.has(dev.uid));
+  // owner件数 (フィルタ前) — トグルボタンに表示する
+  let ownerUserCount = 0;
+  for (const uid of Object.keys(users || {})) if (isUserOwner(uid)) ownerUserCount++;
+  let ownerDeviceCount = 0;
+  for (const [devId, g] of Object.entries(guestDevices || {})) if (!users[g.uid] && isDeviceOwner(devId, g)) ownerDeviceCount++;
+  window._ownerHiddenCount = ownerUserCount + ownerDeviceCount;
+  // showOwners=off なら除外 (集計・一覧 すべて適用)
+  if (!showOwners) {
+    users = Object.fromEntries(Object.entries(users).filter(([uid]) => !isUserOwner(uid)));
+    guestDevices = Object.fromEntries(Object.entries(guestDevices || {}).filter(([devId, g]) => !isDeviceOwner(devId, g)));
+  }
+
   const entries = Object.entries(users).map(([uid, u]) => ({ uid, ...u }));
   // 最終ログイン降順
   entries.sort((a, b) => (b.lastLoginAt || 0) - (a.lastLoginAt || 0));
@@ -986,6 +1010,12 @@ function renderUsers(users, uidToNickname, guestDevices) {
       `;
       const detail = document.createElement('div');
       detail.className = 'user-detail';
+      const _devCentral = (window._centralDevices || {})[d.deviceId] || {};
+      const _isAutoOwner = _devCentral.lastUid && adminUids.has(_devCentral.lastUid);
+      const _isManualOwner = ownerDeviceIds.has(d.deviceId);
+      const ownerLine = _isAutoOwner
+        ? `<div style="margin-top:8px;color:#fcd34d">🏠 admin uid 一致で自動 owner 認定 (lastUid=<code style="font-size:11px">${_devCentral.lastUid}</code>)</div>`
+        : `<div style="margin-top:8px"><button class="mark-owner-btn" data-devid="${d.deviceId}" data-marked="${_isManualOwner ? '1' : '0'}" style="padding:6px 12px;border-radius:6px;border:1px solid ${_isManualOwner ? 'rgba(251,191,36,0.6)' : 'rgba(255,255,255,0.25)'};background:${_isManualOwner ? 'rgba(251,191,36,0.18)' : 'transparent'};color:#e6e9ef;cursor:pointer;font-size:12px">${_isManualOwner ? '✓ 自分マーク済 (クリックで解除)' : '🏠 自分のデバイスとしてマーク'}</button></div>`;
       detail.innerHTML = `
         <div style="padding:14px 18px;color:#c0c4d0;font-size:13px">
           <div><b>device_id</b>: <code style="font-size:11px">${d.deviceId}</code></div>
@@ -993,11 +1023,15 @@ function renderUsers(users, uidToNickname, guestDevices) {
           <div><b>プレイ日数</b>: ${d.days ? d.days.size : 0}日 (${d.days ? [...d.days].sort().join(', ') : ''})</div>
           <div><b>最終操作</b>: ${d.lastAt}</div>
           ${d.retroactive ? '<div style="color:#fcd34d;margin-top:6px">※ 過去ゲスト遡及アップロード</div>' : ''}
+          ${ownerLine}
           <div style="margin-top:8px;color:rgba(255,255,255,0.5);font-size:11px">アカウント未登録のためキャラ獲得情報は端末ローカルのみで保持されています</div>
         </div>
       `;
       row.appendChild(detail);
-      row.addEventListener('click', () => detail.classList.toggle('active'));
+      row.addEventListener('click', (ev) => {
+        if (ev.target.closest('.mark-owner-btn')) return; // ボタンクリックは展開トグルしない
+        detail.classList.toggle('active');
+      });
     } else {
       row.innerHTML = `
         <div class="u-nickname ${d.isMe ? 'me' : ''} ${d.nicknameDim ? 'u-uid-fallback' : ''}">${escapeHtml(d.nickname)}</div>
@@ -1050,6 +1084,8 @@ function renderUsers(users, uidToNickname, guestDevices) {
     const t = dev.lastVisitAt || dev.lastGasshukuRollAt || 0;
     // ログイン済 uid に紐づく device は users 側でカウント済 → 除外
     if (dev.lastUid && dauUids.has(dev.lastUid)) continue;  // 既カウント
+    // showOwners=off の時は owner device を除外 (lastUid==admin or 手動マーク済)
+    if (!showOwners && (ownerDeviceIds.has(devId) || (dev.lastUid && adminUids.has(dev.lastUid)))) continue;
     if (t >= T_24H && (!dev.lastUid || !dauUids.has(dev.lastUid))) dauDevs.add(devId);
     if (t >= T_7D && (!dev.lastUid || !wauUids.has(dev.lastUid))) wauDevs.add(devId);
     if (t >= T_30D && (!dev.lastUid || !mauUids.has(dev.lastUid))) mauDevs.add(devId);
@@ -1201,6 +1237,8 @@ function renderUsers(users, uidToNickname, guestDevices) {
 
   // 合宿ガチャ統計 (今日)
   loadGasshukuStats();
+  // owner トグルボタンのラベル更新 (件数表示)
+  if (typeof _updateOwnerToggleLabel === 'function') _updateOwnerToggleLabel();
 }
 
 // ヘッダクリックでソート (DOMContentLoaded後にbind)
@@ -1389,6 +1427,56 @@ function escapeHtml(s) {
 }
 
 $('#refresh-btn').addEventListener('click', () => { if (isAdmin) loadAll(); });
+
+// owner 表示トグル: クリックで表示/非表示切替 → localStorage 保存 → 再描画
+function _updateOwnerToggleLabel() {
+  const btn = $('#toggle-show-owners');
+  if (!btn) return;
+  const showing = localStorage.getItem('prism-admin-show-owners') === 'on';
+  const hidden = window._ownerHiddenCount || 0;
+  if (showing) {
+    btn.textContent = '🏠 自分含む';
+    btn.style.background = 'rgba(251,191,36,0.18)';
+    btn.style.borderColor = 'rgba(251,191,36,0.5)';
+  } else {
+    btn.textContent = hidden > 0 ? `🏠 自分除外 (${hidden}件)` : '🏠 自分除外';
+    btn.style.background = '';
+    btn.style.borderColor = '';
+  }
+}
+_updateOwnerToggleLabel();
+$('#toggle-show-owners').addEventListener('click', () => {
+  const cur = localStorage.getItem('prism-admin-show-owners') === 'on';
+  localStorage.setItem('prism-admin-show-owners', cur ? 'off' : 'on');
+  if (window._lastRenderArgs) renderUsers(...window._lastRenderArgs);
+  _updateOwnerToggleLabel();
+});
+
+// 🏠 マーク/解除 ボタン (event delegation): _meta/ownerDevices/{deviceId} 書込 → 再描画
+document.addEventListener('click', async (ev) => {
+  const btn = ev.target.closest('.mark-owner-btn');
+  if (!btn) return;
+  ev.stopPropagation();
+  const devId = btn.dataset.devid;
+  const wasMarked = btn.dataset.marked === '1';
+  if (!devId) return;
+  if (!isAdmin) { alert('admin認証が必要です'); return; }
+  btn.disabled = true;
+  btn.textContent = wasMarked ? '解除中…' : 'マーク中…';
+  try {
+    const ref = db.ref('prism-gacha/_meta/ownerDevices/' + devId);
+    await ref.set(wasMarked ? null : true);
+    // ローカル状態 更新
+    if (wasMarked) window._ownerDeviceIds.delete(devId);
+    else window._ownerDeviceIds.add(devId);
+    if (window._lastRenderArgs) renderUsers(...window._lastRenderArgs);
+    _updateOwnerToggleLabel();
+  } catch (e) {
+    alert('書込失敗: ' + (e.message || e) + '\nFirebase Rules で _meta/ownerDevices の admin write 権限を確認してください。');
+    btn.disabled = false;
+    btn.textContent = wasMarked ? '✓ 自分マーク済 (クリックで解除)' : '🏠 自分のデバイスとしてマーク';
+  }
+});
 
 // ────────── 要望タブ ──────────
 let feedbackItems = [];
