@@ -3893,14 +3893,15 @@ $("#story-stage").addEventListener('click', e => {
 
 // ============ v1.1.3: Master Mute + BGM プレイヤー (拡張版) ============
 // BGM_LIST: labelは「メインテーマ」「第1章テーマ」など使用場面を表記、descは原曲名
+// duration はffprobeで実測した固定値 (新曲追加時は scripts/measure_bgm.sh で取得→更新)
 const BGM_LIST = [
-  { id: 'dawn',    label: 'メインテーマ',     desc: 'Prism Dawn (夜明けの希望)',         file: '/assets/bgm/home.mp3' },
-  { id: 'watch',   label: '第1章テーマ',      desc: 'Prism Watch (三柱の夜警)',          file: '/assets/bgm/prism-watch.mp3' },
-  { id: 'tide',    label: '第2章テーマ',      desc: 'Prism Tide (虹の潮)',                file: '/assets/bgm/prism-tide.mp3' },
-  { id: 'rift',    label: '戦闘テーマ',        desc: 'Prismatic Rift Overture (虹裂の序曲)', file: '/assets/bgm/Prismatic Rift Overture.mp3' },
-  { id: 'church',  label: '白焔教会テーマ',    desc: 'Prism Sanctus (白焔の祈り)',        file: '/assets/bgm/prism-church.mp3' },
-  { id: 'aquasis', label: 'アクアシステーマ',  desc: 'Prism Abyss (深海の宮)',            file: '/assets/bgm/prism-aquasis.mp3' },
-  { id: 'crimson', label: '紅玉海賊団テーマ',  desc: 'Prism Sailborn (紅潮の風)',         file: '/assets/bgm/prism-crimson.mp3' },
+  { id: 'dawn',    label: 'メインテーマ',     desc: 'Prism Dawn (夜明けの希望)',          duration: '2:49', file: '/assets/bgm/home.mp3' },
+  { id: 'watch',   label: '第1章テーマ',      desc: 'Prism Watch (三柱の夜警)',           duration: '2:17', file: '/assets/bgm/prism-watch.mp3' },
+  { id: 'tide',    label: '第2章テーマ',      desc: 'Prism Tide (虹の潮)',                 duration: '2:44', file: '/assets/bgm/prism-tide.mp3' },
+  { id: 'rift',    label: '戦闘テーマ',        desc: 'Prismatic Rift Overture (虹裂の序曲)', duration: '3:08', file: '/assets/bgm/Prismatic Rift Overture.mp3' },
+  { id: 'church',  label: '白焔教会テーマ',    desc: 'Prism Sanctus (白焔の祈り)',         duration: '3:09', file: '/assets/bgm/prism-church.mp3' },
+  { id: 'aquasis', label: 'アクアシステーマ',  desc: 'Prism Abyss (深海の宮)',             duration: '2:59', file: '/assets/bgm/prism-aquasis.mp3' },
+  { id: 'crimson', label: '紅玉海賊団テーマ',  desc: 'Prism Sailborn (紅潮の風)',          duration: '2:51', file: '/assets/bgm/prism-crimson.mp3' },
 ];
 const bgmAudio = document.getElementById("bgm-home");
 
@@ -4129,42 +4130,10 @@ function openBgmPanel() {
   renderBgmPanel();
   $("#bgm-panel").classList.add('active');
   document.body.classList.add('modal-open');
-  // 全曲のmetadataを並列取得 → loaded時にrender更新
-  fetchAllBgmDurations();
 }
 function closeBgmPanel() {
   $("#bgm-panel").classList.remove('active');
   document.body.classList.remove('modal-open');
-}
-
-// 曲時間 cache + 取得
-const bgmDurations = {};  // id -> seconds
-function fmtDuration(sec) {
-  if (!sec || isNaN(sec) || !isFinite(sec)) return '--:--';
-  const m = Math.floor(sec / 60);
-  const s = Math.floor(sec % 60);
-  return m + ':' + String(s).padStart(2, '0');
-}
-function fetchBgmDuration(id, file) {
-  return new Promise(resolve => {
-    if (bgmDurations[id]) return resolve(bgmDurations[id]);
-    const a = new Audio();
-    a.preload = 'metadata';
-    a.addEventListener('loadedmetadata', () => {
-      bgmDurations[id] = a.duration;
-      resolve(a.duration);
-    }, { once: true });
-    a.addEventListener('error', () => resolve(null), { once: true });
-    a.src = file;
-  });
-}
-function fetchAllBgmDurations() {
-  const pending = BGM_LIST.filter(b => !bgmDurations[b.id]);
-  if (!pending.length) return;
-  Promise.all(pending.map(b => fetchBgmDuration(b.id, b.file))).then(() => {
-    // パネル表示中なら再描画して時間を反映
-    if ($("#bgm-panel").classList.contains('active')) renderBgmPanel();
-  });
 }
 
 function renderBgmPanel() {
@@ -4209,7 +4178,6 @@ function renderBgmPanel() {
     const row = document.createElement('div');
     row.className = 'bgm-row' + (b.id === bgmCurrentId ? ' now' : '');
     const checked = bgmPlaylist[b.id] ? 'checked' : '';
-    const dur = fmtDuration(bgmDurations[b.id]);
     row.innerHTML =
       '<label class="bgm-check">' +
         '<input type="checkbox" ' + checked + ' data-bgm-id="' + b.id + '">' +
@@ -4217,7 +4185,7 @@ function renderBgmPanel() {
       '</label>' +
       '<div class="bgm-info" data-play-id="' + b.id + '">' +
         '<div class="bgm-row-title">' + escapeHtml(b.label) +
-          '<span class="bgm-row-duration">' + dur + '</span>' +
+          '<span class="bgm-row-duration">' + escapeHtml(b.duration || '') + '</span>' +
         '</div>' +
         '<div class="bgm-row-desc">' + escapeHtml(b.desc || '') + '</div>' +
       '</div>' +
