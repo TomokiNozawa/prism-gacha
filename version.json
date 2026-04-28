@@ -1,8 +1,19 @@
 {
-  "version": "1.2.1",
-  "releasedAt": "2026-04-26",
+  "version": "1.2.2",
+  "releasedAt": "2026-04-28",
   "pendingChangelog": [],
   "changelog": [
+    {
+      "version": "1.2.2",
+      "date": "2026-04-28",
+      "type": "patch",
+      "notes": [
+        "🎵 戦闘テーマBGM『Prismatic Rift Overture (虹裂の序曲)』を追加しました",
+        "🎵 派閥テーマBGMを追加しました(白焔教会・海淵都市アクアシス・紅玉海賊団の3派閥分)",
+        "📱 BGMが端末のロック画面・コントロールセンターから操作できるようになりました(PWA・スマホ向け)",
+        "🕐 BGMパネルに各曲の長さを表示するようにしました"
+      ]
+    },
     {
       "version": "1.2.1",
       "date": "2026-04-26",
