@@ -220,6 +220,11 @@
   function imgPath(c, mode) {
     return `/images/gasshuku/${c.id}_${c.slug}_${mode === 'real' ? 'real' : 'fantasy'}.png`;
   }
+  // 図鑑セル用の軽量サムネ。 ファンタジーは 512x512 WebP (Lanczos縮小+中央正方クロップ) を別ファイルで持つ
+  function thumbPath(c, mode) {
+    if (mode === 'real') return imgPath(c, mode);
+    return `/images/gasshuku/${c.id}_${c.slug}_fantasy_thumb.webp`;
+  }
 
   // ====== 合宿図鑑 + 凸システム (localStorage + Firebase で端末間連携) ======
   const COLLECT_KEY = 'prism-gasshuku-collected';
@@ -366,7 +371,7 @@
           });
         } else if (got) {
           cell.innerHTML = `
-            <img src="${imgPath(c, mode)}" alt="${c.name}">
+            <img src="${thumbPath(c, mode)}" alt="${c.name}">
             <div class="gasshuku-cell-mode">${mode === 'real' ? '📷' : '🌈'}${tierBadge}</div>
           `;
           cell.style.cursor = 'pointer';
