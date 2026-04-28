@@ -684,12 +684,39 @@ function renderHistory() {
   });
 }
 
+// ───── モーダル背景 scroll lock 共通ヘルパー (iOS PWA対応) ─────
+// 仕様:
+// - 開く時に scrollY を保存 → body { position:fixed; top:-${scrollY}px } を inline 設定
+// - 閉じる時に inline style 解除 → window.scrollTo で位置復元
+// - ネスト対応: _modalDepth でカウント、 全モーダル閉じるまで unlock しない
+// - CSS は style.css の body.modal-open / html.modal-open ルールが overflow:hidden を担当
+let _modalDepth = 0;
+let _savedScrollY = 0;
+function _lockBodyScroll() {
+  if (_modalDepth === 0) {
+    _savedScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+    document.documentElement.classList.add('modal-open');
+    document.body.style.top = `-${_savedScrollY}px`;
+    document.body.classList.add('modal-open');
+  }
+  _modalDepth++;
+}
+function _unlockBodyScroll() {
+  _modalDepth = Math.max(0, _modalDepth - 1);
+  if (_modalDepth === 0) {
+    document.body.classList.remove('modal-open');
+    document.body.style.top = '';
+    document.documentElement.classList.remove('modal-open');
+    window.scrollTo(0, _savedScrollY);
+  }
+}
+
 function openHistoryModal() {
   renderHistory();
   const modal = $("#history-modal");
   if (modal) {
     modal.classList.add('active');
-    document.body.classList.add('modal-open');
+    _lockBodyScroll();
   }
 }
 
@@ -697,7 +724,7 @@ function closeHistoryModal() {
   const modal = $("#history-modal");
   if (modal) {
     modal.classList.remove('active');
-    document.body.classList.remove('modal-open');
+    _unlockBodyScroll();
   }
 }
 
@@ -2194,6 +2221,7 @@ function showCharDetail(c) {
   detailIdx = idx >= 0 ? idx : 0;
   renderCharDetail(c);
   $("#char-detail").classList.add("active");
+  _lockBodyScroll();
 }
 
 function renderCharDetail(c) {
@@ -3011,6 +3039,7 @@ function onZoomWheel(e) {
 function closeCharDetail() {
   $("#char-detail").classList.remove("active");
   $("#char-img-zoom").classList.remove("active");
+  _unlockBodyScroll();
 }
 
 // ────────────── Bindings ──────────────
@@ -3239,6 +3268,7 @@ async function openStory(storyId) {
   $("#story-title").textContent = info.title;
   $("#story-scene-content").innerHTML = '<div class="story-loading">読み込み中…</div>';
   $("#story-modal").classList.add("active");
+  _lockBodyScroll();
   storyOpenedAt = Date.now();
   try {
     const resp = await fetch(info.file + '?v=' + Date.now());
@@ -3771,6 +3801,7 @@ function storyPrev() {
 }
 function closeStory() {
   $("#story-modal").classList.remove("active");
+  _unlockBodyScroll();
 }
 
 // 進捗保存 (localStorage)
@@ -4212,11 +4243,11 @@ bgmAudio.addEventListener('timeupdate', () => {
 function openBgmPanel() {
   renderBgmPanel();
   $("#bgm-panel").classList.add('active');
-  document.body.classList.add('modal-open');
+  _lockBodyScroll();
 }
 function closeBgmPanel() {
   $("#bgm-panel").classList.remove('active');
-  document.body.classList.remove('modal-open');
+  _unlockBodyScroll();
 }
 
 function renderBgmPanel() {
@@ -5091,14 +5122,14 @@ function maybeShowMigrationNotice() {
       '<button class="migration-btn primary" onclick="location.replace(\'https://prismaera.pages.dev/\')">新URLへ移動 →</button>';
   }
   modal.classList.add('active');
-  document.body.classList.add('modal-open');
+  _lockBodyScroll();
 }
 
 function closeMigrationNotice() {
   const modal = document.getElementById('migration-modal');
   if (!modal) return;
   modal.classList.remove('active');
-  document.body.classList.remove('modal-open');
+  _unlockBodyScroll();
 }
 
 // ────────────── Account Prompt (既存ゲスト進捗ありユーザーへの案内) ──────────────
@@ -5253,7 +5284,7 @@ function showPrismaeraUpdateModal(fromVer, toVer, changelog) {
   }
 
   modal.style.display = 'flex';
-  document.body.classList.add('modal-open');
+  _lockBodyScroll();
 }
 
 function dismissUpdateModal(reload) {
@@ -5265,7 +5296,7 @@ function dismissUpdateModal(reload) {
     }
   } catch (e) {}
   modal.style.display = 'none';
-  document.body.classList.remove('modal-open');
+  _unlockBodyScroll();
   if (reload) {
     // PWA/ServiceWorkerキャッシュ破棄目的で location.reload(true)
     // (引数は新ブラウザで非対応でも location.reload() に fallback)
@@ -5400,14 +5431,14 @@ function openFeedbackModal() {
     m.querySelectorAll('input[name="fb-cat"]').forEach(r => r.checked = (r.value === 'request'));
   }
   m.classList.add('active');
-  document.body.classList.add('modal-open');
+  _lockBodyScroll();
   if (loggedIn) setTimeout(() => { const ta = m.querySelector('#feedback-text'); if (ta) ta.focus(); }, 50);
 }
 function closeFeedbackModal() {
   const m = document.getElementById('feedback-modal');
   if (!m) return;
   m.classList.remove('active');
-  document.body.classList.remove('modal-open');
+  _unlockBodyScroll();
 }
 async function submitFeedback() {
   if (!authUser) { showToast('ログインが必要です'); return; }

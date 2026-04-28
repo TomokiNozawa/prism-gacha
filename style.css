@@ -3983,6 +3983,18 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 body.gasshuku-modal-open {
   overflow: hidden;
 }
+/* 全モーダル共通の背景 scroll lock。 JS 側 (body.classList.add('modal-open')) と セットで機能する */
+/* iOS PWA scroll lock: 単純な overflow:hidden では効かないため、 JS で position:fixed + top:-scrollY をセット */
+body.modal-open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  /* top は JS で `-${savedScrollY}px` を直接 inline 設定 (close時にwindow.scrollTo で復元) */
+}
+html.modal-open {
+  overflow: hidden;
+  /* iOS で html 側もロックしないとアドレスバー領域が反応してしまう */
+}
 
 .gasshuku-modal {
   display: none;
