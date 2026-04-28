@@ -28,6 +28,14 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script>
+// Service Worker 登録 (iOS の PWA識別強化目的、 Now Playing タップが Prismaera へ正しく戻るように)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => { /* 失敗してもアプリ動作には影響なし */ });
+  });
+}
+</script>
 </head>
 <body>
 <div id="bg-layer"></div>

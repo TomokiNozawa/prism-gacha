@@ -4059,6 +4059,13 @@ function pauseBgm() {
   renderBgmPanel();
 }
 
+// iOS の Now Playing 所有強化: bgmAudio の play/pause を一括で MediaSession.playbackState に反映
+// (playBgm/pauseBgm/toggleMasterMute/ended イベントなど経路を問わず同期される)
+if ('mediaSession' in navigator) {
+  bgmAudio.addEventListener('play', () => { try { navigator.mediaSession.playbackState = 'playing'; } catch (e) {} });
+  bgmAudio.addEventListener('pause', () => { try { navigator.mediaSession.playbackState = 'paused'; } catch (e) {} });
+}
+
 function bgmToggle() {
   if (bgmEnabled && !bgmAudio.paused) pauseBgm();
   else playBgm(bgmCurrentId);
