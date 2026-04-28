@@ -92,7 +92,7 @@ def update_manifest(new_ver: str) -> None:
 def update_index(new_ver: str) -> None:
     text = INDEX_HTML.read_text(encoding="utf-8")
     text = re.sub(
-        r'(<span class="ver">)v[\d.]+(</span>)',
+        r'(<span class="ver"[^>]*>)v[\d.]+(</span>)',
         lambda m: f"{m.group(1)}v{new_ver}{m.group(2)}",
         text,
     )
