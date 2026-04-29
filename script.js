@@ -4448,27 +4448,20 @@ function _bgmStartUnmuteMonitor() {
   }, 250);
 }
 
-// play() フォールバック: ログ付き診断版
+// play() フォールバック: 直接再生 → muted-unmute → ユーザー操作待ち
 function _bgmPlayWithFallback() {
   if (!bgmAudio || !bgmEnabled || masterMuted) return;
   if (bgmAudio.muted) bgmAudio.muted = false;
-  console.log('[BGM] play attempt 1 (direct)');
-  bgmAudio.play().then(() => {
-    console.log('[BGM] play attempt 1 SUCCESS - playing normally');
-  }).catch((err) => {
-    console.warn('[BGM] play attempt 1 FAILED:', err.name, err.message);
+  bgmAudio.play().catch(() => {
     if (bgmAudioCtx && bgmAudioCtx.state === 'suspended') {
       try { bgmAudioCtx.resume(); } catch (e) {}
     }
-    console.log('[BGM] play attempt 2 (muted-unmute strategy)');
+    // muted-unmute strategy (ブラウザによっては muted autoplay は許可される)
     bgmAudio.muted = true;
     bgmAudio.play().then(() => {
-      console.log('[BGM] muted play SUCCESS - sync unmute');
       if (!masterMuted) bgmAudio.muted = false;
-      console.log('[BGM] muted now:', bgmAudio.muted, 'paused:', bgmAudio.paused);
       _bgmStartUnmuteMonitor();
-    }).catch((err2) => {
-      console.warn('[BGM] muted play FAILED:', err2.name, err2.message);
+    }).catch(() => {
       bgmAudio.muted = false;
       _bgmRegisterInteractionRetry();
     });
