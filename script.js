@@ -3313,8 +3313,15 @@ function _showFactionSide(fid) {
     toggle.classList.remove('active');
     toggle.setAttribute('aria-expanded', 'false');
   });
-  // メニュー内ボタン押下後は閉じる
+  // メニュー内ボタン押下後は閉じる + backdrop (menu自体) クリックで閉じる
   menu.addEventListener('click', (e) => {
+    // backdrop (menu container 自体) tap → close
+    if (e.target === menu) {
+      menu.classList.remove('active');
+      toggle.classList.remove('active');
+      toggle.setAttribute('aria-expanded', 'false');
+      return;
+    }
     if (e.target.closest('button, a')) {
       menu.classList.remove('active');
       toggle.classList.remove('active');
@@ -4308,46 +4315,50 @@ function loadBgmSrc(id) {
     bgmAudio.dataset.loadedId = track.id;
     // play カウントの一元管理用: 異なる src 読込時にこのフラグをリセット → bgmAudio.play() 時に1回だけ +1
     bgmAudio.dataset.bgmPlayLogged = '';
-    // リロード復帰: 同じ曲なら保存された位置から再開 (iOS PWA でも確実に効くよう複数イベントで保険)
+    try { bgmAudio.load(); } catch (e) {} // 明示 load (iOS で preload 効かない場合の保険)
+
+    // リロード復帰: 同じ曲なら保存された位置から再開
     const savedId = localStorage.getItem('prism-bgm-last-id');
     const savedTime = parseFloat(localStorage.getItem('prism-bgm-last-time') || '0');
     if (savedId === track.id && savedTime > 0.5) {
-      let seeked = false;
-      const seekToSaved = () => {
-        if (seeked) return;
+      let seekDone = false;
+      const trySeek = () => {
+        if (seekDone) return;
         if (!isFinite(bgmAudio.duration) || bgmAudio.duration <= 0) return;
         if (savedTime >= bgmAudio.duration - 1) return;
         try {
           bgmAudio.currentTime = savedTime;
-          seeked = true;
+          seekDone = true;
         } catch (e) {}
-        // 100ms後に検証 (PC Chrome: seek後 paused に戻る → play再開、 Mobile: 反映されてない → retry)
-        setTimeout(() => {
-          if (bgmAudio.readyState < 2) return;
-          // PC: seek で paused になったら自動再生再開
-          if (bgmAudio.paused && bgmEnabled && !masterMuted) {
-            bgmAudio.play().catch(() => {});
-          }
-          // Mobile: currentTime が反映されてない場合 retry
-          if (Math.abs(bgmAudio.currentTime - savedTime) > 2) {
-            try { bgmAudio.currentTime = savedTime; } catch (e) {}
-            // さらに 200ms後 もう1回 検証 (mobile Safari の遅延反映)
-            setTimeout(() => {
-              if (Math.abs(bgmAudio.currentTime - savedTime) > 2) {
-                try { bgmAudio.currentTime = savedTime; } catch (e) {}
-              }
-            }, 200);
-          }
-        }, 100);
       };
-      // loadedmetadata + canplay + playing 3経路で seek 試行 (iOS で metadata pre-cached 等で
-      // 1イベント取りこぼしても他で拾える)。 'playing' は実際に音が出始めた時、 currentTime 変更が
-      // 確実に反映されるタイミング (mobile Safari で先頭から再生される問題の本命対策)
-      bgmAudio.addEventListener('loadedmetadata', seekToSaved, { once: true });
-      bgmAudio.addEventListener('canplay', seekToSaved, { once: true });
-      bgmAudio.addEventListener('playing', seekToSaved, { once: true });
-      // 既に metadata 読み込み済 (バックバッファ等) なら即 seek
-      if (bgmAudio.readyState >= 1) setTimeout(seekToSaved, 30);
+      // metadata取得時 → canplay → playing の3段階で seek (取りこぼし防止)
+      bgmAudio.addEventListener('loadedmetadata', trySeek, { once: true });
+      bgmAudio.addEventListener('canplay', trySeek, { once: true });
+      // playing イベントで seek 検証 + 反映漏れの最終 retry (mobile Safari 対策)
+      bgmAudio.addEventListener('playing', () => {
+        trySeek(); // まだ seek してなかったら今やる
+        // 反映確認 + retry (Mobile で currentTime= が黙殺された場合)
+        setTimeout(() => {
+          if (Math.abs(bgmAudio.currentTime - savedTime) > 2 && isFinite(bgmAudio.duration)) {
+            try { bgmAudio.currentTime = savedTime; } catch (e) {}
+          }
+        }, 200);
+        setTimeout(() => {
+          if (Math.abs(bgmAudio.currentTime - savedTime) > 2 && isFinite(bgmAudio.duration)) {
+            try { bgmAudio.currentTime = savedTime; } catch (e) {}
+          }
+        }, 600);
+      }, { once: true });
+      // PC Chrome: seek 後 paused に戻ることがある → 'seeked' で検出して自動 play 再開
+      bgmAudio.addEventListener('seeked', () => {
+        if (bgmAudio.paused && bgmEnabled && !masterMuted) {
+          bgmAudio.play().catch(() => {
+            setTimeout(() => { if (bgmAudio.paused && bgmEnabled && !masterMuted) bgmAudio.play().catch(() => {}); }, 250);
+          });
+        }
+      });
+      // 既に metadata あれば即 seek
+      if (bgmAudio.readyState >= 1) setTimeout(trySeek, 30);
     }
   }
   bgmAudio.loop = (bgmRepeat === 'one');
@@ -4426,17 +4437,40 @@ function playBgm(id) {
   loadBgmSrc(id);
   _applyVolumeToAudio();
   bgmEnabled = true;
-  // play() リトライ: 失敗時 200ms後に再試行 (#19 次の曲再生されない問題対策、 audio context resume 後再試行)
-  bgmAudio.play().catch(() => {
-    if (bgmAudioCtx && bgmAudioCtx.state === 'suspended') {
-      try { bgmAudioCtx.resume(); } catch (e) {}
-    }
-    setTimeout(() => { if (bgmAudio.paused && bgmEnabled && !masterMuted) bgmAudio.play().catch(() => {}); }, 200);
-  });
+  _bgmPlayWithFallback();
   saveBgmState();
   updateMasterMuteBtn();
   renderBgmPanel();
   // play カウント増分は bgmAudio の 'play' event listener で一元管理 (どの経路から再生開始しても正確に+1)
+}
+
+// play() リトライ: 失敗時に [200ms後再試行 → 次のユーザー操作で再試行] の二段階フォールバック
+// (#19 次の曲が再生されない問題: ended → bgmNext → playBgm で iOS が autoplay 許可を切ったケース対応)
+function _bgmPlayWithFallback() {
+  bgmAudio.play().catch(() => {
+    // Web Audio Context 復帰
+    if (bgmAudioCtx && bgmAudioCtx.state === 'suspended') {
+      try { bgmAudioCtx.resume(); } catch (e) {}
+    }
+    // 200ms後 再試行
+    setTimeout(() => {
+      if (!bgmEnabled || masterMuted || !bgmAudio.paused) return;
+      bgmAudio.play().catch(() => {
+        // それでも失敗 → 次のユーザー操作で再試行 (タップ1回で再開)
+        const retryOnInteraction = () => {
+          ['click', 'touchstart', 'pointerdown', 'keydown'].forEach(ev =>
+            document.removeEventListener(ev, retryOnInteraction, { capture: true })
+          );
+          if (bgmEnabled && !masterMuted && bgmAudio.paused) {
+            bgmAudio.play().catch(() => {});
+          }
+        };
+        ['click', 'touchstart', 'pointerdown', 'keydown'].forEach(ev =>
+          document.addEventListener(ev, retryOnInteraction, { capture: true, once: true, passive: true })
+        );
+      });
+    }, 200);
+  });
 }
 
 function pauseBgm() {
@@ -4557,12 +4591,14 @@ document.addEventListener('visibilitychange', () => {
     bgmAudioCtx.resume().catch(() => {});
   }
   if (bgmEnabled && !masterMuted && bgmAudio.paused) {
-    bgmAudio.play().catch(() => {/* autoplay制約 */});
+    if (typeof _bgmPlayWithFallback === 'function') _bgmPlayWithFallback();
+    else bgmAudio.play().catch(() => {});
   }
 });
 window.addEventListener('pageshow', (e) => {
   if (e.persisted && bgmEnabled && !masterMuted && bgmAudio.paused) {
-    bgmAudio.play().catch(() => {});
+    if (typeof _bgmPlayWithFallback === 'function') _bgmPlayWithFallback();
+    else bgmAudio.play().catch(() => {});
   }
 });
 
@@ -4708,12 +4744,12 @@ updateMasterMuteBtn();
 // bgmEnabled=true かつ masterMuted=false の時のみ試行。
 // A-3: 「リロード前に再生していたらそのまま流す」— 起動時に即試行も仕込む
 if (bgmEnabled && !masterMuted) {
-  // 即試行 (DOMロード済み前提、ユーザー操作無くてもブラウザによっては通ることも)
-  setTimeout(() => { if (bgmEnabled && !masterMuted && bgmAudio.paused) bgmAudio.play().catch(() => {}); }, 100);
+  // 即試行 (DOMロード済み前提、ユーザー操作無くてもブラウザによっては通ることも) — _bgmPlayWithFallback で interaction retry も込み
+  setTimeout(() => { if (bgmEnabled && !masterMuted && bgmAudio.paused) _bgmPlayWithFallback(); }, 100);
   // 駄目だった場合は interaction フォールバック
   const bgmAutoplayEvents = ['click', 'pointerdown', 'touchstart', 'keydown', 'scroll'];
   function startBgmOnce() {
-    if (bgmEnabled && !masterMuted && bgmAudio.paused) bgmAudio.play().catch(() => {});
+    if (bgmEnabled && !masterMuted && bgmAudio.paused) _bgmPlayWithFallback();
     updateMasterMuteBtn();
     renderBgmPanel();
     bgmAutoplayEvents.forEach(ev => document.removeEventListener(ev, startBgmOnce, true));

@@ -2902,29 +2902,54 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
     font-size: 18px;
     margin-left: auto;
   }
+  /* モバイルメニューを fullscreen popup 化 (透過問題完全解消、 タップしやすい大きさに) */
   .topbar-secondary {
     display: none;
-    position: absolute;
-    top: 100%;
-    right: 14px;
-    /* ❗ 完全不透明: rgba 0.97 + backdrop-filter だと iOS Safari で透けて見えていた */
-    background: #14102c;
-    border: 1px solid rgba(200, 180, 255, 0.45);
-    border-radius: 12px;
-    padding: 12px;
-    z-index: 100; /* topbar内の z-index:10 より上 */
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    /* 完全不透明 backdrop */
+    background: rgba(5, 6, 16, 0.92);
+    backdrop-filter: blur(8px);
+    /* 旧 dropdown プロパティ overwrite */
+    top: 0;
+    right: 0;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 32px 24px;
+    min-width: 0;
     flex-direction: column;
-    gap: 8px;
-    min-width: 200px;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7), 0 0 16px rgba(200, 125, 255, 0.2);
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
   }
   .topbar-secondary.active {
     display: flex !important;
   }
+  /* popup内の各ボタン: tap target 44+ + 中央寄せ + 大き目 */
   .topbar-secondary > .gallery-btn {
     width: 100%;
-    text-align: left;
-    justify-content: flex-start;
+    max-width: 320px;
+    padding: 16px 20px !important;
+    font-size: 15px !important;
+    text-align: center;
+    justify-content: center;
+    border-radius: 12px;
+    min-height: 52px;
+    /* 当てやすいよう間隔広め */
+  }
+  /* popup タイトル代わりに ✕ 案内 (上端) */
+  .topbar-secondary::before {
+    content: '× メニュー (背景タップで閉じる)';
+    color: rgba(200, 180, 255, 0.7);
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    position: absolute;
+    top: calc(env(safe-area-inset-top, 0px) + 16px);
+    left: 0; right: 0;
+    text-align: center;
+    pointer-events: none;
   }
   .topbar-more-toggle.active {
     background: rgba(200, 125, 255, 0.18);
