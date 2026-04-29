@@ -2907,27 +2907,34 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
     display: none;
     position: fixed;
     inset: 0;
-    z-index: 9999;
-    /* 完全不透明 backdrop */
-    background: rgba(5, 6, 16, 0.92);
-    backdrop-filter: blur(8px);
+    z-index: 99999;
+    /* 完全不透明 backdrop (透過なし) */
+    background: #050610;
     /* 旧 dropdown プロパティ overwrite */
     top: 0;
     right: 0;
+    left: 0;
+    bottom: 0;
     border: none;
     border-radius: 0;
     box-shadow: none;
-    padding: 32px 24px;
+    margin: 0;
+    /* button 多い時はスクロール、 上部 hint 分の padding-top */
+    padding: calc(env(safe-area-inset-top, 0px) + 56px) 24px 32px;
     min-width: 0;
+    width: 100vw !important;
+    height: 100vh !important;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 14px;
+    justify-content: flex-start;
+    gap: 12px;
+    overflow-y: auto;
+    pointer-events: auto;
   }
   .topbar-secondary.active {
     display: flex !important;
   }
-  /* popup内の各ボタン: tap target 44+ + 中央寄せ + 大き目 */
+  /* popup内の各ボタン: tap target + 中央寄せ + 大き目 */
   .topbar-secondary > .gallery-btn {
     width: 100%;
     max-width: 320px;
@@ -2937,16 +2944,16 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
     justify-content: center;
     border-radius: 12px;
     min-height: 52px;
-    /* 当てやすいよう間隔広め */
+    flex-shrink: 0;
   }
-  /* popup タイトル代わりに ✕ 案内 (上端) */
+  /* popup タイトル代わりに ✕ 案内 (上端 sticky) */
   .topbar-secondary::before {
     content: '× メニュー (背景タップで閉じる)';
     color: rgba(200, 180, 255, 0.7);
     font-size: 12px;
     letter-spacing: 0.05em;
     position: absolute;
-    top: calc(env(safe-area-inset-top, 0px) + 16px);
+    top: calc(env(safe-area-inset-top, 0px) + 14px);
     left: 0; right: 0;
     text-align: center;
     pointer-events: none;
