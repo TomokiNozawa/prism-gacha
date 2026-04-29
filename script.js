@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.2.3e — 演出&ゲームロジック (Season 1 第1章)
+   Prismaera v1.2.3f — 演出&ゲームロジック (Season 1 第1章)
    ============================================================ */
 "use strict";
 
@@ -3975,25 +3975,29 @@ function setupCharDetailBlink(c) {
   // ブラウザの404キャッシュ対策: 初回probeのみcache busterを付ける(成功後の本番swapはキャッシュ効かせる)
   probe.src = blinkUrl + (blinkUrl.includes('?') ? '&' : '?') + '_p=' + Date.now();
 }
-// ────────── ストーリー本文中のキャラ初登場カットイン (B3+C1: 中央表示・LRのみ) ──────────
+// ────────── ストーリー本文中のキャラ初登場カットイン (ストーリー起点・演出重視) ──────────
+// scene: シーンの label ("2-6") またはラベルなし場合は title ("プリズマの黄昏") で指定
+const STORY_CUTIN_CONFIG = {
+  's1c1': [
+    { scene: '2-3',            charName: 'セラフィエル' },
+    { scene: 'プリズマの黄昏', charName: '虹意 プリズマ' },
+  ],
+  's1c2': [
+    { scene: '2-6',            charName: '深海女王 ネプテア' },
+    { scene: '2-11',           charName: '波紋の聖女 イザベル' },
+  ],
+};
 let _firstAppearanceMap = new Map(); // charName → 初出シーンindex
 function precomputeFirstAppearances() {
   _firstAppearanceMap.clear();
   if (!storyScenes || storyScenes.length === 0) return;
-  // LR + UR を対象 (LRは伝説演出、URは章ボス/キーキャラの初登場演出)
-  const targets = [
-    ...((POOL && POOL.LR) || []).map(c => ({ ...c, tier: 'LR' })),
-    ...((POOL && POOL.UR) || []).map(c => ({ ...c, tier: 'UR' })),
-  ];
-  for (let i = 0; i < storyScenes.length; i++) {
-    const s = storyScenes[i];
-    const text = (s.title || '') + '\n' + (s.contentMd || '');
-    for (const c of targets) {
-      if (_firstAppearanceMap.has(c.name)) continue;
-      const tokens = c.name.split(/[\s ]/);
-      const lastToken = tokens[tokens.length - 1];
-      if (text.includes(c.name) || (lastToken !== c.name && text.includes(lastToken))) {
-        _firstAppearanceMap.set(c.name, i);
+  const entries = STORY_CUTIN_CONFIG[currentStoryId] || [];
+  for (const entry of entries) {
+    for (let i = 0; i < storyScenes.length; i++) {
+      const s = storyScenes[i];
+      if (s.label === entry.scene || s.title === entry.scene) {
+        _firstAppearanceMap.set(entry.charName, i);
+        break;
       }
     }
   }
@@ -4008,17 +4012,24 @@ function _buildCutinHtml(c) {
     `</div>`;
 }
 function injectStoryCutins(bodyHtml, sceneIdx) {
-  const targets = [
-    ...((POOL && POOL.LR) || []).map(c => ({ ...c, tier: 'LR' })),
-    ...((POOL && POOL.UR) || []).map(c => ({ ...c, tier: 'UR' })),
+  const entries = STORY_CUTIN_CONFIG[currentStoryId] || [];
+  const charNames = entries
+    .filter(e => _firstAppearanceMap.get(e.charName) === sceneIdx)
+    .map(e => e.charName);
+  if (charNames.length === 0) return bodyHtml;
+  const allChars = [
+    ...((POOL && POOL.LR)  || []).map(c => ({ ...c, tier: 'LR' })),
+    ...((POOL && POOL.UR)  || []).map(c => ({ ...c, tier: 'UR' })),
+    ...((POOL && POOL.SSR) || []).map(c => ({ ...c, tier: 'SSR' })),
+    ...((POOL && POOL.SR)  || []).map(c => ({ ...c, tier: 'SR' })),
+    ...((POOL && POOL.R)   || []).map(c => ({ ...c, tier: 'R' })),
   ];
-  const newcomers = targets
-    .filter(c => _firstAppearanceMap.get(c.name) === sceneIdx);
-  if (newcomers.length === 0) return bodyHtml;
-  for (const c of newcomers) {
-    const tokens = c.name.split(/[\s ]/);
+  for (const charName of charNames) {
+    const c = allChars.find(x => x.name === charName);
+    if (!c) continue;
+    const tokens = charName.split(/[\s　]/);
     const lastToken = tokens[tokens.length - 1];
-    const candidates = [c.name, lastToken].filter((v, i, a) => v && a.indexOf(v) === i);
+    const candidates = [charName, lastToken].filter((v, i, a) => v && a.indexOf(v) === i);
     let injected = false;
     for (const cand of candidates) {
       const esc = cand.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -4031,7 +4042,6 @@ function injectStoryCutins(bodyHtml, sceneIdx) {
       }
     }
     if (!injected) {
-      // 段落単位で見つからなければ本文先頭に挿入
       bodyHtml = _buildCutinHtml(c) + bodyHtml;
     }
   }
