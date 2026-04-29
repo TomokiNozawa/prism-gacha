@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.2.3f — 演出&ゲームロジック (Season 1 第1章)
+   Prismaera v1.2.3g — 演出&ゲームロジック (Season 1 第1章)
    ============================================================ */
 "use strict";
 
@@ -3979,7 +3979,6 @@ function setupCharDetailBlink(c) {
 // scene: シーンの label ("2-6") またはラベルなし場合は title ("プリズマの黄昏") で指定
 const STORY_CUTIN_CONFIG = {
   's1c1': [
-    { scene: '2-3',            charName: 'セラフィエル' },
     { scene: 'プリズマの黄昏', charName: '虹意 プリズマ' },
   ],
   's1c2': [
