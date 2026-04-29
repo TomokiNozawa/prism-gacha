@@ -558,7 +558,9 @@ body {
   </div>
 </div>
 
-<div id="login-gate" class="login-gate">
+<div id="auth-checking" style="display:flex;align-items:center;justify-content:center;height:60vh;color:rgba(255,255,255,0.5);font-size:14px;letter-spacing:0.1em;">認証確認中…</div>
+
+<div id="login-gate" class="login-gate" style="display:none">
   <h2>管理画面ログイン</h2>
   <p>gengor 専用</p>
   <input id="gate-nickname" placeholder="nickname" autocomplete="username">
@@ -695,6 +697,7 @@ function nicknameToEmail(nickname) {
 }
 
 auth.onAuthStateChanged(async user => {
+  $('#auth-checking').style.display = 'none';
   if (!user) {
     $('#app').style.display = 'none';
     $('#login-gate').style.display = '';

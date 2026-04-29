@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.2.3 — 演出&ゲームロジック (Season 1 第1章)
+   Prismaera v1.2.3d — 演出&ゲームロジック (Season 1 第1章)
    ============================================================ */
 "use strict";
 
@@ -3563,6 +3563,7 @@ const STORY_KEY_GUARD_MS = 300;
 let storyScenes = [];     // [{label, title, contentMd, bg}, ...]
 let storyIdx = 0;
 let currentStoryId = null;
+let currentStoryPov = null;  // 章のPOVキャラ名 (**POV**: 名前 から抽出)
 
 async function openStory(storyId) {
   const info = STORY_FILES[storyId];
@@ -3578,6 +3579,8 @@ async function openStory(storyId) {
     const resp = await fetch(info.file + '?v=' + Date.now());
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const md = await resp.text();
+    const povMatch = md.match(/\*\*POV\*\*\s*[:：]\s*(.+)/);
+    currentStoryPov = povMatch ? povMatch[1].trim() : null;
     storyScenes = parseStoryToScenes(md);
     precomputeFirstAppearances();
     storyIdx = restoreStoryProgress(storyId, storyScenes.length);
@@ -3740,6 +3743,19 @@ function renderScene() {
   _updateTapGuide(storyIdx === 0);
 }
 
+// POVキャラをPOOLから検索 (完全一致優先、解放済み高レア優先)
+function _findPovChar(povName) {
+  for (const tier of ['LR', 'UR', 'SSR', 'SR', 'R']) {
+    const c = POOL[tier].find(c => c.name === povName);
+    if (c && isUnlocked(c)) return { ...c, tier, hits: 1 };
+  }
+  for (const tier of ['LR', 'UR', 'SSR', 'SR', 'R']) {
+    const c = POOL[tier].find(c => c.name.includes(povName));
+    if (c && isUnlocked(c)) return { ...c, tier, hits: 1 };
+  }
+  return null;
+}
+
 // シーン本文に登場するキャラを自動検出して下部に立ち絵を並べる
 function renderSceneChars(scene) {
   const container = $("#story-scene-chars");
@@ -3819,6 +3835,18 @@ function renderSceneChars(scene) {
   // 出現回数多い順、最大12体まで
   found.sort((a, b) => b.hits - a.hits);
   const top = found.slice(0, 12);
+  // POVキャラを先頭に配置
+  if (currentStoryPov) {
+    const povIdx = top.findIndex(c => c.name === currentStoryPov || c.name.includes(currentStoryPov));
+    if (povIdx > 0) {
+      const [povChar] = top.splice(povIdx, 1);
+      top.unshift(povChar);
+    } else if (povIdx === -1 && /私|わたし/.test(scene.contentMd || '')) {
+      // 名前は出ないが「私/わたし」がある → POVキャラを先頭に追加
+      const povChar = _findPovChar(currentStoryPov);
+      if (povChar) top.unshift(povChar);
+    }
+  }
   if (top.length === 0) {
     container.innerHTML = '';
     container.style.display = 'none';
@@ -4133,6 +4161,7 @@ function closeStory() {
   _unlockBodyScroll();
   // ギャラリーに戻った時に全件で再構築させる
   detailUnlockedList = [];
+  currentStoryPov = null;
 }
 
 // 進捗保存 (localStorage)
