@@ -4442,7 +4442,21 @@ function playBgm(id) {
 // mobile 判定 (iOS Safari + Android Chrome)
 const _isMobileBrowser = /iPhone|iPad|iPod|Android/.test(navigator.userAgent);
 
-// play() フォールバック: 必ず最初に muted=false 防御、 mobile autoplay 失敗時は muted-unmute (sync 解除)
+// 多段 unmute monitor: 5秒間 polling で muted残留を検出して解除する (iOS sync unmute 拒否対策)
+function _bgmStartUnmuteMonitor() {
+  let attempts = 0;
+  const interval = setInterval(() => {
+    attempts++;
+    if (attempts > 20) { clearInterval(interval); return; }
+    if (bgmAudio.muted && !masterMuted && bgmEnabled) {
+      bgmAudio.muted = false;
+    }
+    if (!bgmAudio.muted || masterMuted) clearInterval(interval);
+  }, 250);
+}
+
+// play() フォールバック: 必ず最初に muted=false 防御、 autoplay 失敗時は **PC/mobile 共通 muted-unmute**
+// (ユーザー報告: "ミュートにしてミュート解除したらいい感じ" → 同じ事を JS で再現)
 function _bgmPlayWithFallback() {
   if (!bgmAudio || !bgmEnabled || masterMuted) return;
   // 防御: muted残留対策
@@ -4451,23 +4465,17 @@ function _bgmPlayWithFallback() {
     if (bgmAudioCtx && bgmAudioCtx.state === 'suspended') {
       try { bgmAudioCtx.resume(); } catch (e) {}
     }
-    if (_isMobileBrowser) {
-      // mobile: muted-unmute 戦略 (毎回)、 unmute は promise resolution 内で**同期実行**
-      // (iOS で setTimeout 経由 unmute が黙殺される事象への対策)
-      bgmAudio.muted = true;
-      bgmAudio.play().then(() => {
-        // play() Promise resolution 直後 同期 unmute (user gesture context が温存される)
-        if (!masterMuted) bgmAudio.muted = false;
-        // 念のため 50ms後にも (一部 iOS で sync unmute 拒否される時の保険)
-        setTimeout(() => { if (!masterMuted) bgmAudio.muted = false; }, 50);
-      }).catch(() => {
-        bgmAudio.muted = false;
-        _bgmRegisterInteractionRetry();
-      });
-    } else {
-      // PC: ブラウザ autoplay 拒否時はユーザー操作待ち
+    // PC/mobile 共通: muted-unmute 戦略 (ブラウザは muted autoplay を必ず許可)
+    bgmAudio.muted = true;
+    bgmAudio.play().then(() => {
+      // sync unmute: play().then() resolution は user gesture context を温存
+      if (!masterMuted) bgmAudio.muted = false;
+      // 多段 unmute monitor: setTimeout で取りこぼした場合に polling で確実に
+      _bgmStartUnmuteMonitor();
+    }).catch(() => {
+      bgmAudio.muted = false;
       _bgmRegisterInteractionRetry();
-    }
+    });
   });
 }
 
@@ -5661,8 +5669,19 @@ async function checkPrismaeraVersion() {
     _prismaeraChangelogCache = changelog;
 
     // ヘッダーのバージョン表記を version.json で上書き
+    // dev 環境では cache buster 末尾の文字 (a/b/c...) を suffix として表示 (確認用)
     const verEl = document.getElementById('app-version');
-    if (verEl) verEl.textContent = 'v' + currentVer;
+    if (verEl) {
+      let suffix = '';
+      const isDevHost = location.hostname.startsWith('dev.') || location.hostname.includes('localhost');
+      if (isDevHost) {
+        try {
+          const cb = (document.querySelector('link[rel=stylesheet]')?.href || '').match(/\?v=\d{8}([a-z])/);
+          if (cb) suffix = cb[1];
+        } catch (e) {}
+      }
+      verEl.textContent = `v${currentVer}${suffix}`;
+    }
 
     let lastSeen = null;
     try { lastSeen = localStorage.getItem(PRISMAERA_VERSION_LS_KEY); } catch (e) {}
