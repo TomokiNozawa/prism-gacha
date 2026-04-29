@@ -4444,48 +4444,38 @@ function playBgm(id) {
   // play カウント増分は bgmAudio の 'play' event listener で一元管理 (どの経路から再生開始しても正確に+1)
 }
 
-// play() 多段フォールバック:
-// 1. 直接再生 (Site Engagement 高いブラウザはここで通る)
-// 2. muted autoplay → unmute (ブラウザは muted 再生を必ず許可、 直後 unmute すれば音付きで継続)
-// 3. 200ms後再試行 (audio context resume 後)
-// 4. 次のユーザー操作 (click/touch/key) で再試行
-// (#19 次の曲再生されない / リロード後 autoplay の対策)
+// play() フォールバック (シンプル版): 直接再生 → 200ms後再試行 → ユーザー操作で再試行
+// muted-unmute 戦略は副作用 (mute状態が残って音が消える) があったため廃止。
+// ブラウザの autoplay 許可がある時 (デフォルト or サイト個別許可) はStrategy 1 で通る。
 function _bgmPlayWithFallback() {
   if (!bgmAudio || !bgmEnabled || masterMuted) return;
+  // 防御: 何らかの理由で muted が残ってたら解除
+  if (bgmAudio.muted) bgmAudio.muted = false;
   // Strategy 1: 通常 play
-  bgmAudio.play().then(() => {
-    // 成功 → 何もしない (mutedになってない)
-  }).catch(() => {
-    // Strategy 2: muted autoplay → unmute (ブラウザは必ず muted autoplay 許可)
-    const wasMuted = bgmAudio.muted;
-    bgmAudio.muted = true;
-    bgmAudio.play().then(() => {
-      // 50ms後 unmute (即時 unmute だと一部ブラウザが拒否することあり)
-      setTimeout(() => { bgmAudio.muted = wasMuted; }, 50);
-    }).catch(() => {
-      bgmAudio.muted = wasMuted;
-      // Strategy 3: Web Audio Context 復帰 + 200ms後再試行
-      if (bgmAudioCtx && bgmAudioCtx.state === 'suspended') {
-        try { bgmAudioCtx.resume(); } catch (e) {}
-      }
-      setTimeout(() => {
-        if (!bgmEnabled || masterMuted || !bgmAudio.paused) return;
-        bgmAudio.play().catch(() => {
-          // Strategy 4: 次のユーザー操作で再試行
-          const retryOnInteraction = () => {
-            ['click', 'touchstart', 'pointerdown', 'keydown'].forEach(ev =>
-              document.removeEventListener(ev, retryOnInteraction, { capture: true })
-            );
-            if (bgmEnabled && !masterMuted && bgmAudio.paused) {
-              bgmAudio.play().catch(() => {});
-            }
-          };
+  bgmAudio.play().catch(() => {
+    if (bgmAudioCtx && bgmAudioCtx.state === 'suspended') {
+      try { bgmAudioCtx.resume(); } catch (e) {}
+    }
+    // Strategy 2: 200ms後 再試行 (ロード待ち後の play)
+    setTimeout(() => {
+      if (!bgmEnabled || masterMuted || !bgmAudio.paused) return;
+      if (bgmAudio.muted) bgmAudio.muted = false;
+      bgmAudio.play().catch(() => {
+        // Strategy 3: 次のユーザー操作で再試行
+        const retryOnInteraction = () => {
           ['click', 'touchstart', 'pointerdown', 'keydown'].forEach(ev =>
-            document.addEventListener(ev, retryOnInteraction, { capture: true, once: true, passive: true })
+            document.removeEventListener(ev, retryOnInteraction, { capture: true })
           );
-        });
-      }, 200);
-    });
+          if (bgmEnabled && !masterMuted && bgmAudio.paused) {
+            if (bgmAudio.muted) bgmAudio.muted = false;
+            bgmAudio.play().catch(() => {});
+          }
+        };
+        ['click', 'touchstart', 'pointerdown', 'keydown'].forEach(ev =>
+          document.addEventListener(ev, retryOnInteraction, { capture: true, once: true, passive: true })
+        );
+      });
+    }, 200);
   });
 }
 
@@ -4758,19 +4748,18 @@ updateMasterMuteBtn();
 
 // 初回ユーザー操作で enabled=true なら再生再開 (autoplay制約回避)
 // bgmEnabled=true かつ masterMuted=false の時のみ試行。
-// _bgmPlayWithFallback が muted-then-unmute 等の多段戦略を持つので、 複数イベントで呼ぶ
+// 単一 setTimeout 100ms (元の挙動に戻す、 多段は逆に副作用あり)
 if (bgmEnabled && !masterMuted) {
-  const _tryAutoplay = () => {
+  setTimeout(() => {
     if (bgmEnabled && !masterMuted && bgmAudio.paused) _bgmPlayWithFallback();
-  };
-  // 多段試行: ブラウザの autoplay 許可タイミングは状況依存なので複数 hook
-  setTimeout(_tryAutoplay, 50);
-  setTimeout(_tryAutoplay, 300);
-  setTimeout(_tryAutoplay, 1000);
-  if (document.readyState === 'complete') _tryAutoplay();
-  else window.addEventListener('load', _tryAutoplay, { once: true });
-  window.addEventListener('focus', () => _tryAutoplay());
-  // 失敗時 interaction フォールバック (どこかタップで強制再開)
+  }, 100);
+  // load イベントでも1回試行 (deferred script で 100ms 早すぎるブラウザ用の保険)
+  if (document.readyState !== 'complete') {
+    window.addEventListener('load', () => {
+      if (bgmEnabled && !masterMuted && bgmAudio.paused) _bgmPlayWithFallback();
+    }, { once: true });
+  }
+  // 失敗時 interaction フォールバック
   const bgmAutoplayEvents = ['click', 'pointerdown', 'touchstart', 'keydown', 'scroll'];
   function startBgmOnce() {
     if (bgmEnabled && !masterMuted && bgmAudio.paused) _bgmPlayWithFallback();

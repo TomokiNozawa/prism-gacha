@@ -2932,7 +2932,13 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
     pointer-events: auto;
   }
   .topbar-secondary.active {
+    /* !important で 上から完全 override (display:contents 残留・他干渉を完全排除) */
     display: flex !important;
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 99999 !important;
+    pointer-events: auto !important;
+    background: #050610 !important;
   }
   /* popup内の各ボタン: tap target + 中央寄せ + 大き目 */
   .topbar-secondary > .gallery-btn {
