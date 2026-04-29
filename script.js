@@ -3980,8 +3980,11 @@ let _firstAppearanceMap = new Map(); // charName → 初出シーンindex
 function precomputeFirstAppearances() {
   _firstAppearanceMap.clear();
   if (!storyScenes || storyScenes.length === 0) return;
-  // C1段階: LR のみ対象
-  const targets = (POOL && POOL.LR) || [];
+  // LR + UR を対象 (LRは伝説演出、URは章ボス/キーキャラの初登場演出)
+  const targets = [
+    ...((POOL && POOL.LR) || []).map(c => ({ ...c, tier: 'LR' })),
+    ...((POOL && POOL.UR) || []).map(c => ({ ...c, tier: 'UR' })),
+  ];
   for (let i = 0; i < storyScenes.length; i++) {
     const s = storyScenes[i];
     const text = (s.title || '') + '\n' + (s.contentMd || '');
@@ -4005,10 +4008,12 @@ function _buildCutinHtml(c) {
     `</div>`;
 }
 function injectStoryCutins(bodyHtml, sceneIdx) {
-  const targets = (POOL && POOL.LR) || [];
+  const targets = [
+    ...((POOL && POOL.LR) || []).map(c => ({ ...c, tier: 'LR' })),
+    ...((POOL && POOL.UR) || []).map(c => ({ ...c, tier: 'UR' })),
+  ];
   const newcomers = targets
-    .filter(c => _firstAppearanceMap.get(c.name) === sceneIdx)
-    .map(c => ({ ...c, tier: 'LR' }));
+    .filter(c => _firstAppearanceMap.get(c.name) === sceneIdx);
   if (newcomers.length === 0) return bodyHtml;
   for (const c of newcomers) {
     const tokens = c.name.split(/[\s ]/);
@@ -4127,7 +4132,9 @@ function _updateTapGuide(show) {
     guide = document.createElement('div');
     guide.id = 'story-tap-guide';
     guide.className = 'story-tap-guide';
-    guide.innerHTML = '<span class="story-tap-guide-left">◀ 前のページ</span><span class="story-tap-guide-right">次のページ ▶</span>';
+    guide.innerHTML =
+      '<div class="story-tap-guide-left"><span class="story-tap-guide-arrow">‹</span><span class="story-tap-guide-label">前へ</span></div>' +
+      '<div class="story-tap-guide-right"><span class="story-tap-guide-arrow">›</span><span class="story-tap-guide-label">次へ</span></div>';
     const stage = document.getElementById('story-stage');
     if (stage) stage.appendChild(guide);
   }

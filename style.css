@@ -2671,6 +2671,10 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   border-color: rgba(255,255,255,0.4);
   box-shadow: 0 0 28px rgba(255,255,255,0.25), 0 0 56px rgba(255,217,77,0.12);
 }
+.story-cutin[data-tier="ur"] {
+  border-color: rgba(255,216,77,0.5);
+  box-shadow: 0 0 22px rgba(255,216,77,0.2), 0 0 44px rgba(95,255,212,0.1);
+}
 .story-cutin-img {
   width: 100%; max-width: 380px;
   height: auto;
@@ -6027,25 +6031,44 @@ body.gasshuku-mode-fantasy .fx-win {
   50% { opacity: 1; transform: scale(1.05); }
 }
 /* タップガイド (章の1ページ目のみ表示) */
+/* タップガイド: 左右エッジに貼り付くタブ型 (漫画アプリ風) */
 .story-tap-guide {
   position: absolute;
-  bottom: 72px;
-  left: 0; right: 0;
+  inset: 0;
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
   pointer-events: none;
   transition: opacity 0.6s ease;
   z-index: 10;
 }
 .story-tap-guide-left,
 .story-tap-guide-right {
-  font-size: 12px;
-  color: rgba(255,255,255,0.55);
-  letter-spacing: 0.06em;
-  background: rgba(0,0,0,0.35);
-  padding: 5px 12px;
-  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 18px 10px;
+  background: rgba(0,0,0,0.32);
+  backdrop-filter: blur(6px);
+  color: rgba(255,255,255,0.8);
+  animation: tapGuide-pulse 2s ease-in-out infinite;
+}
+.story-tap-guide-left  { border-radius: 0 10px 10px 0; }
+.story-tap-guide-right { border-radius: 10px 0 0 10px; }
+.story-tap-guide-arrow {
+  font-size: 26px;
+  font-weight: 300;
+  line-height: 1;
+}
+.story-tap-guide-label {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  opacity: 0.85;
+}
+@keyframes tapGuide-pulse {
+  0%, 100% { opacity: 0.55; }
+  50%       { opacity: 1; }
 }
 /* ===== END ===== */
 
