@@ -3082,14 +3082,39 @@ const FACTION_ICONS = {
 };
 // 派閥間の繋がり (関係深い派閥ペア = 道路で結ぶ)
 const FACTION_ROUTES = [
-  ['genso', 'rulers'], ['genso', 'church'], ['genso', 'tower'],
-  ['rulers', 'redwing'], ['rulers', 'dragon'],
-  ['church', 'aquasis'], ['church', 'dragon'],
-  ['redwing', 'yakai'], ['yakai', 'wolf'],
-  ['forest', 'wolf'], ['forest', 'silver'],
-  ['silver', 'academy'], ['tower', 'academy'],
-  ['seventh', 'rulers'], ['aquasis', 'crimson'],
+  ['genso', 'rulers'], ['rulers', 'church'], ['rulers', 'dragon'],
+  ['church', 'forest'], ['dragon', 'redwing'],
+  ['forest', 'wolf'], ['redwing', 'yakai'],
+  ['wolf', 'silver'], ['yakai', 'seventh'],
+  ['silver', 'academy'], ['seventh', 'academy'],
+  ['tower', 'rulers'], ['tower', 'academy'],
+  ['academy', 'aquasis'], ['aquasis', 'crimson'],
 ];
+
+// ワールドマップ専用 座標 (相関図 FACTIONS とは独立、 ファンタジー世界の地理を表現)
+// viewBox 2000x1600。 上=空界、 中央=大陸、 下=海域
+const FACTION_WORLD_COORDS = {
+  // 天空界 (浮遊する星の世界)
+  genso:   { x: 1000, y:  140, region: '天空界' },
+  // 中央 (覇者の都)
+  rulers:  { x: 1000, y:  450, region: '中央大陸' },
+  tower:   { x: 1000, y:  720, region: '中央大陸' },
+  // 西部山岳 (北→南)
+  church:  { x:  450, y:  380, region: '西方聖域' },
+  forest:  { x:  280, y:  720, region: '西方樹海' },
+  wolf:    { x:  330, y: 1010, region: '西方荒野' },
+  silver:  { x:  500, y: 1250, region: '西方氷土' },
+  // 東部山岳 (北→南)
+  dragon:  { x: 1550, y:  380, region: '東方山脈' },
+  redwing: { x: 1720, y:  720, region: '東方紅地' },
+  yakai:   { x: 1670, y: 1010, region: '東方夜域' },
+  seventh: { x: 1500, y: 1250, region: '東方光土' },
+  // 南方 (海域近く)
+  academy: { x: 1000, y: 1180, region: '中央南部' },
+  // 海域 (一番南)
+  aquasis: { x:  800, y: 1450, region: '南方海域' },
+  crimson: { x: 1300, y: 1450, region: '南方海域' },
+};
 
 function renderWorldMap() {
   const canvas = document.getElementById('world-map-canvas');
@@ -3101,7 +3126,12 @@ function renderWorldMap() {
     memberCount[f] = (memberCount[f] || 0) + 1;
   }
   const W = 2000, H = 1600;
-  const factionMap = Object.fromEntries(FACTIONS.map(f => [f.id, f]));
+  // ワールド専用座標を FACTIONS にマージ (相関図用 x,y はそのまま、 ワールド用は FACTION_WORLD_COORDS から)
+  const factionMap = Object.fromEntries(FACTIONS.map(f => {
+    const wc = FACTION_WORLD_COORDS[f.id];
+    return [f.id, wc ? { ...f, x: wc.x, y: wc.y, region: wc.region } : f];
+  }));
+  const factionsForMap = FACTIONS.map(f => factionMap[f.id]);
   let svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">`;
   // 装飾の defs: 大陸グラデ + 海洋 + 派閥ハロー
   svg += `<defs>
@@ -3125,37 +3155,66 @@ function renderWorldMap() {
   // 海洋 (背景)
   svg += `<rect width="${W}" height="${H}" fill="url(#ocean-grad)"/>`;
   svg += `<rect width="${W}" height="${H}" fill="url(#grid-faint)"/>`;
-  // 大陸 (中央集中の楕円)
-  svg += `<ellipse cx="${W/2}" cy="${H/2-40}" rx="${W*0.46}" ry="${H*0.42}" fill="url(#land-grad)"/>`;
-  // 装飾的な波線 (海岸線風)
-  svg += `<path d="M 100 1380 Q 500 1330 1000 1390 T 1900 1380" stroke="rgba(125,211,252,0.12)" stroke-width="2" fill="none"/>`;
-  svg += `<path d="M 100 1450 Q 500 1410 1000 1460 T 1900 1450" stroke="rgba(125,211,252,0.08)" stroke-width="2" fill="none"/>`;
-  // 派閥間のルート (光の道)
+  // ─── 大陸シェイプ (有機的な海岸線、 楕円より自然) ───
+  svg += `<path d="M 220,360 Q 80,800 200,1280 Q 400,1550 1000,1580 Q 1600,1550 1800,1280 Q 1920,800 1780,360 Q 1500,80 1000,140 Q 500,80 220,360 Z"
+    fill="url(#land-grad)" stroke="rgba(125,211,252,0.15)" stroke-width="3"/>`;
+  // 山脈 (西側 + 東側 連山) — 三角の繰り返し
+  let mountains = '';
+  for (let i = 0; i < 8; i++) {
+    const xw = 280 + i * 30;
+    mountains += `<polygon points="${xw-22},860 ${xw},810 ${xw+22},860" fill="rgba(180,140,200,0.15)" stroke="rgba(180,140,200,0.3)" stroke-width="1"/>`;
+    const xe = 1700 - i * 30;
+    mountains += `<polygon points="${xe-22},860 ${xe},810 ${xe+22},860" fill="rgba(180,140,200,0.15)" stroke="rgba(180,140,200,0.3)" stroke-width="1"/>`;
+  }
+  svg += mountains;
+  // 中央の森 (アイコン化された木) と中央湖
+  svg += `<circle cx="900" cy="900" r="60" fill="rgba(95,255,212,0.08)" stroke="rgba(95,255,212,0.25)" stroke-width="2"/>`;
+  svg += `<text x="900" y="918" font-size="48" text-anchor="middle">🌳</text>`;
+  // 海岸線 (大陸の南端、 波線2本)
+  svg += `<path d="M 200 1340 Q 500 1310 1000 1350 T 1820 1330" stroke="rgba(125,211,252,0.25)" stroke-width="3" fill="none"/>`;
+  svg += `<path d="M 200 1410 Q 500 1380 1000 1420 T 1820 1400" stroke="rgba(125,211,252,0.18)" stroke-width="2" fill="none"/>`;
+  svg += `<path d="M 200 1470 Q 500 1440 1000 1480 T 1820 1460" stroke="rgba(125,211,252,0.12)" stroke-width="2" fill="none"/>`;
+  // コンパスローズ (右下隅)
+  svg += `<g transform="translate(1820, 230)">
+    <circle r="60" fill="rgba(20,15,45,0.7)" stroke="rgba(255,217,122,0.4)" stroke-width="2"/>
+    <polygon points="0,-50 8,0 0,50 -8,0" fill="rgba(255,217,122,0.7)"/>
+    <polygon points="-50,0 0,8 50,0 0,-8" fill="rgba(255,217,122,0.4)"/>
+    <text y="-32" font-size="18" text-anchor="middle" fill="rgba(255,217,122,0.9)" font-weight="700" stroke="rgba(0,0,0,0.7)" stroke-width="2" paint-order="stroke">N</text>
+    <text y="46" font-size="18" text-anchor="middle" fill="rgba(255,217,122,0.9)" font-weight="700" stroke="rgba(0,0,0,0.7)" stroke-width="2" paint-order="stroke">S</text>
+    <text x="-52" y="6" font-size="18" text-anchor="middle" fill="rgba(255,217,122,0.7)" font-weight="700" stroke="rgba(0,0,0,0.7)" stroke-width="2" paint-order="stroke">W</text>
+    <text x="52" y="6" font-size="18" text-anchor="middle" fill="rgba(255,217,122,0.7)" font-weight="700" stroke="rgba(0,0,0,0.7)" stroke-width="2" paint-order="stroke">E</text>
+  </g>`;
+  // タイトル装飾 (左上隅)
+  svg += `<g transform="translate(200, 100)">
+    <text font-size="44" font-weight="700" fill="rgba(255,217,122,0.9)" stroke="rgba(0,0,0,0.85)" stroke-width="3" paint-order="stroke">虹霊界 大陸地図</text>
+    <text y="40" font-size="18" fill="rgba(200,180,255,0.7)" stroke="rgba(0,0,0,0.7)" stroke-width="2" paint-order="stroke">— Realm of Prismaera —</text>
+  </g>`;
+  // 派閥間のルート (光の道) — ワールド配置
   FACTION_ROUTES.forEach(([a, b]) => {
     const fa = factionMap[a], fb = factionMap[b];
     if (!fa || !fb) return;
-    svg += `<line x1="${fa.x}" y1="${fa.y}" x2="${fb.x}" y2="${fb.y}" stroke="rgba(200,180,255,0.18)" stroke-width="3" stroke-dasharray="8 12" stroke-linecap="round"/>`;
+    svg += `<line x1="${fa.x}" y1="${fa.y}" x2="${fb.x}" y2="${fb.y}" stroke="rgba(200,180,255,0.22)" stroke-width="3" stroke-dasharray="8 12" stroke-linecap="round"/>`;
   });
-  // 各派閥ノード
-  FACTIONS.forEach(f => {
+  // 各派閥ノード (ワールド配置)
+  factionsForMap.forEach(f => {
     const cnt = memberCount[f.id] || 0;
-    const r = 95 + Math.min(cnt * 6, 40);  // 95〜135
+    const r = 92 + Math.min(cnt * 5, 35);  // 92〜127
     const icon = FACTION_ICONS[f.id] || '⚐';
     svg += `<g class="world-faction-node" data-faction="${f.id}" transform="translate(${f.x},${f.y})">
       <!-- 外周ハロー -->
-      <circle r="${r+18}" fill="${f.color}" fill-opacity="0.05" filter="url(#glow)"/>
+      <circle r="${r+18}" fill="${f.color}" fill-opacity="0.06" filter="url(#glow)"/>
       <!-- 本体 -->
-      <circle r="${r}" fill="${f.color}" fill-opacity="0.22" stroke="${f.color}" stroke-width="4" stroke-opacity="0.85"/>
+      <circle r="${r}" fill="${f.color}" fill-opacity="0.25" stroke="${f.color}" stroke-width="4" stroke-opacity="0.9"/>
       <!-- 内側装飾円 -->
-      <circle r="${r-12}" fill="none" stroke="${f.color}" stroke-width="1" stroke-opacity="0.4" stroke-dasharray="4 6"/>
+      <circle r="${r-14}" fill="none" stroke="${f.color}" stroke-width="1" stroke-opacity="0.5" stroke-dasharray="4 6"/>
       <!-- アイコン -->
-      <text y="-12" font-size="56" text-anchor="middle" style="paint-order:normal">${icon}</text>
+      <text y="-10" font-size="58" text-anchor="middle">${icon}</text>
       <!-- ふりがな (上) -->
       <text class="faction-yomi" y="-${r+24}">${escapeHtml(f.yomi)}</text>
       <!-- 派閥名 (中央下) -->
-      <text y="38">${escapeHtml(f.label)}</text>
+      <text y="40">${escapeHtml(f.label)}</text>
       <!-- メンバー数 (下) -->
-      <text class="faction-count" y="${r+40}">${cnt}人</text>
+      <text class="faction-count" y="${r+42}">${cnt}人</text>
     </g>`;
   });
   svg += `</svg>`;
@@ -4229,6 +4288,8 @@ function loadBgmSrc(id) {
   if (bgmAudio.dataset.loadedId !== track.id) {
     bgmAudio.src = track.file;
     bgmAudio.dataset.loadedId = track.id;
+    // play カウントの一元管理用: 異なる src 読込時にこのフラグをリセット → bgmAudio.play() 時に1回だけ +1
+    bgmAudio.dataset.bgmPlayLogged = '';
     // リロード復帰: 同じ曲なら保存された位置から再開 (iOS PWA でも確実に効くよう複数イベントで保険)
     const savedId = localStorage.getItem('prism-bgm-last-id');
     const savedTime = parseFloat(localStorage.getItem('prism-bgm-last-time') || '0');
@@ -4243,11 +4304,12 @@ function loadBgmSrc(id) {
           seeked = true;
         } catch (e) {}
       };
-      // loadedmetadata + canplay + play 3経路で seek 試行 (iOS で metadata pre-cached 等で
-      // 1イベント取りこぼしても他で拾える)
+      // loadedmetadata + canplay + playing 3経路で seek 試行 (iOS で metadata pre-cached 等で
+      // 1イベント取りこぼしても他で拾える)。 'playing' は実際に音が出始めた時、 currentTime 変更が
+      // 確実に反映されるタイミング (mobile Safari で先頭から再生される問題の本命対策)
       bgmAudio.addEventListener('loadedmetadata', seekToSaved, { once: true });
       bgmAudio.addEventListener('canplay', seekToSaved, { once: true });
-      bgmAudio.addEventListener('play', seekToSaved, { once: true });
+      bgmAudio.addEventListener('playing', seekToSaved, { once: true });
       // 既に metadata 読み込み済 (バックバッファ等) なら即 seek
       if (bgmAudio.readyState >= 1) setTimeout(seekToSaved, 30);
     }
@@ -4295,11 +4357,16 @@ function loadBgmSrc(id) {
   }
 }
 
-// admin 統計用: BGM 再生開始 / 完聴 (ended) を別カウントで eventStats に記録
+// admin 統計用: BGM 再生開始 / 完聴 (ended) を別カウントで eventStats + ユーザー個別に記録
+// type='play' or 'ended' / trackId='dawn' 等
 function _logBgmEvent(type, trackId) {
   if (!fbDb || !trackId) return;
   try {
     fbDb.ref(`prism-gacha/_meta/eventStats/bgm/${type}/${trackId}`).transaction(c => (c || 0) + 1);
+    // ログイン中ユーザーに個別カウント (admin で per-user 表示)
+    if (typeof authUser !== 'undefined' && authUser && authUser.uid) {
+      fbDb.ref(`prism-gacha/users/${authUser.uid}/bgmStats/${trackId}/${type}`).transaction(c => (c || 0) + 1);
+    }
   } catch (e) {}
 }
 
@@ -4310,14 +4377,11 @@ function playBgm(id) {
   if (bgmAudioCtx && bgmAudioCtx.state === 'suspended') {
     try { bgmAudioCtx.resume(); } catch (e) {}
   }
-  // 同じ曲を再ロードしただけ (currentTime復帰で再生継続) では計上しない、 異なる曲の再生開始だけカウント
-  const isNewTrack = (bgmCurrentId !== id) || (bgmAudio.dataset.loadedId !== id);
   if (masterMuted) {
     // ミュート中は再生要求だけ保持(enabled=true)、実際の再生はmute解除時
     bgmCurrentId = id;
     bgmEnabled = true;
     loadBgmSrc(id);
-    if (isNewTrack) _logBgmEvent('play', id);
     saveBgmState();
     updateMasterMuteBtn();
     renderBgmPanel();
@@ -4327,10 +4391,10 @@ function playBgm(id) {
   _applyVolumeToAudio();
   bgmEnabled = true;
   bgmAudio.play().catch(() => {/* autoplay拒否は想定内 */});
-  if (isNewTrack) _logBgmEvent('play', id);
   saveBgmState();
   updateMasterMuteBtn();
   renderBgmPanel();
+  // play カウント増分は bgmAudio の 'play' event listener で一元管理 (どの経路から再生開始しても正確に+1)
 }
 
 function pauseBgm() {
@@ -4461,6 +4525,13 @@ window.addEventListener('pageshow', (e) => {
 });
 
 // ───── Audio event handlers ─────
+// play イベント: 経路を問わず再生開始時に1回だけ +1 カウント (auto-resume / playBgm / shuffle next すべて)
+bgmAudio.addEventListener('play', () => {
+  // 同じ src で複数回 play() してもここで +1 しないよう dataset でガード
+  if (bgmAudio.dataset.bgmPlayLogged === bgmCurrentId) return;
+  bgmAudio.dataset.bgmPlayLogged = bgmCurrentId;
+  _logBgmEvent('play', bgmCurrentId);
+});
 bgmAudio.addEventListener('ended', () => {
   localStorage.setItem('prism-bgm-last-time', '0');
   // admin統計: 完聴 (ended は曲が最後まで再生された時にだけ発火、 skip では発火しないので "完聴回数" として正確)

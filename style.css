@@ -98,6 +98,11 @@ body::before {
 /* デスクトップ: ⋮ ボタン非表示、 secondary は contents で直接 stats に並ぶ */
 .topbar-more-toggle { display: none; }
 .topbar-secondary { display: contents; }
+
+/* close ボタンの (Esc) 表記をモバイルで非表示 (タップ操作には不要) */
+@media (max-width: 700px) {
+  .esc-hint { display: none; }
+}
 .title {
   font-size: 20px; font-weight: 700; letter-spacing: 0.08em;
   background: linear-gradient(90deg, #ffd84d, #5fffd4, #c87dff, #ff5faa);
@@ -2683,12 +2688,29 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 .relations-modal.active { display: flex; }
 .relations-header {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 22px; gap: 16px;
+  padding: 14px 60px 14px 22px; gap: 16px;  /* 右の close ボタン分余白 */
   background: rgba(0,0,0,0.5);
   border-bottom: 1px solid rgba(255,255,255,0.1);
   backdrop-filter: blur(8px);
   flex-wrap: wrap;
+  position: relative;  /* 子の close を absolute で角に置くための基準 */
 }
+/* 相関図 close を他モーダル同様 右上 ✕ 風に統一 (モバイルで本体と被る問題対策) */
+.relations-header > .close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  z-index: 10;
+  font-family: inherit;
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  background: rgba(255,255,255,0.08);
+  color: var(--text);
+  border: 1px solid rgba(255,255,255,0.15);
+}
+.relations-header > .close:hover { background: rgba(255,255,255,0.15); }
 .relations-header h2 {
   margin: 0; font-size: 22px; letter-spacing: 0.2em;
   color: #fff;
@@ -2737,11 +2759,15 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 }
 
 @media (max-width: 720px) {
-  .relations-header { padding: 8px 10px; gap: 6px; flex-direction: column; align-items: stretch; }
+  .relations-header { padding: 10px 56px 10px 12px; gap: 6px; flex-direction: column; align-items: stretch; }
   .relations-header h2 { font-size: 16px; margin: 0; text-align: center; }
   .relations-legend { justify-content: center; gap: 6px; font-size: 10px; }
   .relations-legend .leg-line { width: 18px; height: 2px; margin-right: 2px; }
-  .relations-header .close { font-size: 11px; padding: 6px 10px; align-self: center; }
+  /* mobile relations close は absolute 配置を維持 (上記グローバル定義) しつつ tap target を確保 */
+  .relations-header > .close {
+    font-size: 11px;
+    padding: 6px 10px;
+  }
 }
 /* 関連キャラパネルのモバイル調整 */
 @media (max-width: 720px) {

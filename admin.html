@@ -592,40 +592,35 @@ body {
 
   <div id="notice" class="notice"></div>
 
-  <!-- F3: デバイス分布 + PWA + Welcome→signup -->
-  <div class="breakdown-section">
-    <div class="breakdown-title">📱 デバイス分布 + 流入</div>
-    <div class="breakdown-grid" id="breakdown-device"></div>
-  </div>
-
-  <!-- F4: 操作ログ + エラー -->
-  <div class="breakdown-section">
-    <div class="breakdown-title">🎬 操作 / 🚨 エラー</div>
-    <div class="breakdown-grid" id="breakdown-events"></div>
-  </div>
-
-  <!-- BGM 再生統計 -->
-  <div class="breakdown-section">
-    <div class="breakdown-title">🎵 BGM 再生統計 (全ユーザー累計)</div>
-    <div id="breakdown-bgm" class="breakdown-bgm"></div>
-  </div>
-
-  <!-- F2: ガチャ種別ブレークダウン -->
-  <div class="breakdown-section">
-    <div class="breakdown-title">📊 ガチャ種別 ブレークダウン</div>
-    <div class="breakdown-grid" id="breakdown-gacha"></div>
-  </div>
-
-  <!-- F2: 章別読了率 -->
-  <div class="breakdown-section">
-    <div class="breakdown-title">📖 章別 読了率 (登録ユーザー基準)</div>
-    <div class="breakdown-grid" id="breakdown-story"></div>
-  </div>
-
-  <!-- タブ切替 -->
+  <!-- タブ切替 (詳細統計 + ユーザー + 要望) -->
   <div class="admin-tabs">
     <button class="admin-tab active" data-panel="users">👥 ユーザー</button>
+    <button class="admin-tab" data-panel="stats">📊 詳細統計</button>
     <button class="admin-tab" data-panel="feedback">📨 要望 <span class="tab-badge" id="tab-fb-badge" style="display:none">0</span></button>
+  </div>
+
+  <!-- 詳細統計タブ (旧 breakdown sections) -->
+  <div class="admin-panel" id="panel-stats">
+    <div class="breakdown-section">
+      <div class="breakdown-title">📱 デバイス分布 + 流入</div>
+      <div class="breakdown-grid" id="breakdown-device"></div>
+    </div>
+    <div class="breakdown-section">
+      <div class="breakdown-title">🎬 操作 / 🚨 エラー</div>
+      <div class="breakdown-grid" id="breakdown-events"></div>
+    </div>
+    <div class="breakdown-section">
+      <div class="breakdown-title">🎵 BGM 再生統計 (全ユーザー累計)</div>
+      <div id="breakdown-bgm" class="breakdown-bgm"></div>
+    </div>
+    <div class="breakdown-section">
+      <div class="breakdown-title">📊 ガチャ種別 ブレークダウン</div>
+      <div class="breakdown-grid" id="breakdown-gacha"></div>
+    </div>
+    <div class="breakdown-section">
+      <div class="breakdown-title">📖 章別 読了率 (登録ユーザー基準)</div>
+      <div class="breakdown-grid" id="breakdown-story"></div>
+    </div>
   </div>
 
   <!-- ユーザータブ -->
@@ -1464,6 +1459,31 @@ function buildDetail(u, s) {
   }
   heatHtml += '</div>';
 
+  // 個別ユーザーの BGM 再生統計 (users/{uid}/bgmStats から)
+  const userBgmStats = u.bgmStats || {};
+  const BGM_LABELS_DETAIL = {
+    dawn: 'メインテーマ', watch: '第1章', tide: '第2章', rift: '戦闘',
+    church: '白焔教会', aquasis: 'アクアシス', crimson: '紅玉海賊団',
+  };
+  let bgmHtml = '';
+  const bgmIds = Object.keys(userBgmStats);
+  if (bgmIds.length === 0) {
+    bgmHtml = '<div style="color:rgba(255,255,255,0.4);font-size:12px;padding:6px 0">このユーザーは BGM 未再生</div>';
+  } else {
+    bgmHtml = '<div style="display:grid;grid-template-columns:1fr auto auto auto;gap:6px 12px;font-size:12px;align-items:center">';
+    bgmHtml += '<div style="color:rgba(200,180,255,0.7);font-size:10px">曲</div><div style="color:rgba(200,180,255,0.7);font-size:10px;text-align:right">▶ 再生</div><div style="color:rgba(200,180,255,0.7);font-size:10px;text-align:right">✓ 完聴</div><div style="color:rgba(200,180,255,0.7);font-size:10px;text-align:right">完聴率</div>';
+    const sorted = bgmIds.sort((a, b) => (userBgmStats[b].play || 0) - (userBgmStats[a].play || 0));
+    for (const id of sorted) {
+      const s = userBgmStats[id] || {};
+      const play = s.play || 0;
+      const ended = s.ended || 0;
+      const pct = play > 0 ? Math.round(ended / play * 100) : 0;
+      const label = BGM_LABELS_DETAIL[id] || id;
+      bgmHtml += `<div>${escapeHtml(label)}</div><div style="text-align:right">${play}</div><div style="text-align:right">${ended}</div><div style="text-align:right;color:${pct >= 50 ? '#5fffd4' : '#fcd34d'}">${pct}%</div>`;
+    }
+    bgmHtml += '</div>';
+  }
+
   detail.innerHTML = `
     <h4>詳細</h4>
     <div class="detail-row"><span>uid</span><b style="font-size:11px;font-family:monospace">${u.uid}</b></div>
@@ -1493,6 +1513,8 @@ function buildDetail(u, s) {
     ${gasshukuTotsu}
     <h4 style="margin-top:12px">📖 ストーリー進捗</h4>
     <div class="detail-story-list">${storyHtml}</div>
+    <h4 style="margin-top:12px">🎵 BGM 再生統計</h4>
+    ${bgmHtml}
   `;
   return detail;
 }

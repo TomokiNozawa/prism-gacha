@@ -3,12 +3,13 @@
 // 副目的: 静的アセットの stale-while-revalidate (体感速度向上、 オフライン耐性は最低限)。
 // HTML/JSON/Firebase API はキャッシュせず常にネットワーク優先 (更新即反映+認証/DB の鮮度維持)。
 
-const SW_VERSION = '20260429a';
+const SW_VERSION = '20260430a';  // mp3 を NEVER_CACHE に変更 (Range request問題で再生不安定だった)
 const CACHE_NAME = `prismaera-static-${SW_VERSION}`;
 
-// アセット拡張子だけキャッシュ対象。 .html/.json/firebase 系は除外
-const STATIC_EXT = /\.(?:css|js|png|jpg|jpeg|webp|svg|mp3|woff2?|ico)(?:\?|$)/i;
+// アセット拡張子だけキャッシュ対象。 .html/.json/firebase 系 + 音声 (Range request問題で stale 化) は除外
+const STATIC_EXT = /\.(?:css|js|png|jpg|jpeg|webp|svg|woff2?|ico)(?:\?|$)/i;
 const NEVER_CACHE_HOST = /(?:firebaseio|googleapis|gstatic|cloudflareinsights)\.com/i;
+const NEVER_CACHE_PATH = /\.(?:mp3|mp4|wav|m4a|ogg|webm)(?:\?|$)/i;  // 音声/動画は Range 完全対応難しいので素通し
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -27,6 +28,7 @@ self.addEventListener('fetch', (event) => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (NEVER_CACHE_HOST.test(url.hostname)) return;
+  if (NEVER_CACHE_PATH.test(url.pathname + url.search)) return;
   if (!STATIC_EXT.test(url.pathname + url.search)) return;
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);
