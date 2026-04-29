@@ -4311,7 +4311,13 @@ function bgmCheckedList() { return BGM_LIST.filter(b => bgmPlaylist[b.id]); }
 let bgmAudioCtx = null;
 let bgmGainNode = null;
 function _ensureBgmAudioGraph() {
-  if (bgmAudioCtx) return;
+  if (bgmAudioCtx) {
+    // 既存ctx が iOS で 'interrupted' になってたら resume 試行
+    if (bgmAudioCtx.state === 'interrupted' || bgmAudioCtx.state === 'suspended') {
+      bgmAudioCtx.resume().catch(() => {});
+    }
+    return;
+  }
   try {
     const Ctx = window.AudioContext || window.webkitAudioContext;
     if (!Ctx) return;
@@ -4320,6 +4326,14 @@ function _ensureBgmAudioGraph() {
     bgmGainNode = bgmAudioCtx.createGain();
     source.connect(bgmGainNode);
     bgmGainNode.connect(bgmAudioCtx.destination);
+    // iOS audio session interruption (次曲遷移/通話/他audio割込み) で ctx が止まる事象への対策
+    bgmAudioCtx.addEventListener('statechange', () => {
+      if (!bgmAudioCtx) return;
+      if (bgmAudioCtx.state === 'interrupted' || bgmAudioCtx.state === 'suspended') {
+        // user gesture 不要で resume 試行 (iOS は audio session active なら通る場合あり)
+        bgmAudioCtx.resume().catch(() => {});
+      }
+    });
   } catch (e) { bgmAudioCtx = null; bgmGainNode = null; }
 }
 
@@ -4629,6 +4643,10 @@ bgmAudio.addEventListener('ended', () => {
   localStorage.setItem('prism-bgm-last-time', '0');
   // admin統計: 完聴 (ended は曲が最後まで再生された時にだけ発火、 skip では発火しないので "完聴回数" として正確)
   _logBgmEvent('ended', bgmCurrentId);
+  // iOS: 次曲再生前に AudioContext を resume (interrupted対策)
+  if (bgmAudioCtx && (bgmAudioCtx.state === 'interrupted' || bgmAudioCtx.state === 'suspended')) {
+    bgmAudioCtx.resume().catch(() => {});
+  }
   if (bgmRepeat === 'one') { try { bgmAudio.play().catch(() => {}); } catch (e) {} return; }
   if (bgmRepeat === 'all') { bgmNext(); return; }
   // repeat=off: 次曲は自動で流さない(ただしプレイリストに複数曲あれば次へ)
