@@ -2,7 +2,7 @@
   "name": "Prismaera",
   "short_name": "Prismaera",
   "description": "虹霊界の物語とガチャとタワーディフェンスが融合したブラウザ体験",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
