@@ -651,6 +651,8 @@ function updateHUD() {
 
   // v1.1.3: ホーム下側は履歴→図鑑表示に変更 (renderHomeGalleryが存在するタイミングで呼ぶ)
   if (typeof renderHomeGallery === 'function') renderHomeGallery();
+  // B3: ストーリー読了視覚化 (Storiesカードのメタタグを動的更新)
+  if (typeof refreshStoryReadBadges === 'function') refreshStoryReadBadges();
 }
 
 // 履歴・図鑑で古いセーブデータのimgパスを最新POOLから引き直す
@@ -3054,6 +3056,141 @@ $("#result-again-ten").addEventListener("click", () => {
 $("#result").addEventListener("click", e => { if (e.target.id === "result") closeResult(); });
 $("#btn-gallery").addEventListener("click", openGallery);
 $("#btn-relations").addEventListener("click", openRelations);
+$("#btn-worldmap")?.addEventListener("click", openWorldMap);
+
+// ============ ワールドマップ (Phase 1) ============
+// 14派閥を世界地図風に配置 (FACTIONS の x,y 座標を流用)。 タップで右側に派閥詳細表示
+let _worldMapActiveFaction = null;
+function openWorldMap() {
+  const m = document.getElementById('world-map');
+  if (!m) return;
+  renderWorldMap();
+  m.removeAttribute('hidden');
+  _lockBodyScroll();
+}
+function closeWorldMap() {
+  const m = document.getElementById('world-map');
+  if (!m) return;
+  m.setAttribute('hidden', '');
+  _unlockBodyScroll();
+}
+function renderWorldMap() {
+  const canvas = document.getElementById('world-map-canvas');
+  if (!canvas || typeof FACTIONS === 'undefined') return;
+  // 派閥ごとのメンバー数を集計
+  const memberCount = {};
+  for (const name in (typeof CHAR_FACTION !== 'undefined' ? CHAR_FACTION : {})) {
+    const f = CHAR_FACTION[name].f;
+    memberCount[f] = (memberCount[f] || 0) + 1;
+  }
+  const W = 2000, H = 1600;
+  let svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" style="width:100%;height:auto;max-height:calc(100vh - 120px)">`;
+  // 海/大陸 風の背景 (薄い円弧で陸地っぽさを演出)
+  svg += `<defs>
+    <radialGradient id="land-grad" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#1a3850" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#0a1228" stop-opacity="0"/>
+    </radialGradient>
+  </defs>`;
+  svg += `<ellipse cx="${W/2}" cy="${H/2}" rx="${W*0.42}" ry="${H*0.4}" fill="url(#land-grad)"/>`;
+  // 各派閥ノード
+  FACTIONS.forEach(f => {
+    const cnt = memberCount[f.id] || 0;
+    const r = 50 + Math.min(cnt * 4, 30);  // メンバー多いほど大きく
+    svg += `<g class="world-faction-node" data-faction="${f.id}" transform="translate(${f.x},${f.y})">
+      <circle r="${r}" fill="${f.color}" fill-opacity="0.18" stroke="${f.color}" stroke-width="2" stroke-opacity="0.7"/>
+      <text class="faction-yomi" y="-${r+12}">${escapeHtml(f.yomi)}</text>
+      <text y="6">${escapeHtml(f.label)}</text>
+      <text class="faction-count" y="${r+22}">${cnt}人</text>
+    </g>`;
+  });
+  svg += `</svg>`;
+  canvas.innerHTML = svg;
+  // クリックバインド
+  canvas.querySelectorAll('.world-faction-node').forEach(node => {
+    node.addEventListener('click', () => {
+      const fid = node.dataset.faction;
+      _showFactionSide(fid);
+      canvas.querySelectorAll('.world-faction-node.active').forEach(n => n.classList.remove('active'));
+      node.classList.add('active');
+    });
+  });
+  // 前回開いていた派閥があれば自動選択
+  if (_worldMapActiveFaction) {
+    const prev = canvas.querySelector(`.world-faction-node[data-faction="${_worldMapActiveFaction}"]`);
+    if (prev) prev.click();
+  } else {
+    document.getElementById('world-map-side').innerHTML = '<div class="world-map-side-empty">📍 派閥をタップして詳細表示</div>';
+  }
+}
+function _showFactionSide(fid) {
+  _worldMapActiveFaction = fid;
+  const side = document.getElementById('world-map-side');
+  if (!side) return;
+  const fac = FACTIONS.find(f => f.id === fid);
+  if (!fac) return;
+  // 該当派閥の全キャラ
+  const chars = [];
+  for (const name in CHAR_FACTION) {
+    if (CHAR_FACTION[name].f !== fid) continue;
+    const c = getCharByName ? getCharByName(name) : null;
+    chars.push({ name, char: c });
+  }
+  // BGM 有無
+  const factionBgmIds = ['church', 'aquasis', 'crimson'];
+  const hasBgm = factionBgmIds.includes(fid);
+  let html = `<h3>${escapeHtml(fac.label)}</h3>`;
+  html += `<div class="faction-yomi-side">${escapeHtml(fac.yomi)}</div>`;
+  html += `<div class="world-map-side-meta">`;
+  html += `<span>👥 ${chars.length}人</span>`;
+  html += hasBgm ? `<span style="color:#fcd34d">🎵 派閥BGM有</span>` : `<span style="color:rgba(255,255,255,0.4)">🎵 BGM無</span>`;
+  html += `</div>`;
+  html += `<div class="world-map-side-members">`;
+  chars.forEach(({ name, char }) => {
+    const unlocked = char && (typeof isUnlocked === 'function' ? isUnlocked(char) : false);
+    const cls = unlocked ? 'world-map-side-member' : 'world-map-side-member locked';
+    const img = char && char.img ? `<img src="${char.img}" alt="${escapeHtml(name)}" loading="lazy">` : '';
+    const display = unlocked ? escapeHtml(name) : '🔒';
+    html += `<div class="${cls}" data-name="${escapeHtml(name)}">${img}<div>${display}</div></div>`;
+  });
+  html += `</div>`;
+  side.innerHTML = html;
+  // メンバークリックでキャラ詳細
+  side.querySelectorAll('.world-map-side-member:not(.locked)').forEach(el => {
+    el.addEventListener('click', () => {
+      const name = el.dataset.name;
+      const c = getCharByName ? getCharByName(name) : null;
+      if (c && typeof showCharDetail === 'function') showCharDetail(c);
+    });
+  });
+}
+// B1: モバイル topbar ⋮ メニュー (デスクトップは display:contents で表示なので影響なし)
+(function setupTopbarMore() {
+  const toggle = document.getElementById('btn-more-toggle');
+  const menu = document.getElementById('topbar-secondary');
+  if (!toggle || !menu) return;
+  toggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const active = menu.classList.toggle('active');
+    toggle.classList.toggle('active', active);
+    toggle.setAttribute('aria-expanded', active ? 'true' : 'false');
+  });
+  document.addEventListener('click', (e) => {
+    if (!menu.classList.contains('active')) return;
+    if (e.target.closest('#topbar-secondary, #btn-more-toggle')) return;
+    menu.classList.remove('active');
+    toggle.classList.remove('active');
+    toggle.setAttribute('aria-expanded', 'false');
+  });
+  // メニュー内ボタン押下後は閉じる
+  menu.addEventListener('click', (e) => {
+    if (e.target.closest('button, a')) {
+      menu.classList.remove('active');
+      toggle.classList.remove('active');
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+})();
 
 // ───── ストーリービューワー (紙芝居風) ─────
 const STORY_FILES = {
@@ -3844,7 +3981,7 @@ document.querySelectorAll('.story-card[data-story]').forEach(card => {
   card.addEventListener('click', () => openStory(card.dataset.story));
 });
 // ストーリー一覧モーダル
-// #10 ストーリー既読マーク (読了済み章カードに ✅ バッジ)
+// #10 ストーリー既読マーク (読了済み章カードに ✅ バッジ + ホームメタタグに 完読数/解放数 動的反映)
 function refreshStoryReadBadges() {
   const sp = (state && state.storyProgress) || {};
   document.querySelectorAll('.story-card[data-story]').forEach(card => {
@@ -3862,6 +3999,28 @@ function refreshStoryReadBadges() {
       badge.remove();
     }
   });
+  // ホーム Stories カードのメタタグを動的更新 (B3 ストーリー読了視覚化)
+  const progEl = document.getElementById('story-entry-progress');
+  if (progEl) {
+    const releasedIds = Object.keys(STORY_FILES || {});
+    const released = releasedIds.length;
+    const completedCount = releasedIds.filter(id => sp[id] && sp[id].completed).length;
+    // 進行中の章があれば「読了 N / 公開M (進行中: X 章 Y/Z シーン)」 形式
+    const inProgress = releasedIds.find(id => sp[id] && !sp[id].completed && (sp[id].lastSceneIndex || 0) > 0);
+    if (completedCount === released && released > 0) {
+      progEl.textContent = `${completedCount} / ${released}章 ✨完読`;
+    } else if (inProgress) {
+      const v = sp[inProgress];
+      const cur = (v.lastSceneIndex || 0) + 1;
+      const tot = v.totalScenes || '?';
+      progEl.textContent = `${completedCount} / ${released}章 完読 (進行中)`;
+      progEl.title = `進行中: ${inProgress.toUpperCase()} ${cur}/${tot} シーン`;
+    } else if (completedCount > 0) {
+      progEl.textContent = `${completedCount} / ${released}章 完読`;
+    } else {
+      progEl.textContent = `${released} / 7章 公開中`;
+    }
+  }
 }
 function openStoryList() {
   refreshStoryReadBadges(); // 開く度に最新状態
@@ -4458,6 +4617,12 @@ document.addEventListener("keydown", e => {
   const _slm = document.getElementById('story-list-modal');
   if (_slm && !_slm.hasAttribute('hidden')) {
     if (e.key === "Escape") { e.preventDefault(); closeStoryList(); }
+    return;
+  }
+  // ワールドマップモーダル
+  const _wmm = document.getElementById('world-map');
+  if (_wmm && !_wmm.hasAttribute('hidden')) {
+    if (e.key === "Escape") { e.preventDefault(); closeWorldMap(); }
     return;
   }
   // キャラ詳細 > 図鑑 > 結果 > ステージ の優先順で Esc処理

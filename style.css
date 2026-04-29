@@ -93,7 +93,11 @@ body::before {
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255,255,255,0.08);
   position: sticky; top: 0; z-index: 10;
+  /* モバイル ⋮ メニュー dropdown を absolute 配置するための基準点 */
 }
+/* デスクトップ: ⋮ ボタン非表示、 secondary は contents で直接 stats に並ぶ */
+.topbar-more-toggle { display: none; }
+.topbar-secondary { display: contents; }
 .title {
   font-size: 20px; font-weight: 700; letter-spacing: 0.08em;
   background: linear-gradient(90deg, #ffd84d, #5fffd4, #c87dff, #ff5faa);
@@ -2863,6 +2867,43 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
     position: static; /* スマホは画面が狭いため sticky 解除、 ヘッダーも自然スクロール */
   }
   main { padding: 12px 14px 48px; }  /* mobile: 上部詰め (旧24px → 12px) */
+  /* モバイル: ⋮ ボタン表示、 secondary 群は dropdown 形式に */
+  .topbar-more-toggle {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    font-size: 18px;
+    margin-left: auto;
+  }
+  .topbar-secondary {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 14px;
+    background: rgba(20, 16, 40, 0.97);
+    border: 1px solid rgba(200, 180, 255, 0.3);
+    border-radius: 12px;
+    padding: 10px;
+    z-index: 20;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 180px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 12px rgba(200, 125, 255, 0.15);
+    backdrop-filter: blur(8px);
+  }
+  .topbar-secondary.active {
+    display: flex !important;
+  }
+  .topbar-secondary > .gallery-btn {
+    width: 100%;
+    text-align: left;
+    justify-content: flex-start;
+  }
+  .topbar-more-toggle.active {
+    background: rgba(200, 125, 255, 0.18);
+    border-color: rgba(200, 125, 255, 0.4);
+  }
   .title { font-size: 16px; }
   .ver { font-size: 9px; }
   .title-kana { font-size: 10px; margin-left: 4px; }
@@ -4009,6 +4050,129 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 body.gasshuku-modal-open {
   overflow: hidden;
 }
+
+/* ============ ワールドマップモーダル (B Phase 1) ============ */
+.world-map-modal {
+  position: fixed; inset: 0; z-index: 230;
+  background: radial-gradient(ellipse at 50% 30%, #1a1f3a 0%, #050810 70%);
+  display: flex; flex-direction: column;
+}
+.world-map-modal[hidden] { display: none; }
+.world-map-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 22px;
+  background: rgba(10,14,29,0.85);
+  border-bottom: 1px solid rgba(200,180,255,0.15);
+}
+.world-map-header h2 {
+  margin: 0; font-size: 18px; letter-spacing: 0.05em;
+  background: linear-gradient(90deg, #ffd84d, #5fffd4, #c87dff);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.world-map-header .close {
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18);
+  color: #e8ecff; padding: 6px 14px; border-radius: 8px; cursor: pointer;
+  font-size: 13px;
+}
+.world-map-body {
+  flex: 1; display: grid; grid-template-columns: 1fr 320px;
+  overflow: hidden;
+}
+@media (max-width: 700px) {
+  .world-map-body { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
+}
+.world-map-canvas {
+  position: relative;
+  overflow: auto;
+  background:
+    radial-gradient(ellipse at 30% 30%, rgba(95, 255, 212, 0.06) 0%, transparent 40%),
+    radial-gradient(ellipse at 70% 60%, rgba(200, 125, 255, 0.06) 0%, transparent 40%),
+    linear-gradient(180deg, #0a1228 0%, #1a1538 100%);
+}
+.world-map-canvas svg { display: block; min-width: 100%; }
+.world-faction-node {
+  cursor: pointer;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+.world-faction-node:hover { transform: scale(1.08); filter: brightness(1.3); }
+.world-faction-node.active circle { stroke: #ffd84d; stroke-width: 3; }
+.world-faction-node text {
+  fill: #fff; font-size: 14px; font-weight: 600;
+  text-anchor: middle; pointer-events: none;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+}
+.world-faction-node .faction-yomi {
+  font-size: 9px; font-weight: 400;
+  fill: rgba(255,255,255,0.65);
+}
+.world-faction-node .faction-count {
+  font-size: 10px;
+  fill: rgba(255, 217, 122, 0.85);
+  font-weight: 700;
+}
+
+.world-map-side {
+  background: rgba(15, 18, 35, 0.95);
+  border-left: 1px solid rgba(200, 180, 255, 0.18);
+  padding: 16px;
+  overflow-y: auto;
+  color: #e8ecff;
+}
+@media (max-width: 700px) {
+  .world-map-side {
+    border-left: none;
+    border-top: 1px solid rgba(200, 180, 255, 0.18);
+    max-height: 40vh;
+  }
+}
+.world-map-side-empty {
+  color: rgba(255,255,255,0.5);
+  text-align: center;
+  padding: 30px 0;
+  font-size: 13px;
+}
+.world-map-side h3 {
+  margin: 0 0 4px;
+  font-size: 18px;
+  letter-spacing: 0.04em;
+}
+.world-map-side .faction-yomi-side {
+  font-size: 11px;
+  color: rgba(255,255,255,0.55);
+  margin-bottom: 12px;
+}
+.world-map-side-meta {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.world-map-side-meta span {
+  background: rgba(255,255,255,0.06);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+.world-map-side-members {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+  gap: 8px;
+}
+.world-map-side-member {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 6px;
+  text-align: center;
+  font-size: 11px;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+.world-map-side-member:hover { border-color: rgba(251, 191, 36, 0.5); }
+.world-map-side-member img {
+  width: 100%; aspect-ratio: 1/1; object-fit: cover;
+  border-radius: 6px; margin-bottom: 4px;
+}
+.world-map-side-member.locked { opacity: 0.4; cursor: default; }
+.world-map-side-member.locked img { filter: grayscale(1); }
 /* 全モーダル共通の背景 scroll lock。 JS 側 (body.classList.add('modal-open')) と セットで機能する */
 /* iOS PWA scroll lock: 単純な overflow:hidden では効かないため、 JS で position:fixed + top:-scrollY をセット */
 body.modal-open {
