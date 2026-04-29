@@ -4619,9 +4619,9 @@ function updateMasterMuteBtn() {
     btn.classList.toggle('muted', masterMuted);
     btn.title = masterMuted ? '全音ミュート中 (クリックで解除)' : '全音ミュート切替 (BGM+ガチャ音)';
   }
-  // 🎵ボタン (BGM詳細) はアイコン固定
+  // 🎵ボタン (BGM詳細): title だけ固定、 textContent は HTML 側のまま (btn-short/btn-long span を温存)
   const bgmBtn = $('#btn-bgm');
-  if (bgmBtn) { bgmBtn.textContent = '🎵'; bgmBtn.title = 'BGM詳細'; }
+  if (bgmBtn) bgmBtn.title = 'BGM詳細';
 }
 
 // ───── iOS PWA: ホーム画面復帰時にBGM自動再開 (visibility/pageshow ハンドラ) ─────
@@ -4777,6 +4777,11 @@ const _bgmShuffleToggle = $("#bgm-shuffle");
 if (_bgmShuffleToggle) _bgmShuffleToggle.addEventListener('change', toggleBgmShuffle);
 
 // 初期ロード
+// autoplay属性は src 設定の **前** に付けないと効かない (HTMLMedia spec: autoplay は src 読込時に評価)
+if (bgmEnabled && !masterMuted) {
+  bgmAudio.autoplay = true;
+  bgmAudio.setAttribute('autoplay', '');
+}
 loadBgmSrc(bgmCurrentId);
 _applyVolumeToAudio();
 updateMasterMuteBtn();
@@ -4784,8 +4789,6 @@ updateMasterMuteBtn();
 // 初回ユーザー操作で enabled=true なら再生再開 (autoplay制約回避)
 // bgmEnabled=true かつ masterMuted=false の時のみ試行。
 if (bgmEnabled && !masterMuted) {
-  // autoplay属性を付ける: 「ブラウザの自動再生許可」 が ON のサイトで src 読込直後に play 開始 (JS の play() より許可されやすい)
-  bgmAudio.autoplay = true;
   setTimeout(() => {
     if (bgmEnabled && !masterMuted && bgmAudio.paused) _bgmPlayWithFallback();
   }, 100);
