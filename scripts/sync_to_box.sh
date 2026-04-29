@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Prismaera: work copy → Box gacha-sim/ 同期スクリプト
+# Prismaera: work copy → Box prismaera/ 同期スクリプト
 #
 # 使い方:
 #   bash scripts/sync_to_box.sh             # 通常実行 (確認なし)
 #   bash scripts/sync_to_box.sh --dry-run   # 何がコピーされるか表示するだけ
 #
 # 動作:
-#   - ~/prism-gacha-work/ → ~/Box/DIK & Company/06_Other/野沢用/claude/gacha-sim/
+#   - ~/prism-gacha-work/ → ~/Box/DIK & Company/06_Other/野沢用/claude/prismaera/
 #   - .git/ と node_modules/ と .DS_Store は除外
 #   - ファイルが Box 側のみに存在する場合は削除しない (--delete しない)
 #     → Box 側に独自ファイル (sounds/, voices/, prompts/bgm/ 等) があるため
@@ -17,7 +17,7 @@
 set -euo pipefail
 
 WORK_DIR="$HOME/prism-gacha-work"
-BOX_DIR="$HOME/Box/DIK & Company/06_Other/野沢用/claude/gacha-sim"
+BOX_DIR="$HOME/Box/DIK & Company/06_Other/野沢用/claude/prismaera"
 
 if [[ ! -d "$WORK_DIR" ]]; then
   echo "❌ work copy が見つかりません: $WORK_DIR"
