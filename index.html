@@ -23,8 +23,8 @@
 <link rel="icon" href="/images/icons/icon-32.png" type="image/png" sizes="32x32">
 <link rel="icon" href="/images/icons/icon-16.png" type="image/png" sizes="16x16">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
-<link rel="manifest" href="/manifest.json?v=20260429l25">
-<link rel="stylesheet" href="/style.css?v=20260429l">
+<link rel="manifest" href="/manifest.json?v=20260429m25">
+<link rel="stylesheet" href="/style.css?v=20260429m">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -46,19 +46,21 @@ if ('serviceWorker' in navigator) {
     <button id="btn-gallery" class="gallery-btn" title="図鑑 (Gキー)">📖 図鑑</button>
     <button id="btn-relations" class="gallery-btn" title="相関図">🌐 相関図</button>
     <button id="btn-worldmap" class="gallery-btn" title="ワールドマップ">🗺️ ワールド</button>
+    <!-- ミュートボタンは topbar 常時表示 (頻用機能) -->
+    <button id="btn-mute-master" class="gallery-btn master-mute-btn" title="全音ミュート切替 (BGM+ガチャ音)">🔊</button>
     <!-- ≡ ハンバーガーメニュー (モバイルのみ表示、 デスクトップは display:none) -->
     <button id="btn-more-toggle" class="gallery-btn topbar-more-toggle" title="メニュー" aria-expanded="false" aria-label="メニュー">≡</button>
-    <!-- セカンダリ群: デスクトップは display:contents で直接 .stats に並ぶ。 モバイルは ⋮ タップで dropdown 展開 -->
-    <div class="topbar-secondary" id="topbar-secondary">
+    <!-- セカンダリ群: デスクトップは display:contents で直接 .stats に並ぶ。 モバイルは ≡ タップで <dialog> モーダル展開 (showModal で背景blocked) -->
+    <dialog class="topbar-secondary" id="topbar-secondary">
+      <button class="topbar-secondary-close" id="btn-secondary-close" type="button" aria-label="閉じる">×</button>
       <button id="btn-history" class="gallery-btn" title="ガチャ履歴">📜 履歴</button>
-      <button id="btn-mute-master" class="gallery-btn master-mute-btn" title="全音ミュート切替 (BGM+ガチャ音)">🔊</button>
-      <button id="btn-bgm" class="gallery-btn" title="BGM詳細">🎵</button>
-      <button id="btn-settings" class="gallery-btn" title="設定" onclick="openSettingsModal()">⚙️</button>
+      <button id="btn-bgm" class="gallery-btn" title="BGM詳細">🎵 BGM</button>
+      <button id="btn-settings" class="gallery-btn" title="設定" onclick="openSettingsModal()">⚙️ 設定</button>
       <a id="btn-env-prod" class="gallery-btn env-switch env-prod" href="https://prismaera.pages.dev/" title="本番環境へ移動" style="display:none;text-decoration:none">🚀 本番</a>
       <a id="btn-env-dev" class="gallery-btn env-switch env-dev" href="https://dev.prismaera.pages.dev/" title="開発環境へ移動 (gengor専用)" style="display:none;text-decoration:none">🧪 dev</a>
       <a id="btn-admin" class="gallery-btn" href="admin.html" title="管理画面 (gengor専用)" style="display:none;text-decoration:none">🛠️ Admin</a>
       <button id="btn-account" class="gallery-btn" title="アカウント" onclick="showAccountModal()">👤 <span id="account-label">ゲスト</span></button>
-    </div>
+    </dialog>
   </div>
 </header>
 
@@ -214,12 +216,17 @@ if ('serviceWorker' in navigator) {
 <!-- Result modal after 10-roll -->
 <div id="result" class="result">
   <div class="result-inner">
+    <!-- モバイル用 上部 アクション (もう一度+閉じる) — desktopは display:none -->
+    <div class="result-actions result-actions-top">
+      <button id="result-again-ten-top" class="result-btn primary" type="button">もう一度10連<span class="esc-hint"> (Enter)</span></button>
+      <button id="result-close-top" class="result-btn secondary" type="button">閉じる<span class="esc-hint"> (Esc)</span></button>
+    </div>
     <h2 id="result-title">結果</h2>
     <div id="result-rarity" class="result-rarity"></div>
     <div id="result-grid" class="result-grid"></div>
     <div class="result-actions">
       <button id="result-close" class="result-btn secondary">閉じる<span class="esc-hint"> (Esc)</span></button>
-      <button id="result-again-ten" class="result-btn primary">もう一度10連 (Enter)</button>
+      <button id="result-again-ten" class="result-btn primary">もう一度10連<span class="esc-hint"> (Enter)</span></button>
     </div>
   </div>
 </div>
@@ -544,7 +551,7 @@ if ('serviceWorker' in navigator) {
 <audio id="bgm-home" preload="auto"></audio>
 
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
-<script src="/script.js?v=20260429l"></script>
-<script src="/gasshuku.js?v=20260429l"></script>
+<script src="/script.js?v=20260429m"></script>
+<script src="/gasshuku.js?v=20260429m"></script>
 </body>
 </html>
