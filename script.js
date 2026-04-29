@@ -4493,12 +4493,8 @@ function _bgmPlayWithFallback() {
         _bgmRegisterInteractionRetry();
       });
     } else {
-      // PC: 200ms後 retry → ユーザー操作待ち
-      setTimeout(() => {
-        if (!bgmEnabled || masterMuted || !bgmAudio.paused) return;
-        if (bgmAudio.muted) bgmAudio.muted = false;
-        bgmAudio.play().catch(() => _bgmRegisterInteractionRetry());
-      }, 200);
+      // PC: ブラウザ autoplay 拒否時はユーザー操作待ち (200ms retry は spam 判定誘発で逆効果)
+      _bgmRegisterInteractionRetry();
     }
   });
 }
@@ -4787,8 +4783,9 @@ updateMasterMuteBtn();
 
 // 初回ユーザー操作で enabled=true なら再生再開 (autoplay制約回避)
 // bgmEnabled=true かつ masterMuted=false の時のみ試行。
-// 単一 setTimeout 100ms (元の挙動に戻す、 多段は逆に副作用あり)
 if (bgmEnabled && !masterMuted) {
+  // autoplay属性を付ける: 「ブラウザの自動再生許可」 が ON のサイトで src 読込直後に play 開始 (JS の play() より許可されやすい)
+  bgmAudio.autoplay = true;
   setTimeout(() => {
     if (bgmEnabled && !masterMuted && bgmAudio.paused) _bgmPlayWithFallback();
   }, 100);
