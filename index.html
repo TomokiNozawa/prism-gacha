@@ -23,8 +23,8 @@
 <link rel="icon" href="/images/icons/icon-32.png" type="image/png" sizes="32x32">
 <link rel="icon" href="/images/icons/icon-16.png" type="image/png" sizes="16x16">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
-<link rel="manifest" href="/manifest.json?v=20260429f25">
-<link rel="stylesheet" href="/style.css?v=20260429f">
+<link rel="manifest" href="/manifest.json?v=20260429g25">
+<link rel="stylesheet" href="/style.css?v=20260429g">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -128,7 +128,7 @@ if ('serviceWorker' in navigator) {
                 <div class="story-entry-tagline">虹霊界に眠る、七つの物語</div>
                 <div class="story-entry-meta">
                   <span class="story-entry-meta-tag">Season 1 公開中</span>
-                  <span class="story-entry-meta-sep">・</span>
+                  <span class="story-entry-meta-sep">ー</span>
                   <span class="story-entry-meta-tag" id="story-entry-progress">2 / 7章 解放</span>
                 </div>
               </div>
@@ -218,7 +218,7 @@ if ('serviceWorker' in navigator) {
     <div id="result-rarity" class="result-rarity"></div>
     <div id="result-grid" class="result-grid"></div>
     <div class="result-actions">
-      <button id="result-close" class="result-btn secondary">閉じる (Esc)</button>
+      <button id="result-close" class="result-btn secondary">閉じる<span class="esc-hint"> (Esc)</span></button>
       <button id="result-again-ten" class="result-btn primary">もう一度10連 (Enter)</button>
     </div>
   </div>
@@ -237,7 +237,7 @@ if ('serviceWorker' in navigator) {
         <span class="g-sr">💜 <b id="gallery-sr-count">0/7</b></span>
         <span class="g-r">💙 <b id="gallery-r-count">0/6</b></span>
       </div>
-      <button class="close" onclick="closeGallery()">× 閉じる (Esc)</button>
+      <button class="close" onclick="closeGallery()">× <span class="close-label-text">閉じる<span class="esc-hint"> (Esc)</span></span></button>
     </div>
     <div id="gallery-grid" class="gallery-grid"></div>
   </div>
@@ -271,7 +271,7 @@ if ('serviceWorker' in navigator) {
 <div id="world-map" class="world-map-modal" hidden>
   <div class="world-map-header">
     <h2>🗺️ 虹霊界 ワールドマップ</h2>
-    <button class="close" onclick="closeWorldMap()">× 閉じる (Esc)</button>
+    <button class="close" onclick="closeWorldMap()">× <span class="close-label-text">閉じる<span class="esc-hint"> (Esc)</span></span></button>
   </div>
   <div class="world-map-body">
     <div id="world-map-canvas" class="world-map-canvas"></div>
@@ -297,7 +297,7 @@ if ('serviceWorker' in navigator) {
       <span class="leg-line leg-rival"></span>好敵手
       <span class="leg-line leg-sister"></span>姉→妹
     </div>
-    <button class="close" onclick="closeRelations()">× 閉じる (Esc)</button>
+    <button class="close" onclick="closeRelations()">× <span class="close-label-text">閉じる<span class="esc-hint"> (Esc)</span></span></button>
   </div>
   <div id="relations-canvas" class="relations-canvas"></div>
   <div id="relations-list" class="relations-list" style="display:none"></div>
@@ -314,7 +314,7 @@ if ('serviceWorker' in navigator) {
       <div class="story-header-controls">
         <span class="story-progress" id="story-progress">- / -</span>
         <button class="story-toc-btn" onclick="toggleStoryToc()" title="目次 (T)">📑</button>
-        <button class="story-close" onclick="closeStory()" title="閉じる (Esc)">×</button>
+        <button class="story-close" onclick="closeStory()" title="閉じる (Esc)" aria-label="閉じる">×</button>
       </div>
     </header>
     <div id="story-toc" class="story-toc">
@@ -544,7 +544,7 @@ if ('serviceWorker' in navigator) {
 <audio id="bgm-home" preload="auto"></audio>
 
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
-<script src="/script.js?v=20260429f"></script>
-<script src="/gasshuku.js?v=20260429f"></script>
+<script src="/script.js?v=20260429g"></script>
+<script src="/gasshuku.js?v=20260429g"></script>
 </body>
 </html>
