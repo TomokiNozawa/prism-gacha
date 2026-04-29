@@ -111,6 +111,20 @@ body {
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 8px;
 }
+.bgm-stats-table {
+  width: 100%; border-collapse: collapse; font-size: 13px;
+}
+.bgm-stats-table th, .bgm-stats-table td {
+  padding: 8px 10px; text-align: left;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.bgm-stats-table th {
+  font-size: 11px; color: rgba(200,180,255,0.7);
+  font-weight: 600; letter-spacing: 0.05em;
+  text-align: left;
+}
+.bgm-stats-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.bgm-stats-table tbody tr:hover { background: rgba(255,255,255,0.03); }
 .breakdown-item {
   background: rgba(0, 0, 0, 0.3);
   border-radius: 8px;
@@ -588,6 +602,12 @@ body {
   <div class="breakdown-section">
     <div class="breakdown-title">🎬 操作 / 🚨 エラー</div>
     <div class="breakdown-grid" id="breakdown-events"></div>
+  </div>
+
+  <!-- BGM 再生統計 -->
+  <div class="breakdown-section">
+    <div class="breakdown-title">🎵 BGM 再生統計 (全ユーザー累計)</div>
+    <div id="breakdown-bgm" class="breakdown-bgm"></div>
   </div>
 
   <!-- F2: ガチャ種別ブレークダウン -->
@@ -1201,6 +1221,61 @@ function renderUsers(users, uidToNickname, guestDevices) {
       </div>`;
     }
     breakdownEvents.innerHTML = html;
+  }
+
+  // BGM 再生統計 (各曲の play / ended 累計、 完聴率 計算)
+  const breakdownBgm = $('#breakdown-bgm');
+  if (breakdownBgm) {
+    const bgm = (window._eventStats && window._eventStats.bgm) || {};
+    const playCounts = bgm.play || {};
+    const endedCounts = bgm.ended || {};
+    // BGM_LIST と同期した label テーブル (script.js と一致させること)
+    const BGM_LABELS = {
+      'dawn':    { label: 'メインテーマ',     desc: 'Prism Dawn (夜明けの希望)' },
+      'watch':   { label: '第1章テーマ',      desc: 'Prism Watch (三柱の夜警)' },
+      'tide':    { label: '第2章テーマ',      desc: 'Prism Tide (虹の潮)' },
+      'rift':    { label: '戦闘テーマ',       desc: 'Prismatic Rift Overture (虹裂の序曲)' },
+      'church':  { label: '白焔教会テーマ',   desc: 'Prism Sanctus (白焔の祈り)' },
+      'aquasis': { label: 'アクアシステーマ', desc: 'Prism Abyss (深海の宮)' },
+      'crimson': { label: '紅玉海賊団テーマ', desc: 'Prism Sailborn (紅潮の風)' },
+    };
+    const allIds = new Set([...Object.keys(playCounts), ...Object.keys(endedCounts), ...Object.keys(BGM_LABELS)]);
+    const rows = [];
+    let totalPlay = 0, totalEnded = 0;
+    for (const id of allIds) {
+      const play = playCounts[id] || 0;
+      const ended = endedCounts[id] || 0;
+      const completePct = play > 0 ? Math.round(ended / play * 100) : 0;
+      totalPlay += play;
+      totalEnded += ended;
+      rows.push({ id, play, ended, completePct, label: (BGM_LABELS[id]?.label || id), desc: (BGM_LABELS[id]?.desc || '') });
+    }
+    // play 多い順
+    rows.sort((a, b) => b.play - a.play);
+    let html = '<table class="bgm-stats-table"><thead><tr>';
+    html += '<th>曲</th><th class="num">▶ 再生</th><th class="num">✓ 完聴</th><th class="num">完聴率</th></tr></thead><tbody>';
+    if (rows.length === 0 || totalPlay === 0) {
+      html += '<tr><td colspan="4" style="text-align:center;color:rgba(255,255,255,0.4);padding:18px">まだ再生データがありません</td></tr>';
+    } else {
+      for (const r of rows) {
+        const dim = r.play === 0 ? ' style="opacity:0.45"' : '';
+        html += `<tr${dim}>
+          <td><b>${escapeHtml(r.label)}</b><br><span style="font-size:11px;color:rgba(255,255,255,0.5)">${escapeHtml(r.desc)}</span></td>
+          <td class="num">${r.play}</td>
+          <td class="num">${r.ended}</td>
+          <td class="num"><b style="color:${r.completePct >= 50 ? '#5fffd4' : '#fcd34d'}">${r.completePct}%</b></td>
+        </tr>`;
+      }
+      const totalPct = totalPlay > 0 ? Math.round(totalEnded / totalPlay * 100) : 0;
+      html += `<tr style="border-top:2px solid rgba(255,255,255,0.18);font-weight:700">
+        <td>合計</td>
+        <td class="num">${totalPlay}</td>
+        <td class="num">${totalEnded}</td>
+        <td class="num">${totalPct}%</td>
+      </tr>`;
+    }
+    html += '</tbody></table>';
+    breakdownBgm.innerHTML = html;
   }
 
   // F2: 章別読了率 (全ユーザー storyProgress を集約)

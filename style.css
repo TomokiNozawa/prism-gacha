@@ -2959,6 +2959,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
      - tap target を 44x44 に拡大 (iOS HIG 準拠) */
   .bgm-close,
   .story-close,
+  .close-detail,
   .gallery-inner .close,
   .gasshuku-close,
   .gasshuku-detail-close,
@@ -2979,6 +2980,22 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+  /* モーダル全体に safe-area-inset-top の padding を入れて、 ヘッダや上部要素が status bar に被らないように */
+  .world-map-header,
+  .relations-header,
+  .gallery-header,
+  .history-modal-inner-header,
+  .feedback-modal-header {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 12px) !important;
+  }
+  /* キャラ詳細は画像wrapが上部に来るので、 inner 全体に safe-area padding を入れる */
+  .char-detail-inner {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 8px) !important;
+  }
+  /* ストーリーモーダルのヘッダも */
+  .story-header {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 8px) !important;
   }
 }
 
@@ -4084,12 +4101,27 @@ body.gasshuku-modal-open {
 .world-map-canvas {
   position: relative;
   overflow: auto;
+  -webkit-overflow-scrolling: touch;
   background:
     radial-gradient(ellipse at 30% 30%, rgba(95, 255, 212, 0.06) 0%, transparent 40%),
     radial-gradient(ellipse at 70% 60%, rgba(200, 125, 255, 0.06) 0%, transparent 40%),
     linear-gradient(180deg, #0a1228 0%, #1a1538 100%);
 }
-.world-map-canvas svg { display: block; min-width: 100%; }
+.world-map-canvas svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+@media (max-width: 700px) {
+  /* モバイル: SVG を 800px 固定幅にして横スクロール (テキストが読めるサイズを保つ) */
+  .world-map-canvas svg {
+    width: 800px;
+    max-width: none;
+    min-width: 800px;
+  }
+}
 .world-faction-node {
   cursor: pointer;
   transition: transform 0.2s ease, filter 0.2s ease;
@@ -4097,18 +4129,22 @@ body.gasshuku-modal-open {
 .world-faction-node:hover { transform: scale(1.08); filter: brightness(1.3); }
 .world-faction-node.active circle { stroke: #ffd84d; stroke-width: 3; }
 .world-faction-node text {
-  fill: #fff; font-size: 14px; font-weight: 600;
+  fill: #fff; font-size: 32px; font-weight: 700;
   text-anchor: middle; pointer-events: none;
-  text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+  /* paint-order で stroke を fill より下に描画 → 縁取り風 (黒背景でも読める) */
+  paint-order: stroke fill;
+  stroke: rgba(0,0,0,0.9); stroke-width: 4px; stroke-linejoin: round;
 }
 .world-faction-node .faction-yomi {
-  font-size: 9px; font-weight: 400;
-  fill: rgba(255,255,255,0.65);
+  font-size: 18px; font-weight: 400;
+  fill: rgba(255,255,255,0.75);
+  stroke-width: 3px;
 }
 .world-faction-node .faction-count {
-  font-size: 10px;
-  fill: rgba(255, 217, 122, 0.85);
+  font-size: 22px;
+  fill: #fcd34d;
   font-weight: 700;
+  stroke-width: 3px;
 }
 
 .world-map-side {

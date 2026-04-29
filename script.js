@@ -3084,7 +3084,7 @@ function renderWorldMap() {
     memberCount[f] = (memberCount[f] || 0) + 1;
   }
   const W = 2000, H = 1600;
-  let svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" style="width:100%;height:auto;max-height:calc(100vh - 120px)">`;
+  let svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">`;
   // 海/大陸 風の背景 (薄い円弧で陸地っぽさを演出)
   svg += `<defs>
     <radialGradient id="land-grad" cx="50%" cy="50%" r="60%">
@@ -3093,15 +3093,15 @@ function renderWorldMap() {
     </radialGradient>
   </defs>`;
   svg += `<ellipse cx="${W/2}" cy="${H/2}" rx="${W*0.42}" ry="${H*0.4}" fill="url(#land-grad)"/>`;
-  // 各派閥ノード
+  // 各派閥ノード (touch target 確保のため viewBox 上で十分大きく)
   FACTIONS.forEach(f => {
     const cnt = memberCount[f.id] || 0;
-    const r = 50 + Math.min(cnt * 4, 30);  // メンバー多いほど大きく
+    const r = 90 + Math.min(cnt * 6, 40);  // メンバー多いほど大きく (90〜130)
     svg += `<g class="world-faction-node" data-faction="${f.id}" transform="translate(${f.x},${f.y})">
-      <circle r="${r}" fill="${f.color}" fill-opacity="0.18" stroke="${f.color}" stroke-width="2" stroke-opacity="0.7"/>
-      <text class="faction-yomi" y="-${r+12}">${escapeHtml(f.yomi)}</text>
-      <text y="6">${escapeHtml(f.label)}</text>
-      <text class="faction-count" y="${r+22}">${cnt}人</text>
+      <circle r="${r}" fill="${f.color}" fill-opacity="0.18" stroke="${f.color}" stroke-width="3" stroke-opacity="0.75"/>
+      <text class="faction-yomi" y="-${r+22}">${escapeHtml(f.yomi)}</text>
+      <text y="10">${escapeHtml(f.label)}</text>
+      <text class="faction-count" y="${r+38}">${cnt}人</text>
     </g>`;
   });
   svg += `</svg>`;
@@ -4229,6 +4229,14 @@ function loadBgmSrc(id) {
   }
 }
 
+// admin 統計用: BGM 再生開始 / 完聴 (ended) を別カウントで eventStats に記録
+function _logBgmEvent(type, trackId) {
+  if (!fbDb || !trackId) return;
+  try {
+    fbDb.ref(`prism-gacha/_meta/eventStats/bgm/${type}/${trackId}`).transaction(c => (c || 0) + 1);
+  } catch (e) {}
+}
+
 function playBgm(id) {
   // shuffleキューから今再生する曲を除外 (直接クリック・next/prev 経由のいずれでも、 同じ曲が次に来ないように)
   if (bgmShuffle) bgmShuffleQueue = bgmShuffleQueue.filter(qid => qid !== id);
@@ -4236,11 +4244,14 @@ function playBgm(id) {
   if (bgmAudioCtx && bgmAudioCtx.state === 'suspended') {
     try { bgmAudioCtx.resume(); } catch (e) {}
   }
+  // 同じ曲を再ロードしただけ (currentTime復帰で再生継続) では計上しない、 異なる曲の再生開始だけカウント
+  const isNewTrack = (bgmCurrentId !== id) || (bgmAudio.dataset.loadedId !== id);
   if (masterMuted) {
     // ミュート中は再生要求だけ保持(enabled=true)、実際の再生はmute解除時
     bgmCurrentId = id;
     bgmEnabled = true;
     loadBgmSrc(id);
+    if (isNewTrack) _logBgmEvent('play', id);
     saveBgmState();
     updateMasterMuteBtn();
     renderBgmPanel();
@@ -4250,6 +4261,7 @@ function playBgm(id) {
   _applyVolumeToAudio();
   bgmEnabled = true;
   bgmAudio.play().catch(() => {/* autoplay拒否は想定内 */});
+  if (isNewTrack) _logBgmEvent('play', id);
   saveBgmState();
   updateMasterMuteBtn();
   renderBgmPanel();
@@ -4385,6 +4397,8 @@ window.addEventListener('pageshow', (e) => {
 // ───── Audio event handlers ─────
 bgmAudio.addEventListener('ended', () => {
   localStorage.setItem('prism-bgm-last-time', '0');
+  // admin統計: 完聴 (ended は曲が最後まで再生された時にだけ発火、 skip では発火しないので "完聴回数" として正確)
+  _logBgmEvent('ended', bgmCurrentId);
   if (bgmRepeat === 'one') { try { bgmAudio.play().catch(() => {}); } catch (e) {} return; }
   if (bgmRepeat === 'all') { bgmNext(); return; }
   // repeat=off: 次曲は自動で流さない(ただしプレイリストに複数曲あれば次へ)
