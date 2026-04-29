@@ -6026,6 +6026,27 @@ body.gasshuku-mode-fantasy .fx-win {
   0%, 100% { opacity: 0.7; transform: scale(1); }
   50% { opacity: 1; transform: scale(1.05); }
 }
+/* タップガイド (章の1ページ目のみ表示) */
+.story-tap-guide {
+  position: absolute;
+  bottom: 72px;
+  left: 0; right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 20px;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+  z-index: 10;
+}
+.story-tap-guide-left,
+.story-tap-guide-right {
+  font-size: 12px;
+  color: rgba(255,255,255,0.55);
+  letter-spacing: 0.06em;
+  background: rgba(0,0,0,0.35);
+  padding: 5px 12px;
+  border-radius: 20px;
+}
 /* ===== END ===== */
 
 /* ===== RELATIONS LIST (#5 派閥別リスト表示) ===== */

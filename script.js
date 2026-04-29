@@ -80,7 +80,7 @@ const POOL = {
       name: "波紋の聖女 イザベル", season: 1,
       title: "自分自身として祈る者",
       caption: "私は、私自身として、祈ります。",
-      desc: "S1C2山場で覚醒したSSRイザベルの新たな姿。聖槍『天穹』が虹色の刃へと変容し、振るうたび海中に虹色の波紋が広がる。『セラフィエル様の代理』ではなく『自分自身の祈り』に目覚めたことで、UR枠へ昇華。S1C7黒月決戦の七座級戦力として再登場予定。SSR版イザベルは別エントリとして併存する。",
+      desc: "深海の決戦を経て覚醒した聖巫騎士の新たな姿。聖槍『天穹』が虹色の刃へと変容し、振るうたび海中に虹色の波紋が広がる。『セラフィエル様の代理』ではなく『自分自身の祈り』に目覚めたことでUR枠へ昇華。ネプテア女王と姉妹の盟約を結ぶ、海と虹の体現者。",
       img: `${S1}/ur/ripple_saint.png`,
     },
   ],
@@ -131,7 +131,7 @@ const POOL = {
       name: "イザベル", season: 1,
       title: "白焔教会の聖巫騎士",
       caption: "あなたの傷、すべてこの手で癒してあげる",
-      desc: "白焔教会の聖域を守る聖巫騎士。聖槍『天穹(てんきゅう)』は虹霊界十英雄の一人から受け継がれし神器。癒しの聖光と戦場の剛力を両立する、稀有な『戦う治癒者』。シオンの幼馴染(素顔を知る三人の一人)。メイリは教会の後輩で彼女を姉と呼ぶ。セラフィエルを『我が神』と仰ぐ。",
+      desc: "白焔教会の聖域を守る聖巫騎士。聖槍『天穹』は虹霊界十英雄の一人から受け継がれし神器。癒しの聖光と戦場の剛力を両立する、稀有な『戦う治癒者』。シオンの幼馴染(素顔を知る三人の一人)。メイリは教会の後輩で彼女を姉と呼ぶ。セラフィエルを『我が神』と仰ぐ。",
       img: `${S1}/ssr/paladin_lady.png`,
     },
     {
@@ -146,14 +146,14 @@ const POOL = {
       name: "紅玉海賊団船長 シャンティ", season: 1,
       title: "海上自由商人の頭領",
       caption: "お前、案外、面白い奴だな。",
-      desc: "紅玉海賊団を率いる紅髪の女船長。『自由商人』を名乗り、海賊行為と交易の境界を絶妙に渡り歩く。双剣『紅潮』を抜き、戦闘では誰よりも前に立つ。煙草を片手に部下を見守る姉貴肌。S1C2でイザベルと意気投合、教会の白鎧を『紅玉号の客人』として迎えた。副長ケイレブとは長年の相棒。",
+      desc: "紅玉海賊団を率いる紅髪の女船長。『自由商人』を名乗り、海賊行為と交易の境界を絶妙に渡り歩く。双剣『紅潮』を抜き、戦闘では誰よりも前に立つ。煙草を片手に部下を見守る姉貴肌。イザベルと意気投合し、教会の白鎧を『紅玉号の客人』として迎えた。副長ケイレブとは長年の相棒。",
       img: `${S1}/ssr/pirate_captain.png`,
     },
     {
       name: "白焔教会見習い巫女 ルーナ", season: 1,
       title: "教会の若き祈り手",
       caption: "イザベル姉さま、お役に立てるよう頑張ります！",
-      desc: "白焔教会の若き見習い巫女。金色のツインテールに錫杖を抱え、純真な瞳でイザベルを姉のように慕う。S1C2でアクアシス遠征に同行し、戦いの中で『自分の祈り』とは何かを掴み始める。メイリ・セラフィの後輩として、教会の次世代を担う逸材。",
+      desc: "白焔教会の若き見習い巫女。金色のツインテールに錫杖を抱え、純真な瞳でイザベルを姉のように慕う。アクアシス遠征に同行し、戦いの中で『自分の祈り』とは何かを掴み始める。メイリ・セラフィの後輩として、教会の次世代を担う逸材。",
       img: `${S1}/ssr/apprentice_priestess.png`,
     },
     {
@@ -240,7 +240,7 @@ const POOL = {
       name: "海獣使い モルガ", season: 1,
       title: "深海女王の伝令",
       caption: "あたしはモルガ！海獣使いだよ！",
-      desc: "海の遊牧民の少女。サメ・イルカ・海蛇など海獣を自在に操り、ネプテアの伝令として海域を駆け巡る。褐色の肌に活発な笑顔、自由奔放な性格。シャンティの紅玉海賊団とは『同じ海を生きる仲間』として認め合う関係。S1C2でイザベルの遠征に救援として参戦。",
+      desc: "海の遊牧民の少女。サメ・イルカ・海蛇など海獣を自在に操り、ネプテアの伝令として海域を駆け巡る。褐色の肌に活発な笑顔、自由奔放な性格。シャンティの紅玉海賊団とは『同じ海を生きる仲間』として認め合う関係。イザベルの遠征に救援として参戦した。",
       img: `${S1}/sr/shark_tamer.png`,
     },
     {
@@ -254,7 +254,7 @@ const POOL = {
       name: "深海巫女 ティアラ", season: 1,
       title: "水晶玉の予言者",
       caption: "海の声が、聞こえるのです。",
-      desc: "アクアシスの深海巫女。貝殻の冠と水晶玉で海の未来を読む神秘的な少女。普段は無口だが、予言を語る時だけ凛とした声で話す。S1C2では『黒月の前兆』を最初に水晶玉で観測した一人。詠聖ベルとは『歌と予言』の互換的な巫女として遠い友。",
+      desc: "アクアシスの深海巫女。貝殻の冠と水晶玉で海の未来を読む神秘的な少女。普段は無口だが、予言を語る時だけ凛とした声で話す。『黒月の前兆』を最初に水晶玉で観測した一人。詠聖ベルとは『歌と予言』の互換的な巫女として遠い友。",
       img: `${S1}/sr/abyss_oracle.png`,
     },
     {
@@ -268,7 +268,7 @@ const POOL = {
       name: "白焔教会騎士 ラナス", season: 1,
       title: "銀白鎧の聖剣士",
       caption: "主の御前、誓いの剣を捧げます。",
-      desc: "白焔教会の若き騎士。銀白の鎧に剣『誓銀』と盾『白霜』を構え、真面目で誠実な性格。S1C2でイザベルの遠征に同行し、海での戦闘経験を積む。仮面騎士シオンとは『教会の盾』として遠縁的な兄弟弟子の関係。",
+      desc: "白焔教会の若き騎士。銀白の鎧に剣『誓銀』と盾『白霜』を構え、真面目で誠実な性格。イザベルの遠征に同行し、海での戦闘経験を積んだ。仮面騎士シオンとは『教会の盾』として遠縁的な兄弟弟子の関係。",
       img: `${S1}/sr/holy_guardian.png`,
     },
   ],
@@ -334,7 +334,7 @@ const POOL = {
       name: "珊瑚漁師 エラン", season: 1,
       title: "海溝の地理案内人",
       caption: "この海なら、誰よりも知っています。",
-      desc: "アクアシス近海で珊瑚漁を営む素朴な青年。海溝の隅々まで知り尽くしており、S1C2では地理案内人として遠征に参加。寡黙だが信頼できる仲間。『自分にできることは、知っている海を案内することだけ』と謙遜する。",
+      desc: "アクアシス近海で珊瑚漁を営む素朴な青年。海溝の隅々まで知り尽くしており、地理案内人として遠征に参加した。寡黙だが信頼できる仲間。『自分にできることは、知っている海を案内することだけ』と謙遜する。",
       img: `${S1}/r/coral_fisherman.png`,
     },
     {
@@ -2566,7 +2566,7 @@ const RELATIONS = [
   { a: '紅玉海賊団副長 ケイレブ',     b: '海賊団船医 クレオ',         type: 'childhood', label: '幼馴染' },
   { a: '紅玉海賊団船長 シャンティ',   b: '海獣使い モルガ',           type: 'fellow', label: '同じ海の仲間' },
   // S1C2同行者 (戦友)
-  { a: '波紋の聖女 イザベル',         b: '紅玉海賊団船長 シャンティ', type: 'fellow', label: 'S1C2戦友' },
+  { a: '波紋の聖女 イザベル',         b: '紅玉海賊団船長 シャンティ', type: 'fellow', label: '海を渡った戦友' },
   { a: '波紋の聖女 イザベル',         b: '白焔教会見習い巫女 ルーナ', type: 'sister', aRole: '姉', bRole: '後輩' },
   { a: '波紋の聖女 イザベル',         b: '白焔教会騎士 ラナス',       type: 'fellow', label: '教会の盾' },
   { a: '波紋の聖女 イザベル',         b: '白焔教会従士 リッカ',       type: 'master', aRole: '主', bRole: '従士' },
@@ -3383,6 +3383,7 @@ const FURIGANA = {
   '月牙狼族': 'げつがろうぞく',
   '深緑樹海': 'しんりょくじゅかい',
   '銀霜王国': 'ぎんそうおうこく',
+  '紅玉海賊団': 'こうぎょくかいぞくだん',
   '黒曜塔': 'こくようとう',
   '白焔教会': 'はくえんきょうかい',
   '第七天': 'だいしちてん',
@@ -3429,9 +3430,13 @@ const FURIGANA = {
   '遊芸師': 'ゆうげいし',
   '鳳凰': 'ほうおう',
   '詠唱': 'えいしょう',
+  '三叉槍': 'さんさそう',
   '聖槍': 'せいそう',
   '七色': 'しちしき',
+  '紅玉号': 'こうぎょくごう',
+  '天穹': 'てんきゅう',
   '黒月': 'こくげつ',
+  '海溝': 'かいこう',
   // 将来章で登場予定 (Season 2 以降)
   '焔国': 'えんこく',
   '龍国': 'りゅうこく',
@@ -3731,6 +3736,8 @@ function renderScene() {
   if (scroll) scroll.scrollTop = 0;
   // 進捗保存
   saveStoryProgress(currentStoryId, storyIdx, storyScenes.length);
+  // タップガイド: 章の1ページ目のみ表示
+  _updateTapGuide(storyIdx === 0);
 }
 
 // シーン本文に登場するキャラを自動検出して下部に立ち絵を並べる
@@ -3809,9 +3816,9 @@ function renderSceneChars(scene) {
       }
     }
   }
-  // 出現回数多い順、最大8体まで
+  // 出現回数多い順、最大12体まで
   found.sort((a, b) => b.hits - a.hits);
-  const top = found.slice(0, 8);
+  const top = found.slice(0, 12);
   if (top.length === 0) {
     container.innerHTML = '';
     container.style.display = 'none';
@@ -3830,9 +3837,11 @@ function renderSceneChars(scene) {
     </div>
   `;
   setupCharBlinkAnimations();
+  // スワイプ対象をシーン内の解放済みキャラのみに限定
+  const sceneUnlocked = top.filter(x => isUnlocked(x));
   container.querySelectorAll('.story-char-thumb').forEach(el => {
     el.addEventListener('click', (e) => {
-      e.stopPropagation(); // ステージクリックの「次へ」を発火させない
+      e.stopPropagation(); // ステージクリックの前後移動を発火させない
       const name = el.dataset.name;
       const c = getCharByName(name);
       if (c && !isUnlocked(c)) {
@@ -3840,9 +3849,7 @@ function renderSceneChars(scene) {
         return;
       }
       if (c && isUnlocked(c)) {
-        if (detailUnlockedList.length === 0) {
-          detailUnlockedList = getAllCharactersWithTier().filter(x => isUnlocked(x));
-        }
+        detailUnlockedList = sceneUnlocked;
         showCharDetail(c);
       }
     });
@@ -4086,6 +4093,29 @@ function renderStoryToc() {
   if (cur) cur.scrollIntoView({ block: 'center' });
 }
 
+function _updateTapGuide(show) {
+  let guide = document.getElementById('story-tap-guide');
+  if (!guide) {
+    guide = document.createElement('div');
+    guide.id = 'story-tap-guide';
+    guide.className = 'story-tap-guide';
+    guide.innerHTML = '<span class="story-tap-guide-left">◀ 前のページ</span><span class="story-tap-guide-right">次のページ ▶</span>';
+    const stage = document.getElementById('story-stage');
+    if (stage) stage.appendChild(guide);
+  }
+  clearTimeout(window._tapGuideTimer);
+  if (show) {
+    guide.style.opacity = '1';
+    guide.style.display = 'flex';
+    window._tapGuideTimer = setTimeout(() => {
+      guide.style.opacity = '0';
+      setTimeout(() => { if (guide) guide.style.display = 'none'; }, 600);
+    }, 3000);
+  } else {
+    guide.style.opacity = '0';
+    guide.style.display = 'none';
+  }
+}
 function storyNext() {
   if (storyIdx < storyScenes.length - 1) {
     storyIdx++;
@@ -4101,6 +4131,8 @@ function storyPrev() {
 function closeStory() {
   $("#story-modal").classList.remove("active");
   _unlockBodyScroll();
+  // ギャラリーに戻った時に全件で再構築させる
+  detailUnlockedList = [];
 }
 
 // 進捗保存 (localStorage)
@@ -4204,15 +4236,18 @@ document.querySelectorAll('#story-list-modal .story-card[data-story]').forEach(c
 $("#story-modal").addEventListener('click', e => {
   if (e.target.id === 'story-modal') closeStory();
 });
-// stageクリックで次へ (ボタン/キャラサムネ/キャラ名リンク等は除外)
+// stageクリックで前後ページ: 左半分=前へ、右半分=次へ
 $("#story-stage").addEventListener('click', e => {
   if (e.target.closest('.story-nav') || e.target.closest('button')) return;
   if (e.target.closest('.story-scene-chars')) return;
   if (e.target.closest('.char-link')) return;
+  if (e.target.closest('.story-tap-guide')) return;
   // テキスト選択中(マウスドラッグでハイライト)は誤発火させない
   const sel = window.getSelection && window.getSelection();
   if (sel && sel.toString().length > 0) return;
-  storyNext();
+  const rect = e.currentTarget.getBoundingClientRect();
+  if (e.clientX < rect.left + rect.width / 2) storyPrev();
+  else storyNext();
 });
 
 // スマホ: 左右スワイプで前後ページ (#4)
