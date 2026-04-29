@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.2.3g — 演出&ゲームロジック (Season 1 第1章)
+   Prismaera v1.2.3h — 演出&ゲームロジック (Season 1 第1章)
    ============================================================ */
 "use strict";
 
@@ -3976,10 +3976,10 @@ function setupCharDetailBlink(c) {
   probe.src = blinkUrl + (blinkUrl.includes('?') ? '&' : '?') + '_p=' + Date.now();
 }
 // ────────── ストーリー本文中のキャラ初登場カットイン (ストーリー起点・演出重視) ──────────
-// scene: シーンの label ("2-6") またはラベルなし場合は title ("プリズマの黄昏") で指定
+// scene: シーンの label ("2-6", "3-3") またはラベルなし場合は title で指定
 const STORY_CUTIN_CONFIG = {
   's1c1': [
-    { scene: 'プリズマの黄昏', charName: '虹意 プリズマ' },
+    { scene: '3-3', charName: '虹意 プリズマ' }, // 3-3: 虹色の人 — プリズマが初めて名乗るシーン
   ],
   's1c2': [
     { scene: '2-6',            charName: '深海女王 ネプテア' },
