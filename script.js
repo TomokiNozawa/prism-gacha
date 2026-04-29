@@ -4335,26 +4335,19 @@ function loadBgmSrc(id) {
   const track = bgmFindById(id) || BGM_LIST[0];
   bgmCurrentId = track.id;
   if (bgmAudio.dataset.loadedId !== track.id) {
-    bgmAudio.src = track.file;
-    bgmAudio.dataset.loadedId = track.id;
-    // play カウントの一元管理用: 異なる src 読込時にこのフラグをリセット → bgmAudio.play() 時に1回だけ +1
-    bgmAudio.dataset.bgmPlayLogged = '';
-    // 注: bgmAudio.load() は呼ばない (preload="auto" 任せ、 明示 load は play 直前にリセットされる副作用あり)
-
-    // リロード復帰: 同じ曲なら保存された位置から再開
-    // ★シンプル化: loadedmetadata 1回のみ、 play() より前に seek (race防止) ★
+    // ★Media Fragment URI★: 「同じ曲を続きから再生」 の時は src URL に #t=秒 を付けて、
+    //   ブラウザに 「読込開始位置 = savedTime」 を伝える → JS seek を呼ぶ必要なくなり、
+    //   autoplay 中の seek-during-play 中断 race が完全消滅
     const savedId = localStorage.getItem('prism-bgm-last-id');
     const savedTime = parseFloat(localStorage.getItem('prism-bgm-last-time') || '0');
+    let srcUrl = track.file;
     if (savedId === track.id && savedTime > 0.5) {
-      const trySeek = () => {
-        if (!isFinite(bgmAudio.duration) || bgmAudio.duration <= 0) return;
-        if (savedTime >= bgmAudio.duration - 1) return;
-        try { bgmAudio.currentTime = savedTime; } catch (e) {}
-      };
-      bgmAudio.addEventListener('loadedmetadata', trySeek, { once: true });
-      // 既に metadata あれば即 seek (cached load)
-      if (bgmAudio.readyState >= 1) setTimeout(trySeek, 30);
+      srcUrl = `${track.file}#t=${savedTime}`;
     }
+    bgmAudio.src = srcUrl;
+    bgmAudio.dataset.loadedId = track.id;
+    // play カウントの一元管理用
+    bgmAudio.dataset.bgmPlayLogged = '';
   }
   bgmAudio.loop = (bgmRepeat === 'one');
   // Media Session API: モバイルロック画面/PWAでの曲名表示
@@ -4643,6 +4636,45 @@ bgmAudio.addEventListener('ended', () => {
 });
 
 // 再生位置を 1秒throttle で保存 (リロード復帰用)
+// 時刻フォーマット (秒 → "m:ss")
+function _bgmFormatTime(sec) {
+  if (!isFinite(sec) || sec < 0) return '-:--';
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+
+// 再生位置バー: 0.5秒間隔で更新 (timeupdateだけだと iOS で発火が稀)
+function _updateBgmProgress() {
+  const fill = document.getElementById('bgm-progress-fill');
+  const cur = document.getElementById('bgm-time-current');
+  const tot = document.getElementById('bgm-time-total');
+  if (!fill || !cur || !tot) return;
+  const d = bgmAudio.duration;
+  const t = bgmAudio.currentTime || 0;
+  if (isFinite(d) && d > 0) {
+    fill.style.width = `${Math.min(100, (t / d) * 100)}%`;
+    tot.textContent = _bgmFormatTime(d);
+  } else {
+    fill.style.width = '0%';
+    tot.textContent = '-:--';
+  }
+  cur.textContent = _bgmFormatTime(t);
+}
+setInterval(_updateBgmProgress, 500);
+
+// 再生位置バー click → seek (panel 開いてる間のみ動作)
+document.addEventListener('click', (e) => {
+  const track = e.target.closest('#bgm-progress-track');
+  if (!track) return;
+  const rect = track.getBoundingClientRect();
+  const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  const d = bgmAudio.duration;
+  if (!isFinite(d) || d <= 0) return;
+  try { bgmAudio.currentTime = ratio * d; } catch (err) {}
+  _updateBgmProgress();
+});
+
 let bgmLastSaveAt = 0;
 bgmAudio.addEventListener('timeupdate', () => {
   const now = Date.now();

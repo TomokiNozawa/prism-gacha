@@ -3137,6 +3137,34 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 .bgm-current-controls {
   display: flex; justify-content: center; gap: 10px;
 }
+/* 再生位置バー */
+.bgm-progress-row {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 12px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.65);
+  font-variant-numeric: tabular-nums;
+}
+.bgm-time-current, .bgm-time-total { min-width: 36px; text-align: center; }
+.bgm-time-current { color: rgba(95, 255, 212, 0.95); font-weight: 700; }
+.bgm-progress-track {
+  flex: 1;
+  height: 6px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 999px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.bgm-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #5fffd4, #c87dff);
+  border-radius: 999px;
+  width: 0%;
+  transition: width 0.2s linear;
+  pointer-events: none;
+}
+.bgm-progress-track:hover { background: rgba(255,255,255,0.18); }
 .bgm-ctrl {
   width: 40px; height: 40px;
   background: rgba(255, 255, 255, 0.08);
