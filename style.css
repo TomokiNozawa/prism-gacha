@@ -3767,10 +3767,26 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   margin-bottom: 4px;
   cursor: pointer;
   user-select: none;
-  list-style-position: outside;
+  list-style: none; /* ブラウザ標準 marker 抑止 (Firefox/Chrome) */
   padding: 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.update-history-head::-webkit-details-marker { display: none; } /* Safari/iOS */
+.update-history-head::before {
+  content: "▶";
+  display: inline-block;
+  font-size: 10px;
+  color: rgba(196, 181, 253, 0.7);
+  transition: transform 0.15s ease;
+  flex-shrink: 0;
+}
+.update-history-entry[open] .update-history-head::before {
+  transform: rotate(90deg);
 }
 .update-history-head:hover { color: #fff; }
+.update-history-head:hover::before { color: #fff; }
 .update-history-entry[open] .update-history-head { margin-bottom: 6px; }
 .update-history ul {
   margin: 0; padding-left: 1.1em;
