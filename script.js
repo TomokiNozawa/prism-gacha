@@ -555,7 +555,7 @@ function pickTier(tier) {
   return { tier, ...ch };
 }
 
-function applyPull(result) {
+function applyPull(result, opts) {
   const key = result.tier + "_" + result.name;
   // 初回獲得判定(永続セットで判定 — 履歴120件制限の影響を受けない)
   result.isNew = !state.unlockedSet[key];
@@ -578,8 +578,11 @@ function applyPull(result) {
   else state.pity += 1;
   state.history.unshift({ ...result, at: Date.now() });
   if (state.history.length > 120) state.history.length = 120;
-  saveState();
-  updateHUD();
+  // opts.deferSave=true の時 saveState/updateHUD を呼ばない (10連で 画面切替を先行させるため)
+  if (!opts || !opts.deferSave) {
+    saveState();
+    updateHUD();
+  }
 }
 
 // ────────────── 10連希少度計算 (多項分布) ──────────────
@@ -1970,8 +1973,13 @@ async function doTen() {
   if (busy) return;
   busy = true;
   skipRequested = false;  // 開始時リセット
+  // Phase 1: roll + メタデータ計算 (state mutation のみ、 saveState/updateHUD は遅延)
   const results = [];
-  for (let i = 0; i < 10; i++) { const r = rollOne(); applyPull(r); results.push(r); }
+  for (let i = 0; i < 10; i++) {
+    const r = rollOne();
+    applyPull(r, { deferSave: true });
+    results.push(r);
+  }
 
   // 最高レアの位置を特定
   const order = { R: 0, SR: 1, SSR: 2, UR: 3, LR: 4 };
@@ -1986,12 +1994,17 @@ async function doTen() {
     best,
   ];
 
+  // Phase 2: 画面切替を即実行 (体感ラグ解消のため intro 演出より前に持ってくる)
   stage.classList.add("active");
   clearStage();
   canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+  setStageTier(best.tier);
+
+  // Phase 3: state 保存 (10連分一気に save × 1回 + updateHUD × 1回、 画面切替の裏で実行)
+  saveState();
+  updateHUD();
 
   // 10連イントロ「× 10」 (旧1100ms→600ms に短縮、 体感の "もたつき" 解消)
-  setStageTier(best.tier);
   showTenIntro();
   play("se-summon", best.tier);
   await sleep(600);
@@ -4471,17 +4484,12 @@ function _bgmPlayWithFallback() {
       // モバイル: muted-unmute 戦略 (ブラウザは muted autoplay は必ず許可)
       bgmAudio.muted = true;
       bgmAudio.play().then(() => {
-        // 'playing' イベントで実際に音が出始めた時に unmute (setTimeout より確実)
-        const unmuteOnPlaying = () => {
-          bgmAudio.removeEventListener('playing', unmuteOnPlaying);
-          if (!masterMuted) bgmAudio.muted = false;
-        };
-        bgmAudio.addEventListener('playing', unmuteOnPlaying, { once: true });
-        // 念のため 500ms後にも unmute (playing が遅延で fire しない時の保険)
-        setTimeout(() => { if (!masterMuted) bgmAudio.muted = false; }, 500);
+        // 複数 timeout で unmute (iOS で 'playing' が fire しない時の保険、 残留 mute 防止)
+        [50, 200, 500, 1000].forEach(delay => {
+          setTimeout(() => { if (!masterMuted) bgmAudio.muted = false; }, delay);
+        });
       }).catch(() => {
         bgmAudio.muted = false;  // 失敗時は確実に unmute 戻す
-        // ユーザー操作待ち
         _bgmRegisterInteractionRetry();
       });
     } else {
@@ -5533,6 +5541,11 @@ function updateAccountButton() {
   const label = $('#account-label');
   if (!label) return;
   label.textContent = authUser ? (authUser.displayName || 'アカウント') : 'ゲスト';
+  // 詳細表記 (popup展開時のみ表示) も同期
+  const labelLong = $('#account-label-long');
+  if (labelLong) {
+    labelLong.textContent = authUser ? `アカウント (${authUser.displayName || ''})` : 'アカウント情報';
+  }
   // Admin リンクは authUser & admin判定済みの場合のみ表示
   const adminBtn = document.getElementById('btn-admin');
   if (adminBtn) {
