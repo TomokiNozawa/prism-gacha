@@ -2173,6 +2173,40 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   pointer-events: none;
 }
 
+/* 場所画像レイヤー: シーンに対応した背景画像をフェードで切替 */
+/* LOCATION_CONFIG[storyId][scene.label] が存在する時、 .active が付与され opacity:0→1 */
+/* z-index 1 で .story-bg のグラデーション本体 (parent) より上、 .story-bg::after は stacking 上では下に来る */
+.story-location-img {
+  position: absolute; inset: 0;
+  z-index: 1;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  pointer-events: none;
+}
+.story-location-img.active {
+  opacity: 1;
+}
+/* 場所画像の上から本文可読性のための暗いグラデーションを重ねる (フェードに連動) */
+.story-location-img::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.40) 60%, rgba(0,0,0,0.65) 100%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+.story-location-img.active::after {
+  opacity: 1;
+}
+/* モバイル: 暗化グラデを少し強める (本文の可読性確保) */
+@media (max-width: 720px) {
+  .story-location-img.active::after {
+    background: linear-gradient(180deg, rgba(0,0,0,0.20) 0%, rgba(0,0,0,0.50) 60%, rgba(0,0,0,0.75) 100%);
+  }
+}
+
 .story-scene-wrap {
   position: relative; z-index: 1;
   max-width: 720px;

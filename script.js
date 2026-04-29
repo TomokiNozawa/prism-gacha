@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.2.4a — 演出&ゲームロジック (Season 1 第1〜2章)
+   Prismaera v1.2.4b — 演出&ゲームロジック (Season 1 第1〜2章)
    ============================================================ */
 "use strict";
 
@@ -3802,6 +3802,22 @@ function renderScene() {
   // カットイン画像の瞬きアニメ (LRのみ、 _blink.png があれば自動)
   setupCutinBlinks();
   $("#story-bg").className = 'story-bg bg-' + (scene.bg || 'default');
+  // 場所画像レイヤー: scene.label (例: '2-7') から LOCATION_CONFIG を引き、 あれば画像をフェードイン
+  const locationImgEl = $("#story-location-img");
+  if (locationImgEl) {
+    const locConf = (LOCATION_CONFIG[currentStoryId] || {})[scene.label];
+    if (locConf && locConf.img) {
+      locationImgEl.style.backgroundImage = `url('${locConf.img}')`;
+      locationImgEl.classList.add('active');
+    } else {
+      locationImgEl.classList.remove('active');
+      // フェードアウト完了後に backgroundImage クリア (次シーンで残像が出ないように)
+      const _imgEl = locationImgEl;
+      setTimeout(() => {
+        if (!_imgEl.classList.contains('active')) _imgEl.style.backgroundImage = '';
+      }, 900);
+    }
+  }
   $("#story-prev").disabled = storyIdx === 0;
   $("#story-next").disabled = storyIdx === storyScenes.length - 1;
   // スクロール位置リセット
@@ -4055,6 +4071,20 @@ const STORY_CUTIN_CONFIG = {
     { scene: '2-6',            charName: '深海女王 ネプテア' },
     { scene: '2-11',           charName: '波紋の聖女 イザベル' },
   ],
+};
+
+// 場所画像 (Location image) — シーンの背景に画像を表示する設定。
+// 各画像のメタデータ (対応シーン・本文行・役割・被写体・コード参照) は
+// STORY/prompts/locations_<storyId>.md 参照。
+// Phase 1 (現状): シーン単位 1画像。 Phase 2 で段落マーカー切替 (entrance/throne) 追加予定。
+const LOCATION_CONFIG = {
+  's1c1': {
+    // S1C1 場所画像は未生成 (locations_s1c1.md スケルトンのみ存在、 後日プロンプト作成→生成)
+  },
+  's1c2': {
+    '2-7':  { img: '/images/locations/s1c2/aquasis_city.png' },   // アクアシス都市進入 (city メイン、 entrance/throne は Phase 2)
+    '2-9':  { img: '/images/locations/s1c2/aquasis_rift.png' },   // 黒い亀裂
+  },
 };
 let _firstAppearanceMap = new Map(); // charName → 初出シーンindex
 function precomputeFirstAppearances() {
