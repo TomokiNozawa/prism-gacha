@@ -4306,11 +4306,30 @@ function saveBgmState() {
 function bgmFindById(id) { return BGM_LIST.find(b => b.id === id); }
 function bgmCheckedList() { return BGM_LIST.filter(b => bgmPlaylist[b.id]); }
 
-// iOS Safari は HTMLMediaElement.volume を黙殺するため Web Audio API GainNode 経由で音量制御する。
-// AudioContext はユーザージェスチャー後にしか作れないので、 初回 playBgm 呼び出し時に lazy init。
+// iOS判定 (iPhone/iPad/iPod + iPadOS の MacIntel偽装も拾う)
+const _isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+// iOS では BGM 音量スライダーを非表示にして「📱 端末の音量ボタンで調整」 案内に差替
+// (gainNode 廃止により audio.volume は黙殺されスライダーが効かないため)
+if (_isIOS) {
+  try {
+    const _row = document.getElementById('bgm-volume-row');
+    const _rowIos = document.getElementById('bgm-volume-row-ios');
+    if (_row) _row.style.display = 'none';
+    if (_rowIos) _rowIos.style.display = 'block';
+  } catch (e) {}
+}
+
+// iOS Safari は HTMLMediaElement.volume を黙殺するため PCでは Web Audio API GainNode 経由で音量制御する。
+// ただし iOS では GainNode 経路 (MediaElementSource→GainNode→destination) が autoplay block と
+// audio session interruption で ctx=interrupted/suspended に堕ち音消えする問題があるため、
+// iOS では GainNode を一切作らず audio element 直経路にする (音量スライダーUIは iOS で非表示にする)。
+// AudioContext はユーザージェスチャー後にしか作れないので、 PCでも初回 playBgm 呼び出し時に lazy init。
 let bgmAudioCtx = null;
 let bgmGainNode = null;
 function _ensureBgmAudioGraph() {
+  if (_isIOS) return;  // iOS は audio element 直経路 (autoplay/interrupted 回避)
   if (bgmAudioCtx) {
     // 既存ctx が iOS で 'interrupted' になってたら resume 試行
     if (bgmAudioCtx.state === 'interrupted' || bgmAudioCtx.state === 'suspended') {
