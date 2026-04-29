@@ -705,12 +705,28 @@ function _lockBodyScroll() {
 }
 function _unlockBodyScroll() {
   _modalDepth = Math.max(0, _modalDepth - 1);
+  // 安全装置: 何かの拍子で depth が漏れた時のため、 全モーダル閉じてれば強制 0
+  if (_modalDepth > 0 && _isAllModalsHidden()) {
+    _modalDepth = 0;
+  }
   if (_modalDepth === 0) {
     document.body.classList.remove('modal-open');
     document.body.style.top = '';
     document.documentElement.classList.remove('modal-open');
     window.scrollTo(0, _savedScrollY);
   }
+}
+function _isAllModalsHidden() {
+  const checkActive = ['#char-detail', '#story-modal', '#bgm-panel', '#feedback-modal', '#history-modal', '#migration-modal', '#update-modal', '#account-modal', '#welcome-modal', '#settings-modal', '#account-prompt', '#story-list-modal', '#world-map', '#char-img-zoom', '#relations', '#gallery'];
+  for (const sel of checkActive) {
+    const el = document.querySelector(sel);
+    if (!el) continue;
+    // .active class または !hidden で開状態判定
+    if (el.classList.contains('active')) return false;
+    if (el.tagName !== undefined && !el.hasAttribute('hidden') && el.id === 'world-map') return false;
+    if (el.style && (el.style.display === 'flex' || el.style.display === 'block')) return false;
+  }
+  return true;
 }
 
 function openHistoryModal() {
@@ -3064,6 +3080,7 @@ let _worldMapActiveFaction = null;
 function openWorldMap() {
   const m = document.getElementById('world-map');
   if (!m) return;
+  if (!m.hasAttribute('hidden')) return; // 既に開いている場合は何もしない (二重 lock 防止)
   renderWorldMap();
   m.removeAttribute('hidden');
   _lockBodyScroll();
@@ -3071,6 +3088,7 @@ function openWorldMap() {
 function closeWorldMap() {
   const m = document.getElementById('world-map');
   if (!m) return;
+  if (m.hasAttribute('hidden')) return; // 既に閉じている → unlock しない
   m.setAttribute('hidden', '');
   _unlockBodyScroll();
 }
@@ -4303,6 +4321,24 @@ function loadBgmSrc(id) {
           bgmAudio.currentTime = savedTime;
           seeked = true;
         } catch (e) {}
+        // 100ms後に検証 (PC Chrome: seek後 paused に戻る → play再開、 Mobile: 反映されてない → retry)
+        setTimeout(() => {
+          if (bgmAudio.readyState < 2) return;
+          // PC: seek で paused になったら自動再生再開
+          if (bgmAudio.paused && bgmEnabled && !masterMuted) {
+            bgmAudio.play().catch(() => {});
+          }
+          // Mobile: currentTime が反映されてない場合 retry
+          if (Math.abs(bgmAudio.currentTime - savedTime) > 2) {
+            try { bgmAudio.currentTime = savedTime; } catch (e) {}
+            // さらに 200ms後 もう1回 検証 (mobile Safari の遅延反映)
+            setTimeout(() => {
+              if (Math.abs(bgmAudio.currentTime - savedTime) > 2) {
+                try { bgmAudio.currentTime = savedTime; } catch (e) {}
+              }
+            }, 200);
+          }
+        }, 100);
       };
       // loadedmetadata + canplay + playing 3経路で seek 試行 (iOS で metadata pre-cached 等で
       // 1イベント取りこぼしても他で拾える)。 'playing' は実際に音が出始めた時、 currentTime 変更が
@@ -4390,7 +4426,13 @@ function playBgm(id) {
   loadBgmSrc(id);
   _applyVolumeToAudio();
   bgmEnabled = true;
-  bgmAudio.play().catch(() => {/* autoplay拒否は想定内 */});
+  // play() リトライ: 失敗時 200ms後に再試行 (#19 次の曲再生されない問題対策、 audio context resume 後再試行)
+  bgmAudio.play().catch(() => {
+    if (bgmAudioCtx && bgmAudioCtx.state === 'suspended') {
+      try { bgmAudioCtx.resume(); } catch (e) {}
+    }
+    setTimeout(() => { if (bgmAudio.paused && bgmEnabled && !masterMuted) bgmAudio.play().catch(() => {}); }, 200);
+  });
   saveBgmState();
   updateMasterMuteBtn();
   renderBgmPanel();

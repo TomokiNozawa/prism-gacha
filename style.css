@@ -2907,16 +2907,16 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
     position: absolute;
     top: 100%;
     right: 14px;
-    background: rgba(20, 16, 40, 0.97);
-    border: 1px solid rgba(200, 180, 255, 0.3);
+    /* ❗ 完全不透明: rgba 0.97 + backdrop-filter だと iOS Safari で透けて見えていた */
+    background: #14102c;
+    border: 1px solid rgba(200, 180, 255, 0.45);
     border-radius: 12px;
-    padding: 10px;
-    z-index: 20;
+    padding: 12px;
+    z-index: 100; /* topbar内の z-index:10 より上 */
     flex-direction: column;
-    gap: 6px;
-    min-width: 180px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 12px rgba(200, 125, 255, 0.15);
-    backdrop-filter: blur(8px);
+    gap: 8px;
+    min-width: 200px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7), 0 0 16px rgba(200, 125, 255, 0.2);
   }
   .topbar-secondary.active {
     display: flex !important;
