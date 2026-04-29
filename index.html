@@ -24,8 +24,8 @@
 <link rel="icon" href="/images/icons/icon-32.png" type="image/png" sizes="32x32">
 <link rel="icon" href="/images/icons/icon-16.png" type="image/png" sizes="16x16">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
-<link rel="manifest" href="/manifest.json?v=20260429x25">
-<link rel="stylesheet" href="/style.css?v=20260429x">
+<link rel="manifest" href="/manifest.json?v=20260429y25">
+<link rel="stylesheet" href="/style.css?v=20260429y">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -449,10 +449,13 @@ if ('serviceWorker' in navigator) {
         <span class="bgm-time-total" id="bgm-time-total">-:--</span>
       </div>
     </div>
-    <div class="bgm-volume-row">
+    <div class="bgm-volume-row" id="bgm-volume-row">
       <span class="bgm-volume-icon">🔈</span>
       <input type="range" id="bgm-volume" min="0" max="100" step="1" value="40" class="bgm-volume-slider" aria-label="音量">
       <span class="bgm-volume-value" id="bgm-volume-value">40%</span>
+    </div>
+    <div class="bgm-volume-row-ios" id="bgm-volume-row-ios" style="display:none; padding:6px 10px; opacity:0.7; font-size:12px; text-align:center;">
+      📱 音量は端末の音量ボタンで調整
     </div>
     <div class="bgm-modes">
       <label class="bgm-shuffle-toggle" for="bgm-shuffle">
@@ -560,7 +563,7 @@ if ('serviceWorker' in navigator) {
 <audio id="bgm-home" preload="auto"></audio>
 
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
-<script src="/script.js?v=20260429x"></script>
-<script src="/gasshuku.js?v=20260429x"></script>
+<script src="/script.js?v=20260429y"></script>
+<script src="/gasshuku.js?v=20260429y"></script>
 </body>
 </html>
