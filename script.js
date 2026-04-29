@@ -1555,7 +1555,7 @@ function showTenIntro() {
   w.className = "fx-ten-intro go";
   w.textContent = "× 10";
   stageVfx.appendChild(w);
-  setTimeout(() => w.remove(), 1200);
+  setTimeout(() => w.remove(), 700);  // 旧1200→700ms (体感遅延の主犯)
 }
 
 const ORB_COLOR = { R: "#6fa8ff", SR: "#c87dff", SSR: "#ffd96a", UR: "#ff5faa", LR: "#ffffff" };
@@ -1990,11 +1990,11 @@ async function doTen() {
   clearStage();
   canvas.width = window.innerWidth; canvas.height = window.innerHeight;
 
-  // 10連イントロ「× 10」
+  // 10連イントロ「× 10」 (旧1100ms→600ms に短縮、 体感の "もたつき" 解消)
   setStageTier(best.tier);
   showTenIntro();
   play("se-summon", best.tier);
-  await sleep(1100);
+  await sleep(600);
   // 一度クリックしたら 10連終了まで「スキップモード」を維持。
   // SSR以上だけは演出を完走するが、終了後も skip モードは保持し、後続R/SRは飛ばす。
   let tenSkipMode = false;
@@ -3064,11 +3064,13 @@ function closeCharDetail() {
 $("#btn-single").addEventListener("click", doSingle);
 $("#btn-ten").addEventListener("click", doTen);
 $("#result-close").addEventListener("click", closeResult);
-$("#result-again-ten").addEventListener("click", () => {
+$("#result-close-top")?.addEventListener("click", closeResult);
+const _resultAgainTen = () => {
   closeResult();
-  // アニメ遷移の直後にdoTen呼出 (closeResult内で busy もクリア前提)
   setTimeout(() => doTen(), 100);
-});
+};
+$("#result-again-ten").addEventListener("click", _resultAgainTen);
+$("#result-again-ten-top")?.addEventListener("click", _resultAgainTen);
 $("#result").addEventListener("click", e => { if (e.target.id === "result") closeResult(); });
 $("#btn-gallery").addEventListener("click", openGallery);
 $("#btn-relations").addEventListener("click", openRelations);
@@ -3299,32 +3301,41 @@ function _showFactionSide(fid) {
 (function setupTopbarMore() {
   const toggle = document.getElementById('btn-more-toggle');
   const menu = document.getElementById('topbar-secondary');
+  const closeBtn = document.getElementById('btn-secondary-close');
   if (!toggle || !menu) return;
+  // <dialog> ベースの popup: showModal() で 背景は inert になり完全 block される (OS保証)
   toggle.addEventListener('click', (e) => {
     e.stopPropagation();
-    const active = menu.classList.toggle('active');
-    toggle.classList.toggle('active', active);
-    toggle.setAttribute('aria-expanded', active ? 'true' : 'false');
+    if (menu.open) {
+      menu.close();
+      toggle.setAttribute('aria-expanded', 'false');
+    } else {
+      // dialog.showModal が無いブラウザは普通の表示にフォールバック
+      if (typeof menu.showModal === 'function') menu.showModal();
+      else menu.setAttribute('open', '');
+      toggle.setAttribute('aria-expanded', 'true');
+    }
   });
-  document.addEventListener('click', (e) => {
-    if (!menu.classList.contains('active')) return;
-    if (e.target.closest('#topbar-secondary, #btn-more-toggle')) return;
-    menu.classList.remove('active');
-    toggle.classList.remove('active');
+  // ✕ ボタンで閉じる
+  if (closeBtn) closeBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (menu.open) menu.close();
+    else menu.removeAttribute('open');
     toggle.setAttribute('aria-expanded', 'false');
   });
-  // メニュー内ボタン押下後は閉じる + backdrop (menu自体) クリックで閉じる
+  // backdrop (::backdrop pseudo) tap で閉じる: dialog の click event は backdrop tap でも element 上で発火
   menu.addEventListener('click', (e) => {
-    // backdrop (menu container 自体) tap → close
+    // dialog 自身がイベントターゲットの時は backdrop タップ
     if (e.target === menu) {
-      menu.classList.remove('active');
-      toggle.classList.remove('active');
+      if (menu.open) menu.close();
+      else menu.removeAttribute('open');
       toggle.setAttribute('aria-expanded', 'false');
       return;
     }
+    // 内部ボタン押下時も閉じる (操作後はメニュー隠したい)
     if (e.target.closest('button, a')) {
-      menu.classList.remove('active');
-      toggle.classList.remove('active');
+      if (menu.open) menu.close();
+      else menu.removeAttribute('open');
       toggle.setAttribute('aria-expanded', 'false');
     }
   });
@@ -4444,39 +4455,59 @@ function playBgm(id) {
   // play カウント増分は bgmAudio の 'play' event listener で一元管理 (どの経路から再生開始しても正確に+1)
 }
 
-// play() フォールバック (シンプル版): 直接再生 → 200ms後再試行 → ユーザー操作で再試行
-// muted-unmute 戦略は副作用 (mute状態が残って音が消える) があったため廃止。
-// ブラウザの autoplay 許可がある時 (デフォルト or サイト個別許可) はStrategy 1 で通る。
+// mobile 判定 (iOS Safari + Android Chrome)
+const _isMobileBrowser = /iPhone|iPad|iPod|Android/.test(navigator.userAgent);
+
+// play() フォールバック: モバイルは muted-unmute 戦略 (autoplay 通す)、 PC はシンプルに retry のみ
 function _bgmPlayWithFallback() {
   if (!bgmAudio || !bgmEnabled || masterMuted) return;
   // 防御: 何らかの理由で muted が残ってたら解除
   if (bgmAudio.muted) bgmAudio.muted = false;
-  // Strategy 1: 通常 play
   bgmAudio.play().catch(() => {
     if (bgmAudioCtx && bgmAudioCtx.state === 'suspended') {
       try { bgmAudioCtx.resume(); } catch (e) {}
     }
-    // Strategy 2: 200ms後 再試行 (ロード待ち後の play)
-    setTimeout(() => {
-      if (!bgmEnabled || masterMuted || !bgmAudio.paused) return;
-      if (bgmAudio.muted) bgmAudio.muted = false;
-      bgmAudio.play().catch(() => {
-        // Strategy 3: 次のユーザー操作で再試行
-        const retryOnInteraction = () => {
-          ['click', 'touchstart', 'pointerdown', 'keydown'].forEach(ev =>
-            document.removeEventListener(ev, retryOnInteraction, { capture: true })
-          );
-          if (bgmEnabled && !masterMuted && bgmAudio.paused) {
-            if (bgmAudio.muted) bgmAudio.muted = false;
-            bgmAudio.play().catch(() => {});
-          }
+    if (_isMobileBrowser) {
+      // モバイル: muted-unmute 戦略 (ブラウザは muted autoplay は必ず許可)
+      bgmAudio.muted = true;
+      bgmAudio.play().then(() => {
+        // 'playing' イベントで実際に音が出始めた時に unmute (setTimeout より確実)
+        const unmuteOnPlaying = () => {
+          bgmAudio.removeEventListener('playing', unmuteOnPlaying);
+          if (!masterMuted) bgmAudio.muted = false;
         };
-        ['click', 'touchstart', 'pointerdown', 'keydown'].forEach(ev =>
-          document.addEventListener(ev, retryOnInteraction, { capture: true, once: true, passive: true })
-        );
+        bgmAudio.addEventListener('playing', unmuteOnPlaying, { once: true });
+        // 念のため 500ms後にも unmute (playing が遅延で fire しない時の保険)
+        setTimeout(() => { if (!masterMuted) bgmAudio.muted = false; }, 500);
+      }).catch(() => {
+        bgmAudio.muted = false;  // 失敗時は確実に unmute 戻す
+        // ユーザー操作待ち
+        _bgmRegisterInteractionRetry();
       });
-    }, 200);
+    } else {
+      // PC: 200ms後 retry → ユーザー操作待ち
+      setTimeout(() => {
+        if (!bgmEnabled || masterMuted || !bgmAudio.paused) return;
+        if (bgmAudio.muted) bgmAudio.muted = false;
+        bgmAudio.play().catch(() => _bgmRegisterInteractionRetry());
+      }, 200);
+    }
   });
+}
+
+function _bgmRegisterInteractionRetry() {
+  const retry = () => {
+    ['click', 'touchstart', 'pointerdown', 'keydown'].forEach(ev =>
+      document.removeEventListener(ev, retry, { capture: true })
+    );
+    if (bgmEnabled && !masterMuted && bgmAudio.paused) {
+      if (bgmAudio.muted) bgmAudio.muted = false;
+      bgmAudio.play().catch(() => {});
+    }
+  };
+  ['click', 'touchstart', 'pointerdown', 'keydown'].forEach(ev =>
+    document.addEventListener(ev, retry, { capture: true, once: true, passive: true })
+  );
 }
 
 function pauseBgm() {
