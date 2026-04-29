@@ -4485,10 +4485,7 @@ function _bgmStartUnmuteMonitor() {
 function _bgmPlayWithFallback() {
   if (!bgmAudio || !bgmEnabled || masterMuted) return;
   if (bgmAudio.muted) bgmAudio.muted = false;
-  bgmAudio.play().then(() => {
-    _bgmDebugLastError = '';
-  }).catch((err) => {
-    if (typeof _bgmDebugLastError !== 'undefined') _bgmDebugLastError = `play1 ${err.name}`;
+  bgmAudio.play().catch(() => {
     if (bgmAudioCtx && bgmAudioCtx.state === 'suspended') {
       try { bgmAudioCtx.resume(); } catch (e) {}
     }
@@ -4497,9 +4494,7 @@ function _bgmPlayWithFallback() {
     bgmAudio.play().then(() => {
       if (!masterMuted) bgmAudio.muted = false;
       _bgmStartUnmuteMonitor();
-      if (typeof _bgmDebugLastError !== 'undefined') _bgmDebugLastError = `mutedplay OK`;
-    }).catch((err2) => {
-      if (typeof _bgmDebugLastError !== 'undefined') _bgmDebugLastError = `play2 ${err2.name}`;
+    }).catch(() => {
       bgmAudio.muted = false;
       _bgmRegisterInteractionRetry();
     });
@@ -4701,44 +4696,7 @@ function _updateBgmProgress() {
 }
 setInterval(_updateBgmProgress, 500);
 
-// ───── BGM デバッグオーバーレイ (dev環境のみ、 mobile で原因切り分け用) ─────
-let _bgmDebugLastError = '';
-(function setupBgmDebugOverlay() {
-  const isDev = location.hostname.startsWith('dev.') || location.hostname.includes('localhost');
-  if (!isDev) return;
-  // オーバーレイ DOM 作成
-  const panel = document.createElement('div');
-  panel.id = 'bgm-debug-overlay';
-  panel.style.cssText = 'position:fixed;top:calc(env(safe-area-inset-top, 0px) + 8px);right:8px;z-index:99998;background:rgba(0,0,0,0.85);color:#5fffd4;font:11px/1.4 monospace;padding:8px 10px;border-radius:8px;border:1px solid rgba(95,255,212,0.4);max-width:260px;pointer-events:auto;cursor:pointer;white-space:pre-line;backdrop-filter:blur(4px);';
-  panel.textContent = 'BGM debug...';
-  document.body.appendChild(panel);
-  let collapsed = false;
-  panel.addEventListener('click', () => {
-    collapsed = !collapsed;
-    panel.style.opacity = collapsed ? '0.3' : '1';
-  });
-  // 500ms 毎に状態更新
-  setInterval(() => {
-    if (collapsed) {
-      panel.textContent = '🎵 (tap to expand)';
-      return;
-    }
-    const a = bgmAudio;
-    const lines = [
-      '🎵 BGM debug',
-      `id: ${bgmCurrentId || '?'}`,
-      `paused: ${a.paused}  muted: ${a.muted}`,
-      `vol: ${a.volume.toFixed(2)}  rate: ${a.playbackRate}`,
-      `time: ${_bgmFormatTime(a.currentTime)} / ${_bgmFormatTime(a.duration)}`,
-      `enabled: ${bgmEnabled}  master: ${masterMuted ? 'MUTE' : 'on'}`,
-      `ctx: ${bgmAudioCtx ? bgmAudioCtx.state : 'none'}  gain: ${bgmGainNode ? bgmGainNode.gain.value.toFixed(2) : '-'}`,
-      `shuffle: ${bgmShuffle}  repeat: ${bgmRepeat}`,
-      `ready: ${a.readyState}  src: ${(a.src||'').split('/').pop().slice(0, 30)}`,
-    ];
-    if (_bgmDebugLastError) lines.push(`⚠️ ${_bgmDebugLastError}`);
-    panel.textContent = lines.join('\n');
-  }, 500);
-})();
+// 再生位置バー click → seek (panel 開いてる間のみ動作)
 document.addEventListener('click', (e) => {
   const track = e.target.closest('#bgm-progress-track');
   if (!track) return;
