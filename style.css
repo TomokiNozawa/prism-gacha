@@ -3759,13 +3759,19 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   max-height: 40vh;
   overflow-y: auto;
 }
-.update-history-entry { margin-bottom: 14px; }
+.update-history-entry { margin-bottom: 10px; }
 .update-history-head {
   font-size: 13px;
   font-weight: 600;
   color: rgba(196, 181, 253, 0.95);
   margin-bottom: 4px;
+  cursor: pointer;
+  user-select: none;
+  list-style-position: outside;
+  padding: 4px 0;
 }
+.update-history-head:hover { color: #fff; }
+.update-history-entry[open] .update-history-head { margin-bottom: 6px; }
 .update-history ul {
   margin: 0; padding-left: 1.1em;
   font-size: 13px;

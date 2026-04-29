@@ -5789,9 +5789,9 @@ function showPrismaeraUpdateModal(fromVer, toVer, changelog) {
     histEl.style.display = 'none';
     changelog.forEach(entry => {
       if (!entry) return;
-      const section = document.createElement('div');
+      const section = document.createElement('details');
       section.className = 'update-history-entry';
-      const h = document.createElement('div');
+      const h = document.createElement('summary');
       h.className = 'update-history-head';
       h.textContent = 'v' + entry.version + ' (' + (entry.date || '') + ')';
       section.appendChild(h);
