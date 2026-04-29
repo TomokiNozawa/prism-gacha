@@ -4315,7 +4315,7 @@ function loadBgmSrc(id) {
     bgmAudio.dataset.loadedId = track.id;
     // play カウントの一元管理用: 異なる src 読込時にこのフラグをリセット → bgmAudio.play() 時に1回だけ +1
     bgmAudio.dataset.bgmPlayLogged = '';
-    try { bgmAudio.load(); } catch (e) {} // 明示 load (iOS で preload 効かない場合の保険)
+    // 注: bgmAudio.load() は呼ばない (preload="auto" 任せ、 明示 load は play 直前にリセットされる副作用あり)
 
     // リロード復帰: 同じ曲なら保存された位置から再開
     const savedId = localStorage.getItem('prism-bgm-last-id');
