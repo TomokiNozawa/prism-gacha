@@ -4342,46 +4342,17 @@ function loadBgmSrc(id) {
     // 注: bgmAudio.load() は呼ばない (preload="auto" 任せ、 明示 load は play 直前にリセットされる副作用あり)
 
     // リロード復帰: 同じ曲なら保存された位置から再開
+    // ★シンプル化: loadedmetadata 1回のみ、 play() より前に seek (race防止) ★
     const savedId = localStorage.getItem('prism-bgm-last-id');
     const savedTime = parseFloat(localStorage.getItem('prism-bgm-last-time') || '0');
     if (savedId === track.id && savedTime > 0.5) {
-      let seekDone = false;
       const trySeek = () => {
-        if (seekDone) return;
         if (!isFinite(bgmAudio.duration) || bgmAudio.duration <= 0) return;
         if (savedTime >= bgmAudio.duration - 1) return;
-        try {
-          bgmAudio.currentTime = savedTime;
-          seekDone = true;
-        } catch (e) {}
+        try { bgmAudio.currentTime = savedTime; } catch (e) {}
       };
-      // metadata取得時 → canplay → playing の3段階で seek (取りこぼし防止)
       bgmAudio.addEventListener('loadedmetadata', trySeek, { once: true });
-      bgmAudio.addEventListener('canplay', trySeek, { once: true });
-      // playing イベントで seek 検証 + 反映漏れの最終 retry (mobile Safari 対策)
-      bgmAudio.addEventListener('playing', () => {
-        trySeek(); // まだ seek してなかったら今やる
-        // 反映確認 + retry (Mobile で currentTime= が黙殺された場合)
-        setTimeout(() => {
-          if (Math.abs(bgmAudio.currentTime - savedTime) > 2 && isFinite(bgmAudio.duration)) {
-            try { bgmAudio.currentTime = savedTime; } catch (e) {}
-          }
-        }, 200);
-        setTimeout(() => {
-          if (Math.abs(bgmAudio.currentTime - savedTime) > 2 && isFinite(bgmAudio.duration)) {
-            try { bgmAudio.currentTime = savedTime; } catch (e) {}
-          }
-        }, 600);
-      }, { once: true });
-      // PC Chrome: seek 後 paused に戻ることがある → 'seeked' で検出して自動 play 再開
-      bgmAudio.addEventListener('seeked', () => {
-        if (bgmAudio.paused && bgmEnabled && !masterMuted) {
-          bgmAudio.play().catch(() => {
-            setTimeout(() => { if (bgmAudio.paused && bgmEnabled && !masterMuted) bgmAudio.play().catch(() => {}); }, 250);
-          });
-        }
-      });
-      // 既に metadata あれば即 seek
+      // 既に metadata あれば即 seek (cached load)
       if (bgmAudio.readyState >= 1) setTimeout(trySeek, 30);
     }
   }
@@ -4470,39 +4441,34 @@ function playBgm(id) {
 
 // mobile 判定 (iOS Safari + Android Chrome)
 const _isMobileBrowser = /iPhone|iPad|iPod|Android/.test(navigator.userAgent);
-// 初回 autoplay (リロード直後のみ true) — muted-unmute 戦略はここでだけ使う。 次曲などでは使わない (mute 残留 silent 防止)
-let _bgmFirstAutoplayAttempt = true;
 
-// play() フォールバック: 初回autoplay (mobile) のみ muted-unmute、 それ以外は普通の retry
+// play() フォールバック: 必ず最初に muted=false 防御、 mobile autoplay 失敗時は muted-unmute (sync 解除)
 function _bgmPlayWithFallback() {
   if (!bgmAudio || !bgmEnabled || masterMuted) return;
-  // 防御: 何らかの理由で muted が残ってたら解除
+  // 防御: muted残留対策
   if (bgmAudio.muted) bgmAudio.muted = false;
   bgmAudio.play().catch(() => {
     if (bgmAudioCtx && bgmAudioCtx.state === 'suspended') {
       try { bgmAudioCtx.resume(); } catch (e) {}
     }
-    if (_isMobileBrowser && _bgmFirstAutoplayAttempt) {
-      // 初回autoplay (リロード直後) のみ muted-unmute (位置復帰のため)
-      _bgmFirstAutoplayAttempt = false;
+    if (_isMobileBrowser) {
+      // mobile: muted-unmute 戦略 (毎回)、 unmute は promise resolution 内で**同期実行**
+      // (iOS で setTimeout 経由 unmute が黙殺される事象への対策)
       bgmAudio.muted = true;
       bgmAudio.play().then(() => {
-        [50, 200, 500, 1000].forEach(delay => {
-          setTimeout(() => { if (!masterMuted) bgmAudio.muted = false; }, delay);
-        });
+        // play() Promise resolution 直後 同期 unmute (user gesture context が温存される)
+        if (!masterMuted) bgmAudio.muted = false;
+        // 念のため 50ms後にも (一部 iOS で sync unmute 拒否される時の保険)
+        setTimeout(() => { if (!masterMuted) bgmAudio.muted = false; }, 50);
       }).catch(() => {
         bgmAudio.muted = false;
         _bgmRegisterInteractionRetry();
       });
     } else {
-      // 次曲・他: muted トリック使わず素直に retry → 駄目ならユーザー操作待ち
+      // PC: ブラウザ autoplay 拒否時はユーザー操作待ち
       _bgmRegisterInteractionRetry();
     }
   });
-  // 初回autoplay 攻撃失敗時に muted-unmute 入る → 成功時は flag を false に
-  if (_bgmFirstAutoplayAttempt && !bgmAudio.paused) {
-    _bgmFirstAutoplayAttempt = false;
-  }
 }
 
 function _bgmRegisterInteractionRetry() {
