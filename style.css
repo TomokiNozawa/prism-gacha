@@ -2913,6 +2913,32 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   main { padding-bottom: calc(48px + env(safe-area-inset-bottom)); }
   /* PWA standalone では safe-area-inset-top ≈ 47-59px となり、 +10pxバッファは過剰。 status bar 直下に詰める */
   .topbar { padding-top: env(safe-area-inset-top); }
+  /* ===== モーダル close ボタン: iPhone PWA で status bar/Dynamic Island に被って押しづらい問題対策 =====
+     - top を safe-area 分下にシフト
+     - tap target を 44x44 に拡大 (iOS HIG 準拠) */
+  .bgm-close,
+  .story-close,
+  .gallery-inner .close,
+  .gasshuku-close,
+  .gasshuku-detail-close,
+  .gasshuku-result-close,
+  .gasshuku-lightbox-close,
+  .gasshuku-invite-close,
+  .feedback-close,
+  .history-close,
+  .settings-close,
+  .migration-close,
+  .account-close,
+  .story-toc-close,
+  .story-list-close,
+  .relations-header .close {
+    top: calc(env(safe-area-inset-top, 0px) + 8px) !important;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
 /* タッチ時のhover無効化（タップ時の不自然な残留hoverを防止） */

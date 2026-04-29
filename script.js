@@ -4206,6 +4206,23 @@ function updateMasterMuteBtn() {
   if (bgmBtn) { bgmBtn.textContent = '🎵'; bgmBtn.title = 'BGM詳細'; }
 }
 
+// ───── iOS PWA: ホーム画面復帰時にBGM自動再開 (visibility/pageshow ハンドラ) ─────
+// PWA を home 画面に戻すとAudioContextがsuspend → 復帰時にOSが自動再開しないため明示的に resume + play
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible') return;
+  if (bgmAudioCtx && bgmAudioCtx.state === 'suspended') {
+    bgmAudioCtx.resume().catch(() => {});
+  }
+  if (bgmEnabled && !masterMuted && bgmAudio.paused) {
+    bgmAudio.play().catch(() => {/* autoplay制約 */});
+  }
+});
+window.addEventListener('pageshow', (e) => {
+  if (e.persisted && bgmEnabled && !masterMuted && bgmAudio.paused) {
+    bgmAudio.play().catch(() => {});
+  }
+});
+
 // ───── Audio event handlers ─────
 bgmAudio.addEventListener('ended', () => {
   localStorage.setItem('prism-bgm-last-time', '0');
