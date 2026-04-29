@@ -4124,10 +4124,14 @@ body.gasshuku-modal-open {
 }
 .world-faction-node {
   cursor: pointer;
-  transition: transform 0.2s ease, filter 0.2s ease;
+  transition: filter 0.18s ease;
 }
-.world-faction-node:hover { transform: scale(1.08); filter: brightness(1.3); }
-.world-faction-node.active circle { stroke: #ffd84d; stroke-width: 3; }
+/* hover時 transform:scale を SVG <g> に当てると attribute transform="translate(x,y)" と衝突して
+   座標がプルプルずれるため、 scaleは使わず filter で発光だけさせる */
+.world-faction-node:hover {
+  filter: brightness(1.35) drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
+}
+.world-faction-node.active circle { stroke: #ffd84d; stroke-width: 4; }
 .world-faction-node text {
   fill: #fff; font-size: 32px; font-weight: 700;
   text-anchor: middle; pointer-events: none;

@@ -3074,6 +3074,23 @@ function closeWorldMap() {
   m.setAttribute('hidden', '');
   _unlockBodyScroll();
 }
+// 派閥ID → 領地アイコン絵文字 (ファンタジー世界観の象徴を一発で伝える)
+const FACTION_ICONS = {
+  genso: '✨', rulers: '👑', church: '⛪', dragon: '🐉', redwing: '🔥',
+  yakai: '🌑', wolf: '🐺', forest: '🌲', silver: '❄️', tower: '🗼',
+  seventh: '☀️', academy: '📚', aquasis: '🌊', crimson: '⚓',
+};
+// 派閥間の繋がり (関係深い派閥ペア = 道路で結ぶ)
+const FACTION_ROUTES = [
+  ['genso', 'rulers'], ['genso', 'church'], ['genso', 'tower'],
+  ['rulers', 'redwing'], ['rulers', 'dragon'],
+  ['church', 'aquasis'], ['church', 'dragon'],
+  ['redwing', 'yakai'], ['yakai', 'wolf'],
+  ['forest', 'wolf'], ['forest', 'silver'],
+  ['silver', 'academy'], ['tower', 'academy'],
+  ['seventh', 'rulers'], ['aquasis', 'crimson'],
+];
+
 function renderWorldMap() {
   const canvas = document.getElementById('world-map-canvas');
   if (!canvas || typeof FACTIONS === 'undefined') return;
@@ -3084,24 +3101,61 @@ function renderWorldMap() {
     memberCount[f] = (memberCount[f] || 0) + 1;
   }
   const W = 2000, H = 1600;
+  const factionMap = Object.fromEntries(FACTIONS.map(f => [f.id, f]));
   let svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">`;
-  // 海/大陸 風の背景 (薄い円弧で陸地っぽさを演出)
+  // 装飾の defs: 大陸グラデ + 海洋 + 派閥ハロー
   svg += `<defs>
-    <radialGradient id="land-grad" cx="50%" cy="50%" r="60%">
-      <stop offset="0%" stop-color="#1a3850" stop-opacity="0.35"/>
-      <stop offset="100%" stop-color="#0a1228" stop-opacity="0"/>
+    <radialGradient id="land-grad" cx="50%" cy="48%" r="58%">
+      <stop offset="0%" stop-color="#3a2858" stop-opacity="0.55"/>
+      <stop offset="55%" stop-color="#1a2055" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#080d22" stop-opacity="0"/>
     </radialGradient>
+    <radialGradient id="ocean-grad" cx="50%" cy="50%" r="80%">
+      <stop offset="0%" stop-color="#0d1538" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#020410" stop-opacity="0.6"/>
+    </radialGradient>
+    <pattern id="grid-faint" width="80" height="80" patternUnits="userSpaceOnUse">
+      <path d="M 80 0 L 0 0 0 80" fill="none" stroke="rgba(200,180,255,0.04)" stroke-width="1"/>
+    </pattern>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
   </defs>`;
-  svg += `<ellipse cx="${W/2}" cy="${H/2}" rx="${W*0.42}" ry="${H*0.4}" fill="url(#land-grad)"/>`;
-  // 各派閥ノード (touch target 確保のため viewBox 上で十分大きく)
+  // 海洋 (背景)
+  svg += `<rect width="${W}" height="${H}" fill="url(#ocean-grad)"/>`;
+  svg += `<rect width="${W}" height="${H}" fill="url(#grid-faint)"/>`;
+  // 大陸 (中央集中の楕円)
+  svg += `<ellipse cx="${W/2}" cy="${H/2-40}" rx="${W*0.46}" ry="${H*0.42}" fill="url(#land-grad)"/>`;
+  // 装飾的な波線 (海岸線風)
+  svg += `<path d="M 100 1380 Q 500 1330 1000 1390 T 1900 1380" stroke="rgba(125,211,252,0.12)" stroke-width="2" fill="none"/>`;
+  svg += `<path d="M 100 1450 Q 500 1410 1000 1460 T 1900 1450" stroke="rgba(125,211,252,0.08)" stroke-width="2" fill="none"/>`;
+  // 派閥間のルート (光の道)
+  FACTION_ROUTES.forEach(([a, b]) => {
+    const fa = factionMap[a], fb = factionMap[b];
+    if (!fa || !fb) return;
+    svg += `<line x1="${fa.x}" y1="${fa.y}" x2="${fb.x}" y2="${fb.y}" stroke="rgba(200,180,255,0.18)" stroke-width="3" stroke-dasharray="8 12" stroke-linecap="round"/>`;
+  });
+  // 各派閥ノード
   FACTIONS.forEach(f => {
     const cnt = memberCount[f.id] || 0;
-    const r = 90 + Math.min(cnt * 6, 40);  // メンバー多いほど大きく (90〜130)
+    const r = 95 + Math.min(cnt * 6, 40);  // 95〜135
+    const icon = FACTION_ICONS[f.id] || '⚐';
     svg += `<g class="world-faction-node" data-faction="${f.id}" transform="translate(${f.x},${f.y})">
-      <circle r="${r}" fill="${f.color}" fill-opacity="0.18" stroke="${f.color}" stroke-width="3" stroke-opacity="0.75"/>
-      <text class="faction-yomi" y="-${r+22}">${escapeHtml(f.yomi)}</text>
-      <text y="10">${escapeHtml(f.label)}</text>
-      <text class="faction-count" y="${r+38}">${cnt}人</text>
+      <!-- 外周ハロー -->
+      <circle r="${r+18}" fill="${f.color}" fill-opacity="0.05" filter="url(#glow)"/>
+      <!-- 本体 -->
+      <circle r="${r}" fill="${f.color}" fill-opacity="0.22" stroke="${f.color}" stroke-width="4" stroke-opacity="0.85"/>
+      <!-- 内側装飾円 -->
+      <circle r="${r-12}" fill="none" stroke="${f.color}" stroke-width="1" stroke-opacity="0.4" stroke-dasharray="4 6"/>
+      <!-- アイコン -->
+      <text y="-12" font-size="56" text-anchor="middle" style="paint-order:normal">${icon}</text>
+      <!-- ふりがな (上) -->
+      <text class="faction-yomi" y="-${r+24}">${escapeHtml(f.yomi)}</text>
+      <!-- 派閥名 (中央下) -->
+      <text y="38">${escapeHtml(f.label)}</text>
+      <!-- メンバー数 (下) -->
+      <text class="faction-count" y="${r+40}">${cnt}人</text>
     </g>`;
   });
   svg += `</svg>`;
@@ -4175,15 +4229,27 @@ function loadBgmSrc(id) {
   if (bgmAudio.dataset.loadedId !== track.id) {
     bgmAudio.src = track.file;
     bgmAudio.dataset.loadedId = track.id;
-    // リロード復帰: 同じ曲なら保存された位置から再開
+    // リロード復帰: 同じ曲なら保存された位置から再開 (iOS PWA でも確実に効くよう複数イベントで保険)
     const savedId = localStorage.getItem('prism-bgm-last-id');
     const savedTime = parseFloat(localStorage.getItem('prism-bgm-last-time') || '0');
     if (savedId === track.id && savedTime > 0.5) {
-      bgmAudio.addEventListener('loadedmetadata', function seekOnce() {
-        if (isFinite(bgmAudio.duration) && savedTime < bgmAudio.duration - 1) {
-          try { bgmAudio.currentTime = savedTime; } catch (e) {}
-        }
-      }, { once: true });
+      let seeked = false;
+      const seekToSaved = () => {
+        if (seeked) return;
+        if (!isFinite(bgmAudio.duration) || bgmAudio.duration <= 0) return;
+        if (savedTime >= bgmAudio.duration - 1) return;
+        try {
+          bgmAudio.currentTime = savedTime;
+          seeked = true;
+        } catch (e) {}
+      };
+      // loadedmetadata + canplay + play 3経路で seek 試行 (iOS で metadata pre-cached 等で
+      // 1イベント取りこぼしても他で拾える)
+      bgmAudio.addEventListener('loadedmetadata', seekToSaved, { once: true });
+      bgmAudio.addEventListener('canplay', seekToSaved, { once: true });
+      bgmAudio.addEventListener('play', seekToSaved, { once: true });
+      // 既に metadata 読み込み済 (バックバッファ等) なら即 seek
+      if (bgmAudio.readyState >= 1) setTimeout(seekToSaved, 30);
     }
   }
   bgmAudio.loop = (bgmRepeat === 'one');
@@ -5234,8 +5300,11 @@ function showAccountModal() {
       if (k.startsWith('UR_')) urCount++;
       else if (k.startsWith('LR_')) lrCount++;
     }
-    $('#account-info-ur').textContent = `${urCount}/5`;
-    $('#account-info-lr').textContent = `${lrCount}/1`;
+    // 分母は POOL から動的に取得 (キャラ追加時に分母を更新し忘れる事故を防ぐ)
+    const urMax = (POOL && POOL.UR) ? POOL.UR.length : 0;
+    const lrMax = (POOL && POOL.LR) ? POOL.LR.length : 0;
+    $('#account-info-ur').textContent = `${urCount}/${urMax}`;
+    $('#account-info-lr').textContent = `${lrCount}/${lrMax}`;
     $('#account-info-sync').textContent = authUser.metadata && authUser.metadata.lastSignInTime
       ? new Date(authUser.metadata.lastSignInTime).toLocaleString('ja-JP')
       : '-';
