@@ -4448,24 +4448,27 @@ function _bgmStartUnmuteMonitor() {
   }, 250);
 }
 
-// play() フォールバック: 必ず最初に muted=false 防御、 autoplay 失敗時は **PC/mobile 共通 muted-unmute**
-// (ユーザー報告: "ミュートにしてミュート解除したらいい感じ" → 同じ事を JS で再現)
+// play() フォールバック: ログ付き診断版
 function _bgmPlayWithFallback() {
   if (!bgmAudio || !bgmEnabled || masterMuted) return;
-  // 防御: muted残留対策
   if (bgmAudio.muted) bgmAudio.muted = false;
-  bgmAudio.play().catch(() => {
+  console.log('[BGM] play attempt 1 (direct)');
+  bgmAudio.play().then(() => {
+    console.log('[BGM] play attempt 1 SUCCESS - playing normally');
+  }).catch((err) => {
+    console.warn('[BGM] play attempt 1 FAILED:', err.name, err.message);
     if (bgmAudioCtx && bgmAudioCtx.state === 'suspended') {
       try { bgmAudioCtx.resume(); } catch (e) {}
     }
-    // PC/mobile 共通: muted-unmute 戦略 (ブラウザは muted autoplay を必ず許可)
+    console.log('[BGM] play attempt 2 (muted-unmute strategy)');
     bgmAudio.muted = true;
     bgmAudio.play().then(() => {
-      // sync unmute: play().then() resolution は user gesture context を温存
+      console.log('[BGM] muted play SUCCESS - sync unmute');
       if (!masterMuted) bgmAudio.muted = false;
-      // 多段 unmute monitor: setTimeout で取りこぼした場合に polling で確実に
+      console.log('[BGM] muted now:', bgmAudio.muted, 'paused:', bgmAudio.paused);
       _bgmStartUnmuteMonitor();
-    }).catch(() => {
+    }).catch((err2) => {
+      console.warn('[BGM] muted play FAILED:', err2.name, err2.message);
       bgmAudio.muted = false;
       _bgmRegisterInteractionRetry();
     });
@@ -4789,11 +4792,7 @@ const _bgmShuffleToggle = $("#bgm-shuffle");
 if (_bgmShuffleToggle) _bgmShuffleToggle.addEventListener('change', toggleBgmShuffle);
 
 // 初期ロード
-// autoplay属性は src 設定の **前** に付けないと効かない (HTMLMedia spec: autoplay は src 読込時に評価)
-if (bgmEnabled && !masterMuted) {
-  bgmAudio.autoplay = true;
-  bgmAudio.setAttribute('autoplay', '');
-}
+// (autoplay 属性 設定は外した: 効果不明 + 邪魔の可能性あり、 v1.2.0 前のシンプルな挙動に戻す)
 loadBgmSrc(bgmCurrentId);
 _applyVolumeToAudio();
 updateMasterMuteBtn();
