@@ -4470,8 +4470,10 @@ function playBgm(id) {
 
 // mobile 判定 (iOS Safari + Android Chrome)
 const _isMobileBrowser = /iPhone|iPad|iPod|Android/.test(navigator.userAgent);
+// 初回 autoplay (リロード直後のみ true) — muted-unmute 戦略はここでだけ使う。 次曲などでは使わない (mute 残留 silent 防止)
+let _bgmFirstAutoplayAttempt = true;
 
-// play() フォールバック: モバイルは muted-unmute 戦略 (autoplay 通す)、 PC はシンプルに retry のみ
+// play() フォールバック: 初回autoplay (mobile) のみ muted-unmute、 それ以外は普通の retry
 function _bgmPlayWithFallback() {
   if (!bgmAudio || !bgmEnabled || masterMuted) return;
   // 防御: 何らかの理由で muted が残ってたら解除
@@ -4480,23 +4482,27 @@ function _bgmPlayWithFallback() {
     if (bgmAudioCtx && bgmAudioCtx.state === 'suspended') {
       try { bgmAudioCtx.resume(); } catch (e) {}
     }
-    if (_isMobileBrowser) {
-      // モバイル: muted-unmute 戦略 (ブラウザは muted autoplay は必ず許可)
+    if (_isMobileBrowser && _bgmFirstAutoplayAttempt) {
+      // 初回autoplay (リロード直後) のみ muted-unmute (位置復帰のため)
+      _bgmFirstAutoplayAttempt = false;
       bgmAudio.muted = true;
       bgmAudio.play().then(() => {
-        // 複数 timeout で unmute (iOS で 'playing' が fire しない時の保険、 残留 mute 防止)
         [50, 200, 500, 1000].forEach(delay => {
           setTimeout(() => { if (!masterMuted) bgmAudio.muted = false; }, delay);
         });
       }).catch(() => {
-        bgmAudio.muted = false;  // 失敗時は確実に unmute 戻す
+        bgmAudio.muted = false;
         _bgmRegisterInteractionRetry();
       });
     } else {
-      // PC: ブラウザ autoplay 拒否時はユーザー操作待ち (200ms retry は spam 判定誘発で逆効果)
+      // 次曲・他: muted トリック使わず素直に retry → 駄目ならユーザー操作待ち
       _bgmRegisterInteractionRetry();
     }
   });
+  // 初回autoplay 攻撃失敗時に muted-unmute 入る → 成功時は flag を false に
+  if (_bgmFirstAutoplayAttempt && !bgmAudio.paused) {
+    _bgmFirstAutoplayAttempt = false;
+  }
 }
 
 function _bgmRegisterInteractionRetry() {
