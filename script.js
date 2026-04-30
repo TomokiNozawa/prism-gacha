@@ -3147,6 +3147,7 @@ function toggleCharImgZoom() {
 
 // 場所画像 (背景 + 挿絵) を拡大表示 — char-img-zoom モーダルを流用
 // 引数 src は原寸 PNG パス (thumb 渡しても _thumb.webp → .png 置換する保険つき)
+let _locImgZoomLocked = false;  // openLocImageZoom経由かのフラグ (char-detail経由の toggleCharImgZoom との lock pair 干渉を回避)
 function openLocImageZoom(src) {
   const z = document.getElementById('char-img-zoom');
   const img = document.getElementById('char-img-zoom-img');
@@ -3160,11 +3161,18 @@ function openLocImageZoom(src) {
   };
   resetZoom();
   z.classList.add('active');
+  _lockBodyScroll();  // モーダル背景 scroll lock (必須、 過去ルール feedback_modal_background_lock.md)
+  _locImgZoomLocked = true;
 }
 
 function closeImgZoom() {
   $("#char-img-zoom").classList.remove("active");
   resetZoom();
+  // openLocImageZoom 経由の時のみ scroll lock 解除 (char-detail内の toggleCharImgZoom 経由は元々 lockしてないのでペア崩れ防止)
+  if (_locImgZoomLocked) {
+    _unlockBodyScroll();
+    _locImgZoomLocked = false;
+  }
 }
 
 // dir: 1=拡大段階, -1=縮小段階, 0=リセット
@@ -4085,13 +4093,17 @@ function renderSceneChars(scene) {
       if (r.remap && r.remap[povName]) { povName = r.remap[povName]; break; }
     }
   }
+  // 全章共通ルール: POV (主人公) キャラは本編シーン (label = X-Y形式) で必ず先頭に配置する
+  // ※ 中表紙 (isAct) / 表紙 (isCover) / プロローグ・エピローグ (label無) は対象外。
+  // ※ 本文に名前/「私/わたし」 が出てなくても POVキャラは必ず先頭追加 (主役は常に「居る」 想定)
   if (povName) {
     const povIdx = top.findIndex(c => c.name === povName || c.name.includes(povName));
     if (povIdx > 0) {
+      // 既にリストにあるが先頭じゃない → 先頭へ移動
       const [povChar] = top.splice(povIdx, 1);
       top.unshift(povChar);
-    } else if (povIdx === -1 && /私|わたし/.test(scene.contentMd || '')) {
-      // 名前は出ないが「私/わたし」がある → POVキャラを先頭に追加
+    } else if (povIdx === -1 && scene.label && !scene.isAct && !scene.isCover) {
+      // リストに未登場 + 本編シーン → 先頭追加 (本文に名前無くても主役だから登場扱い)
       const povChar = _findPovChar(povName);
       if (povChar) top.unshift(povChar);
     }
@@ -4357,12 +4369,23 @@ function _collectAllAssetUrls() {
   return Array.from(urls);
 }
 
-// M4: 全アセット並列DL — progressCb(done, total, currentUrl) で進捗通知
-// 5並列、 失敗無視 (404やネット切断は静かにスキップ)
+// M4: 未DLアセットのみ並列DL — 既に SW Cache Storage にあるURLは skip
+// 既DL分の再fetchは無駄 + 失敗ケースを増やすので、 caches.match で実態確認 → 未cacheのみ fetch
+// progressCb(done, total, currentUrl) は 未DL分だけの進捗 (0/N)
 async function _downloadAllAssets(progressCb) {
-  const urls = _collectAllAssetUrls();
+  const allUrls = _collectAllAssetUrls();
+  // 全URLを並列で cache 確認、 未cacheだけリスト化 (既DL分は再fetchしない)
+  const checks = await Promise.all(allUrls.map(async (url) => {
+    try { return [url, !!(await caches.match(url))]; } catch (e) { return [url, false]; }
+  }));
+  const urls = checks.filter(([_, cached]) => !cached).map(([url, _]) => url);
+  const skipped = allUrls.length - urls.length;  // 既DL済 (今回はskip)
   const total = urls.length;
   let done = 0, succeeded = 0;
+  if (total === 0) {
+    // 全部 cache 済み → fetch 不要
+    return { done: 0, total: 0, succeeded: 0, skipped };
+  }
   const CONCURRENCY = 5;
   let idx = 0;
   async function worker() {
@@ -4378,7 +4401,7 @@ async function _downloadAllAssets(progressCb) {
     }
   }
   await Promise.all(Array.from({ length: CONCURRENCY }, () => worker()));
-  return { done, total, succeeded };
+  return { done, total, succeeded, skipped };
 }
 
 // M4: 設定モーダルのDLボタン状態 refresh — SW Cache Storage 実態を確認して未DL数を計算、
@@ -4798,14 +4821,20 @@ document.querySelectorAll('#story-list-modal .story-card[data-story]').forEach(c
 });
 // 背景クリックで閉じる
 $("#story-modal").addEventListener('click', e => {
+  // 拡大画像モーダルが active な間は story-modal の click を一切処理しない
+  // (画像 backdrop click → closeImgZoom が同タイミングで story-modal の close を呼ぶ事故防止)
+  if (document.getElementById('char-img-zoom').classList.contains('active')) return;
   if (e.target.id === 'story-modal') closeStory();
 });
 // stageクリックで前後ページ: 左半分=前へ、右半分=次へ
 $("#story-stage").addEventListener('click', e => {
+  // 拡大画像モーダル中は左右ページ送りも無効化
+  if (document.getElementById('char-img-zoom').classList.contains('active')) return;
   if (e.target.closest('.story-nav') || e.target.closest('button')) return;
   if (e.target.closest('.story-scene-chars')) return;
   if (e.target.closest('.char-link')) return;
   if (e.target.closest('.story-tap-guide')) return;
+  if (e.target.closest('.story-location-inline')) return;  // 挿絵タップは zoom 専用
   // テキスト選択中(マウスドラッグでハイライト)は誤発火させない
   const sel = window.getSelection && window.getSelection();
   if (sel && sel.toString().length > 0) return;
@@ -4820,12 +4849,15 @@ $("#story-stage").addEventListener('click', e => {
   if (!stage) return;
   let touchStartX = 0, touchStartY = 0, touchStartT = 0;
   stage.addEventListener('touchstart', (e) => {
+    // 拡大画像中はスワイプ判定しない (画像のpinch zoom等を妨げない)
+    if (document.getElementById('char-img-zoom').classList.contains('active')) return;
     if (e.touches.length !== 1) return;
     touchStartX = e.touches[0].clientX;
     touchStartY = e.touches[0].clientY;
     touchStartT = Date.now();
   }, { passive: true });
   stage.addEventListener('touchend', (e) => {
+    if (document.getElementById('char-img-zoom').classList.contains('active')) return;
     if (e.changedTouches.length !== 1) return;
     const dx = e.changedTouches[0].clientX - touchStartX;
     const dy = e.changedTouches[0].clientY - touchStartY;
@@ -4833,6 +4865,7 @@ $("#story-stage").addEventListener('click', e => {
     // 横スワイプ: |dx| > 60px、縦は 50px以内、500ms以内
     if (Math.abs(dx) > 60 && Math.abs(dy) < 50 && dt < 500) {
       if (e.target.closest('button') || e.target.closest('.char-link')) return;
+      if (e.target.closest('.story-location-inline')) return;  // 挿絵タップは zoom 専用
       const sel = window.getSelection && window.getSelection();
       if (sel && sel.toString().length > 0) return;
       // 自然な感覚: 左スワイプ(dx<0) = 次へ、右スワイプ = 前へ
@@ -5485,6 +5518,13 @@ if (_btnHistory) _btnHistory.addEventListener("click", openHistoryModal);
 
 document.addEventListener("keydown", e => {
   if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+  // === 最優先: 拡大画像モーダル (z-index 260、 全モーダル中の最上位) ===
+  // active 中は他の Esc 処理 (story-modal の closeStory 等) を完全に通さない
+  const _ciz = document.getElementById('char-img-zoom');
+  if (_ciz && _ciz.classList.contains('active')) {
+    if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); closeImgZoom(); }
+    return;
+  }
   // === 最上位モーダル (1つでも開いてれば Esc で閉じる) ===
   // ようこそモーダル
   const _wm = document.getElementById('welcome-modal');
