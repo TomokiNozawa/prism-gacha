@@ -687,6 +687,15 @@ const $ = s => document.querySelector(s);
 
 // Season1 定員 (キャラマスター)
 const TIER_MAX = { LR: 1, UR: 7, SSR: 11, SR: 15, R: 11 };  // S1C2 (v1.2.0) 反映: UR+2, SSR+3, SR+5, R+5
+// 凸ヒート ソート用: 各tier内のキャラ順 (script.js POOL の定義順 = ID順)。 キャラ追加時は同期更新必須。
+const TIER_ORDER = { LR: 0, UR: 1, SSR: 2, SR: 3, R: 4 };
+const CHAR_ORDER = {
+  LR: ['虹意 プリズマ'],
+  UR: ['セラフィエル', '龍帝 アルテミス', '星海のノクス', '千夜姫 カグヤ', '焔帝 ヒノオウ', '深海女王 ネプテア', '波紋の聖女 イザベル'],
+  SSR: ['森の射手 リナエ', '獣牙 ガルド', '竜爵 ヴィル', '仮面騎士 シオン', '黒猫 ノア', '朱音', 'イザベル', 'ひなた', '紅玉海賊団船長 シャンティ', '白焔教会見習い巫女 ルーナ', 'アクアシス筆頭魔術師 グラシエル'],
+  SR: ['ルミナ', '黒刃 玄', 'セラフィ', '紅翼 ツキ', '薫音', 'リリム', 'メイリ', '詠聖 ベル', '影刃 シン', '焔舞 ヒナカ', '海獣使い モルガ', '珊瑚鎧の海騎士 コラリア', '深海巫女 ティアラ', '紅玉海賊団副長 ケイレブ', '白焔教会騎士 ラナス'],
+  R: ['ちさと', 'カイ', 'こはね', 'ヴィオラ', 'アルス', 'ミレイア', '深海の少女 パール', '海賊見習い ミカ', '珊瑚漁師 エラン', '海賊団船医 クレオ', '白焔教会従士 リッカ'],
+};
 
 function nicknameToEmail(nickname) {
   const bytes = new TextEncoder().encode(nickname);
@@ -1417,10 +1426,30 @@ function buildDetail(u, s) {
     if (n >= 3) return 't3';
     return 't1';
   }
-  function buildTotsuGrid(dups) {
+  function buildTotsuGrid(dups, mode) {
+    // mode: 'normal' (通常ガチャ key=TIER_NAME) or 'gasshuku' (合宿ガチャ key=ID '01'〜'14')
     const keys = Object.keys(dups || {});
     if (keys.length === 0) return '<div style="color:rgba(255,255,255,0.4);font-size:11px">獲得なし</div>';
-    keys.sort((a,b) => (dups[b]||0) - (dups[a]||0));
+    if (mode === 'gasshuku') {
+      // 合宿: ID 数値順
+      keys.sort((a, b) => Number(a) - Number(b));
+    } else {
+      // 通常: tier順 (LR>UR>SSR>SR>R) + 同tier内は CHAR_ORDER (POOL定義順)
+      keys.sort((a, b) => {
+        const ma = a.match(/^(LR|UR|SSR|SR|R)_(.+)$/);
+        const mb = b.match(/^(LR|UR|SSR|SR|R)_(.+)$/);
+        if (!ma || !mb) return a.localeCompare(b, 'ja');
+        const oa = TIER_ORDER[ma[1]] ?? 99;
+        const ob = TIER_ORDER[mb[1]] ?? 99;
+        if (oa !== ob) return oa - ob;
+        const list = CHAR_ORDER[ma[1]] || [];
+        const ia = list.indexOf(ma[2]);
+        const ib = list.indexOf(mb[2]);
+        if (ia >= 0 && ib >= 0) return ia - ib;
+        if (ia < 0 && ib < 0) return ma[2].localeCompare(mb[2], 'ja');
+        return ia < 0 ? 1 : -1;  // CHAR_ORDER 未掲載は末尾
+      });
+    }
     let html = '<div class="detail-totsu-grid">';
     for (const k of keys) {
       const n = dups[k] || 0;
@@ -1432,8 +1461,8 @@ function buildDetail(u, s) {
     html += '</div>';
     return html;
   }
-  const normalTotsu = buildTotsuGrid(s.dupCounts || {});
-  const gasshukuTotsu = buildTotsuGrid(u.gasshukuDups || {});
+  const normalTotsu = buildTotsuGrid(s.dupCounts || {}, 'normal');
+  const gasshukuTotsu = buildTotsuGrid(u.gasshukuDups || {}, 'gasshuku');
 
   // F1表示: visit/streak詳細
   const firstVisit = u.firstVisitAt ? new Date(u.firstVisitAt).toLocaleString('ja-JP') : '-';
