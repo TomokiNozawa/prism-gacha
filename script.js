@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.2.4c — 演出&ゲームロジック (Season 1 第1〜2章)
+   Prismaera v1.2.4d — 演出&ゲームロジック (Season 1 第1〜2章)
    ============================================================ */
 "use strict";
 
@@ -3904,6 +3904,24 @@ function renderSceneChars(scene) {
       if (katakanaTail && katakanaTail !== lastToken && !allFullNames.has(katakanaTail)) add(katakanaTail);
     }
   }
+  // シーン依存 remap: STORY_CHAR_REMAP に該当があれば候補の char を別キャラに差し替える。
+  // 例: s1c2 の 2-11 以降「イザベル」 → 覚醒後 UR「波紋の聖女 イザベル」 として「このシーンに登場」 に表示。
+  if (scene.label && typeof STORY_CHAR_REMAP !== 'undefined' && currentStoryId && STORY_CHAR_REMAP[currentStoryId]) {
+    const applicableRemaps = STORY_CHAR_REMAP[currentStoryId].filter(r => _sceneLabelGte(scene.label, r.fromLabel));
+    for (const r of applicableRemaps) {
+      for (const [fromName, toFullName] of Object.entries(r.remap || {})) {
+        let targetChar = null;
+        for (const tier of ['LR','UR','SSR','SR','R']) {
+          const found = POOL[tier].find(c => c.name === toFullName);
+          if (found) { targetChar = { ...found, tier }; break; }
+        }
+        if (!targetChar) continue;
+        for (const cand of candidates) {
+          if (cand.name === fromName) cand.char = targetChar;
+        }
+      }
+    }
+  }
   // 長い候補を先に処理 (短い候補が長い候補の一部にマッチする誤検出を防ぐ)
   candidates.sort((a, b) => b.len - a.len);
 
@@ -3942,15 +3960,22 @@ function renderSceneChars(scene) {
   // 出現回数多い順、最大12体まで
   found.sort((a, b) => b.hits - a.hits);
   const top = found.slice(0, 12);
-  // POVキャラを先頭に配置
-  if (currentStoryPov) {
-    const povIdx = top.findIndex(c => c.name === currentStoryPov || c.name.includes(currentStoryPov));
+  // POVキャラを先頭に配置 (シーン依存remap対応: 2-11以降「イザベル」 → 「波紋の聖女 イザベル」 に切替)
+  let povName = currentStoryPov;
+  if (povName && scene.label && typeof STORY_CHAR_REMAP !== 'undefined' && currentStoryId && STORY_CHAR_REMAP[currentStoryId]) {
+    const applicableRemaps = STORY_CHAR_REMAP[currentStoryId].filter(r => _sceneLabelGte(scene.label, r.fromLabel));
+    for (const r of applicableRemaps) {
+      if (r.remap && r.remap[povName]) { povName = r.remap[povName]; break; }
+    }
+  }
+  if (povName) {
+    const povIdx = top.findIndex(c => c.name === povName || c.name.includes(povName));
     if (povIdx > 0) {
       const [povChar] = top.splice(povIdx, 1);
       top.unshift(povChar);
     } else if (povIdx === -1 && /私|わたし/.test(scene.contentMd || '')) {
       // 名前は出ないが「私/わたし」がある → POVキャラを先頭に追加
-      const povChar = _findPovChar(currentStoryPov);
+      const povChar = _findPovChar(povName);
       if (povChar) top.unshift(povChar);
     }
   }
