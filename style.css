@@ -179,7 +179,50 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 }
 
 /* summon buttons */
-.cta { display: flex; gap: 14px; }
+.cta { display: flex; flex-direction: column; gap: 14px; }
+/* 2段カード: 通常ガチャ + ピックアップガチャ (2026-05-01〜) */
+.cta-card {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 14px 16px 16px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(40,28,80,0.4), rgba(28,20,55,0.5));
+  border: 1px solid rgba(167,139,250,0.25);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.cta-card.cta-pickup {
+  background: linear-gradient(135deg, rgba(95,150,210,0.18), rgba(125,180,200,0.12));
+  border: 1px solid rgba(125,200,240,0.35);
+}
+.cta-card:hover { border-color: rgba(252,211,77,0.45); }
+.cta-card-label {
+  font-size: 13px; font-weight: 700; letter-spacing: 0.05em;
+  color: #fcd34d;
+}
+.cta-card.cta-pickup .cta-card-label {
+  color: #7dd3fc;  /* 青系で 第2章テーマ (海) を示唆 */
+}
+.cta-card-sub {
+  font-size: 11px; font-weight: 400; letter-spacing: 0.04em;
+  color: rgba(255,255,255,0.6);
+  margin-left: 6px;
+}
+.cta-card-buttons { display: flex; gap: 12px; }
+.cta-card-buttons .summon { flex: 1; }
+/* ピックアップ専用ボタンの色味調整 */
+.summon.pickup {
+  background: linear-gradient(135deg, #1a3050 0%, #1d4a73 50%, #1a3050 100%);
+  border-color: rgba(125, 211, 252, 0.6);
+}
+.summon.pickup:hover {
+  border-color: #fcd34d;
+  filter: brightness(1.15);
+}
+@media (max-width: 600px) {
+  .cta-card { padding: 12px 14px 14px; }
+  .cta-card-label { font-size: 12px; }
+  .cta-card-sub { font-size: 10px; display: block; margin-left: 0; margin-top: 2px; }
+  .cta-card-buttons { gap: 10px; }
+}
 .summon {
   position: relative; cursor: pointer;
   min-width: 140px; padding: 22px 28px;

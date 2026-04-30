@@ -607,22 +607,40 @@ function saveState() {
 }
 
 // ────────────── Rolling ──────────────
-function rollOne() {
+// ピックアップ章: 該当章のキャラだけ重み×2、 他は×1。 章全体のtier比率(R65/SR25/SSR7/UR3)は維持。
+const PICKUP_CHAPTER = 's1c2';  // 最新章固定 (S1C3公開時に 's1c3' へ手動更新)
+const PICKUP_WEIGHT = 2;
+
+function rollOne(opts = {}) {
   // 天井: UR確定(LRではなく)
-  if (state.pity >= PITY - 1) return pickTier("UR");
+  if (state.pity >= PITY - 1) return pickTier("UR", opts);
   const r = Math.random();
   let acc = 0;
   // LRから順に判定（稀なtierから降順）
   for (const tier of ["LR", "UR", "SSR", "SR", "R"]) {
     acc += RATES[tier];
-    if (r < acc) return pickTier(tier);
+    if (r < acc) return pickTier(tier, opts);
   }
-  return pickTier("R");
+  return pickTier("R", opts);
 }
-function pickTier(tier) {
+function pickTier(tier, opts = {}) {
   const pool = POOL[tier];
-  const ch = pool[Math.floor(Math.random() * pool.length)];
-  return { tier, ...ch };
+  if (!pool || pool.length === 0) return { tier };
+  // 通常ガチャ: 等確率
+  if (!opts.pickup) {
+    const ch = pool[Math.floor(Math.random() * pool.length)];
+    return { tier, ...ch };
+  }
+  // ピックアップ: 指定章のキャラ重みPICKUP_WEIGHT倍、 他は重み1で重み付き乱択
+  const pickupChapter = opts.pickup;
+  const weights = pool.map(c => c.chapter === pickupChapter ? PICKUP_WEIGHT : 1);
+  const total = weights.reduce((a, b) => a + b, 0);
+  let rnd = Math.random() * total;
+  for (let i = 0; i < pool.length; i++) {
+    rnd -= weights[i];
+    if (rnd < 0) return { tier, ...pool[i] };
+  }
+  return { tier, ...pool[pool.length - 1] };
 }
 
 function applyPull(result, opts) {
@@ -2024,11 +2042,11 @@ async function finalize(result, opts = {}) {
 // ────────────── Public: single / ten ──────────────
 let busy = false;
 
-async function doSingle() {
+async function doSingle(opts = {}) {
   if (busy) return;
   busy = true;
   skipRequested = false;  // 開始時リセット
-  const result = rollOne();
+  const result = rollOne({ pickup: opts.pickup });
   applyPull(result);
   stage.classList.add("active");
   clearStage();
@@ -2039,14 +2057,14 @@ async function doSingle() {
   busy = false;
 }
 
-async function doTen() {
+async function doTen(opts = {}) {
   if (busy) return;
   busy = true;
   skipRequested = false;  // 開始時リセット
   // Phase 1: roll + メタデータ計算 (state mutation のみ、 saveState/updateHUD は遅延)
   const results = [];
   for (let i = 0; i < 10; i++) {
-    const r = rollOne();
+    const r = rollOne({ pickup: opts.pickup });
     applyPull(r, { deferSave: true });
     results.push(r);
   }
@@ -3264,8 +3282,12 @@ function closeCharDetail() {
 }
 
 // ────────────── Bindings ──────────────
-$("#btn-single").addEventListener("click", doSingle);
-$("#btn-ten").addEventListener("click", doTen);
+// 通常ガチャ
+$("#btn-single").addEventListener("click", () => doSingle());
+$("#btn-ten").addEventListener("click", () => doTen());
+// ピックアップガチャ (現状: PICKUP_CHAPTER='s1c2' = 第2章ピックアップ)
+$("#btn-single-pickup")?.addEventListener("click", () => doSingle({ pickup: PICKUP_CHAPTER }));
+$("#btn-ten-pickup")?.addEventListener("click", () => doTen({ pickup: PICKUP_CHAPTER }));
 $("#result-close").addEventListener("click", closeResult);
 $("#result-close-top")?.addEventListener("click", closeResult);
 const _resultAgainTen = () => {
