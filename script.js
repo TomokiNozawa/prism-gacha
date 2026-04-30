@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.2.3t — 演出&ゲームロジック (Season 1 第1〜2章)
+   Prismaera v1.2.3u — 演出&ゲームロジック (Season 1 第1〜2章)
    ============================================================ */
 "use strict";
 
@@ -2362,7 +2362,7 @@ function renderGalleryByTab() {
       // cache buster 付きで サムネ更新時にブラウザキャッシュ刷新
       const img = document.createElement("img");
       img.className = "gallery-card-img";
-      img.src = (c.img || '').replace(/\.png$/i, '_thumb.webp') + '?v=20260430t';
+      img.src = (c.img || '').replace(/\.png$/i, '_thumb.webp') + '?v=20260430u';
       img.alt = c.name;
       img.loading = "lazy";
       img.decoding = "async";
@@ -4224,24 +4224,27 @@ const LOCATION_CONFIG = {
     // S1C1 場所画像は未生成 (locations_s1c1.md スケルトンのみ存在、 後日プロンプト作成→生成)
   },
   's1c2': {
-    '2-7':  { img: '/images/locations/s1c2/aquasis_city_thumb.webp' },   // アクアシス都市進入 (city メイン)
-    '2-9':  { img: '/images/locations/s1c2/aquasis_rift_thumb.webp' },   // 黒い亀裂
+    // 各シーンの「印象深い1場面」 を背景画像として配置 (野沢方針 2026-04-30: 背景中心で統一感)
+    '2-1':  { img: '/images/locations/s1c2/church_morning_thumb.webp' },          // 七色ステンドグラスで祈るイザベル
+    '2-3':  { img: '/images/locations/s1c2/serapia_sunset_thumb.webp' },          // 桟橋でイザベル×シャンティ対面
+    '2-4':  { img: '/images/locations/s1c2/crimson_pearl_night_thumb.webp' },     // 月のない夜の紅玉号甲板
+    '2-5':  { img: '/images/locations/s1c2/shadeova_swarm_thumb.webp' },          // 影喰い襲来戦闘
+    '2-7':  { img: '/images/locations/s1c2/aquasis_city_thumb.webp' },            // 海中の珊瑚都市 (視覚インパクト最大)
+    '2-9':  { img: '/images/locations/s1c2/aquasis_rift_thumb.webp' },            // 海溝の底・黒い亀裂
+    '2-11': { img: '/images/locations/s1c2/ripple_saint_awakening_thumb.webp' },  // 七色覚醒
+    '2-13': { img: '/images/locations/s1c2/serapia_dawn_thumb.webp' },            // 朝焼けの港 (ミカと別れ)
   },
 };
 
-// 本文中インライン挿絵 — キャラ挿絵 (story-cutin) と同じ感覚で、 場所画像を文章中に登場させる。
+// 本文中インライン挿絵 — シーン内に複数の場所/場面があるシーンのみ補助挿絵を入れる。
+// 通常は LOCATION_CONFIG の背景画像で 1シーン1枚。 例外的に 2-7 (海上→海中→宮殿の進行) のみ複数場面。
 // 各 entry: { scene: 'X-Y', marker: '本文内の anchor フレーズ', img: '画像パス' }
-// marker を含む <p> 直前に挿絵が挿入される。 marker 不一致時はシーン本文末尾に追加。
+// marker を含む <p> の **直後** に挿絵が挿入される (本文を読み終えてから絵を見る自然な流れ)。
 const STORY_LOCATION_INLINE_CONFIG = {
   's1c2': [
-    { scene: '2-1',  marker: '祭壇の前に膝をつき',                       img: '/images/locations/s1c2/church_morning_thumb.webp' },
-    { scene: '2-3',  marker: 'オレンジ色に染まる桟橋',                   img: '/images/locations/s1c2/serapia_sunset_thumb.webp' },
-    { scene: '2-4',  marker: '甲板は磨かれ',                              img: '/images/locations/s1c2/crimson_pearl_night_thumb.webp' },
-    { scene: '2-5',  marker: '海面が、不自然に黒く渦巻いていた',          img: '/images/locations/s1c2/shadeova_swarm_thumb.webp' },
-    { scene: '2-7',  marker: '海溝の入り口に向かった',                    img: '/images/locations/s1c2/aquasis_entrance_thumb.webp' },
-    { scene: '2-7',  marker: '宮殿の謁見の間',                            img: '/images/locations/s1c2/aquasis_throne_thumb.webp' },
-    { scene: '2-11', marker: '光の中で、私の鎧が、変容した',              img: '/images/locations/s1c2/ripple_saint_awakening_thumb.webp' },
-    { scene: '2-13', marker: 'セラピアの港に戻ったのは、夜明けだった',    img: '/images/locations/s1c2/serapia_dawn_thumb.webp' },
+    // 2-7 はクライマックス (謁見=city背景) に至る進行を 2枚で補強
+    { scene: '2-7', marker: '海溝の入り口に向かった', img: '/images/locations/s1c2/aquasis_entrance_thumb.webp' },  // 海上から見下ろし (本文を読んでから絵で「これが海溝」)
+    { scene: '2-7', marker: '宮殿の謁見の間',         img: '/images/locations/s1c2/aquasis_throne_thumb.webp' },    // 謁見の間を読んでから玉座シーン
   ],
 };
 
@@ -4325,8 +4328,9 @@ function injectStoryCutins(bodyHtml, sceneIdx) {
   return bodyHtml;
 }
 
-// ────────── 場所インライン挿絵 (本文中の anchor フレーズ直前に挿絵 div 挿入) ──────────
-// STORY_LOCATION_INLINE_CONFIG の各 entry に対して、 marker を含む <p> 直前に挿絵カードを挿入。
+// ────────── 場所インライン挿絵 (本文中の anchor フレーズを含む段落の直後に挿絵 div 挿入) ──────────
+// STORY_LOCATION_INLINE_CONFIG の各 entry に対して、 marker を含む <p>...</p> の **直後** に挿絵カードを挿入。
+// 「本文を読み終えてから絵を見る」 自然な流れ (野沢方針)。
 // 同一シーンに複数 entry がある場合は順次適用 (例: 2-7 の entrance + throne を別段落に)。
 function injectStoryLocationInlines(bodyHtml, sceneIdx) {
   const scene = storyScenes[sceneIdx];
@@ -4339,10 +4343,10 @@ function injectStoryLocationInlines(bodyHtml, sceneIdx) {
     let injected = false;
     if (e.marker) {
       const esc = e.marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const re = new RegExp(`<p[^>]*>(?:(?!<\\/p>).)*?${esc}`);
-      const m = bodyHtml.match(re);
-      if (m && m.index >= 0) {
-        bodyHtml = bodyHtml.slice(0, m.index) + cardHtml + bodyHtml.slice(m.index);
+      // marker を含む <p>...</p> 全体をマッチ → 直後 (= </p>後) に挿絵を挿入
+      const re = new RegExp(`(<p[^>]*>(?:(?!<\\/p>).)*?${esc}(?:(?!<\\/p>).)*?<\\/p>)`);
+      if (re.test(bodyHtml)) {
+        bodyHtml = bodyHtml.replace(re, '$1' + cardHtml);
         injected = true;
       }
     }
