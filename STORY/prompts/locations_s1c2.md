@@ -406,33 +406,37 @@ Aspect ratio 16:9, high detail.
 
 ---
 
-## 【12】serapia_evening.png — 2-3 港町セラピア (背景・キャラなし純風景)
+## 【12】serapia_evening.png — 2-3 港町セラピア (背景・キャラなし純風景、 9:16 縦長)
 
 - **対応シーン**: 2-3 港町セラピア (シーン全体の背景)
 - **本文行**: `STORY/s1c2.md` l.114〜「南方の港町セラピアに着いた頃には、 夕暮れだった」 / l.117「塩の匂いと、魚の匂いと、潮風の匂い」
-- **役割**: 背景画像 (LOCATION_CONFIG['s1c2']['2-3'])
+- **役割**: 背景画像 (LOCATION_CONFIG['s1c2']['2-3'])、 9:16 縦長
 - **被写体**: 夕暮れの港町セラピアの純風景。 **キャラなし**。 イザベル/シャンティ/ラナス登場前のシーン全体雰囲気
 - **ストーリー全体との整合**: 「陸の白 (教会) と海 (海賊) の境界」 の舞台のみ提示。 キャラ対面シーンは挿絵 (serapia_sunset) で表現する分離設計
 - **ストーリー使用**: ✅ (背景)
-- **コード参照**: `LOCATION_CONFIG['s1c2']['2-3']` (画像生成後に追加)
+- **コード参照**: `LOCATION_CONFIG['s1c2']['2-3']` (実装済)
+- **比率**: **9:16 (縦長)** — モバイル縦持ちで全体表示、 PCは object-fit: cover で中央クロップ。 切り取られにくい
 
 > **添付画像**: なし (キャラリファレンス不要、 純風景)
 
 ```
 A bustling southern harbor town at sunset, named Serapia, in a fantasy world.
-A long wooden pier extends into a calm sea bathed in orange-gold sunset light.
-Tall masts of pirate galleons rise in the background, their crimson sails partially furled,
-silhouetted against the setting sun. Stone-and-timber buildings line the shore — fishermen's
-cottages, seafood stalls with fish drying in nets, lanterns being lit one by one,
+Vertical composition: a long wooden pier extends from foreground into a calm sea
+bathed in orange-gold sunset light, leading the eye from bottom to upper horizon.
+Tall masts of pirate galleons rise prominently in the upper portion of the frame,
+their crimson sails partially furled, silhouetted against the setting sun.
+Stone-and-timber buildings line the shore on both sides — fishermen's cottages,
+seafood stalls with fish drying in nets, lanterns being lit one by one,
 seabirds wheeling overhead, fishermen carrying baskets walking along the pier.
-The horizon glows with deep amber and rose, the sea reflecting molten gold.
+The upper sky glows with deep amber and rose gradient, the sea reflecting molten gold.
 No featured human characters in the foreground — this is a pure environmental establishing
 shot capturing the harbor town atmosphere before any protagonists arrive.
 Anime fantasy illustration style, warm twilight atmosphere,
 vibrant orange and rose-pink palette with cool blue ocean below,
-emphasis on environment, light, and texture (worn wooden planks, rope coils, sail canvas).
-Wide cinematic shot from a slightly elevated angle on the pier, looking out to sea.
-Aspect ratio 16:9, high detail.
+emphasis on vertical depth (foreground pier → midground ships → upper sky),
+texture detail (worn wooden planks, rope coils, sail canvas).
+Tall cinematic vertical composition from a slightly elevated angle on the pier looking out to sea.
+Aspect ratio 9:16, high detail.
 ```
 
 ---
@@ -480,7 +484,10 @@ Aspect ratio 16:9, high detail.
 
 ## 使い方メモ
 
-- **コピペ完結**: 各 ``` ブロック内の英語プロンプトをそのまま ChatGPT (DALL-E 3) にコピペ → そのまま画像生成可能 (`Aspect ratio 16:9, high detail.` まで本文に含めてある、 追記不要)
+- **コピペ完結**: 各 ``` ブロック内の英語プロンプトをそのまま ChatGPT (DALL-E 3) にコピペ → そのまま画像生成可能 (`Aspect ratio` 指定まで本文に含めてある、 追記不要)
+- **🔴 比率方針 (野沢確定 2026-04-30)**:
+  - **背景画像 = 9:16 (縦長) 推奨** : モバイル縦持ちで全体表示、 PC は object-fit:cover で中央クロップ → 切り取られにくい。 既存【1】〜【11】 は 16:9 で生成済、 **【12】以降の新規背景プロンプトは 9:16** で書く
+  - **本文インライン挿絵 = 16:9 (横長)**: 縦スクロール中の横長カットインとして配置 (現状継続)
 - **添付画像 (キャラリファレンス)**: 各セクションの「添付画像」 欄記載のキャラ画像 (`/c/Users/t2262/prism-gacha-work/images/characters/season1/{tier}/{name}.png`) を ChatGPT に手動添付してから生成。 添付があると顔立ち・衣装が安定する
 - **生成画像の保存先**: `/c/Users/t2262/prism-gacha-work/images/locations/s1c2/{ファイル名}.png`
 - 全プロンプトはアニメ風ファンタジー、 深海色 (青緑+金) ベース、 七色伏線を散りばめた統一トーン

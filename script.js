@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.2.3y — 演出&ゲームロジック (Season 1 第1〜2章)
+   Prismaera v1.2.3z — 演出&ゲームロジック (Season 1 第1〜2章)
    ============================================================ */
 "use strict";
 
@@ -2362,7 +2362,7 @@ function renderGalleryByTab() {
       // cache buster 付きで サムネ更新時にブラウザキャッシュ刷新
       const img = document.createElement("img");
       img.className = "gallery-card-img";
-      img.src = (c.img || '').replace(/\.png$/i, '_thumb.webp') + '?v=20260430y';
+      img.src = (c.img || '').replace(/\.png$/i, '_thumb.webp') + '?v=20260430z';
       img.alt = c.name;
       img.loading = "lazy";
       img.decoding = "async";
@@ -4229,7 +4229,7 @@ const LOCATION_CONFIG = {
   's1c2': {
     // 各シーンの「印象深い1場面」 を背景画像として配置 (野沢方針: 背景中心で統一感)
     '2-1':  { img: '/images/locations/s1c2/church_morning_thumb.webp' },          // 七色ステンドグラスで祈るイザベル
-    // 2-3: 新規背景画像 (港町の純風景、 キャラなし) を生成待ち、 暫定でグラデ背景。 serapia_sunset は挿絵化
+    '2-3':  { img: '/images/locations/s1c2/serapia_evening_thumb.webp' },         // 港町セラピア純風景 (9:16 縦長、 キャラなし)
     '2-4':  { img: '/images/locations/s1c2/crimson_pearl_night_thumb.webp' },     // 月のない夜の紅玉号甲板
     // 2-5: shadeova_swarm を挿絵化、 背景はグラデ (戦闘シーンの動きを挿絵で強調)
     '2-7':  { img: '/images/locations/s1c2/aquasis_city_thumb.webp' },            // 海中の珊瑚都市 (視覚インパクト最大)
