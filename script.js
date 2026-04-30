@@ -4333,6 +4333,63 @@ async function _downloadAllAssets(progressCb) {
   return { done, total, succeeded };
 }
 
+// M4: 設定モーダルのDLボタン状態 refresh — SW Cache Storage 実態を確認して未DL数を計算、
+// 未DL>0 ならボタン表示+件数表示、 全DL済みならボタン非表示で「✅ 全X件保存済み」 のみ表示。
+// 「再ダウンロード」 ボタンは出さない (野沢方針: 押す必要ないボタンは見せない)。
+async function _refreshOfflineStatus(m) {
+  if (!m) return;
+  const dlBtn = m.querySelector('#settings-offline-dl');
+  const progEl = m.querySelector('#settings-offline-progress');
+  const statusEl = m.querySelector('#settings-offline-status');
+  if (!dlBtn || !statusEl) return;
+  // 確認中表示 (caches.match × 全URLで数百ms程度かかる場合あり)
+  statusEl.textContent = '確認中…';
+  let total = 0, cached = 0;
+  try {
+    const urls = _collectAllAssetUrls();
+    total = urls.length;
+    if (total === 0) {
+      dlBtn.style.display = 'none';
+      statusEl.textContent = '';
+      return;
+    }
+    const checks = await Promise.all(urls.map(async (url) => {
+      try { return (await caches.match(url)) ? 1 : 0; } catch (e) { return 0; }
+    }));
+    cached = checks.reduce((a, b) => a + b, 0);
+  } catch (e) {
+    statusEl.textContent = '';
+    return;
+  }
+  const missing = total - cached;
+  if (progEl) progEl.hidden = true;
+  if (missing <= 0) {
+    // 全DL済み: ボタン非表示
+    dlBtn.style.display = 'none';
+    statusEl.innerHTML = `✅ <b>全 ${total} 件</b> 保存済み (オフラインでも快適に動作します)`;
+    // ストレージ使用量を併記 (取れる環境のみ)
+    if (navigator.storage && navigator.storage.estimate) {
+      try {
+        const est = await navigator.storage.estimate();
+        if (est && est.usage) {
+          const mb = (est.usage / 1024 / 1024).toFixed(1);
+          statusEl.innerHTML += ` <span style="opacity:0.7">/ 端末使用 ${mb}MB</span>`;
+        }
+      } catch (e) {}
+    }
+  } else {
+    // 未DLあり: ボタン表示
+    dlBtn.style.display = '';
+    if (cached > 0) {
+      dlBtn.textContent = `📥 未保存 ${missing} 件をダウンロード`;
+      statusEl.innerHTML = `保存済み <b>${cached}</b> / <b>${total}</b> 件 (未保存 ${missing} 件)`;
+    } else {
+      dlBtn.textContent = `📥 ダウンロード開始`;
+      statusEl.innerHTML = `<b>${total}</b> 件のアセット (BGM・キャラ画像・場所画像)`;
+    }
+  }
+}
+
 // シーン依存のキャラリンク remap — 同じ単独名 (例: 「イザベル」) でも、 シーン進行に応じて別キャラ (例: 覚醒後 UR) にリンク先を切替える。
 // 例: s1c2 の 2-11 (波紋の聖女覚醒) 以降は、 単独名「イザベル」 を SSR ではなく UR「波紋の聖女 イザベル」 にリンクさせる。
 // fromLabel: そのラベル含めてそれ以降のシーンで適用 (X-Y 形式、 X=幕、 Y=シーン番号)。
@@ -6424,7 +6481,7 @@ function openSettingsModal() {
         m.querySelectorAll('.settings-fontsize-btn').forEach(bb => bb.classList.toggle('active', bb.dataset.size === sz));
       });
     });
-    // M4: 全アセットDL
+    // M4: 全アセットDL — 状態管理 (未DL数 > 0 の時だけボタン表示)
     const dlBtn = m.querySelector('#settings-offline-dl');
     const progEl = m.querySelector('#settings-offline-progress');
     const fillEl = m.querySelector('#settings-progress-fill');
@@ -6434,34 +6491,22 @@ function openSettingsModal() {
       dlBtn.addEventListener('click', async () => {
         if (dlBtn.disabled) return;
         dlBtn.disabled = true;
-        const origText = dlBtn.textContent;
         dlBtn.textContent = '📥 ダウンロード中…';
         progEl.hidden = false;
         fillEl.style.width = '0%';
         textEl.textContent = '準備中…';
         statusEl.textContent = '';
         try {
-          const result = await _downloadAllAssets((done, total) => {
+          await _downloadAllAssets((done, total) => {
             const pct = total ? Math.round(done / total * 100) : 0;
             fillEl.style.width = pct + '%';
             textEl.textContent = `${done} / ${total} (${pct}%)`;
           });
-          localStorage.setItem('prism-offline-saved', '1');
           localStorage.setItem('prism-offline-saved-at', new Date().toISOString());
-          dlBtn.textContent = '✅ 再ダウンロード';
-          statusEl.textContent = `✅ ${result.succeeded} / ${result.total} 件保存完了 (失敗 ${result.total - result.succeeded} 件はオンライン時に自動取得)`;
-          // ストレージ使用量表示 (取れる環境のみ)
-          if (navigator.storage && navigator.storage.estimate) {
-            try {
-              const est = await navigator.storage.estimate();
-              if (est && est.usage) {
-                const mb = (est.usage / 1024 / 1024).toFixed(1);
-                statusEl.textContent += ` / 端末ストレージ使用 ${mb}MB`;
-              }
-            } catch (e) {}
-          }
+          progEl.hidden = true;
+          // DL完了後、 cache 実態を見て状態 refresh
+          await _refreshOfflineStatus(m);
         } catch (e) {
-          dlBtn.textContent = origText;
           statusEl.textContent = `⚠️ エラー: ${e && e.message || e}`;
         } finally {
           dlBtn.disabled = false;
@@ -6469,21 +6514,8 @@ function openSettingsModal() {
       });
     }
   }
-  // 開く度に「保存済み」 状態を反映
-  try {
-    const dlBtn2 = m.querySelector('#settings-offline-dl');
-    const statusEl2 = m.querySelector('#settings-offline-status');
-    if (dlBtn2 && localStorage.getItem('prism-offline-saved') === '1') {
-      dlBtn2.textContent = '✅ 再ダウンロード';
-      const at = localStorage.getItem('prism-offline-saved-at');
-      if (at && statusEl2) {
-        const d = new Date(at);
-        if (!isNaN(d.getTime())) {
-          statusEl2.textContent = `✅ ${d.getMonth()+1}/${d.getDate()} 保存済み`;
-        }
-      }
-    }
-  } catch (e) {}
+  // 開く度に cache 実態確認 → ボタン表示/非表示判定
+  _refreshOfflineStatus(m);
   // 現在値を反映
   const s = loadSettings();
   m.querySelector('#settings-mute').checked = !!s.muted;
