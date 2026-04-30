@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.2.3u — 演出&ゲームロジック (Season 1 第1〜2章)
+   Prismaera v1.2.3v — 演出&ゲームロジック (Season 1 第1〜2章)
    ============================================================ */
 "use strict";
 
@@ -2362,7 +2362,7 @@ function renderGalleryByTab() {
       // cache buster 付きで サムネ更新時にブラウザキャッシュ刷新
       const img = document.createElement("img");
       img.className = "gallery-card-img";
-      img.src = (c.img || '').replace(/\.png$/i, '_thumb.webp') + '?v=20260430u';
+      img.src = (c.img || '').replace(/\.png$/i, '_thumb.webp') + '?v=20260430v';
       img.alt = c.name;
       img.loading = "lazy";
       img.decoding = "async";
@@ -4211,7 +4211,7 @@ const STORY_CUTIN_CONFIG = {
   ],
   's1c2': [
     { scene: '2-6',            charName: '深海女王 ネプテア' },
-    { scene: '2-11',           charName: '波紋の聖女 イザベル' },
+    // 2-11 波紋の聖女イザベルのキャラカットインは削除 (野沢指示: 場所画像 ripple_saint_awakening 挿絵で代替)
   ],
 };
 
@@ -4224,27 +4224,32 @@ const LOCATION_CONFIG = {
     // S1C1 場所画像は未生成 (locations_s1c1.md スケルトンのみ存在、 後日プロンプト作成→生成)
   },
   's1c2': {
-    // 各シーンの「印象深い1場面」 を背景画像として配置 (野沢方針 2026-04-30: 背景中心で統一感)
+    // 各シーンの「印象深い1場面」 を背景画像として配置 (野沢方針: 背景中心で統一感)
     '2-1':  { img: '/images/locations/s1c2/church_morning_thumb.webp' },          // 七色ステンドグラスで祈るイザベル
-    '2-3':  { img: '/images/locations/s1c2/serapia_sunset_thumb.webp' },          // 桟橋でイザベル×シャンティ対面
+    // 2-3: 新規背景画像 (港町の純風景、 キャラなし) を生成待ち、 暫定でグラデ背景。 serapia_sunset は挿絵化
     '2-4':  { img: '/images/locations/s1c2/crimson_pearl_night_thumb.webp' },     // 月のない夜の紅玉号甲板
-    '2-5':  { img: '/images/locations/s1c2/shadeova_swarm_thumb.webp' },          // 影喰い襲来戦闘
+    // 2-5: shadeova_swarm を挿絵化、 背景はグラデ (戦闘シーンの動きを挿絵で強調)
     '2-7':  { img: '/images/locations/s1c2/aquasis_city_thumb.webp' },            // 海中の珊瑚都市 (視覚インパクト最大)
     '2-9':  { img: '/images/locations/s1c2/aquasis_rift_thumb.webp' },            // 海溝の底・黒い亀裂
-    '2-11': { img: '/images/locations/s1c2/ripple_saint_awakening_thumb.webp' },  // 七色覚醒
+    // 2-11: ripple_saint_awakening を挿絵化、 キャラカットインも削除 (覚醒の絶頂を挿絵で表現)
     '2-13': { img: '/images/locations/s1c2/serapia_dawn_thumb.webp' },            // 朝焼けの港 (ミカと別れ)
   },
 };
 
-// 本文中インライン挿絵 — シーン内に複数の場所/場面があるシーンのみ補助挿絵を入れる。
-// 通常は LOCATION_CONFIG の背景画像で 1シーン1枚。 例外的に 2-7 (海上→海中→宮殿の進行) のみ複数場面。
-// 各 entry: { scene: 'X-Y', marker: '本文内の anchor フレーズ', img: '画像パス' }
-// marker を含む <p> の **直後** に挿絵が挿入される (本文を読み終えてから絵を見る自然な流れ)。
+// 本文中インライン挿絵 — シーン内に複数の場所/場面があるシーン、 または背景に向かない動的場面で使用。
+// 各 entry: { scene: 'X-Y', marker: '本文内の anchor フレーズ', position: 'before'|'after', img: '画像パス' }
+// position: 'after' (デフォルト) = marker を含む <p> 直後に挿入 / 'before' = <p> 直前に挿入
 const STORY_LOCATION_INLINE_CONFIG = {
   's1c2': [
-    // 2-7 はクライマックス (謁見=city背景) に至る進行を 2枚で補強
-    { scene: '2-7', marker: '海溝の入り口に向かった', img: '/images/locations/s1c2/aquasis_entrance_thumb.webp' },  // 海上から見下ろし (本文を読んでから絵で「これが海溝」)
-    { scene: '2-7', marker: '宮殿の謁見の間',         img: '/images/locations/s1c2/aquasis_throne_thumb.webp' },    // 謁見の間を読んでから玉座シーン
+    // 2-3: 新背景 (純風景、 生成待ち) + シャンティ登場時に挿絵
+    { scene: '2-3',  marker: '頭には大きな三角帽子に紅い羽飾り', position: 'after',  img: '/images/locations/s1c2/serapia_sunset_thumb.webp' },
+    // 2-5: 戦闘シーンの動的瞬間を挿絵で
+    { scene: '2-5',  marker: '群れに突っ込んだ',                  position: 'after',  img: '/images/locations/s1c2/shadeova_swarm_thumb.webp' },
+    // 2-7: 海上 (entrance) → 海中 (city背景) → 宮殿 (throne) の進行
+    { scene: '2-7',  marker: '巨大な珊瑚の都市が広がっていた',    position: 'after',  img: '/images/locations/s1c2/aquasis_entrance_thumb.webp' },
+    { scene: '2-7',  marker: '宮殿の謁見の間',                    position: 'before', img: '/images/locations/s1c2/aquasis_throne_thumb.webp' },
+    // 2-11: 覚醒の絶頂を挿絵で (キャラカットインは削除)
+    { scene: '2-11', marker: '光の中で、私の鎧が、変容した',      position: 'after',  img: '/images/locations/s1c2/ripple_saint_awakening_thumb.webp' },
   ],
 };
 
@@ -4328,10 +4333,10 @@ function injectStoryCutins(bodyHtml, sceneIdx) {
   return bodyHtml;
 }
 
-// ────────── 場所インライン挿絵 (本文中の anchor フレーズを含む段落の直後に挿絵 div 挿入) ──────────
-// STORY_LOCATION_INLINE_CONFIG の各 entry に対して、 marker を含む <p>...</p> の **直後** に挿絵カードを挿入。
-// 「本文を読み終えてから絵を見る」 自然な流れ (野沢方針)。
-// 同一シーンに複数 entry がある場合は順次適用 (例: 2-7 の entrance + throne を別段落に)。
+// ────────── 場所インライン挿絵 (本文中の anchor フレーズを含む段落の前後に挿絵 div 挿入) ──────────
+// STORY_LOCATION_INLINE_CONFIG の各 entry の position で挿入位置を制御:
+//   - 'after' (デフォルト): marker を含む <p>...</p> の **直後** (= 本文を読了してから絵を見る)
+//   - 'before':              marker を含む <p> の **直前** (= 絵を見てから本文を読む)
 function injectStoryLocationInlines(bodyHtml, sceneIdx) {
   const scene = storyScenes[sceneIdx];
   if (!scene || !scene.label) return bodyHtml;
@@ -4343,11 +4348,21 @@ function injectStoryLocationInlines(bodyHtml, sceneIdx) {
     let injected = false;
     if (e.marker) {
       const esc = e.marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      // marker を含む <p>...</p> 全体をマッチ → 直後 (= </p>後) に挿絵を挿入
-      const re = new RegExp(`(<p[^>]*>(?:(?!<\\/p>).)*?${esc}(?:(?!<\\/p>).)*?<\\/p>)`);
-      if (re.test(bodyHtml)) {
-        bodyHtml = bodyHtml.replace(re, '$1' + cardHtml);
-        injected = true;
+      if (e.position === 'before') {
+        // marker を含む <p> の直前に挿入
+        const re = new RegExp(`<p[^>]*>(?:(?!<\\/p>).)*?${esc}`);
+        const m = bodyHtml.match(re);
+        if (m && m.index >= 0) {
+          bodyHtml = bodyHtml.slice(0, m.index) + cardHtml + bodyHtml.slice(m.index);
+          injected = true;
+        }
+      } else {
+        // 'after' (デフォルト): marker を含む <p>...</p> の直後に挿入
+        const re = new RegExp(`(<p[^>]*>(?:(?!<\\/p>).)*?${esc}(?:(?!<\\/p>).)*?<\\/p>)`);
+        if (re.test(bodyHtml)) {
+          bodyHtml = bodyHtml.replace(re, '$1' + cardHtml);
+          injected = true;
+        }
       }
     }
     if (!injected) {

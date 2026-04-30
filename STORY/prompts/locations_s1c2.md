@@ -406,6 +406,37 @@ Aspect ratio 16:9, high detail.
 
 ---
 
+## 【12】serapia_evening.png — 2-3 港町セラピア (背景・キャラなし純風景)
+
+- **対応シーン**: 2-3 港町セラピア (シーン全体の背景)
+- **本文行**: `STORY/s1c2.md` l.114〜「南方の港町セラピアに着いた頃には、 夕暮れだった」 / l.117「塩の匂いと、魚の匂いと、潮風の匂い」
+- **役割**: 背景画像 (LOCATION_CONFIG['s1c2']['2-3'])
+- **被写体**: 夕暮れの港町セラピアの純風景。 **キャラなし**。 イザベル/シャンティ/ラナス登場前のシーン全体雰囲気
+- **ストーリー全体との整合**: 「陸の白 (教会) と海 (海賊) の境界」 の舞台のみ提示。 キャラ対面シーンは挿絵 (serapia_sunset) で表現する分離設計
+- **ストーリー使用**: ✅ (背景)
+- **コード参照**: `LOCATION_CONFIG['s1c2']['2-3']` (画像生成後に追加)
+
+> **添付画像**: なし (キャラリファレンス不要、 純風景)
+
+```
+A bustling southern harbor town at sunset, named Serapia, in a fantasy world.
+A long wooden pier extends into a calm sea bathed in orange-gold sunset light.
+Tall masts of pirate galleons rise in the background, their crimson sails partially furled,
+silhouetted against the setting sun. Stone-and-timber buildings line the shore — fishermen's
+cottages, seafood stalls with fish drying in nets, lanterns being lit one by one,
+seabirds wheeling overhead, fishermen carrying baskets walking along the pier.
+The horizon glows with deep amber and rose, the sea reflecting molten gold.
+No featured human characters in the foreground — this is a pure environmental establishing
+shot capturing the harbor town atmosphere before any protagonists arrive.
+Anime fantasy illustration style, warm twilight atmosphere,
+vibrant orange and rose-pink palette with cool blue ocean below,
+emphasis on environment, light, and texture (worn wooden planks, rope coils, sail canvas).
+Wide cinematic shot from a slightly elevated angle on the pier, looking out to sea.
+Aspect ratio 16:9, high detail.
+```
+
+---
+
 # 配置サマリ (一覧)
 
 ## Phase 1 — 既存5枚 (アクアシス系背景画像)
