@@ -4114,12 +4114,13 @@ function renderSceneChars(scene) {
       const [povChar] = top.splice(povIdx, 1);
       top.unshift(povChar);
     } else if (povIdx === -1) {
-      // top12 に居ない (= 本文に名前ほぼ出てない) → 本文に名前 or 「私/わたし」 が出る時のみ追加
+      // top12 に居ない時、 本文に POV名 (token) が含まれている場合のみ追加。
+      // 「私/わたし」 等の pronoun 判定は廃止 (= エピローグの観測者シーンで他キャラの「私」 で
+      //  ちさとが誤検出される事故防止、 野沢指摘 2026-05-01)。
       const contentMd = scene.contentMd || '';
       const tokens = _povTokens(povName);
       const hasName = tokens.some(t => t && contentMd.includes(t));
-      const hasPronoun = /(?:私|わたし|僕|ぼく|俺|おれ)/.test(contentMd);
-      if (hasName || hasPronoun) {
+      if (hasName) {
         const povChar = _findPovChar(povName);
         if (povChar) top.unshift(povChar);
       }
