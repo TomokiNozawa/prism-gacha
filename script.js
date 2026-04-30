@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.2.4b — 演出&ゲームロジック (Season 1 第1〜2章)
+   Prismaera v1.2.4c — 演出&ゲームロジック (Season 1 第1〜2章)
    ============================================================ */
 "use strict";
 
@@ -510,7 +510,7 @@ const LORE_BY_KEY = {
   // ===== S1C2 追加 (UR×2、各4本) =====
   "UR_深海女王 ネプテア": [
     { title: "千年の海を治める", body: "ネプテアがアクアシスを治め始めて、もう千年が経つ。最初は人魚と陸人の架け橋として現れ、海溝の祈りを守り続けてきた。臣下からは『母』と慕われるが、その肩に載る千年の重さを知るのはネプテア自身だけ。三叉槍を傍に置き、夜更けに月光の海を見つめる時間こそが、彼女の唯一の休息である。海の女王は、誰にも見せない夜を持っている。" },
-    { title: "養女パールへの愛", body: "パールを孤児院から引き取った夜のこと。雷雨の海溝に流された幼子を、ネプテアが自ら腕に抱いて宮殿に戻った。臣下は『お役目に差し障る』と止めたが、ネプテアは『お役目こそ、この子を守る理由になる』と微笑んだ。海の女王の私的な愛情は、この娘にだけ向けられる。海溝の宮殿で、母と娘が二人で月光を見る時間こそが、ネプテアの真の祈りなのだ。" },
+    { title: "養女パールへの愛", body: "パールを孤児院から迎え入れた夜のこと。両親を影喰いに失い、海溝の孤児院で震えていた幼子を、ネプテアが自ら腕に抱いて宮殿に戻った。臣下は『お役目に差し障る』と止めたが、ネプテアは『お役目こそ、この子を守る理由になる』と微笑んだ。海の女王の私的な愛情は、この娘にだけ向けられる。海溝の宮殿で、母と娘が二人で月光を見る時間こそが、ネプテアの真の祈りなのだ。" },
     { title: "黒月の前兆", body: "海の祈りを守る者として、ネプテアは『青の音』が薄れていくのを最初に察した。原虹七色の青——万物を結ぶ祈り——が、ここ数年、明らかに薄くなっている。海溝の影喰いはその予兆に過ぎない。『七色がすべて欠けた時、黒月が空に昇る』——それは古い予言だが、ネプテアは今やそれを現実の確信として、観測者三柱への報告を準備している。波紋の聖女イザベルもまた、その時の盾になる——そう信じて、姉妹の盟約を結んだ。" },
     { title: "三叉槍『虹潮』の真意", body: "三叉槍の真名は『虹潮(こうちょう)』。ネプテア自身の千年の祈りを束ねた神器。三本の穂先は『過去・現在・未来』を象徴し、振るうたびに海中へ虹色の波紋が広がる。だが本当の意味は別にある——『海の民が選んだ三つの誓い』(統治・調和・継承) を体現しているのだ。波紋は浄化の力であると同時に、ネプテア自身が次の世代へ何を残すかを問う鏡でもある。最後の一振りはいつか、必ず誰かの背中を押すために放たれる。" },
   ],
@@ -523,7 +523,7 @@ const LORE_BY_KEY = {
 
   // ===== S1C2 追加 (SSR×3、各3本) =====
   "SSR_紅玉海賊団船長 シャンティ": [
-    { title: "ケイレブとの十年", body: "副長ケイレブとは、もう十年来の相棒。出会いは港町の喧嘩——シャンティが暴れていた時、唯一止めに入った若者がケイレブだった。『お前、自分が誰を守りたいのか分かってない』とケイレブは言った。シャンティは『お前に何が分かる』と返したが、その夜、紅玉号の副長候補に彼を指名した。十年後の今も、ケイレブはシャンティの右腕。互いに『次の海はどこだ』と問い続ける関係である。" },
+    { title: "ケイレブとの十年", body: "副長ケイレブとは、もう十年来の相棒。出会いは港町の喧嘩——シャンティが暴れていた時、唯一止めに入った若者がケイレブだった。シャンティは止めに入ったケイレブを睨み、低くこう告げた——『お前、自分が誰を守りたいのか分かってない』。ケイレブは黙って引いたが、その夜、シャンティは紅玉号の副長候補に彼を指名した。十年後の今も、ケイレブはシャンティの右腕。互いに『次の海はどこだ』と問い続ける関係である。" },
     { title: "教会の白鎧を客人に", body: "なぜイザベルを紅玉号に乗せたのか——シャンティ自身、最初は気まぐれだったと言う。だが船を出して三日目の夜、シャンティはケイレブに告白した。『あの女、自分の鎧の重さを忘れてない目をしてた。船にあの目があると、舵が逸れない気がした』。自由商人の頭領が、教会の聖巫騎士を客人に迎える——稀有な絵が、紅玉号の伝説に新しいページを書いた。" },
     { title: "煙草の理由", body: "シャンティが戦場で煙草をふかすのは、亡き前任船長の癖を継いだもの。前任は赤毛のシャンティを拾った父代わりの男で、最後の海戦で『紅玉号を頼む』と言って消えた。シャンティは煙草を吸いながら、彼の最期の言葉を反芻する。『海賊は自由でいい。だが、誰かを守る自由を選べ』——その教えは、今も紅玉号の航路を決めている。煙草の煙は、過去への祈りでもある。" },
   ],
@@ -540,7 +540,7 @@ const LORE_BY_KEY = {
 
   // ===== S1C2 追加 (SR×5、各2本) =====
   "SR_海獣使い モルガ": [
-    { title: "サメの名はジン", body: "モルガの相棒のサメには『ジン』という名がある。名付けたのは八歳の頃。海の遊牧民の少女が初めて出会った時、ジンはまだ仔ザメで、母を影喰いに失って漂っていた。『あたしが母さんになる』とモルガは決めた。今ではモルガの背に乗るほど大きくなったジンは、彼女の言葉を全部理解する。海獣使いは、命じる者ではなく、共に泳ぐ仲間。それがモルガの誇りだ。" },
+    { title: "サメの名はジン", body: "モルガの相棒のサメには『ジン』という名がある。名付けたのは八歳の頃。海の遊牧民の少女が初めて出会った時、ジンはまだ仔ザメで、母を影喰いに失って漂っていた。『あたしが母さんになる』とモルガは決めた。今ではモルガを背に乗せるほど大きくなったジンは、彼女の言葉を全部理解する。海獣使いは、命じる者ではなく、共に泳ぐ仲間。それがモルガの誇りだ。" },
     { title: "海の遊牧民の歌", body: "海の遊牧民には、千年伝わる歌がある。『海は誰のものでもなく、海は皆のものだ』——その歌をモルガは祖母から教わった。ネプテア女王の伝令を引き受けたのも、その歌を信じていたから。海の女王に従うのは、海全体を信じる行為と同じ。海獣たちが海を駆ける時、モルガはいつも歌を口ずさむ。海は、誰かが歌う限り、自由でいられる。" },
   ],
   "SR_珊瑚鎧の海騎士 コラリア": [
@@ -552,11 +552,11 @@ const LORE_BY_KEY = {
     { title: "ベルとの遠い友", body: "詠聖ベルとは、互いに会ったことがない。だがティアラは、ベルの歌が原虹に届くことを水晶玉で見た。『歌と予言は同じ系譜』——古い文献にそう書かれていた。海と陸、それぞれ別の方法で原虹に触れる二人。互いに名は知っているが顔は知らない。それでもティアラは、ベルが歌う夜だけ水晶玉が淡く光ることを知っている。沈黙の友情は、海溝の底にも届く。" },
   ],
   "SR_紅玉海賊団副長 ケイレブ": [
-    { title: "シャンティへの忠誠", body: "ケイレブが副長になったのは、シャンティに『お前は自分が誰を守りたいか分かってない』と言ったあの夜の翌日。シャンティは何も説明せず、『紅玉号の副長になれ』と命じた。ケイレブは『分かった』とだけ返した。十年後の今、ケイレブは知っている——あの夜、シャンティに自分自身を見透かされていたのだと。守りたいのは紅玉海賊団そのもの。船長と仲間と、海を進む船首の風景。" },
+    { title: "シャンティへの忠誠", body: "ケイレブが副長になったのは、シャンティに『お前は自分が誰を守りたいか分かってない』と言われたあの夜の翌日。シャンティは何も説明せず、『紅玉号の副長になれ』と命じた。ケイレブは『分かった』とだけ返した。十年後の今、ケイレブは知っている——あの夜、シャンティに自分自身を見透かされていたのだと。守りたいのは紅玉海賊団そのもの。船長と仲間と、海を進む船首の風景。" },
     { title: "クレオの幼馴染", body: "船医クレオとは、生まれ故郷の同じ村の幼馴染。子供の頃、二人で海に憧れて泳ぎ続けた。クレオが医術の道に進み、ケイレブが剣の道に進んだ後も、互いの選択を尊重し続けてきた。紅玉号でようやく再会した時、クレオは『遅かったわね』と笑い、ケイレブは『お前を待たせたな』と返した。船の上で、二人の幼馴染は今も同じ夢を見ている——『無事に港へ帰ろう』と。" },
   ],
   "SR_白焔教会騎士 ラナス": [
-    { title: "シオンへの兄弟弟子", body: "仮面騎士シオンとは、教会の盾としての遠縁的な兄弟弟子の関係。同じ師範から剣と盾を学んだ時期があり、ラナスは仮面の下のシオンの素顔を知る数少ない教会人の一人。シオンが声を捨てた夜、ラナスは唯一の証人だった。『お前の選択を、教会は咎めない』——ラナスはそう約束し、以来一度もその素顔について口にしていない。沈黙の誓いは、最も重い騎士の誓いの一つである。" },
+    { title: "シオンへの兄弟弟子", body: "仮面騎士シオンとは、教会の盾としての遠縁的な兄弟弟子の関係。同じ師範から剣と盾を学んだ時期があり、ラナスはシオンの元の声と剣の癖を僅かに憶えている数少ない教会人の一人——素顔を知るのは王族・イザベル・セラフィエル様の三人だけで、 ラナスは知る側ではない。だが修練場で見かける仮面の下からは、 かつての兄弟子の気配だけが確かに感じられる。『お前の選択を、教会は咎めない』——ラナスは心の中でそう誓い、 以来一度もシオンの過去について口にしていない。沈黙の誓いは、 最も重い騎士の誓いの一つである。" },
     { title: "銀白鎧の誓い", body: "ラナスの銀白鎧は、洗礼の日に師範から受け継いだもの。『この鎧は、お前の誠実を映す鏡だ』と師範は言った。以来ラナスは、戦場から戻るたびに鎧を磨く——傷も汚れも残さず、銀白の輝きを取り戻すまで。同僚は『過剰な完璧主義』と笑うが、ラナスにとって鎧の輝きは、自分自身の誓いの可視化。誠実は内面の問題だが、外面に表れる時、初めて他人に届く。" },
   ],
 
@@ -3525,7 +3525,8 @@ const FURIGANA = {
 
 // HTMLテキストノード内のキャラ名を <a class="char-link"> でラップ
 // 詳細画面オープン用。長い候補から処理して短い名前の誤マッチ回避。
-function linkifyCharNames(html) {
+// sceneLabel: 現シーンの label ('2-11' 等)。 STORY_CHAR_REMAP のシーン依存 remap に使う (省略可)。
+function linkifyCharNames(html, sceneLabel) {
   if (typeof POOL === 'undefined') return html;
   const tmp = document.createElement('div');
   tmp.innerHTML = html;
@@ -3548,6 +3549,26 @@ function linkifyCharNames(html) {
       add(fullName);
       if (lastToken !== fullName && !allFullNames.has(lastToken)) add(lastToken);
       if (katakanaTail && katakanaTail !== lastToken && !allFullNames.has(katakanaTail)) add(katakanaTail);
+    }
+  }
+  // シーン依存 remap: STORY_CHAR_REMAP に該当があれば、 候補の char を別キャラに差し替える。
+  // 例: s1c2 の 2-11 以降「イザベル」 → 覚醒後 UR「波紋の聖女 イザベル」 にリンク。
+  if (sceneLabel && typeof STORY_CHAR_REMAP !== 'undefined' && currentStoryId && STORY_CHAR_REMAP[currentStoryId]) {
+    const applicableRemaps = STORY_CHAR_REMAP[currentStoryId].filter(r => _sceneLabelGte(sceneLabel, r.fromLabel));
+    for (const r of applicableRemaps) {
+      for (const [fromName, toFullName] of Object.entries(r.remap || {})) {
+        // POOL から targetChar を探す (tier 横断)
+        let targetChar = null;
+        for (const tier of ['LR','UR','SSR','SR','R']) {
+          const found = POOL[tier].find(c => c.name === toFullName);
+          if (found) { targetChar = { ...found, tier }; break; }
+        }
+        if (!targetChar) continue;
+        // 既存candidateで name===fromName のものを差し替え (短名衝突で1件だけのはず、 全件差替で安全)
+        for (const cand of candidates) {
+          if (cand.name === fromName) cand.char = targetChar;
+        }
+      }
     }
   }
   candidates.sort((a, b) => b.name.length - a.name.length);
@@ -3749,9 +3770,9 @@ function renderScene() {
   $("#story-progress").textContent = `${storyIdx + 1} / ${storyScenes.length}`;
   $("#story-scene-label").textContent = scene.label || '';
   $("#story-scene-label").style.display = scene.label ? '' : 'none';
-  // タイトル: キャラ名リンク化 + ふりがな
+  // タイトル: キャラ名リンク化 + ふりがな (sceneLabel 渡しで覚醒後リンク等の文脈切替対応)
   const titleEl = $("#story-scene-title");
-  titleEl.innerHTML = applyFurigana(linkifyCharNames(escapeHtml(scene.title)));
+  titleEl.innerHTML = applyFurigana(linkifyCharNames(escapeHtml(scene.title), scene.label));
   let bodyHtml;
   if (typeof marked !== 'undefined' && scene.contentMd) {
     bodyHtml = marked.parse(scene.contentMd);
@@ -3760,8 +3781,8 @@ function renderScene() {
       ? '<p>' + scene.contentMd.replace(/\n\n+/g, '</p><p>').replace(/\n/g, '<br>') + '</p>'
       : '';
   }
-  // 本文: キャラ名リンク化 → ふりがな → 初登場キャラのカットイン挿入
-  bodyHtml = linkifyCharNames(bodyHtml);
+  // 本文: キャラ名リンク化 → ふりがな → 初登場キャラのカットイン挿入 (sceneLabel で文脈依存リンク切替)
+  bodyHtml = linkifyCharNames(bodyHtml, scene.label);
   bodyHtml = applyFurigana(bodyHtml);
   bodyHtml = injectStoryCutins(bodyHtml, storyIdx);
   // 最終シーン: 次章/一覧ナビゲーションを末尾に追加
@@ -4086,6 +4107,26 @@ const LOCATION_CONFIG = {
     '2-9':  { img: '/images/locations/s1c2/aquasis_rift.png' },   // 黒い亀裂
   },
 };
+
+// シーン依存のキャラリンク remap — 同じ単独名 (例: 「イザベル」) でも、 シーン進行に応じて別キャラ (例: 覚醒後 UR) にリンク先を切替える。
+// 例: s1c2 の 2-11 (波紋の聖女覚醒) 以降は、 単独名「イザベル」 を SSR ではなく UR「波紋の聖女 イザベル」 にリンクさせる。
+// fromLabel: そのラベル含めてそれ以降のシーンで適用 (X-Y 形式、 X=幕、 Y=シーン番号)。
+const STORY_CHAR_REMAP = {
+  's1c2': [
+    { fromLabel: '2-11', remap: { 'イザベル': '波紋の聖女 イザベル' } },
+  ],
+};
+
+// "X-Y" ラベル比較: label が fromLabel と等しい or 後 (= 数値で大きい) かを判定。
+// 章 (第X幕) を跨いで比較するため、 まず X、 次に Y を比較。
+function _sceneLabelGte(label, fromLabel) {
+  if (!label || !fromLabel) return false;
+  const a = String(label).split('-').map(n => parseInt(n, 10));
+  const b = String(fromLabel).split('-').map(n => parseInt(n, 10));
+  if (isNaN(a[0]) || isNaN(b[0])) return false;
+  if (a[0] !== b[0]) return a[0] > b[0];
+  return (a[1] || 0) >= (b[1] || 0);
+}
 let _firstAppearanceMap = new Map(); // charName → 初出シーンindex
 function precomputeFirstAppearances() {
   _firstAppearanceMap.clear();
@@ -4103,11 +4144,11 @@ function precomputeFirstAppearances() {
 }
 function _buildCutinHtml(c) {
   const tier = c.tier ? c.tier.toLowerCase() : 'lr';
+  // 「✦ 新登場」 ラベルと title (キャッチフレーズ) は野沢指示で非表示。
+  // ストーリー本文中の挿絵としてキャラ画像とキャラ名のみを差し込む。
   return `<div class="story-cutin" data-tier="${tier}" data-name="${escapeHtml(c.name)}">` +
-    `<div class="story-cutin-newcomer">✦ 新登場</div>` +
     `<img class="story-cutin-img" src="${c.img}" alt="${escapeHtml(c.name)}" loading="lazy">` +
     `<div class="story-cutin-name">${escapeHtml(c.name)}</div>` +
-    (c.title ? `<div class="story-cutin-title">${escapeHtml(c.title)}</div>` : '') +
     `</div>`;
 }
 function injectStoryCutins(bodyHtml, sceneIdx) {
