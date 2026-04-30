@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.2.3v — 演出&ゲームロジック (Season 1 第1〜2章)
+   Prismaera v1.2.3w — 演出&ゲームロジック (Season 1 第1〜2章)
    ============================================================ */
 "use strict";
 
@@ -2362,7 +2362,7 @@ function renderGalleryByTab() {
       // cache buster 付きで サムネ更新時にブラウザキャッシュ刷新
       const img = document.createElement("img");
       img.className = "gallery-card-img";
-      img.src = (c.img || '').replace(/\.png$/i, '_thumb.webp') + '?v=20260430v';
+      img.src = (c.img || '').replace(/\.png$/i, '_thumb.webp') + '?v=20260430w';
       img.alt = c.name;
       img.loading = "lazy";
       img.decoding = "async";
@@ -3765,7 +3765,8 @@ async function openStory(storyId) {
     const resp = await fetch(info.file + '?v=' + Date.now());
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const md = await resp.text();
-    const povMatch = md.match(/\*\*POV\*\*\s*[:：]\s*(.+)/);
+    // POV: 「**POV**: イザベル (白焔教会 聖巫騎士)」 の括弧前部分のみ取得 (POOL の name と一致させるため)
+    const povMatch = md.match(/\*\*POV\*\*\s*[:：]\s*([^\n(（]+)/);
     currentStoryPov = povMatch ? povMatch[1].trim() : null;
     storyScenes = parseStoryToScenes(md);
     precomputeFirstAppearances();
