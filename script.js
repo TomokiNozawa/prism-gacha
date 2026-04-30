@@ -3755,6 +3755,7 @@ async function openStory(storyId) {
   const info = STORY_FILES[storyId];
   if (!info) return;
   currentStoryId = storyId;
+  _prefetchChapterAssets(storyId);  // M2: 章の場所画像を background DL → SWで LOC_CACHE 充填
   $("#story-meta").textContent = info.meta;
   $("#story-title").textContent = info.title;
   $("#story-scene-content").innerHTML = '<div class="story-loading">読み込み中…</div>';
@@ -4255,6 +4256,23 @@ const STORY_LOCATION_INLINE_CONFIG = {
     { scene: '2-11', marker: '光の中で、私の鎧が、変容した',      position: 'after',  img: '/images/locations/s1c2/ripple_saint_awakening_thumb.webp' },
   ],
 };
+
+// M2: 章別場所画像 オンデマンドプリキャッシュ
+// openStory() 開始時に呼び、 当該章の LOCATION_CONFIG + STORY_LOCATION_INLINE_CONFIG の全画像URLを
+// background fetch する。 SW (sw.js) が傍受して LOC_CACHE に put → 2回目以降は瞬時表示 (フラッシュ消失)。
+// 失敗は無視 (ネットワーク次第)。 fetch の Response は使わず投げ捨て (SW が cache に入れるのが目的)。
+function _prefetchChapterAssets(storyId) {
+  const urls = new Set();
+  const bg = LOCATION_CONFIG[storyId] || {};
+  for (const k in bg) { if (bg[k] && bg[k].img) urls.add(bg[k].img); }
+  const inlines = STORY_LOCATION_INLINE_CONFIG[storyId] || [];
+  for (const e of inlines) { if (e && e.img) urls.add(e.img); }
+  if (urls.size === 0) return;
+  // 低優先度で並列発火 (本文fetchを邪魔しない)。 SW が無効環境でもブラウザのHTTPキャッシュには載る
+  for (const url of urls) {
+    try { fetch(url, { credentials: 'omit' }).catch(() => {}); } catch (e) {}
+  }
+}
 
 // シーン依存のキャラリンク remap — 同じ単独名 (例: 「イザベル」) でも、 シーン進行に応じて別キャラ (例: 覚醒後 UR) にリンク先を切替える。
 // 例: s1c2 の 2-11 (波紋の聖女覚醒) 以降は、 単独名「イザベル」 を SSR ではなく UR「波紋の聖女 イザベル」 にリンクさせる。
