@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.2.3x — 演出&ゲームロジック (Season 1 第1〜2章)
+   Prismaera v1.2.3y — 演出&ゲームロジック (Season 1 第1〜2章)
    ============================================================ */
 "use strict";
 
@@ -2362,7 +2362,7 @@ function renderGalleryByTab() {
       // cache buster 付きで サムネ更新時にブラウザキャッシュ刷新
       const img = document.createElement("img");
       img.className = "gallery-card-img";
-      img.src = (c.img || '').replace(/\.png$/i, '_thumb.webp') + '?v=20260430x';
+      img.src = (c.img || '').replace(/\.png$/i, '_thumb.webp') + '?v=20260430y';
       img.alt = c.name;
       img.loading = "lazy";
       img.decoding = "async";
@@ -3877,11 +3877,12 @@ function renderScene() {
       ? '<p>' + scene.contentMd.replace(/\n\n+/g, '</p><p>').replace(/\n/g, '<br>') + '</p>'
       : '';
   }
-  // 本文: キャラ名リンク化 → ふりがな → 初登場キャラのカットイン挿入 → 場所インライン挿絵 (sceneLabel で文脈依存リンク切替)
+  // 本文: 場所インライン挿絵 (ruby/link化前の純HTMLでmarker検索) → キャラ名リンク化 → ふりがな → 初登場キャラのカットイン挿入
+  // injectStoryLocationInlines を最前に呼ぶ理由: ふりがな (<ruby>) や キャラリンク (<a>) で marker文字列が分断されるとマッチ失敗するため
+  bodyHtml = injectStoryLocationInlines(bodyHtml, storyIdx);
   bodyHtml = linkifyCharNames(bodyHtml, scene.label);
   bodyHtml = applyFurigana(bodyHtml);
   bodyHtml = injectStoryCutins(bodyHtml, storyIdx);
-  bodyHtml = injectStoryLocationInlines(bodyHtml, storyIdx);
   // 最終シーン: 次章/一覧ナビゲーションを末尾に追加
   if (storyIdx === storyScenes.length - 1) {
     bodyHtml += buildEndNavHtml(currentStoryId);
@@ -4339,6 +4340,7 @@ function injectStoryCutins(bodyHtml, sceneIdx) {
 // STORY_LOCATION_INLINE_CONFIG の各 entry の position で挿入位置を制御:
 //   - 'after' (デフォルト): marker を含む <p>...</p> の **直後** (= 本文を読了してから絵を見る)
 //   - 'before':              marker を含む <p> の **直前** (= 絵を見てから本文を読む)
+// 実装: indexOf ベースで marker位置を find → そこから前後の <p>/</p> を見つけて挿入
 function injectStoryLocationInlines(bodyHtml, sceneIdx) {
   const scene = storyScenes[sceneIdx];
   if (!scene || !scene.label) return bodyHtml;
@@ -4349,21 +4351,23 @@ function injectStoryLocationInlines(bodyHtml, sceneIdx) {
     const cardHtml = `<div class="story-location-inline"><img class="story-location-inline-img" src="${e.img}" alt="" loading="lazy" decoding="async"></div>`;
     let injected = false;
     if (e.marker) {
-      const esc = e.marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      if (e.position === 'before') {
-        // marker を含む <p> の直前に挿入
-        const re = new RegExp(`<p[^>]*>(?:(?!<\\/p>).)*?${esc}`);
-        const m = bodyHtml.match(re);
-        if (m && m.index >= 0) {
-          bodyHtml = bodyHtml.slice(0, m.index) + cardHtml + bodyHtml.slice(m.index);
-          injected = true;
-        }
-      } else {
-        // 'after' (デフォルト): marker を含む <p>...</p> の直後に挿入
-        const re = new RegExp(`(<p[^>]*>(?:(?!<\\/p>).)*?${esc}(?:(?!<\\/p>).)*?<\\/p>)`);
-        if (re.test(bodyHtml)) {
-          bodyHtml = bodyHtml.replace(re, '$1' + cardHtml);
-          injected = true;
+      const markerIdx = bodyHtml.indexOf(e.marker);
+      if (markerIdx >= 0) {
+        if (e.position === 'before') {
+          // marker位置から逆方向に <p を探して、 その直前に挿絵
+          const openP = bodyHtml.lastIndexOf('<p', markerIdx);
+          if (openP >= 0) {
+            bodyHtml = bodyHtml.slice(0, openP) + cardHtml + bodyHtml.slice(openP);
+            injected = true;
+          }
+        } else {
+          // 'after' (デフォルト): marker位置から前方の </p> を探して、 その直後に挿絵
+          const closeP = bodyHtml.indexOf('</p>', markerIdx);
+          if (closeP >= 0) {
+            const insertAt = closeP + 4;  // </p> の長さ
+            bodyHtml = bodyHtml.slice(0, insertAt) + cardHtml + bodyHtml.slice(insertAt);
+            injected = true;
+          }
         }
       }
     }
