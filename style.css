@@ -1481,6 +1481,55 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   padding: 5px 10px; border-radius: 6px;
   background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.06);
 }
+/* 章タブ (すべて/第1章/第2章/期間限定) */
+.gallery-tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 6px 0 10px;
+  padding: 2px 0 4px;
+  scrollbar-width: thin;
+}
+.gallery-tabs::-webkit-scrollbar { height: 4px; }
+.gallery-tabs::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
+.gallery-tab {
+  flex: 0 0 auto;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  white-space: nowrap;
+}
+.gallery-tab:hover {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.2);
+}
+.gallery-tab:active { transform: translateY(1px); }
+.gallery-tab.active {
+  background: linear-gradient(135deg, #7e57ff, #5fbfff);
+  border-color: transparent;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(126, 87, 255, 0.35);
+}
+/* 期間限定タブは少し別色で目立たせる (合宿の「赤」 ニュアンス) */
+.gallery-tab-limited {
+  border-color: rgba(255, 100, 80, 0.3);
+}
+.gallery-tab-limited.active {
+  background: linear-gradient(135deg, #e85a4f, #ff9a4f);
+  box-shadow: 0 2px 8px rgba(232, 90, 79, 0.35);
+}
+@media (max-width: 640px) {
+  .gallery-tab { padding: 6px 12px; font-size: 12px; }
+}
 .gallery-stats .g-lr   {
   color: #111; background: linear-gradient(90deg, #fff, #ffd84d, #ff5faa, #5fffd4) !important;
   background-size: 300% 300%; animation: rate-shine 2s linear infinite;

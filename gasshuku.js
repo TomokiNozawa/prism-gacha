@@ -182,7 +182,49 @@
     if (h > 0) return `あと${h}時間${m}分`;
     return `あと${m}分`;
   }
+  // 合宿ガチャ・合宿図鑑エリアが「そもそも見えるか」 を判定。
+  // - カットオフ前 (Date.now() < GASSHUKU_END_AT): 全員見える (現状互換)
+  // - カットオフ後: Firebase 認証済 かつ アカウント作成日 < cutoff のユーザーのみ見える
+  //   それ以外 (ゲスト / 05/01以降に作成したアカウント) → 合宿エリア完全非表示
+  // 野沢さんの方針: すでにアカウント作成済の方への配慮。 新規ユーザーは合宿の存在すら知らない。
+  function isGasshukuVisible() {
+    if (Date.now() < GASSHUKU_END_AT) return true;
+    const app = (function () { try { return firebase.app('prism-gacha'); } catch (e) { return null; } })();
+    if (!app) return false;
+    try {
+      const user = app.auth().currentUser;
+      if (!user) return false;
+      const created = user.metadata && user.metadata.creationTime
+        ? new Date(user.metadata.creationTime).getTime()
+        : Infinity;
+      return created < GASSHUKU_END_AT;
+    } catch (e) {
+      return false;
+    }
+  }
   function updateGasshukuLimitedUI() {
+    // visibility 判定を最初に: 非表示なら合宿エリアを完全に隠して終了
+    const visible = isGasshukuVisible();
+    const ctaBlock = document.querySelector('.gasshuku-cta-block');
+    const galleryHead = document.querySelector('#gasshuku-gallery-head, .gasshuku-gallery-heading');
+    const galleryGrid = document.getElementById('gasshuku-gallery-grid');
+    if (!visible) {
+      if (ctaBlock) ctaBlock.style.display = 'none';
+      if (galleryHead) galleryHead.style.display = 'none';
+      if (galleryGrid) galleryGrid.style.display = 'none';
+      // 期間限定バッジも消す
+      const oldBadge = document.getElementById('gasshuku-period-badge');
+      if (oldBadge) oldBadge.remove();
+      // 図鑑モーダル内の期間限定タブの可視性も更新 (script.js 側関数)
+      if (typeof window.updateGalleryTabsVisibility === 'function') window.updateGalleryTabsVisibility();
+      return;
+    }
+    // visible 復帰時: display を元に戻す (以前 hide していた場合)
+    if (ctaBlock) ctaBlock.style.display = '';
+    if (galleryHead) galleryHead.style.display = '';
+    if (galleryGrid) galleryGrid.style.display = '';
+    if (typeof window.updateGalleryTabsVisibility === 'function') window.updateGalleryTabsVisibility();
+
     const active = isGasshukuActive();
     const timeLeft = gasshukuTimeLeft();
     // CTAブロック サブ表示
@@ -338,12 +380,9 @@
       console.warn('[gasshuku] watchAuth failed:', e);
     }
   }
-  function renderGasshukuGallery() {
-    const grid = document.getElementById('gasshuku-gallery-grid');
-    const cntEl = document.getElementById('gasshuku-gallery-count');
-    const totalEl = document.getElementById('gasshuku-gallery-total');
-    if (!grid) return;
-    if (totalEl) totalEl.textContent = String(POOL.length * 2);
+  // 合宿キャラを指定 grid に描画 (ホーム画面下 / 図鑑モーダル「期間限定」 タブ 共通ロジック)
+  function renderGasshukuToGrid(grid) {
+    if (!grid) return { count: 0, total: POOL.length * 2 };
     const d = loadCollected();
     grid.innerHTML = '';
     let count = 0;
@@ -385,8 +424,25 @@
         grid.appendChild(cell);
       });
     });
-    if (cntEl) cntEl.textContent = String(count);
     setTimeout(() => { try { setupGasshukuBlink(grid); } catch(e){} }, 100);
+    return { count, total: POOL.length * 2 };
+  }
+
+  function renderGasshukuGallery() {
+    const grid = document.getElementById('gasshuku-gallery-grid');
+    const cntEl = document.getElementById('gasshuku-gallery-count');
+    const totalEl = document.getElementById('gasshuku-gallery-total');
+    if (!grid) return;
+    if (totalEl) totalEl.textContent = String(POOL.length * 2);
+    const { count } = renderGasshukuToGrid(grid);
+    if (cntEl) cntEl.textContent = String(count);
+  }
+
+  // 図鑑モーダル「期間限定」 タブから呼ばれる: 渡された grid に合宿キャラを描画
+  // 既存 grid layout (gallery-grid) はそのまま使用、 中の gasshuku-gallery-cell スタイルだけ流用
+  function renderGasshukuGalleryInModal(targetGrid) {
+    if (!targetGrid) return { count: 0, total: 0 };
+    return renderGasshukuToGrid(targetGrid);
   }
 
   // ====== 詳細モーダル (合宿用、独立) ======
@@ -1138,4 +1194,8 @@
   } else {
     init();
   }
+
+  // script.js (図鑑モーダル「期間限定」 タブ) から呼ばれる関数を expose
+  window.isGasshukuVisible = isGasshukuVisible;
+  window.renderGasshukuGalleryInModal = renderGasshukuGalleryInModal;
 })();

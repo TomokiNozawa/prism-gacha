@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.2.3m — 演出&ゲームロジック (Season 1 第1〜2章)
+   Prismaera v1.2.3n — 演出&ゲームロジック (Season 1 第1〜2章)
    ============================================================ */
 "use strict";
 
@@ -25,7 +25,7 @@ const S1 = "/images/characters/season1";
 const POOL = {
   LR: [
     {
-      name: "虹意 プリズマ", season: 1,
+      name: "虹意 プリズマ", season: 1, chapter: 's1c1',
       title: "原虹の意志・唯一の伝説",
       caption: "我は光の源。\n終わりにして、始まり。",
       desc: "原虹の最初の光から生まれた自意識。性別という概念の外にいる、虹霊界そのものの『人格』。影喰いの誕生はこの存在の無意識下の『迷い』から生じたと伝えられる。虹光剣『始源(げんそう)』は万色の刃を持つ。セラフィエルを『自分の羽』と呼び、カグヤを『最古の記憶の番人』と呼ぶ。他の全ての戦士は『プリズマの指先』である。",
@@ -34,35 +34,35 @@ const POOL = {
   ],
   UR: [
     {
-      name: "セラフィエル", season: 1,
+      name: "セラフィエル", season: 1, chapter: 's1c1',
       title: "至天の聖騎士",
       caption: "貴方の祈り、我が光となる。",
       desc: "原虹の中心で生まれた六翼の天使。人の姿を借りて降臨する神霊。ハルバード『虹天』は原虹そのものの結晶。世界が完全な闇に呑まれる時のみ顕現し、光を取り戻す。プリズマの分身とも言われ、カグヤ・ノクスと並ぶ『観測者の三姉妹』の一角。イザベルを地上の『代理』として認めている。",
       img: `${S1}/ur/seraph_paladin.png`,
     },
     {
-      name: "龍帝 アルテミス", season: 1,
+      name: "龍帝 アルテミス", season: 1, chapter: 's1c1',
       title: "虹霊界の覇王",
       caption: "我が背の龍が\n世界の終わりを告げる。",
       desc: "星暁峰で千年修行した竜人の皇帝。背に映る巨大な龍影は竜魂の実体化。双大剣『陰陽』は光と闇を同時に振るう。虹霊界十国すべてが彼に頭を垂れる。紫竜ヴィル・リリムとは遠縁。焔帝ヒノオウは戦友。紅翼末妹ひなたに一方的に『おにーさま！』と慕われている(本人は困惑気味)。",
       img: `${S1}/ur/dragon_emperor.png`,
     },
     {
-      name: "星海のノクス", season: 1,
+      name: "星海のノクス", season: 1, chapter: 's1c1',
       title: "虚空の星辰魔女",
       caption: "宇宙は私の中にある。\n貴方も、この瞬間も。",
       desc: "人か神かも定かではない謎の魔女。髪には銀河を、従者に惑星を宿す。星杖『虚境』で時間と因果を織る。影喰いとの初戦で世界を救った伝説の存在。黒曜塔の最古の卒業生。セラフィエル・カグヤと『観測者の三姉妹』。黒猫ノアが憧れて論文を投稿してくるが、毎度『まだ甘い』と返す(密かに成長を楽しんでいる)。",
       img: `${S1}/ur/cosmic_witch.png`,
     },
     {
-      name: "千夜姫 カグヤ", season: 1,
+      name: "千夜姫 カグヤ", season: 1, chapter: 's1c1',
       title: "虹霊界最古の賢者",
       caption: "幼く見えるか？ うむ、千年やっとるでな",
       desc: "原虹の誕生より前から在る月の化身。小柄な少女の姿で顕現しているが、実齢は計り知れぬ。九尾の天狐を従え、杖『月影(つきかげ)』に全魔術の原典を宿す。気まぐれに人前へ現れ、助言を残して消える。プリズマの記憶の番人。九尾の朱音とは遠い血縁。セラフィエル・ノクスとは千年来の友。",
       img: `${S1}/ur/ancient_sage.png`,
     },
     {
-      name: "焔帝 ヒノオウ", season: 1,
+      name: "焔帝 ヒノオウ", season: 1, chapter: 's1c1',
       title: "虹霊界第七天の女神帝",
       caption: "すべての闇を\nこの火で照らしてやろう。",
       desc: "七天の最高天を統べる炎の女神帝。背に巨大な朱の鳳凰を従え、双大剣『日輪』『月輪』を振るう。影喰いとの戦いでは常に前衛に立つ戦闘神。焔と虹を同時に纏う稀有な存在。龍帝アルテミスとは戦友。焔舞ヒナカを『愛弟子』として認め、朱音の焔術も元を辿れば彼女に繋がる。",
@@ -70,14 +70,14 @@ const POOL = {
     },
     // ===== S1C2 追加 (UR2体) =====
     {
-      name: "深海女王 ネプテア", season: 1,
+      name: "深海女王 ネプテア", season: 1, chapter: 's1c2',
       title: "海淵都市アクアシスの統治者",
       caption: "海の祈りを守る者として、\n必ず力を貸す。",
       desc: "海淵都市アクアシスを千年治める深海女王。三叉槍と虹色の波紋で影喰いを浄化する。統治は厳格でありながら慈愛に満ち、海の民すべてが彼女を『母』と慕う。覚醒イザベルを『波紋の聖女』と認め、姉妹の盟約を結ぶ。海溝の異変と『黒月の前兆』を最初に察知した観測者の一人。",
       img: `${S1}/ur/sea_queen.png`,
     },
     {
-      name: "波紋の聖女 イザベル", season: 1,
+      name: "波紋の聖女 イザベル", season: 1, chapter: 's1c2',
       title: "自分自身として祈る者",
       caption: "私は、私自身として、祈ります。",
       desc: "深海の決戦を経て覚醒した聖巫騎士の新たな姿。聖槍『天穹』が虹色の刃へと変容し、振るうたび海中に虹色の波紋が広がる。『セラフィエル様の代理』ではなく『自分自身の祈り』に目覚めたことでUR枠へ昇華。ネプテア女王と姉妹の盟約を結ぶ、海と虹の体現者。",
@@ -86,56 +86,56 @@ const POOL = {
   ],
   SSR: [
     {
-      name: "森の射手 リナエ", season: 1,
+      name: "森の射手 リナエ", season: 1, chapter: 's1c1',
       title: "深緑樹海の守り手",
       caption: "葉音が消えた瞬間、狙いは定まっている",
       desc: "エルフ狩人氏族の末裔。樹齢千年の祖木から作られた『生きた弓』の継承者。葉擦れだけで敵の位置を読み、矢は外さない。樹海の異変をいち早く察知する斥候。半エルフのヴィオラは弓の後輩で、気まぐれに指導している。影刃シンとは『一番目の斥候』の座を競う好敵手。",
       img: `${S1}/ssr/elf_archer.png`,
     },
     {
-      name: "獣牙 ガルド", season: 1,
+      name: "獣牙 ガルド", season: 1, chapter: 's1c1',
       title: "月牙狼族の戦士団長",
       caption: "群れのために斧を振るう。それだけだ",
       desc: "狼獣人の誇り高き戦士族。両手斧『月牙』は代々の団長が受け継ぐ英雄の遺物。寡黙で粗野に見えて、仲間のためには命を惜しまない。紫竜ヴィルとは以前領地問題で斬り合った仲だが、今は背中を預ける戦友。",
       img: `${S1}/ssr/wolf_warrior.png`,
     },
     {
-      name: "竜爵 ヴィル", season: 1,
+      name: "竜爵 ヴィル", season: 1, chapter: 's1c1',
       title: "紫竜王国の第三王女",
       caption: "竜の血を甘く見るな、死ぬぞ",
       desc: "紫竜王の三女にして、生まれながらの竜人。三叉槍『紫雷』は彼女自身の竜気を解放する。王位継承権を弟に譲り、戦場を己の居場所と決めた。龍帝アルテミスとは遠縁(竜の血筋)。リリムは実の従妹で、彼女を姉のように慕う。朱音とは酒の飲み仲間。",
       img: `${S1}/ssr/draco_lancer.png`,
     },
     {
-      name: "仮面騎士 シオン", season: 1,
+      name: "仮面騎士 シオン", season: 1, chapter: 's1c1',
       title: "銀霜王国の沈黙の盾",
       caption: "騎士に名は要らぬ。仮面と誓いがあれば",
       desc: "素顔も声も伏せた謎の聖騎士。王族暗殺の陰謀から主君を守るため、名と顔を捨てた。盾『誓盾』とメイス『裁罰』は神器級。無言の剛力が恐怖を呼ぶ。仮面の下の素顔を知る者は三人だけ——王族、イザベル、そしてセラフィエル。イザベルとは古い幼馴染。",
       img: `${S1}/ssr/masked_knight.png`,
     },
     {
-      name: "黒猫 ノア", season: 1,
+      name: "黒猫 ノア", season: 1, chapter: 's1c1',
       title: "黒曜塔の若き司書官",
       caption: "本なら任せて♪ 読むのも書くのも、ぶっ壊すのも",
       desc: "黒曜塔の禁書庫を預かる猫獣人の天才。浮遊魔導書『夜導』で召喚魔術を操る。自由奔放で人懐っこいが、禁書の扱いだけは絶対に譲らない。星海ノクスを憧れ、論文を投稿しては『まだ甘い』と返されるのを楽しんでいる。こはねは同じ獣人として妹分。",
       img: `${S1}/ssr/cat_librarian.png`,
     },
     {
-      name: "朱音", season: 1,
+      name: "朱音", season: 1, chapter: 's1c1',
       title: "夜焔郷の遊芸師",
       caption: "逃げたいなら今のうち。逃げなかったら、もう遅いわ",
       desc: "夜焔郷の花街で一等と謳われる遊芸師。表の顔は舞い手、裏の顔は暗殺者。九尾の黒狐の血を引き、金の扇『紅月』から放つ灼火の術で標的を焼き尽くす。遠い血縁にカグヤ(九尾の天狐系)がいる。紫竜ヴィルとは酒の飲み仲間。こはねは拾った妹分の狐獣人。",
       img: `${S1}/ssr/kitsune_lady.png`,
     },
     {
-      name: "イザベル", season: 1,
+      name: "イザベル", season: 1, chapter: 's1c1',
       title: "白焔教会の聖巫騎士",
       caption: "あなたの傷、すべてこの手で癒してあげる",
       desc: "白焔教会の聖域を守る聖巫騎士。聖槍『天穹』は虹霊界十英雄の一人から受け継がれし神器。癒しの聖光と戦場の剛力を両立する、稀有な『戦う治癒者』。シオンの幼馴染(素顔を知る三人の一人)。メイリは教会の後輩で彼女を姉と呼ぶ。セラフィエルを『我が神』と仰ぐ。",
       img: `${S1}/ssr/paladin_lady.png`,
     },
     {
-      name: "ひなた", season: 1,
+      name: "ひなた", season: 1, chapter: 's1c1',
       title: "皇家の末妹・見習い剣士",
       caption: "ね、わたしも連れてって！修行したんだから！",
       desc: "紅翼皇家の末妹、齢十三。兄姉たちの背を追って剣の道へ。小太刀『桜散(さくらちらし)』で舞うように戦う。屈託のない笑顔の奥に、家を守る強い意志を秘める。紅翼ツキは実姉、薫音は剣師範。龍帝アルテミスを『おにーさま！』と呼び慕う(一方的)。",
@@ -143,21 +143,21 @@ const POOL = {
     },
     // ===== S1C2 追加 (SSR3体) =====
     {
-      name: "紅玉海賊団船長 シャンティ", season: 1,
+      name: "紅玉海賊団船長 シャンティ", season: 1, chapter: 's1c2',
       title: "海上自由商人の頭領",
       caption: "お前、案外、面白い奴だな。",
       desc: "紅玉海賊団を率いる紅髪の女船長。『自由商人』を名乗り、海賊行為と交易の境界を絶妙に渡り歩く。双剣『紅潮』を抜き、戦闘では誰よりも前に立つ。煙草を片手に部下を見守る姉貴肌。イザベルと意気投合し、教会の白鎧を『紅玉号の客人』として迎えた。副長ケイレブとは長年の相棒。",
       img: `${S1}/ssr/pirate_captain.png`,
     },
     {
-      name: "白焔教会見習い巫女 ルーナ", season: 1,
+      name: "白焔教会見習い巫女 ルーナ", season: 1, chapter: 's1c2',
       title: "教会の若き祈り手",
       caption: "イザベル姉さま、お役に立てるよう頑張ります！",
       desc: "白焔教会の若き見習い巫女。金色のツインテールに錫杖を抱え、純真な瞳でイザベルを姉のように慕う。アクアシス遠征に同行し、戦いの中で『自分の祈り』とは何かを掴み始める。メイリ・セラフィの後輩として、教会の次世代を担う逸材。",
       img: `${S1}/ssr/apprentice_priestess.png`,
     },
     {
-      name: "アクアシス筆頭魔術師 グラシエル", season: 1,
+      name: "アクアシス筆頭魔術師 グラシエル", season: 1, chapter: 's1c2',
       title: "深海宮殿の冷静な参謀",
       caption: "事態を、簡潔に話します。",
       desc: "海淵都市アクアシスの筆頭氷魔術師。ネプテア女王の参謀として、海溝の異変を分析する冷静沈着な頭脳派。氷結魔法を操り、戦闘でも後衛から的確な支援を行う。『青の音』を奪う黒月の存在を最初に察知した一人。星海ノクスとは『虚空観測者』として遠縁の研究仲間。",
@@ -166,70 +166,70 @@ const POOL = {
   ],
   SR: [
     {
-      name: "ルミナ", season: 1,
+      name: "ルミナ", season: 1, chapter: 's1c1',
       title: "銀霜の巫女",
       caption: "……みんな、頑張って。わたし、ここにいるから",
       desc: "銀霜王国の雪月神殿の巫女。吹雪の中でも光を絶やさない灯籠のような存在。戦場では後方に立ち、味方の武運を祈る。イザベルとは治療の情報交換をする間柄。",
       img: `${S1}/sr/silver_girl.png`,
     },
     {
-      name: "黒刃 玄", season: 1,
+      name: "黒刃 玄", season: 1, chapter: 's1c1',
       title: "浪人剣士",
       caption: "斬る。それ以外は知らん",
       desc: "紅翼皇家を破門された元剣術師範代。今は放浪し、金で依頼を受ける浪人剣士。無口だが、子供と犬には弱い。ミレイアの非公式な剣の師。薫音の兄弟子。",
       img: `${S1}/sr/swordsman.png`,
     },
     {
-      name: "セラフィ", season: 1,
+      name: "セラフィ", season: 1, chapter: 's1c1',
       title: "白焔教会の見習い魔導士",
       caption: "呪文、ちゃんと覚えたんだから……！",
       desc: "白焔教会の若き見習い魔導士。名前がセラフィエル様に似ていることを気にしているが、同一人物ではない(本人はそれが密かな誇り)。詠聖ベルとは合唱魔法の相方。",
       img: `${S1}/sr/mage.png`,
     },
     {
-      name: "紅翼 ツキ", season: 1,
+      name: "紅翼 ツキ", season: 1, chapter: 's1c1',
       title: "紅翼皇家の次姫",
       caption: "妹の分まで、ちゃんと守るから",
       desc: "紅翼皇家の次女。ひなたの姉で、家を守るのは自分の役目だと自任している。ツインテールは紅翼皇家の女子の伝統装束。薫音師範を『姐さん』と呼び慕う。",
       img: `${S1}/sr/red_twintail.png`,
     },
     {
-      name: "薫音", season: 1,
+      name: "薫音", season: 1, chapter: 's1c1',
       title: "紅翼皇家の剣師範",
       caption: "お稽古の時間。さあ、構えなさい",
       desc: "紅翼皇家に仕える剣の師範。舞のような太刀筋から『剣舞の薫音』と呼ばれる。清廉で厳しく、弟子思い。ひなた・ツキの剣の師。黒刃玄の妹弟子。お酒には弱い(秘密)。",
       img: `${S1}/sr/katana_miko.png`,
     },
     {
-      name: "リリム", season: 1,
+      name: "リリム", season: 1, chapter: 's1c1',
       title: "紫竜の若竜人",
       caption: "えへへ、ヴィル姉さまみたいになりたい！",
       desc: "紫竜王国の若き竜人。まだ成竜ではないため、竜化は部分的。ピンク色の鱗が特徴の珍しい突然変異種で、本人は少し気にしている。ヴィルは実の従姉で師匠、龍帝を『おじうえ』と呼ぶ(遠縁だが)。",
       img: `${S1}/sr/pink_dragon_girl.png`,
     },
     {
-      name: "メイリ", season: 1,
+      name: "メイリ", season: 1, chapter: 's1c1',
       title: "白焔教会の見習い巫女",
       caption: "大丈夫、傷はすぐに塞がります……ね？",
       desc: "白焔教会の見習い巫女。臆病だが治癒の才能は一級。戦場では後衛に徹する。イザベルを実の姉のように慕う。セラフィは同期で親友。",
       img: `${S1}/sr/white_priestess.png`,
     },
     {
-      name: "詠聖 ベル", season: 1,
+      name: "詠聖 ベル", season: 1, chapter: 's1c1',
       title: "白焔教会の歌巫女",
       caption: "光よ、この戦場に集え",
       desc: "白焔教会の歌巫女。戦闘能力はないが、彼女の歌声は原虹の波動を増幅させ、戦士たちの力となる。セラフィと合唱のコンビ。メイリとも仲良し。",
       img: `${S1}/sr/songstress.png`,
     },
     {
-      name: "影刃 シン", season: 1,
+      name: "影刃 シン", season: 1, chapter: 's1c1',
       title: "夜焔・影衆の若頭",
       caption: "一撃、一瞬、一切",
       desc: "夜焔郷の裏側、影衆と呼ばれる情報衆の若頭。朱音とは別組織だが、協力関係にある。こはねは影衆の妹分(エージェント見習い)。リナエとは情報戦の速さで争う好敵手。",
       img: `${S1}/sr/shadow_ninja.png`,
     },
     {
-      name: "焔舞 ヒナカ", season: 1,
+      name: "焔舞 ヒナカ", season: 1, chapter: 's1c1',
       title: "第七天の踊り子",
       caption: "この踊り、あなたの為に",
       desc: "第七天の祭祀を務める炎の踊り子。ヒノオウの焔術を舞に昇華させた独自の流派を創始した。焔帝ヒノオウ直属の愛弟子。朱音とは『焔術を競う妹分』として友好関係。",
@@ -237,35 +237,35 @@ const POOL = {
     },
     // ===== S1C2 追加 (SR5体) =====
     {
-      name: "海獣使い モルガ", season: 1,
+      name: "海獣使い モルガ", season: 1, chapter: 's1c2',
       title: "深海女王の伝令",
       caption: "あたしはモルガ！海獣使いだよ！",
       desc: "海の遊牧民の少女。サメ・イルカ・海蛇など海獣を自在に操り、ネプテアの伝令として海域を駆け巡る。褐色の肌に活発な笑顔、自由奔放な性格。シャンティの紅玉海賊団とは『同じ海を生きる仲間』として認め合う関係。イザベルの遠征に救援として参戦した。",
       img: `${S1}/sr/shark_tamer.png`,
     },
     {
-      name: "珊瑚鎧の海騎士 コラリア", season: 1,
+      name: "珊瑚鎧の海騎士 コラリア", season: 1, chapter: 's1c2',
       title: "アクアシスの近衛槍士",
       caption: "女王様の御前、お通しください。",
       desc: "ネプテア女王直属の近衛海騎士。ピンクのボブカットに珊瑚の槍『潮華』を持ち、礼儀正しく戦場を駆ける。『海の騎士』という珍しい肩書を誇りにし、陸の聖騎士イザベルとは戦友のような関係を築いた。グラシエルの戦友でもある。",
       img: `${S1}/sr/coral_knight.png`,
     },
     {
-      name: "深海巫女 ティアラ", season: 1,
+      name: "深海巫女 ティアラ", season: 1, chapter: 's1c2',
       title: "水晶玉の予言者",
       caption: "海の声が、聞こえるのです。",
       desc: "アクアシスの深海巫女。貝殻の冠と水晶玉で海の未来を読む神秘的な少女。普段は無口だが、予言を語る時だけ凛とした声で話す。『黒月の前兆』を最初に水晶玉で観測した一人。詠聖ベルとは『歌と予言』の互換的な巫女として遠い友。",
       img: `${S1}/sr/abyss_oracle.png`,
     },
     {
-      name: "紅玉海賊団副長 ケイレブ", season: 1,
+      name: "紅玉海賊団副長 ケイレブ", season: 1, chapter: 's1c2',
       title: "双剣の若き副長",
       caption: "ようこそ紅玉号へ。船長は荒っぽいですが、まあ慣れます。",
       desc: "紅玉海賊団の副長。黒髪に琥珀色の瞳、人懐こい笑顔の青年。シャンティ船長の右腕として、双剣『風裂』を背に交差させて戦う。船員からの信頼が厚く、団のまとめ役としても優秀。船医クレオとは幼馴染。",
       img: `${S1}/sr/pirate_firstmate.png`,
     },
     {
-      name: "白焔教会騎士 ラナス", season: 1,
+      name: "白焔教会騎士 ラナス", season: 1, chapter: 's1c2',
       title: "銀白鎧の聖剣士",
       caption: "主の御前、誓いの剣を捧げます。",
       desc: "白焔教会の若き騎士。銀白の鎧に剣『誓銀』と盾『白霜』を構え、真面目で誠実な性格。イザベルの遠征に同行し、海での戦闘経験を積んだ。仮面騎士シオンとは『教会の盾』として遠縁的な兄弟弟子の関係。",
@@ -274,42 +274,42 @@ const POOL = {
   ],
   R: [
     {
-      name: "ちさと", season: 1,
+      name: "ちさと", season: 1, chapter: 's1c1',
       title: "星霊学院の剣見習い",
       caption: "こわいけど、がんばるっ！",
       desc: "星霊学院の剣術科一年生。まだ新人だが、勇気だけは一人前。カイ・こはね・アルス・ミレイアとは同期の『星霊学院四人組＋α』。寮では常にカイと押しくらまんじゅう状態。",
       img: `${S1}/r/student.png`,
     },
     {
-      name: "カイ", season: 1,
+      name: "カイ", season: 1, chapter: 's1c1',
       title: "星霊学院の弓見習い",
       caption: "遠くから、です……！",
       desc: "星霊学院の弓術科。気弱だが目だけはいい。斥候として将来を嘱望されている。ちさとを密かに想っている。いつかリナエのように森で射ちたい。",
       img: `${S1}/r/boy_scout.png`,
     },
     {
-      name: "こはね", season: 1,
+      name: "こはね", season: 1, chapter: 's1c1',
       title: "夜焔・影衆見習い",
       caption: "朱音さまの、足手まといには、なりません！",
       desc: "夜焔郷の狐獣人の少女。朱音に拾われて影衆見習いとして働いている。実は魔術の才能もある。ノアとは同じ獣人として姉妹のよう。シンとは先輩後輩。",
       img: `${S1}/r/fox_girl.png`,
     },
     {
-      name: "ヴィオラ", season: 1,
+      name: "ヴィオラ", season: 1, chapter: 's1c1',
       title: "半エルフの弓使い",
       caption: "矢は、外さない。たぶん",
       desc: "深緑樹海の外れに住む半エルフ。純血ではないため、樹海の中では肩身が狭い。戦場でなら実力が認められると信じている。リナエを憧れの先輩として慕う。",
       img: `${S1}/r/archer.png`,
     },
     {
-      name: "アルス", season: 1,
+      name: "アルス", season: 1, chapter: 's1c1',
       title: "星霊学院の魔導見習い",
       caption: "魔法の本、ちゃんと読んだ！",
       desc: "星霊学院の魔術科首席。眼鏡の奥に秘めた野心は、いつか黒曜塔で学ぶこと。ノアを憧れの先輩として崇拝。ちさと・カイ・こはねと同期の『四人組』。",
       img: `${S1}/r/young_mage.png`,
     },
     {
-      name: "ミレイア", season: 1,
+      name: "ミレイア", season: 1, chapter: 's1c1',
       title: "星霊学院の盾見習い",
       caption: "壁なら、任せて",
       desc: "星霊学院の剣術科、ちさとの同期で親友。体格は学年一。面倒見がよく、四人組の姉的存在。非公式に黒刃玄から剣を習っている。",
@@ -317,35 +317,35 @@ const POOL = {
     },
     // ===== S1C2 追加 (R5体) =====
     {
-      name: "深海の少女 パール", season: 1,
+      name: "深海の少女 パール", season: 1, chapter: 's1c2',
       title: "ネプテアの養女",
       caption: "母さま……戦い、無事に終わりますように。",
       desc: "ネプテア女王が孤児院から引き取った養女。十二歳ほどの幼さで、貝殻のドレスを纏い、海の宮殿で育つ。本人は『いつか母さまの役に立ちたい』と願い、宮殿での雑務を懸命にこなす。ネプテアにとっては唯一の家族。",
       img: `${S1}/r/deepsea_girl.png`,
     },
     {
-      name: "海賊見習い ミカ", season: 1,
+      name: "海賊見習い ミカ", season: 1, chapter: 's1c2',
       title: "紅玉号の活発な少女",
       caption: "お姉さん、また会える？",
       desc: "紅玉海賊団の最年少海賊見習い。短剣を腰に差し、甲板を駆け回る活発な少女。シャンティ船長を『お姉ちゃん』と慕い、いつか自分も立派な海賊になることを夢見ている。イザベルから『あなただけの色を見つけて』と言葉を貰い、密かに励みにしている。",
       img: `${S1}/r/pirate_cabin_girl.png`,
     },
     {
-      name: "珊瑚漁師 エラン", season: 1,
+      name: "珊瑚漁師 エラン", season: 1, chapter: 's1c2',
       title: "海溝の地理案内人",
       caption: "この海なら、誰よりも知っています。",
       desc: "アクアシス近海で珊瑚漁を営む素朴な青年。海溝の隅々まで知り尽くしており、地理案内人として遠征に参加した。寡黙だが信頼できる仲間。『自分にできることは、知っている海を案内することだけ』と謙遜する。",
       img: `${S1}/r/coral_fisherman.png`,
     },
     {
-      name: "海賊団船医 クレオ", season: 1,
+      name: "海賊団船医 クレオ", season: 1, chapter: 's1c2',
       title: "紅玉号の薬箱",
       caption: "怪我は早めに見せてくださいね。",
       desc: "紅玉海賊団の若い女性船医。薬箱を片手に、戦闘後の傷ついた船員を黙々と治療する。寡黙で優しく、副長ケイレブとは幼馴染。海賊団の『お母さん』的存在として、皆から大切にされている。",
       img: `${S1}/r/ship_doctor.png`,
     },
     {
-      name: "白焔教会従士 リッカ", season: 1,
+      name: "白焔教会従士 リッカ", season: 1, chapter: 's1c2',
       title: "真面目な教会従者",
       caption: "姉さま、お忘れ物はございませんか？",
       desc: "白焔教会の若き従士。ランタンを掲げ、礼儀正しくイザベルに付き従う。生真面目さゆえに時々空回りするが、誠実な性格で皆から愛される。メイリ・ルーナと並ぶ『教会の次世代3人組』の一人。",
@@ -2261,15 +2261,70 @@ function isNewUnlocked(c) {
 let detailUnlockedList = [];
 let detailIdx = 0;
 
+// 図鑑タブ state ('all' | 's1c1' | 's1c2' | 'gasshuku')
+let currentGalleryTab = 'all';
+
 function openGallery() {
+  // 期間限定タブの可視性を更新 (合宿エリアが見えるユーザーのみ表示)
+  updateGalleryTabsVisibility();
+  // デフォルトタブ「すべて」 で開く (前回タブを保持したい場合は state.lastGalleryTab に保存検討)
+  selectGalleryTab('all');
+  $("#gallery").classList.add("active");
+}
+
+// 図鑑モーダル「期間限定」 タブの可視性 (gasshuku.js の isGasshukuVisible と連動)
+function updateGalleryTabsVisibility() {
+  const limited = document.querySelector('.gallery-tab-limited');
+  if (!limited) return;
+  const visible = typeof window.isGasshukuVisible === 'function' && window.isGasshukuVisible();
+  limited.style.display = visible ? '' : 'none';
+}
+window.updateGalleryTabsVisibility = updateGalleryTabsVisibility;
+
+// 章タブ切替
+function selectGalleryTab(tab) {
+  currentGalleryTab = tab;
+  // タブ active 状態
+  document.querySelectorAll('.gallery-tab').forEach(el => {
+    el.classList.toggle('active', el.dataset.tab === tab);
+  });
+  renderGalleryByTab();
+}
+
+// タブに応じて図鑑グリッドを描画
+function renderGalleryByTab() {
   const grid = $("#gallery-grid");
+  if (!grid) return;
   grid.innerHTML = "";
+
+  // 「期間限定」 タブ → 合宿キャラ表示 (gasshuku.js に委譲)
+  if (currentGalleryTab === 'gasshuku') {
+    if (typeof window.renderGasshukuGalleryInModal === 'function') {
+      const { count, total } = window.renderGasshukuGalleryInModal(grid) || { count: 0, total: 0 };
+      // 統計を合宿用に: 入手N/Mのみ表示、 tier別はダッシュ
+      $("#gallery-unlocked-count").textContent = count;
+      $("#gallery-total-count").textContent = total;
+      ['lr', 'ur', 'ssr', 'sr', 'r'].forEach(t => {
+        const el = $(`#gallery-${t}-count`);
+        if (el) el.textContent = '–';
+      });
+    }
+    return;
+  }
+
+  // 通常タブ (all / s1c1 / s1c2)
   const all = getAllCharactersWithTier();
+  const filtered = currentGalleryTab === 'all'
+    ? all
+    : all.filter(c => c.chapter === currentGalleryTab);
+
   const unlockedByTier = { LR: 0, UR: 0, SSR: 0, SR: 0, R: 0 };
-  const totalByTier = { LR: POOL.LR.length, UR: POOL.UR.length, SSR: POOL.SSR.length, SR: POOL.SR.length, R: POOL.R.length };
-  // 解放済みキャラのみ詳細ナビ対象 (グリッド表示順と同じ)
-  detailUnlockedList = all.filter(c => isUnlocked(c));
-  for (const c of all) {
+  const totalByTier = { LR: 0, UR: 0, SSR: 0, SR: 0, R: 0 };
+  for (const c of filtered) totalByTier[c.tier]++;
+  // 解放済みキャラのみ詳細ナビ対象 (フィルター済みグリッド表示順と同じ)
+  detailUnlockedList = filtered.filter(c => isUnlocked(c));
+
+  for (const c of filtered) {
     const unlocked = isUnlocked(c);
     if (unlocked) unlockedByTier[c.tier]++;
     const card = document.createElement("div");
@@ -2296,6 +2351,7 @@ function openGallery() {
     }
     grid.appendChild(card);
   }
+
   const unlockedTotal = Object.values(unlockedByTier).reduce((a, b) => a + b, 0);
   const total = Object.values(totalByTier).reduce((a, b) => a + b, 0);
   $("#gallery-unlocked-count").textContent = unlockedTotal;
@@ -2305,7 +2361,6 @@ function openGallery() {
   $("#gallery-ssr-count").textContent = `${unlockedByTier.SSR}/${totalByTier.SSR}`;
   $("#gallery-sr-count").textContent = `${unlockedByTier.SR}/${totalByTier.SR}`;
   $("#gallery-r-count").textContent = `${unlockedByTier.R}/${totalByTier.R}`;
-  $("#gallery").classList.add("active");
 }
 
 function closeGallery() {
