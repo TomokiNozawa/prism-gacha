@@ -4324,10 +4324,14 @@ const STORY_LOCATION_INLINE_CONFIG = {
   's1c1': [
     // 1-2 食堂: 五人の朝食 (カイの卵焼きシーン)
     { scene: '1-2',  marker: '卵焼き多めにとっておいたから',     position: 'after',  img: '/images/locations/s1c1/breakfast_table_thumb.webp' },
+    // 2-2 戦闘の山場: 大型影喰いがちさとをロックオン (敵カタログ的意義もある)
+    { scene: '2-2',  marker: '影喰いがちさとを見た',             position: 'after',  img: '/images/enemies/shadeova_large_thumb.webp' },
     // 2-4 朱音とひなた: 派手な合流 (紅蓮+桜花)
     { scene: '2-4',  marker: '紅蓮の炎が舞い上がった',           position: 'after',  img: '/images/locations/s1c1/akane_hinata_arrival_thumb.webp' },
     // 2-5 ガルドとヴィル: 重厚な合流 (狼+紫槍)
     { scene: '2-5',  marker: '紫色の槍を構えた女性',             position: 'after',  img: '/images/locations/s1c1/garudo_vill_arrival_thumb.webp' },
+    // 2-6 裂け目から小型群体湧出: 既存背景 (rift_emergence) と併存、 群体クローズアップ
+    { scene: '2-6',  marker: '次々と這い出してきた',             position: 'after',  img: '/images/enemies/shadeova_swarm_land_thumb.webp' },
     // 3-4 戦いの終わり: 大人6人連携で裂け目縫合 (戦闘クライマックス締め)
     { scene: '3-4',  marker: '裂け目が閉じる音だった',           position: 'after',  img: '/images/locations/s1c1/rift_seal_thumb.webp' },
     // エピローグ プリズマの黄昏: 章の最終 (label 無いので title 比較で hit)
@@ -4336,6 +4340,8 @@ const STORY_LOCATION_INLINE_CONFIG = {
   's1c2': [
     // 2-3: 新背景 (純風景、 生成待ち) + シャンティ登場時に挿絵
     { scene: '2-3',  marker: '頭には大きな三角帽子に紅い羽飾り', position: 'after',  img: '/images/locations/s1c2/serapia_sunset_thumb.webp' },
+    // 2-5 海中影喰い登場: 群れ突入挿絵より前に「水中型」 紹介
+    { scene: '2-5',  marker: '影喰い——水中型',                  position: 'after',  img: '/images/enemies/shadeova_swarm_marine_thumb.webp' },
     // 2-5: 戦闘シーンの動的瞬間を挿絵で
     { scene: '2-5',  marker: '群れに突っ込んだ',                  position: 'after',  img: '/images/locations/s1c2/shadeova_swarm_thumb.webp' },
     // 2-7: 海上 (entrance) → 海中 (city背景) → 宮殿 (throne) の進行
