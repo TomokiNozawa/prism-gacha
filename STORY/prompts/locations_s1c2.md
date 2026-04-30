@@ -44,6 +44,7 @@ and a female pirate captain matching the second reference image —
 red coat, large feathered tricorn hat — both gazing into the trench.
 Anime illustration, late afternoon orange-gold sky, dramatic perspective
 from behind the ship looking down into the trench.
+Aspect ratio 16:9, high detail.
 ```
 
 ---
@@ -70,6 +71,7 @@ Grand underwater cityscape, fantasy anime illustration style,
 vibrant blues and aquamarines, gold-tinted light beams filtering from far above,
 tiny silhouettes of merfolk and sea creatures visible between buildings.
 Wide establishing shot, cinematic perspective from mid-trench height.
+Aspect ratio 16:9, high detail.
 ```
 
 ---
@@ -95,6 +97,7 @@ The palace glows with a gentle inner radiance of aquamarine and pale gold.
 Bioluminescent jellyfish drift lazily past the towers.
 Fantasy anime illustration, majestic and serene,
 deep-sea atmosphere, teal and lavender color palette.
+Aspect ratio 16:9, high detail.
 ```
 
 ---
@@ -124,6 +127,7 @@ On the throne sits the Sea Queen — silver-blue flowing hair, trident in hand,
 coral and pearl crown. Rows of sea-knight guards in coral armor stand at attention.
 Interior fantasy illustration, grand ceremonial atmosphere,
 cool blues and warm gold accents, shimmer and depth.
+Aspect ratio 16:9, high detail.
 ```
 
 ---
@@ -158,6 +162,7 @@ that barely holds back the encroaching shadow.
 Dark fantasy battle illustration, high contrast between holy rainbow light
 and dark void, oppressive atmosphere, deep indigo and black with flashes
 of gold, teal, and rainbow.
+Aspect ratio 16:9, high detail.
 ```
 
 ---
@@ -197,6 +202,7 @@ a long silver lance laid beside her, her form bathed in seven-colored light from
 Soft, sacred atmosphere, anime fantasy illustration style,
 warm golden tones with vivid prismatic accents, particles of light dust drifting in the air.
 Wide cinematic interior shot from rear-three-quarters perspective.
+Aspect ratio 16:9, high detail.
 ```
 
 ---
@@ -237,6 +243,7 @@ faction is striking — the meeting of two worlds.
 Anime fantasy illustration style, warm twilight atmosphere,
 vibrant orange and rose-pink palette with cool blue ocean below.
 Wide cinematic shot from a slightly elevated angle on the pier, side-on perspective.
+Aspect ratio 16:9, high detail.
 ```
 
 ---
@@ -275,6 +282,7 @@ from passing waves visible. The mood is heavy with anticipation,
 a calm before unseen danger — the absent moon a subtle hint of greater shadows to come.
 Anime fantasy illustration, deep indigo and black with warm amber lantern accents,
 side-angle shot from mid-deck height.
+Aspect ratio 16:9, high detail.
 ```
 
 ---
@@ -316,6 +324,7 @@ a microcosm of the prismatic world's eternal struggle.
 Anime fantasy battle illustration, high contrast between holy white-gold light
 and oppressive black-violet shadow, dramatic dynamic composition,
 wide cinematic shot from mid-air angle showing all three protagonists and the swarm.
+Aspect ratio 16:9, high detail.
 ```
 
 ---
@@ -354,6 +363,7 @@ Anime fantasy illustration, ascendant ceremonial atmosphere,
 vibrant rainbow palette against deep indigo-black,
 dramatic central composition, spiritual awakening pose,
 wide cinematic shot facing the awakening figure with the queen as supporting witness.
+Aspect ratio 16:9, high detail.
 ```
 
 ---
@@ -391,6 +401,7 @@ The harbor is quiet and reverent, holding the stillness of a new day after great
 Anime fantasy illustration style, hopeful and ascendant atmosphere,
 soft full-rainbow gradient sky, golden hour color palette with prismatic highlights.
 Wide cinematic shot from the pier, looking eastward toward the rising sun and the ship.
+Aspect ratio 16:9, high detail.
 ```
 
 ---
@@ -438,6 +449,7 @@ Wide cinematic shot from the pier, looking eastward toward the rising sun and th
 
 ## 使い方メモ
 
-- 末尾に `high detail, 16:9` (横長) または `vertical, 9:16` (縦) を追加で比率指定
-- 全プロンプトはアニメ風ファンタジー、深海色 (青緑+金) を統一
-- 添付画像は `images/characters/season1/{tier}/{name}.png` から指定
+- **コピペ完結**: 各 ``` ブロック内の英語プロンプトをそのまま ChatGPT (DALL-E 3) にコピペ → そのまま画像生成可能 (`Aspect ratio 16:9, high detail.` まで本文に含めてある、 追記不要)
+- **添付画像 (キャラリファレンス)**: 各セクションの「添付画像」 欄記載のキャラ画像 (`/c/Users/t2262/prism-gacha-work/images/characters/season1/{tier}/{name}.png`) を ChatGPT に手動添付してから生成。 添付があると顔立ち・衣装が安定する
+- **生成画像の保存先**: `/c/Users/t2262/prism-gacha-work/images/locations/s1c2/{ファイル名}.png`
+- 全プロンプトはアニメ風ファンタジー、 深海色 (青緑+金) ベース、 七色伏線を散りばめた統一トーン
