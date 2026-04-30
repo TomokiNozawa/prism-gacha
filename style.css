@@ -2823,6 +2823,28 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   .story-cutin-name { font-size: 18px; }
 }
 
+/* ───── 場所インライン挿絵 (本文中の anchor フレーズ直前に表示、 16:9 横長) ───── */
+.story-location-inline {
+  margin: 28px auto;
+  max-width: 100%;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.5), 0 0 40px rgba(255,255,255,0.05);
+  position: relative;
+  animation: cutin-fade-in 0.6s ease-out;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.story-location-inline-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  border-radius: inherit;
+}
+@media (max-width: 600px) {
+  .story-location-inline { margin: 20px auto; border-radius: 10px; }
+}
+
 /* ───── 相関図 ───── */
 .relations-modal {
   position: fixed; inset: 0; z-index: 230;

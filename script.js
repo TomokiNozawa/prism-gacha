@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.2.3s — 演出&ゲームロジック (Season 1 第1〜2章)
+   Prismaera v1.2.3t — 演出&ゲームロジック (Season 1 第1〜2章)
    ============================================================ */
 "use strict";
 
@@ -2362,7 +2362,7 @@ function renderGalleryByTab() {
       // cache buster 付きで サムネ更新時にブラウザキャッシュ刷新
       const img = document.createElement("img");
       img.className = "gallery-card-img";
-      img.src = (c.img || '').replace(/\.png$/i, '_thumb.webp') + '?v=20260430s';
+      img.src = (c.img || '').replace(/\.png$/i, '_thumb.webp') + '?v=20260430t';
       img.alt = c.name;
       img.loading = "lazy";
       img.decoding = "async";
@@ -3876,10 +3876,11 @@ function renderScene() {
       ? '<p>' + scene.contentMd.replace(/\n\n+/g, '</p><p>').replace(/\n/g, '<br>') + '</p>'
       : '';
   }
-  // 本文: キャラ名リンク化 → ふりがな → 初登場キャラのカットイン挿入 (sceneLabel で文脈依存リンク切替)
+  // 本文: キャラ名リンク化 → ふりがな → 初登場キャラのカットイン挿入 → 場所インライン挿絵 (sceneLabel で文脈依存リンク切替)
   bodyHtml = linkifyCharNames(bodyHtml, scene.label);
   bodyHtml = applyFurigana(bodyHtml);
   bodyHtml = injectStoryCutins(bodyHtml, storyIdx);
+  bodyHtml = injectStoryLocationInlines(bodyHtml, storyIdx);
   // 最終シーン: 次章/一覧ナビゲーションを末尾に追加
   if (storyIdx === storyScenes.length - 1) {
     bodyHtml += buildEndNavHtml(currentStoryId);
@@ -4217,15 +4218,31 @@ const STORY_CUTIN_CONFIG = {
 // 場所画像 (Location image) — シーンの背景に画像を表示する設定。
 // 各画像のメタデータ (対応シーン・本文行・役割・被写体・コード参照) は
 // STORY/prompts/locations_<storyId>.md 参照。
-// Phase 1 (現状): シーン単位 1画像。 Phase 2 で段落マーカー切替 (entrance/throne) 追加予定。
+// Phase 1 = 背景画像 (シーン全体に被さる) / Phase 2 = 本文インライン挿絵 (STORY_LOCATION_INLINE_CONFIG)
 const LOCATION_CONFIG = {
   's1c1': {
     // S1C1 場所画像は未生成 (locations_s1c1.md スケルトンのみ存在、 後日プロンプト作成→生成)
   },
   's1c2': {
-    '2-7':  { img: '/images/locations/s1c2/aquasis_city.png' },   // アクアシス都市進入 (city メイン、 entrance/throne は Phase 2)
-    '2-9':  { img: '/images/locations/s1c2/aquasis_rift.png' },   // 黒い亀裂
+    '2-7':  { img: '/images/locations/s1c2/aquasis_city_thumb.webp' },   // アクアシス都市進入 (city メイン)
+    '2-9':  { img: '/images/locations/s1c2/aquasis_rift_thumb.webp' },   // 黒い亀裂
   },
+};
+
+// 本文中インライン挿絵 — キャラ挿絵 (story-cutin) と同じ感覚で、 場所画像を文章中に登場させる。
+// 各 entry: { scene: 'X-Y', marker: '本文内の anchor フレーズ', img: '画像パス' }
+// marker を含む <p> 直前に挿絵が挿入される。 marker 不一致時はシーン本文末尾に追加。
+const STORY_LOCATION_INLINE_CONFIG = {
+  's1c2': [
+    { scene: '2-1',  marker: '祭壇の前に膝をつき',                       img: '/images/locations/s1c2/church_morning_thumb.webp' },
+    { scene: '2-3',  marker: 'オレンジ色に染まる桟橋',                   img: '/images/locations/s1c2/serapia_sunset_thumb.webp' },
+    { scene: '2-4',  marker: '甲板は磨かれ',                              img: '/images/locations/s1c2/crimson_pearl_night_thumb.webp' },
+    { scene: '2-5',  marker: '海面が、不自然に黒く渦巻いていた',          img: '/images/locations/s1c2/shadeova_swarm_thumb.webp' },
+    { scene: '2-7',  marker: '海溝の入り口に向かった',                    img: '/images/locations/s1c2/aquasis_entrance_thumb.webp' },
+    { scene: '2-7',  marker: '宮殿の謁見の間',                            img: '/images/locations/s1c2/aquasis_throne_thumb.webp' },
+    { scene: '2-11', marker: '光の中で、私の鎧が、変容した',              img: '/images/locations/s1c2/ripple_saint_awakening_thumb.webp' },
+    { scene: '2-13', marker: 'セラピアの港に戻ったのは、夜明けだった',    img: '/images/locations/s1c2/serapia_dawn_thumb.webp' },
+  ],
 };
 
 // シーン依存のキャラリンク remap — 同じ単独名 (例: 「イザベル」) でも、 シーン進行に応じて別キャラ (例: 覚醒後 UR) にリンク先を切替える。
@@ -4307,6 +4324,36 @@ function injectStoryCutins(bodyHtml, sceneIdx) {
   }
   return bodyHtml;
 }
+
+// ────────── 場所インライン挿絵 (本文中の anchor フレーズ直前に挿絵 div 挿入) ──────────
+// STORY_LOCATION_INLINE_CONFIG の各 entry に対して、 marker を含む <p> 直前に挿絵カードを挿入。
+// 同一シーンに複数 entry がある場合は順次適用 (例: 2-7 の entrance + throne を別段落に)。
+function injectStoryLocationInlines(bodyHtml, sceneIdx) {
+  const scene = storyScenes[sceneIdx];
+  if (!scene || !scene.label) return bodyHtml;
+  const entries = (STORY_LOCATION_INLINE_CONFIG[currentStoryId] || []).filter(e => e.scene === scene.label);
+  if (entries.length === 0) return bodyHtml;
+  for (const e of entries) {
+    if (!e.img) continue;
+    const cardHtml = `<div class="story-location-inline"><img class="story-location-inline-img" src="${e.img}" alt="" loading="lazy" decoding="async"></div>`;
+    let injected = false;
+    if (e.marker) {
+      const esc = e.marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const re = new RegExp(`<p[^>]*>(?:(?!<\\/p>).)*?${esc}`);
+      const m = bodyHtml.match(re);
+      if (m && m.index >= 0) {
+        bodyHtml = bodyHtml.slice(0, m.index) + cardHtml + bodyHtml.slice(m.index);
+        injected = true;
+      }
+    }
+    if (!injected) {
+      // marker未指定 / マッチ失敗 → 本文末尾に追加 (フォールバック)
+      bodyHtml += cardHtml;
+    }
+  }
+  return bodyHtml;
+}
+
 let _cutinBlinkTimers = [];
 function setupCutinBlinks() {
   _cutinBlinkTimers.forEach(id => clearTimeout(id));
