@@ -2265,7 +2265,9 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 .story-location-img {
   position: absolute; inset: 0;
   z-index: 1;
-  background-size: cover;
+  /* contain: 9:16 縦長画像の全体を表示 (cover だと中心拡大されて寄りすぎる)。
+     container 比率と画像比率が違う場合の余白は親 .story-bg のグラデで埋まる */
+  background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
   opacity: 0;
@@ -2495,18 +2497,18 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 
 /* ───── ホーム上部 2列レイアウト (Story主役 ⇄ Feedback) ───── */
 /* 旧: 合宿ガチャ ⇄ Story+Feedback (1fr 1fr) → 5/1〜 合宿エリア廃止に伴い 2fr 1fr に再編 */
+/* align-items: start → 左右独立の高さ (左カラムが伸びても右FBは自然サイズで縦長にならない) */
 .home-actions-row {
   display: grid;
   grid-template-columns: 2fr 1fr;  /* Story主役 / Feedback サブ */
   gap: 18px;
-  align-items: stretch;
+  align-items: start;
   margin: 16px 0;
-  grid-column: 1 / -1; /* hero(1fr auto)の全列スパン → 右端が通常10連と揃う */
+  grid-column: 1 / -1; /* hero(1fr auto)の全列スパン → 右端が10連と揃う */
 }
 .home-actions-row > .story-stack,
 .home-actions-row > .home-feedback {
   display: flex; flex-direction: column;
-  height: 100%;
   margin: 0;
   padding: 0;
   max-width: none;
@@ -2514,13 +2516,9 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 .story-stack {
   gap: 12px;
 }
-/* flex比率での高さ強制をやめ、 両方 content-fit に。 align-items:stretch で
-   左カラム合計高さに右FBが合うため、 teaser がコンテンツ overflow しなくなる */
 .story-stack > .story-entry-block { flex: 0 0 auto; margin: 0; }
 .story-stack > .story-next-teaser { flex: 0 0 auto; }
-.home-actions-row > .home-feedback .home-feedback-card {
-  height: 100%;
-}
+/* home-feedback-card は align-items:start により親FB自然サイズに、 height:100%不要 */
 @media (max-width: 700px) {
   .home-actions-row { grid-template-columns: 1fr; gap: 14px; }
   .story-stack > .story-entry-block .story-entry-btn,
@@ -2528,10 +2526,11 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 }
 
 /* H2: 次の物語ティザー (S1C3 砂塵の隊商 - Coming Soon) */
+/* Stories と高さバランス取るためコンパクト化 (= 縦長になりすぎないように) */
 .story-next-teaser {
   position: relative;
-  display: flex; align-items: center; gap: 18px;
-  padding: 20px 22px 20px 22px;
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px 20px;
   background: linear-gradient(135deg, rgba(150, 100, 220, 0.14), rgba(255, 180, 100, 0.08));
   border: 1px dashed rgba(255, 217, 122, 0.3);
   border-radius: 14px;
@@ -2554,7 +2553,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   z-index: 1;
 }
 .story-next-icon {
-  font-size: 36px; line-height: 1; flex: 0 0 auto;
+  font-size: 30px; line-height: 1; flex: 0 0 auto;
   filter: drop-shadow(0 0 6px rgba(200, 125, 255, 0.5));
   z-index: 1;
 }
@@ -2562,29 +2561,29 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   flex: 1; min-width: 0; z-index: 1;
 }
 .story-next-meta {
-  font-size: 11px; color: rgba(200, 180, 255, 0.7);
+  font-size: 10.5px; color: rgba(200, 180, 255, 0.7);
   letter-spacing: 0.08em;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 .story-next-title {
-  font-size: 18px; font-weight: 700;
+  font-size: 16px; font-weight: 700;
   background: linear-gradient(90deg, #c87dff 0%, #ffd84d 100%);
   -webkit-background-clip: text; background-clip: text; color: transparent;
-  margin-bottom: 6px;
+  margin-bottom: 3px;
   letter-spacing: 0.04em;
   line-height: 1.3;
 }
 .story-next-pov {
-  font-size: 12px; color: rgba(255, 255, 255, 0.7);
-  margin-bottom: 8px;
+  font-size: 11px; color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 5px;
 }
 .story-next-tagline {
-  font-size: 12px; color: rgba(255, 255, 255, 0.65);
+  font-size: 11.5px; color: rgba(255, 255, 255, 0.65);
   font-style: italic;
-  line-height: 1.6;
-  margin-bottom: 10px;
-  /* 2行までに制限、 オーバーフロー隠し */
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  line-height: 1.5;
+  margin-bottom: 6px;
+  /* 1行に絞ってコンパクト化 (はみ出しは ... で省略) */
+  display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;
   overflow: hidden;
 }
 .story-next-stats {
@@ -2985,6 +2984,11 @@ body.has-offline-banner .topbar { margin-top: 30px; }
   display: block;
   object-fit: cover;
   border-radius: inherit;
+  cursor: zoom-in;
+  transition: filter 0.18s ease;
+}
+.story-location-inline:hover .story-location-inline-img {
+  filter: brightness(1.06);
 }
 @media (max-width: 600px) {
   .story-location-inline { margin: 20px auto; border-radius: 10px; }

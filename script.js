@@ -3145,6 +3145,23 @@ function toggleCharImgZoom() {
   }
 }
 
+// 場所画像 (背景 + 挿絵) を拡大表示 — char-img-zoom モーダルを流用
+// 引数 src は原寸 PNG パス (thumb 渡しても _thumb.webp → .png 置換する保険つき)
+function openLocImageZoom(src) {
+  const z = document.getElementById('char-img-zoom');
+  const img = document.getElementById('char-img-zoom-img');
+  if (!z || !img || !src) return;
+  const fullSrc = src.replace(/_thumb\.webp$/i, '.png');
+  img.src = fullSrc;
+  // 原寸PNGが404 の場合は thumb webp にフォールバック
+  img.onerror = function () {
+    this.onerror = null;
+    this.src = src;
+  };
+  resetZoom();
+  z.classList.add('active');
+}
+
 function closeImgZoom() {
   $("#char-img-zoom").classList.remove("active");
   resetZoom();
@@ -4318,12 +4335,23 @@ function _collectAllAssetUrls() {
   try {
     for (const sid in LOCATION_CONFIG) {
       const conf = LOCATION_CONFIG[sid] || {};
-      for (const k in conf) { if (conf[k] && conf[k].img) urls.add(conf[k].img); }
+      for (const k in conf) {
+        if (conf[k] && conf[k].img) {
+          urls.add(conf[k].img);
+          // 原寸PNG (拡大表示用) も追加。 失敗しても _downloadAllAssets が無視
+          urls.add(conf[k].img.replace(/_thumb\.webp$/i, '.png'));
+        }
+      }
     }
   } catch (e) {}
   try {
     for (const sid in STORY_LOCATION_INLINE_CONFIG) {
-      (STORY_LOCATION_INLINE_CONFIG[sid] || []).forEach(e2 => { if (e2 && e2.img) urls.add(e2.img); });
+      (STORY_LOCATION_INLINE_CONFIG[sid] || []).forEach(e2 => {
+        if (e2 && e2.img) {
+          urls.add(e2.img);
+          urls.add(e2.img.replace(/_thumb\.webp$/i, '.png'));
+        }
+      });
     }
   } catch (e) {}
   return Array.from(urls);
@@ -4504,7 +4532,9 @@ function injectStoryLocationInlines(bodyHtml, sceneIdx) {
   if (entries.length === 0) return bodyHtml;
   for (const e of entries) {
     if (!e.img) continue;
-    const cardHtml = `<div class="story-location-inline"><img class="story-location-inline-img" src="${e.img}" alt="" loading="lazy" decoding="async"></div>`;
+    // タップで拡大: data-fullsrc に原寸PNG (thumb→.png 置換) を持たせ、 click で zoom モーダル
+    const fullSrc = e.img.replace(/_thumb\.webp$/i, '.png');
+    const cardHtml = `<div class="story-location-inline" onclick="openLocImageZoom('${fullSrc}')" role="button" tabindex="0" aria-label="拡大表示" title="タップで拡大"><img class="story-location-inline-img" src="${e.img}" alt="" loading="lazy" decoding="async"></div>`;
     let injected = false;
     if (e.marker) {
       const markerIdx = bodyHtml.indexOf(e.marker);
