@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.2.3z — 演出&ゲームロジック (Season 1 第1〜2章)
+   Prismaera v1.2.3aa — 演出&ゲームロジック (Season 1 第1〜2章)
    ============================================================ */
 "use strict";
 
@@ -2362,7 +2362,7 @@ function renderGalleryByTab() {
       // cache buster 付きで サムネ更新時にブラウザキャッシュ刷新
       const img = document.createElement("img");
       img.className = "gallery-card-img";
-      img.src = (c.img || '').replace(/\.png$/i, '_thumb.webp') + '?v=20260430z';
+      img.src = (c.img || '').replace(/\.png$/i, '_thumb.webp') + '?v=20260430aa';
       img.alt = c.name;
       img.loading = "lazy";
       img.decoding = "async";
@@ -6150,7 +6150,8 @@ async function checkPrismaeraVersion() {
       const isDevHost = location.hostname.startsWith('dev.') || location.hostname.includes('localhost');
       if (isDevHost) {
         try {
-          const cb = (document.querySelector('link[rel=stylesheet]')?.href || '').match(/\?v=\d{8}([a-z])/);
+          // [a-z]+ で複数文字 suffix (z 到達後の aa, bb, cc... も対応)
+          const cb = (document.querySelector('link[rel=stylesheet]')?.href || '').match(/\?v=\d{8}([a-z]+)/);
           if (cb) suffix = cb[1];
         } catch (e) {}
       }
