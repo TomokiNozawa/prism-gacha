@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.2.3w — 演出&ゲームロジック (Season 1 第1〜2章)
+   Prismaera v1.2.3x — 演出&ゲームロジック (Season 1 第1〜2章)
    ============================================================ */
 "use strict";
 
@@ -2362,7 +2362,7 @@ function renderGalleryByTab() {
       // cache buster 付きで サムネ更新時にブラウザキャッシュ刷新
       const img = document.createElement("img");
       img.className = "gallery-card-img";
-      img.src = (c.img || '').replace(/\.png$/i, '_thumb.webp') + '?v=20260430w';
+      img.src = (c.img || '').replace(/\.png$/i, '_thumb.webp') + '?v=20260430x';
       img.alt = c.name;
       img.loading = "lazy";
       img.decoding = "async";
@@ -3947,15 +3947,16 @@ function renderScene() {
   _updateTapGuide(storyIdx === 0);
 }
 
-// POVキャラをPOOLから検索 (完全一致優先、解放済み高レア優先)
+// POVキャラをPOOLから検索 (完全一致優先)
+// POV は章の主人公 = ストーリー上そのシーンに必ず居る前提 → 未解放でも表示する (ガチャ未解放でもPOVは見える)
 function _findPovChar(povName) {
   for (const tier of ['LR', 'UR', 'SSR', 'SR', 'R']) {
     const c = POOL[tier].find(c => c.name === povName);
-    if (c && isUnlocked(c)) return { ...c, tier, hits: 1 };
+    if (c) return { ...c, tier, hits: 1 };
   }
   for (const tier of ['LR', 'UR', 'SSR', 'SR', 'R']) {
     const c = POOL[tier].find(c => c.name.includes(povName));
-    if (c && isUnlocked(c)) return { ...c, tier, hits: 1 };
+    if (c) return { ...c, tier, hits: 1 };
   }
   return null;
 }
