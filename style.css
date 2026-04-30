@@ -4120,8 +4120,6 @@ body.has-offline-banner .topbar { margin-top: 30px; }
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
-  max-height: 40vh;
-  overflow-y: auto;
 }
 .update-history-entry { margin-bottom: 10px; }
 .update-history-head {
