@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.2.3o — 演出&ゲームロジック (Season 1 第1〜2章)
+   Prismaera v1.2.3p — 演出&ゲームロジック (Season 1 第1〜2章)
    ============================================================ */
 "use strict";
 
@@ -2330,7 +2330,14 @@ function renderGalleryByTab() {
     const card = document.createElement("div");
     card.className = "gallery-card " + c.tier.toLowerCase() + (unlocked ? "" : " locked");
     if (unlocked) {
-      card.style.backgroundImage = `url('${c.img}')`;
+      // <img> 化で画質改善 (background-image はGPU合成時にぼける、 ガチャカード rcard と同じパターン)
+      const img = document.createElement("img");
+      img.className = "gallery-card-img";
+      img.src = c.img;
+      img.alt = c.name;
+      img.loading = "lazy";
+      img.decoding = "async";
+      card.appendChild(img);
       card.addEventListener("click", () => showCharDetail(c));
     }
     const tierBadge = document.createElement("div");
