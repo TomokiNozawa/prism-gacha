@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.2.3p — 演出&ゲームロジック (Season 1 第1〜2章)
+   Prismaera v1.2.3q — 演出&ゲームロジック (Season 1 第1〜2章)
    ============================================================ */
 "use strict";
 
@@ -2263,13 +2263,31 @@ let detailIdx = 0;
 
 // 図鑑タブ state ('all' | 's1c1' | 's1c2' | 'gasshuku')
 let currentGalleryTab = 'all';
+// レアリティフィルター state ('all' | 'LR' | 'UR' | 'SSR' | 'SR' | 'R')
+let currentGalleryTier = 'all';
 
 function openGallery() {
   // 期間限定タブの可視性を更新 (合宿エリアが見えるユーザーのみ表示)
   updateGalleryTabsVisibility();
-  // デフォルトタブ「すべて」 で開く (前回タブを保持したい場合は state.lastGalleryTab に保存検討)
+  // デフォルトタブ「すべて」 + レアリティフィルター解除 で開く
+  currentGalleryTier = 'all';
+  document.querySelectorAll('.rarity-filter').forEach(el => el.classList.remove('active'));
   selectGalleryTab('all');
   $("#gallery").classList.add("active");
+}
+
+// レアリティフィルター: 同じ tier 再クリックで解除、 別 tier クリックで切替
+function selectRarityFilter(tier) {
+  if (currentGalleryTab === 'gasshuku') return;  // 期間限定タブでは tier フィルター無効
+  if (currentGalleryTier === tier) {
+    currentGalleryTier = 'all';
+  } else {
+    currentGalleryTier = tier;
+  }
+  document.querySelectorAll('.rarity-filter').forEach(el => {
+    el.classList.toggle('active', el.dataset.tier === currentGalleryTier);
+  });
+  renderGalleryByTab();
 }
 
 // 図鑑モーダル「期間限定」 タブの可視性 (gasshuku.js の isGasshukuVisible と連動)
@@ -2284,6 +2302,9 @@ window.updateGalleryTabsVisibility = updateGalleryTabsVisibility;
 // 章タブ切替
 function selectGalleryTab(tab) {
   currentGalleryTab = tab;
+  // 章タブ切替時は レアリティフィルターをリセット
+  currentGalleryTier = 'all';
+  document.querySelectorAll('.rarity-filter').forEach(el => el.classList.remove('active'));
   // タブ active 状態
   document.querySelectorAll('.gallery-tab').forEach(el => {
     el.classList.toggle('active', el.dataset.tab === tab);
@@ -2312,31 +2333,42 @@ function renderGalleryByTab() {
     return;
   }
 
-  // 通常タブ (all / s1c1 / s1c2)
+  // 通常タブ (all / s1c1 / s1c2) — 章 + レアリティ の2軸フィルター
   const all = getAllCharactersWithTier();
-  const filtered = currentGalleryTab === 'all'
+  const byChapter = currentGalleryTab === 'all'
     ? all
     : all.filter(c => c.chapter === currentGalleryTab);
+  const filtered = currentGalleryTier === 'all'
+    ? byChapter
+    : byChapter.filter(c => c.tier === currentGalleryTier);
 
+  // 統計は 章タブ単位 で集計 (tier フィルターを適用すると tier別総数が壊れるため)
   const unlockedByTier = { LR: 0, UR: 0, SSR: 0, SR: 0, R: 0 };
   const totalByTier = { LR: 0, UR: 0, SSR: 0, SR: 0, R: 0 };
-  for (const c of filtered) totalByTier[c.tier]++;
+  for (const c of byChapter) {
+    totalByTier[c.tier]++;
+    if (isUnlocked(c)) unlockedByTier[c.tier]++;
+  }
   // 解放済みキャラのみ詳細ナビ対象 (フィルター済みグリッド表示順と同じ)
   detailUnlockedList = filtered.filter(c => isUnlocked(c));
 
   for (const c of filtered) {
     const unlocked = isUnlocked(c);
-    if (unlocked) unlockedByTier[c.tier]++;
     const card = document.createElement("div");
     card.className = "gallery-card " + c.tier.toLowerCase() + (unlocked ? "" : " locked");
     if (unlocked) {
       // <img> 化で画質改善 (background-image はGPU合成時にぼける、 ガチャカード rcard と同じパターン)
+      // サムネ版 (_thumb.webp 512x768、 Lanczos縮小) を優先、 不在時は原寸PNGにフォールバック
       const img = document.createElement("img");
       img.className = "gallery-card-img";
-      img.src = c.img;
+      img.src = (c.img || '').replace(/\.png$/i, '_thumb.webp');
       img.alt = c.name;
       img.loading = "lazy";
       img.decoding = "async";
+      img.onerror = function () {
+        this.onerror = null;
+        this.src = c.img;
+      };
       card.appendChild(img);
       card.addEventListener("click", () => showCharDetail(c));
     }
