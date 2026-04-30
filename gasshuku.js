@@ -239,11 +239,9 @@
       btn.disabled = !active;
       btn.classList.toggle('gasshuku-ended', !active);
     });
-    // CTAブロック全体に終了class
-    const ctaBlock = document.querySelector('.gasshuku-cta-block');
+    // CTAブロック全体に終了class (ctaBlock / galleryHead は関数冒頭で取得済み)
     if (ctaBlock) ctaBlock.classList.toggle('gasshuku-ended-block', !active);
     // 図鑑エリア期間限定バッジ
-    const galleryHead = document.querySelector('#gasshuku-gallery-head, .gasshuku-gallery-heading');
     let badge = document.getElementById('gasshuku-period-badge');
     if (!badge && galleryHead) {
       badge = document.createElement('div');
