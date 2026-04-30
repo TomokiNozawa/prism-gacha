@@ -1,436 +1,168 @@
-# S1C3 キャラ画像 プロンプト集
+# Prismaera 画像プロンプト — Season 1 第3章「砂塵の隊商」
 
-S1C3「砂塵の隊商」 の新キャラ10体の画像生成プロンプト。 GPT (DALL-E 3) 向け英語プロンプト。
+POV: ヴィル (紫竜王国 第三王女、 既存 SSR `draco_lancer.png`)
+新派閥: 古龍砂漠サハール (遊牧民+古龍末裔の混合)
+背景基調: 砂漠・古代遺跡・古龍の彫像 / 派閥背景キーワード `golden dune under twin stars and ancient dragon statues` (`_common.md` 準拠)
 
-> **🎯 引き継ぎ規約**
-> - **比率**: 単体立ち絵 = **3:4 縦長 (1024×1365)** で統一 (野沢方針 2026-05-01、 PC/モバイル両対応)
-> - **添付画像**: 新規キャラのため キャラリファ添付 **なし** (純粋な新規生成)
-> - **解剖学指示**: 人型キャラ全員に **CRITICAL ANATOMY REQUIREMENTS 必須** (DALL-E 3 の手指破綻事故対策)
-> - **末尾文言**: 添付なしのため「元画像から〜」 は **不要**
-> - **ファイル名**: `images/characters/season1/{tier}/{filename}.png` に保存
-> - **生成後**: thumb webp 自動生成 (Claude が ffmpeg で対応)
+**tier配分**: UR 2 / SSR 3 / SR 3 / R 2 = 10体 (UR比率 ~20%、 章規模圧縮)
+
+**UR2体の構成**:
+- UR1 サハナ: 第3章ヒロイン、 砂海王女、 風使い → **S1C7 黒月決戦に七座級風使いとして再登場 (outline.md S1C3伏線)**。 UR帯の派手さはこの未来戦力に向けた布石として描く必要あり (七色の風オーラ + 額の風紋)
+- UR2 ファラー: 古龍末裔の老女、 千年級記憶を持つ語り部 → **S2 古龍王覚醒キーパーソン / S2C4 記憶の海で再登場**。 背後に「失われた古龍王」 colossal silhouette を必ず焼き付ける + 千年記憶の浮遊光
+
+**⚠️ S1C1/S1C2 とのテイスト整合 (絶対)**:
+- 全プロンプトを **単一パラグラフ・キーワード密集型** で記述 (s1c1_chars.md / s1c2_chars.md と同形式)
+- 多段パラグラフ・物語的描写は禁止 (DALL-E 3 が別テイストを返す事故源)
+- tier別の派手さ階層 (`_common.md` 準拠):
+  - **UR**: heroic stance with rainbow aura + dramatic rim light + glowing accents + majestic divine presence
+  - **SSR**: dynamic stance + cinematic rim lighting + detailed weapon decoration
+  - **SR**: confident poised stance + cinematic rim lighting (控えめ)
+  - **R**: natural standing + soft daylight
+- 装飾密度ではなく「オーラ/ライティング/背景の派手さ」 で tier を表現する
+
+**⚠️ ファイル名規則 (絶対)**:
+- 本ファイルのセクション見出しは tier+連番+slug 形式 (`ur_08_desert_princess.png` 等) — s1c1 (ur_01〜ur_05) / s1c2 (ur_06〜ur_07) からの連番継承
+- **実保存ファイル名は slug のみ** (`images/characters/season1/ur/desert_princess.png`) — 既存 `sea_queen.png` / `ripple_saint.png` 等と整合
+
+**共通末尾**: `original character, no logos, no text, no watermark`
+**推奨設定**: `gpt-image-1` (quality: high) / DALL·E 3 HD / size `1024x1536`
+**保存先**: `images/characters/season1/<tier>/<slug>.png`
+
+**解剖学指示**: 全プロンプトに `CRITICAL ANATOMY REQUIREMENTS` (5本指・関節・武器の握り) を埋め込み済 (CLAUDE.md / `feedback_image_prompt_charref_suffix.md` 準拠)
 
 ---
 
-## S1C3 概要 (outline.md より)
+## UR (2体)
 
-- **POV**: ヴィル (紫竜王国 第三王女、 既存 SSR)
-- **規模**: 10体 (UR2 / SSR3 / SR3 / R2)
-- **新派閥**: 古龍砂漠サハール (遊牧民+古龍末裔の混合)
-- **テーマ**: 血ではなく、 共に過ごした時間が家族
-- **山場**: ヴィル+サハナが夜空の星を見上げて、 それぞれの孤独を打ち明ける場面
-- **Season跨ぎ伏線**:
-  - 失われた古龍王 → S2 で覚醒予定
-  - サハナ → S1C7 黒月決戦に再登場
-  - ファラー → 観測者寄り (S1C7 / S2C4 記憶の海)
+### 1. `ur_08_desert_princess.png` — 砂海王女 サハナ（古龍砂漠サハール・双風刀シャマール・七色風オーラ）
 
----
-
-# 【1】砂海王女 サハナ (UR、 ヒロイン)
-
-- **filename**: `desert_princess.png`
-- **path**: `images/characters/season1/ur/desert_princess.png`
-- **派閥**: 古龍砂漠サハール
-- **役割**: 第3章ヒロイン、 砂漠遊牧民の若き王女、 風を操る戦士
-- **性格**: 自由奔放、 親しみやすい、 内面に深い孤独 (両親を幼い頃に亡くし族長代理)
-- **関係性**: ヴィルと「血ではない家族」 の関係 (s1c3 山場)、 グランは剣の師、 ティナは妹分
-- **Season跨ぎ伏線**: S1C7 黒月決戦に七座級風使いとして再登場
-- **武器**: 双風刀 (シャマール) — 二振りの曲剣、 振ると風が刃となる
-- **外見**: 17-18歳、 浅黒い肌 (砂漠民の褐色)、 ライトブラウンの長い波打つ髪、 アンバー色の瞳、 民族風アクセサリー (額飾り・腕輪・耳飾り)、 砂漠民族衣装 (赤と金の刺繍が入ったゆったりしたチュニックとパンツ、 腰に絹の帯、 軽装の革ブーツ)、 両肩に砂風が螺旋を描く
-- **比率**: 3:4 縦長 (単体立ち絵)
-- **コード参照**: 実装後 POOL.UR に追加、 LOCATION_CONFIG['s1c3'] のシーンでも使用
+**派閥**: 古龍砂漠サハール / **役割**: 第3章ヒロイン、 17-18歳の砂漠遊牧王女、 風を操る戦士 / **武器**: 双風刀シャマール (二振りの曲剣、 振ると風が刃となる) / **伏線**: S1C7黒月決戦に**七座級風使い**として再登場、 七色の風で黒月の妖気を吹き散らす役 — 額の風紋がその布石
 
 ```
-A vertical 3:4 portrait of a young desert nomad princess named Sahana, full-body standing pose.
-She is 17-18 years old, with sun-tanned dark-honey skin and long wavy light-brown hair flowing
-in a desert wind, framed by golden ornaments and small gemstones. Her eyes are striking amber-gold,
-intense yet warm. She wears traditional desert nomad attire: a flowing red-and-gold embroidered
-tunic with a deep V-cut neckline, loose violet trousers tucked into soft leather boots, a silk
-sash at her waist with hanging metal coins. Multiple bracelets on her arms, an ornate forehead
-chain with a single small ruby. She holds two curved scimitar-style swords (Shamar twin blades),
-one in each hand, the air around the blades swirling with visible wind currents flecked with
-golden sand particles. Her stance is confident and graceful — slight forward lean, balanced,
-ready for combat.
-Behind her, a vast desert at golden hour: rolling dunes, distant ancient ruins half-buried
-in sand, a sky transitioning from gold horizon to deep purple zenith with the seven prismatic
-streams of the genso (red, orange, yellow, green, blue, indigo, violet) flowing softly through
-the upper sky.
-
-Anime fantasy illustration style, regal yet approachable atmosphere,
-warm desert palette (gold, sand, deep red, warm brown) with violet sky accent.
-Tall vertical composition emphasizing her height and the desert behind.
-
-CRITICAL ANATOMY REQUIREMENTS: Anatomically correct human hands with exactly five distinct,
-well-formed fingers per hand (no extra, no fused, no missing fingers). Both hands grip the
-sword hilts firmly with all five fingers visible and properly positioned. Both arms in
-natural human poses with proper joint angles. Avoid any anatomical distortion of hands,
-fingers, or arms.
-
-Aspect ratio 3:4, high detail.
+anime-style full-body portrait of a young desert nomad princess named Sahana, 17-18 years old with sun-tanned warm honey skin glowing with healthy radiance, long wavy light-brown hair with subtle golden highlights flowing wildly in seven swirling prismatic wind currents around her body, striking amber-gold eyes glowing with inner prismatic light, ornate forehead chain with a small glowing wind-rune mark radiating soft rainbow light between her brows, traditional desert nomad warrior attire — flowing crimson-and-gold tribal tunic with deep V neckline and rich gold embroidery, layered violet silk sash at the waist with hanging gold coins, loose violet trousers tucked into ornate leather warrior boots, multiple gold bangles and arm-cuffs, jeweled earrings, wielding twin curved scimitar swords (Shamar twin blades) with prismatic rainbow-edged blades one in each hand, surrounded by spiraling seven-color wind streams of red orange yellow green blue indigo violet light flowing outward from her body like seven outspread wings of wind, heroic stance with full rainbow wind aura radiating majestic divine warrior presence, golden dune under twin stars and ancient dragon statues with the seven prismatic streams of the genso flowing across the upper sky, dramatic rim light with prismatic wind aura and golden dust particles swirling around her, detailed linework, high-quality illustration, CRITICAL ANATOMY REQUIREMENTS: anatomically correct human hands with exactly five distinct well-formed fingers per hand, both hands gripping the scimitar hilts firmly with all five fingers visible and properly positioned, both arms in natural combat-ready poses with proper joint angles, original character, no logos, no text, no watermark
 ```
 
 ---
 
-# 【2】古龍の語り部 ファラー (UR、 伝承の番人)
+### 2. `ur_09_dragon_sage.png` — 古龍の語り部 ファラー（古龍砂漠サハール・古龍杖ジナ・千年記憶+古龍王シルエット）
 
-- **filename**: `dragon_sage.png`
-- **path**: `images/characters/season1/ur/dragon_sage.png`
-- **派閥**: 古龍砂漠サハール
-- **役割**: 古龍の末裔、 失われた古龍王の伝承を語る老女、 千年級の知恵
-- **性格**: 静謐、 深く語る、 すべてを見透かすような目
-- **関係性**: 観測者三柱 (カグヤ・ノクス・セラフィエル) と遠い縁、 千年前を覚えている
-- **Season跨ぎ伏線**: S2 古龍王覚醒のキーパーソン、 S2C4 記憶の海 で再登場
-- **武器**: 古龍杖 (ジナ) — 紫水晶を頂いた長杖、 古龍の鱗を埋め込んだ
-- **外見**: 70-80代に見える老女 (実年齢不明、 数百年級)、 銀色の長い三つ編み、 深い紫の瞳、 浅黒い砂漠肌、 古代エジプト・ペルシャ混合の儀礼衣装 (深紫と金の長衣、 多層のショール、 古龍の鱗を縫い込んだベルト)、 額に古龍の刻印 (うろこ紋)
-- **比率**: 3:4 縦長
+**派閥**: 古龍砂漠サハール / **役割**: 古龍の末裔の老女、 「失われた古龍王」 の伝承を語る、 千年級の知恵 / **武器**: 古龍杖ジナ (紫水晶を頂いた長杖、 古龍の鱗を埋め込んだ) / **伏線**: S2 古龍王覚醒のキーパーソン、 S2C4 記憶の海で再登場 — 背後の colossal sleeping dragon silhouette は必ず焼き付け、 観測者三柱 (カグヤ・ノクス・セラフィエル) との遠縁を示唆する千年記憶の浮遊光を散らす
 
 ```
-A vertical 3:4 portrait of an ancient dragon-blooded sage named Fara, full-body standing pose.
-She appears to be in her seventies but radiates a presence far older — perhaps centuries.
-Her skin is sun-tanned dark-honey, weathered with fine lines around her wise eyes.
-Long silver hair in a single thick braid that falls past her waist. Her eyes are deep
-amethyst-violet, calm and seeing-through. She wears layered ceremonial robes blending
-ancient Persian and Egyptian aesthetics: a deep-violet outer robe with gold embroidery of
-dragon scales running along the hem and sleeves, a layered silk shawl over her shoulders,
-a wide ornate belt embedded with iridescent dragon scales (small, real fragments of an
-ancient dragon's hide). On her forehead, a small marking of the dragon scale-pattern
-in faint gold luminescence (her bloodline mark). She holds a tall ceremonial staff named
-Jhina, topped with a large faceted amethyst crystal that glows with deep violet inner light,
-the staff's body wrapped with cords and small dragon scales. Her stance is dignified,
-patient, with the staff slightly forward.
-Behind her, an ancient stone temple courtyard at twilight: cracked carved pillars depicting
-dragons, scattered ancient ruins, the sky deep amethyst-purple with the seven genso colors
-faintly visible like distant constellations. A faint outline of a colossal dragon
-silhouette is barely visible in the upper background, sleeping/dormant — the "lost dragon king".
-
-Anime fantasy illustration style, mystical-ancient atmosphere, dignified solemn presence,
-deep purple + gold + ancient stone palette, faint rainbow constellation overhead.
-Tall vertical composition emphasizing her dignified verticality.
-
-CRITICAL ANATOMY REQUIREMENTS: Anatomically correct human hands with exactly five distinct,
-well-formed fingers per hand. Her hand grips the staff firmly with all five fingers visible.
-Both arms in natural elderly human poses with proper joint angles, slightly relaxed.
-Avoid any anatomical distortion.
-
-Aspect ratio 3:4, high detail.
+anime-style full-body portrait of an ancient dragon-blooded sage woman named Fara, weathered sun-tanned dark-honey skin with fine wisdom lines around her eyes, very long silver hair in a single thick braid falling past her waist with iridescent dragon-scale ornaments woven into the braid, deep amethyst-violet eyes glowing with prismatic ancient knowledge seeing far beyond, intricate dragon-scale glyph mark on her forehead radiating soft rainbow light, layered ceremonial sage robes blending ancient Persian and Egyptian aesthetics — deep-violet outer robe with extensive gold dragon-scale embroidery flowing along hem and sleeves, layered iridescent silk shawl over her shoulders, wide ornate belt embedded with shimmering rainbow dragon-scale fragments, holding a tall ornate ceremonial staff named Jhina topped with a massive faceted amethyst crystal radiating prismatic violet-rainbow light beams, the staff body wrapped with dragon scales and prayer cords, heroic divine stance with rainbow aura, majestic ancient sage presence with floating translucent memory-images of past dragons drifting around her like glowing wisps, behind her a colossal translucent silhouette of an immense ancient sleeping dragon king coiling through the sky in violet-rainbow mist, golden dune under twin stars and ancient dragon statues with the seven prismatic streams of the genso flowing across the night sky, dramatic rim light with prismatic glow and floating golden dust, detailed linework, high-quality illustration, CRITICAL ANATOMY REQUIREMENTS: anatomically correct human hands with exactly five distinct well-formed fingers per hand, the hand gripping the staff firmly with all five fingers visible and properly positioned, both arms in natural elderly human poses with proper joint angles slightly relaxed, original character, no logos, no text, no watermark
 ```
 
 ---
 
-# 【3】隊商長 アーシャ (SSR、 商人指揮官)
+## SSR (3体)
 
-- **filename**: `caravan_leader.png`
-- **path**: `images/characters/season1/ssr/caravan_leader.png`
-- **派閥**: 古龍砂漠サハール
-- **役割**: 砂漠隊商の女商人指揮官、 サハナと旧知の頼れる姉貴分
-- **性格**: 強気、 商売人気質、 義理堅い、 笑顔の裏で計算高い
-- **武器**: 短剣 + 鞭 (商人としての護身、 駆け引き武器)
-- **外見**: 30代後半女性、 浅黒い肌、 黒髪のショートポニーテール、 鋭い茶色の瞳、 商人風実用衣装 (深緑のキャラバンコート、 革ベルトに財布と短剣、 ターバン風頭巾)
+### 3. `ssr_16_caravan_leader.png` — 隊商長 アーシャ（古龍砂漠サハール・短剣+鞭・キャラバンコート）
+
+**派閥**: 古龍砂漠サハール / **役割**: 砂漠隊商の女商人指揮官、 サハナの旧知の姉貴分、 ヴィルが顔を隠して同行する / **武器**: 短剣 + 鞭 / **設定**: 30代後半、 強気の商売人気質、 義理堅い
 
 ```
-A vertical 3:4 portrait of a desert caravan leader named Asha, full-body standing pose.
-She is in her late thirties, dark-honey skin tanned from years of desert travel.
-Black hair pulled into a short ponytail under a deep-green silk turban-headband, with
-small golden coins dangling along the fabric edge. Her eyes are sharp brown, calculating yet
-warm. She wears a practical desert merchant outfit: a deep-forest-green long traveler's coat
-worn open over a tan tunic, leather belt with multiple pouches (coin purses, scrolls, a
-short dagger sheathed at her hip), loose practical desert pants tucked into knee-high
-leather boots. Multiple silver bracelets on one wrist, a single intricate ring on her thumb.
-She holds a coiled leather whip in one hand (her preferred negotiation tool) and rests her
-other hand on the dagger hilt. Her expression is a confident smirk, with a hint of
-mischief — a merchant queen who has seen everything.
-Behind her, a sun-baked desert market scene at midday: caravan tents, packed camels,
-silk banners, distant crowd of merchants and customers, with the bright golden desert
-sun overhead and the genso rainbow streams in the high blue sky.
-
-Anime fantasy illustration style, lively merchant-queen atmosphere,
-warm earth tones (forest green, tan, gold, brown) with bright desert sky.
-Tall vertical composition emphasizing her commanding presence.
-
-CRITICAL ANATOMY REQUIREMENTS: Five distinct fingers per hand, both hands clearly defined,
-both arms in natural human poses with proper joint angles. The hand holding the whip
-grips it firmly with all fingers visible.
-
-Aspect ratio 3:4, high detail.
+anime-style full-body portrait of a confident desert caravan leader woman in her late thirties named Asha, sun-tanned dark-honey skin weathered from years of desert travel, black hair pulled into a sleek short ponytail under a deep forest-green silk turban-headband decorated with hanging small gold coins, sharp calculating brown eyes with a warm merchant smirk, deep forest-green long traveler coat worn open over a tan tunic, sturdy leather belt with multiple pouches and scrolls and a sheathed dagger, loose practical desert pants tucked into knee-high leather boots, multiple silver bracelets on one wrist and an intricate single thumb ring, holding a coiled leather merchant whip in one hand and the other hand resting on her dagger hilt, dynamic confident stance facing forward with one foot slightly forward, sun-baked desert market scene with caravan tents and laden camels in mid-distance under a golden hour sky with the seven prismatic streams of the genso flowing through the upper sky, cinematic rim lighting with warm desert amber glow, detailed linework, high-quality illustration, CRITICAL ANATOMY REQUIREMENTS: anatomically correct human hands with exactly five distinct well-formed fingers per hand, the hand holding the whip grips it firmly with all five fingers visible, both arms in natural human poses with proper joint angles, original character, no logos, no text, no watermark
 ```
 
 ---
 
-# 【4】砂牙の老戦士 グラン (SSR、 サハナの剣の師)
+### 4. `ssr_17_desert_veteran.png` — 砂牙の老戦士 グラン（古龍砂漠サハール・両手大剣サンガ・隻眼）
 
-- **filename**: `desert_veteran.png`
-- **path**: `images/characters/season1/ssr/desert_veteran.png`
-- **派閥**: 古龍砂漠サハール
-- **役割**: サハナに剣を教えた老戦士、 砂漠最強の戦士、 一族の守り手
-- **性格**: 寡黙、 厳しい、 弟子に深い愛情、 戦場では獅子のような強さ
-- **武器**: 大剣「砂牙 (サンガ)」 — 砂で研いだ青銅の両手大剣
-- **外見**: 50代男性、 隻眼 (左目に古傷)、 浅黒い肌、 灰色まじりの黒い髪をオールバック、 顎髭、 戦士の鎧 (古龍鱗の胸当て、 革と布のローブ、 革ブーツ、 風になびくマント)
+**派閥**: 古龍砂漠サハール / **役割**: サハナに剣を教えた老戦士、 砂漠最強、 一族の守り手 / **武器**: 両手大剣サンガ (砂で研いだ青銅) / **設定**: 50代男性、 隻眼 (左目に古傷)、 寡黙、 弟子に深い愛情 / **挿絵連動**: tribe_battle.png に登場
 
 ```
-A vertical 3:4 portrait of a veteran desert warrior named Gran, full-body standing pose.
-He is in his fifties, deeply tanned and weathered, with a missing left eye covered by
-an old battle-scar (not eye-patch — visible scar across his closed eyelid). His remaining
-right eye is sharp amber-gold. Black hair streaked with grey, slicked back. A short
-trimmed beard. He wears a desert warrior's armored attire: a chest piece made of large
-iridescent dragon scales bound with leather, layered earth-toned robes underneath,
-heavy leather greaves and gauntlets, a long traveler's mantle in faded burgundy that
-flows behind him in the desert wind. He holds a massive two-handed greatsword named Sanga,
-its blade made of polished bronze etched with desert sigils, point planted in the sand
-beside him as he stands at ease. The blade is roughly his own height. His stance is
-patient, weathered, like a tree that has stood in the desert for decades.
-Behind him, a windswept rocky desert canyon at dusk: tall sandstone cliffs, cracked
-canyon floor, faint sandstorm in the distance, the sky deep amber transitioning to violet
-zenith with the genso rainbow streams visible.
-
-Anime fantasy illustration style, weathered-warrior gravitas atmosphere,
-earth-tone palette (sand, leather brown, dusty bronze, faded burgundy) with amber dusk sky.
-Tall vertical composition emphasizing his rooted, mountain-like stance.
-
-CRITICAL ANATOMY REQUIREMENTS: Five distinct fingers per hand, both hands grip the
-greatsword hilt firmly with all fingers visible and properly positioned. Both arms in
-natural human poses, mature musculature with proper joint angles. Avoid distortion.
-
-Aspect ratio 3:4, high detail.
+anime-style full-body portrait of a veteran desert warrior man in his fifties named Gran, deeply sun-tanned weathered dark skin, missing left eye covered by an old battle scar across the closed eyelid (no eyepatch), sharp amber-gold remaining right eye, black hair streaked with grey slicked back, short trimmed dark beard, desert warrior armored attire — chest piece of large iridescent dragon scales bound with leather straps, layered earth-toned undertunic, heavy leather greaves and gauntlets, faded burgundy traveler mantle flowing in the desert wind behind him, holding a massive two-handed bronze greatsword named Sanga etched with desert sigils with the blade tip planted in the sand beside him, dynamic patient warrior stance like a weathered tree rooted in the desert, windswept rocky desert canyon at dusk with sandstone cliffs and faint sandstorm in the distance and the seven prismatic streams of the genso flowing across the violet-amber dusk sky, cinematic rim lighting with warm dusk amber glow and dust particles, detailed linework, high-quality illustration, CRITICAL ANATOMY REQUIREMENTS: anatomically correct human hands with exactly five distinct well-formed fingers per hand, both hands gripping the greatsword hilt firmly with all five fingers visible and properly positioned, both arms in natural mature human poses with proper joint angles and visible musculature, original character, no logos, no text, no watermark
 ```
 
 ---
 
-# 【5】紫竜の侍従 リアム (SSR、 紫竜王国忠臣)
+### 5. `ssr_18_purple_dragon_servant.png` — 紫竜の侍従 リアム（紫竜王国・紫竜の槍・侍従礼服）
 
-- **filename**: `purple_dragon_servant.png`
-- **path**: `images/characters/season1/ssr/purple_dragon_servant.png`
-- **派閥**: 紫竜王国 (既存)
-- **役割**: ヴィルを心配して砂漠まで追ってくる忠臣、 紫竜王国側の視点
-- **性格**: 真面目、 王女への忠誠、 やや堅物
-- **武器**: 紫竜の槍 (細身の儀礼槍、 紫の刃)
-- **外見**: 20代後半男性、 紫がかった黒髪、 すっきりした顔立ち、 紫色の瞳、 紫竜王国の侍従礼服 (紫と銀の鎧、 紫マント、 王国紋章入り)
+**派閥**: 紫竜王国 (既存) / **役割**: ヴィルを心配して砂漠まで追ってくる忠臣、 紫竜王国側の視点 / **武器**: 紫竜の槍 (細身の儀礼槍、 紫の刃) / **設定**: 20代後半、 真面目、 王女への忠誠心強い
 
 ```
-A vertical 3:4 portrait of a young Purple Dragon Kingdom royal retainer named Liam, full-body
-standing pose. He is in his late twenties, fair-skinned with a hint of light tan, neatly
-combed dark hair with violet highlights. His eyes are royal violet, serious and earnest.
-He wears the formal armor of the Purple Dragon Kingdom: violet-and-silver plate armor
-with intricate dragon-motif engravings on the chest piece and shoulder guards, white
-ceremonial undertunic, a royal purple cape clasped with the kingdom's silver dragon emblem,
-silver-trimmed boots. He holds a slender ceremonial spear with a violet-glowing blade —
-the blade emits faint violet dragon energy along its edge. His stance is upright, dignified,
-the spear held vertical at his side like a guard standing watch. His expression is earnest
-worry — he has traveled far to find his princess.
-Behind him, the entrance to the Purple Dragon Kingdom's outer fortress at dawn: tall
-violet-stone walls, banners with the silver dragon emblem flowing in the morning breeze,
-the sky transitioning from purple horizon to bright gold zenith with the genso rainbow
-streams.
-
-Anime fantasy illustration style, regal-loyalist gravitas atmosphere,
-royal purple + silver + gold palette with violet armor accents.
-Tall vertical composition emphasizing his upright dignified stance.
-
-CRITICAL ANATOMY REQUIREMENTS: Five distinct fingers per hand, the hand gripping the
-spear shows all five fingers firmly around the shaft. Both arms in natural human poses
-with proper joint angles. Avoid distortion.
-
-Aspect ratio 3:4, high detail.
+anime-style full-body portrait of a young Purple Dragon Kingdom royal retainer in his late twenties named Liam, fair skin with a subtle light tan, neatly combed dark hair with violet highlights, royal violet earnest serious eyes, formal armor of the Purple Dragon Kingdom — violet-and-silver plate armor with intricate dragon-motif engravings on the chest piece and shoulder guards, white ceremonial undertunic, royal purple cape clasped at the shoulder with the kingdom silver dragon emblem, silver-trimmed armored boots, holding a slender ceremonial spear with a violet-glowing blade emitting faint violet dragon-energy along its edge, dynamic upright dignified stance with the spear held vertical at his side like a royal guard standing watch, expression of earnest concern as he searches for his missing princess, violet dragon palace with coiled dragon silhouettes and silver banners under a dawn sky transitioning from purple horizon to bright gold zenith with the seven prismatic streams of the genso flowing through the upper sky, cinematic rim lighting with cool violet and silver glow, detailed linework, high-quality illustration, CRITICAL ANATOMY REQUIREMENTS: anatomically correct human hands with exactly five distinct well-formed fingers per hand, the hand gripping the spear shows all five fingers firmly around the shaft, both arms in natural human poses with proper joint angles, original character, no logos, no text, no watermark
 ```
 
 ---
 
-# 【6】祭舞のサフィラ (SR、 七色の踊り子)
+## SR (3体)
 
-- **filename**: `festival_dancer.png`
-- **path**: `images/characters/season1/sr/festival_dancer.png`
-- **派閥**: 古龍砂漠サハール
-- **役割**: 部族祭事の踊り手、 七色の絹を纏う踊りで影喰いを浄化する
-- **性格**: 朗らか、 祭り好き、 神聖な踊りには深い覚悟
-- **武器**: 七色の絹布 (踊りの道具、 戦闘では浄化の武器)
-- **外見**: 20代前半女性、 褐色肌、 編み込んだ赤茶色の髪、 翠色の瞳、 七色の絹を纏った民族舞踊衣装 (露出多めの上下、 多層の絹布が翻る)
+### 6. `sr_16_festival_dancer.png` — 祭舞のサフィラ（古龍砂漠サハール・七色絹布・浄化の踊り手）
+
+**派閥**: 古龍砂漠サハール / **役割**: 部族祭事の踊り手、 七色絹を纏う踊りで影喰いを浄化する / **武器**: 七色の絹布 (踊りの道具、 戦闘では浄化の武器) / **設定**: 20代前半女性、 朗らか、 神聖な踊りには深い覚悟
 
 ```
-A vertical 3:4 portrait of a desert festival dancer named Safira, full-body standing pose
-mid-dance. She is in her early twenties, sun-tanned warm skin, long red-brown hair in
-intricate braids decorated with small golden coins and ribbons. Her eyes are jade green,
-bright and joyful. She wears a desert festival dance costume: a fitted bandeau-style top
-in deep crimson with golden embroidery, a flowing low-rise skirt in seven layered silks
-(red, orange, yellow, green, blue, indigo, violet) that swirl outward as she dances,
-multiple bangles on her arms and ankles, an intricate beaded headpiece. Her midriff is
-visible. She holds two long flowing silk scarves, one in each hand — these are her
-dance weapons, each scarf in a different prismatic color, currently swirling around her
-in mid-motion. Her pose is mid-twirl, one leg extended, body in graceful spiral, the
-seven-color silks creating a rainbow halo around her. Her expression is radiant joy.
-Behind her, a desert oasis at evening with festive bonfires, tribal banners, and the
-genso rainbow streams visible in the deep blue sky overhead.
-
-Anime fantasy illustration style, joyful celebration atmosphere,
-vivid seven-color palette against warm desert evening tones.
-Tall vertical composition with dynamic dance motion.
-
-CRITICAL ANATOMY REQUIREMENTS: Five distinct fingers per hand, both hands holding silk
-scarves with all fingers clearly defined. Both arms in natural dancer poses with proper
-joint angles. Avoid distortion.
-
-Aspect ratio 3:4, high detail.
+anime-style full-body portrait of a desert festival dancer young woman in her early twenties named Safira, sun-tanned warm-honey skin, long red-brown hair in intricate braids decorated with small golden coins and ribbons, bright joyful jade-green eyes, intricate beaded headpiece with hanging jewels, desert festival dance costume — fitted bandeau-style top in deep crimson with golden embroidery, flowing low-rise skirt made of seven layered prismatic silks (red orange yellow green blue indigo violet) swirling outward in the dance, multiple bangles on arms and ankles, exposed midriff, holding two long flowing silk scarves of different prismatic colors swirling around her in mid-motion, confident poised mid-twirl pose with one leg extended in a graceful spiral creating a rainbow halo of silks, radiant joy expression, desert oasis at evening with festive bonfires and tribal banners under the seven prismatic streams of the genso, cinematic rim lighting with warm amber dance-firelight glow, detailed linework, high-quality illustration, CRITICAL ANATOMY REQUIREMENTS: anatomically correct human hands with exactly five distinct well-formed fingers per hand, both hands holding silk scarves with all fingers clearly defined, both arms in natural dancer poses with proper joint angles, original character, no logos, no text, no watermark
 ```
 
 ---
 
-# 【7】古龍鍛冶 オウル (SR、 古龍鱗を扱う伝統職人)
+### 7. `sr_17_dragon_smith.png` — 古龍鍛冶 オウル（古龍砂漠サハール・大ハンマー・職人哲人）
 
-- **filename**: `dragon_smith.png`
-- **path**: `images/characters/season1/sr/dragon_smith.png`
-- **派閥**: 古龍砂漠サハール
-- **役割**: 古龍の鱗を鍛える伝統職人、 ヴィルに「血の意味」 を諭す哲人
-- **性格**: 寡黙、 職人気質、 言葉少なに深い洞察を語る
-- **武器**: 鍛冶用大ハンマー (戦闘でも使う)
-- **外見**: 40代男性、 大柄、 浅黒い肌、 短い黒髪、 角張った顎、 深い茶色の瞳、 革エプロン + 厚手の作業着 (鍛冶炉の煤で汚れた)、 太い腕に古い火傷跡
+**派閥**: 古龍砂漠サハール / **役割**: 古龍の鱗を鍛える伝統職人、 ヴィルに「血の意味」 を諭す哲人 / **武器**: 鍛冶用大ハンマー (戦闘でも使う) / **設定**: 40代男性、 大柄、 寡黙、 言葉少なに深い洞察
 
 ```
-A vertical 3:4 portrait of a desert dragon-scale blacksmith named Owl, full-body standing pose.
-He is in his forties, large-built with broad shoulders and powerful arms, sun-tanned dark
-skin with several old burn scars on his forearms (badges of his trade). Short black hair,
-square-jawed, deep brown eyes that are wise and patient. He wears a heavy leather
-blacksmith's apron over a sleeveless dark-grey work tunic, the apron stained with soot
-and small scorch marks. Heavy leather gauntlets on his hands, sturdy work pants and
-reinforced boots. Around his neck, a single dragon-scale pendant (his trade mark).
-He holds a large blacksmith's warhammer at his side — its head made of polished
-bronze etched with dragon-scale patterns, the haft thick desert hardwood. The hammer
-also serves as his combat weapon. His stance is solid, grounded, like a man rooted in
-his craft.
-Behind him, a desert forge workshop at twilight: large stone forge with glowing embers,
-anvil, hanging tools, finished dragon-scale armor pieces displayed on racks, with the
-genso rainbow streams faintly visible through a high window.
-
-Anime fantasy illustration style, craftsman-philosopher atmosphere,
-warm forge-fire palette (dark amber, deep brown, soot grey) with twilight blue accent.
-Tall vertical composition emphasizing his sturdy build.
-
-CRITICAL ANATOMY REQUIREMENTS: Five distinct fingers per hand, the hand gripping the
-hammer shows all five fingers firmly around the haft. Both arms with mature
-musculature, natural human joint angles. Avoid distortion.
-
-Aspect ratio 3:4, high detail.
+anime-style full-body portrait of a desert dragon-scale blacksmith man in his forties named Owl, large-built with broad shoulders and powerful muscular arms, sun-tanned dark skin with several old burn scars on his forearms as badges of his trade, short black hair, square-jawed face, deep wise patient brown eyes, heavy leather blacksmith apron over a sleeveless dark-grey work tunic stained with soot and small scorch marks, heavy leather work gauntlets on his hands, sturdy work pants and reinforced boots, single iridescent dragon-scale pendant on a leather cord around his neck, holding a large blacksmith warhammer with a polished bronze head etched with dragon-scale patterns and a thick desert hardwood haft, confident poised solid grounded stance like a man rooted in his craft, desert forge workshop at twilight with stone forge glowing with embers and an anvil and finished dragon-scale armor pieces displayed on racks under the seven prismatic streams of the genso faintly visible through a high window, cinematic rim lighting with warm forge-fire amber glow against twilight blue accent, detailed linework, high-quality illustration, CRITICAL ANATOMY REQUIREMENTS: anatomically correct human hands with exactly five distinct well-formed fingers per hand, the hand gripping the hammer shows all five fingers firmly around the haft, both arms with mature musculature in natural human poses with proper joint angles, original character, no logos, no text, no watermark
 ```
 
 ---
 
-# 【8】砂風の戦士 ライ (SR、 サハナを慕う若き戦士)
+### 8. `sr_18_young_desert_warrior.png` — 砂風の戦士 ライ（古龍砂漠サハール・双短剣・サハナへの憧れ）
 
-- **filename**: `young_desert_warrior.png`
-- **path**: `images/characters/season1/sr/young_desert_warrior.png`
-- **派閥**: 古龍砂漠サハール
-- **役割**: サハナを慕う若き戦士、 一族の未来、 後の世代の希望
-- **性格**: 真面目、 まっすぐ、 サハナへの憧れ
-- **武器**: 双短剣 (サハナの双剣を真似た若き戦士の構え)
-- **外見**: 16-17歳少年、 褐色肌、 ダークブラウンの短髪 (前髪長め)、 ヘーゼル色の瞳、 軽装戦士衣装 (タンクトップ + ベスト + 動きやすいパンツ + 革ブーツ + 腕巻き)
+**派閥**: 古龍砂漠サハール / **役割**: サハナを慕う若き戦士、 一族の未来 / **武器**: 双短剣 (サハナの双剣を真似た若き戦士の構え) / **設定**: 16-17歳少年、 真面目、 まっすぐ、 サハナへの憧れ
 
 ```
-A vertical 3:4 portrait of a young desert warrior boy named Rai, full-body standing pose.
-He is 16-17 years old, sun-tanned warm-honey skin, dark brown short hair with longer
-fringe sweeping across his forehead, hazel eyes — earnest and admiring. He wears a light
-desert warrior outfit: a sleeveless dark-tan tunic with leather chest harness,
-practical loose dark trousers tucked into ankle-high leather boots, leather wraps
-on his forearms (training gear), a single small amulet around his neck. He holds two
-short daggers — clearly modeled after Sahana's twin scimitar style but on a smaller
-scale (as he is still her student-admirer). His stance is eager, slightly forward,
-ready to spring into action — a young warrior trying his hardest to prove himself.
-His expression is determined-bright.
-Behind him, a desert training ground with target dummies, scattered weapon racks, and
-older warriors training in the distance, the desert sun setting behind in warm orange,
-genso rainbow streams visible above.
-
-Anime fantasy illustration style, eager-young-warrior atmosphere,
-warm sand + earth tone palette with warm sunset orange accent.
-Tall vertical composition emphasizing his eager forward stance.
-
-CRITICAL ANATOMY REQUIREMENTS: Five distinct fingers per hand, both hands grip daggers
-firmly with all fingers visible. Both arms in natural youthful human poses with proper
-joint angles.
-
-Aspect ratio 3:4, high detail.
+anime-style full-body portrait of a young desert warrior boy 16-17 years old named Rai, sun-tanned warm-honey skin, dark brown short hair with longer fringe sweeping across his forehead, earnest bright hazel eyes full of admiration, sleeveless dark-tan tunic with a leather chest harness, practical loose dark trousers tucked into ankle-high leather boots, leather wraps on his forearms as training gear, single small amulet around his neck, holding two short daggers clearly modeled after his master's twin scimitar style on a smaller scale, confident poised eager forward stance ready to spring into action like a young warrior trying to prove himself, determined bright expression, desert training ground at sunset with target dummies and weapon racks and older warriors training in the distance under the seven prismatic streams of the genso, cinematic rim lighting with warm orange sunset glow, detailed linework, high-quality illustration, CRITICAL ANATOMY REQUIREMENTS: anatomically correct human hands with exactly five distinct well-formed fingers per hand, both hands grip the daggers firmly with all fingers visible, both arms in natural youthful human poses with proper joint angles, original character, no logos, no text, no watermark
 ```
 
 ---
 
-# 【9】砂塵の子 ティナ (R、 子供枠)
+## R (2体)
 
-- **filename**: `desert_child.png`
-- **path**: `images/characters/season1/r/desert_child.png`
-- **派閥**: 古龍砂漠サハール
-- **役割**: サハナの妹分、 子供枠、 一族の未来
-- **性格**: 元気、 好奇心旺盛、 サハナを姉のように慕う
-- **武器**: なし (子供のため、 護身用の小石スリングのみ持ち歩く程度)
-- **外見**: 8-9歳少女、 褐色肌、 ふわふわのライトブラウンのおさげ髪 (二つに結んだ)、 大きな丸い茶色の瞳、 民族風の子供服 (動きやすい短いチュニックとブルマー、 草履)
+### 9. `r_12_desert_child.png` — 砂塵の子 ティナ（古龍砂漠サハール・スリング・子供枠）
+
+**派閥**: 古龍砂漠サハール / **役割**: サハナの妹分、 子供枠、 一族の未来 / **武器**: 小さな革のスリング (護身用の小石を投げる) / **設定**: 8-9歳少女、 元気、 好奇心旺盛、 サハナを姉のように慕う
 
 ```
-A vertical 3:4 portrait of a small desert child girl named Tina, full-body standing pose.
-She is 8-9 years old, sun-tanned warm-honey skin, fluffy light-brown hair tied into two
-small twin braids decorated with tiny colorful beads. Her eyes are large warm brown,
-round and curious — bright with childhood wonder. She wears simple desert children's
-attire: a loose short red-orange tunic with white embroidery, comfortable bloomer pants
-to the knee, simple woven sandals, a small bag slung across her shoulder (containing
-her stones and treasures). She holds a small leather sling in her hand, almost like a
-toy — her "weapon" for chasing off small desert critters and feeling brave.
-Her stance is bouncy, one foot slightly forward, an excited grin on her face.
-Behind her, a peaceful nomadic camp at midday: colorful tents, grazing camels in the
-distance, family members visible going about daily life, the genso rainbow streams
-streaming peacefully through the bright sky.
-
-Anime fantasy illustration style, joyful innocent-childhood atmosphere,
-bright warm palette (red-orange, sand-tan, sky-blue) with cheerful colors.
-Tall vertical composition emphasizing her small bouncy presence.
-
-CRITICAL ANATOMY REQUIREMENTS: Five distinct fingers per hand, the hand holding the
-sling shows all five fingers clearly. Both arms in natural childlike human poses with
-proper joint angles.
-
-Aspect ratio 3:4, high detail.
+anime-style full-body portrait of a small desert child girl 8-9 years old named Tina, sun-tanned warm-honey skin, fluffy light-brown hair tied into two small twin braids decorated with tiny colorful beads, large warm round curious brown eyes bright with childhood wonder, simple desert children attire — loose short red-orange tunic with white embroidery, comfortable bloomer pants reaching her knees, simple woven sandals, small bag slung across her shoulder containing her stones and treasures, holding a small leather sling in one hand almost like a toy, natural standing bouncy pose with one foot slightly forward and an excited bright grin, peaceful nomadic camp at midday with colorful patterned tents and grazing camels in the distance and family members visible going about daily life under the seven prismatic streams of the genso flowing peacefully through the bright sky, soft daylight with gentle warm cheerful glow, detailed linework, high-quality illustration, CRITICAL ANATOMY REQUIREMENTS: anatomically correct human hands with exactly five distinct well-formed fingers per hand, the hand holding the sling shows all five fingers clearly, both arms in natural childlike human poses with proper joint angles, original character, no logos, no text, no watermark
 ```
 
 ---
 
-# 【10】語り部の老 ナドラ (R、 古龍王伝承の補助)
+### 10. `r_13_old_storyteller.png` — 語り部の老 ナドラ（古龍砂漠サハール・物語の杖・温和な老語り部）
 
-- **filename**: `old_storyteller.png`
-- **path**: `images/characters/season1/r/old_storyteller.png`
-- **派閥**: 古龍砂漠サハール
-- **役割**: 古龍王伝承の補助的な語り部 (ファラーとは別系統、 一般遊牧民側の伝承)
-- **性格**: 温和、 物語を愛する、 子供たちに昔話を聞かせる
-- **武器**: 物語の杖 (実用ではなく装飾、 古龍の歯を埋め込んだ)
-- **外見**: 60代男性、 浅黒い肌、 白髪混じりの長い髭、 後ろで束ねた白髪、 優しい焦茶の瞳、 砂漠老人の長衣 (深いブルーグレーの長衣、 多層のショール、 革のサンダル)
+**派閥**: 古龍砂漠サハール / **役割**: 古龍王伝承の補助的な語り部 (ファラーとは別系統、 一般遊牧民側の伝承) / **武器**: 物語の杖 (実用ではなく装飾、 古龍の歯を埋め込んだ) / **設定**: 60代男性、 温和、 物語を愛する、 子供たちに昔話を聞かせる
 
 ```
-A vertical 3:4 portrait of an elderly desert storyteller named Nadra, full-body standing pose.
-He is in his sixties, sun-tanned and weathered skin, long white-streaked dark hair tied
-back in a low ponytail, a long flowing salt-and-pepper beard. His eyes are warm dark-brown,
-gentle and full of stories. He wears a desert elder's robes: deep blue-grey long flowing
-robe with silver embroidery, layered shawl over his shoulders in lighter grey, a wide
-woven belt holding a small leather pouch (for tobacco or treasured small items), simple
-leather sandals. He holds a tall storyteller's staff — slender, made of pale desert wood
-with a single ancient dragon tooth embedded near the top (a gift from a long-ago dragon),
-the staff worn smooth from generations of use. His stance is gentle, slightly leaning on
-the staff, a peaceful smile on his face — the smile of one who has seen many tellings
-and many listeners.
-Behind him, a tribal evening campfire scene: children sitting around the fire listening
-to stories, scattered tents in the soft firelight, the desert night sky above with the
-genso rainbow streams flowing softly among the stars.
-
-Anime fantasy illustration style, gentle storyteller atmosphere,
-warm firelight palette (deep blue-grey, warm amber firelight, white starlight).
-Tall vertical composition emphasizing his peaceful elder presence.
-
-CRITICAL ANATOMY REQUIREMENTS: Five distinct fingers per hand, the hand on the staff
-shows all five fingers clearly gripping. Both arms in natural elderly human poses with
-proper joint angles, slightly relaxed.
-
-Aspect ratio 3:4, high detail.
+anime-style full-body portrait of an elderly desert storyteller man in his sixties named Nadra, sun-tanned weathered dark-honey skin, long white-streaked dark hair tied back in a low ponytail, long flowing salt-and-pepper beard, gentle warm dark-brown eyes full of stories and gentle humor, desert elder robes — deep blue-grey long flowing robe with silver embroidery, layered lighter-grey shawl over his shoulders, wide woven belt holding a small leather pouch, simple leather sandals, holding a tall slender storyteller staff of pale desert wood with a single ancient dragon tooth embedded near the top worn smooth from generations of use, natural standing slightly leaning on the staff with a peaceful gentle smile of one who has seen many tellings, tribal evening campfire scene with children sitting around the fire and scattered tents in soft firelight under the seven prismatic streams of the genso flowing softly among the night stars, soft daylight blending into warm firelight glow, detailed linework, high-quality illustration, CRITICAL ANATOMY REQUIREMENTS: anatomically correct human hands with exactly five distinct well-formed fingers per hand, the hand on the staff shows all five fingers clearly gripping, both arms in natural elderly human poses with proper joint angles slightly relaxed, original character, no logos, no text, no watermark
 ```
 
 ---
 
-# 生成手順 (野沢用メモ)
+## 📋 スマホ生成用まとめ（生成順）
 
-1. 各セクションの ``` ブロックをコピー → ChatGPT (DALL-E 3) に貼付
-2. 添付画像なし、 そのまま生成
-3. 生成された画像を `images/characters/season1/{tier}/{filename}.png` (上記 path 参照) で Box保存
-   - ※ 注意: prismaera/images/characters/season1/{tier}/ がない場合は新規作成
+| # | tier | 名前 | section header | 実保存slug | 派閥 | 伏線 |
+|---|---|---|---|---|---|---|
+| 1 | UR | サハナ (砂海王女) | `ur_08_desert_princess` | `desert_princess` | 古龍砂漠サハール | S1C7 七座級風使い再登場 |
+| 2 | UR | ファラー (古龍の語り部) | `ur_09_dragon_sage` | `dragon_sage` | 古龍砂漠サハール | S2 古龍王覚醒キーパーソン / S2C4 記憶の海 |
+| 3 | SSR | アーシャ (隊商長) | `ssr_16_caravan_leader` | `caravan_leader` | 古龍砂漠サハール | — |
+| 4 | SSR | グラン (砂牙の老戦士) | `ssr_17_desert_veteran` | `desert_veteran` | 古龍砂漠サハール | tribe_battle 挿絵連動 |
+| 5 | SSR | リアム (紫竜の侍従) | `ssr_18_purple_dragon_servant` | `purple_dragon_servant` | 紫竜王国 | — |
+| 6 | SR | サフィラ (祭舞) | `sr_16_festival_dancer` | `festival_dancer` | 古龍砂漠サハール | — |
+| 7 | SR | オウル (古龍鍛冶) | `sr_17_dragon_smith` | `dragon_smith` | 古龍砂漠サハール | — |
+| 8 | SR | ライ (砂風の戦士) | `sr_18_young_desert_warrior` | `young_desert_warrior` | 古龍砂漠サハール | — |
+| 9 | R | ティナ (砂塵の子) | `r_12_desert_child` | `desert_child` | 古龍砂漠サハール | — |
+| 10 | R | ナドラ (語り部の老) | `r_13_old_storyteller` | `old_storyteller` | 古龍砂漠サハール | — |
+
+生成結果は `images/characters/season1/<tier>/<slug>.png` (実保存slug 列の名前で) に保存。
+
+---
+
+## 生成手順 (野沢用メモ)
+
+1. 各セクションの ``` ブロックを ChatGPT (DALL-E 3) にコピペ → 添付画像なし → 生成
+2. 全員 1024x1536 縦長 (3:4)、 解剖学指示込みで指破綻リスク低減
+3. 保存先: `images/characters/season1/{tier}/{slug}.png` (実保存slug 列の名前)
 4. 全10体生成完了後、 Claude に伝えれば thumb webp + POOL追加 + LOCATION_CONFIG 設定 + 第3章本文の最終ブラッシュアップ → v1.3.0 リリースまで実行
-
-10体並行生成は ChatGPT の負荷次第で時間かかる、 4-5体ずつ分割推奨。
+5. 10体並行生成は ChatGPT の負荷次第で時間かかる、 4-5体ずつ分割推奨
