@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.2.3q — 演出&ゲームロジック (Season 1 第1〜2章)
+   Prismaera v1.2.3r — 演出&ゲームロジック (Season 1 第1〜2章)
    ============================================================ */
 "use strict";
 
@@ -2358,16 +2358,17 @@ function renderGalleryByTab() {
     card.className = "gallery-card " + c.tier.toLowerCase() + (unlocked ? "" : " locked");
     if (unlocked) {
       // <img> 化で画質改善 (background-image はGPU合成時にぼける、 ガチャカード rcard と同じパターン)
-      // サムネ版 (_thumb.webp 512x768、 Lanczos縮小) を優先、 不在時は原寸PNGにフォールバック
+      // サムネ版 (_thumb.webp 最大768x1152、 Lanczos縮小、 PC HiDPI 1.5x対応) を優先、 不在時は原寸PNGにフォールバック
+      // cache buster 付きで サムネ更新時にブラウザキャッシュ刷新
       const img = document.createElement("img");
       img.className = "gallery-card-img";
-      img.src = (c.img || '').replace(/\.png$/i, '_thumb.webp');
+      img.src = (c.img || '').replace(/\.png$/i, '_thumb.webp') + '?v=20260430s';
       img.alt = c.name;
       img.loading = "lazy";
       img.decoding = "async";
       img.onerror = function () {
         this.onerror = null;
-        this.src = c.img;
+        this.src = c.img;  // 原寸PNGフォールバック (cache busterなし)
       };
       card.appendChild(img);
       card.addEventListener("click", () => showCharDetail(c));
