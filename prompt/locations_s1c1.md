@@ -292,18 +292,181 @@ Aspect ratio 9:16, high detail.
 
 ---
 
-# 配置サマリ (一覧)
+# 本文インライン挿絵 (5シーン、 16:9 横長)
 
-| シーン | 画像 | 本文行 | 役割 | 主要被写体 |
-|---|---|---|---|---|
-| **1-1 学院の朝** | `academy_morning.png` | l.34〜 | 背景 | 星霊学院全景・朝・原虹光 (キャラなし) |
-| **1-3 朝練** | `training_ground.png` | l.116〜 | 背景 | 練習場・藁束・ちさと無力感 |
-| **1-4 屋上 (予兆)** | `rooftop_omen.png` | l.157〜 | 背景 | 学院屋上・五人・空が灰色侵食 |
-| **2-3 白い光** | `izabel_descent.png` | l.345〜 | 背景 | イザベル降臨・六翼・聖槍 |
-| **2-6 裂け目** | `rift_emergence.png` | l.487〜 | 背景 | 紫色の縦長裂け目・大人キャラ突入 |
-| **3-2 ちさと覚醒** | `chisato_awakening.png` | l.597〜 | 背景 | 涙・七色光・木剣輝く |
-| **3-3 プリズマ降臨** | `prisma_descent.png` | l.668〜 | 背景 | プリズマ・銀髪・結晶長衣・虹色の目 |
-| **4-2 屋上 (新しい朝)** | `rooftop_dawn.png` | l.864〜 | 背景 | 五人で弁当・笑顔・空の虹色 |
+S1C2 と同方針: 背景に出ない「ピンポイントで引きがある場面」 を挿絵化。 縦スクロール本文の中で 16:9 横長カットインとして配置。
+
+## 【9】breakfast_table.png — 1-2 食堂 (日常の和やかさ)
+
+- **対応シーン**: 1-2 食堂 (五人の朝食、 日常感)
+- **本文行**: `STORY/s1c1.md` l.71〜「学院の食堂は、 すでに賑わっていた」 / l.100「カイが頬を赤くしながら、 ちさとに皿をすっと差し出した」 / l.102「これ、 卵焼き多めにとっておいたから」
+- **役割**: 本文インライン挿絵 (1-2 シーン中盤、 marker候補: 「卵焼き多めにとっておいたから」)、 16:9 横長
+- **被写体**: 学院食堂の長テーブル、 五人 (ちさと/カイ/アルス/ミレイア/こはね) が食事、 カイがちさとに皿を差し出す瞬間、 アルスが本を読みながら、 こはねが小さく笑う
+- **ストーリー全体との整合**: 平和な日常の和やかさ → 後の戦闘との対比軸。 五人の絆が S1C7 まで続く Season1 ベースの確認場面
+
+> **添付画像 5枚**: `r/student.png` (ちさと) / `r/boy_scout.png` (カイ) / `r/young_mage.png` (アルス) / `r/warrior.png` (ミレイア) / `r/fox_girl.png` (こはね)
+
+```
+A horizontal warm scene at a fantasy academy dining hall in the morning.
+A long wooden communal table extends across the frame with steaming bowls of soup,
+golden tamagoyaki (rolled omelet), bread baskets, and tea cups. Five young academy
+cadets sit together: a chestnut-haired girl matching the first reference image (center-left),
+a blue-haired boy matching the second reference image (beside her, blushing slightly,
+extending a plate of tamagoyaki toward her), a glasses-wearing boy matching the third
+reference image (further along, reading a thick tome with one hand while eating with
+the other), a tall braided-hair girl matching the fourth reference image (smiling
+warmly), and a small silver-haired fox-eared girl matching the fifth reference image
+(quietly giggling at the boy's blush). Other students fill the background tables.
+Tall arched windows let in golden morning light, casting warm beams across the polished
+wood. Steam rises gently from the soup bowls.
+The atmosphere is warm, ordinary, friendly — the comfort of daily routine before
+the world changes.
+Anime fantasy illustration style, soft warm golden tones with hints of academy navy-blue
+uniforms, hopeful and intimate mood.
+Wide horizontal cinematic shot capturing the full table and all five characters.
+Aspect ratio 16:9, high detail.
+```
+
+---
+
+## 【10】akane_hinata_arrival.png — 2-4 朱音とひなた合流 (派手な大人合流)
+
+- **対応シーン**: 2-4 朱音とひなた (派閥合流の演出、 紅蓮の炎+桜花)
+- **本文行**: `STORY/s1c1.md` l.410〜「東の空から、 紅蓮の炎が舞い上がった。 それは、 ただの炎ではなかった。 炎が、 踊るように、 人の形を取って、 地上へ降りてきた」 / l.427「桜の花弁を散らしながら、 もう一人の影が降りてきた」
+- **役割**: 本文インライン挿絵 (2-4 シーン冒頭、 marker候補: 「紅蓮の炎が舞い上がった」)、 16:9 横長
+- **被写体**: 朱音 (SSR、 紅い唇・黒髪・片肌脱ぎ着物・両手の金扇から燃える炎) が紅蓮の炎で空から降臨、 横にひなた (SSR、 桜色ツインテール・小太刀) が桜花の花弁を散らしながら降臨
+- **ストーリー全体との整合**: 夜焔郷+紅翼皇家の合流 = 後の S1C2 (海淵都市/紅玉海賊団) や S1C4 (氷霊王国/空挺城) と並ぶ Season1 派閥参戦の最初の演出
+
+> **添付画像 2枚**: `ssr/kitsune_lady.png` (朱音 SSR) / `ssr/little_sister.png` (ひなた SSR)
+
+```
+A horizontal dramatic arrival scene of two legendary warriors descending from the sky
+to a battlefield. On the left side: a stunning kitsune dancer matching the first reference
+image — black flowing hair pinned with golden ornaments, one shoulder of her ornate
+red-and-gold kimono slipped down, bare shoulder, golden mischievous eyes, holding two
+golden fans (kingyu) trailing crimson flames that swirl into a fox-shaped silhouette
+behind her. She lands gracefully, scattering crimson sparks.
+On the right side: a smaller young swordmistress matching the second reference image —
+cherry-blossom pink twin-tails, kimono-styled cadet outfit, drawing a short tachi (kotachi)
+named Sakurachirashi. She descends through a flurry of pink cherry blossom petals that
+swirl around her like a snowstorm. Her expression is bright and eager.
+Between them in the air, the two energies — crimson flame and pink petals — intertwine
+beautifully. In the background, a battlefield with churned earth and distant academy
+towers, sky bruised purple-black from earlier conflict, but their arrival is a brilliant
+cut of vivid color through the dimness.
+Anime fantasy illustration style, opulent and theatrical atmosphere,
+crimson + pink palette against a darker battlefield background, dynamic dual-character composition.
+Wide cinematic horizontal shot with both characters fully visible.
+Aspect ratio 16:9, high detail.
+```
+
+---
+
+## 【11】garudo_vill_arrival.png — 2-5 ガルドとヴィル合流 (重厚な大人合流)
+
+- **対応シーン**: 2-5 ガルドとヴィル (派閥合流第二陣)
+- **本文行**: `STORY/s1c1.md` l.462〜「地響きのように、 もう一人がやってきた」 「獣牙ガルド。 月牙狼族の戦士団長。 両手で抱える大きな斧、 剥き出しの上半身、 狼の耳と尾」 / l.472「紫色の槍を構えた女性」 「竜爵ヴィル、 紫竜王国の第三王女」
+- **役割**: 本文インライン挿絵 (2-5 シーン中盤、 marker候補: 「紫色の槍を構えた女性」)、 16:9 横長
+- **被写体**: ガルド (SSR、 月牙狼族戦士団長・両手大斧・狼の耳と尾・剥き出しの上半身) と ヴィル (SSR、 紫竜王国第三王女・紫色の槍『紫雷』・竜気) が並んで戦場に立つ
+- **ストーリー全体との整合**: 月牙狼族+紫竜王国の合流 = S1C3 (古龍砂漠) や S1C4 (氷霊王国) でヴィルが活躍する伏線
+
+> **添付画像 2枚**: `ssr/wolf_warrior.png` (ガルド SSR) / `ssr/draco_lancer.png` (ヴィル SSR)
+
+```
+A horizontal heavy-impact arrival scene of two warrior champions on a battlefield.
+On the left side: a wolf-tribe warrior chieftain matching the first reference image —
+muscular bare-chested with wolf ears and a wolf tail, gripping a massive double-bladed
+axe (Tsukiba) over his shoulder, weather-beaten skin, wild silver-gray hair, fierce
+amber eyes. The ground is cracked beneath his heavy stance.
+On the right side: a dragon princess matching the second reference image — long flowing
+violet hair, regal armored dress in royal purple and silver, holding a long ornate
+spear (Shiraii) crackling with violet dragon-energy lightning. Subtle dragon scales
+gleam on her arms, two small horn-like protrusions visible above her temples.
+Between them, the air shimmers with their combined presence — heavy axe-stance vs
+elegant spear-grace, two opposing styles that have come together for a common cause.
+Distant battlefield with shadow creatures retreating, smoke and dust in the air.
+The composition emphasizes the weight and gravitas of veteran warriors arriving.
+Anime fantasy illustration style, heavy heroic atmosphere,
+earth-brown wolf warrior + royal violet dragon princess color contrast,
+dynamic dual-character pose, cinematic battlefield backdrop.
+Wide cinematic horizontal shot with both characters and surrounding battlefield visible.
+Aspect ratio 16:9, high detail.
+```
+
+---
+
+## 【12】rift_seal.png — 3-4 戦いの終わり (裂け目閉じ、 章の戦闘クライマックス締め)
+
+- **対応シーン**: 3-4 戦いの終わり (大人達の合流戦闘+裂け目閉じる瞬間)
+- **本文行**: `STORY/s1c1.md` l.754〜「戦場中央の方で、 大きな閃光が走った。 裂け目が閉じる音だった」 / l.757〜「朱音の炎、 イザベルの聖槍、 ヴィルの槍、 ガルドの斧、 ひなたの小太刀、 シンの闇刃。 すべてが合わさって、 裂け目を縫い合わせた」
+- **役割**: 本文インライン挿絵 (3-4 シーン冒頭、 marker候補: 「裂け目が閉じる音だった」)、 16:9 横長
+- **被写体**: 戦場中央、 大人キャラ6人 (イザベル/朱音/ヴィル/ガルド/ひなた/シン) の武器の光が交差して紫色の裂け目を縫い合わせる、 大閃光、 七色光が裂け目から噴出
+- **ストーリー全体との整合**: S1C7 黒月決戦の集合戦闘の予兆 (大人達の連携、 七座未満キャラの最大協力)。 S1C2 イザベル覚醒、 S1C5 シオン分離など各章の派閥代表が同時に活躍する形
+
+> **添付画像 6枚**:
+> - `ssr/paladin_lady.png` (イザベル)
+> - `ssr/kitsune_lady.png` (朱音)
+> - `ssr/draco_lancer.png` (ヴィル)
+> - `ssr/wolf_warrior.png` (ガルド)
+> - `ssr/little_sister.png` (ひなた)
+> - `sr/shadow_ninja.png` (シン)
+
+```
+A horizontal climactic battlefield moment of multiple legendary warriors sealing a
+violet rift in space-time with combined attacks. Center frame: a tall jagged violet
+rift in reality, but it is being stitched closed by criss-crossing beams of brilliant
+light from six heroes positioned around it. The combined attacks form an X-shaped
+star pattern of holy and elemental light at the rift's center, exploding in a rainbow
+flash as it seals. Each hero is captured mid-strike from a different angle:
+a holy paladin matching the first reference image (silver lance with white-gold light)
+from upper left, a kitsune dancer matching the second reference image (golden fans
+with crimson flame) from upper right, a dragon princess matching the third reference
+image (violet lightning spear) from lower left, a wolf warrior matching the fourth
+reference image (massive axe with earth-shockwave) from lower right, a small swordmistress
+matching the fifth reference image (pink-cherry-blossom kotachi) from middle left,
+a shadow ninja matching the sixth reference image (dark double-blade) from middle right.
+Their attacks converge at the rift, which is collapsing inward in a brilliant rainbow
+flash. Battlefield smoke and shadow creature ash swirl around. The sky above shows
+a final purple wound healing into normal twilight indigo.
+Anime fantasy illustration style, climactic team-attack atmosphere with multi-elemental
+light convergence, dynamic radial composition, sense of victory through unity.
+Wide cinematic horizontal shot showing the rift center and all six heroes simultaneously.
+Aspect ratio 16:9, high detail.
+```
+
+---
+
+## 【13】prisma_twilight.png — エピローグ プリズマの黄昏 (章の締め)
+
+- **対応シーン**: エピローグ プリズマの黄昏 (章の最終小節、 プリズマが眠りに入る予兆)
+- **本文行**: `STORY/s1c1.md` l.974〜「原虹の最も深い場所、 誰も訪れたことのない世界の中心で、 プリズマは、 静かに目を閉じていた」 / l.984「プリズマの体が、 結晶のように、 虹色の塵となって舞い上がる」 / l.990「その光は、 確かに、 世界中に降り注いだ」
+- **役割**: 本文インライン挿絵 (エピローグ最終、 marker候補: 「結晶のように、 虹色の塵となって舞い上がる」)、 16:9 横長
+- **被写体**: 世界の中心、 プリズマ LR、 静かに目を閉じる、 体が結晶のように崩れ虹色の塵となって舞い上がり、 世界中に七色光が降り注ぐ俯瞰
+- **ストーリー全体との整合**: S1C7 黒月決戦でのプリズマ封印 = 物語全体の終着点の予告。 「お前たちの中に、 私は生きている」 のテーマがちさとの覚醒 (3-2) と直接繋がる Season1 全体の締め
+
+> **添付画像**: `lr/prisma.png` (プリズマ LR)
+
+```
+A horizontal cosmic-scale twilight scene at the deepest center of the prismatic world.
+Center frame: the celestial androgynous figure matching the reference image —
+long silver hair, eyes peacefully closed, draped in crystalline robes — stands at the
+heart of an endless prismatic void, body beginning to dissolve elegantly into countless
+floating crystal particles that catch and refract all seven rainbow colors. The particles
+swirl outward in a vast spiral, traveling beyond the frame as if reaching the entire world.
+Around the figure, the void is layered with twilight indigo gradients fading into pure
+prismatic light at the horizons — a sunset that is both ending and continuation.
+Wisps of seven-color genso ribbons stream outward from the figure toward distant lands,
+carrying the dispersing essence to all of creation. The atmosphere is sacred, melancholy,
+hopeful — the reverent goodbye of a divine being who is not truly dying, but transforming
+and seeding the next era. No other characters in frame — Prisma alone with the cosmos.
+Anime fantasy illustration style, transcendent cosmic atmosphere with delicate prismatic
+particle effects, deep twilight indigo merged with all seven rainbow hues, ethereal
+ascendant mood.
+Wide cinematic horizontal shot with the center figure framed by vast prismatic void.
+Aspect ratio 16:9, high detail.
+```
+
+---
 
 ## 場所画像なしシーン (CSSグラデのみ)
 
