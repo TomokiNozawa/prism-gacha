@@ -25,7 +25,7 @@
 <link rel="icon" href="/images/icons/icon-16.png" type="image/png" sizes="16x16">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
 <link rel="manifest" href="/manifest.json?v=20260429c25">
-<link rel="stylesheet" href="/style.css?v=20260501n">
+<link rel="stylesheet" href="/style.css?v=20260501o">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -71,20 +71,20 @@ if ('serviceWorker' in navigator) {
 <main>
   <section class="hero">
     <div class="hero-copy">
-      <h1>あなたの色を、 探しに</h1>
-      <p>七色の中に、 あなたの一色がある</p>
-      <div class="rate">
-        <span class="r">R 65%</span>
-        <span class="sr">SR 25%</span>
-        <span class="ssr">SSR 7%</span>
-        <span class="ur">🌈 UR 3%</span>
-      </div>
+      <h1>Prismaera</h1>
+      <p>虹霊界の物語、 ここに</p>
     </div>
 
     <div class="cta">
       <!-- 通常ガチャ (全キャラ均等) -->
       <div class="cta-card cta-normal">
         <div class="cta-card-label">🎴 通常ガチャ <span class="cta-card-sub">全キャラ均等</span></div>
+        <div class="cta-card-rate rate">
+          <span class="r">R 65%</span>
+          <span class="sr">SR 25%</span>
+          <span class="ssr">SSR 7%</span>
+          <span class="ur">🌈 UR 3%</span>
+        </div>
         <div class="cta-card-buttons">
           <button id="btn-single" class="summon single">
             <span class="lbl">単発</span>
@@ -99,6 +99,13 @@ if ('serviceWorker' in navigator) {
       <!-- ピックアップガチャ (最新章キャラ ×2) -->
       <div class="cta-card cta-pickup">
         <div class="cta-card-label">📖 <span id="pickup-chapter-label">第2章</span>ピックアップ <span class="cta-card-sub" id="pickup-chapter-sub">S1C2キャラ ×2倍</span></div>
+        <div class="cta-card-rate rate">
+          <span class="r">R 65%</span>
+          <span class="sr">SR 25%</span>
+          <span class="ssr">SSR 7%</span>
+          <span class="ur">🌈 UR 3%</span>
+          <span class="pickup-note">+ S1C2 ×2</span>
+        </div>
         <div class="cta-card-buttons">
           <button id="btn-single-pickup" class="summon single pickup">
             <span class="lbl">単発</span>
@@ -585,7 +592,7 @@ if ('serviceWorker' in navigator) {
 <audio id="bgm-home" preload="auto"></audio>
 
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
-<script src="/script.js?v=20260501n"></script>
-<script src="/gasshuku.js?v=20260501n"></script>
+<script src="/script.js?v=20260501o"></script>
+<script src="/gasshuku.js?v=20260501o"></script>
 </body>
 </html>

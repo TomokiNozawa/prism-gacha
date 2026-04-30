@@ -215,6 +215,23 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   color: rgba(255,255,255,0.6);
   margin-left: 6px;
 }
+.cta-card-rate {
+  /* hero-copy から CTA カード内に移動 (2026-05-01)、 既存 .rate スタイルを継承しつつ少し小さめに */
+  display: flex; gap: 6px; flex-wrap: wrap;
+  font-size: 10px;
+}
+.cta-card-rate span {
+  font-size: 10px; padding: 3px 8px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 999px;
+}
+.cta-card-rate .pickup-note {
+  background: linear-gradient(90deg, rgba(125,211,252,0.3), rgba(252,211,77,0.3));
+  border-color: rgba(252,211,77,0.5);
+  color: #ffd84d;
+  font-weight: 700;
+}
 .cta-card-buttons { display: flex; gap: 12px; }
 .cta-card-buttons .summon { flex: 1; }
 /* ピックアップ専用ボタンの色味調整 */
