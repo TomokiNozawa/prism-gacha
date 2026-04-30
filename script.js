@@ -4206,7 +4206,8 @@ function buildEndNavHtml(storyId) {
 // ────────────── キャラ瞬きアニメーション (Live2D風プロト) ──────────────
 // 命名規則: 通常 prisma.png + 瞬き prisma_blink.png を同フォルダに配置
 // 検出: <name>_blink.png が 200 OK で読めれば瞬き有効化、そうでなければ静止
-// 適用範囲: ストーリーシーンの登場キャラサムネイル中、現状LRのみ(プロト段階)
+// 適用範囲: ストーリーシーンの登場キャラサムネ + キャラ詳細モーダル
+// 2026-05-01: 全 tier に拡張 (画像無いキャラは _blinkImageCache='ng' で skip、 副作用なし)
 const BLINK_INTERVAL_MIN = 1800;   // ms (最短間隔)
 const BLINK_INTERVAL_RANGE = 1700; // ms (ランダムレンジ)  → 1.8〜3.5秒
 const BLINK_DURATION = 180;        // ms (目を閉じている時間)
@@ -4218,8 +4219,8 @@ function clearBlinkTimers() {
 }
 function setupCharBlinkAnimations() {
   clearBlinkTimers();
-  // プロト: LRのみ対象
-  document.querySelectorAll('.story-char-thumb.lr .story-char-img').forEach(imgEl => {
+  // 全 tier 対象 (LR/UR/SSR/SR/R)、 _blink.png が無いキャラは _blinkImageCache='ng' で自動skip
+  document.querySelectorAll('.story-char-thumb .story-char-img').forEach(imgEl => {
     const bg = imgEl.style.backgroundImage || '';
     const m = bg.match(/url\(['"]?([^'")]+)['"]?\)/);
     if (!m) return;
@@ -4260,8 +4261,7 @@ let _detailBlinkTimer = null;
 function setupCharDetailBlink(c) {
   if (_detailBlinkTimer) { clearTimeout(_detailBlinkTimer); _detailBlinkTimer = null; }
   if (!c || !c.img) return;
-  // プロト段階: LRのみ
-  if (c.tier !== 'LR') return;
+  // 全 tier 対象、 _blink.png が無いキャラは probe で skip される
   const imgEl = document.getElementById('char-detail-img');
   const zoomEl = document.getElementById('char-img-zoom-img');
   if (!imgEl) return;
