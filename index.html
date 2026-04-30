@@ -25,7 +25,7 @@
 <link rel="icon" href="/images/icons/icon-16.png" type="image/png" sizes="16x16">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
 <link rel="manifest" href="/manifest.json?v=20260429c25">
-<link rel="stylesheet" href="/style.css?v=20260430m">
+<link rel="stylesheet" href="/style.css?v=20260430n">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -42,7 +42,7 @@ if ('serviceWorker' in navigator) {
 <div id="bg-layer"></div>
 
 <header class="topbar">
-  <div class="title">✦ Prismaera <span class="title-kana">-プリズマエラ-</span> <span class="ver" id="app-version">v1.2.3l</span></div>
+  <div class="title">✦ Prismaera <span class="title-kana">-プリズマエラ-</span> <span class="ver" id="app-version">v1.2.3m</span></div>
   <div class="stats">
     <button id="btn-gallery" class="gallery-btn" title="図鑑 (Gキー)">📖 図鑑</button>
     <button id="btn-relations" class="gallery-btn" title="相関図">🌐 相関図</button>
@@ -239,11 +239,11 @@ if ('serviceWorker' in navigator) {
       <h2>✦ 星霊図鑑</h2>
       <div class="gallery-stats">
         <span>入手 <b id="gallery-unlocked-count">0</b> / <b id="gallery-total-count">25</b></span>
-        <span class="g-lr">👑 <b id="gallery-lr-count">0/1</b></span>
-        <span class="g-ur">🌈 <b id="gallery-ur-count">0/4</b></span>
-        <span class="g-ssr">✨ <b id="gallery-ssr-count">0/8</b></span>
-        <span class="g-sr">💜 <b id="gallery-sr-count">0/7</b></span>
-        <span class="g-r">💙 <b id="gallery-r-count">0/6</b></span>
+        <span class="g-lr"><span class="tier-label">LR</span> <b id="gallery-lr-count">0/1</b></span>
+        <span class="g-ur"><span class="tier-label">UR</span> <b id="gallery-ur-count">0/4</b></span>
+        <span class="g-ssr"><span class="tier-label">SSR</span> <b id="gallery-ssr-count">0/8</b></span>
+        <span class="g-sr"><span class="tier-label">SR</span> <b id="gallery-sr-count">0/7</b></span>
+        <span class="g-r"><span class="tier-label">R</span> <b id="gallery-r-count">0/6</b></span>
       </div>
       <button class="close" onclick="closeGallery()">× <span class="close-label-text">閉じる<span class="esc-hint"> (Esc)</span></span></button>
     </div>
@@ -565,7 +565,7 @@ if ('serviceWorker' in navigator) {
 <audio id="bgm-home" preload="auto"></audio>
 
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
-<script src="/script.js?v=20260430m"></script>
-<script src="/gasshuku.js?v=20260430m"></script>
+<script src="/script.js?v=20260430n"></script>
+<script src="/gasshuku.js?v=20260430n"></script>
 </body>
 </html>
