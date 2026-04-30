@@ -2530,8 +2530,8 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 /* H2: 次の物語ティザー (S1C3 砂塵の隊商 - Coming Soon) */
 .story-next-teaser {
   position: relative;
-  display: flex; align-items: center; gap: 14px;
-  padding: 14px 16px 14px 18px;
+  display: flex; align-items: center; gap: 18px;
+  padding: 20px 22px 20px 22px;
   background: linear-gradient(135deg, rgba(150, 100, 220, 0.14), rgba(255, 180, 100, 0.08));
   border: 1px dashed rgba(255, 217, 122, 0.3);
   border-radius: 14px;
@@ -2545,7 +2545,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   pointer-events: none;
 }
 .story-next-badge {
-  position: absolute; top: 8px; right: 12px;
+  position: absolute; top: 12px; right: 16px;
   font-size: 9px; font-weight: 800; letter-spacing: 0.16em;
   color: #ffd84d;
   background: rgba(0, 0, 0, 0.4);
@@ -2554,7 +2554,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   z-index: 1;
 }
 .story-next-icon {
-  font-size: 32px; line-height: 1; flex: 0 0 auto;
+  font-size: 36px; line-height: 1; flex: 0 0 auto;
   filter: drop-shadow(0 0 6px rgba(200, 125, 255, 0.5));
   z-index: 1;
 }
@@ -2562,43 +2562,51 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   flex: 1; min-width: 0; z-index: 1;
 }
 .story-next-meta {
-  font-size: 10px; color: rgba(200, 180, 255, 0.7);
+  font-size: 11px; color: rgba(200, 180, 255, 0.7);
   letter-spacing: 0.08em;
-  margin-bottom: 1px;
+  margin-bottom: 4px;
 }
 .story-next-title {
-  font-size: 16px; font-weight: 700;
+  font-size: 18px; font-weight: 700;
   background: linear-gradient(90deg, #c87dff 0%, #ffd84d 100%);
   -webkit-background-clip: text; background-clip: text; color: transparent;
-  margin-bottom: 3px;
+  margin-bottom: 6px;
   letter-spacing: 0.04em;
+  line-height: 1.3;
 }
 .story-next-pov {
-  font-size: 11px; color: rgba(255, 255, 255, 0.7);
-  margin-bottom: 5px;
+  font-size: 12px; color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 8px;
 }
 .story-next-tagline {
-  font-size: 11.5px; color: rgba(255, 255, 255, 0.65);
+  font-size: 12px; color: rgba(255, 255, 255, 0.65);
   font-style: italic;
-  line-height: 1.5;
-  margin-bottom: 4px;
+  line-height: 1.6;
+  margin-bottom: 10px;
   /* 2行までに制限、 オーバーフロー隠し */
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
   overflow: hidden;
 }
 .story-next-stats {
-  font-size: 10.5px; color: rgba(255, 217, 122, 0.75);
-  letter-spacing: 0.06em;
+  display: flex; flex-wrap: wrap; gap: 6px 14px;
+  font-size: 11px; letter-spacing: 0.04em;
   font-weight: 600;
 }
+.story-next-stats > span {
+  color: rgba(255, 217, 122, 0.85);
+  white-space: nowrap;
+}
+.story-next-stats > span:first-child {
+  color: #ffd84d;  /* 公開予定日は強調 */
+}
 @media (max-width: 600px) {
-  .story-next-teaser { padding: 12px 14px 12px 14px; gap: 10px; }
-  .story-next-icon { font-size: 26px; }
-  .story-next-title { font-size: 14px; }
-  .story-next-pov { font-size: 10px; }
-  .story-next-tagline { font-size: 10.5px; }
-  .story-next-stats { font-size: 9.5px; }
-  .story-next-badge { font-size: 8px; padding: 2px 7px; }
+  .story-next-teaser { padding: 16px 16px 16px 18px; gap: 12px; }
+  .story-next-icon { font-size: 30px; }
+  .story-next-title { font-size: 15px; }
+  .story-next-pov { font-size: 11px; margin-bottom: 6px; }
+  .story-next-tagline { font-size: 11px; margin-bottom: 8px; }
+  .story-next-stats { font-size: 10px; gap: 4px 10px; }
+  .story-next-badge { font-size: 8px; padding: 2px 7px; top: 10px; right: 12px; }
 }
 
 /* ───── ホーム画面の要望カード ───── */
