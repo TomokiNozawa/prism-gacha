@@ -3976,13 +3976,23 @@ function renderScene() {
 
 // POVキャラをPOOLから検索 (完全一致優先)
 // POV は章の主人公 = ストーリー上そのシーンに必ず居る前提 → 未解放でも表示する (ガチャ未解放でもPOVは見える)
+// POV名を tokens に分解 (例: "鈴宮 ちさと" → ["鈴宮", "ちさと"]、 半角/全角空白対応)
+function _povTokens(povName) {
+  return (povName || '').split(/[\s　]+/).filter(Boolean);
+}
+// キャラ名と POV名のマッチ判定 (フルネーム / シンプル名 / 部分一致 / token単位 を全方向で許容)
+// 例: cName="ちさと" + povName="鈴宮 ちさと" → token "ちさと" 一致で true
+//     cName="波紋の聖女 イザベル" + povName="イザベル" → cName.includes(povName) で true
+function _matchPovChar(cName, povName) {
+  if (!cName || !povName) return false;
+  if (cName === povName) return true;
+  if (cName.includes(povName)) return true;
+  if (povName.includes(cName)) return true;
+  return _povTokens(povName).some(t => cName.includes(t));
+}
 function _findPovChar(povName) {
   for (const tier of ['LR', 'UR', 'SSR', 'SR', 'R']) {
-    const c = POOL[tier].find(c => c.name === povName);
-    if (c) return { ...c, tier, hits: 1 };
-  }
-  for (const tier of ['LR', 'UR', 'SSR', 'SR', 'R']) {
-    const c = POOL[tier].find(c => c.name.includes(povName));
+    const c = POOL[tier].find(c => _matchPovChar(c.name, povName));
     if (c) return { ...c, tier, hits: 1 };
   }
   return null;
@@ -4093,19 +4103,26 @@ function renderSceneChars(scene) {
       if (r.remap && r.remap[povName]) { povName = r.remap[povName]; break; }
     }
   }
-  // 全章共通ルール: POV (主人公) キャラは本編シーン (label = X-Y形式) で必ず先頭に配置する
-  // ※ 中表紙 (isAct) / 表紙 (isCover) / プロローグ・エピローグ (label無) は対象外。
-  // ※ 本文に名前/「私/わたし」 が出てなくても POVキャラは必ず先頭追加 (主役は常に「居る」 想定)
+  // 全章共通ルール: POV (主人公) キャラがシーンに登場する時、 必ず「このシーンに登場」 1人目に配置
+  // ※ 「登場する」 = top12 リストに含まれる (本文に名前出現で自動検出済) OR 本文に名前/「私/わたし」 が出てる
+  // ※ POV不在のシーン (例: プロローグ観測者たち) には追加しない (野沢方針 2026-05-01)
+  // ※ POV名マッチは _matchPovChar (token分解で柔軟マッチ、 例: "鈴宮 ちさと" ↔ POOL "ちさと")
   if (povName) {
-    const povIdx = top.findIndex(c => c.name === povName || c.name.includes(povName));
+    const povIdx = top.findIndex(c => _matchPovChar(c.name, povName));
     if (povIdx > 0) {
       // 既にリストにあるが先頭じゃない → 先頭へ移動
       const [povChar] = top.splice(povIdx, 1);
       top.unshift(povChar);
-    } else if (povIdx === -1 && scene.label && !scene.isAct && !scene.isCover) {
-      // リストに未登場 + 本編シーン → 先頭追加 (本文に名前無くても主役だから登場扱い)
-      const povChar = _findPovChar(povName);
-      if (povChar) top.unshift(povChar);
+    } else if (povIdx === -1) {
+      // top12 に居ない (= 本文に名前ほぼ出てない) → 本文に名前 or 「私/わたし」 が出る時のみ追加
+      const contentMd = scene.contentMd || '';
+      const tokens = _povTokens(povName);
+      const hasName = tokens.some(t => t && contentMd.includes(t));
+      const hasPronoun = /(?:私|わたし|僕|ぼく|俺|おれ)/.test(contentMd);
+      if (hasName || hasPronoun) {
+        const povChar = _findPovChar(povName);
+        if (povChar) top.unshift(povChar);
+      }
     }
   }
   if (top.length === 0) {

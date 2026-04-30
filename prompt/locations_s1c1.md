@@ -339,6 +339,8 @@ Aspect ratio 16:9, high detail.
 
 > **添付画像 2枚**: `ssr/kitsune_lady.png` (朱音 SSR) / `ssr/little_sister.png` (ひなた SSR)
 
+> **⚠️ 再生成 (2026-05-01)**: 既存版 (akane_hinata_arrival.png) は ひなたの右手指が解剖学的に崩壊していたため再生成必要。 下記プロンプトで上書き生成してください。
+
 ```
 A horizontal dramatic arrival scene of two legendary warriors descending from the sky
 to a battlefield. On the left side: a stunning kitsune dancer matching the first reference
@@ -357,7 +359,19 @@ cut of vivid color through the dimness.
 Anime fantasy illustration style, opulent and theatrical atmosphere,
 crimson + pink palette against a darker battlefield background, dynamic dual-character composition.
 Wide cinematic horizontal shot with both characters fully visible.
+
+CRITICAL ANATOMY REQUIREMENTS: Both characters must have anatomically correct human hands
+with exactly five distinct, well-formed fingers per hand (no extra fingers, no fused fingers,
+no missing fingers). Both arms must be in natural human poses with proper joint angles.
+The kitsune dancer's hands grip the two golden fans firmly with all five fingers visible
+and clearly defined. The young swordmistress's hands grip the short tachi hilt with both
+hands, all five fingers per hand correctly proportioned and positioned. Avoid any
+anatomical distortion of hands, fingers, or arms.
+
 Aspect ratio 16:9, high detail.
+
+-----
+元画像から表情や姿勢は変わってOKです
 ```
 
 ---
