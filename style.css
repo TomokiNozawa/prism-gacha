@@ -2514,10 +2514,10 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 .story-stack {
   gap: 12px;
 }
-/* 主役: story-entry-block は 2/3 高さ、 ティザーは 1/3 */
-.story-stack > .story-entry-block { flex: 2; margin: 0; }
-.story-stack > .story-next-teaser { flex: 1; }
-.story-stack > .story-entry-block .story-entry-btn,
+/* flex比率での高さ強制をやめ、 両方 content-fit に。 align-items:stretch で
+   左カラム合計高さに右FBが合うため、 teaser がコンテンツ overflow しなくなる */
+.story-stack > .story-entry-block { flex: 0 0 auto; margin: 0; }
+.story-stack > .story-next-teaser { flex: 0 0 auto; }
 .home-actions-row > .home-feedback .home-feedback-card {
   height: 100%;
 }

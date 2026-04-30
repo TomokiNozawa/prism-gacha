@@ -4225,7 +4225,15 @@ const STORY_CUTIN_CONFIG = {
 // Phase 1 = 背景画像 (シーン全体に被さる) / Phase 2 = 本文インライン挿絵 (STORY_LOCATION_INLINE_CONFIG)
 const LOCATION_CONFIG = {
   's1c1': {
-    // S1C1 場所画像は未生成 (locations_s1c1.md スケルトンのみ存在、 後日プロンプト作成→生成)
+    // 各シーンの「印象深い1場面」 を 9:16 縦長背景画像として配置
+    '1-1': { img: '/images/locations/s1c1/academy_morning_thumb.webp' },     // 星霊学院の朝 (学院全景、 七色の光)
+    '1-3': { img: '/images/locations/s1c1/training_ground_thumb.webp' },     // 剣術科 朝練 (ちさと無力感)
+    '1-4': { img: '/images/locations/s1c1/rooftop_omen_thumb.webp' },        // 屋上 (五人の絆 + 影喰い予兆)
+    '2-3': { img: '/images/locations/s1c1/izabel_descent_thumb.webp' },      // 白い光 (イザベル降臨)
+    '2-6': { img: '/images/locations/s1c1/rift_emergence_thumb.webp' },      // 裂け目 (影喰い大量湧出)
+    '3-2': { img: '/images/locations/s1c1/chisato_awakening_thumb.webp' },   // 山場: ちさと虹脈覚醒
+    '3-3': { img: '/images/locations/s1c1/prisma_descent_thumb.webp' },      // プリズマ降臨
+    '4-2': { img: '/images/locations/s1c1/rooftop_dawn_thumb.webp' },        // 屋上の朝 (新しい日常)
   },
   's1c2': {
     // 各シーンの「印象深い1場面」 を背景画像として配置 (野沢方針: 背景中心で統一感)
@@ -4244,6 +4252,18 @@ const LOCATION_CONFIG = {
 // 各 entry: { scene: 'X-Y', marker: '本文内の anchor フレーズ', position: 'before'|'after', img: '画像パス' }
 // position: 'after' (デフォルト) = marker を含む <p> 直後に挿入 / 'before' = <p> 直前に挿入
 const STORY_LOCATION_INLINE_CONFIG = {
+  's1c1': [
+    // 1-2 食堂: 五人の朝食 (カイの卵焼きシーン)
+    { scene: '1-2',  marker: '卵焼き多めにとっておいたから',     position: 'after',  img: '/images/locations/s1c1/breakfast_table_thumb.webp' },
+    // 2-4 朱音とひなた: 派手な合流 (紅蓮+桜花)
+    { scene: '2-4',  marker: '紅蓮の炎が舞い上がった',           position: 'after',  img: '/images/locations/s1c1/akane_hinata_arrival_thumb.webp' },
+    // 2-5 ガルドとヴィル: 重厚な合流 (狼+紫槍)
+    { scene: '2-5',  marker: '紫色の槍を構えた女性',             position: 'after',  img: '/images/locations/s1c1/garudo_vill_arrival_thumb.webp' },
+    // 3-4 戦いの終わり: 大人6人連携で裂け目縫合 (戦闘クライマックス締め)
+    { scene: '3-4',  marker: '裂け目が閉じる音だった',           position: 'after',  img: '/images/locations/s1c1/rift_seal_thumb.webp' },
+    // エピローグ プリズマの黄昏: 章の最終 (label 無いので title 比較で hit)
+    { scene: 'プリズマの黄昏', marker: '結晶のように、 虹色の塵となって舞い上がる', position: 'after', img: '/images/locations/s1c1/prisma_twilight_thumb.webp' },
+  ],
   's1c2': [
     // 2-3: 新背景 (純風景、 生成待ち) + シャンティ登場時に挿絵
     { scene: '2-3',  marker: '頭には大きな三角帽子に紅い羽飾り', position: 'after',  img: '/images/locations/s1c2/serapia_sunset_thumb.webp' },
@@ -4477,8 +4497,10 @@ function injectStoryCutins(bodyHtml, sceneIdx) {
 // 実装: indexOf ベースで marker位置を find → そこから前後の <p>/</p> を見つけて挿入
 function injectStoryLocationInlines(bodyHtml, sceneIdx) {
   const scene = storyScenes[sceneIdx];
-  if (!scene || !scene.label) return bodyHtml;
-  const entries = (STORY_LOCATION_INLINE_CONFIG[currentStoryId] || []).filter(e => e.scene === scene.label);
+  if (!scene) return bodyHtml;
+  // label (例: '1-2') か title (例: 'プリズマの黄昏'、 エピローグなど label無いシーン) のどちらかでマッチ
+  const entries = (STORY_LOCATION_INLINE_CONFIG[currentStoryId] || [])
+    .filter(e => e.scene === scene.label || e.scene === scene.title);
   if (entries.length === 0) return bodyHtml;
   for (const e of entries) {
     if (!e.img) continue;
