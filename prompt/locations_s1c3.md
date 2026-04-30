@@ -219,7 +219,7 @@ Aspect ratio 3:4, high detail.
 - **対応シーン**: 2-2 砂塵の襲撃 (サハナ初登場、 砂塵影喰い vs サハナ + 隊商)
 - **役割**: 本文インライン挿絵 (marker候補: 「サハナが風を纏って跳んだ」 等、 シーン中盤)、 16:9 横長
 - **被写体**: 砂塵影喰いと戦うサハナ。 影喰いは画面奥で巨大砂虫風 (enemies_shadeova.md 参照)、 サハナが画面前景で双風刀構え
-- **添付画像**: サハナ `ur/desert_princess.png` (S1C3新規)
+- **添付画像 (2枚)**: サハナ `ur/desert_princess.png` (S1C3新規生成済) + `images/enemies/shadeova_sand.png` (野沢生成済の砂塵影喰い参照画像)
 
 ```
 A horizontal 16:9 dramatic battlefield scene of a desert princess engaging a massive
@@ -259,7 +259,7 @@ proper joint angles.
 - **対応シーン**: 3-2 影喰いの大波 (サハール部族集結、 ヴィル+サハナ+グラン共闘)
 - **役割**: 本文インライン挿絵 (marker候補: 「部族の戦士たちが、 一斉に駆けた」 等)、 16:9 横長
 - **被写体**: 部族戦士たちと共闘するヴィル+サハナ+グラン。 影喰いの群れ (sand_shadeova) が前面に押し寄せる
-- **添付画像**: ヴィル `ssr/draco_lancer.png` (既存) + サハナ `ur/desert_princess.png` + グラン `ssr/desert_veteran.png` (S1C3新規)
+- **添付画像 (4枚、 ChatGPT添付上限注意)**: ヴィル `ssr/draco_lancer.png` (既存) + サハナ `ur/desert_princess.png` + グラン `ssr/desert_veteran.png` (S1C3新規) + `images/enemies/shadeova_sand.png` (砂塵影喰い参照、 4枚目で生成不安定なら割愛OK)
 
 ```
 A horizontal 16:9 epic combat scene of three warrior champions standing united against
