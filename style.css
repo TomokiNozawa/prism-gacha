@@ -152,7 +152,11 @@ body::before {
 main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 
 .hero {
-  display: grid; grid-template-columns: 1fr auto; gap: 40px; align-items: center;
+  display: grid;
+  /* PC でも縦並び (1列) に変更 — CTA が縦長2段カード化したため、 hero copy 横に並べると
+     不格好になる問題を解消 (野沢指摘 2026-05-01) */
+  grid-template-columns: 1fr;
+  gap: 24px;
   margin-bottom: 48px;
 }
 .hero h1 {
@@ -179,7 +183,12 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 }
 
 /* summon buttons */
-.cta { display: flex; flex-direction: column; gap: 14px; }
+/* PC: 通常+ピックアップを横並び 2列 / モバイル: 縦並び 2段 */
+.cta { display: flex; flex-direction: row; gap: 14px; }
+@media (max-width: 700px) {
+  .cta { flex-direction: column; }
+}
+.cta-card { flex: 1; }
 /* 2段カード: 通常ガチャ + ピックアップガチャ (2026-05-01〜) */
 .cta-card {
   display: flex; flex-direction: column; gap: 10px;
