@@ -4274,6 +4274,65 @@ function _prefetchChapterAssets(storyId) {
   }
 }
 
+// M4: 全アセット URL 列挙 — 設定モーダルの「📥 オフライン用に全アセット保存」 で使用
+//   - BGM 全曲 (BGM_LIST.file)
+//   - キャラ画像 (POOL の全 tier × 各キャラの原寸PNG + _thumb.webp)
+//   - 場所画像 (LOCATION_CONFIG + STORY_LOCATION_INLINE_CONFIG の img URL)
+function _collectAllAssetUrls() {
+  const urls = new Set();
+  try {
+    if (typeof BGM_LIST !== 'undefined') BGM_LIST.forEach(b => { if (b && b.file) urls.add(b.file); });
+  } catch (e) {}
+  try {
+    if (typeof POOL !== 'undefined') {
+      for (const tier of ['LR','UR','SSR','SR','R']) {
+        (POOL[tier] || []).forEach(c => {
+          if (!c || !c.img) return;
+          urls.add(c.img);
+          // _thumb.webp 版 (gallery で実際に使われるサイズ)
+          urls.add(c.img.replace(/\.png$/i, '_thumb.webp'));
+        });
+      }
+    }
+  } catch (e) {}
+  try {
+    for (const sid in LOCATION_CONFIG) {
+      const conf = LOCATION_CONFIG[sid] || {};
+      for (const k in conf) { if (conf[k] && conf[k].img) urls.add(conf[k].img); }
+    }
+  } catch (e) {}
+  try {
+    for (const sid in STORY_LOCATION_INLINE_CONFIG) {
+      (STORY_LOCATION_INLINE_CONFIG[sid] || []).forEach(e2 => { if (e2 && e2.img) urls.add(e2.img); });
+    }
+  } catch (e) {}
+  return Array.from(urls);
+}
+
+// M4: 全アセット並列DL — progressCb(done, total, currentUrl) で進捗通知
+// 5並列、 失敗無視 (404やネット切断は静かにスキップ)
+async function _downloadAllAssets(progressCb) {
+  const urls = _collectAllAssetUrls();
+  const total = urls.length;
+  let done = 0, succeeded = 0;
+  const CONCURRENCY = 5;
+  let idx = 0;
+  async function worker() {
+    while (idx < urls.length) {
+      const myIdx = idx++;
+      const url = urls[myIdx];
+      try {
+        const r = await fetch(url, { credentials: 'omit' });
+        if (r && r.ok) succeeded++;
+      } catch (e) { /* 失敗無視 */ }
+      done++;
+      try { progressCb && progressCb(done, total, url); } catch (e) {}
+    }
+  }
+  await Promise.all(Array.from({ length: CONCURRENCY }, () => worker()));
+  return { done, total, succeeded };
+}
+
 // シーン依存のキャラリンク remap — 同じ単独名 (例: 「イザベル」) でも、 シーン進行に応じて別キャラ (例: 覚醒後 UR) にリンク先を切替える。
 // 例: s1c2 の 2-11 (波紋の聖女覚醒) 以降は、 単独名「イザベル」 を SSR ではなく UR「波紋の聖女 イザベル」 にリンクさせる。
 // fromLabel: そのラベル含めてそれ以降のシーンで適用 (X-Y 形式、 X=幕、 Y=シーン番号)。
@@ -6318,6 +6377,16 @@ function openSettingsModal() {
             <button class="settings-fontsize-btn" data-size="large">大</button>
           </div>
         </div>
+        <div class="settings-section settings-offline-section">
+          <div class="settings-label">📥 オフライン用に全アセット保存</div>
+          <div class="settings-offline-desc">BGM・キャラ画像・場所画像を端末にキャッシュ。 通信が不安定な場所でもサクサク動きます。</div>
+          <button type="button" class="settings-offline-dl" id="settings-offline-dl">📥 ダウンロード開始</button>
+          <div class="settings-offline-progress" id="settings-offline-progress" hidden>
+            <div class="progress-bar"><div class="progress-fill" id="settings-progress-fill"></div></div>
+            <div class="progress-text" id="settings-progress-text">0 / 0</div>
+          </div>
+          <div class="settings-offline-status" id="settings-offline-status"></div>
+        </div>
         <div class="settings-section">
           <button type="button" class="settings-feedback-link" onclick="closeSettingsModal();openFeedbackModal()">📨 ご意見・ご要望を送る</button>
         </div>
@@ -6355,7 +6424,66 @@ function openSettingsModal() {
         m.querySelectorAll('.settings-fontsize-btn').forEach(bb => bb.classList.toggle('active', bb.dataset.size === sz));
       });
     });
+    // M4: 全アセットDL
+    const dlBtn = m.querySelector('#settings-offline-dl');
+    const progEl = m.querySelector('#settings-offline-progress');
+    const fillEl = m.querySelector('#settings-progress-fill');
+    const textEl = m.querySelector('#settings-progress-text');
+    const statusEl = m.querySelector('#settings-offline-status');
+    if (dlBtn) {
+      dlBtn.addEventListener('click', async () => {
+        if (dlBtn.disabled) return;
+        dlBtn.disabled = true;
+        const origText = dlBtn.textContent;
+        dlBtn.textContent = '📥 ダウンロード中…';
+        progEl.hidden = false;
+        fillEl.style.width = '0%';
+        textEl.textContent = '準備中…';
+        statusEl.textContent = '';
+        try {
+          const result = await _downloadAllAssets((done, total) => {
+            const pct = total ? Math.round(done / total * 100) : 0;
+            fillEl.style.width = pct + '%';
+            textEl.textContent = `${done} / ${total} (${pct}%)`;
+          });
+          localStorage.setItem('prism-offline-saved', '1');
+          localStorage.setItem('prism-offline-saved-at', new Date().toISOString());
+          dlBtn.textContent = '✅ 再ダウンロード';
+          statusEl.textContent = `✅ ${result.succeeded} / ${result.total} 件保存完了 (失敗 ${result.total - result.succeeded} 件はオンライン時に自動取得)`;
+          // ストレージ使用量表示 (取れる環境のみ)
+          if (navigator.storage && navigator.storage.estimate) {
+            try {
+              const est = await navigator.storage.estimate();
+              if (est && est.usage) {
+                const mb = (est.usage / 1024 / 1024).toFixed(1);
+                statusEl.textContent += ` / 端末ストレージ使用 ${mb}MB`;
+              }
+            } catch (e) {}
+          }
+        } catch (e) {
+          dlBtn.textContent = origText;
+          statusEl.textContent = `⚠️ エラー: ${e && e.message || e}`;
+        } finally {
+          dlBtn.disabled = false;
+        }
+      });
+    }
   }
+  // 開く度に「保存済み」 状態を反映
+  try {
+    const dlBtn2 = m.querySelector('#settings-offline-dl');
+    const statusEl2 = m.querySelector('#settings-offline-status');
+    if (dlBtn2 && localStorage.getItem('prism-offline-saved') === '1') {
+      dlBtn2.textContent = '✅ 再ダウンロード';
+      const at = localStorage.getItem('prism-offline-saved-at');
+      if (at && statusEl2) {
+        const d = new Date(at);
+        if (!isNaN(d.getTime())) {
+          statusEl2.textContent = `✅ ${d.getMonth()+1}/${d.getDate()} 保存済み`;
+        }
+      }
+    }
+  } catch (e) {}
   // 現在値を反映
   const s = loadSettings();
   m.querySelector('#settings-mute').checked = !!s.muted;
@@ -6372,6 +6500,22 @@ function closeSettingsModal() {
 }
 // 起動時に設定適用
 applySettings(loadSettings());
+
+// M5: オフライン indicator バナー — navigator.onLine 検出 + online/offline events
+function _updateOfflineBanner() {
+  const b = document.getElementById('offline-banner');
+  if (!b) return;
+  if (navigator.onLine) {
+    b.hidden = true;
+    document.body.classList.remove('has-offline-banner');
+  } else {
+    b.hidden = false;
+    document.body.classList.add('has-offline-banner');
+  }
+}
+window.addEventListener('online', _updateOfflineBanner);
+window.addEventListener('offline', _updateOfflineBanner);
+_updateOfflineBanner();
 
 // ====== ご意見・ご要望モーダル ======
 function openFeedbackModal() {
