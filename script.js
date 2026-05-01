@@ -4293,7 +4293,21 @@ function renderSceneChars(scene) {
   // ※ 「登場する」 = top12 リストに含まれる (本文に名前出現で自動検出済) OR 本文に名前/「私/わたし」 が出てる
   // ※ POV不在のシーン (例: プロローグ観測者たち) には追加しない (野沢方針 2026-05-01)
   // ※ POV名マッチは _matchPovChar (token分解で柔軟マッチ、 例: "鈴宮 ちさと" ↔ POOL "ちさと")
-  if (povName) {
+  // 章末 scene (`第N章 終`) は **次章主人公 1人だけ** 表示する単独ルール (野沢方針 2026-05-01)
+  // 現章 POV や本文中の他キャラ (次章予告で言及される他派閥キャラ含む) は出さない
+  const isFinalScene = /^第[\d一二三四五六七八九十]+章\s*終$/.test(scene.title || '');
+  if (isFinalScene) {
+    top.length = 0;  // 既存の自動検出 top12 を破棄
+    if (typeof STORY_OUTLINE !== 'undefined') {
+      const outlineIdx = STORY_OUTLINE.findIndex(c => c.id === currentStoryId);
+      const nextEntry = (outlineIdx >= 0 && outlineIdx < STORY_OUTLINE.length - 1) ? STORY_OUTLINE[outlineIdx + 1] : null;
+      if (nextEntry && nextEntry.povCharName && typeof _findCharByExactName === 'function') {
+        const nextPovChar = _findCharByExactName(nextEntry.povCharName);
+        if (nextPovChar) top.push({ ...nextPovChar, hits: 1 });
+      }
+    }
+    // top.length が 0 (Season完結等) なら以下の POV ロジックも skip — 後の hide branch で隠れる
+  } else if (povName) {
     const povIdx = top.findIndex(c => _matchPovChar(c.name, povName));
     if (povIdx > 0) {
       // 既にリストにあるが先頭じゃない → 先頭へ移動
@@ -4377,12 +4391,10 @@ const STORY_ACT_INTROS = {
   },
   's1c2': {
     'Season 1 第2章 — 南方海域の異変':  'いつもの祈りの朝。 でも、 今日の派遣は、 少しだけ違う気がした。\n— イザベル',
-    '第一幕 — 派遣の朝':                'セラフィエル様の代理として、 海へ。 私の祈りは、 届くだろうか。\n— イザベル',
-    '第二幕 — 紅玉海賊団との出会い':    '白い鎧と、 紅い帆。 出会うはずのなかった、 二つの海。\n— イザベル',
-    '第三幕 — 海中の異変':              '神は陸の上だけにいるのか。 海の底で、 私は問われる。\n— イザベル',
-    '第四幕 — 海溝の底へ':              '光の届かぬ深淵で、 私は何を見るのだろう。\n— イザベル',
-    '第五幕 — 覚醒の波紋':              '波紋が、 海を七色に染めていく——その日が、 来た。\n— イザベル',
-    '第六幕 — 帰り道':                  '戦いの後の朝。 帰る道の、 いつもと違う光。\n— イザベル',
+    '第一幕 — 出航':                    'セラフィエル様の代理として、 海へ。 私の祈りは、 届くだろうか。\n— イザベル',
+    '第二幕 — 海淵':                    '神は陸の上だけにいるのか。 海の底で、 私は問われる。\n— イザベル',
+    '第三幕 — 覚醒の波紋':              '波紋が、 海を七色に染めていく——その日が、 来た。\n— イザベル',
+    '第四幕 — 帰路':                    '戦いの後の朝。 帰る道の、 いつもと違う光。\n— イザベル',
   },
   's1c3': {
     'Season 1 第3章 — 砂塵の隊商':      '紫竜王国の第三王女として生まれた私が、 砂漠で出会うものは——。\n— ヴィル',
@@ -4394,17 +4406,28 @@ const STORY_ACT_INTROS = {
 };
 
 // 全章の outline (公開順、 公開済 + 将来予定)。 STORY_FILES (公開済) との差分で「Coming Soon teaser」 を出す
-// outline.md とミラー、 章追加時はここも更新。 各 entry: { id, meta, title, icon, tagline, releaseDate? }
-// releaseDate (YYYY-MM-DD) は未公開章に設定すると teaser に「📅 YYYY/M/D 公開予定」 で表示。 未指定なら「📅 公開予定」 のみ
+// outline.md とミラー、 章追加時はここも更新。 各 entry: { id, meta, title, icon, tagline, releaseDate?, povCharName }
+// releaseDate (YYYY-MM-DD): 未公開章に設定すると teaser に「📅 YYYY/M/D 公開予定」 表示
+// povCharName: 章末 scene の「次章主人公1人だけ表示」 で使う POOL の name (完全一致、 _findCharByExactName で検索)
 const STORY_OUTLINE = [
-  { id: 's1c1', meta: 'Season 1 — 第1章', title: '序: 七座の使命',     icon: '✨', tagline: '誰もが原虹の一筋を持つ。 世界はあなたから始まる' },
-  { id: 's1c2', meta: 'Season 1 — 第2章', title: '南方海域の異変',     icon: '🌊', tagline: '信じる対象は、 外にあるとは限らない' },
-  { id: 's1c3', meta: 'Season 1 — 第3章', title: '砂塵の隊商',         icon: '🐉', tagline: '血ではなく、 共に過ごした時間が家族を作る' },
-  { id: 's1c4', meta: 'Season 1 — 第4章', title: '凍土と空',           icon: '❄️', tagline: '強者の頂は、 孤独を共に分かち合うことで初めて温かい', releaseDate: '2026-05-02' },
-  { id: 's1c5', meta: 'Season 1 — 第5章', title: '黒月の予兆',         icon: '🌑', tagline: '自分の中の影を見つめ、 抱きしめてから手放す' },
-  { id: 's1c6', meta: 'Season 1 — 第6章', title: '七座満つる',         icon: '🌈', tagline: '違っていても、 同じ目的を持つ仲間でいられる' },
-  { id: 's1c7', meta: 'Season 1 — 第7章', title: '黒月決戦',           icon: '☄️', tagline: '影を消すのではなく、 共に在ると認める' },
+  { id: 's1c1', meta: 'Season 1 — 第1章', title: '序: 七座の使命',     icon: '✨', tagline: '誰もが原虹の一筋を持つ。 世界はあなたから始まる',                       povCharName: 'ちさと' },
+  { id: 's1c2', meta: 'Season 1 — 第2章', title: '南方海域の異変',     icon: '🌊', tagline: '信じる対象は、 外にあるとは限らない',                                povCharName: 'イザベル' },
+  { id: 's1c3', meta: 'Season 1 — 第3章', title: '砂塵の隊商',         icon: '🐉', tagline: '血ではなく、 共に過ごした時間が家族を作る',                          povCharName: '竜爵 ヴィル' },
+  { id: 's1c4', meta: 'Season 1 — 第4章', title: '凍土と空',           icon: '❄️', tagline: '強者の頂は、 孤独を共に分かち合うことで初めて温かい', releaseDate: '2026-05-02', povCharName: '龍帝 アルテミス' },
+  { id: 's1c5', meta: 'Season 1 — 第5章', title: '黒月の予兆',         icon: '🌑', tagline: '自分の中の影を見つめ、 抱きしめてから手放す',                       povCharName: '仮面騎士 シオン' },
+  { id: 's1c6', meta: 'Season 1 — 第6章', title: '七座満つる',         icon: '🌈', tagline: '違っていても、 同じ目的を持つ仲間でいられる',                       povCharName: 'セラフィエル' },
+  { id: 's1c7', meta: 'Season 1 — 第7章', title: '黒月決戦',           icon: '☄️', tagline: '影を消すのではなく、 共に在ると認める',                              povCharName: '虹意 プリズマ' },
 ];
+
+// POOL から完全一致でキャラ取得 (章末「次章主人公1人だけ」 表示用、 token分解マッチを避けて Spoiler的UR覚醒後と区別)
+function _findCharByExactName(name) {
+  if (typeof POOL === 'undefined') return null;
+  for (const tier of ['LR', 'UR', 'SSR', 'SR', 'R']) {
+    const c = (POOL[tier] || []).find(x => x.name === name);
+    if (c) return { ...c, tier };
+  }
+  return null;
+}
 
 // 最終シーン用ナビゲーション (次章公開済 / 次章未公開 Coming Soon / Season完結 の3パターン)
 function buildEndNavHtml(storyId) {
@@ -4529,9 +4552,9 @@ const STORY_CUTIN_CONFIG = {
     { scene: '3-3', charName: '虹意 プリズマ' }, // 3-3: 虹色の人 — プリズマが初めて名乗るシーン
   ],
   's1c2': [
-    // 2026-05-01 ラベル幕単位化: 旧 2-6 → 3-2 (第三幕 ネプテア初登場)
-    { scene: '3-2',            charName: '深海女王 ネプテア' },
-    // 第五幕 5-3 波紋の聖女イザベルのキャラカットインは削除 (野沢指示: 場所画像 ripple_saint_awakening 挿絵で代替)
+    // 2026-05-01 4幕統合: 旧 3-2 → 2-2 (第二幕 ネプテア初登場)
+    { scene: '2-2',            charName: '深海女王 ネプテア' },
+    // 第三幕 3-3 波紋の聖女イザベルのキャラカットインは削除 (野沢指示: 場所画像 ripple_saint_awakening 挿絵で代替)
   ],
   's1c3': [
     // 2-1 アーシャ初登場 → asha_meeting.png 挿絵で代替 (cutin より絵が強い)、 cutin削除
@@ -4558,16 +4581,15 @@ const LOCATION_CONFIG = {
     '4-2': { img: '/images/locations/s1c1/rooftop_dawn_thumb.webp' },        // 屋上の朝 (新しい日常)
   },
   's1c2': {
-    // 各シーンの「印象深い1場面」 を背景画像として配置 (野沢方針: 背景中心で統一感)
-    // 2026-05-01 ラベル変更: 全章 幕単位連番 (N=幕番号) に統一、 旧 2-X → 1-1〜6-2
+    // 2026-05-01 4幕統合: 出航/海淵/覚醒の波紋/帰路、 全章幕単位連番 (N=幕番号)
     '1-1': { img: '/images/locations/s1c2/church_morning_thumb.webp' },          // 第一幕 1-1 教会の朝 (七色ステンドグラスで祈るイザベル)
-    '2-1': { img: '/images/locations/s1c2/serapia_evening_thumb.webp' },         // 第二幕 2-1 港町セラピア純風景
-    '2-2': { img: '/images/locations/s1c2/crimson_pearl_night_thumb.webp' },     // 第二幕 2-2 月のない夜の紅玉号甲板
-    // 第三幕 3-1 影喰いの群れ: shadeova_swarm を挿絵化、 背景はグラデ (戦闘シーン動的)
-    '4-1': { img: '/images/locations/s1c2/aquasis_city_thumb.webp' },            // 第四幕 4-1 海中の珊瑚都市 (視覚インパクト最大)
-    '5-1': { img: '/images/locations/s1c2/aquasis_rift_thumb.webp' },            // 第五幕 5-1 海溝の底・黒い亀裂
-    // 第五幕 5-3 波紋の聖女: ripple_saint_awakening を挿絵化、 キャラカットイン削除
-    '6-2': { img: '/images/locations/s1c2/serapia_dawn_thumb.webp' },            // 第六幕 6-2 朝焼けの港 (ミカと別れ)
+    '1-3': { img: '/images/locations/s1c2/serapia_evening_thumb.webp' },         // 第一幕 1-3 港町セラピア純風景
+    '1-4': { img: '/images/locations/s1c2/crimson_pearl_night_thumb.webp' },     // 第一幕 1-4 月のない夜の紅玉号甲板
+    // 第二幕 2-1 影喰いの群れ: shadeova_swarm を挿絵化、 背景はグラデ (戦闘シーン動的)
+    '2-3': { img: '/images/locations/s1c2/aquasis_city_thumb.webp' },            // 第二幕 2-3 海中の珊瑚都市 (アクアシス宮殿)
+    '3-1': { img: '/images/locations/s1c2/aquasis_rift_thumb.webp' },            // 第三幕 3-1 海溝の底・黒い亀裂
+    // 第三幕 3-3 波紋の聖女: ripple_saint_awakening を挿絵化、 キャラカットイン削除
+    '4-2': { img: '/images/locations/s1c2/serapia_dawn_thumb.webp' },            // 第四幕 4-2 朝焼けの港 (ミカと別れ)
   },
   's1c3': {
     // 各シーンの「印象深い1場面」 を 3:4 縦長背景画像として配置
@@ -4605,18 +4627,18 @@ const STORY_LOCATION_INLINE_CONFIG = {
     { scene: 'プリズマの黄昏', marker: '結晶のように、 虹色の塵となって舞い上がる', position: 'after', img: '/images/locations/s1c1/prisma_twilight_thumb.webp' },
   ],
   's1c2': [
-    // 2026-05-01 ラベル幕単位化: 旧 2-X → 第N幕の M番目 (N-M)
-    // 第二幕 2-1 港町セラピア (旧 2-3): シャンティ登場時に挿絵
-    { scene: '2-1',  marker: '頭には大きな三角帽子に紅い羽飾り', position: 'after',  img: '/images/locations/s1c2/serapia_sunset_thumb.webp' },
-    // 第三幕 3-1 海中影喰い登場 (旧 2-5): 群れ突入挿絵より前に「水中型」 紹介
-    { scene: '3-1',  marker: '影喰い——水中型',                  position: 'after',  img: '/images/enemies/shadeova_swarm_marine_thumb.webp' },
-    // 第三幕 3-1 (旧 2-5): 戦闘シーンの動的瞬間を挿絵で
-    { scene: '3-1',  marker: '群れに突っ込んだ',                  position: 'after',  img: '/images/locations/s1c2/shadeova_swarm_thumb.webp' },
-    // 第四幕 4-1 アクアシス宮殿 (旧 2-7): 海上 (entrance) → 海中 (city背景) → 宮殿 (throne) の進行
-    { scene: '4-1',  marker: '巨大な珊瑚の都市が広がっていた',    position: 'after',  img: '/images/locations/s1c2/aquasis_entrance_thumb.webp' },
-    { scene: '4-1',  marker: '宮殿の謁見の間',                    position: 'before', img: '/images/locations/s1c2/aquasis_throne_thumb.webp' },
-    // 第五幕 5-3 波紋の聖女 (旧 2-11): 覚醒の絶頂を挿絵で (キャラカットイン削除)
-    { scene: '5-3',  marker: '光の中で、私の鎧が、変容した',      position: 'after',  img: '/images/locations/s1c2/ripple_saint_awakening_thumb.webp' },
+    // 2026-05-01 4幕統合: 出航/海淵/覚醒の波紋/帰路 に再mapping
+    // 第一幕 1-3 港町セラピア (旧 2-3 → 1-3): シャンティ登場時に挿絵
+    { scene: '1-3',  marker: '頭には大きな三角帽子に紅い羽飾り', position: 'after',  img: '/images/locations/s1c2/serapia_sunset_thumb.webp' },
+    // 第二幕 2-1 海中影喰い登場 (旧 3-1 → 2-1): 群れ突入挿絵より前に「水中型」 紹介
+    { scene: '2-1',  marker: '影喰い——水中型',                  position: 'after',  img: '/images/enemies/shadeova_swarm_marine_thumb.webp' },
+    // 第二幕 2-1 (旧 3-1): 戦闘シーンの動的瞬間を挿絵で
+    { scene: '2-1',  marker: '群れに突っ込んだ',                  position: 'after',  img: '/images/locations/s1c2/shadeova_swarm_thumb.webp' },
+    // 第二幕 2-3 アクアシス宮殿 (旧 4-1 → 2-3): 海上 (entrance) → 海中 (city背景) → 宮殿 (throne) の進行
+    { scene: '2-3',  marker: '巨大な珊瑚の都市が広がっていた',    position: 'after',  img: '/images/locations/s1c2/aquasis_entrance_thumb.webp' },
+    { scene: '2-3',  marker: '宮殿の謁見の間',                    position: 'before', img: '/images/locations/s1c2/aquasis_throne_thumb.webp' },
+    // 第三幕 3-3 波紋の聖女 (旧 5-3 → 3-3): 覚醒の絶頂を挿絵で (キャラカットイン削除)
+    { scene: '3-3',  marker: '光の中で、私の鎧が、変容した',      position: 'after',  img: '/images/locations/s1c2/ripple_saint_awakening_thumb.webp' },
   ],
   's1c3': [
     // 1-2 リアム誓い、 三月の約束 (主従の絆 + 旅の制約成立)
@@ -4814,7 +4836,10 @@ const STORY_POV_EXCLUDE_SCENES = {
     '教会のセラフィエル',
     'プリズマの黄昏',
   ],
-  's1c2': [],
+  's1c2': [
+    // エピローグ — 天の境で (セラフィエル + カグヤ + ノクス)、 観測者シーン
+    'エピローグ — 天の境で',
+  ],
   's1c3': [
     // エピローグ — 観測者たち は h2 で body あり regular scene、 観測者三柱の語り場面
     'エピローグ — 観測者たち',
@@ -4826,8 +4851,8 @@ const STORY_POV_EXCLUDE_SCENES = {
 // fromLabel: そのラベル含めてそれ以降のシーンで適用 (X-Y 形式、 X=幕、 Y=シーン番号)。
 const STORY_CHAR_REMAP = {
   's1c2': [
-    // 2026-05-01 ラベル幕単位化: 旧 2-11 → 5-3 (第五幕 波紋の聖女覚醒シーン)
-    { fromLabel: '5-3', remap: { 'イザベル': '波紋の聖女 イザベル' } },
+    // 2026-05-01 4幕統合: 旧 5-3 → 3-3 (第三幕 波紋の聖女覚醒シーン)
+    { fromLabel: '3-3', remap: { 'イザベル': '波紋の聖女 イザベル' } },
   ],
 };
 
