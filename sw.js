@@ -7,7 +7,7 @@
 //
 // HTML/JSON/Firebase API はキャッシュせず常にネットワーク優先 (更新即反映+認証/DBの鮮度維持)。
 
-const SW_VERSION = '20260501d';  // 「全アセットDL」 race condition 修正 (await cache.put + offline-saved cache)
+const SW_VERSION = '20260501e';  // v1.3.0 第3章公開 (新キャラ10体 + 場所画像9枚 + 凸秘話25話 + 各種修正)
 const STATIC_CACHE = `prismaera-static-${SW_VERSION}`;
 const BGM_CACHE    = `prismaera-bgm-${SW_VERSION}`;
 const LOC_CACHE    = `prismaera-loc-${SW_VERSION}`;
@@ -15,15 +15,16 @@ const LOC_CACHE    = `prismaera-loc-${SW_VERSION}`;
 const OFFLINE_SAVED = 'prismaera-offline-saved';
 
 // プリキャッシュ対象 BGM — script.js BGM_LIST と同期 (新曲追加時はここも更新)
+// 配列順は BGM_LIST と完全同期 (dawn/watch/tide/sands/rift/church/aquasis/crimson/sahar = 9曲)
 const PRECACHE_BGM = [
   '/assets/bgm/home.mp3',
   '/assets/bgm/prism-watch.mp3',
   '/assets/bgm/prism-tide.mp3',
+  '/assets/bgm/prism-sands.mp3',
   '/assets/bgm/Prismatic Rift Overture.mp3',
   '/assets/bgm/prism-church.mp3',
   '/assets/bgm/prism-aquasis.mp3',
   '/assets/bgm/prism-crimson.mp3',
-  '/assets/bgm/prism-sands.mp3',
   '/assets/bgm/prism-sahar.mp3',
 ];
 
