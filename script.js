@@ -97,6 +97,21 @@ const POOL = {
       desc: "見た目は8-10歳の幼女、 中身は千年級。 古龍の血を最も濃く引く一族の長老。 古龍杖ジナを携え、 失われた古龍王の伝承を守る。 幼子の姿のまま、 千年の知恵と杖を振るう。 観測者三柱と千年前を共有する縁を持つ。 ヴィルを『次の千年の鍵』 と密かに見定めている。",
       img: `${S1}/ur/dragon_sage.png`,
     },
+    // ===== S1C4 追加 (UR2、 凍土の覇者+空挺の女皇) =====
+    {
+      name: "氷帝 グレイル", season: 1, chapter: 's1c4',
+      title: "凍土の若き覇王、 第三の覇者候補",
+      caption: "凍土の寒さではない。 別の寒さだ。",
+      desc: "氷霊王国ニーヴルの若き氷帝、 二十六。 古代氷霊の血を強く引く者で、 実年齢は本人も知らない。 双の氷剣ニフルとヘイルで凍土を統べる。 アルテミスとの一騎打ちで引き分け、 互いを「戦友」 と認め合う山場の相手。 龍国の覇者と並ぶ「第三の覇者候補」 として黒月決戦の隣に立つ約束を交わす。",
+      img: `${S1}/ur/ice_emperor.png`,
+    },
+    {
+      name: "空挺女皇 ヴァーレ", season: 1, chapter: 's1c4',
+      title: "蒸気と歯車の若き女皇、 機械文明の継承者",
+      caption: "沈黙の塔が、 もう一度動く時が来る。",
+      desc: "空挺城ゼノニアの神童女皇、 二十六-二十七。 機械工学と魔導を融合させた蒸気帝国の若き戴冠者。 蒸気魔導杖オラリオンと真鍮歯車の翼を従え、 観測者七座の手にすら届かぬ「もう一つの道」 を歩む。 アルテミスとの外交で「機械と魔導の融合」 が世界に何をもたらすかを示唆。 ゼピル学者を師に持つ。",
+      img: `${S1}/ur/sky_empress.png`,
+    },
   ],
   SSR: [
     {
@@ -197,6 +212,56 @@ const POOL = {
       caption: "ヴィル殿下、 必ずお迎えに参ります。",
       desc: "紫竜王国の若き侍従。 ヴィルが城を抜けた朝に砂時計で三月を計り、 期限内に戻らなければ単騎で迎えに行くと決めていた。 父も侍従だった世襲で、 細身の儀礼槍『紫翼』 を継ぐ。 ヴィル殿下を『家族』 と思っている、 不器用なだけ真っ直ぐな青年。",
       img: `${S1}/ssr/purple_dragon_servant.png`,
+    },
+    // ===== S1C4 追加 (SSR7、 ニーヴル+ゼノニア の主要キャラ) =====
+    {
+      name: "氷塔の聖騎士 リオネ", season: 1, chapter: 's1c4',
+      title: "ニーヴル筆頭聖騎士、 グレイル直属",
+      caption: "陛下の背は、 私が守ります。",
+      desc: "氷霊王国ニーヴルの筆頭聖騎士、 二十四-二十五。 銀のショートカットに凛とした聖騎士気質。 氷剣ホークフロストの使い手。 グレイル氷帝への絶対忠誠を持ち、 凍土の盾として戦場に立つ。 アスラ見習い騎士の指南役。",
+      img: `${S1}/ssr/ice_paladin.png`,
+    },
+    {
+      name: "空挺城総監 ガリオン", season: 1, chapter: 's1c4',
+      title: "ゼノニア大将軍、 ヴァーレ女皇の右腕",
+      caption: "蒸気砲、 装填完了。",
+      desc: "空挺城ゼノニアの大将軍、 二十七-二十八。 蒸気砲付き巨腕鎧と巨大シールドを纏う。 ヴァーレ女皇の右腕として軍事を統べ、 寡黙ながら部下からの信頼厚い。 ヴィン砲手 副官。",
+      img: `${S1}/ssr/sky_general.png`,
+    },
+    {
+      name: "氷霜の巫女 ユーリス", season: 1, chapter: 's1c4',
+      title: "凍土の予言者、 神事の継承者",
+      caption: "次に龍を譲る相手を、 もうあなたは知っているはずです。",
+      desc: "ニーヴル神事を司る若き巫女、 二十二-二十三。 氷の予言杖イルディラから七色の予言光を放つ。 アルテミス龍帝に「次に龍を譲る相手」 を示唆する伏線回収者。 妹のイル祭司と神殿を守る。",
+      img: `${S1}/ssr/frost_oracle.png`,
+    },
+    {
+      name: "摂政 ヴァルキ", season: 1, chapter: 's1c4',
+      title: "ニーヴル摂政、 凍土外交の知略",
+      caption: "陛下の即位、 私が支えます。",
+      desc: "氷霊王国ニーヴルの摂政、 二十八。 グレイル先代 (前帝) の右腕として凍土の外交を司り、 グレイル即位後も摂政として内政を担う。 銀の長髪を編み込んだ女政治家、 知略の人。",
+      img: `${S1}/ssr/ice_regent.png`,
+    },
+    {
+      name: "北方剣聖 ハグル", season: 1, chapter: 's1c4',
+      title: "グレイル剣師、 古代氷霊の血を引く者",
+      caption: "(沈黙、 一礼)",
+      desc: "グレイル氷帝の剣師、 二十六-二十七。 古代氷霊の血を強く引く者で実年齢は本人も知らない。 双の氷剣ヘルファング (ニフルとヘイルの先代型) の使い手。 寡黙、 弟子グレイルへの信頼は揺らがない。",
+      img: `${S1}/ssr/north_swordmaster.png`,
+    },
+    {
+      name: "空挺城首席学者 ゼピル", season: 1, chapter: 's1c4',
+      title: "ヴァーレ女皇の師、 機械工学の理論家",
+      caption: "沈黙の塔の文献、 いずれ陛下にも。",
+      desc: "ゼノニア機械工学の理論を確立した若き神童学者、 二十八。 蒸気魔導書と真鍮羅針盤を扱う。 ヴァーレ女皇の師でありながら、 同じ研究を異なる立場で進める「同志」。 S2「沈黙の塔」 機械文明覚醒の理論家。",
+      img: `${S1}/ssr/sky_scholar.png`,
+    },
+    {
+      name: "真鍮の女将 ハーニア", season: 1, chapter: 's1c4',
+      title: "ゼノニア工房親方、 ベルの師匠",
+      caption: "また、 来てくださいよ陛下!",
+      desc: "ゼノニア整備工房の親方、 二十五-二十六。 銅赤ショートカット、 大型レンチハンマーを担ぐたくましい工房長。 ベル整備士の師匠、 ガリオン総監の蒸気砲鎧の整備担当。 機械文明の温度を支える人。",
+      img: `${S1}/ssr/brass_foreman.png`,
     },
   ],
   SR: [
@@ -327,6 +392,56 @@ const POOL = {
       desc: "十六-十七歳の若き戦士。 十一歳の時にサハナに助けられて以来、 双短剣で姉の双剣シャマールを真似てきた。 ティナを実の妹のように見守る。 一族の未来を担う次世代の戦士。",
       img: `${S1}/sr/young_desert_warrior.png`,
     },
+    // ===== S1C4 追加 (SR7、 ニーヴル+ゼノニア の戦士+整備士+祭司+狩人) =====
+    {
+      name: "氷牙の戦士 イズン", season: 1, chapter: 's1c4',
+      title: "ニーヴル若き戦士、 グレイル氷帝に憧れる",
+      caption: "陛下の隣で、 戦いたいんだ!",
+      desc: "ニーヴルの若き戦士、 十九-二十歳。 銀髪のロングサイドテール、 元気で熱血。 氷の双斧フリムリで凍土の前線を戦う。 グレイル氷帝への憧れ深く、 「いつか陛下の隣で戦う」 が夢。",
+      img: `${S1}/sr/ice_warrior.png`,
+    },
+    {
+      name: "空挺整備士 ベル", season: 1, chapter: 's1c4',
+      title: "ゼノニア機械工房の若き整備士、 ハーニアの弟子",
+      caption: "ご無事でー!",
+      desc: "ゼノニア機械工房の整備士、 二十-二十一。 朱色ショートカットに溌剌とした若き機械工女。 大型スパナと軽機関銃を扱う。 ハーニア親方を師に持ち、 機械への深い愛情を燃やす。 ジン機関士の幼馴染。",
+      img: `${S1}/sr/sky_engineer.png`,
+    },
+    {
+      name: "凍土の狩人 シエラ", season: 1, chapter: 's1c4',
+      title: "ニーヴル猟師、 雪豹シロの相棒",
+      caption: "(無言で氷弓を構える)",
+      desc: "ニーヴルの若き狩人、 二十一-二十二。 銀髪ロングストレート、 寡黙で集中力の塊。 氷の長弓グレシエルで凍土の獣道を熟知。 雪豹「シロ」 を相棒にする。",
+      img: `${S1}/sr/frost_hunter.png`,
+    },
+    {
+      name: "氷塔の見習い騎士 アスラ", season: 1, chapter: 's1c4',
+      title: "リオネ筆頭聖騎士の後輩",
+      caption: "リオネ姉さま、 私も!",
+      desc: "ニーヴル氷塔聖騎士団の見習い、 十七-十八。 銀髪ミディアムに真面目で真っ直ぐな性格。 氷剣ショートソードを扱う。 リオネ筆頭聖騎士への憧れ深く、 凍り影喰い襲撃で命懸けの援護を見せた。",
+      img: `${S1}/sr/ice_apprentice.png`,
+    },
+    {
+      name: "凍土の祭司 イル", season: 1, chapter: 's1c4',
+      title: "ユーリスの実妹、 神事の補佐",
+      caption: "(鈴杖を鳴らす)",
+      desc: "ニーヴル神事の補佐役、 二十歳。 ユーリス氷霜の巫女の実妹。 銀の長髪 (姉と同色) と静謐な気配。 氷の鈴杖で神事の始まりを告げる。 姉への深い敬愛を持つ。",
+      img: `${S1}/sr/frost_priestess.png`,
+    },
+    {
+      name: "蒸気砲手 ヴィン", season: 1, chapter: 's1c4',
+      title: "ガリオン総監の副官、 ゼノニア軍の名手",
+      caption: "(蒸気ライフルを担いで沈黙)",
+      desc: "ゼノニア軍の砲手、 二十二-二十三。 黒髪のバックスリックに落ち着いた狙撃手気質。 蒸気ライフルの名手、 ガリオン総監の副官として軍事を支える。",
+      img: `${S1}/sr/steam_gunner.png`,
+    },
+    {
+      name: "空挺機関士 ジン", season: 1, chapter: 's1c4',
+      title: "ベル整備士の幼馴染、 蒸気エンジンの専門家",
+      caption: "ベル、 ねじ持ってこいよ。",
+      desc: "ゼノニア機関室の機関士、 二十一。 朱茶のミディアムに朗らかで頼れる性格。 大型スパナを二刀流で振るう。 ベル整備士の幼馴染、 機械工房での息の合った職人の応酬は工房名物。",
+      img: `${S1}/sr/sky_machinist.png`,
+    },
   ],
   R: [
     {
@@ -420,6 +535,21 @@ const POOL = {
       caption: "祖父の物語を、 次の子供たちへ。",
       desc: "二十二-二十三歳の若き語り部。 昨年、 祖父が遺した物語の杖 (古龍の歯入り) と語り部の役を受け継いだ。 砂漠夜営の焚き火の前で子供たちに祖父の話を語り継ぐ。 ファラー婆さんとは別系統の遊牧民側伝承の継承者。",
       img: `${S1}/r/young_storyteller.png`,
+    },
+    // ===== S1C4 追加 (R2、 凍土の少年+空挺の少年) =====
+    {
+      name: "凍土の少年 アルク", season: 1, chapter: 's1c4',
+      title: "ニーヴル雪原村の子、 凍土の冒険心",
+      caption: "おうへい様だっ……!",
+      desc: "ニーヴル雪原村の少年、 十一-十二歳。 銀髪のショート、 元気で好奇心旺盛。 氷玉投げが得意。 イズン兄に憧れて、 「いつか戦士になる!」 と意気込む。 ミウは幼馴染。",
+      img: `${S1}/r/frost_boy.png`,
+    },
+    {
+      name: "空の少女 ピピ", season: 1, chapter: 's1c4',
+      title: "ゼノニア郊外の整備見習い",
+      caption: "ねじまわしっ! あったよっ!",
+      desc: "ゼノニア郊外の整備見習いの少女、 十二-十三歳。 朱色ショート、 朗らかで活発。 ねじまわしを工具兼武器に。 ベル姉に憧れ、 工房通いを始めた。",
+      img: `${S1}/r/sky_girl.png`,
     },
   ],
 };
@@ -725,7 +855,7 @@ function saveState() {
 
 // ────────────── Rolling ──────────────
 // ピックアップ章: 該当章のキャラだけ重み×2、 他は×1。 章全体のtier比率(R65/SR25/SSR7/UR3)は維持。
-const PICKUP_CHAPTER = 's1c3';  // 最新章固定 (S1C4公開時に 's1c4' へ手動更新)
+const PICKUP_CHAPTER = 's1c4';  // 最新章固定 (S1C5公開時に 's1c5' へ手動更新)
 const PICKUP_WEIGHT = 2;
 
 function rollOne(opts = {}) {
@@ -5126,6 +5256,15 @@ const LOCATION_CONFIG = {
     // 第三幕 3-3 波紋の聖女: ripple_saint_awakening を挿絵化、 キャラカットイン削除
     '4-2': { img: '/images/locations/s1c2/serapia_dawn_thumb.webp' },            // 第四幕 4-2 朝焼けの港 (ミカと別れ)
   },
+  's1c4': {
+    // 第4章「凍土と空」 背景 (3:4縦長 + 1枚 16:9横長 = snow_field_silence は 3:4縦)
+    '1-1': { img: '/images/locations/s1c4/imperial_jade_palace_thumb.webp' },         // プロローグ/1-1 龍国玉座
+    '1-3': { img: '/images/locations/s1c4/frozen_tundra_journey_thumb.webp' },        // 1-3 雪原を行く
+    '2-1': { img: '/images/locations/s1c4/niiruru_ice_palace_thumb.webp' },           // 2-1 氷宮殿の謁見
+    '3-1': { img: '/images/locations/s1c4/zenonia_floating_fortress_thumb.webp' },    // 3-1 空挺城ゼノニア
+    '3-3': { img: '/images/locations/s1c4/snow_field_silence_thumb.webp' },           // 3-3 山場 雪原で空を見上げる (アルテミス+グレイル)
+    '銀霜の月に呼ばれる者': { img: '/images/locations/s1c4/observer_prophecy_realm_thumb.webp' },  // エピローグ subscene
+  },
   's1c3': {
     // 各シーンの「印象深い1場面」 を 3:4 縦長背景画像として配置
     '1-1': { img: '/images/locations/s1c3/purple_dragon_palace_thumb.webp' },     // 玉座の間 (父王とヴィルの対話)
@@ -5175,6 +5314,13 @@ const STORY_LOCATION_INLINE_CONFIG = {
     // 第三幕 3-3 波紋の聖女 (旧 5-3 → 3-3): 覚醒の絶頂を挿絵で (キャラカットイン削除)
     { scene: '3-3',  marker: '光の中で、私の鎧が、変容した',      position: 'after',  img: '/images/locations/s1c2/ripple_saint_awakening_thumb.webp' },
   ],
+  's1c4': [
+    // 第4章 挿絵 (16:9横、 全 4枚)
+    { scene: '2-2',  marker: '五合目で、 私は双剣を交差させた',                   position: 'before', img: '/images/locations/s1c4/duel_ice_vs_dragon_thumb.webp' },
+    { scene: '2-3',  marker: 'ふと、 古い戦場の記憶が、 不意に蘇った',           position: 'after',  img: '/images/locations/s1c4/flashback_artemis_hinoo_thumb.webp' },
+    { scene: '3-1',  marker: 'ヴァーレが、 静かに口を開いた',                     position: 'before', img: '/images/locations/s1c4/vaire_diplomacy_thumb.webp' },
+    { scene: '4-1',  marker: '氷の小さな神殿の中央に、 ユーリスは立っていた',     position: 'after',  img: '/images/locations/s1c4/frost_oracle_prophecy_thumb.webp' },
+  ],
   's1c3': [
     // 1-2 リアム誓い、 三月の約束 (主従の絆 + 旅の制約成立)
     { scene: '1-2',  marker: '不器用だけれど、 真っ直ぐな、 リアムらしい言葉だった', position: 'after',  img: '/images/locations/s1c3/liam_oath_thumb.webp' },
@@ -5193,7 +5339,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260502m';
+const IMG_CACHE_VERSION = '20260502n';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -5893,6 +6039,10 @@ const BGM_LIST = [
   { id: 'aquasis', label: 'アクアシステーマ',  desc: 'Prism Abyss (深海の宮)',             duration: '2:59', file: '/assets/bgm/prism-aquasis.mp3' },
   { id: 'crimson', label: '紅玉海賊団テーマ',  desc: 'Prism Sailborn (紅潮の風)',          duration: '2:51', file: '/assets/bgm/prism-crimson.mp3' },
   { id: 'sahar',   label: 'サハールテーマ',    desc: 'Prism Sahar (古龍の風)',             duration: '2:48', file: '/assets/bgm/prism-sahar.mp3' },
+  // ===== S1C4 追加 (3曲: 章テーマ + 派閥BGM x2) =====
+  { id: 'frost',    label: '第4章テーマ',      desc: 'Prism Frost (凍空の鼓動)',           duration: '2:53', file: '/assets/bgm/prism-frost.mp3' },
+  { id: 'niflheim', label: 'ニーヴルテーマ',   desc: 'Prism Niflheim (氷霊の歌)',          duration: '3:09', file: '/assets/bgm/prism-niflheim.mp3' },
+  { id: 'aether',   label: 'ゼノニアテーマ',   desc: 'Prism Aether (蒸気の鼓動)',          duration: '3:08', file: '/assets/bgm/prism-aether.mp3' },
 ];
 const bgmAudio = document.getElementById("bgm-home");
 

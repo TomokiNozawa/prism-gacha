@@ -7,7 +7,7 @@
 //
 // HTML/JSON/Firebase API はキャッシュせず常にネットワーク優先 (更新即反映+認証/DBの鮮度維持)。
 
-const SW_VERSION = '20260502m';  // v1.3.2+ ランク調整 (SSS廃止/SS統合) + 説明文見直し + LEGEND見切れ修正
+const SW_VERSION = '20260502n';  // v1.3.2+ S1C4 アセット反映 (キャラ18 + 場所10 + BGM3) + PICKUP_CHAPTER s1c4 切替
 const STATIC_CACHE = `prismaera-static-${SW_VERSION}`;
 const BGM_CACHE    = `prismaera-bgm-${SW_VERSION}`;
 const LOC_CACHE    = `prismaera-loc-${SW_VERSION}`;
@@ -26,6 +26,9 @@ const PRECACHE_BGM = [
   '/assets/bgm/prism-aquasis.mp3',
   '/assets/bgm/prism-crimson.mp3',
   '/assets/bgm/prism-sahar.mp3',
+  '/assets/bgm/prism-frost.mp3',
+  '/assets/bgm/prism-niflheim.mp3',
+  '/assets/bgm/prism-aether.mp3',
 ];
 
 // LRU上限 (entry数ベース、 サイズベースではない理由: Cache APIは個別sizeを取れないため)
