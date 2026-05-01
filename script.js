@@ -3774,27 +3774,32 @@ function _showChapterGallery(storyId) {
   // HTML 組み立て
   let html = `<h3>${escapeHtml(outline.icon || '📖')} ${escapeHtml(outline.title)}</h3>`;
   html += `<div class="faction-yomi-side">${escapeHtml(outline.meta)}</div>`;
-  html += `<div class="world-map-side-meta">`;
-  html += `<span>🖼️ 場所 ${locations.length}枚</span>`;
-  html += `<span>👥 キャラ ${chars.length}人</span>`;
+  // タブフィルター: すべて / 場所 / キャラ
+  html += `<div class="chapter-gallery-tabs">`;
+  html += `<button type="button" class="chapter-tab active" data-tab="all">すべて</button>`;
+  html += `<button type="button" class="chapter-tab" data-tab="loc">🖼️ 場所 ${locations.length}枚</button>`;
+  html += `<button type="button" class="chapter-tab" data-tab="char">👥 キャラ ${chars.length}人</button>`;
   html += `</div>`;
   if (outline.tagline) {
     html += `<div class="chapter-gallery-tagline">${escapeHtml(outline.tagline)}</div>`;
   }
   // 場所画像セクション
   if (locations.length > 0) {
+    html += `<div class="chapter-gallery-section chapter-gallery-section-loc">`;
     html += `<div class="chapter-gallery-section-title">🖼️ 場所</div>`;
     html += `<div class="chapter-gallery-locations">`;
     locations.forEach((loc, idx) => {
-      html += `<div class="chapter-gallery-loc" data-img="${escapeHtml(loc.img)}" data-scene="${escapeHtml(loc.scene)}">`;
+      html += `<div class="chapter-gallery-loc" data-img="${escapeHtml(loc.img)}" data-scene="${escapeHtml(loc.scene)}" data-idx="${idx}">`;
       html += `<img src="${escapeHtml(loc.img)}" alt="${escapeHtml(loc.scene)}" loading="lazy">`;
       html += `<div class="chapter-gallery-loc-label"><span class="chapter-gallery-loc-kind">${escapeHtml(loc.kind)}</span> ${escapeHtml(loc.scene)}</div>`;
       html += `</div>`;
     });
     html += `</div>`;
+    html += `</div>`;
   }
   // キャラセクション
   if (chars.length > 0) {
+    html += `<div class="chapter-gallery-section chapter-gallery-section-char">`;
     html += `<div class="chapter-gallery-section-title">👥 登場キャラ</div>`;
     html += `<div class="world-map-side-members">`;
     chars.forEach(c => {
@@ -3805,15 +3810,27 @@ function _showChapterGallery(storyId) {
       html += `<div class="${cls}" data-name="${escapeHtml(c.name)}">${img}<div>${display}</div></div>`;
     });
     html += `</div>`;
+    html += `</div>`;
   }
   side.innerHTML = html;
-  // 場所画像 click → 拡大 (既存 char-img-zoom モーダル流用、 .png 原寸表示)
-  side.querySelectorAll('.chapter-gallery-loc').forEach(el => {
+  // タブ click → section フィルター
+  const applyTab = (tab) => {
+    side.querySelectorAll('.chapter-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    const showLoc  = (tab === 'all' || tab === 'loc');
+    const showChar = (tab === 'all' || tab === 'char');
+    side.querySelectorAll('.chapter-gallery-section-loc').forEach(s => { s.style.display = showLoc ? '' : 'none'; });
+    side.querySelectorAll('.chapter-gallery-section-char').forEach(s => { s.style.display = showChar ? '' : 'none'; });
+  };
+  side.querySelectorAll('.chapter-tab').forEach(btn => {
+    btn.addEventListener('click', () => applyTab(btn.dataset.tab));
+  });
+  // 場所画像 click → 拡大 (既存 openLocImageZoom 流用 + nav context で前後ナビ)
+  side.querySelectorAll('.chapter-gallery-loc').forEach((el) => {
     el.addEventListener('click', () => {
+      const idx = parseInt(el.dataset.idx, 10) || 0;
       const thumbUrl = el.dataset.img;
-      // _thumb.webp → 原寸 (.png/.jpg) に置換、 該当しなければそのまま
       const fullUrl = thumbUrl.replace(/_thumb\.webp$/i, '.png');
-      _openLocImageZoom(fullUrl);
+      _openLocImageZoom(fullUrl, { list: locations, index: idx });
     });
   });
   // キャラ click → キャラ詳細 (既存)
@@ -3826,17 +3843,109 @@ function _showChapterGallery(storyId) {
   });
 }
 
-// 場所画像拡大 (既存 char-img-zoom モーダル流用、 ない場合は新ウィンドウでなく no-op)
-function _openLocImageZoom(url) {
-  // 既存実装 openLocImageZoom があればそれを使う、 なければ char-img-zoom を流用
-  if (typeof openLocImageZoom === 'function') { openLocImageZoom(url); return; }
-  const zoom = document.getElementById('char-img-zoom');
-  const img = document.getElementById('char-img-zoom-img');
-  if (zoom && img) {
-    img.src = url;
-    zoom.removeAttribute('hidden');
+// 場所画像拡大 (openLocImageZoom 流用 + 章ギャラリー用 nav context)
+// navContext: { list: [{img, scene, kind}], index } — 渡されたら前後ナビUI を表示
+function _openLocImageZoom(url, navContext) {
+  if (typeof openLocImageZoom === 'function') {
+    openLocImageZoom(url);
+  } else {
+    const zoom = document.getElementById('char-img-zoom');
+    const img = document.getElementById('char-img-zoom-img');
+    if (zoom && img) { img.src = url; zoom.classList.add('active'); }
   }
+  // navigation: list が 2枚以上なら prev/next + counter UI を inject
+  _locZoomNav = (navContext && navContext.list && navContext.list.length >= 2) ? { ...navContext } : null;
+  _renderLocZoomNav();
 }
+
+let _locZoomNav = null;  // 章ギャラリー側の prev/next nav state
+
+function _renderLocZoomNav() {
+  const z = document.getElementById('char-img-zoom');
+  if (!z) return;
+  // 既存 nav UI を削除 (再描画用)
+  const oldNav = z.querySelector('.loc-zoom-nav');
+  if (oldNav) oldNav.remove();
+  if (!_locZoomNav) return;
+  const { list, index } = _locZoomNav;
+  if (!list || list.length < 2) return;
+  const nav = document.createElement('div');
+  nav.className = 'loc-zoom-nav';
+  nav.innerHTML = `
+    <button type="button" class="loc-zoom-nav-btn prev" aria-label="前の画像">‹</button>
+    <div class="loc-zoom-nav-counter">${index + 1} / ${list.length}</div>
+    <button type="button" class="loc-zoom-nav-btn next" aria-label="次の画像">›</button>
+  `;
+  z.appendChild(nav);
+  nav.querySelector('.prev').addEventListener('click', (e) => { e.stopPropagation(); _locZoomNavGo(-1); });
+  nav.querySelector('.next').addEventListener('click', (e) => { e.stopPropagation(); _locZoomNavGo(1); });
+}
+
+function _locZoomNavGo(dir) {
+  if (!_locZoomNav) return;
+  const { list, index } = _locZoomNav;
+  const newIdx = (index + dir + list.length) % list.length;
+  _locZoomNav.index = newIdx;
+  const next = list[newIdx];
+  if (!next || !next.img) return;
+  const fullSrc = next.img.replace(/_thumb\.webp$/i, '.png');
+  const img = document.getElementById('char-img-zoom-img');
+  if (img) {
+    img.src = fullSrc;
+    img.onerror = function () { this.onerror = null; this.src = next.img; };
+  }
+  // ズーム状態を 1x にリセット (新しい画像で改めてズーム可能に)
+  if (typeof zoomImg === 'function') zoomImg(0);
+  _renderLocZoomNav();
+}
+
+// キーボード ←→ で navigation (章ギャラリー nav active 時のみ)
+document.addEventListener('keydown', (e) => {
+  const z = document.getElementById('char-img-zoom');
+  if (!z || !z.classList.contains('active')) return;
+  if (!_locZoomNav) return;
+  if (e.key === 'ArrowLeft')  { e.preventDefault(); _locZoomNavGo(-1); }
+  else if (e.key === 'ArrowRight') { e.preventDefault(); _locZoomNavGo(1); }
+});
+
+// closeImgZoom 時に nav state クリア (UIは DOM 削除で連動)
+const _origCloseImgZoom = (typeof closeImgZoom === 'function') ? closeImgZoom : null;
+if (_origCloseImgZoom) {
+  closeImgZoom = function() {
+    _locZoomNav = null;
+    const z = document.getElementById('char-img-zoom');
+    if (z) { const n = z.querySelector('.loc-zoom-nav'); if (n) n.remove(); }
+    return _origCloseImgZoom.apply(this, arguments);
+  };
+}
+
+// touch swipe で前後ナビ (章ギャラリー nav active時のみ)
+(function setupLocZoomSwipe() {
+  let sx = 0, sy = 0, swiping = false;
+  const z = () => document.getElementById('char-img-zoom');
+  document.addEventListener('touchstart', (e) => {
+    const zoom = z();
+    if (!zoom || !zoom.classList.contains('active')) return;
+    if (!_locZoomNav) return;
+    if (typeof zoomScale !== 'undefined' && zoomScale > 1.05) return;  // 拡大中は swipe 抑止 (pan優先)
+    if (e.touches.length !== 1) return;
+    sx = e.touches[0].clientX;
+    sy = e.touches[0].clientY;
+    swiping = true;
+  }, { passive: true });
+  document.addEventListener('touchend', (e) => {
+    if (!swiping) return;
+    swiping = false;
+    if (!_locZoomNav) return;
+    const t = (e.changedTouches && e.changedTouches[0]) || null;
+    if (!t) return;
+    const dx = t.clientX - sx;
+    const dy = t.clientY - sy;
+    if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.2) return; // 横スワイプ判定
+    if (dx < 0) _locZoomNavGo(1);
+    else _locZoomNavGo(-1);
+  }, { passive: true });
+})();
 
 // Phase 2: ワールドマップ用 toast (Coming Soon等) — 中央下に1.6秒表示
 let _worldMapToastTimer = null;

@@ -4857,6 +4857,32 @@ body.gasshuku-modal-open {
 }
 
 /* ========== Phase 2: 章ギャラリー (章マーカータップで側パネル表示) ========== */
+.chapter-gallery-tabs {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.chapter-tab {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.85);
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  font-weight: 500;
+}
+.chapter-tab:hover {
+  background: rgba(255, 217, 122, 0.12);
+  border-color: rgba(255, 217, 122, 0.4);
+}
+.chapter-tab.active {
+  background: rgba(255, 217, 122, 0.25);
+  border-color: rgba(255, 217, 122, 0.7);
+  color: #ffe9a3;
+  font-weight: 700;
+}
+.chapter-gallery-section { margin-bottom: 16px; }
 .chapter-gallery-tagline {
   font-size: 12px;
   color: rgba(255, 217, 122, 0.85);
@@ -4928,6 +4954,62 @@ body.gasshuku-modal-open {
   stroke: #ffffff;
   stroke-width: 5;
   filter: drop-shadow(0 0 14px rgba(255, 217, 122, 0.95));
+}
+
+/* ========== 場所画像拡大時の前後ナビゲーション ========== */
+.loc-zoom-nav {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(0, 0, 0, 0.78);
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  z-index: 12;
+  pointer-events: auto;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+}
+.loc-zoom-nav-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  font-size: 28px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  font-weight: 600;
+  padding: 0;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.loc-zoom-nav-btn:hover {
+  background: rgba(255, 217, 122, 0.25);
+  border-color: rgba(255, 217, 122, 0.6);
+  transform: scale(1.08);
+}
+.loc-zoom-nav-btn:active { transform: scale(0.95); }
+.loc-zoom-nav-counter {
+  color: #ffd97a;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  min-width: 60px;
+  text-align: center;
+  font-weight: 600;
+}
+@media (max-width: 700px) {
+  .loc-zoom-nav { bottom: 16px; padding: 6px 12px; gap: 8px; }
+  .loc-zoom-nav-btn { width: 38px; height: 38px; font-size: 24px; }
+  .loc-zoom-nav-counter { font-size: 12px; min-width: 48px; }
 }
 
 /* ========== Phase 2: ワールドマップ toast ========== */
