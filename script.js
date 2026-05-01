@@ -839,20 +839,63 @@ function computeTenRollRarity(results) {
   }
   const oneInN = exactProb > 0 ? Math.round(1 / exactProb) : Infinity;
   const thisP = exactProb;
-  // ランク判定: LRヒットは最上位、次にUR数、その後rarerOrEqualProbで区別
+  // ランク判定: 偏差値ベース (パワプロ風 G〜SS + 特別枠 SSS/LEGEND)
+  // LR ヒットは別格、 偏差値 99+ で SSS 達成 (UR3+ 等の超大爆発)
   let rank, rankClass;
-  if (counts.LR >= 1) { rank = "LEGEND"; rankClass = "legend"; }
-  else if (counts.UR >= 3) { rank = "SSS"; rankClass = "sss"; }
-  else if (counts.UR >= 2) { rank = "SS"; rankClass = "ss"; }
-  else if (counts.UR >= 1 && counts.SSR >= 2) { rank = "SS"; rankClass = "ss"; }
-  else if (counts.UR >= 1) { rank = "S+"; rankClass = "splus"; }
-  else if (counts.SSR >= 3) { rank = "S"; rankClass = "s"; }
-  else if (counts.SSR >= 2) { rank = "A+"; rankClass = "aplus"; }
-  else if (counts.SSR >= 1) { rank = "A"; rankClass = "a"; }
-  else if (counts.SR >= 4) { rank = "B+"; rankClass = "bplus"; }
-  else if (counts.SR >= 2) { rank = "B"; rankClass = "b"; }
-  else { rank = "C"; rankClass = "c"; }
+  if (counts.LR >= 1)        { rank = "LEGEND"; rankClass = "legend"; }
+  else if (tScore >= 90)     { rank = "SSS"; rankClass = "sss"; }
+  else if (tScore >= 75)     { rank = "SS";  rankClass = "ss";  }
+  else if (tScore >= 65)     { rank = "S";   rankClass = "s";   }
+  else if (tScore >= 60)     { rank = "A";   rankClass = "a";   }
+  else if (tScore >= 55)     { rank = "B";   rankClass = "b";   }
+  else if (tScore >= 50)     { rank = "C";   rankClass = "c";   }
+  else if (tScore >= 45)     { rank = "D";   rankClass = "d";   }
+  else if (tScore >= 40)     { rank = "E";   rankClass = "e";   }
+  else if (tScore >= 35)     { rank = "F";   rankClass = "f";   }
+  else                       { rank = "G";   rankClass = "g";   }
   return { thisP, rarerOrEqualProb, oneInN, rank, rankClass, counts, ssrPlusCount, exactProb, score, tScore };
+}
+
+// ランク表 popup (ガチャ結果モーダルから「ランク表 (?)」 で開く)
+function showRankTable() {
+  let modal = document.getElementById('rank-table-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'rank-table-modal';
+    modal.className = 'rank-table-modal';
+    modal.innerHTML = `
+      <div class="rank-table-card">
+        <div class="rank-table-head">
+          <div class="rank-table-title">📊 ランク表 (パワプロ風)</div>
+          <button type="button" class="rank-table-close" onclick="closeRankTable()" aria-label="閉じる">×</button>
+        </div>
+        <div class="rank-table-body">
+          <div class="rank-table-row"><span class="rarity-rank rank-g">G</span><span class="rank-table-range">偏差値 〜34</span><span class="rank-table-desc">最低 (R中心)</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-f">F</span><span class="rank-table-range">35〜39</span><span class="rank-table-desc">かなり下</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-e">E</span><span class="rank-table-range">40〜44</span><span class="rank-table-desc">下寄り</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-d">D</span><span class="rank-table-range">45〜49</span><span class="rank-table-desc">平均下</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-c">C</span><span class="rank-table-range">50〜54</span><span class="rank-table-desc">平均</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-b">B</span><span class="rank-table-range">55〜59</span><span class="rank-table-desc">平均上 (SSR出)</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-a">A</span><span class="rank-table-range">60〜64</span><span class="rank-table-desc">上位 (SSR数 or UR)</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-s">S</span><span class="rank-table-range">65〜74</span><span class="rank-table-desc">高位 (UR1+)</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-ss">SS</span><span class="rank-table-range">75〜89</span><span class="rank-table-desc">最高位 (UR2+)</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-sss">SSS</span><span class="rank-table-range">90+</span><span class="rank-table-desc">超大爆発 (UR3+)</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-legend">LEGEND</span><span class="rank-table-range">LR ヒット</span><span class="rank-table-desc">最高峰 (LR出)</span></div>
+        </div>
+        <div class="rank-table-note">
+          偏差値は重み付きスコア (R=1 / SR=3 / SSR=10 / UR=30 / LR=100) を体感マッピング (25=最低 / 50=平均 / 75=上位 / 99=理論上限) に変換した値。
+          LR ヒット時は偏差値関係なく LEGEND ランク。
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeRankTable(); });
+  }
+  modal.classList.add('active');
+}
+function closeRankTable() {
+  const modal = document.getElementById('rank-table-modal');
+  if (modal) modal.classList.remove('active');
 }
 
 // ────────────── HUD ──────────────
@@ -2375,11 +2418,13 @@ function showResult(results, best) {
   rarBox.appendChild(rankEl);
   const lineEl = document.createElement("div");
   lineEl.className = "rarity-line";
-  // 偏差値 + SSR以上数 のシンプル2項目表示 (50=平均、 60+=上位16%、 70+=上位2.3% の感覚)
+  // 偏差値 + SSR以上数 + ランク表ヘルプ (50=平均、 60+=上位16%、 70+=上位2.3% の感覚)
   lineEl.innerHTML =
     `<span>偏差値 <b>${rar.tScore}</b></span>` +
     `<span class="dot">·</span>` +
-    `<span>SSR以上 <b>${rar.ssrPlusCount}体</b></span>`;
+    `<span>SSR以上 <b>${rar.ssrPlusCount}体</b></span>` +
+    `<span class="dot">·</span>` +
+    `<button type="button" class="rank-help-btn" onclick="showRankTable()" title="ランク表を表示">ランク表 (?)</button>`;
   rarBox.appendChild(lineEl);
 
   $("#result").classList.add("active");
@@ -5150,7 +5195,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260502k';
+const IMG_CACHE_VERSION = '20260502l';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる

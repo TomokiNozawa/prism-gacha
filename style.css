@@ -1459,13 +1459,15 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   font-size: 24px; font-weight: 900; letter-spacing: 0.3em;
   padding: 4px 16px; border-radius: 6px;
 }
-.rarity-rank.rank-c     { color: #aaa; background: rgba(255,255,255,0.05); }
-.rarity-rank.rank-b     { color: #6fa8ff; background: rgba(111,168,255,0.1); }
-.rarity-rank.rank-bplus { color: #6fa8ff; background: rgba(111,168,255,0.18); text-shadow: 0 0 10px rgba(111,168,255,0.6); }
-.rarity-rank.rank-a     { color: #c87dff; background: rgba(200,125,255,0.1); text-shadow: 0 0 10px rgba(200,125,255,0.5); }
-.rarity-rank.rank-aplus { color: #c87dff; background: rgba(200,125,255,0.2); text-shadow: 0 0 14px rgba(200,125,255,0.8); }
-.rarity-rank.rank-s     { color: #ffd96a; background: rgba(255,217,106,0.1); text-shadow: 0 0 14px rgba(255,217,106,0.7); }
-.rarity-rank.rank-splus { color: #ffd96a; background: rgba(255,217,106,0.2); text-shadow: 0 0 18px rgba(255,217,106,0.9); }
+/* パワプロ風 ランク色 (G/F/E/D/C/B/A/S/SS/SSS + LEGEND)、 偏差値ベース連動 (2026-05-02) */
+.rarity-rank.rank-g     { color: #888; background: rgba(255,255,255,0.04); }
+.rarity-rank.rank-f     { color: #b08866; background: rgba(176,136,102,0.08); }
+.rarity-rank.rank-e     { color: #c08855; background: rgba(192,136,85,0.10); }
+.rarity-rank.rank-d     { color: #88aa44; background: rgba(136,170,68,0.10); }
+.rarity-rank.rank-c     { color: #44cc44; background: rgba(68,204,68,0.12); }
+.rarity-rank.rank-b     { color: #44aaee; background: rgba(68,170,238,0.12); text-shadow: 0 0 8px rgba(68,170,238,0.4); }
+.rarity-rank.rank-a     { color: #2266dd; background: rgba(34,102,221,0.15); text-shadow: 0 0 12px rgba(100,150,255,0.5); }
+.rarity-rank.rank-s     { color: #ffd96a; background: rgba(255,217,106,0.18); text-shadow: 0 0 16px rgba(255,217,106,0.8); }
 .rarity-rank.rank-ss,
 .rarity-rank.rank-sss {
   background: linear-gradient(90deg, #ff5faa, #ffd84d, #5fffd4, #7ea8ff, #c87dff);
@@ -1488,6 +1490,102 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 }
 .rarity-line b { color: #fff; font-weight: 800; }
 .rarity-line .dot { color: rgba(255,255,255,0.3); }
+.rank-help-btn {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: rgba(255,217,122,0.85);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.rank-help-btn:hover {
+  background: rgba(255,217,122,0.18);
+  border-color: rgba(255,217,122,0.5);
+  color: #ffd97a;
+}
+
+/* ランク表モーダル */
+.rank-table-modal {
+  position: fixed; inset: 0; z-index: 280;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  align-items: center; justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.rank-table-modal.active { display: flex; }
+.rank-table-card {
+  background: linear-gradient(180deg, #1a1f3a 0%, #0a0d20 100%);
+  border: 1px solid rgba(200,180,255,0.25);
+  border-radius: 14px;
+  max-width: 480px; width: 100%;
+  max-height: 85vh; overflow-y: auto;
+  padding: 18px 22px;
+  color: #e8ecff;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+}
+.rank-table-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 14px;
+  border-bottom: 1px solid rgba(200,180,255,0.15);
+  padding-bottom: 10px;
+}
+.rank-table-title {
+  font-size: 16px; font-weight: 700;
+  background: linear-gradient(90deg, #ffd84d, #5fffd4, #c87dff);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.rank-table-close {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #fff;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  font-size: 20px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.rank-table-close:hover { background: rgba(255,255,255,0.15); }
+.rank-table-body {
+  display: flex; flex-direction: column; gap: 6px;
+}
+.rank-table-row {
+  display: grid;
+  grid-template-columns: 80px 90px 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+.rank-table-row:hover { background: rgba(255,255,255,0.04); }
+.rank-table-row .rarity-rank {
+  font-size: 16px; padding: 2px 8px;
+  letter-spacing: 0.15em;
+  text-align: center;
+}
+.rank-table-range {
+  font-size: 12px;
+  color: rgba(255,217,122,0.85);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.rank-table-desc {
+  font-size: 12px;
+  color: rgba(255,255,255,0.75);
+}
+.rank-table-note {
+  margin-top: 14px;
+  padding: 10px;
+  background: rgba(120,100,200,0.10);
+  border: 1px solid rgba(200,180,255,0.20);
+  border-radius: 6px;
+  font-size: 11px;
+  color: rgba(200,180,255,0.85);
+  line-height: 1.5;
+}
 
 @media (max-width: 640px) {
   .rarity-rank { font-size: 18px; letter-spacing: 0.2em; }
