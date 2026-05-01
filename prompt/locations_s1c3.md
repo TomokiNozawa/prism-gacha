@@ -39,8 +39,10 @@ S1C3「砂塵の隊商」 の場所画像 (背景+挿絵) の DALL-E 3 用プロ
 | 7 | sand_shadeova_battle.png | 16:9 | 挿絵 | 2-2 砂塵の襲撃 | サハナ初登場 |
 | 8 | tribe_battle.png | 16:9 | 挿絵 | 3-2 影喰いの大波 | サハナ+ヴィル+グラン |
 | 9 | lost_dragon_king_omen.png | 16:9 | 挿絵 | 4-1 古龍王の予兆 | ファラー |
+| **10** | **asha_meeting.png** | 16:9 | 挿絵 | 2-1 ヴィル+アーシャ出会い | ヴィル+アーシャ (新規追加) |
+| **11** | **farewell.png** | 16:9 | 挿絵 | 4-2 別れの朝、 サハナが双剣を掲げる | サハナ単独+遠景部族 (新規追加) |
 
-合計 9枚 (背景6 + 挿絵3)。
+合計 11枚 (背景6 + 挿絵5)。
 
 ---
 
@@ -192,6 +194,43 @@ Aspect ratio 16:9, high detail.
 
 ```
 A horizontal 16:9 mystical revelation scene featuring a tiny ancient dragon-blooded sage girl and a colossal sleeping dragon king silhouette behind her, in the foreground center a tiny sage girl matching the reference image who appears 8-10 years old with long silver braided hair trailing past her ankles and oversized deep violet ceremonial robes pooling around her bare feet holding her tall staff (roughly three times her own small height) with the violet amethyst crystal raised high glowing brightly with pulsing prismatic violet light casting illumination forward and upward, her expression solemn and reverent showing centuries of wisdom in her child face seen in three-quarters view releasing a handful of fine golden sand from her free small hand into the wind, in the entire upper background a colossal translucent silhouette of an immense ancient dragon king coiling through the sky with its massive serpentine body glimpsed through the violet evening clouds only partially visible mostly silhouette in cloud and haze and its head turned slightly as if dreaming, the dragon outline shimmering between solid form and pure violet mist suggesting it is still asleep still half-mythical but beginning to stir, the contrast between her tiny child body and the colossal dragon emphasizing her ancient soul, faint golden-violet sparks drifting upward from the sage released sand toward the dragon silhouette as if her offering reaches its dream, the desert below dusk-purple with ancient ruin pillars visible in the lower foreground frame, the sky deep amethyst with the seven prismatic streams of the genso faintly visible behind the dragon shape, anime fantasy illustration style with mystical prophetic awe atmosphere and deep violet and golden mist and amethyst silhouette palette, wide cinematic horizontal composition with the small sage anchoring the lower-left and the colossal dragon silhouette dominating the upper expanse. CRITICAL ANATOMY REQUIREMENTS: the sage girl with anatomically correct human hands of exactly five distinct well-formed fingers per hand, the small hand on the tall staff gripping firmly with all five fingers visible, both arms in natural childlike human poses with proper joint angles. Aspect ratio 16:9, high detail.
+
+-----
+元画像から表情や姿勢は変わってOKです
+```
+
+---
+
+# 【10】asha_meeting.png — ヴィル+アーシャ宿場町出会い (挿絵、 16:9、 キャラ含む、 新規追加 2026-05-01)
+
+- **対応シーン**: 2-1 隊商に紛れて (ヴィルが顔を隠して宿場町でアーシャの隊商に同行を決める出会いの瞬間)
+- **本文行**: marker `アーシャと名乗ったその女` の後 (アーシャの一言目「あんた、 ひとり旅?」 〜「乗りな、 お嬢さん。 サハールへようこそ」 のいずれか)
+- **役割**: 本文インライン挿絵、 16:9 横長
+- **被写体**: 砂漠の入口の宿場町。 顔布で素性を隠したヴィル (旅装、 紫の儀礼槍を腰に) と、 緑のキャラバンコート+金貨ターバンのアーシャ (神童商人) が向き合う。 アーシャがにやりと笑い手を振る。 背景はラクダ・隊商の旗・乾いた街並み・砂風
+- **添付画像 (2枚、 必須)**:
+  - `images/characters/season1/ssr/draco_lancer.png` (ヴィル、 既存)
+  - `images/characters/season1/ssr/caravan_leader.png` (アーシャ、 S1C3 ssr_16 生成済み前提)
+
+```
+A horizontal 16:9 illustration of a desert oasis-edge trading post where a violet-haired traveler princess and a young desert caravan leader meet for the first time, on the left a violet-haired traveler matching the first reference image with long flowing violet hair partially hidden under a desert face-cloth wrap obscuring the lower half of her face for anonymity, wearing a simple traveler tunic over her royal violet-and-silver under-armor, her ornate violet ceremonial spear strapped diagonally across her back, slightly tense posture as she has just been called out by a stranger, on the right a young prodigy caravan leader matching the second reference image (early twenties) with sun-tanned warm-honey skin and wild black hair pulled into a high messy ponytail under a deep forest-green silk turban-headband decorated with hanging gold coins, deep forest-green long traveler coat worn open over tan tunic, leather belt with pouches and sheathed dagger, holding her coiled leather merchant whip with one hand raised in a confident waving smirk gesture as if saying "welcome to Sahar", in the mid-background a desert trading post scene with laden camels and caravan tents and merchant banners fluttering and a few other travelers visible in silhouette, dusty sandy ground beneath their feet, the sky a warm golden-hour amber transitioning to soft blue with the seven prismatic streams of the genso flowing across the upper sky, anime fantasy illustration style with first-encounter atmosphere of cautious traveler meeting open-hearted local, warm sand-gold and forest-green and royal-violet color palette, wide cinematic horizontal composition with the two characters as focal points anchored slightly off-center. CRITICAL ANATOMY REQUIREMENTS: both characters with anatomically correct human hands of exactly five distinct well-formed fingers per hand, the caravan leader hand holding the whip with all five fingers visible, both arms in natural human poses with proper joint angles. Aspect ratio 16:9, high detail.
+
+-----
+元画像から表情や姿勢は変わってOKです (ヴィルの顔布だけは維持してください、 顔半分が隠れている必要あります)
+```
+
+---
+
+# 【11】farewell.png — 別れの朝、 サハナが双剣を掲げる (挿絵、 16:9、 キャラ含む、 新規追加 2026-05-01)
+
+- **対応シーン**: 4-2 砂漠の朝、 別れ (ヴィルが紫竜王国へ帰る朝、 サハナが砂丘の上で双剣を掲げ、 七色の風が一筋朝の空に走るアイコニック瞬間)
+- **本文行**: marker `サハナは、 砂丘の上で、 双剣を高く掲げた` の後 (4-2 末尾の見送り場面)
+- **役割**: 本文インライン挿絵 (4-2 別れシーンの hero shot)、 16:9 横長
+- **被写体**: 砂丘の頂で双剣を高く掲げるサハナ。 七色の風が刃から朝の空へ一筋走る。 背景下方に朝霧の中の部族メンバー (アーシャ・グラン・他) のシルエットが手を振っている。 遠景にヴィルの馬車の小さな影が砂漠を進む。 朝焼けの空、 桃色〜金色のグラデーション
+- **添付画像 (1枚、 必須)**:
+  - `images/characters/season1/ur/desert_princess.png` (サハナ、 S1C3 ur_08 生成済み前提)
+
+```
+A horizontal 16:9 cinematic farewell illustration of a desert nomad princess raising her twin scimitar swords high atop a sand dune at dawn, in the foreground center-right a young desert nomad princess matching the reference image with long wavy light-brown hair flowing in the dawn breeze and sun-tanned warm honey skin and tribal red-and-gold outfit, standing tall on the crest of a sand dune with both arms raised holding her twin curved Shamar scimitar swords crossed high above her head, a single brilliant rainbow wind current of seven prismatic colors (red orange yellow green blue indigo violet) streaming from the blade tips up into the morning sky like a blessing or farewell salute, her expression a confident smile of "until we meet again", in the lower-foreground left side small silhouettes of desert tribe members in dawn mist waving farewell (a turbaned woman a tall warrior a robed sage figures), in the mid-distance below the dune a tiny silhouette of a single horse-drawn caravan wagon receding into the golden desert landscape leaving behind one set of fading wheel tracks, the sky a breathtaking dawn gradient from rose-gold horizon through soft peach to fading violet zenith with the seven prismatic streams of the genso delicately threading across the morning sky, soft dawn mist drifting low across the sand, anime fantasy illustration style with bittersweet farewell-blessing atmosphere, warm rose-gold and tribal-red and prismatic-rainbow color palette, wide cinematic horizontal composition with the princess silhouette as the heroic focal anchor against the vast dawn sky. CRITICAL ANATOMY REQUIREMENTS: the princess with anatomically correct human hands of exactly five distinct well-formed fingers per hand, both hands gripping the scimitar hilts firmly with all five fingers visible and properly positioned with arms raised high overhead, both arms in natural raised salute pose with proper joint angles. Aspect ratio 16:9, high detail.
 
 -----
 元画像から表情や姿勢は変わってOKです
