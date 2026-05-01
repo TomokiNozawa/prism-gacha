@@ -381,40 +381,61 @@ Aspect ratio 16:9, high detail.
 
 ---
 
-## 【11】serapia_dawn.png — 2-13 夜明けの港 (帰還)
+## 【11】serapia_dawn.png — 4-2 朝焼けの港 (ミカと別れ、 章末)
 
-- **対応シーン**: 2-13 夜明けの港 (帰還、 物語の締め)
+- **対応シーン**: 4-2 朝焼けの港 (ミカとの別れ、 物語の締め、 章末背景)
 - **本文行**: `STORY/s1c2.md` l.576〜「セラピアの港に戻ったのは、 夜明けだった」 / l.578〜「ミカが私の手を握って、 笑った」 / l.605〜「朝陽が、 海から昇り、 虹霊界の南方を七色に染めていた」
-- **役割**: 本文インライン挿絵 (物語の余韻、 章の締め)
-- **被写体**: 朝焼けのセラピア港、 七色に染まる空、 紅玉号、 覚醒イザベル UR + ミカ
+- **役割**: 背景画像 (LOCATION_CONFIG['s1c2']['4-2'])、 **3:4 縦長** — 章末シーン全体の背景。 s1c1 (`rooftop_dawn`) / s1c3 (`desert_dawn`) と章末統一フォーマット
+- **被写体**: 朝焼けのセラピア港、 七色に染まる空、 紅玉号、 覚醒イザベル UR + ミカ — **縦パン構図** (上=昇る朝陽 + 七色グラデ空 / 中=紅玉号と二人 / 下=波打ち際の桟橋)
 - **ストーリー全体との整合**: 朝陽の七色 = 原虹七色の世界が今も保たれている象徴 / 2-3 (夕暮れ) と対をなす朝焼けで 「失われていない」 ことを示す / 物語の最後の七色 → 次の章への希望 + S1C7 までずっと続く「七色を守る祈り」 のテーマ
 - **ストーリー使用**: ✅
-- **コード参照**: `LOCATION_CONFIG['s1c2']['2-13']` (実装後)
+- **コード参照**: `LOCATION_CONFIG['s1c2']['4-2']` (実装済)
+- **比率**: **3:4 縦長 (1086×1448 推奨)** — 章末背景共通フォーマット、 縦構図でドラマ性を縦に積み上げる
 
 > **添付画像** (生成時):
 > - `images/characters/season1/ur/ripple_saint.png` (覚醒後イザベル UR、 紅玉号甲板)
 > - `images/characters/season1/r/pirate_cabin_girl.png` (ミカ R、 イザベルの隣で見上げる)
 
 ```
-The southern harbor town of Serapia at sunrise.
-The sun rises directly from the eastern sea, casting a long golden path across the water.
-The sky transitions from deep indigo at the top to soft rose, gold, and full prismatic
-seven-color rainbow hues at the horizon — a vivid sign that the prismatic world's
-harmony has been preserved.
-A pirate galleon with crimson sails (the Crimson Pearl) is moored at the pier,
-its silhouette warm against the dawn light.
-On the deck of the galleon: a holy paladin in her awakened form matching the first
-reference image — rainbow-iridescent armor, seven-colored light wings folded gently
-behind her, silver-rainbow gradient hair, serene expression — kneels lightly to face
-a young pirate apprentice girl matching the second reference image — short brown hair,
-a small dagger at her belt, looking up with bright admiring eyes.
-The paladin's hand rests softly on the girl's head in a gesture of farewell blessing.
-Mist drifts low over the water, seabirds beginning their morning calls.
-The harbor is quiet and reverent, holding the stillness of a new day after great trial.
-Anime fantasy illustration style, hopeful and ascendant atmosphere,
-soft full-rainbow gradient sky, golden hour color palette with prismatic highlights.
-Wide cinematic shot from the pier, looking eastward toward the rising sun and the ship.
-Aspect ratio 16:9, high detail.
+The southern harbor town of Serapia at sunrise — chapter-ending farewell scene.
+Vertical composition layered top-to-bottom:
+
+Upper third (sky): The sun rises directly from the eastern sea on the upper horizon,
+the sky transitions from deep indigo at the very top to soft rose, gold, and a full
+prismatic seven-color rainbow gradient near the horizon — a vivid sign that the
+prismatic world's harmony has been preserved. Wisps of golden cloud catch the dawn light.
+
+Middle third (ship + characters): A pirate galleon with crimson sails (the Crimson
+Pearl) is moored at the pier in mid-frame, its tall masts and crimson sails warmly
+backlit by the rising sun, casting long silhouettes across the water. On the deck
+of the galleon, slightly off-center: a holy paladin in her awakened form matching
+the first reference image — rainbow-iridescent armor with seven-colored light wings
+folded gently behind her, silver-rainbow gradient hair flowing in the dawn breeze,
+serene expression — kneels lightly to face a young pirate apprentice girl matching
+the second reference image — short brown hair, a small dagger at her belt, looking
+up with bright admiring eyes. The paladin's hand rests softly on the girl's head
+in a gesture of farewell blessing.
+
+Lower third (pier + water): The wooden pier extends from foreground into the water,
+warm dawn reflections painting golden ripples on the calm sea, mist drifting low
+across the surface, a few seabirds wheeling through the lower-mid frame.
+
+The harbor is quiet and reverent, holding the stillness of a new day after great
+trial. Anime fantasy illustration style, hopeful and ascendant atmosphere,
+soft full-rainbow gradient sky, golden hour color palette with prismatic highlights,
+warm dawn lighting from the upper horizon.
+Tall cinematic vertical composition (3:4 portrait) emphasizing the layered depth
+from sky → ship+characters → pier+water.
+Aspect ratio 3:4, high detail.
+
+CRITICAL ANATOMY REQUIREMENTS:
+- Each visible hand must have exactly 5 fingers in natural anatomical position
+- Paladin's hand resting on the girl's head: 5 fingers visible, gentle splay,
+  no extra or missing digits, no fused finger merging with hair
+- Girl's hand (if visible): 5 fingers, natural relaxed position, dagger sheathed at belt
+- Joints (elbows, knees, wrists) bend in anatomically correct directions
+- No floating limbs, no broken bones, no asymmetrical proportions
+- Both characters fully clothed as in reference images, no missing armor pieces
 
 元画像から表情や姿勢は変わってOKです
 ```
@@ -479,7 +500,7 @@ Aspect ratio 9:16, high detail.
 | **2-4 紅玉号の夜** | `crimson_pearl_night.png` | l.166 | インライン挿絵 | 月のない夜 = 黒月の前兆を視覚的に暗示 |
 | **2-5 影喰いの群れ** | `shadeova_swarm.png` | l.213 | インライン挿絵 | 影喰い vs 七色 = 終盤決戦 (S1C7) の縮図 |
 | **2-11 波紋の聖女覚醒** | `ripple_saint_awakening.png` | l.479 | インライン挿絵 | UR覚醒、 七座級戦力の視覚化 (S1C7 黒月決戦の伏線) |
-| **2-13 夜明けの港 (帰還)** | `serapia_dawn.png` | l.576 | インライン挿絵 | 朝陽の七色 = 原虹七色が守られた象徴、 次章への希望 |
+| **4-2 朝焼けの港 (ミカと別れ、 章末)** | `serapia_dawn.png` | l.576 | **背景画像 (3:4縦長)** | 朝陽の七色 = 原虹七色が守られた象徴、 次章への希望、 s1c1/s1c3 と章末統一 |
 
 ## 場所画像なしシーン (CSSグラデ背景のみ)
 

@@ -5346,7 +5346,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260502q';
+const IMG_CACHE_VERSION = '20260502r';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -5401,19 +5401,24 @@ function _prefetchChapterAssets(storyId) {
 //   - BGM 全曲 (BGM_LIST.file)
 //   - キャラ画像 (POOL の全 tier × 各キャラの原寸PNG + _thumb.webp)
 //   - 場所画像 (LOCATION_CONFIG + STORY_LOCATION_INLINE_CONFIG の img URL)
-function _collectAllAssetUrls() {
-  const urls = new Set();
+//
+// 2026-05-02: カテゴリ別 (BGM / キャラ / 場所) に分割可能化。
+// `_collectAssetUrlsByCategory()` がメイン、 `_collectAllAssetUrls()` は flat 配列の互換ラッパー。
+function _collectAssetUrlsByCategory() {
+  const bgm = new Set();
+  const characters = new Set();
+  const locations = new Set();
   try {
-    if (typeof BGM_LIST !== 'undefined') BGM_LIST.forEach(b => { if (b && b.file) urls.add(b.file); });
+    if (typeof BGM_LIST !== 'undefined') BGM_LIST.forEach(b => { if (b && b.file) bgm.add(b.file); });
   } catch (e) {}
   try {
     if (typeof POOL !== 'undefined') {
       for (const tier of ['LR','UR','SSR','SR','R']) {
         (POOL[tier] || []).forEach(c => {
           if (!c || !c.img) return;
-          urls.add(c.img);
+          characters.add(c.img);
           // _thumb.webp 版 (gallery で実際に使われるサイズ)
-          urls.add(c.img.replace(/\.png(\?.*)?$/i, '_thumb.webp$1'));
+          characters.add(c.img.replace(/\.png(\?.*)?$/i, '_thumb.webp$1'));
         });
       }
     }
@@ -5423,9 +5428,9 @@ function _collectAllAssetUrls() {
       const conf = LOCATION_CONFIG[sid] || {};
       for (const k in conf) {
         if (conf[k] && conf[k].img) {
-          urls.add(conf[k].img);
+          locations.add(conf[k].img);
           // 原寸PNG (拡大表示用) も追加。 失敗しても _downloadAllAssets が無視
-          urls.add(conf[k].img.replace(/_thumb\.webp(\?.*)?$/i, '.png$1'));
+          locations.add(conf[k].img.replace(/_thumb\.webp(\?.*)?$/i, '.png$1'));
         }
       }
     }
@@ -5434,13 +5439,21 @@ function _collectAllAssetUrls() {
     for (const sid in STORY_LOCATION_INLINE_CONFIG) {
       (STORY_LOCATION_INLINE_CONFIG[sid] || []).forEach(e2 => {
         if (e2 && e2.img) {
-          urls.add(e2.img);
-          urls.add(e2.img.replace(/_thumb\.webp(\?.*)?$/i, '.png$1'));
+          locations.add(e2.img);
+          locations.add(e2.img.replace(/_thumb\.webp(\?.*)?$/i, '.png$1'));
         }
       });
     }
   } catch (e) {}
-  return Array.from(urls);
+  return {
+    bgm: Array.from(bgm),
+    characters: Array.from(characters),
+    locations: Array.from(locations),
+  };
+}
+function _collectAllAssetUrls() {
+  const cats = _collectAssetUrlsByCategory();
+  return [...cats.bgm, ...cats.characters, ...cats.locations];
 }
 
 // M4: 未DLアセットのみ並列DL — 既に SW Cache Storage にあるURLは skip
@@ -5451,8 +5464,9 @@ function _collectAllAssetUrls() {
 // DL後も「未保存N件」 が変わらない事故対策。 メインthread で明示的に
 // 'prismaera-offline-saved' cache に put することで、 SW intercept成否に関わらず
 // caches.match が確実に hit するよう defensive に書き込む。
-async function _downloadAllAssets(progressCb) {
-  const allUrls = _collectAllAssetUrls();
+async function _downloadAllAssets(progressCb, urlList) {
+  // 2026-05-02: urlList 渡しで category 別 DL に対応。 省略時は全アセット (従来通り)
+  const allUrls = urlList || _collectAllAssetUrls();
   // 全URLを並列で cache 確認、 未cacheだけリスト化 (既DL分は再fetchしない)
   const checks = await Promise.all(allUrls.map(async (url) => {
     try { return [url, !!(await caches.match(url))]; } catch (e) { return [url, false]; }
@@ -5492,9 +5506,25 @@ async function _downloadAllAssets(progressCb) {
   return { done, total, succeeded, skipped };
 }
 
+// M4: cache 件数チェック — 渡された URL list のうち caches.match で hit した件数を返す
+async function _countCachedInUrls(urls) {
+  if (!urls || urls.length === 0) return 0;
+  const checks = await Promise.all(urls.map(async (url) => {
+    try { return (await caches.match(url)) ? 1 : 0; } catch (e) { return 0; }
+  }));
+  return checks.reduce((a, b) => a + b, 0);
+}
+
 // M4: 設定モーダルのDLボタン状態 refresh — SW Cache Storage 実態を確認して未DL数を計算、
 // 未DL>0 ならボタン表示+件数表示、 全DL済みならボタン非表示で「✅ 全X件保存済み」 のみ表示。
 // 「再ダウンロード」 ボタンは出さない (野沢方針: 押す必要ないボタンは見せない)。
+//
+// 2026-05-02: カテゴリ別 breakdown (BGM / キャラ / 場所) も合わせて更新。
+const _OFFLINE_CAT_META = {
+  bgm:        { icon: '🎵', label: 'BGM' },
+  characters: { icon: '🧝', label: 'キャラ画像' },
+  locations:  { icon: '🗺️', label: '場所画像' },
+};
 async function _refreshOfflineStatus(m) {
   if (!m) return;
   const dlBtn = m.querySelector('#settings-offline-dl');
@@ -5503,27 +5533,60 @@ async function _refreshOfflineStatus(m) {
   if (!dlBtn || !statusEl) return;
   // 確認中表示 (caches.match × 全URLで数百ms程度かかる場合あり)
   statusEl.textContent = '確認中…';
-  let total = 0, cached = 0;
+  let cats, total = 0;
   try {
-    const urls = _collectAllAssetUrls();
-    total = urls.length;
+    cats = _collectAssetUrlsByCategory();
+    total = cats.bgm.length + cats.characters.length + cats.locations.length;
     if (total === 0) {
       dlBtn.style.display = 'none';
       statusEl.textContent = '';
       return;
     }
-    const checks = await Promise.all(urls.map(async (url) => {
-      try { return (await caches.match(url)) ? 1 : 0; } catch (e) { return 0; }
-    }));
-    cached = checks.reduce((a, b) => a + b, 0);
   } catch (e) {
     statusEl.textContent = '';
     return;
   }
+  // カテゴリ別に並列でcache 件数集計
+  const [bgmCached, charCached, locCached] = await Promise.all([
+    _countCachedInUrls(cats.bgm),
+    _countCachedInUrls(cats.characters),
+    _countCachedInUrls(cats.locations),
+  ]);
+  const cached = bgmCached + charCached + locCached;
   const missing = total - cached;
+  // breakdown UI 更新
+  const breakdown = {
+    bgm:        { total: cats.bgm.length,        cached: bgmCached  },
+    characters: { total: cats.characters.length, cached: charCached },
+    locations:  { total: cats.locations.length,  cached: locCached  },
+  };
+  for (const cat of Object.keys(breakdown)) {
+    const row = m.querySelector(`.settings-offline-cat[data-category="${cat}"]`);
+    if (!row) continue;
+    const countEl = row.querySelector('.settings-offline-cat-count');
+    const catBtn = row.querySelector('.settings-offline-cat-btn');
+    const t = breakdown[cat].total, c = breakdown[cat].cached, miss = t - c;
+    if (countEl) {
+      if (t === 0) {
+        countEl.textContent = '— / —';
+      } else if (miss <= 0) {
+        countEl.innerHTML = `✅ <b>${t}</b>件`;
+      } else {
+        countEl.innerHTML = `<b>${c}</b> / <b>${t}</b>`;
+      }
+    }
+    if (catBtn) {
+      if (t === 0 || miss <= 0) {
+        catBtn.hidden = true;
+      } else {
+        catBtn.hidden = false;
+        catBtn.textContent = `📥 ${miss}件`;
+      }
+    }
+  }
   if (progEl) progEl.hidden = true;
   if (missing <= 0) {
-    // 全DL済み: ボタン非表示
+    // 全DL済み: マスター ボタン非表示
     dlBtn.style.display = 'none';
     statusEl.innerHTML = `✅ <b>全 ${total} 件</b> 保存済み (オフラインでも快適に動作します)`;
     // ストレージ使用量を併記 (取れる環境のみ)
@@ -5537,14 +5600,14 @@ async function _refreshOfflineStatus(m) {
       } catch (e) {}
     }
   } else {
-    // 未DLあり: ボタン表示
+    // 未DLあり: マスター ボタン表示
     dlBtn.style.display = '';
     if (cached > 0) {
-      dlBtn.textContent = `📥 未保存 ${missing} 件をダウンロード`;
+      dlBtn.textContent = `📥 全 ${missing} 件をまとめてDL`;
       statusEl.innerHTML = `保存済み <b>${cached}</b> / <b>${total}</b> 件 (未保存 ${missing} 件)`;
     } else {
-      dlBtn.textContent = `📥 ダウンロード開始`;
-      statusEl.innerHTML = `<b>${total}</b> 件のアセット (BGM・キャラ画像・場所画像)`;
+      dlBtn.textContent = `📥 全 ${total} 件をまとめてDL`;
+      statusEl.innerHTML = `<b>${total}</b> 件のアセット (下のカテゴリ別DLでも個別保存可能)`;
     }
   }
 }
@@ -5982,7 +6045,7 @@ $("#story-modal").addEventListener('click', e => {
   // 拡大画像モーダルが active な間は story-modal の click を一切処理しない
   // (画像 backdrop click → closeImgZoom が同タイミングで story-modal の close を呼ぶ事故防止)
   if (document.getElementById('char-img-zoom').classList.contains('active')) return;
-  if (e.target.id === 'story-modal') closeStory();
+  if (e.target.id === 'story-modal') { closeStory(); openStoryList(); }
 });
 // stageクリックで前後ページ: 左半分=前へ、右半分=次へ
 $("#story-stage").addEventListener('click', e => {
@@ -6799,7 +6862,7 @@ document.addEventListener("keydown", e => {
       if (e.key === "Escape") { e.preventDefault(); toggleStoryToc(); return; }
     }
     if (e.key === "t" || e.key === "T") { e.preventDefault(); toggleStoryToc(); return; }
-    if (e.key === "Escape") { e.preventDefault(); closeStory(); }
+    if (e.key === "Escape") { e.preventDefault(); closeStory(); openStoryList(); }
     else if (e.key === "Enter" || e.key === "ArrowRight") {
       e.preventDefault(); storyNext();
     }
@@ -7844,14 +7907,34 @@ function openSettingsModal() {
           <div class="settings-power-saver-desc">背景アニメ・キャラ瞬きを停止して発熱を抑えます。 (OS の省電力モード ON 時は自動有効)</div>
         </div>
         <div class="settings-section settings-offline-section">
-          <div class="settings-label">📥 オフライン用に全アセット保存</div>
-          <div class="settings-offline-desc">BGM・キャラ画像・場所画像を端末にキャッシュ。 通信が不安定な場所でもサクサク動きます。</div>
+          <div class="settings-label">📥 オフライン用にアセット保存</div>
+          <div class="settings-offline-desc">BGM・キャラ画像・場所画像を端末にキャッシュ。 通信が不安定な場所でもサクサク動きます。 カテゴリ別にDL可能 (BGMだけ、 場所画像だけ等)。</div>
           <button type="button" class="settings-offline-dl" id="settings-offline-dl">📥 ダウンロード開始</button>
           <div class="settings-offline-progress" id="settings-offline-progress" hidden>
             <div class="progress-bar"><div class="progress-fill" id="settings-progress-fill"></div></div>
             <div class="progress-text" id="settings-progress-text">0 / 0</div>
           </div>
           <div class="settings-offline-status" id="settings-offline-status"></div>
+          <div class="settings-offline-breakdown">
+            <div class="settings-offline-cat" data-category="bgm">
+              <span class="settings-offline-cat-icon">🎵</span>
+              <span class="settings-offline-cat-label">BGM</span>
+              <span class="settings-offline-cat-count">— / —</span>
+              <button type="button" class="settings-offline-cat-btn" data-category="bgm" hidden>📥</button>
+            </div>
+            <div class="settings-offline-cat" data-category="characters">
+              <span class="settings-offline-cat-icon">🧝</span>
+              <span class="settings-offline-cat-label">キャラ画像</span>
+              <span class="settings-offline-cat-count">— / —</span>
+              <button type="button" class="settings-offline-cat-btn" data-category="characters" hidden>📥</button>
+            </div>
+            <div class="settings-offline-cat" data-category="locations">
+              <span class="settings-offline-cat-icon">🗺️</span>
+              <span class="settings-offline-cat-label">場所画像</span>
+              <span class="settings-offline-cat-count">— / —</span>
+              <button type="button" class="settings-offline-cat-btn" data-category="locations" hidden>📥</button>
+            </div>
+          </div>
         </div>
         <div class="settings-section">
           <button type="button" class="settings-history-link" onclick="closeSettingsModal();openVersionHistoryModal()">📜 アップデート履歴を見る</button>
@@ -7909,32 +7992,53 @@ function openSettingsModal() {
     const fillEl = m.querySelector('#settings-progress-fill');
     const textEl = m.querySelector('#settings-progress-text');
     const statusEl = m.querySelector('#settings-offline-status');
+    // M4: マスター + カテゴリ別 DL を共通化 (urlList 渡しで対応)。
+    // running中は他ボタンも disabled にして parallel DL を防ぐ
+    const _allDlBtns = () => Array.from(m.querySelectorAll('#settings-offline-dl, .settings-offline-cat-btn'));
+    async function _runDownload(urlList, label) {
+      const btns = _allDlBtns();
+      btns.forEach(b => b.disabled = true);
+      const origText = dlBtn.textContent;
+      dlBtn.textContent = `📥 ダウンロード中… (${label})`;
+      progEl.hidden = false;
+      fillEl.style.width = '0%';
+      textEl.textContent = '準備中…';
+      statusEl.textContent = '';
+      try {
+        await _downloadAllAssets((done, total) => {
+          const pct = total ? Math.round(done / total * 100) : 0;
+          fillEl.style.width = pct + '%';
+          textEl.textContent = `${done} / ${total} (${pct}%)`;
+        }, urlList);
+        localStorage.setItem('prism-offline-saved-at', new Date().toISOString());
+        progEl.hidden = true;
+        // DL完了後、 cache 実態を見て状態 refresh
+        await _refreshOfflineStatus(m);
+      } catch (e) {
+        statusEl.textContent = `⚠️ エラー: ${e && e.message || e}`;
+        dlBtn.textContent = origText;
+      } finally {
+        btns.forEach(b => b.disabled = false);
+      }
+    }
     if (dlBtn) {
-      dlBtn.addEventListener('click', async () => {
+      // マスター: 全カテゴリ
+      dlBtn.addEventListener('click', () => {
         if (dlBtn.disabled) return;
-        dlBtn.disabled = true;
-        dlBtn.textContent = '📥 ダウンロード中…';
-        progEl.hidden = false;
-        fillEl.style.width = '0%';
-        textEl.textContent = '準備中…';
-        statusEl.textContent = '';
-        try {
-          await _downloadAllAssets((done, total) => {
-            const pct = total ? Math.round(done / total * 100) : 0;
-            fillEl.style.width = pct + '%';
-            textEl.textContent = `${done} / ${total} (${pct}%)`;
-          });
-          localStorage.setItem('prism-offline-saved-at', new Date().toISOString());
-          progEl.hidden = true;
-          // DL完了後、 cache 実態を見て状態 refresh
-          await _refreshOfflineStatus(m);
-        } catch (e) {
-          statusEl.textContent = `⚠️ エラー: ${e && e.message || e}`;
-        } finally {
-          dlBtn.disabled = false;
-        }
+        _runDownload(null, '全アセット');
       });
     }
+    // カテゴリ別ボタン
+    m.querySelectorAll('.settings-offline-cat-btn').forEach(catBtn => {
+      catBtn.addEventListener('click', () => {
+        if (catBtn.disabled) return;
+        const cat = catBtn.dataset.category;
+        const cats = _collectAssetUrlsByCategory();
+        const urls = cats[cat] || [];
+        const label = (_OFFLINE_CAT_META[cat] && _OFFLINE_CAT_META[cat].label) || cat;
+        _runDownload(urls, label);
+      });
+    });
   }
   // 開く度に cache 実態確認 → ボタン表示/非表示判定
   _refreshOfflineStatus(m);
