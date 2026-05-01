@@ -839,11 +839,10 @@ function computeTenRollRarity(results) {
   }
   const oneInN = exactProb > 0 ? Math.round(1 / exactProb) : Infinity;
   const thisP = exactProb;
-  // ランク判定: 偏差値ベース (パワプロ風 G〜SS + 特別枠 SSS/LEGEND)
-  // LR ヒットは別格、 偏差値 99+ で SSS 達成 (UR3+ 等の超大爆発)
+  // ランク判定: 偏差値ベース (G/F/E/D/C/B/A/S/SS + LEGEND)
+  // 75+ は全部 SS に統合 (SSS 廃止、 野沢さん指示 2026-05-02)、 LR ヒットは別格 LEGEND
   let rank, rankClass;
   if (counts.LR >= 1)        { rank = "LEGEND"; rankClass = "legend"; }
-  else if (tScore >= 90)     { rank = "SSS"; rankClass = "sss"; }
   else if (tScore >= 75)     { rank = "SS";  rankClass = "ss";  }
   else if (tScore >= 65)     { rank = "S";   rankClass = "s";   }
   else if (tScore >= 60)     { rank = "A";   rankClass = "a";   }
@@ -866,25 +865,24 @@ function showRankTable() {
     modal.innerHTML = `
       <div class="rank-table-card">
         <div class="rank-table-head">
-          <div class="rank-table-title">📊 ランク表 (パワプロ風)</div>
+          <div class="rank-table-title">📊 ランク表</div>
           <button type="button" class="rank-table-close" onclick="closeRankTable()" aria-label="閉じる">×</button>
         </div>
         <div class="rank-table-body">
-          <div class="rank-table-row"><span class="rarity-rank rank-g">G</span><span class="rank-table-range">偏差値 〜34</span><span class="rank-table-desc">最低 (R中心)</span></div>
-          <div class="rank-table-row"><span class="rarity-rank rank-f">F</span><span class="rank-table-range">35〜39</span><span class="rank-table-desc">かなり下</span></div>
-          <div class="rank-table-row"><span class="rarity-rank rank-e">E</span><span class="rank-table-range">40〜44</span><span class="rank-table-desc">下寄り</span></div>
-          <div class="rank-table-row"><span class="rarity-rank rank-d">D</span><span class="rank-table-range">45〜49</span><span class="rank-table-desc">平均下</span></div>
-          <div class="rank-table-row"><span class="rarity-rank rank-c">C</span><span class="rank-table-range">50〜54</span><span class="rank-table-desc">平均</span></div>
-          <div class="rank-table-row"><span class="rarity-rank rank-b">B</span><span class="rank-table-range">55〜59</span><span class="rank-table-desc">平均上 (SSR出)</span></div>
-          <div class="rank-table-row"><span class="rarity-rank rank-a">A</span><span class="rank-table-range">60〜64</span><span class="rank-table-desc">上位 (SSR数 or UR)</span></div>
-          <div class="rank-table-row"><span class="rarity-rank rank-s">S</span><span class="rank-table-range">65〜74</span><span class="rank-table-desc">高位 (UR1+)</span></div>
-          <div class="rank-table-row"><span class="rarity-rank rank-ss">SS</span><span class="rank-table-range">75〜89</span><span class="rank-table-desc">最高位 (UR2+)</span></div>
-          <div class="rank-table-row"><span class="rarity-rank rank-sss">SSS</span><span class="rank-table-range">90+</span><span class="rank-table-desc">超大爆発 (UR3+)</span></div>
-          <div class="rank-table-row"><span class="rarity-rank rank-legend">LEGEND</span><span class="rank-table-range">LR ヒット</span><span class="rank-table-desc">最高峰 (LR出)</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-g">G</span><span class="rank-table-range">偏差値 〜34</span><span class="rank-table-desc">不運 (R が大半)</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-f">F</span><span class="rank-table-range">35〜39</span><span class="rank-table-desc">やや不運 (SR 少なめ)</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-e">E</span><span class="rank-table-range">40〜44</span><span class="rank-table-desc">下寄り (SR 数体)</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-d">D</span><span class="rank-table-range">45〜49</span><span class="rank-table-desc">平均より少し下 (SR 多め)</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-c">C</span><span class="rank-table-range">50〜54</span><span class="rank-table-desc">平均 (期待値ど真ん中)</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-b">B</span><span class="rank-table-range">55〜59</span><span class="rank-table-desc">平均より少し上 (SSR ヒット)</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-a">A</span><span class="rank-table-range">60〜64</span><span class="rank-table-desc">上位 (SSR 複数体)</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-s">S</span><span class="rank-table-range">65〜74</span><span class="rank-table-desc">高位 (UR ヒット)</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-ss">SS</span><span class="rank-table-range">75 以上</span><span class="rank-table-desc">大爆発 (UR 複数 or 高 SSR)</span></div>
+          <div class="rank-table-row rank-table-row-legend"><span class="rarity-rank rank-legend">LEGEND</span><span class="rank-table-range">LR ヒット</span><span class="rank-table-desc">最高峰 (LR 出現)</span></div>
         </div>
         <div class="rank-table-note">
           偏差値は重み付きスコア (R=1 / SR=3 / SSR=10 / UR=30 / LR=100) を体感マッピング (25=最低 / 50=平均 / 75=上位 / 99=理論上限) に変換した値。
-          LR ヒット時は偏差値関係なく LEGEND ランク。
+          LR が出た瞬間に偏差値関係なく LEGEND ランクが発火。
         </div>
       </div>
     `;
@@ -5195,7 +5193,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260502l';
+const IMG_CACHE_VERSION = '20260502m';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
