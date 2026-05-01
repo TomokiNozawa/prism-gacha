@@ -25,7 +25,7 @@
 <link rel="icon" href="/images/icons/icon-16.png" type="image/png" sizes="16x16">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
 <link rel="manifest" href="/manifest.json?v=20260501a25">
-<link rel="stylesheet" href="/style.css?v=20260501a">
+<link rel="stylesheet" href="/style.css?v=20260501b">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -98,13 +98,13 @@ if ('serviceWorker' in navigator) {
       </div>
       <!-- ピックアップガチャ (最新章キャラ ×2) -->
       <div class="cta-card cta-pickup">
-        <div class="cta-card-label">📖 <span id="pickup-chapter-label">第2章</span>ピックアップ <span class="cta-card-sub" id="pickup-chapter-sub">第2章キャラ ×2倍</span></div>
+        <div class="cta-card-label">📖 <span id="pickup-chapter-label">第3章</span>ピックアップ <span class="cta-card-sub" id="pickup-chapter-sub">第3章キャラ ×2倍</span></div>
         <div class="cta-card-rate rate">
           <span class="r">R 65%</span>
           <span class="sr">SR 25%</span>
           <span class="ssr">SSR 7%</span>
           <span class="ur">🌈 UR 3%</span>
-          <span class="pickup-note">+ 第2章 ×2</span>
+          <span class="pickup-note" id="pickup-note">+ 第3章 ×2</span>
         </div>
         <div class="cta-card-buttons">
           <button id="btn-single-pickup" class="summon single pickup">
@@ -143,6 +143,22 @@ if ('serviceWorker' in navigator) {
           </button>
         </div>
 
+        <!-- H2: 次の物語 ティザー (S1C4 凍土と空) -->
+        <div class="story-next-teaser" aria-label="次章準備中">
+          <div class="story-next-badge">Coming Soon</div>
+          <div class="story-next-icon">❄️</div>
+          <div class="story-next-text">
+            <div class="story-next-meta">Season 1 — 第4章</div>
+            <div class="story-next-title">凍土と空</div>
+            <div class="story-next-pov">主人公: アルテミス / 龍国 龍帝</div>
+            <div class="story-next-tagline">強者の頂は、 孤独を共に分かち合うことで初めて温かい ─ 北の凍土で覇王が見るものは</div>
+            <div class="story-next-stats">
+              <span>📅 公開予定</span>
+              <span>新キャラ予定 +20体</span>
+              <span>新派閥: 氷霊王国ニーヴル / 空挺城ゼノニア</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- 右カラム: ご意見・ご要望 (コンパクト) -->
@@ -186,6 +202,12 @@ if ('serviceWorker' in navigator) {
           <span class="story-card-desc">紫竜王国の第三王女・ヴィルが、古龍砂漠サハールで「血ではなく時間が家族を作る」と知る物語</span>
           <span class="story-card-volume">約11,000字 / 主人公: ヴィル</span>
         </button>
+        <div class="story-card disabled">
+          <span class="story-card-meta">Season 1 — 第4章</span>
+          <span class="story-card-title">凍土と空</span>
+          <span class="story-card-desc">龍国・龍帝アルテミスが、 北の凍土で氷帝グレイルと一騎打ちの末「強者の孤独」を知る物語</span>
+          <span class="story-card-volume">Coming Soon… / 主人公: アルテミス</span>
+        </div>
       </div>
     </div>
   </div>
@@ -566,7 +588,7 @@ if ('serviceWorker' in navigator) {
 <audio id="bgm-home" preload="auto"></audio>
 
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
-<script src="/script.js?v=20260501a"></script>
-<script src="/gasshuku.js?v=20260501a"></script>
+<script src="/script.js?v=20260501b"></script>
+<script src="/gasshuku.js?v=20260501b"></script>
 </body>
 </html>

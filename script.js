@@ -3402,9 +3402,27 @@ function closeCharDetail() {
 // 通常ガチャ
 $("#btn-single").addEventListener("click", () => doSingle());
 $("#btn-ten").addEventListener("click", () => doTen());
-// ピックアップガチャ (現状: PICKUP_CHAPTER='s1c2' = 第2章ピックアップ)
+// ピックアップガチャ
 $("#btn-single-pickup")?.addEventListener("click", () => doSingle({ pickup: PICKUP_CHAPTER }));
 $("#btn-ten-pickup")?.addEventListener("click", () => doTen({ pickup: PICKUP_CHAPTER }));
+
+// ピックアップ章ラベルを PICKUP_CHAPTER から自動更新 (HTMLハードコード回避、 章バンプ時の更新漏れ防止)
+function updatePickupChapterLabels() {
+  const m = String(PICKUP_CHAPTER || '').match(/s\d+c(\d+)/);
+  const chapterNum = m ? m[1] : '?';
+  const label = `第${chapterNum}章`;
+  const labelEl = document.getElementById('pickup-chapter-label');
+  const subEl = document.getElementById('pickup-chapter-sub');
+  const noteEl = document.getElementById('pickup-note');
+  if (labelEl) labelEl.textContent = label;
+  if (subEl) subEl.textContent = `${label}キャラ ×2倍`;
+  if (noteEl) noteEl.textContent = `+ ${label} ×2`;
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', updatePickupChapterLabels);
+} else {
+  updatePickupChapterLabels();
+}
 $("#result-close").addEventListener("click", closeResult);
 $("#result-close-top")?.addEventListener("click", closeResult);
 const _resultAgainTen = () => {
