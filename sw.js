@@ -7,7 +7,7 @@
 //
 // HTML/JSON/Firebase API はキャッシュせず常にネットワーク優先 (更新即反映+認証/DBの鮮度維持)。
 
-const SW_VERSION = '20260502j';  // v1.3.2+ UR「確定」 → 「獲得」 + S1C5 ティザー強化
+const SW_VERSION = '20260502k';  // v1.3.2+ 一覧モーダル第4章カード active 化
 const STATIC_CACHE = `prismaera-static-${SW_VERSION}`;
 const BGM_CACHE    = `prismaera-bgm-${SW_VERSION}`;
 const LOC_CACHE    = `prismaera-loc-${SW_VERSION}`;
