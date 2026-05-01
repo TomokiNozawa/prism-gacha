@@ -6651,12 +6651,14 @@ function openSettingsModal() {
             <button class="settings-fontsize-btn" data-size="large">大</button>
           </div>
         </div>
-        <div class="settings-section">
-          <div class="settings-label">🔋 省電力モード</div>
-          <label class="settings-toggle">
-            <input type="checkbox" id="settings-power-saver">
-            <span class="settings-toggle-track"></span>
-          </label>
+        <div class="settings-section settings-power-section">
+          <div class="settings-power-row">
+            <div class="settings-label">🔋 省電力モード</div>
+            <label class="settings-toggle">
+              <input type="checkbox" id="settings-power-saver">
+              <span class="settings-toggle-track"></span>
+            </label>
+          </div>
           <div class="settings-power-saver-desc">背景アニメ・キャラ瞬きを停止して発熱を抑えます。 (OS の省電力モード ON 時は自動有効)</div>
         </div>
         <div class="settings-section settings-offline-section">
