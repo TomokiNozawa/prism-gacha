@@ -7,7 +7,7 @@
 //
 // HTML/JSON/Firebase API はキャッシュせず常にネットワーク優先 (更新即反映+認証/DBの鮮度維持)。
 
-const SW_VERSION = '20260502h';  // v1.3.2+ ガチャ偏差値を体感マッピング (25=最低、 50=平均、 75=上位、 99=理論上限)
+const SW_VERSION = '20260502i';  // v1.3.2+ s1c4.md [挿絵予定] → [画像追加予定] 統一表記
 const STATIC_CACHE = `prismaera-static-${SW_VERSION}`;
 const BGM_CACHE    = `prismaera-bgm-${SW_VERSION}`;
 const LOC_CACHE    = `prismaera-loc-${SW_VERSION}`;
