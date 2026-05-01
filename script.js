@@ -3655,7 +3655,7 @@ function renderWorldMap() {
   </g>`;
   svg += `</svg>`;
   canvas.innerHTML = svg;
-  // Phase 2: 章マーカー click → 該当章を openStory (公開済のみ)、 drag距離 4px 超は click 無視
+  // Phase 2: 章マーカー click → 章ギャラリー (場所画像 + キャラ) を side panel に表示。 drag距離 4px 超は click 無視
   canvas.querySelectorAll('.world-chapter-marker').forEach(node => {
     node.addEventListener('click', (e) => {
       if ((svgEl && (svgEl.__worldMapDragDist || 0) > 4)) return;
@@ -3665,9 +3665,9 @@ function renderWorldMap() {
         _showWorldMapToast(`📅 ${sid.toUpperCase()} は近日公開予定`);
         return;
       }
-      closeWorldMap();
-      // closeWorldMap の unlock 後に openStory が lock し直す (タイミング差を避けて 1tick遅延)
-      setTimeout(() => { if (typeof openStory === 'function') openStory(sid); }, 50);
+      _showChapterGallery(sid);
+      canvas.querySelectorAll('.world-chapter-marker.active, .world-faction-node.active').forEach(n => n.classList.remove('active'));
+      node.classList.add('active');
     });
   });
   // Phase 2: S2/S3 ティザー click → Coming Soon toast、 drag距離 4px 超は click 無視
@@ -3740,6 +3740,102 @@ function _showFactionSide(fid) {
       if (c && typeof showCharDetail === 'function') showCharDetail(c);
     });
   });
+}
+
+// Phase 2: 章ギャラリー — 章マーカータップで該当章の場所画像 + 登場キャラを side panel に表示
+// 仕様: ストーリーに飛ばさず、 イラスト/キャラの一覧鑑賞専用 (野沢方針 2026-05-01)
+function _showChapterGallery(storyId) {
+  _worldMapActiveFaction = null; // 派閥選択をリセット (章ギャラリー優先表示)
+  const side = document.getElementById('world-map-side');
+  if (!side) return;
+  const outline = (typeof STORY_OUTLINE !== 'undefined') ? STORY_OUTLINE.find(c => c.id === storyId) : null;
+  if (!outline) return;
+  // 場所画像を集約 (背景 + 挿絵)
+  const bgConf = (typeof LOCATION_CONFIG !== 'undefined') ? (LOCATION_CONFIG[storyId] || {}) : {};
+  const inlineConf = (typeof STORY_LOCATION_INLINE_CONFIG !== 'undefined') ? (STORY_LOCATION_INLINE_CONFIG[storyId] || []) : [];
+  const locations = [];
+  for (const sceneKey in bgConf) {
+    if (bgConf[sceneKey] && bgConf[sceneKey].img) {
+      locations.push({ scene: sceneKey, kind: '背景', img: bgConf[sceneKey].img });
+    }
+  }
+  inlineConf.forEach(e => {
+    if (e && e.img) locations.push({ scene: e.scene, kind: '挿絵', img: e.img });
+  });
+  // 該当章のキャラを POOL から抽出 (chapter === storyId)
+  const chars = [];
+  if (typeof POOL !== 'undefined') {
+    for (const tier of ['LR', 'UR', 'SSR', 'SR', 'R']) {
+      (POOL[tier] || []).forEach(c => {
+        if (c && c.chapter === storyId) chars.push({ ...c, tier });
+      });
+    }
+  }
+  // HTML 組み立て
+  let html = `<h3>${escapeHtml(outline.icon || '📖')} ${escapeHtml(outline.title)}</h3>`;
+  html += `<div class="faction-yomi-side">${escapeHtml(outline.meta)}</div>`;
+  html += `<div class="world-map-side-meta">`;
+  html += `<span>🖼️ 場所 ${locations.length}枚</span>`;
+  html += `<span>👥 キャラ ${chars.length}人</span>`;
+  html += `</div>`;
+  if (outline.tagline) {
+    html += `<div class="chapter-gallery-tagline">${escapeHtml(outline.tagline)}</div>`;
+  }
+  // 場所画像セクション
+  if (locations.length > 0) {
+    html += `<div class="chapter-gallery-section-title">🖼️ 場所</div>`;
+    html += `<div class="chapter-gallery-locations">`;
+    locations.forEach((loc, idx) => {
+      html += `<div class="chapter-gallery-loc" data-img="${escapeHtml(loc.img)}" data-scene="${escapeHtml(loc.scene)}">`;
+      html += `<img src="${escapeHtml(loc.img)}" alt="${escapeHtml(loc.scene)}" loading="lazy">`;
+      html += `<div class="chapter-gallery-loc-label"><span class="chapter-gallery-loc-kind">${escapeHtml(loc.kind)}</span> ${escapeHtml(loc.scene)}</div>`;
+      html += `</div>`;
+    });
+    html += `</div>`;
+  }
+  // キャラセクション
+  if (chars.length > 0) {
+    html += `<div class="chapter-gallery-section-title">👥 登場キャラ</div>`;
+    html += `<div class="world-map-side-members">`;
+    chars.forEach(c => {
+      const unlocked = (typeof isUnlocked === 'function') ? isUnlocked(c) : false;
+      const cls = unlocked ? 'world-map-side-member' : 'world-map-side-member locked';
+      const img = c.img ? `<img src="${escapeHtml(c.img)}" alt="${escapeHtml(c.name)}" loading="lazy">` : '';
+      const display = unlocked ? escapeHtml(c.name) : '🔒';
+      html += `<div class="${cls}" data-name="${escapeHtml(c.name)}">${img}<div>${display}</div></div>`;
+    });
+    html += `</div>`;
+  }
+  side.innerHTML = html;
+  // 場所画像 click → 拡大 (既存 char-img-zoom モーダル流用、 .png 原寸表示)
+  side.querySelectorAll('.chapter-gallery-loc').forEach(el => {
+    el.addEventListener('click', () => {
+      const thumbUrl = el.dataset.img;
+      // _thumb.webp → 原寸 (.png/.jpg) に置換、 該当しなければそのまま
+      const fullUrl = thumbUrl.replace(/_thumb\.webp$/i, '.png');
+      _openLocImageZoom(fullUrl);
+    });
+  });
+  // キャラ click → キャラ詳細 (既存)
+  side.querySelectorAll('.world-map-side-member:not(.locked)').forEach(el => {
+    el.addEventListener('click', () => {
+      const name = el.dataset.name;
+      const c = (typeof getCharByName === 'function') ? getCharByName(name) : null;
+      if (c && typeof showCharDetail === 'function') showCharDetail(c);
+    });
+  });
+}
+
+// 場所画像拡大 (既存 char-img-zoom モーダル流用、 ない場合は新ウィンドウでなく no-op)
+function _openLocImageZoom(url) {
+  // 既存実装 openLocImageZoom があればそれを使う、 なければ char-img-zoom を流用
+  if (typeof openLocImageZoom === 'function') { openLocImageZoom(url); return; }
+  const zoom = document.getElementById('char-img-zoom');
+  const img = document.getElementById('char-img-zoom-img');
+  if (zoom && img) {
+    img.src = url;
+    zoom.removeAttribute('hidden');
+  }
 }
 
 // Phase 2: ワールドマップ用 toast (Coming Soon等) — 中央下に1.6秒表示
