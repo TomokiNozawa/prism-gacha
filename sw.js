@@ -7,7 +7,7 @@
 //
 // HTML/JSON/Firebase API はキャッシュせず常にネットワーク優先 (更新即反映+認証/DBの鮮度維持)。
 
-const SW_VERSION = '20260501s';  // v1.3.1s ワールドマップ preserveAspectRatio meet → slice に revert (派閥アイコン+ティザーを画像内に収める)
+const SW_VERSION = '20260501t';  // v1.3.2 hotfix: STORY_FILES から s1c4 一旦削除 (v1.4.0 main release 時に復活)
 const STATIC_CACHE = `prismaera-static-${SW_VERSION}`;
 const BGM_CACHE    = `prismaera-bgm-${SW_VERSION}`;
 const LOC_CACHE    = `prismaera-loc-${SW_VERSION}`;

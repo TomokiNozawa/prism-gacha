@@ -4153,7 +4153,7 @@ const STORY_FILES = {
   s1c1: { title: '序: 七座の使命', meta: 'Season 1 — 第1章', file: 'STORY/s1c1.md' },
   s1c2: { title: '南方海域の異変', meta: 'Season 1 — 第2章', file: 'STORY/s1c2.md' },
   s1c3: { title: '砂塵の隊商', meta: 'Season 1 — 第3章', file: 'STORY/s1c3.md' },
-  s1c4: { title: '凍土と空',     meta: 'Season 1 — 第4章', file: 'STORY/s1c4.md' },
+  // s1c4 は v1.4.0 main release 時に追加 (本文 + キャラ + 場所画像 + BGM 揃ってから)
 };
 
 function escapeHtml(s) {
@@ -5128,7 +5128,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260501s';
+const IMG_CACHE_VERSION = '20260501t';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -5351,10 +5351,7 @@ const STORY_POV_EXCLUDE_SCENES = {
     // 観測者三柱 (カグヤ + ノクス + セラフィエル) — POV (ヴィル) ではないので除外
     '凍土の三柱',
   ],
-  's1c4': [
-    // 観測者三柱 (カグヤ + ノクス + セラフィエル) — POV (アルテミス) ではないので除外
-    '銀霜の月に呼ばれる者',
-  ],
+  // s1c4 は v1.4.0 main release 時に追加 (本文公開と同時)
 };
 
 // シーン依存のキャラリンク remap — 同じ単独名 (例: 「イザベル」) でも、 シーン進行に応じて別キャラ (例: 覚醒後 UR) にリンク先を切替える。
