@@ -3804,7 +3804,8 @@ const FURIGANA = {
 // HTMLテキストノード内のキャラ名を <a class="char-link"> でラップ
 // 詳細画面オープン用。長い候補から処理して短い名前の誤マッチ回避。
 // sceneLabel: 現シーンの label ('2-11' 等)。 STORY_CHAR_REMAP のシーン依存 remap に使う (省略可)。
-function linkifyCharNames(html, sceneLabel) {
+// sceneTitle: 現シーンの title (例: 'エピローグ — 天の境で')。 fromTitle ベースの remap 用。
+function linkifyCharNames(html, sceneLabel, sceneTitle) {
   if (typeof POOL === 'undefined') return html;
   const tmp = document.createElement('div');
   tmp.innerHTML = html;
@@ -3830,9 +3831,13 @@ function linkifyCharNames(html, sceneLabel) {
     }
   }
   // シーン依存 remap: STORY_CHAR_REMAP に該当があれば、 候補の char を別キャラに差し替える。
-  // 例: s1c2 の 2-11 以降「イザベル」 → 覚醒後 UR「波紋の聖女 イザベル」 にリンク。
-  if (sceneLabel && typeof STORY_CHAR_REMAP !== 'undefined' && currentStoryId && STORY_CHAR_REMAP[currentStoryId]) {
-    const applicableRemaps = STORY_CHAR_REMAP[currentStoryId].filter(r => _sceneLabelGte(sceneLabel, r.fromLabel));
+  // 例: s1c2 の 3-3 以降「イザベル」 → 覚醒後 UR「波紋の聖女 イザベル」 にリンク (fromLabel ベース)
+  // 例: s1c2 エピローグ「天の境で」 のイザベル → 覚醒後 UR (fromTitle ベース、 label='' のため)
+  if (typeof STORY_CHAR_REMAP !== 'undefined' && currentStoryId && STORY_CHAR_REMAP[currentStoryId]) {
+    const applicableRemaps = STORY_CHAR_REMAP[currentStoryId].filter(r =>
+      (r.fromLabel && sceneLabel && _sceneLabelGte(sceneLabel, r.fromLabel)) ||
+      (r.fromTitle && sceneTitle && sceneTitle === r.fromTitle)
+    );
     for (const r of applicableRemaps) {
       for (const [fromName, toFullName] of Object.entries(r.remap || {})) {
         // POOL から targetChar を探す (tier 横断)
@@ -4063,7 +4068,7 @@ function renderScene() {
   $("#story-meta").textContent = labelStr ? `${baseMeta} / ${labelStr}` : baseMeta;
   // タイトル: キャラ名リンク化 + ふりがな (sceneLabel 渡しで覚醒後リンク等の文脈切替対応)
   const titleEl = $("#story-scene-title");
-  titleEl.innerHTML = applyFurigana(linkifyCharNames(escapeHtml(scene.title), scene.label));
+  titleEl.innerHTML = applyFurigana(linkifyCharNames(escapeHtml(scene.title), scene.label, scene.title));
   let bodyHtml;
   if (typeof marked !== 'undefined' && scene.contentMd) {
     bodyHtml = marked.parse(scene.contentMd);
@@ -4075,7 +4080,7 @@ function renderScene() {
   // 本文: 場所インライン挿絵 (ruby/link化前の純HTMLでmarker検索) → キャラ名リンク化 → ふりがな → 初登場キャラのカットイン挿入
   // injectStoryLocationInlines を最前に呼ぶ理由: ふりがな (<ruby>) や キャラリンク (<a>) で marker文字列が分断されるとマッチ失敗するため
   bodyHtml = injectStoryLocationInlines(bodyHtml, storyIdx);
-  bodyHtml = linkifyCharNames(bodyHtml, scene.label);
+  bodyHtml = linkifyCharNames(bodyHtml, scene.label, scene.title);
   bodyHtml = applyFurigana(bodyHtml);
   bodyHtml = injectStoryCutins(bodyHtml, storyIdx);
   // 最終シーン: 次章/一覧ナビゲーションを末尾に追加
@@ -4177,6 +4182,13 @@ function _matchPovChar(cName, povName) {
   return _povTokens(povName).some(t => cName.includes(t));
 }
 function _findPovChar(povName) {
+  // 第1優先: 完全一致 (POOL に「イザベル」 と「波紋の聖女 イザベル」 が両方ある時、
+  //   povName='イザベル' で UR の長名にinclude誤マッチしないように)
+  for (const tier of ['LR', 'UR', 'SSR', 'SR', 'R']) {
+    const c = POOL[tier].find(c => c.name === povName);
+    if (c) return { ...c, tier, hits: 1 };
+  }
+  // 第2優先: token / 部分一致 (例: povName='鈴宮 ちさと' → POOL'ちさと' に token一致で true)
   for (const tier of ['LR', 'UR', 'SSR', 'SR', 'R']) {
     const c = POOL[tier].find(c => _matchPovChar(c.name, povName));
     if (c) return { ...c, tier, hits: 1 };
@@ -4226,9 +4238,13 @@ function renderSceneChars(scene) {
     }
   }
   // シーン依存 remap: STORY_CHAR_REMAP に該当があれば候補の char を別キャラに差し替える。
-  // 例: s1c2 の 2-11 以降「イザベル」 → 覚醒後 UR「波紋の聖女 イザベル」 として「このシーンに登場」 に表示。
-  if (scene.label && typeof STORY_CHAR_REMAP !== 'undefined' && currentStoryId && STORY_CHAR_REMAP[currentStoryId]) {
-    const applicableRemaps = STORY_CHAR_REMAP[currentStoryId].filter(r => _sceneLabelGte(scene.label, r.fromLabel));
+  // 例: s1c2 の 3-3 以降「イザベル」 → 覚醒後 UR「波紋の聖女 イザベル」 として「このシーンに登場」 に表示。
+  // 例: s1c2 エピローグ「天の境で」 のイザベル → 覚醒後 UR (fromTitle ベース、 label='' のため)
+  if (typeof STORY_CHAR_REMAP !== 'undefined' && currentStoryId && STORY_CHAR_REMAP[currentStoryId]) {
+    const applicableRemaps = STORY_CHAR_REMAP[currentStoryId].filter(r =>
+      (r.fromLabel && scene.label && _sceneLabelGte(scene.label, r.fromLabel)) ||
+      (r.fromTitle && scene.title && scene.title === r.fromTitle)
+    );
     for (const r of applicableRemaps) {
       for (const [fromName, toFullName] of Object.entries(r.remap || {})) {
         let targetChar = null;
@@ -4281,10 +4297,14 @@ function renderSceneChars(scene) {
   // 出現回数多い順、最大12体まで
   found.sort((a, b) => b.hits - a.hits);
   const top = found.slice(0, 12);
-  // POVキャラを先頭に配置 (シーン依存remap対応: 2-11以降「イザベル」 → 「波紋の聖女 イザベル」 に切替)
+  // POVキャラを先頭に配置 (シーン依存remap対応: 3-3以降「イザベル」 → 「波紋の聖女 イザベル」 に切替)
+  // fromTitle ベースの remap (エピローグ等 label 無いシーン) にも対応
   let povName = currentStoryPov;
-  if (povName && scene.label && typeof STORY_CHAR_REMAP !== 'undefined' && currentStoryId && STORY_CHAR_REMAP[currentStoryId]) {
-    const applicableRemaps = STORY_CHAR_REMAP[currentStoryId].filter(r => _sceneLabelGte(scene.label, r.fromLabel));
+  if (povName && typeof STORY_CHAR_REMAP !== 'undefined' && currentStoryId && STORY_CHAR_REMAP[currentStoryId]) {
+    const applicableRemaps = STORY_CHAR_REMAP[currentStoryId].filter(r =>
+      (r.fromLabel && scene.label && _sceneLabelGte(scene.label, r.fromLabel)) ||
+      (r.fromTitle && scene.title && scene.title === r.fromTitle)
+    );
     for (const r of applicableRemaps) {
       if (r.remap && r.remap[povName]) { povName = r.remap[povName]; break; }
     }
@@ -4829,20 +4849,21 @@ async function _refreshOfflineStatus(m) {
 // renderSceneChars で「pronoun (私/わたし) 検出」 が他キャラの「私」 を拾ってしまう事故を防ぐ
 // key: storyId、 value: scene.title 完全一致リスト
 const STORY_POV_EXCLUDE_SCENES = {
+  // 全章エピローグは「## エピローグ — N」 (h2 空 body 中表紙) + h3 subscene の構造で統一。
+  // POV 検出が動くのは h3 subscene 側 (中表紙は contentMd 短く skip)、 それぞれ subscene title を列挙。
   's1c1': [
-    // エピローグ — 観測者たち の subscene (h3、 label無し、 title=サブタイトル)
     '月夜のカグヤ',
     '星海のノクス',
     '教会のセラフィエル',
     'プリズマの黄昏',
   ],
   's1c2': [
-    // エピローグ — 天の境で (セラフィエル + カグヤ + ノクス)、 観測者シーン
-    'エピローグ — 天の境で',
+    // セラフィエル POV (天の境で) — POV (イザベル) ではないので除外
+    '天の境で',
   ],
   's1c3': [
-    // エピローグ — 観測者たち は h2 で body あり regular scene、 観測者三柱の語り場面
-    'エピローグ — 観測者たち',
+    // 観測者三柱 (カグヤ + ノクス + セラフィエル) — POV (ヴィル) ではないので除外
+    '凍土の三柱',
   ],
 };
 
@@ -4853,6 +4874,9 @@ const STORY_CHAR_REMAP = {
   's1c2': [
     // 2026-05-01 4幕統合: 旧 5-3 → 3-3 (第三幕 波紋の聖女覚醒シーン)
     { fromLabel: '3-3', remap: { 'イザベル': '波紋の聖女 イザベル' } },
+    // 2026-05-01 真エピローグ「天の境で」 (覚醒後の世界線、 セラフィエル POV で「我が代理イザベル」 言及)
+    // label='' で fromLabel ベース不可のため fromTitle で h3 subscene title と完全一致判定
+    { fromTitle: '天の境で', remap: { 'イザベル': '波紋の聖女 イザベル' } },
   ],
 };
 
