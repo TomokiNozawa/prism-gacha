@@ -4050,6 +4050,11 @@ function renderScene() {
   $("#story-progress").textContent = `${storyIdx + 1} / ${storyScenes.length}`;
   $("#story-scene-label").textContent = scene.label || '';
   $("#story-scene-label").style.display = scene.label ? '' : 'none';
+  // ヘッダの章メタにシーンラベルを追記 (例: "Season 1 — 第3章 / 2-1")
+  // シーン切替に追従して常時最新表示、 scene.label 無いシーン (プロローグ/エピローグ) は章メタのみ
+  const chapterInfo = STORY_FILES[currentStoryId];
+  const baseMeta = chapterInfo ? chapterInfo.meta : '';
+  $("#story-meta").textContent = scene.label ? `${baseMeta} / ${scene.label}` : baseMeta;
   // タイトル: キャラ名リンク化 + ふりがな (sceneLabel 渡しで覚醒後リンク等の文脈切替対応)
   const titleEl = $("#story-scene-title");
   titleEl.innerHTML = applyFurigana(linkifyCharNames(escapeHtml(scene.title), scene.label));
