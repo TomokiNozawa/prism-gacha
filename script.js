@@ -999,16 +999,16 @@ function showRankTable() {
           <button type="button" class="rank-table-close" onclick="closeRankTable()" aria-label="閉じる">×</button>
         </div>
         <div class="rank-table-body">
-          <div class="rank-table-row"><span class="rarity-rank rank-g">G</span><span class="rank-table-range">偏差値 〜34</span><span class="rank-table-desc">不運 (R が大半)</span></div>
-          <div class="rank-table-row"><span class="rarity-rank rank-f">F</span><span class="rank-table-range">35〜39</span><span class="rank-table-desc">やや不運 (SR 少なめ)</span></div>
-          <div class="rank-table-row"><span class="rarity-rank rank-e">E</span><span class="rank-table-range">40〜44</span><span class="rank-table-desc">下寄り (SR 数体)</span></div>
-          <div class="rank-table-row"><span class="rarity-rank rank-d">D</span><span class="rank-table-range">45〜49</span><span class="rank-table-desc">平均より少し下 (SR 多め)</span></div>
-          <div class="rank-table-row"><span class="rarity-rank rank-c">C</span><span class="rank-table-range">50〜54</span><span class="rank-table-desc">平均 (期待値ど真ん中)</span></div>
-          <div class="rank-table-row"><span class="rarity-rank rank-b">B</span><span class="rank-table-range">55〜59</span><span class="rank-table-desc">平均より少し上 (SSR ヒット)</span></div>
-          <div class="rank-table-row"><span class="rarity-rank rank-a">A</span><span class="rank-table-range">60〜64</span><span class="rank-table-desc">上位 (SSR 複数体)</span></div>
-          <div class="rank-table-row"><span class="rarity-rank rank-s">S</span><span class="rank-table-range">65〜74</span><span class="rank-table-desc">高位 (UR ヒット)</span></div>
-          <div class="rank-table-row"><span class="rarity-rank rank-ss">SS</span><span class="rank-table-range">75 以上</span><span class="rank-table-desc">大爆発 (UR 複数 or 高 SSR)</span></div>
           <div class="rank-table-row rank-table-row-legend"><span class="rarity-rank rank-legend">LEGEND</span><span class="rank-table-range">LR ヒット</span><span class="rank-table-desc">最高峰 (LR 出現)</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-ss">SS</span><span class="rank-table-range">75 以上</span><span class="rank-table-desc">大爆発 (UR 複数 or 高 SSR)</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-s">S</span><span class="rank-table-range">65〜74</span><span class="rank-table-desc">高位 (UR ヒット)</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-a">A</span><span class="rank-table-range">60〜64</span><span class="rank-table-desc">上位 (SSR 複数体)</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-b">B</span><span class="rank-table-range">55〜59</span><span class="rank-table-desc">平均より少し上 (SSR ヒット)</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-c">C</span><span class="rank-table-range">50〜54</span><span class="rank-table-desc">平均 (期待値ど真ん中)</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-d">D</span><span class="rank-table-range">45〜49</span><span class="rank-table-desc">平均より少し下 (SR 多め)</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-e">E</span><span class="rank-table-range">40〜44</span><span class="rank-table-desc">下寄り (SR 数体)</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-f">F</span><span class="rank-table-range">35〜39</span><span class="rank-table-desc">やや不運 (SR 少なめ)</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-g">G</span><span class="rank-table-range">偏差値 〜34</span><span class="rank-table-desc">不運 (R が大半)</span></div>
         </div>
         <div class="rank-table-note">
           偏差値は重み付きスコア (R=1 / SR=3 / SSR=10 / UR=30 / LR=100) を体感マッピング (25=最低 / 50=平均 / 75=上位 / 99=理論上限) に変換した値。
@@ -1112,7 +1112,7 @@ function _unlockBodyScroll() {
   }
 }
 function _isAllModalsHidden() {
-  const checkActive = ['#char-detail', '#story-modal', '#bgm-panel', '#feedback-modal', '#history-modal', '#migration-modal', '#update-modal', '#account-modal', '#welcome-modal', '#settings-modal', '#account-prompt', '#story-list-modal', '#world-map', '#char-img-zoom', '#relations', '#gallery'];
+  const checkActive = ['#char-detail', '#story-modal', '#bgm-panel', '#feedback-modal', '#history-modal', '#migration-modal', '#update-modal', '#account-modal', '#welcome-modal', '#settings-modal', '#account-prompt', '#story-list-modal', '#world-map', '#char-img-zoom', '#relations', '#gallery', '#result', '#rank-table-modal'];
   for (const sel of checkActive) {
     const el = document.querySelector(sel);
     if (!el) continue;
@@ -5339,7 +5339,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260502n';
+const IMG_CACHE_VERSION = '20260502o';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -6680,7 +6680,14 @@ if (_btnHistory) _btnHistory.addEventListener("click", openHistoryModal);
 
 document.addEventListener("keydown", e => {
   if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
-  // === 最優先: 拡大画像モーダル (z-index 260、 全モーダル中の最上位) ===
+  // === 最優先: ランク表モーダル (z-index 280、 全モーダル中で最上位 ===
+  // result + ランク表 同時 open 時の「Esc で result 閉じてランク表残る」 バグ対策 (野沢さん指摘 2026-05-02)
+  const _rtm = document.getElementById('rank-table-modal');
+  if (_rtm && _rtm.classList.contains('active')) {
+    if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); closeRankTable(); }
+    return;  // ランク表 active 中は他のキー処理 (Space/Enter 等) も全block
+  }
+  // === 拡大画像モーダル (z-index 260、 ランク表より下) ===
   // active 中は他の Esc 処理 (story-modal の closeStory 等) を完全に通さない
   const _ciz = document.getElementById('char-img-zoom');
   if (_ciz && _ciz.classList.contains('active')) {
@@ -6824,6 +6831,9 @@ document.addEventListener("keydown", e => {
     return;
   }
   if (busy) return;
+  // モーダル open 中は Space/Enter による裏ガチャ抑止 (野沢さん指摘 2026-05-02 Space バグ対策)
+  // _isAllModalsHidden は ranking/result/char-detail/story 等 主要モーダルを網羅チェック
+  if (typeof _isAllModalsHidden === 'function' && !_isAllModalsHidden()) return;
   if (e.key === " ") { e.preventDefault(); doSingle(); }
   else if (e.key === "Enter") { e.preventDefault(); doTen(); }
   else if (e.key === "g" || e.key === "G") { e.preventDefault(); openGallery(); }

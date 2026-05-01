@@ -151,6 +151,55 @@ def check_chapter_structure():
     return checked
 
 
+def check_modal_requirements():
+    """ルール6 (WARNING): モーダル/popup 必須要件チェック (野沢さん指示 2026-05-02)
+    新規モーダル要素 (id 末尾 -modal or -panel or -popup) に対して以下が揃っているか:
+    1. Esc キー処理 (keydown.*Escape.*close{ModalName} or _isAllModalsHidden 等の網羅)
+    2. close 関数 (closeXxx() or dismissXxx())
+    3. 背景クリック close (target === modal or target.id === xxx)
+    4. _isAllModalsHidden の checkActive 配列に追加されているか (Space/Enter 裏発火防止)
+
+    現状: 完璧な静的解析は難しいので、 「checkActive配列に modal id がない」 だけでも検出する簡易チェック。
+    """
+    script = ROOT / "script.js"
+    index = ROOT / "index.html"
+    if not script.exists():
+        return 0
+    text = script.read_text(encoding="utf-8")
+    html = index.read_text(encoding="utf-8") if index.exists() else ""
+
+    # 全モーダル ID 抽出 (HTML <div id="xxx-modal" or "xxx-panel" or "xxx-popup">)
+    modal_ids = set(re.findall(r'<(?:div|dialog|section)\s+[^>]*id="([\w-]+(?:-modal|-panel|-popup))"', html))
+    # script.js 内で createElement('div').id = 'xxx-modal' パターンも検出
+    modal_ids.update(re.findall(r"\.id\s*=\s*['\"]([\w-]+(?:-modal|-panel|-popup))['\"]", text))
+
+    # _isAllModalsHidden の checkActive 配列を抽出
+    m_active = re.search(r"const checkActive\s*=\s*\[([^\]]+)\]", text)
+    active_ids = set()
+    if m_active:
+        active_ids = set(re.findall(r"#([\w-]+)", m_active.group(1)))
+
+    checked = 0
+    for mid in sorted(modal_ids):
+        # 除外: gasshuku 等の旧モーダル / topbar-secondary 等の特殊ケース
+        if mid in ('topbar-secondary', 'gasshuku-modal'):
+            continue
+        checked += 1
+        # checkActive に登録されているか
+        if mid not in active_ids:
+            violations.append(
+                f"[ルール6 モーダル網羅] {mid} が _isAllModalsHidden の checkActive 配列にない\n"
+                f"      → script.js の checkActive に '#{mid}' を追加 (Space/Enter 裏発火防止)"
+            )
+        # close 関数があるか (closeXxx or dismissXxx)
+        guess = re.sub(r'-modal$|-panel$|-popup$', '', mid).replace('-', '_')
+        close_pat = re.compile(rf"function (close|dismiss){guess[0].upper()}{guess[1:]}", re.I)
+        if not close_pat.search(text):
+            # name 推測が合わない場合あり、 警告止まり
+            pass  # skip この check (false positive 多すぎ)
+    return checked
+
+
 def check_nozawa_honorific():
     """ルール5: 「野沢」 呼び捨て検出 (ドキュメント系MDのみ対象、 scripts/ は自己参照誤検知のため除外)"""
     targets = []
@@ -205,10 +254,14 @@ n2 = check_internal_chapter_keys()
 n5_pre = len(violations)
 check_nozawa_honorific()
 n5_post = len(violations)
+n6_pre = len(violations)
+n6 = check_modal_requirements()
+n6_post = len(violations)
 warnings = list(violations)
 violations.clear()
 print(f"  ルール2 (内部キー直書き): {n2}件 検査 [WARNING / 誤検知あり]")
 print(f"  ルール5 (野沢呼称): {n5_post - n5_pre}件 検査 [WARNING / 誤検知あり]")
+print(f"  ルール6 (モーダル網羅): {n6}件 検査 [WARNING / Esc・Space網羅対策]")
 
 print()
 

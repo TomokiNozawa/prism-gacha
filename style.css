@@ -1553,7 +1553,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 }
 .rank-table-row {
   display: grid;
-  grid-template-columns: 90px 90px 1fr;
+  grid-template-columns: 100px 90px 1fr;
   align-items: center;
   gap: 10px;
   padding: 4px 6px;
@@ -1568,8 +1568,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   white-space: nowrap;
   overflow: visible;
 }
-/* LEGEND は文字長く letter-spacing でも見切れる、 専用調整 */
-.rank-table-row-legend { grid-template-columns: 110px 90px 1fr; }
+/* LEGEND は文字長く letter-spacing でも見切れる、 font-size と letter-spacing のみ縮小 (列幅は通常行と統一) */
 .rank-table-row-legend .rarity-rank {
   font-size: 13px;
   letter-spacing: 0.05em;
