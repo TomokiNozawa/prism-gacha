@@ -7,7 +7,7 @@
 //
 // HTML/JSON/Firebase API はキャッシュせず常にネットワーク優先 (更新即反映+認証/DBの鮮度維持)。
 
-const SW_VERSION = '20260502s';  // v1.3.2+ crimson_pearl_night 明度UP + serapia_dawn 3:4反映 + オフライン保存 5カテゴリ細分 + 容量表示
+const SW_VERSION = '20260502t';  // v1.3.2+ crimson_pearl_night 再生成反映 + 未DL容量予測表示 + BGMシャッフル直近5曲履歴で同曲repeat防止
 const STATIC_CACHE = `prismaera-static-${SW_VERSION}`;
 const BGM_CACHE    = `prismaera-bgm-${SW_VERSION}`;
 const LOC_CACHE    = `prismaera-loc-${SW_VERSION}`;

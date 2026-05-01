@@ -5346,7 +5346,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260502s';
+const IMG_CACHE_VERSION = '20260502t';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -5514,42 +5514,81 @@ async function _downloadAllAssets(progressCb, urlList) {
   return { done, total, succeeded, skipped };
 }
 
-// M4: cache 件数 + 容量 を計測 — 渡された URL list のうち hit したものについて、
-// 件数と合計バイト数を返す。 容量取得は Content-Length 優先、 失敗時 blob().size。
-// 並列5本で全URL検査、 全URL同時 fetch しても Cache Storage 内なので軽量。
-async function _measureCacheBytes(urls) {
-  if (!urls || urls.length === 0) return { cached: 0, bytes: 0 };
-  let cached = 0, bytes = 0;
-  const CONCURRENCY = 5;
+// M4: URL → bytes 永続化マップ。 一度測ったら localStorage に保存、 以後 instant に参照可能。
+// 静的アセットは URL 不変なら size 不変なので safely cache 可能。
+const _OFFLINE_URL_BYTES = new Map();
+const _OFFLINE_BYTES_LS_KEY = 'prism-offline-url-bytes';
+try {
+  const stored = JSON.parse(localStorage.getItem(_OFFLINE_BYTES_LS_KEY) || '{}');
+  for (const k in stored) { if (typeof stored[k] === 'number' && stored[k] > 0) _OFFLINE_URL_BYTES.set(k, stored[k]); }
+} catch (e) {}
+function _persistOfflineBytes() {
+  try {
+    const obj = {};
+    for (const [k, v] of _OFFLINE_URL_BYTES) obj[k] = v;
+    localStorage.setItem(_OFFLINE_BYTES_LS_KEY, JSON.stringify(obj));
+  } catch (e) {}
+}
+// 1 URL の容量を取得。 優先順位:
+//   (1) メモ済 _OFFLINE_URL_BYTES
+//   (2) Cache Storage に既にあれば response から Content-Length or blob().size
+//   (3) HEAD リクエスト (ネットワーク必要だが本体DLしないので軽い)
+async function _fetchUrlBytes(url) {
+  if (_OFFLINE_URL_BYTES.has(url)) return _OFFLINE_URL_BYTES.get(url);
+  let bytes = 0;
+  // (2) cache 経由
+  try {
+    const r = await caches.match(url);
+    if (r) {
+      const cl = r.headers && r.headers.get && r.headers.get('content-length');
+      if (cl && /^\d+$/.test(cl)) bytes = parseInt(cl, 10);
+      else { try { bytes = (await r.clone().blob()).size || 0; } catch (e) {} }
+    }
+  } catch (e) {}
+  // (3) HEAD ネットワーク
+  if (bytes <= 0) {
+    try {
+      const r = await fetch(url, { method: 'HEAD', credentials: 'omit', cache: 'no-store' });
+      if (r && r.ok) {
+        const cl = r.headers.get('content-length');
+        if (cl && /^\d+$/.test(cl)) bytes = parseInt(cl, 10);
+      }
+    } catch (e) {}
+  }
+  if (bytes > 0) _OFFLINE_URL_BYTES.set(url, bytes);
+  return bytes;
+}
+// urls を並列で計測 → cached件数 + cachedBytes + totalBytes(全URLの合計サイズ予測)。
+// concurrency 高め (20) で 250URLs 程度なら数秒で完了。
+async function _measureUrlsTotal(urls) {
+  if (!urls || urls.length === 0) return { cached: 0, cachedBytes: 0, totalBytes: 0 };
+  let cached = 0, cachedBytes = 0, totalBytes = 0;
+  const CONCURRENCY = 20;
   let idx = 0;
   async function worker() {
     while (idx < urls.length) {
       const myIdx = idx++;
       const url = urls[myIdx];
+      const sz = await _fetchUrlBytes(url);
+      totalBytes += sz;
       try {
         const r = await caches.match(url);
-        if (!r) continue;
-        cached++;
-        // Content-Length が立っていればそれが最も軽い
-        const cl = r.headers && r.headers.get && r.headers.get('content-length');
-        if (cl && /^\d+$/.test(cl)) {
-          bytes += parseInt(cl, 10);
-        } else {
-          // fallback: blob で実体サイズ (重いが正確)
-          try {
-            const blob = await r.clone().blob();
-            bytes += blob.size || 0;
-          } catch (e) {}
-        }
+        if (r) { cached++; cachedBytes += sz; }
       } catch (e) {}
     }
   }
   await Promise.all(Array.from({ length: CONCURRENCY }, () => worker()));
-  return { cached, bytes };
+  _persistOfflineBytes();
+  return { cached, cachedBytes, totalBytes };
 }
 // 後方互換: 件数だけ
 async function _countCachedInUrls(urls) {
-  return (await _measureCacheBytes(urls)).cached;
+  return (await _measureUrlsTotal(urls)).cached;
+}
+// 後方互換: cached + cached容量だけ (HEAD なし、 ローカルcache のみ)
+async function _measureCacheBytes(urls) {
+  const r = await _measureUrlsTotal(urls);
+  return { cached: r.cached, bytes: r.cachedBytes };
 }
 function _formatBytes(b) {
   if (!b || b <= 0) return '0 MB';
@@ -5597,43 +5636,54 @@ async function _refreshOfflineStatus(m) {
     statusEl.textContent = '';
     return;
   }
-  // カテゴリ別に並列で cache 件数 + バイト集計
-  const measures = await Promise.all(_OFFLINE_CAT_KEYS.map(k => _measureCacheBytes(cats[k])));
+  // カテゴリ別に並列で cache 件数 + 全URL予測バイト集計 (HEAD でメモ化、 2回目以降 instant)
+  const measures = await Promise.all(_OFFLINE_CAT_KEYS.map(k => _measureUrlsTotal(cats[k])));
   const breakdown = {};
-  let cached = 0, bytesTotal = 0;
+  let cached = 0, cachedBytes = 0, totalBytes = 0;
   _OFFLINE_CAT_KEYS.forEach((k, i) => {
-    breakdown[k] = { total: cats[k].length, cached: measures[i].cached, bytes: measures[i].bytes };
+    breakdown[k] = {
+      total: cats[k].length,
+      cached: measures[i].cached,
+      cachedBytes: measures[i].cachedBytes,
+      totalBytes: measures[i].totalBytes,
+    };
     cached += measures[i].cached;
-    bytesTotal += measures[i].bytes;
+    cachedBytes += measures[i].cachedBytes;
+    totalBytes += measures[i].totalBytes;
   });
   const missing = total - cached;
-  // breakdown UI 更新
+  const missingBytes = Math.max(0, totalBytes - cachedBytes);
+  // breakdown UI 更新 — 各行に「件数 / 容量 (済 + 予測総量)」 を表示
   for (const cat of _OFFLINE_CAT_KEYS) {
     const row = m.querySelector(`.settings-offline-cat[data-category="${cat}"]`);
     if (!row) continue;
     const countEl = row.querySelector('.settings-offline-cat-count');
     const sizeEl  = row.querySelector('.settings-offline-cat-size');
     const catBtn  = row.querySelector('.settings-offline-cat-btn');
-    const t = breakdown[cat].total, c = breakdown[cat].cached, miss = t - c;
+    const b = breakdown[cat];
+    const t = b.total, c = b.cached, miss = t - c;
+    const missBytes = Math.max(0, b.totalBytes - b.cachedBytes);
     if (countEl) {
-      if (t === 0) {
-        countEl.textContent = '— / —';
-      } else if (miss <= 0) {
-        countEl.innerHTML = `✅ <b>${t}</b>件`;
-      } else {
-        countEl.innerHTML = `<b>${c}</b> / <b>${t}</b>`;
-      }
+      if (t === 0) countEl.textContent = '— / —';
+      else if (miss <= 0) countEl.innerHTML = `✅ <b>${t}</b>件`;
+      else countEl.innerHTML = `<b>${c}</b> / <b>${t}</b>`;
     }
     if (sizeEl) {
-      if (t === 0 || c === 0) sizeEl.textContent = '';
-      else sizeEl.textContent = _formatBytes(breakdown[cat].bytes);
+      // 0件 → 空
+      // 全DL済 → 容量だけ (例 "47.4 MB")
+      // 部分DL → "47.4 / 250 MB"
+      // 未DL  → "≈ 250 MB"
+      if (t === 0) sizeEl.textContent = '';
+      else if (miss <= 0) sizeEl.textContent = _formatBytes(b.cachedBytes);
+      else if (c > 0) sizeEl.textContent = `${_formatBytes(b.cachedBytes)} / ${_formatBytes(b.totalBytes)}`;
+      else sizeEl.textContent = `≈ ${_formatBytes(b.totalBytes)}`;
     }
     if (catBtn) {
       if (t === 0 || miss <= 0) {
         catBtn.hidden = true;
       } else {
         catBtn.hidden = false;
-        catBtn.textContent = `📥 ${miss}件`;
+        catBtn.textContent = `📥 ${miss}件 (${_formatBytes(missBytes)})`;
       }
     }
   }
@@ -5641,7 +5691,7 @@ async function _refreshOfflineStatus(m) {
   if (missing <= 0) {
     // 全DL済み: マスター ボタン非表示
     dlBtn.style.display = 'none';
-    statusEl.innerHTML = `✅ <b>全 ${total} 件</b> 保存済み (合計 <b>${_formatBytes(bytesTotal)}</b>)`;
+    statusEl.innerHTML = `✅ <b>全 ${total} 件</b> 保存済み (合計 <b>${_formatBytes(cachedBytes)}</b>)`;
     // ストレージ使用量を併記 (取れる環境のみ)
     if (navigator.storage && navigator.storage.estimate) {
       try {
@@ -5653,14 +5703,13 @@ async function _refreshOfflineStatus(m) {
       } catch (e) {}
     }
   } else {
-    // 未DLあり: マスター ボタン表示
+    // 未DLあり: マスター ボタン表示 (容量併記)
     dlBtn.style.display = '';
+    dlBtn.textContent = `📥 全 ${missing} 件 (${_formatBytes(missingBytes)}) をまとめてDL`;
     if (cached > 0) {
-      dlBtn.textContent = `📥 全 ${missing} 件をまとめてDL`;
-      statusEl.innerHTML = `保存済み <b>${cached}</b> / <b>${total}</b> 件 (未保存 ${missing} 件 / 保存済 ${_formatBytes(bytesTotal)})`;
+      statusEl.innerHTML = `保存済み <b>${cached}</b> / <b>${total}</b> 件 (${_formatBytes(cachedBytes)} / 全 ${_formatBytes(totalBytes)})`;
     } else {
-      dlBtn.textContent = `📥 全 ${total} 件をまとめてDL`;
-      statusEl.innerHTML = `<b>${total}</b> 件のアセット (下のカテゴリ別DLでも個別保存可能)`;
+      statusEl.innerHTML = `<b>${total}</b> 件のアセット (DL予測 <b>${_formatBytes(totalBytes)}</b>)`;
     }
   }
 }
@@ -6178,6 +6227,11 @@ let bgmCurrentId = localStorage.getItem("prism-bgm-current") || BGM_LIST[0].id;
 // v1.1.3: bgmMode (sequence/random/repeat) は shuffle(bool) + repeat('off'|'all'|'one') に分離
 let bgmShuffle = localStorage.getItem("prism-bgm-shuffle") === "on";
 let bgmRepeat = localStorage.getItem("prism-bgm-repeat") || 'off'; // 'off'|'all'|'one'
+// 直近 N 曲履歴 — シャッフル queue 再生成時に「最近再生した曲が新 queue 前半に来る」 違和感を防ぐ
+const BGM_RECENT_HISTORY_SIZE = 5;
+let bgmRecentHistory = [];
+try { bgmRecentHistory = JSON.parse(localStorage.getItem("prism-bgm-recent") || '[]'); } catch (e) { bgmRecentHistory = []; }
+if (!Array.isArray(bgmRecentHistory)) bgmRecentHistory = [];
 // v1.2.3: shuffle はキュー方式 (Fisher-Yates で全曲シャッフル → 順に消化 → 枯れたら再シャッフル)。直前曲との連続反復を構造的に防ぐ
 let bgmShuffleQueue = [];
 try { bgmShuffleQueue = JSON.parse(localStorage.getItem("prism-bgm-shuffle-queue") || '[]'); } catch (e) { bgmShuffleQueue = []; }
@@ -6448,13 +6502,43 @@ function bgmToggle() {
   else playBgm(bgmCurrentId);
 }
 
-// Fisher-Yates shuffle で id 配列をランダム並べ替え。avoidFirstId が先頭に来たら2番目と入替(連続反復防止)
+// 再生開始した曲を recent history に記録 (LRU、 最新が末尾)
+function _bgmRememberPlayed(id) {
+  if (!id) return;
+  bgmRecentHistory = bgmRecentHistory.filter(x => x !== id);
+  bgmRecentHistory.push(id);
+  while (bgmRecentHistory.length > BGM_RECENT_HISTORY_SIZE) bgmRecentHistory.shift();
+  try { localStorage.setItem("prism-bgm-recent", JSON.stringify(bgmRecentHistory)); } catch (e) {}
+}
+
+// Fisher-Yates shuffle で id 配列をランダム並べ替え。
+// 改良 (2026-05-02): avoidFirstId だけでなく直近 BGM_RECENT_HISTORY_SIZE 曲を 「新queue 前半に置かない」 ようにする。
+// → 12曲中 5曲先まで「同じ曲」 が来ない感覚的均等性を確保 (野沢さん指摘「何曲か後にすぐ同じ曲が来る」)。
 function _bgmGenShuffleQueue(list, avoidFirstId) {
   const ids = list.map(b => b.id);
+  // Fisher-Yates 標準シャッフル
   for (let i = ids.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [ids[i], ids[j]] = [ids[j], ids[i]];
   }
+  // 直近再生した曲 + avoidFirstId を「最近曲」 set に集める
+  const recent = new Set(bgmRecentHistory);
+  if (avoidFirstId) recent.add(avoidFirstId);
+  // queue が短すぎる (recent + 1 以下) なら spreading 諦め (やってもループするだけ)
+  if (ids.length > 2 && recent.size > 0 && ids.length > recent.size) {
+    const halfPoint = Math.ceil(ids.length / 2);
+    // 前半 (0..halfPoint) を走査、 recent 入りは 後半 (halfPoint..N-1) の non-recent 位置と swap
+    for (let i = 0; i < halfPoint; i++) {
+      if (!recent.has(ids[i])) continue;
+      // 後半で recent でない位置を探す
+      let swapIdx = -1;
+      for (let k = ids.length - 1; k >= halfPoint; k--) {
+        if (!recent.has(ids[k])) { swapIdx = k; break; }
+      }
+      if (swapIdx > 0) [ids[i], ids[swapIdx]] = [ids[swapIdx], ids[i]];
+    }
+  }
+  // 追加保護: 万一先頭に avoidFirstId が来てたら 1 と swap (recent処理で大体は弾けてるはず)
   if (avoidFirstId && ids.length > 1 && ids[0] === avoidFirstId) {
     [ids[0], ids[1]] = [ids[1], ids[0]];
   }
@@ -6569,6 +6653,8 @@ bgmAudio.addEventListener('play', () => {
   if (bgmAudio.dataset.bgmPlayLogged === bgmCurrentId) return;
   bgmAudio.dataset.bgmPlayLogged = bgmCurrentId;
   _logBgmEvent('play', bgmCurrentId);
+  // ランダム queue 再生成時の repeat 防止用、 再生開始した曲を履歴に記録
+  _bgmRememberPlayed(bgmCurrentId);
 });
 bgmAudio.addEventListener('ended', () => {
   localStorage.setItem('prism-bgm-last-time', '0');
