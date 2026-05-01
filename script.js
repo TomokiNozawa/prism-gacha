@@ -5068,6 +5068,13 @@ const STORY_ACT_INTROS = {
     '第三幕 — 古龍の気配':              '砂漠の遺跡で、 私は古き者の眼差しに出会う。\n— ヴィル',
     '第四幕 — 帰還':                    '答えを得たかは、 まだ分からない。 けれど、 帰る時が来た。\n— ヴィル',
   },
+  's1c4': {
+    'Season 1 第4章 — 凍土と空':        '千年生きた覇王が、 三人目の戦友を見出す日の話だ。\n— 龍帝 アルテミス',
+    '第一幕 — 都を発つ':                '凍土へ向かう旅は、 千年に一度の歩み。 私の中で、 何かが動き始めている。\n— アルテミス',
+    '第二幕 — 氷の都':                  '氷帝という男に会う。 言葉ではなく、 剣で語る相手だ。\n— アルテミス',
+    '第三幕 — 凍土の対話':              '孤独を分かち合える相手と、 雪原で空を見上げる夜。\n— アルテミス',
+    '第四幕 — 帰路':                    '次に龍を譲る相手を、 私はもう、 知っているのかもしれない。\n— アルテミス',
+  },
 };
 
 // 全章の outline (公開順、 公開済 + 将来予定)。 STORY_FILES (公開済) との差分で「Coming Soon teaser」 を出す
@@ -5339,7 +5346,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260502o';
+const IMG_CACHE_VERSION = '20260502p';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる

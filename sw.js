@@ -7,7 +7,7 @@
 //
 // HTML/JSON/Firebase API はキャッシュせず常にネットワーク優先 (更新即反映+認証/DBの鮮度維持)。
 
-const SW_VERSION = '20260502o';  // v1.3.2+ ランク表 LEGEND上G下 並び替え + Esc/Space バグ修正 + ルール6 モーダル網羅
+const SW_VERSION = '20260502p';  // v1.3.2+ 図鑑フィルター 第3章/第4章 追加 + STORY_ACT_INTROS s1c4 追加 + ルール7 章追加漏れ
 const STATIC_CACHE = `prismaera-static-${SW_VERSION}`;
 const BGM_CACHE    = `prismaera-bgm-${SW_VERSION}`;
 const LOC_CACHE    = `prismaera-loc-${SW_VERSION}`;

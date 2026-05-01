@@ -151,6 +151,49 @@ def check_chapter_structure():
     return checked
 
 
+def check_chapter_completeness():
+    """ルール7 (BLOCKER): 章追加時の漏れチェック (野沢さん指示 2026-05-02)
+    STORY_FILES に存在する全 s1c? が以下の必須箇所に登録されているか:
+    1. STORY_ACT_INTROS (表紙/中表紙引き文、 主人公モノローグ)
+    2. index.html gallery-tabs (図鑑のフィルター)
+
+    将来追加候補: STORY_OUTLINE povCharName (ルール3 で別途) / LOCATION_CONFIG / POOL chapter / BGM_LIST
+    """
+    script = ROOT / "script.js"
+    index = ROOT / "index.html"
+    if not script.exists():
+        return 0
+    text = script.read_text(encoding="utf-8")
+    html = index.read_text(encoding="utf-8") if index.exists() else ""
+
+    # STORY_FILES の章 ID 抽出
+    m = re.search(r'const STORY_FILES\s*=\s*\{([\s\S]*?)\};', text)
+    if not m:
+        return 0
+    sf_ids = sorted(set(re.findall(r"^\s+(s1c\d+):\s*\{", m.group(1), re.M)))
+
+    # STORY_ACT_INTROS の章 ID
+    m2 = re.search(r'const STORY_ACT_INTROS\s*=\s*\{([\s\S]*?)\n\};', text)
+    sai_ids = set(re.findall(r"'(s1c\d+)':\s*\{", m2.group(1))) if m2 else set()
+
+    # index.html gallery-tabs の章 ID
+    gt_ids = set(re.findall(r'data-tab="(s1c\d+)"', html))
+
+    checked = len(sf_ids)
+    for sid in sf_ids:
+        if sid not in sai_ids:
+            violations.append(
+                f"[ルール7 章追加漏れ] STORY_ACT_INTROS に {sid} 未登録\n"
+                f"      → 表紙/中表紙引き文 (主人公モノローグ) が空表示になる、 script.js の STORY_ACT_INTROS に追加要"
+            )
+        if sid not in gt_ids:
+            violations.append(
+                f"[ルール7 章追加漏れ] index.html gallery-tabs に {sid} 未登録\n"
+                f"      → 図鑑のフィルターに第N章ボタンが出ない、 index.html の gallery-tabs に <button data-tab=\"{sid}\"> 追加要"
+            )
+    return checked
+
+
 def check_modal_requirements():
     """ルール6 (WARNING): モーダル/popup 必須要件チェック (野沢さん指示 2026-05-02)
     新規モーダル要素 (id 末尾 -modal or -panel or -popup) に対して以下が揃っているか:
@@ -246,6 +289,8 @@ n3 = check_story_outline_pov()
 print(f"  ルール3 (povCharName): {n3}章 検査 [BLOCKER]")
 n4 = check_chapter_structure()
 print(f"  ルール4 (章構造): {n4}章 検査 [BLOCKER]")
+n7 = check_chapter_completeness()
+print(f"  ルール7 (章追加漏れ): {n7}章 検査 [BLOCKER]")
 
 # === Warning ルール (commit はブロックせず、 開発者手動 review) ===
 violations_blocker = list(violations)  # ここまでが blocker 違反
