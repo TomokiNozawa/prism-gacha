@@ -45,6 +45,8 @@ red coat, large feathered tricorn hat — both gazing into the trench.
 Anime illustration, late afternoon orange-gold sky, dramatic perspective
 from behind the ship looking down into the trench.
 Aspect ratio 16:9, high detail.
+
+元画像から表情や姿勢は変わってOKです
 ```
 
 ---
@@ -128,6 +130,8 @@ coral and pearl crown. Rows of sea-knight guards in coral armor stand at attenti
 Interior fantasy illustration, grand ceremonial atmosphere,
 cool blues and warm gold accents, shimmer and depth.
 Aspect ratio 16:9, high detail.
+
+元画像から表情や姿勢は変わってOKです
 ```
 
 ---
@@ -163,6 +167,8 @@ Dark fantasy battle illustration, high contrast between holy rainbow light
 and dark void, oppressive atmosphere, deep indigo and black with flashes
 of gold, teal, and rainbow.
 Aspect ratio 16:9, high detail.
+
+元画像から表情や姿勢は変わってOKです
 ```
 
 ---
@@ -203,6 +209,8 @@ Soft, sacred atmosphere, anime fantasy illustration style,
 warm golden tones with vivid prismatic accents, particles of light dust drifting in the air.
 Wide cinematic interior shot from rear-three-quarters perspective.
 Aspect ratio 16:9, high detail.
+
+元画像から表情や姿勢は変わってOKです
 ```
 
 ---
@@ -244,6 +252,8 @@ Anime fantasy illustration style, warm twilight atmosphere,
 vibrant orange and rose-pink palette with cool blue ocean below.
 Wide cinematic shot from a slightly elevated angle on the pier, side-on perspective.
 Aspect ratio 16:9, high detail.
+
+元画像から表情や姿勢は変わってOKです
 ```
 
 ---
@@ -280,6 +290,8 @@ and midnight black with warm amber lantern accents and faint phosphorescent
 sea glow, vertical composition with tall night sky dominating the upper two
 thirds and deck details in the lower third.
 Aspect ratio 3:4, vertical orientation 1024x1536, high detail.
+
+元画像から表情や姿勢は変わってOKです
 ```
 
 ---
@@ -322,6 +334,8 @@ Anime fantasy battle illustration, high contrast between holy white-gold light
 and oppressive black-violet shadow, dramatic dynamic composition,
 wide cinematic shot from mid-air angle showing all three protagonists and the swarm.
 Aspect ratio 16:9, high detail.
+
+元画像から表情や姿勢は変わってOKです
 ```
 
 ---
@@ -361,6 +375,8 @@ vibrant rainbow palette against deep indigo-black,
 dramatic central composition, spiritual awakening pose,
 wide cinematic shot facing the awakening figure with the queen as supporting witness.
 Aspect ratio 16:9, high detail.
+
+元画像から表情や姿勢は変わってOKです
 ```
 
 ---
@@ -399,6 +415,8 @@ Anime fantasy illustration style, hopeful and ascendant atmosphere,
 soft full-rainbow gradient sky, golden hour color palette with prismatic highlights.
 Wide cinematic shot from the pier, looking eastward toward the rising sun and the ship.
 Aspect ratio 16:9, high detail.
+
+元画像から表情や姿勢は変わってOKです
 ```
 
 ---
@@ -434,6 +452,8 @@ emphasis on vertical depth (foreground pier → midground ships → upper sky),
 texture detail (worn wooden planks, rope coils, sail canvas).
 Tall cinematic vertical composition from a slightly elevated angle on the pier looking out to sea.
 Aspect ratio 9:16, high detail.
+
+元画像から表情や姿勢は変わってOKです
 ```
 
 ---

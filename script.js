@@ -5631,13 +5631,21 @@ function saveStoryProgress(storyId, idx, totalScenes, curSceneLabel) {
       const prev = state.storyProgress[storyId] || {};
       const total = totalScenes || prev.totalScenes || 0;
       const wasCompleted = prev.completed;
-      // maxReachedSceneLabel: 一度到達したシーンは戻っても保持 (単調増加)、 ロック判定はこれで行う
+      // maxReachedSceneLabel: 「順次到達 (前回 lastSceneIndex + 1 で進んだ場合)」 のみ更新
+      // 目次ジャンプや prev で飛んだ場合は更新しない (読まずに先のシーン画像が見えてしまう問題対策)
       const prevMaxLabel = prev.maxReachedSceneLabel || null;
       let newMaxLabel = prevMaxLabel;
       if (curSceneLabel) {
         const curOrd = _sceneLabelToOrd(curSceneLabel);
         const prevMaxOrd = _sceneLabelToOrd(prevMaxLabel);
-        if (curOrd > prevMaxOrd) newMaxLabel = curSceneLabel;
+        const prevIdx = prev.lastSceneIndex;
+        // 初回 (進捗ゼロ) で idx=0 (1-1相当) なら max を初期設定
+        const isFirstAccess = (typeof prevIdx !== 'number');
+        // 順次到達 = 前回 idx + 1 (next/swipe でシーン1個ずつ進んだ場合のみ)
+        const isSequentialAdvance = (typeof prevIdx === 'number') && (idx === prevIdx + 1);
+        if (curOrd > prevMaxOrd && (isFirstAccess || isSequentialAdvance)) {
+          newMaxLabel = curSceneLabel;
+        }
       }
       state.storyProgress[storyId] = {
         lastSceneIndex: idx,

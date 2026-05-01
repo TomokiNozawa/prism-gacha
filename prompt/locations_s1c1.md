@@ -84,6 +84,8 @@ Anime fantasy illustration style, muted earth tones (straw beige, weathered wood
 dusty cobblestone gray) accented with soft morning gold from the upper sky.
 Tall vertical composition: foreground straw targets → midground student → upper academy walls and sky.
 Aspect ratio 3:4, vertical orientation 1024x1536, high detail.
+
+元画像から表情や姿勢は変わってOKです
 ```
 
 ---
@@ -121,6 +123,8 @@ Anime fantasy illustration style, contrast between vivid prismatic right-sky and
 ash-gray left-sky, dramatic vertical composition.
 Tall vertical composition: rooftop foreground → five protagonists midground → vast disturbed sky upper.
 Aspect ratio 3:4, vertical orientation 1024x1536, high detail.
+
+元画像から表情や姿勢は変わってOKです
 ```
 
 ---
@@ -152,6 +156,8 @@ Anime fantasy illustration style, divine and ascendant atmosphere,
 brilliant white-gold-rainbow light against dark battlefield smoke.
 Tall vertical composition: cadets below → descending paladin midframe → exploding heavenly light upper.
 Aspect ratio 3:4, vertical orientation 1024x1536, high detail.
+
+元画像から表情や姿勢は変わってOKです
 ```
 
 ---
@@ -187,6 +193,8 @@ Anime fantasy illustration style, oppressive dark fantasy atmosphere with sickly
 contrast, dramatic vertical composition emphasizing the towering rift.
 Tall vertical composition: heroes below → rift midframe → corrupted sky upper.
 Aspect ratio 3:4, vertical orientation 1024x1536, high detail.
+
+元画像から表情や姿勢は変わってOKです
 ```
 
 ---
@@ -219,6 +227,8 @@ Anime fantasy illustration style, transcendent and tearful atmosphere,
 contrast of overwhelming prismatic warmth against the dark battlefield.
 Tall vertical composition: fallen friends foreground → awakening protagonist midframe → rainbow light pillar upper.
 Aspect ratio 3:4, vertical orientation 1024x1536, high detail.
+
+元画像から表情や姿勢は変わってOKです
 ```
 
 ---
@@ -251,6 +261,8 @@ Anime fantasy illustration style, transcendent divine atmosphere, soft prismatic
 luminance against deep twilight indigo, ethereal and reverent mood.
 Tall vertical composition: kneeling cadets foreground → Prisma's apparition midframe → twilight rainbow sky upper.
 Aspect ratio 3:4, vertical orientation 1024x1536, high detail.
+
+元画像から表情や姿勢は変わってOKです
 ```
 
 ---
@@ -288,6 +300,8 @@ Anime fantasy illustration style, gentle hopeful atmosphere, warm midday gold mi
 with prismatic sky, sense of peaceful continuation after great trial.
 Tall vertical composition: five friends foreground (intimate circle) → rooftop midframe → vast prismatic sky upper.
 Aspect ratio 3:4, vertical orientation 1024x1536, high detail.
+
+元画像から表情や姿勢は変わってOKです
 ```
 
 ---
@@ -325,6 +339,8 @@ Anime fantasy illustration style, soft warm golden tones with hints of academy n
 uniforms, hopeful and intimate mood.
 Wide horizontal cinematic shot capturing the full table and all five characters.
 Aspect ratio 16:9, high detail.
+
+元画像から表情や姿勢は変わってOKです
 ```
 
 ---
@@ -405,6 +421,8 @@ earth-brown wolf warrior + royal violet dragon princess color contrast,
 dynamic dual-character pose, cinematic battlefield backdrop.
 Wide cinematic horizontal shot with both characters and surrounding battlefield visible.
 Aspect ratio 16:9, high detail.
+
+元画像から表情や姿勢は変わってOKです
 ```
 
 ---
@@ -446,6 +464,8 @@ Anime fantasy illustration style, climactic team-attack atmosphere with multi-el
 light convergence, dynamic radial composition, sense of victory through unity.
 Wide cinematic horizontal shot showing the rift center and all six heroes simultaneously.
 Aspect ratio 16:9, high detail.
+
+元画像から表情や姿勢は変わってOKです
 ```
 
 ---
@@ -478,6 +498,8 @@ particle effects, deep twilight indigo merged with all seven rainbow hues, ether
 ascendant mood.
 Wide cinematic horizontal shot with the center figure framed by vast prismatic void.
 Aspect ratio 16:9, high detail.
+
+元画像から表情や姿勢は変わってOKです
 ```
 
 ---
