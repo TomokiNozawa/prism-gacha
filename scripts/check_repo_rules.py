@@ -152,12 +152,21 @@ def check_chapter_structure():
 
 
 def check_chapter_completeness():
-    """ルール7 (BLOCKER): 章追加時の漏れチェック (野沢さん指示 2026-05-02)
+    """ルール7 (BLOCKER): 章公開チェックリスト (野沢さん指示 2026-05-02 拡張)
     STORY_FILES に存在する全 s1c? が以下の必須箇所に登録されているか:
+
+    BLOCKER (commit abort):
     1. STORY_ACT_INTROS (表紙/中表紙引き文、 主人公モノローグ)
     2. index.html gallery-tabs (図鑑のフィルター)
+    3. index.html story-list-modal story-card[data-story=...] (一覧モーダルの章カード active 化)
 
-    将来追加候補: STORY_OUTLINE povCharName (ルール3 で別途) / LOCATION_CONFIG / POOL chapter / BGM_LIST
+    WARNING (アセット未生成段階で許容、 開発者手動 review):
+    4. POOL に chapter='s1c?' のキャラ存在 (なし=ガチャに章キャラ未公開)
+    5. LORE_BY_KEY に s1c? キャラの凸秘話 entry (なし=凸秘話空)
+    6. index.html story-next-teaser が STORY_FILES の最新章の次を指しているか (古い章を teaser しているのは不整合)
+
+    POV1人目固定ルール: 章末ページで次章主人公1人だけ表示は STORY_OUTLINE.povCharName (ルール3 で完全一致確認済)、
+    本編シーンで POV1人目は renderSceneChars のランタイム挙動 (静的チェック不可、 CLAUDE.md ルール参照)
     """
     script = ROOT / "script.js"
     index = ROOT / "index.html"
@@ -179,19 +188,88 @@ def check_chapter_completeness():
     # index.html gallery-tabs の章 ID
     gt_ids = set(re.findall(r'data-tab="(s1c\d+)"', html))
 
+    # index.html story-list-modal の story-card[data-story=...]
+    sc_ids = set(re.findall(r'class="story-card"[^>]*data-story="(s1c\d+)"', html))
+
+    # POOL に chapter='s1c?' があるか
+    pool_chap = set(re.findall(r"chapter:\s*'(s1c\d+)'", text))
+
+    # LORE_BY_KEY に s1c? キャラの凸秘話 (キャラ名 → tier_name 形式)
+    # 各章の POOL キャラに対して LORE_BY_KEY[ \"<tier>_<name>\" ] が存在するか確認
+    m_pool = re.search(r'const POOL\s*=\s*(\{[\s\S]*?\n\});', text)
+    pool_chars_by_chap = {}  # {sid: [(tier, name), ...]}
+    if m_pool:
+        pool_text = m_pool.group(1)
+        # tier セクション分割で検出
+        for tier_match in re.finditer(r'\b(LR|UR|SSR|SR|R):\s*\[([\s\S]*?)\n  \]', pool_text):
+            tier = tier_match.group(1)
+            for ent in re.finditer(r'name:\s*"([^"]+)"[^}]*?chapter:\s*\'(s1c\d+)\'', tier_match.group(2)):
+                name = ent.group(1)
+                chap = ent.group(2)
+                pool_chars_by_chap.setdefault(chap, []).append((tier, name))
+    # LORE_BY_KEY 抽出
+    m_lore = re.search(r'const LORE_BY_KEY\s*=\s*\{([\s\S]*?)\n\};', text)
+    lore_keys = set(re.findall(r'"(\w+_[^"]+)"', m_lore.group(1))) if m_lore else set()
+
+    # ホームティザー: index.html story-next-teaser から次章 ID 抽出 (data-* で持たれてない場合は title 文字列でマッチ)
+    teaser_chap_match = re.search(r'<div class="story-next-teaser"[\s\S]*?第(\d+)章', html)
+    teaser_chap_num = int(teaser_chap_match.group(1)) if teaser_chap_match else None
+
     checked = len(sf_ids)
     for sid in sf_ids:
+        # 1. STORY_ACT_INTROS BLOCKER
         if sid not in sai_ids:
             violations.append(
-                f"[ルール7 章追加漏れ] STORY_ACT_INTROS に {sid} 未登録\n"
-                f"      → 表紙/中表紙引き文 (主人公モノローグ) が空表示になる、 script.js の STORY_ACT_INTROS に追加要"
+                f"[ルール7-1 章追加漏れ] STORY_ACT_INTROS に {sid} 未登録\n"
+                f"      → 表紙/中表紙引き文 (主人公モノローグ) が空表示、 script.js STORY_ACT_INTROS に追加要"
             )
+        # 2. gallery-tabs BLOCKER
         if sid not in gt_ids:
             violations.append(
-                f"[ルール7 章追加漏れ] index.html gallery-tabs に {sid} 未登録\n"
-                f"      → 図鑑のフィルターに第N章ボタンが出ない、 index.html の gallery-tabs に <button data-tab=\"{sid}\"> 追加要"
+                f"[ルール7-2 章追加漏れ] index.html gallery-tabs に {sid} 未登録\n"
+                f"      → 図鑑のフィルター第N章ボタンなし、 index.html gallery-tabs に <button data-tab=\"{sid}\"> 追加要"
+            )
+        # 3. story-list-modal story-card BLOCKER
+        if sid not in sc_ids:
+            violations.append(
+                f"[ルール7-3 章追加漏れ] index.html story-list-modal の story-card に {sid} 未登録\n"
+                f"      → 一覧モーダルから章を読めない (disabled / 未active)、 <button class=\"story-card\" data-story=\"{sid}\"> 追加要"
+            )
+        # 4. POOL キャラ WARNING (アセット未公開段階OK)
+        if sid not in pool_chap:
+            warnings_only.append(
+                f"[ルール7-4 章キャラ未追加] POOL に chapter='{sid}' のキャラなし (アセット未公開なら OK)\n"
+                f"      → 章キャラ揃ったら POOL に追加 + chapter フィールド設定要"
+            )
+        # 5. LORE_BY_KEY 凸秘話 WARNING
+        chars = pool_chars_by_chap.get(sid, [])
+        missing_lore = []
+        for tier, name in chars:
+            key = f"{tier}_{name}"
+            if key not in lore_keys:
+                missing_lore.append(key)
+        if missing_lore:
+            warnings_only.append(
+                f"[ルール7-5 凸秘話未登録] {sid} の {len(missing_lore)}/{len(chars)}キャラ LORE_BY_KEY 未登録\n"
+                f"      → 例: {missing_lore[:3]}... (アセット完成段階なら追加推奨、 凸数=R1/SR2/SSR3/UR4/LR5話)"
+            )
+    # 6. ホームティザー 次章チェック (WARNING、 章公開直後に手動更新が必要なため)
+    if teaser_chap_num is not None and sf_ids:
+        # 最新公開章 (sf_ids 末尾)
+        last_chap = sf_ids[-1]
+        last_num = int(re.match(r's1c(\d+)', last_chap).group(1))
+        # 次章番号
+        next_num = last_num + 1
+        if teaser_chap_num != next_num:
+            warnings_only.append(
+                f"[ルール7-6 ティザー古い] index.html story-next-teaser が「第{teaser_chap_num}章」 を指しているが、 最新公開章は「第{last_num}章」 (s1c{last_num})、 次章ティザーは「第{next_num}章」 にすべき\n"
+                f"      → index.html story-next-teaser を 第{next_num}章 (s1c{next_num}) のティザーに更新要 (STORY_OUTLINE['s1c{next_num}'].tagline 参照)"
             )
     return checked
+
+
+# warnings 専用集積
+warnings_only = []
 
 
 def check_modal_requirements():
@@ -302,11 +380,13 @@ n5_post = len(violations)
 n6_pre = len(violations)
 n6 = check_modal_requirements()
 n6_post = len(violations)
-warnings = list(violations)
+warnings = list(violations) + warnings_only
 violations.clear()
+warnings_only.clear()
 print(f"  ルール2 (内部キー直書き): {n2}件 検査 [WARNING / 誤検知あり]")
 print(f"  ルール5 (野沢呼称): {n5_post - n5_pre}件 検査 [WARNING / 誤検知あり]")
 print(f"  ルール6 (モーダル網羅): {n6}件 検査 [WARNING / Esc・Space網羅対策]")
+print(f"  ルール7-4/5/6 (章WARNING): {len(warnings) - n6}件 検査 [WARNING / 章公開段階]")
 
 print()
 
