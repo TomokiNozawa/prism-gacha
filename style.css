@@ -6401,6 +6401,83 @@ body.gasshuku-mode-fantasy .fx-win {
 }
 /* ===== END ===== */
 
+/* ===== 表紙/中表紙 演出 (B案: 引き文 + A案: 七色グラデ + particle) ===== */
+.story-act-cover {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  padding: 50px 24px 60px;
+  min-height: 240px;
+  border-radius: 18px;
+  background: radial-gradient(ellipse at 50% 30%, rgba(95,255,212,0.06), rgba(200,125,255,0.06) 50%, transparent 80%);
+  border: 1px solid rgba(255,255,255,0.06);
+  overflow: hidden;
+  animation: storyCoverFadeIn 0.8s ease;
+}
+.story-act-cover.is-cover {
+  background: radial-gradient(ellipse at 50% 30%, rgba(255,184,77,0.10), rgba(200,125,255,0.10) 50%, transparent 80%);
+  border-color: rgba(255,216,77,0.18);
+}
+/* 七色 particle (CSS のみで光の塵流れ) */
+.story-act-particles {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    radial-gradient(2px 2px at 12% 22%, rgba(255,95,170,0.6), transparent 60%),
+    radial-gradient(1.5px 1.5px at 78% 35%, rgba(95,255,212,0.6), transparent 60%),
+    radial-gradient(2px 2px at 38% 68%, rgba(200,125,255,0.6), transparent 60%),
+    radial-gradient(1.5px 1.5px at 65% 80%, rgba(255,216,77,0.6), transparent 60%),
+    radial-gradient(2px 2px at 88% 15%, rgba(126,168,255,0.6), transparent 60%),
+    radial-gradient(1.5px 1.5px at 22% 88%, rgba(255,255,255,0.5), transparent 60%);
+  background-size: 240px 240px;
+  animation: storyActParticleDrift 18s linear infinite, storyCoverFadeIn 1.2s ease;
+  opacity: 0.7;
+}
+@keyframes storyActParticleDrift {
+  0%   { transform: translate(0, 0); }
+  50%  { transform: translate(20px, -10px); }
+  100% { transform: translate(0, 0); }
+}
+.story-act-intro {
+  position: relative; z-index: 1;
+  font-size: 14px; line-height: 2.0; letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.85);
+  text-align: center;
+  font-style: italic;
+  max-width: 480px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  animation: storyActIntroIn 1.2s ease 0.3s backwards;
+}
+.story-act-intro span:last-child {
+  /* 「— キャラ名」 行を控えめに */
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 12px;
+  color: rgba(255,216,77,0.9);
+  letter-spacing: 0.12em;
+  font-style: normal;
+}
+@keyframes storyActIntroIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+/* 表紙/中表紙時のタイトル: 七色グラデ + slow pulse (通常 scene title は通常表示) */
+.story-scene-title.story-scene-title-cover {
+  background: linear-gradient(90deg, #fbbf24, #ec4899, #c4b5fd, #5fffd4, #fbbf24);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: storyCoverTitleShift 6s linear infinite, storyActIntroIn 1s ease backwards;
+  text-shadow: none;
+}
+@keyframes storyCoverTitleShift {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
 /* ===== STORY COVER HINT (#6 表紙UX、読み込み中ぽさを排除) ===== */
 .story-cover-hint {
   display: flex;

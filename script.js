@@ -4082,11 +4082,28 @@ function renderScene() {
   if (storyIdx === storyScenes.length - 1) {
     bodyHtml += buildEndNavHtml(currentStoryId);
   }
-  // #6 表紙シーン (isCover) と中表紙 (isAct) は「タップで開幕」を明示
-  if (scene.isCover) {
-    bodyHtml = '<div class="story-cover-hint"><span class="story-cover-spark">✦</span><div class="story-cover-tap">タップで開幕</div><span class="story-cover-spark">✦</span></div>';
-  } else if (scene.isAct) {
-    bodyHtml = '<div class="story-cover-hint"><span class="story-cover-spark">❖</span><div class="story-cover-tap">タップで次へ</div><span class="story-cover-spark">❖</span></div>';
+  // #6 表紙シーン (isCover) と中表紙 (isAct) は引き文 (B) + 七色演出 (A) で深化
+  if (scene.isCover || scene.isAct) {
+    const intros = STORY_ACT_INTROS[currentStoryId] || {};
+    const intro = intros[scene.title] || '';
+    const isCover = scene.isCover;
+    const spark = isCover ? '✦' : '❖';
+    const tapLabel = isCover ? 'タップで開幕' : 'タップで次へ';
+    const introHtml = intro
+      ? `<div class="story-act-intro">${escapeHtml(intro).split('\n').map(l => `<span>${l}</span>`).join('<br>')}</div>`
+      : '';
+    bodyHtml = `<div class="story-act-cover ${isCover ? 'is-cover' : 'is-act'}">
+      <div class="story-act-particles" aria-hidden="true"></div>
+      ${introHtml}
+      <div class="story-cover-hint">
+        <span class="story-cover-spark">${spark}</span>
+        <div class="story-cover-tap">${tapLabel}</div>
+        <span class="story-cover-spark">${spark}</span>
+      </div>
+    </div>`;
+    titleEl.classList.add('story-scene-title-cover');
+  } else {
+    titleEl.classList.remove('story-scene-title-cover');
   }
   $("#story-scene-content").innerHTML = bodyHtml;
   // キャラ名リンクのクリックハンドラ (本文 + タイトル共通)
@@ -4334,6 +4351,34 @@ function renderSceneChars(scene) {
 function escapeRegExp(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
+
+// 表紙 (isCover) / 中表紙 (isAct) の引き文 — POVキャラの振り返り風一言、 各章の本編幕タイトルに対応
+// key: scene.title (h1 or h2 の見出し文字列に完全一致)
+// 章追加時はここも更新 (本編作成時に POV/テーマから引き文を書く)
+const STORY_ACT_INTROS = {
+  's1c1': {
+    'Season 1 第1章 — 序: 七座の使命': 'これから始まる、 七色の世界の物語。\n— 鈴宮ちさと',
+    '第一幕 — 学院の朝':                '平凡な学院生の朝。 でも、 きっと今日は違う。 何かが始まる、 そんな気がした。\n— ちさと',
+    '第二幕 — 影喰いの襲来':            '闇に呑まれた友人たち。 私の力では、 何も守れなかった。\n— ちさと',
+    '第三幕 — 覚醒':                    'もう守られる側にはいられない。 私の中の、 七色の光。\n— ちさと',
+    '第四幕 — 新しい朝':                '世界は変わってしまった。 けれど、 友人たちは、 まだここにいる。\n— ちさと',
+  },
+  's1c2': {
+    'Season 1 第2章 — 南方海域の異変':  'セラフィエル様の代理ではなく、 私自身として祈った日の話。\n— イザベル',
+    '第一幕 — 派遣の朝':                'セラフィエル様の代理として、 海へ。 私の祈りは、 届くだろうか。\n— イザベル',
+    '第二幕 — 紅玉海賊団との出会い':    '白い鎧と、 紅い帆。 出会うはずのなかった、 二つの海。\n— イザベル',
+    '第三幕 — 海中の異変':              '神は陸の上だけにいるのか。 海の底で、 私は問われた。\n— イザベル',
+    '第四幕 — 海溝の底へ':              '光の届かぬ深淵。 そこで初めて、 私自身の祈りが、 形を持った。\n— イザベル',
+    '第五幕 — 覚醒の波紋':              'セラフィエル様の代理ではなく、 私自身として、 立つ。\n— イザベル',
+  },
+  's1c3': {
+    'Season 1 第3章 — 砂塵の隊商':      '王女として生まれた重みの意味を、 砂漠の風と星空が教えてくれた日々。\n— ヴィル',
+    '第一幕 — 城を抜けて':              '王女として生まれた、 この『血』 の意味を。 自分の足で、 探しに行く。\n— ヴィル',
+    '第二幕 — 砂漠の入口':              '砂漠の風は、 王宮の作法を知らない。 だから、 楽だった。\n— ヴィル',
+    '第三幕 — 古龍の気配':              '血より深い繋がりを、 砂漠は教えてくれた。\n— ヴィル',
+    '第四幕 — 帰還':                    '持って帰れたわ、 父上。 血ではなく、 時間が家族を作る、 という答えを。\n— ヴィル',
+  },
+};
 
 // 全章の outline (公開順、 公開済 + 将来予定)。 STORY_FILES (公開済) との差分で「Coming Soon teaser」 を出す
 // outline.md とミラー、 章追加時はここも更新。 各 entry: { id, meta, title, icon, tagline }
