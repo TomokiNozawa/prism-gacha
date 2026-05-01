@@ -4233,6 +4233,7 @@ function setupCharBlinkAnimations() {
     if (cached === 'ok') { _startBlinkLoop(imgEl, normalUrl, blinkUrl); return; }
     // 初回は preload で存在確認 (404キャッシュ対策で cache buster 付与)
     const probe = new Image();
+    probe.__silentFail = true;  // 期待される404 (キャラに _blink.png 未配置) を errorログから除外
     probe.onload = () => { _blinkImageCache.set(blinkUrl, 'ok'); _startBlinkLoop(imgEl, normalUrl, blinkUrl); };
     probe.onerror = () => { _blinkImageCache.set(blinkUrl, 'ng'); };
     probe.src = blinkUrl + (blinkUrl.includes('?') ? '&' : '?') + '_p=' + Date.now();
@@ -4275,6 +4276,7 @@ function setupCharDetailBlink(c) {
   if (cached === 'ng') return;
   if (cached === 'ok') { _startDetailBlinkLoop(imgEl, zoomEl, normalUrl, blinkUrl); return; }
   const probe = new Image();
+  probe.__silentFail = true;  // 期待される404 (キャラに _blink.png 未配置) を errorログから除外
   probe.onload = () => { _blinkImageCache.set(blinkUrl, 'ok'); _startDetailBlinkLoop(imgEl, zoomEl, normalUrl, blinkUrl); };
   probe.onerror = () => { _blinkImageCache.set(blinkUrl, 'ng'); console.debug('[blink-detail] not found:', blinkUrl); };
   // ブラウザの404キャッシュ対策: 初回probeのみcache busterを付ける(成功後の本番swapはキャッシュ効かせる)
@@ -4666,6 +4668,7 @@ function setupCutinBlinks() {
     if (cached === 'ng') return;
     if (cached === 'ok') { _startCutinBlinkLoop(imgEl, normalUrl, blinkUrl); return; }
     const probe = new Image();
+    probe.__silentFail = true;  // 期待される404 (キャラに _blink.png 未配置) を errorログから除外
     probe.onload = () => { _blinkImageCache.set(blinkUrl, 'ok'); _startCutinBlinkLoop(imgEl, normalUrl, blinkUrl); };
     probe.onerror = () => { _blinkImageCache.set(blinkUrl, 'ng'); };
     probe.src = blinkUrl + (blinkUrl.includes('?') ? '&' : '?') + '_p=' + Date.now();
@@ -5825,7 +5828,10 @@ function getInflowInfo() {
 const __errorLoggedKeys = new Set();
 async function logErrorToFirebase(type, msg, extra) {
   if (!fbDb) return;
-  const key = type + '::' + (msg || '').slice(0, 100);
+  // dedup キーは ?_p=... や ?v=... 等の query string を除いた形で生成
+  // (cache buster 付き probe URL が unique 化して dedup を素通りする事故対策)
+  const cleanMsg = String(msg || '').split('?')[0].slice(0, 100);
+  const key = type + '::' + cleanMsg;
   if (__errorLoggedKeys.has(key)) return;
   __errorLoggedKeys.add(key);
   try {
@@ -5844,6 +5850,8 @@ async function logErrorToFirebase(type, msg, extra) {
 
 // グローバルエラーフック (window.onerror + unhandledrejection)
 window.addEventListener('error', (e) => {
+  // 期待される失敗 (blink probe 等で `__silentFail=true` マーカー付き) はログから除外
+  if (e.target && e.target.__silentFail) return;
   // <img> のロード失敗は ev.target が IMG/AUDIO 等
   if (e.target && (e.target.tagName === 'IMG' || e.target.tagName === 'AUDIO')) {
     const src = e.target.src || '';

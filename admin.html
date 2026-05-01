@@ -610,6 +610,9 @@ body {
     <div class="breakdown-section">
       <div class="breakdown-title">🎬 操作 / 🚨 エラー</div>
       <div class="breakdown-grid" id="breakdown-events"></div>
+      <div style="text-align:right;margin-top:6px;">
+        <button type="button" id="btn-clear-errors" style="font-size:11px;padding:5px 10px;background:rgba(255,94,154,0.15);border:1px solid rgba(255,94,154,0.4);border-radius:6px;color:#ff9ec0;cursor:pointer;">🗑️ 過去エラーログをクリア</button>
+      </div>
     </div>
     <div class="breakdown-section">
       <div class="breakdown-title">🎵 BGM 再生統計 (全ユーザー累計)</div>
@@ -1228,6 +1231,25 @@ function renderUsers(users, uidToNickname, guestDevices) {
       </div>`;
     }
     breakdownEvents.innerHTML = html;
+    // 過去エラーログ全削除ボタン (二重登録防止のため _wired フラグ)
+    const clearBtn = document.getElementById('btn-clear-errors');
+    if (clearBtn && !clearBtn._wired) {
+      clearBtn._wired = true;
+      clearBtn.addEventListener('click', async () => {
+        if (!confirm(`現在のエラーログ累計 ${totalErrors} 件を全削除します。\n\n復元できません。 続行しますか?`)) return;
+        try {
+          clearBtn.disabled = true;
+          clearBtn.textContent = '🗑️ 削除中…';
+          await firebase.database().ref('prism-gacha/_meta/eventStats/errors').remove();
+          alert('✅ エラーログをクリアしました。\n画面を再読込します。');
+          location.reload();
+        } catch (e) {
+          alert('❌ 削除に失敗しました: ' + (e && e.message || e));
+          clearBtn.disabled = false;
+          clearBtn.textContent = '🗑️ 過去エラーログをクリア';
+        }
+      });
+    }
   }
 
   // BGM 再生統計 (各曲の play / ended 累計、 完聴率 計算)
