@@ -7,7 +7,7 @@
 //
 // HTML/JSON/Firebase API はキャッシュせず常にネットワーク優先 (更新即反映+認証/DBの鮮度維持)。
 
-const SW_VERSION = '20260502a';  // v1.3.2+ ガチャ画像 prefetch 即実行 + R/SR preload 追加
+const SW_VERSION = '20260502b';  // v1.3.2+ ワールドマップ open/close 状態管理 lock pair 厳密化
 const STATIC_CACHE = `prismaera-static-${SW_VERSION}`;
 const BGM_CACHE    = `prismaera-bgm-${SW_VERSION}`;
 const LOC_CACHE    = `prismaera-loc-${SW_VERSION}`;

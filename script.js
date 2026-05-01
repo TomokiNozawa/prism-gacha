@@ -3465,20 +3465,28 @@ const STORY_FACTION_TEASER = [
   { id: 'season3', label: '???', subLabel: '— 始原の地 —',     x: 1850, y: 1500 },
 ];
 
+// ワールドマップ open/close 状態管理 (hidden attribute ではなく内部フラグで lock pair を厳密管理)
+// 2026-05-02 修正: hidden attribute だけで判定すると、 char-detail/img-zoom 等の経由で
+// hidden state が想定外に変化した時に lock pair が崩れて button 反応しなくなる問題対策
+let _worldMapIsOpen = false;
 function openWorldMap() {
   const m = document.getElementById('world-map');
   if (!m) return;
-  if (!m.hasAttribute('hidden')) return; // 既に開いている場合は何もしない (二重 lock 防止)
   renderWorldMap();
   m.removeAttribute('hidden');
-  _lockBodyScroll();
+  if (!_worldMapIsOpen) {
+    _lockBodyScroll();
+    _worldMapIsOpen = true;
+  }
 }
 function closeWorldMap() {
   const m = document.getElementById('world-map');
   if (!m) return;
-  if (m.hasAttribute('hidden')) return; // 既に閉じている → unlock しない
   m.setAttribute('hidden', '');
-  _unlockBodyScroll();
+  if (_worldMapIsOpen) {
+    _unlockBodyScroll();
+    _worldMapIsOpen = false;
+  }
 }
 // 派閥ID → 領地アイコン絵文字 (ファンタジー世界観の象徴を一発で伝える)
 const FACTION_ICONS = {
@@ -5130,7 +5138,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260502a';
+const IMG_CACHE_VERSION = '20260502b';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
