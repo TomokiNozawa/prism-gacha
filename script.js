@@ -4129,6 +4129,7 @@ const STORY_FILES = {
   s1c1: { title: '序: 七座の使命', meta: 'Season 1 — 第1章', file: 'STORY/s1c1.md' },
   s1c2: { title: '南方海域の異変', meta: 'Season 1 — 第2章', file: 'STORY/s1c2.md' },
   s1c3: { title: '砂塵の隊商', meta: 'Season 1 — 第3章', file: 'STORY/s1c3.md' },
+  s1c4: { title: '凍土と空',     meta: 'Season 1 — 第4章', file: 'STORY/s1c4.md' },
 };
 
 function escapeHtml(s) {
@@ -5287,6 +5288,10 @@ const STORY_POV_EXCLUDE_SCENES = {
   's1c3': [
     // 観測者三柱 (カグヤ + ノクス + セラフィエル) — POV (ヴィル) ではないので除外
     '凍土の三柱',
+  ],
+  's1c4': [
+    // 観測者三柱 (カグヤ + ノクス + セラフィエル) — POV (アルテミス) ではないので除外
+    '銀霜の月に呼ばれる者',
   ],
 };
 
