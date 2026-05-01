@@ -1026,6 +1026,106 @@ function closeRankTable() {
   if (modal) modal.classList.remove('active');
 }
 
+// 排出率詳細 popup (ホームの「📊 排出率詳細」 ボタンで開く)。 lazy 構築 + 開く度に再描画 (PICKUP_CHAPTER 切替対応)。
+function showRateDetail() {
+  let modal = document.getElementById('rate-detail-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'rate-detail-modal';
+    modal.className = 'rate-detail-modal';
+    document.body.appendChild(modal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeRateDetail(); });
+  }
+  const chapMatch = String(PICKUP_CHAPTER || '').match(/s\d+c(\d+)/);
+  const chapLabel = chapMatch ? `第${chapMatch[1]}章` : PICKUP_CHAPTER;
+  // 通常ガチャ 表
+  let normalRows = '';
+  for (const tier of ['LR', 'UR', 'SSR', 'SR', 'R']) {
+    const pct = (RATES[tier] || 0) * 100;
+    if (pct <= 0) continue;
+    const cnt = (POOL[tier] || []).length;
+    const tierEach = cnt > 0 ? (pct / cnt).toFixed(3) : '—';
+    normalRows += `<div class="rate-detail-row tier-${tier.toLowerCase()}">
+      <span class="rate-detail-tier">${tier}</span>
+      <span class="rate-detail-pct">${pct.toFixed(2)}%</span>
+      <span class="rate-detail-cnt">${cnt}体</span>
+      <span class="rate-detail-each">1体あたり ${tierEach}%</span>
+    </div>`;
+  }
+  // ピックアップ 表 (該当章キャラの tier 内シェア)
+  let pickupRows = '';
+  let pickupCharsBlock = '';
+  for (const tier of ['LR', 'UR', 'SSR', 'SR', 'R']) {
+    const all = POOL[tier] || [];
+    const pickups = all.filter(c => c.chapter === PICKUP_CHAPTER);
+    if (all.length === 0) continue;
+    const tierPct = (RATES[tier] || 0) * 100;
+    if (pickups.length === 0) {
+      pickupRows += `<div class="rate-detail-row tier-${tier.toLowerCase()} pickup-empty">
+        <span class="rate-detail-tier">${tier}</span>
+        <span class="rate-detail-pct">${tierPct.toFixed(2)}%</span>
+        <span class="rate-detail-cnt">${chapLabel}該当 0体</span>
+        <span class="rate-detail-each">通常排出のみ</span>
+      </div>`;
+      continue;
+    }
+    const totalWeight = pickups.length * PICKUP_WEIGHT + (all.length - pickups.length) * 1;
+    const pickupShare = (pickups.length * PICKUP_WEIGHT) / totalWeight;
+    const pickupTierPct = tierPct * pickupShare;
+    const pickupEach = pickupTierPct / pickups.length;
+    pickupRows += `<div class="rate-detail-row tier-${tier.toLowerCase()}">
+      <span class="rate-detail-tier">${tier}</span>
+      <span class="rate-detail-pct">${pickupTierPct.toFixed(2)}%</span>
+      <span class="rate-detail-cnt">${pickups.length}体 ピックアップ</span>
+      <span class="rate-detail-each">1体あたり ${pickupEach.toFixed(3)}%</span>
+    </div>`;
+    pickupCharsBlock += `<div class="rate-detail-pickup-tier-block">
+      <div class="rate-detail-pickup-tier-head"><span class="rate-detail-tier tier-${tier.toLowerCase()}">${tier}</span> ピックアップ対象 (${pickups.length}体)</div>
+      <div class="rate-detail-pickup-chars">
+        ${pickups.map(c => `<span class="rate-detail-pickup-char tier-${tier.toLowerCase()}">${escapeHtml(c.name)}</span>`).join('')}
+      </div>
+    </div>`;
+  }
+  modal.innerHTML = `
+    <div class="rate-detail-card">
+      <div class="rate-detail-head">
+        <div class="rate-detail-title">📊 排出率詳細</div>
+        <button type="button" class="rate-detail-close" onclick="closeRateDetail()" aria-label="閉じる">×</button>
+      </div>
+      <div class="rate-detail-body">
+        <div class="rate-detail-section">
+          <h3>🎴 通常ガチャ (全キャラ均等)</h3>
+          <div class="rate-detail-table">${normalRows}</div>
+        </div>
+        <div class="rate-detail-section">
+          <h3>📖 ${chapLabel} ピックアップガチャ (重み ×${PICKUP_WEIGHT})</h3>
+          <p class="rate-detail-desc">${chapLabel} に所属するキャラは tier 内で <b>×${PICKUP_WEIGHT}</b> の重み (= 通常時より排出率上昇)。 tier 自体の確率 (${(RATES.R*100).toFixed(0)}/${(RATES.SR*100).toFixed(0)}/${(RATES.SSR*100).toFixed(0)}/${(RATES.UR*100).toFixed(0)}%) は変わらない。</p>
+          <div class="rate-detail-table">${pickupRows}</div>
+        </div>
+        <div class="rate-detail-section">
+          <h3>📋 ${chapLabel} ピックアップ対象キャラ</h3>
+          ${pickupCharsBlock || '<p class="rate-detail-desc">該当キャラなし</p>'}
+        </div>
+      </div>
+      <div class="rate-detail-note">
+        ガチャ確率は試行ごとに独立 (前の結果は次に影響しない)。 LR は天井システム ${typeof PITY === 'number' ? PITY : 100}連で確定獲得。
+      </div>
+    </div>
+  `;
+  modal.classList.add('active');
+  _lockBodyScroll();
+}
+function closeRateDetail() {
+  const modal = document.getElementById('rate-detail-modal');
+  if (!modal) return;
+  if (modal.classList.contains('active')) {
+    modal.classList.remove('active');
+    _unlockBodyScroll();
+  }
+}
+window.showRateDetail = showRateDetail;
+window.closeRateDetail = closeRateDetail;
+
 // ────────────── HUD ──────────────
 const $ = s => document.querySelector(s);
 
@@ -1112,7 +1212,7 @@ function _unlockBodyScroll() {
   }
 }
 function _isAllModalsHidden() {
-  const checkActive = ['#char-detail', '#story-modal', '#bgm-panel', '#feedback-modal', '#history-modal', '#migration-modal', '#update-modal', '#account-modal', '#welcome-modal', '#settings-modal', '#account-prompt', '#story-list-modal', '#world-map', '#char-img-zoom', '#relations', '#gallery', '#result', '#rank-table-modal'];
+  const checkActive = ['#char-detail', '#story-modal', '#bgm-panel', '#feedback-modal', '#history-modal', '#migration-modal', '#update-modal', '#account-modal', '#welcome-modal', '#settings-modal', '#account-prompt', '#story-list-modal', '#world-map', '#char-img-zoom', '#relations', '#gallery', '#result', '#rank-table-modal', '#rate-detail-modal'];
   for (const sel of checkActive) {
     const el = document.querySelector(sel);
     if (!el) continue;
@@ -3598,6 +3698,7 @@ $("#btn-ten").addEventListener("click", () => doTen());
 // ピックアップガチャ
 $("#btn-single-pickup")?.addEventListener("click", () => doSingle({ pickup: PICKUP_CHAPTER }));
 $("#btn-ten-pickup")?.addEventListener("click", () => doTen({ pickup: PICKUP_CHAPTER }));
+$("#btn-rate-detail")?.addEventListener("click", () => showRateDetail());
 
 // ピックアップ章ラベルを PICKUP_CHAPTER から自動更新 (HTMLハードコード回避、 章バンプ時の更新漏れ防止)
 function updatePickupChapterLabels() {
@@ -4442,6 +4543,28 @@ const FURIGANA = {
   '地底市': 'ちていし',
   '黒月衆': 'こくげつしゅう',
   '沈黙の塔': 'ちんもくのとう',
+  // S1C4 (凍土と空) で頻出する難読語
+  '氷帝': 'ひょうてい',
+  '北方剣聖': 'ほっぽうけんせい',
+  '凍土': 'とうど',
+  '雪原': 'せつげん',
+  '予言杖': 'よげんづえ',
+  '氷宮殿': 'こおりきゅうでん',
+  '氷霊': 'ひょうれい',
+  '玉座': 'ぎょくざ',
+  '翡翠': 'ひすい',
+  '双大剣': 'そうだいけん',
+  '陰陽': 'いんよう',
+  '近衛': 'このえ',
+  '摂政': 'せっしょう',
+  '黒刃': 'くろは',
+  '虹晶': 'こうしょう',
+  '銀霜': 'ぎんそう',
+  '剣聖': 'けんせい',
+  '鈴杖': 'れいじょう',
+  '巫女': 'みこ',
+  '神事': 'しんじ',
+  '聖域': 'せいいき',
 };
 
 // HTMLテキストノード内のキャラ名を <a class="char-link"> でラップ
@@ -4499,9 +4622,18 @@ function linkifyCharNames(html, sceneLabel, sceneTitle) {
   }
   candidates.sort((a, b) => b.name.length - a.name.length);
 
-  // 名前内の半角/全角スペース位置に「、」「,」「・」も許容する正規表現を生成
+  // 名前内の半角/全角スペース位置に「、」「,」「・」も許容する正規表現を生成。
+  // 2026-05-02 修正: 短い純カタカナ名 (例「イル」 2文字) が他のカタカナ語の部分文字列
+  //   ヘ「イル」 / 「イル」ディラ にマッチする事故対策。 前後カタカナ拒否の lookbehind/lookahead を付ける。
   const escapeRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const buildFlexRe = name => new RegExp(name.split(/[\s ]+/).map(escapeRe).join('[\\s 、,・]?'), 'g');
+  const buildFlexRe = name => {
+    const escaped = name.split(/[\s ]+/).map(escapeRe).join('[\\s 、,・]?');
+    const isPureKatakana = /^[ァ-ヶー]+$/.test(name);
+    if (isPureKatakana && name.length <= 3) {
+      return new RegExp(`(?<![ァ-ヶー])${escaped}(?![ァ-ヶー])`, 'g');
+    }
+    return new RegExp(escaped, 'g');
+  };
 
   function walk(node) {
     if (node.nodeType === Node.TEXT_NODE) {
@@ -4540,33 +4672,31 @@ function linkifyCharNames(html, sceneLabel, sceneTitle) {
   return tmp.innerHTML;
 }
 
-// HTMLの中のテキストノードだけにふりがなを適用 (タグ内属性は対象外)
+// HTMLの中のテキストノードだけにふりがなを適用 (タグ内属性は対象外)。
+// 2026-05-02 修正: 旧 2-pass 実装 (RUBY${term} marker → <ruby> 置換) はバグ:
+//   短い term の検索が、 直前に置いた marker 文字列「RUBY」 自体に hit して
+//   多重 marker 化 → 表示に「RUBY」 という生文字が残る事故が発生。
+// 1-pass regex で long-first / mutual-exclusive 置換に変更。
 function applyFurigana(html) {
   const tmp = document.createElement('div');
   tmp.innerHTML = html;
   const keys = Object.keys(FURIGANA).sort((a, b) => b.length - a.length);
+  if (keys.length === 0) return tmp.innerHTML;
+  const escapeRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const pattern = new RegExp(keys.map(escapeRe).join('|'), 'g');
   function walk(node) {
     if (node.nodeType === Node.TEXT_NODE) {
-      let text = node.textContent;
-      let changed = false;
-      for (const term of keys) {
-        if (text.includes(term)) {
-          text = text.split(term).join(`RUBY${term}`);
-          changed = true;
-        }
-      }
-      if (changed) {
-        let html = text;
-        for (const term of keys) {
-          const yomi = FURIGANA[term];
-          html = html.split(`RUBY${term}`).join(`<ruby>${term}<rt>${yomi}</rt></ruby>`);
-        }
-        const span = document.createElement('span');
-        span.innerHTML = html;
-        const frag = document.createDocumentFragment();
-        while (span.firstChild) frag.appendChild(span.firstChild);
-        node.parentNode.replaceChild(frag, node);
-      }
+      const text = node.textContent;
+      pattern.lastIndex = 0;
+      if (!pattern.test(text)) return;
+      pattern.lastIndex = 0;
+      const replaced = text.replace(pattern, m => `<ruby>${m}<rt>${FURIGANA[m]}</rt></ruby>`);
+      if (replaced === text) return;
+      const span = document.createElement('span');
+      span.innerHTML = replaced;
+      const frag = document.createDocumentFragment();
+      while (span.firstChild) frag.appendChild(span.firstChild);
+      node.parentNode.replaceChild(frag, node);
     } else if (node.nodeType === Node.ELEMENT_NODE) {
       if (node.tagName === 'RUBY' || node.tagName === 'CODE' || node.tagName === 'PRE') return;
       Array.from(node.childNodes).forEach(walk);
@@ -5346,7 +5476,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260502u';
+const IMG_CACHE_VERSION = '20260502v';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -6913,6 +7043,12 @@ document.addEventListener("keydown", e => {
   if (_rtm && _rtm.classList.contains('active')) {
     if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); closeRankTable(); }
     return;  // ランク表 active 中は他のキー処理 (Space/Enter 等) も全block
+  }
+  // 排出率詳細モーダル (ランク表と同様の最優先扱い)
+  const _rdm = document.getElementById('rate-detail-modal');
+  if (_rdm && _rdm.classList.contains('active')) {
+    if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); closeRateDetail(); }
+    return;
   }
   // === 拡大画像モーダル (z-index 260、 ランク表より下) ===
   // active 中は他の Esc 処理 (story-modal の closeStory 等) を完全に通さない
