@@ -4335,15 +4335,43 @@ function escapeRegExp(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-// 最終シーン用ナビゲーション (次章 / ストーリー一覧)
+// 全章の outline (公開順、 公開済 + 将来予定)。 STORY_FILES (公開済) との差分で「Coming Soon teaser」 を出す
+// outline.md とミラー、 章追加時はここも更新。 各 entry: { id, meta, title, icon, tagline }
+const STORY_OUTLINE = [
+  { id: 's1c1', meta: 'Season 1 — 第1章', title: '序: 七座の使命',     icon: '✨', tagline: '誰もが原虹の一筋を持つ。 世界はあなたから始まる' },
+  { id: 's1c2', meta: 'Season 1 — 第2章', title: '南方海域の異変',     icon: '🌊', tagline: '信じる対象は、 外にあるとは限らない' },
+  { id: 's1c3', meta: 'Season 1 — 第3章', title: '砂塵の隊商',         icon: '🐉', tagline: '血ではなく、 共に過ごした時間が家族を作る' },
+  { id: 's1c4', meta: 'Season 1 — 第4章', title: '凍土と空',           icon: '❄️', tagline: '強者の頂は、 孤独を共に分かち合うことで初めて温かい' },
+  { id: 's1c5', meta: 'Season 1 — 第5章', title: '黒月の予兆',         icon: '🌑', tagline: '自分の中の影を見つめ、 抱きしめてから手放す' },
+  { id: 's1c6', meta: 'Season 1 — 第6章', title: '七座満つる',         icon: '🌈', tagline: '違っていても、 同じ目的を持つ仲間でいられる' },
+  { id: 's1c7', meta: 'Season 1 — 第7章', title: '黒月決戦',           icon: '☄️', tagline: '影を消すのではなく、 共に在ると認める' },
+];
+
+// 最終シーン用ナビゲーション (次章公開済 / 次章未公開 Coming Soon / Season完結 の3パターン)
 function buildEndNavHtml(storyId) {
-  const ids = Object.keys(STORY_FILES);
-  const idx = ids.indexOf(storyId);
-  const nextId = idx >= 0 && idx < ids.length - 1 ? ids[idx + 1] : null;
+  const outlineIdx = STORY_OUTLINE.findIndex(c => c.id === storyId);
+  const next = (outlineIdx >= 0 && outlineIdx < STORY_OUTLINE.length - 1) ? STORY_OUTLINE[outlineIdx + 1] : null;
+  const isPublished = next && STORY_FILES[next.id];
   let html = '<div class="story-end-nav">';
-  if (nextId) {
-    const next = STORY_FILES[nextId];
-    html += `<button type="button" class="story-end-nav-btn primary" onclick="openStory('${nextId}')">次の章を読む: ${escapeHtml(next.title)} <span class="story-end-nav-arrow">→</span></button>`;
+  if (next && isPublished) {
+    // 次章公開済: そのまま遷移ボタン
+    html += `<button type="button" class="story-end-nav-btn primary" onclick="openStory('${next.id}')">次の章を読む: ${escapeHtml(next.title)} <span class="story-end-nav-arrow">→</span></button>`;
+  } else if (next && !isPublished) {
+    // 次章未公開: Coming Soon teaser カード
+    html += `<div class="story-end-nav-teaser">
+      <div class="story-end-nav-teaser-badge">Coming Soon</div>
+      <div class="story-end-nav-teaser-icon">${next.icon || '📖'}</div>
+      <div class="story-end-nav-teaser-meta">${escapeHtml(next.meta)}</div>
+      <div class="story-end-nav-teaser-title">${escapeHtml(next.title)}</div>
+      ${next.tagline ? `<div class="story-end-nav-teaser-tagline">${escapeHtml(next.tagline)}</div>` : ''}
+      <div class="story-end-nav-teaser-sub">📅 公開予定 — お楽しみに</div>
+    </div>`;
+  } else {
+    // Season完結 (outline 末尾)
+    html += `<div class="story-end-nav-finale">
+      <div class="story-end-nav-finale-badge">— Season 完結 —</div>
+      <div class="story-end-nav-finale-sub">次の Season をお楽しみに</div>
+    </div>`;
   }
   html += `<button type="button" class="story-end-nav-btn secondary" onclick="closeStory();openStoryList()">📖 ストーリー一覧へ</button>`;
   html += '</div>';
