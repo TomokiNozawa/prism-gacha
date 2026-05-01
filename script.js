@@ -4382,12 +4382,13 @@ const STORY_ACT_INTROS = {
 };
 
 // 全章の outline (公開順、 公開済 + 将来予定)。 STORY_FILES (公開済) との差分で「Coming Soon teaser」 を出す
-// outline.md とミラー、 章追加時はここも更新。 各 entry: { id, meta, title, icon, tagline }
+// outline.md とミラー、 章追加時はここも更新。 各 entry: { id, meta, title, icon, tagline, releaseDate? }
+// releaseDate (YYYY-MM-DD) は未公開章に設定すると teaser に「📅 YYYY/M/D 公開予定」 で表示。 未指定なら「📅 公開予定」 のみ
 const STORY_OUTLINE = [
   { id: 's1c1', meta: 'Season 1 — 第1章', title: '序: 七座の使命',     icon: '✨', tagline: '誰もが原虹の一筋を持つ。 世界はあなたから始まる' },
   { id: 's1c2', meta: 'Season 1 — 第2章', title: '南方海域の異変',     icon: '🌊', tagline: '信じる対象は、 外にあるとは限らない' },
   { id: 's1c3', meta: 'Season 1 — 第3章', title: '砂塵の隊商',         icon: '🐉', tagline: '血ではなく、 共に過ごした時間が家族を作る' },
-  { id: 's1c4', meta: 'Season 1 — 第4章', title: '凍土と空',           icon: '❄️', tagline: '強者の頂は、 孤独を共に分かち合うことで初めて温かい' },
+  { id: 's1c4', meta: 'Season 1 — 第4章', title: '凍土と空',           icon: '❄️', tagline: '強者の頂は、 孤独を共に分かち合うことで初めて温かい', releaseDate: '2026-05-02' },
   { id: 's1c5', meta: 'Season 1 — 第5章', title: '黒月の予兆',         icon: '🌑', tagline: '自分の中の影を見つめ、 抱きしめてから手放す' },
   { id: 's1c6', meta: 'Season 1 — 第6章', title: '七座満つる',         icon: '🌈', tagline: '違っていても、 同じ目的を持つ仲間でいられる' },
   { id: 's1c7', meta: 'Season 1 — 第7章', title: '黒月決戦',           icon: '☄️', tagline: '影を消すのではなく、 共に在ると認める' },
@@ -4404,13 +4405,19 @@ function buildEndNavHtml(storyId) {
     html += `<button type="button" class="story-end-nav-btn primary" onclick="openStory('${next.id}')">次の章を読む: ${escapeHtml(next.title)} <span class="story-end-nav-arrow">→</span></button>`;
   } else if (next && !isPublished) {
     // 次章未公開: Coming Soon teaser カード
+    let releaseLabel = '📅 公開予定 — お楽しみに';
+    if (next.releaseDate) {
+      // YYYY-MM-DD → YYYY/M/D (ゼロ埋めなし、 軽い表記)
+      const [y, m, d] = next.releaseDate.split('-').map(s => parseInt(s, 10));
+      if (y && m && d) releaseLabel = `📅 <b>${y}/${m}/${d}</b> 公開予定`;
+    }
     html += `<div class="story-end-nav-teaser">
       <div class="story-end-nav-teaser-badge">Coming Soon</div>
       <div class="story-end-nav-teaser-icon">${next.icon || '📖'}</div>
       <div class="story-end-nav-teaser-meta">${escapeHtml(next.meta)}</div>
       <div class="story-end-nav-teaser-title">${escapeHtml(next.title)}</div>
       ${next.tagline ? `<div class="story-end-nav-teaser-tagline">${escapeHtml(next.tagline)}</div>` : ''}
-      <div class="story-end-nav-teaser-sub">📅 公開予定 — お楽しみに</div>
+      <div class="story-end-nav-teaser-sub">${releaseLabel}</div>
     </div>`;
   } else {
     // Season完結 (outline 末尾)
