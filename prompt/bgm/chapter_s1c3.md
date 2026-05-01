@@ -4,8 +4,8 @@
 
 > **🎯 引き継ぎ規約**
 > - 出力ファイル: `assets/bgm/prism-sands.mp3`
-> - **既存生成済み**: v1 (BPM 78、 contemplative) で生成 → `prism-sands.mp3` (2:47) として配置済
-> - **再生成用 v2** (BPM 110、 up-tempo): 野沢方針 2026-05-01 「やっぱアップテンポ系が好み」 反映、 v1 物足りない場合の再生成オプション
+> - **現在運用中**: **v2** (BPM 110、 up-tempo、 3:02) で生成 → `prism-sands.mp3` として配置済 (野沢方針 2026-05-01「やっぱアップテンポ系が好み」 反映後の再生成版)
+> - **v1 (BPM 78、 contemplative)** は撤去済、 v2 が現行
 > - script.js BGM_LIST 追加時に duration 計測 → mm:ss 固定値で埋める (`bash scripts/measure_bgm.sh`)
 
 ---
@@ -16,7 +16,7 @@
 
 ---
 
-## 🎵 v1 — Contemplative 原版 (BPM 78、 既存 `prism-sands.mp3` はこちら)
+## 🎵 v1 — Contemplative 原版 (BPM 78、 アーカイブ、 現在は未使用)
 
 - **基調**: 砂漠系民族音楽 + ファンタジー
 - **ムード**: エキゾチック / 神秘的 / 哀愁 / 旅情
@@ -45,9 +45,9 @@ BPM 78, key D minor with Phrygian dominant flavor (Middle Eastern color),
 
 ---
 
-## 🎵 v2 — Up-tempo 版 (BPM 110、 野沢方針 2026-05-01)
+## 🎵 v2 — Up-tempo 版 ★現行 (BPM 110、 野沢方針 2026-05-01、 現 `prism-sands.mp3` 3:02 はこれ)
 
-> 「やっぱアップテンポ系が好み」 を反映。 contemplative/slow を energetic forward momentum に切替、 旅情を保ちつつ駆動感を加える。 v1 が物足りない時の再生成用 (`feedback_bgm_uptempo.md`)。
+> 「やっぱアップテンポ系が好み」 を反映 (`feedback_bgm_uptempo.md`)。 contemplative/slow を energetic forward momentum に切替、 旅情を保ちつつ駆動感を加える。 **野沢が v1 から差し替えて運用中**。
 
 - **基調**: 砂漠系民族音楽 + ファンタジー (アップテンポ寄り)
 - **ムード**: エキゾチック / 神秘的 / 旅情の躍動感
