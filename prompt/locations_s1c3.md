@@ -40,7 +40,7 @@ S1C3「砂塵の隊商」 の場所画像 (背景+挿絵) の DALL-E 3 用プロ
 | 8 | tribe_battle.png | 16:9 | 挿絵 | 3-2 影喰いの大波 | サハナ+ヴィル+グラン |
 | 9 | lost_dragon_king_omen.png | 16:9 | 挿絵 | 4-1 古龍王の予兆 | ファラー |
 | **10** | **asha_meeting.png** | 16:9 | 挿絵 | 2-1 ヴィル+アーシャ出会い | ヴィル+アーシャ (新規追加) |
-| **11** | **farewell.png** | 16:9 | 挿絵 | 4-2 別れの朝、 サハナが双剣を掲げる | サハナ単独+遠景部族 (新規追加) |
+| **11** | **farewell.png** | 16:9 | 挿絵 | 4-2 別れの朝、 紫水晶を分け合う | ヴィル+サハナ二人 (新規追加、 全章の結実) |
 
 合計 11枚 (背景6 + 挿絵5)。
 
@@ -220,17 +220,18 @@ A horizontal 16:9 illustration of a desert oasis-edge trading post where a viole
 
 ---
 
-# 【11】farewell.png — 別れの朝、 サハナが双剣を掲げる (挿絵、 16:9、 キャラ含む、 新規追加 2026-05-01)
+# 【11】farewell.png — 別れの朝、 紫水晶を分け合う二人 (挿絵、 16:9、 キャラ含む、 新規追加 2026-05-01、 改修 2026-05-01)
 
-- **対応シーン**: 4-2 砂漠の朝、 別れ (ヴィルが紫竜王国へ帰る朝、 サハナが砂丘の上で双剣を掲げ、 七色の風が一筋朝の空に走るアイコニック瞬間)
-- **本文行**: marker `サハナは、 砂丘の上で、 双剣を高く掲げた` の後 (4-2 末尾の見送り場面)
-- **役割**: 本文インライン挿絵 (4-2 別れシーンの hero shot)、 16:9 横長
-- **被写体**: 砂丘の頂で双剣を高く掲げるサハナ。 七色の風が刃から朝の空へ一筋走る。 背景下方に朝霧の中の部族メンバー (アーシャ・グラン・他) のシルエットが手を振っている。 遠景にヴィルの馬車の小さな影が砂漠を進む。 朝焼けの空、 桃色〜金色のグラデーション
-- **添付画像 (1枚、 必須)**:
+- **対応シーン**: 4-2 砂漠の朝、 別れ (第3章テーマ「血ではなく時間が家族」 が物理的に結晶化する最強エモシーン)
+- **本文行**: marker `朝日の中で、 紫水晶が、 七色に輝いた` の後 (本文「これで、 二人で、 一つ」 → 紫水晶七色光のクライマックス瞬間)
+- **役割**: 本文インライン挿絵 (4-2 ヴィル+サハナ別れの hero shot、 全章の結実)、 16:9 横長
+- **被写体**: 朝霧の砂漠で向かい合うヴィルとサハナ。 二人の手のひらにそれぞれ紫水晶のかけら半分。 朝日が紫水晶に当たって七色に輝く。 ヴィルの手首には七色絹紐 (サハナから受け取った守り紐)。 涙を堪えた笑顔。 背景: 朝焼け空、 朝霧、 部族メンバーが遠景 silhouette、 馬車も控えめに
+- **添付画像 (2枚、 必須)**:
+  - `images/characters/season1/ssr/draco_lancer.png` (ヴィル、 既存)
   - `images/characters/season1/ur/desert_princess.png` (サハナ、 S1C3 ur_08 生成済み前提)
 
 ```
-A horizontal 16:9 cinematic farewell illustration of a desert nomad princess raising her twin scimitar swords high atop a sand dune at dawn, in the foreground center-right a young desert nomad princess matching the reference image with long wavy light-brown hair flowing in the dawn breeze and sun-tanned warm honey skin and tribal red-and-gold outfit, standing tall on the crest of a sand dune with both arms raised holding her twin curved Shamar scimitar swords crossed high above her head, a single brilliant rainbow wind current of seven prismatic colors (red orange yellow green blue indigo violet) streaming from the blade tips up into the morning sky like a blessing or farewell salute, her expression a confident smile of "until we meet again", in the lower-foreground left side small silhouettes of desert tribe members in dawn mist waving farewell (a turbaned woman a tall warrior a robed sage figures), in the mid-distance below the dune a tiny silhouette of a single horse-drawn caravan wagon receding into the golden desert landscape leaving behind one set of fading wheel tracks, the sky a breathtaking dawn gradient from rose-gold horizon through soft peach to fading violet zenith with the seven prismatic streams of the genso delicately threading across the morning sky, soft dawn mist drifting low across the sand, anime fantasy illustration style with bittersweet farewell-blessing atmosphere, warm rose-gold and tribal-red and prismatic-rainbow color palette, wide cinematic horizontal composition with the princess silhouette as the heroic focal anchor against the vast dawn sky. CRITICAL ANATOMY REQUIREMENTS: the princess with anatomically correct human hands of exactly five distinct well-formed fingers per hand, both hands gripping the scimitar hilts firmly with all five fingers visible and properly positioned with arms raised high overhead, both arms in natural raised salute pose with proper joint angles. Aspect ratio 16:9, high detail.
+A horizontal 16:9 deeply emotional farewell illustration of a violet-haired dragon princess and a desert nomad princess facing each other at dawn in the misty desert, holding halves of a shared violet crystal that catches the rising sun light and shines in seven prismatic rainbow colors, on the left a violet-haired dragon princess matching the first reference image with long flowing violet hair stirred by the dawn breeze (no face cloth — she is fully revealed now as the princess returning home), wearing her royal violet-and-silver traveler attire with her ornate violet ceremonial spear strapped diagonally across her back, in her open left palm she holds one half of a fractured small violet amethyst crystal, on her right wrist a delicate seven-color silk braided bracelet (the keepsake gift from Sahana), her expression a quiet smile of "until we meet again" with eyes glimmering with tears she refuses to shed, on the right a young desert nomad princess matching the second reference image with long wavy light-brown hair flowing in the dawn breeze and sun-tanned warm honey skin and tribal red-and-gold outfit and her twin curved Shamar scimitar swords sheathed at her hips, in her open right palm she holds the other half of the same fractured violet amethyst crystal, her expression a confident farewell smile that hides a touch of loneliness, between their two outstretched hands the broken violet amethyst crystal halves catch the rising sun and refract into a brilliant seven-color rainbow burst (red orange yellow green blue indigo violet) that briefly halos around their faces, in the lower-mid background soft silhouettes of desert tribe members in dawn mist waving from a distance (turbaned woman tall warrior robed sage child figures), in the far background a small horse-drawn caravan wagon waiting to depart, the sky a breathtaking dawn gradient from rose-gold horizon through soft peach to fading violet zenith with the seven prismatic streams of the genso delicately threading across the morning sky, soft dawn mist drifting low across the sand, anime fantasy illustration style with bittersweet emotional climax atmosphere of two souls who became "family beyond blood" parting at dawn, warm rose-gold and royal-violet and tribal-red and prismatic-rainbow color palette, wide cinematic horizontal composition with the two figures and the shared crystal at the visual heart, dawn rays slanting from the right. CRITICAL ANATOMY REQUIREMENTS: both characters with anatomically correct human hands of exactly five distinct well-formed fingers per hand, both hands holding the crystal halves with all five fingers visible and properly positioned in open offering palms, both arms in natural extended-towards-each-other poses with proper joint angles.
 
 -----
 元画像から表情や姿勢は変わってOKです

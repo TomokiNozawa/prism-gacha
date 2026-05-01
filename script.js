@@ -4520,8 +4520,8 @@ const STORY_LOCATION_INLINE_CONFIG = {
     { scene: '3-2',  marker: '部族の戦士たちが、 一斉に駆けた',         position: 'after',  img: '/images/locations/s1c3/tribe_battle_thumb.webp' },
     // 4-1 古龍王の予兆: ファラーが砂を風に放ち、 巨大な古龍王のシルエットが揺らぐ (S2 伏線)
     { scene: '4-1',  marker: 'ファラーは砂を一握り掬い、 風に放った',   position: 'after',  img: '/images/locations/s1c3/lost_dragon_king_omen_thumb.webp' },
-    // 4-2 別れの朝: サハナが砂丘の上で双剣を掲げ、 七色の風が朝の空に走るアイコニック瞬間
-    { scene: '4-2',  marker: 'サハナは、 砂丘の上で、 双剣を高く掲げた', position: 'after',  img: '/images/locations/s1c3/farewell_thumb.webp' },
+    // 4-2 別れの朝: ヴィル+サハナが紫水晶を分け合う最強エモシーン (七色光、 七色絹紐、 「これで二人で一つ」)
+    { scene: '4-2',  marker: '朝日の中で、 紫水晶が、 七色に輝いた',     position: 'after',  img: '/images/locations/s1c3/farewell_thumb.webp' },
   ],
 };
 
