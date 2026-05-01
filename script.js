@@ -4300,15 +4300,26 @@ function renderSceneChars(scene) {
       const [povChar] = top.splice(povIdx, 1);
       top.unshift(povChar);
     } else if (povIdx === -1) {
-      // top12 に居ない時、 本文に POV名 (token) が含まれている場合のみ追加。
-      // 「私/わたし」 等の pronoun 判定は廃止 (= エピローグの観測者シーンで他キャラの「私」 で
-      //  ちさとが誤検出される事故防止、 野沢指摘 2026-05-01)。
-      const contentMd = scene.contentMd || '';
-      const tokens = _povTokens(povName);
-      const hasName = tokens.some(t => t && contentMd.includes(t));
-      if (hasName) {
-        const povChar = _findPovChar(povName);
-        if (povChar) top.unshift(povChar);
+      // top12 に居ない時、 以下のいずれかで POV を追加 (1人目固定):
+      //   (1) 章末 scene (「第N章 終」) → 強制ON (次章予告本文で POV名が出ない場合の救済)
+      //   (2) 本文に POV名 (token) が含まれる
+      //   (3) 本文に first-person pronoun 「私 / わたし / わたくし」 が含まれる
+      //       (= s1c2 全シーン+s1c3 全シーン+s1c1 一部シーン の first-person POV scene 救済)
+      // ただし STORY_POV_EXCLUDE_SCENES に含まれる scene (観測者シーン等) は除外
+      //   → s1c1 epilogue subscenes (月夜のカグヤ等) や s1c3 「エピローグ — 観測者たち」 など
+      const excludeList = (typeof STORY_POV_EXCLUDE_SCENES !== 'undefined' && STORY_POV_EXCLUDE_SCENES[currentStoryId]) || [];
+      const isExcluded = excludeList.includes(scene.title || '');
+      if (!isExcluded) {
+        const contentMd = scene.contentMd || '';
+        const isFinalScene = /^第[\d一二三四五六七八九十]+章\s*終$/.test(scene.title || '');
+        const tokens = _povTokens(povName);
+        const hasName = tokens.some(t => t && contentMd.includes(t));
+        // first-person pronoun 検出 (POVが narrator として「私 / わたし」 を使う場合)
+        const hasPronoun = /[「『（\s。、]?(?:私|わたし|わたくし)(?:[はがにのを、。\s「『])/m.test(contentMd);
+        if (isFinalScene || hasName || hasPronoun) {
+          const povChar = _findPovChar(povName);
+          if (povChar) top.unshift(povChar);
+        }
       }
     }
   }
@@ -4518,8 +4529,9 @@ const STORY_CUTIN_CONFIG = {
     { scene: '3-3', charName: '虹意 プリズマ' }, // 3-3: 虹色の人 — プリズマが初めて名乗るシーン
   ],
   's1c2': [
-    { scene: '2-6',            charName: '深海女王 ネプテア' },
-    // 2-11 波紋の聖女イザベルのキャラカットインは削除 (野沢指示: 場所画像 ripple_saint_awakening 挿絵で代替)
+    // 2026-05-01 ラベル幕単位化: 旧 2-6 → 3-2 (第三幕 ネプテア初登場)
+    { scene: '3-2',            charName: '深海女王 ネプテア' },
+    // 第五幕 5-3 波紋の聖女イザベルのキャラカットインは削除 (野沢指示: 場所画像 ripple_saint_awakening 挿絵で代替)
   ],
   's1c3': [
     // 2-1 アーシャ初登場 → asha_meeting.png 挿絵で代替 (cutin より絵が強い)、 cutin削除
@@ -4547,14 +4559,15 @@ const LOCATION_CONFIG = {
   },
   's1c2': {
     // 各シーンの「印象深い1場面」 を背景画像として配置 (野沢方針: 背景中心で統一感)
-    '2-1':  { img: '/images/locations/s1c2/church_morning_thumb.webp' },          // 七色ステンドグラスで祈るイザベル
-    '2-3':  { img: '/images/locations/s1c2/serapia_evening_thumb.webp' },         // 港町セラピア純風景 (9:16 縦長、 キャラなし)
-    '2-4':  { img: '/images/locations/s1c2/crimson_pearl_night_thumb.webp' },     // 月のない夜の紅玉号甲板
-    // 2-5: shadeova_swarm を挿絵化、 背景はグラデ (戦闘シーンの動きを挿絵で強調)
-    '2-7':  { img: '/images/locations/s1c2/aquasis_city_thumb.webp' },            // 海中の珊瑚都市 (視覚インパクト最大)
-    '2-9':  { img: '/images/locations/s1c2/aquasis_rift_thumb.webp' },            // 海溝の底・黒い亀裂
-    // 2-11: ripple_saint_awakening を挿絵化、 キャラカットインも削除 (覚醒の絶頂を挿絵で表現)
-    '2-13': { img: '/images/locations/s1c2/serapia_dawn_thumb.webp' },            // 朝焼けの港 (ミカと別れ)
+    // 2026-05-01 ラベル変更: 全章 幕単位連番 (N=幕番号) に統一、 旧 2-X → 1-1〜6-2
+    '1-1': { img: '/images/locations/s1c2/church_morning_thumb.webp' },          // 第一幕 1-1 教会の朝 (七色ステンドグラスで祈るイザベル)
+    '2-1': { img: '/images/locations/s1c2/serapia_evening_thumb.webp' },         // 第二幕 2-1 港町セラピア純風景
+    '2-2': { img: '/images/locations/s1c2/crimson_pearl_night_thumb.webp' },     // 第二幕 2-2 月のない夜の紅玉号甲板
+    // 第三幕 3-1 影喰いの群れ: shadeova_swarm を挿絵化、 背景はグラデ (戦闘シーン動的)
+    '4-1': { img: '/images/locations/s1c2/aquasis_city_thumb.webp' },            // 第四幕 4-1 海中の珊瑚都市 (視覚インパクト最大)
+    '5-1': { img: '/images/locations/s1c2/aquasis_rift_thumb.webp' },            // 第五幕 5-1 海溝の底・黒い亀裂
+    // 第五幕 5-3 波紋の聖女: ripple_saint_awakening を挿絵化、 キャラカットイン削除
+    '6-2': { img: '/images/locations/s1c2/serapia_dawn_thumb.webp' },            // 第六幕 6-2 朝焼けの港 (ミカと別れ)
   },
   's1c3': {
     // 各シーンの「印象深い1場面」 を 3:4 縦長背景画像として配置
@@ -4592,17 +4605,18 @@ const STORY_LOCATION_INLINE_CONFIG = {
     { scene: 'プリズマの黄昏', marker: '結晶のように、 虹色の塵となって舞い上がる', position: 'after', img: '/images/locations/s1c1/prisma_twilight_thumb.webp' },
   ],
   's1c2': [
-    // 2-3: 新背景 (純風景、 生成待ち) + シャンティ登場時に挿絵
-    { scene: '2-3',  marker: '頭には大きな三角帽子に紅い羽飾り', position: 'after',  img: '/images/locations/s1c2/serapia_sunset_thumb.webp' },
-    // 2-5 海中影喰い登場: 群れ突入挿絵より前に「水中型」 紹介
-    { scene: '2-5',  marker: '影喰い——水中型',                  position: 'after',  img: '/images/enemies/shadeova_swarm_marine_thumb.webp' },
-    // 2-5: 戦闘シーンの動的瞬間を挿絵で
-    { scene: '2-5',  marker: '群れに突っ込んだ',                  position: 'after',  img: '/images/locations/s1c2/shadeova_swarm_thumb.webp' },
-    // 2-7: 海上 (entrance) → 海中 (city背景) → 宮殿 (throne) の進行
-    { scene: '2-7',  marker: '巨大な珊瑚の都市が広がっていた',    position: 'after',  img: '/images/locations/s1c2/aquasis_entrance_thumb.webp' },
-    { scene: '2-7',  marker: '宮殿の謁見の間',                    position: 'before', img: '/images/locations/s1c2/aquasis_throne_thumb.webp' },
-    // 2-11: 覚醒の絶頂を挿絵で (キャラカットインは削除)
-    { scene: '2-11', marker: '光の中で、私の鎧が、変容した',      position: 'after',  img: '/images/locations/s1c2/ripple_saint_awakening_thumb.webp' },
+    // 2026-05-01 ラベル幕単位化: 旧 2-X → 第N幕の M番目 (N-M)
+    // 第二幕 2-1 港町セラピア (旧 2-3): シャンティ登場時に挿絵
+    { scene: '2-1',  marker: '頭には大きな三角帽子に紅い羽飾り', position: 'after',  img: '/images/locations/s1c2/serapia_sunset_thumb.webp' },
+    // 第三幕 3-1 海中影喰い登場 (旧 2-5): 群れ突入挿絵より前に「水中型」 紹介
+    { scene: '3-1',  marker: '影喰い——水中型',                  position: 'after',  img: '/images/enemies/shadeova_swarm_marine_thumb.webp' },
+    // 第三幕 3-1 (旧 2-5): 戦闘シーンの動的瞬間を挿絵で
+    { scene: '3-1',  marker: '群れに突っ込んだ',                  position: 'after',  img: '/images/locations/s1c2/shadeova_swarm_thumb.webp' },
+    // 第四幕 4-1 アクアシス宮殿 (旧 2-7): 海上 (entrance) → 海中 (city背景) → 宮殿 (throne) の進行
+    { scene: '4-1',  marker: '巨大な珊瑚の都市が広がっていた',    position: 'after',  img: '/images/locations/s1c2/aquasis_entrance_thumb.webp' },
+    { scene: '4-1',  marker: '宮殿の謁見の間',                    position: 'before', img: '/images/locations/s1c2/aquasis_throne_thumb.webp' },
+    // 第五幕 5-3 波紋の聖女 (旧 2-11): 覚醒の絶頂を挿絵で (キャラカットイン削除)
+    { scene: '5-3',  marker: '光の中で、私の鎧が、変容した',      position: 'after',  img: '/images/locations/s1c2/ripple_saint_awakening_thumb.webp' },
   ],
   's1c3': [
     // 1-2 リアム誓い、 三月の約束 (主従の絆 + 旅の制約成立)
@@ -4789,12 +4803,31 @@ async function _refreshOfflineStatus(m) {
   }
 }
 
+// POV検出から除外する scene (観測者シーン等、 POV キャラがそこに居ない場面)
+// renderSceneChars で「pronoun (私/わたし) 検出」 が他キャラの「私」 を拾ってしまう事故を防ぐ
+// key: storyId、 value: scene.title 完全一致リスト
+const STORY_POV_EXCLUDE_SCENES = {
+  's1c1': [
+    // エピローグ — 観測者たち の subscene (h3、 label無し、 title=サブタイトル)
+    '月夜のカグヤ',
+    '星海のノクス',
+    '教会のセラフィエル',
+    'プリズマの黄昏',
+  ],
+  's1c2': [],
+  's1c3': [
+    // エピローグ — 観測者たち は h2 で body あり regular scene、 観測者三柱の語り場面
+    'エピローグ — 観測者たち',
+  ],
+};
+
 // シーン依存のキャラリンク remap — 同じ単独名 (例: 「イザベル」) でも、 シーン進行に応じて別キャラ (例: 覚醒後 UR) にリンク先を切替える。
 // 例: s1c2 の 2-11 (波紋の聖女覚醒) 以降は、 単独名「イザベル」 を SSR ではなく UR「波紋の聖女 イザベル」 にリンクさせる。
 // fromLabel: そのラベル含めてそれ以降のシーンで適用 (X-Y 形式、 X=幕、 Y=シーン番号)。
 const STORY_CHAR_REMAP = {
   's1c2': [
-    { fromLabel: '2-11', remap: { 'イザベル': '波紋の聖女 イザベル' } },
+    // 2026-05-01 ラベル幕単位化: 旧 2-11 → 5-3 (第五幕 波紋の聖女覚醒シーン)
+    { fromLabel: '5-3', remap: { 'イザベル': '波紋の聖女 イザベル' } },
   ],
 };
 
