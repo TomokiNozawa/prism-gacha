@@ -7,7 +7,7 @@
 //
 // HTML/JSON/Firebase API はキャッシュせず常にネットワーク優先 (更新即反映+認証/DBの鮮度維持)。
 
-const SW_VERSION = '20260502c';  // v1.3.2+ ガチャ希少度計算 B案 (SSR以上数ベース 二項分布) に変更
+const SW_VERSION = '20260502d';  // v1.3.2+ SW controllerchange 自動 reload 削除 (画面チカつき UX 改善)
 const STATIC_CACHE = `prismaera-static-${SW_VERSION}`;
 const BGM_CACHE    = `prismaera-bgm-${SW_VERSION}`;
 const LOC_CACHE    = `prismaera-loc-${SW_VERSION}`;

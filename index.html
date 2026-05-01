@@ -24,29 +24,18 @@
 <link rel="icon" href="/images/icons/icon-32.png" type="image/png" sizes="32x32">
 <link rel="icon" href="/images/icons/icon-16.png" type="image/png" sizes="16x16">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
-<link rel="manifest" href="/manifest.json?v=20260502c25">
-<link rel="stylesheet" href="/style.css?v=20260502c">
+<link rel="manifest" href="/manifest.json?v=20260502d25">
+<link rel="stylesheet" href="/style.css?v=20260502d">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <script>
 // Service Worker 登録 (iOS の PWA識別強化目的、 Now Playing タップが Prismaera へ正しく戻るように)
-// 加えて、 SW 更新検知時に自動リロード (新版 SW が controller になった時に1回限り reload)。
-// アセット差し替え後、 ユーザーがタブを閉じずに使い続けても次回操作で確実に新版に切り替わる。
+// 2026-05-02: controllerchange 自動 reload は削除 (画面チカつき UX 悪化のため、 野沢さん指示)
+// アセット差し替え時の cache 更新は SW_VERSION bump (旧 cache 自動削除) + IMG_CACHE_VERSION 付与で別 URL 化 で対応
 if ('serviceWorker' in navigator) {
-  let _swReloadOnce = false;
-  // 既存 SW から新 SW へ controller が交代した時 = 新 SW がページを制御 → 1回 reload
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (_swReloadOnce) return;
-    _swReloadOnce = true;
-    console.log('[SW] controller changed → reload to apply new version');
-    window.location.reload();
-  });
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').then(reg => {
-      // 起動時に update 確認、 新版があれば skipWaiting → activate → controllerchange でリロード
-      reg.update().catch(() => {});
-    }).catch(() => { /* 失敗してもアプリ動作には影響なし */ });
+    navigator.serviceWorker.register('/sw.js').catch(() => { /* 失敗してもアプリ動作には影響なし */ });
   });
 }
 </script>
@@ -601,7 +590,7 @@ if ('serviceWorker' in navigator) {
 <audio id="bgm-home" preload="auto"></audio>
 
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
-<script src="/script.js?v=20260502c"></script>
-<script src="/gasshuku.js?v=20260502c"></script>
+<script src="/script.js?v=20260502d"></script>
+<script src="/gasshuku.js?v=20260502d"></script>
 </body>
 </html>
