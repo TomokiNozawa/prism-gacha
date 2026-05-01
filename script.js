@@ -3655,9 +3655,10 @@ function renderWorldMap() {
   </g>`;
   svg += `</svg>`;
   canvas.innerHTML = svg;
-  // Phase 2: 章マーカー click → 該当章を openStory (公開済のみ)
+  // Phase 2: 章マーカー click → 該当章を openStory (公開済のみ)、 drag距離 4px 超は click 無視
   canvas.querySelectorAll('.world-chapter-marker').forEach(node => {
     node.addEventListener('click', (e) => {
+      if ((svgEl && (svgEl.__worldMapDragDist || 0) > 4)) return;
       e.stopPropagation();
       const sid = node.dataset.story;
       if (node.classList.contains('coming-soon')) {
@@ -3669,9 +3670,10 @@ function renderWorldMap() {
       setTimeout(() => { if (typeof openStory === 'function') openStory(sid); }, 50);
     });
   });
-  // Phase 2: S2/S3 ティザー click → Coming Soon toast
+  // Phase 2: S2/S3 ティザー click → Coming Soon toast、 drag距離 4px 超は click 無視
   canvas.querySelectorAll('.world-faction-teaser').forEach(node => {
     node.addEventListener('click', (e) => {
+      if ((svgEl && (svgEl.__worldMapDragDist || 0) > 4)) return;
       e.stopPropagation();
       _showWorldMapToast('🌫️ 未公開領域 — 物語の進行で姿を現します');
     });
@@ -3680,9 +3682,10 @@ function renderWorldMap() {
   const svgEl = canvas.querySelector('svg');
   const zoomLayer = canvas.querySelector('.world-zoom-layer');
   if (svgEl && zoomLayer) _setupWorldMapZoomPan(svgEl, zoomLayer);
-  // クリックバインド
+  // クリックバインド (drag距離 4px 超は click 無視 — pan 操作と区別)
   canvas.querySelectorAll('.world-faction-node').forEach(node => {
     node.addEventListener('click', () => {
+      if ((svgEl && (svgEl.__worldMapDragDist || 0) > 4)) return;
       const fid = node.dataset.faction;
       _showFactionSide(fid);
       canvas.querySelectorAll('.world-faction-node.active').forEach(n => n.classList.remove('active'));
@@ -3766,8 +3769,9 @@ function _setupWorldMapZoomPan(svg, layer) {
   let scale = (_worldMapZoomState && _worldMapZoomState.scale) || 1;
   let tx    = (_worldMapZoomState && _worldMapZoomState.tx)    || 0;
   let ty    = (_worldMapZoomState && _worldMapZoomState.ty)    || 0;
-  // pan時の click 抑止 (pointermove 距離で判定)
-  let dragMoved = 0;
+  // pan時の click 抑止 (pointerdown→up間の累積距離)。
+  // svg.__worldMapDragDist として公開、 派閥/章マーカー/ティザー click 側が参照
+  svg.__worldMapDragDist = 0;
   const update = () => {
     // 範囲ガード: scale=1 の時は強制中央 (tx=ty=0)、 scale>1 は viewBox外に飛ばないようclamp
     if (scale <= MIN) { scale = MIN; tx = 0; ty = 0; }
@@ -3797,13 +3801,13 @@ function _setupWorldMapZoomPan(svg, layer) {
     update();
   }, { passive: false });
   // pointer drag + pinch
+  // 注意: setPointerCapture は使わない (子要素 click が svg レベルに吸われる挙動を避けるため)
   const pts = new Map();
   let lastDist = null;
   const onPointerDown = (e) => {
-    if (e.target.closest('.zoom-btn')) return; // ズームボタン上は capture しない
-    svg.setPointerCapture(e.pointerId);
+    if (e.target.closest('.zoom-btn')) return; // ズームボタン上は pan 開始しない
     pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    dragMoved = 0;
+    svg.__worldMapDragDist = 0;
   };
   const onPointerMove = (e) => {
     if (!pts.has(e.pointerId)) return;
@@ -3816,7 +3820,7 @@ function _setupWorldMapZoomPan(svg, layer) {
       const sy = H / rect.height;
       tx += dx * sx;
       ty += dy * sy;
-      dragMoved += Math.hypot(dx, dy);
+      svg.__worldMapDragDist = (svg.__worldMapDragDist || 0) + Math.hypot(dx, dy);
       update();
     } else if (pts.size === 2) {
       const arr = [...pts.values()];
@@ -3833,7 +3837,7 @@ function _setupWorldMapZoomPan(svg, layer) {
         ty = py - (py - ty) * (newScale / scale);
         scale = newScale;
         update();
-        dragMoved += 5; // pinch 中は click 抑止
+        svg.__worldMapDragDist = (svg.__worldMapDragDist || 0) + 10; // pinch中は確実に click 抑止
       }
       lastDist = dist;
     }
@@ -3846,11 +3850,7 @@ function _setupWorldMapZoomPan(svg, layer) {
   svg.addEventListener('pointermove',  onPointerMove);
   svg.addEventListener('pointerup',    onPointerUp);
   svg.addEventListener('pointercancel', onPointerUp);
-  // drag距離が大きい時は派閥/章マーカー click を抑止 (capture 段階で stopImmediatePropagation)
-  svg.addEventListener('click', (e) => {
-    if (dragMoved > 4) { e.stopPropagation(); e.stopImmediatePropagation(); e.preventDefault(); }
-    dragMoved = 0;
-  }, true);
+  svg.addEventListener('pointerleave', onPointerUp);
   // dblclick で reset
   svg.addEventListener('dblclick', (e) => {
     e.preventDefault();
