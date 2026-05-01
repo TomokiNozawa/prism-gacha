@@ -109,11 +109,15 @@ def check_story_outline_pov():
 
 
 def check_chapter_structure():
-    """ルール4: STORY/s1c?.md 4幕統一"""
+    """ルール4: STORY/s1c?.md 章構造 (柔軟化版 2026-05-01)
+    - 必須: プロローグ + 第一幕 + エピローグ + 第N章 終
+    - 第二幕〜第N幕 は任意 (物語量に応じて自由、 4幕推奨だが固定でない)
+    - シーン番号 N-K の N は 1〜8 まで許容 (現実的な章規模)、 旧章単位連番 (1-13等) は禁止
+    """
     target_dir = ROOT / "STORY"
     if not target_dir.exists():
         return 0
-    REQUIRED = ['## プロローグ', '## 第一幕', '## 第二幕', '## 第三幕', '## 第四幕', '## エピローグ']
+    REQUIRED = ['## プロローグ', '## 第一幕', '## エピローグ']  # 必須3項目に緩和
     checked = 0
     for path in sorted(target_dir.glob("s1c*.md")):
         if path.name == "outline.md":
@@ -127,7 +131,7 @@ def check_chapter_structure():
         if missing:
             violations.append(
                 f"[ルール4 章構造] {path.name} に欠如: {', '.join(missing)}\n"
-                f"      → 「プロローグ + 第一幕〜第四幕 + エピローグ + 第N章 終」 統一形式 必要"
+                f"      → 必須: 「プロローグ + 第一幕 + エピローグ + 第N章 終」 (第二幕以降は任意、 物語量に応じて自由)"
             )
         # 「第N章 終」 ヘッダ
         m = re.search(r'^## 第\d+章 終$', text, flags=re.M)
@@ -138,11 +142,11 @@ def check_chapter_structure():
             )
         # シーン番号 (N-K) 形式チェック (旧 1-13 みたいな章単位連番でなく N=幕単位)
         scene_labels = re.findall(r'^### (\d+)-(\d+):', text, flags=re.M)
-        bad = [(n, k) for n, k in scene_labels if int(n) > 4]  # 第5幕以降は無いはず
+        bad = [(n, k) for n, k in scene_labels if int(n) > 8]  # 8幕以上は現実的に無い
         if bad:
             violations.append(
-                f"[ルール4 シーン番号] {path.name} に幕番号5以上のシーンあり: {bad}\n"
-                f"      → シーン番号は幕単位 (N-K, N≦4) 必要、 旧章単位連番 (1-13等) は禁止"
+                f"[ルール4 シーン番号] {path.name} に幕番号9以上のシーンあり: {bad}\n"
+                f"      → シーン番号は幕単位 (N-K, N≦8) 必要、 旧章単位連番 (1-13等) は禁止"
             )
     return checked
 
