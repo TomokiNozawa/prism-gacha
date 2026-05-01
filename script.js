@@ -3449,16 +3449,18 @@ let _worldMapActiveFaction = null;
 let _worldMapZoomState = null; // { scale, tx, ty } セッション中保持
 
 // 章マーカー: 各章の主舞台座標。 公開済み章は openStory、 公開予定章 (releaseDate あり) は Coming Soon バッジ
+// 2026-05-01 調整: 画像端からの見切れ + 派閥アイコン + S2/S3ティザーとの重なり 回避
 const STORY_CHAPTER_MARKERS = [
-  { storyId: 's1c1', label: '第1章', icon: '✨', x: 1330, y: 1130 }, // 星霊学院 academy 北西
-  { storyId: 's1c2', label: '第2章', icon: '🌊', x:  920, y: 1430 }, // アクアシス aquasis 南西
-  { storyId: 's1c3', label: '第3章', icon: '🐉', x: 1700, y: 1450 }, // 砂漠サハール (派閥未登録、 専用座標)
-  { storyId: 's1c4', label: '第4章', icon: '❄️', x: 1720, y:  130 }, // 凍土+空 (北方東部、 Coming Soon)
+  { storyId: 's1c1', label: '第1章', icon: '✨', x: 1330, y: 1100 }, // 星霊学院 academy 北西、 上に少し上げて派閥円との距離確保
+  { storyId: 's1c2', label: '第2章', icon: '🌊', x:  900, y: 1380 }, // アクアシス aquasis 南西、 内側に少し移動
+  { storyId: 's1c3', label: '第3章', icon: '🐉', x: 1670, y: 1380 }, // 砂漠サハール (派閥未登録、 専用座標)、 ???ティザーから離す
+  { storyId: 's1c4', label: '第4章', icon: '❄️', x: 1700, y:  220 }, // 凍土+空 (北方東部、 Coming Soon)、 内側に下げてコンパスローズと干渉回避
 ];
 // S2/S3 派閥ティザー (霧表現): まだ実装されていない領域を「???」 で示す
+// 画像範囲外は viewBox bg で見えにくいため内側に配置
 const STORY_FACTION_TEASER = [
-  { id: 'season2', label: '???', subLabel: '— Season 2 領域 —', x:  200, y: 1530 },
-  { id: 'season3', label: '???', subLabel: '— 始原の地 —',     x: 1900, y: 1530 },
+  { id: 'season2', label: '???', subLabel: '— Season 2 領域 —', x:  150, y: 1500 },
+  { id: 'season3', label: '???', subLabel: '— 始原の地 —',     x: 1850, y: 1500 },
 ];
 
 function openWorldMap() {
@@ -3559,10 +3561,11 @@ function renderWorldMap() {
   // Phase 2 Step B (2026-05-01〜): 手描き風 ワールドマップ背景画像 (1792×1024) を最背面に配置
   // 既存 SVG装飾 (大陸shape / 山脈 / 森 / 海岸線) は画像内に内包、 SVG側からは削除
   // 派閥アイコン + 章マーカー + コンパスローズ + タイトル + S2/S3ティザー は画像の上に重ねる
-  svg += `<image href="${_appendImgCacheBuster('/images/locations/world_map.png')}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="xMidYMid slice" opacity="0.95"/>`;
-  // 派閥アイコン視認性向上: 画像の上に薄い暗オーバーレイ (グリッド + ocean tint)
-  svg += `<rect width="${W}" height="${H}" fill="url(#ocean-grad)" opacity="0.25"/>`;
-  svg += `<rect width="${W}" height="${H}" fill="url(#grid-faint)" opacity="0.5"/>`;
+  // viewBox 2000x1600 (5:4) に対し画像 1792x1024 (16:9) なので preserveAspectRatio="xMidYMid meet" で全画像表示+上下に余白
+  // 余白部分は .world-map-canvas の dark gradient で自然に埋まる
+  svg += `<image href="${_appendImgCacheBuster('/images/locations/world_map.png')}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="xMidYMid meet" opacity="0.95"/>`;
+  // 派閥アイコン視認性向上: 画像の上に薄い暗オーバーレイ (ocean tint のみ、 グリッドは画像と被るので除去)
+  svg += `<rect width="${W}" height="${H}" fill="url(#ocean-grad)" opacity="0.2"/>`;
   // コンパスローズ (右下隅)
   svg += `<g transform="translate(1820, 230)">
     <circle r="60" fill="rgba(20,15,45,0.7)" stroke="rgba(255,217,122,0.4)" stroke-width="2"/>
@@ -3573,10 +3576,11 @@ function renderWorldMap() {
     <text x="-52" y="6" font-size="18" text-anchor="middle" fill="rgba(255,217,122,0.7)" font-weight="700" stroke="rgba(0,0,0,0.7)" stroke-width="2" paint-order="stroke">W</text>
     <text x="52" y="6" font-size="18" text-anchor="middle" fill="rgba(255,217,122,0.7)" font-weight="700" stroke="rgba(0,0,0,0.7)" stroke-width="2" paint-order="stroke">E</text>
   </g>`;
-  // タイトル装飾 (左上隅)
-  svg += `<g transform="translate(200, 100)">
-    <text font-size="44" font-weight="700" fill="rgba(255,217,122,0.9)" stroke="rgba(0,0,0,0.85)" stroke-width="3" paint-order="stroke">虹霊界 大陸地図</text>
-    <text y="40" font-size="18" fill="rgba(200,180,255,0.7)" stroke="rgba(0,0,0,0.7)" stroke-width="2" paint-order="stroke">— Realm of Prismaera —</text>
+  // タイトル装飾 (左上隅、 半透明背景パネル付きで画像と被っても読める)
+  svg += `<g transform="translate(40, 40)">
+    <rect x="-10" y="-30" width="430" height="80" rx="10" fill="rgba(10,14,29,0.7)" stroke="rgba(255,217,122,0.4)" stroke-width="1.5"/>
+    <text x="10" y="10" font-size="36" font-weight="700" fill="rgba(255,217,122,0.95)" stroke="rgba(0,0,0,0.85)" stroke-width="2" paint-order="stroke">🗺️ 虹霊界 大陸地図</text>
+    <text x="14" y="38" font-size="14" fill="rgba(200,180,255,0.85)" stroke="rgba(0,0,0,0.7)" stroke-width="1" paint-order="stroke">— Realm of Prismaera —</text>
   </g>`;
   // 派閥間のルート (光の道) — ワールド配置
   FACTION_ROUTES.forEach(([a, b]) => {
@@ -5123,7 +5127,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260501q';
+const IMG_CACHE_VERSION = '20260501r';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる

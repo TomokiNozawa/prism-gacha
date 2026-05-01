@@ -7,7 +7,7 @@
 //
 // HTML/JSON/Firebase API はキャッシュせず常にネットワーク優先 (更新即反映+認証/DBの鮮度維持)。
 
-const SW_VERSION = '20260501q';  // v1.3.1q s1c1/s1c2/s1c3 全 thumb.webp を元PNGから再生成 (bash 整数比較で aspect 正しく判定)
+const SW_VERSION = '20260501r';  // v1.3.1r s1c2 縦長更新4枚反映 + ワールドマップ aspect/マーカー/タイトル調整
 const STATIC_CACHE = `prismaera-static-${SW_VERSION}`;
 const BGM_CACHE    = `prismaera-bgm-${SW_VERSION}`;
 const LOC_CACHE    = `prismaera-loc-${SW_VERSION}`;
