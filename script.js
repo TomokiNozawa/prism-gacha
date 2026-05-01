@@ -2356,10 +2356,10 @@ function showResult(results, best) {
   rarBox.appendChild(rankEl);
   const lineEl = document.createElement("div");
   lineEl.className = "rarity-line";
-  // B案: 「SSR以上 X体 / 約N人に1人」 のシンプル2項目表示 (希少度上位は SSR以上0体で100%になる無意味表示のため削除 2026-05-02)
-  const oneInNStr = rar.oneInN >= 1e6 ? "100万人以上に1人" :
-                    rar.oneInN >= 1000 ? `約 ${(rar.oneInN/1000).toFixed(1)} 万人に1人`.replace(/\.0 万/, "万") :
-                    `約 ${rar.oneInN.toLocaleString()} 人に1人`;
+  // B案: 「SSR以上 X体 / 約N回に1回」 のシンプル2項目表示
+  const oneInNStr = rar.oneInN >= 1e6 ? "100万回以上に1回" :
+                    rar.oneInN >= 1000 ? `約 ${(rar.oneInN/1000).toFixed(1)} 万回に1回`.replace(/\.0 万/, "万") :
+                    `約 ${rar.oneInN.toLocaleString()} 回に1回`;
   lineEl.innerHTML =
     `<span>SSR以上 <b>${rar.ssrPlusCount}体</b></span>` +
     `<span class="dot">·</span>` +
@@ -5134,7 +5134,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260502e';
+const IMG_CACHE_VERSION = '20260502f';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
