@@ -7255,4 +7255,61 @@ html[data-fontsize="small"] .gasshuku-story-body { font-size: 13px; }
 html[data-fontsize="large"] .story-scene-content,
 html[data-fontsize="large"] .char-detail-desc,
 html[data-fontsize="large"] .gasshuku-story-body { font-size: 17px; }
+
+/* ===== モバイル発熱対策 (2026-05-01) ===== */
+
+/* タブ非表示 (背面化) でアニメ全停止 — JS が body.app-paused を toggle */
+body.app-paused,
+body.app-paused *,
+body.app-paused::before,
+body.app-paused::after,
+body.app-paused *::before,
+body.app-paused *::after {
+  animation-play-state: paused !important;
+}
+
+/* OS の prefers-reduced-motion: reduce 尊重 — 環境アンビエントアニメを停止 */
+@media (prefers-reduced-motion: reduce) {
+  body::before,
+  body::after,
+  body.t-1000 #bg-layer {
+    animation: none !important;
+  }
+  body::after {
+    filter: none;
+    opacity: 0.45;
+  }
+}
+
+/* モバイル: 重い blur を軽量化 (見た目ほぼ同じ、 GPU負荷大幅減) */
+@media (max-width: 700px) {
+  body::after { filter: blur(12px); }
+  .topbar { backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+}
+
+/* 省電力モード (設定からユーザー切替) — アンビエントアニメ全停止 + blur OFF */
+body.power-saver::before,
+body.power-saver::after {
+  animation: none !important;
+}
+body.power-saver::after {
+  filter: none;
+  opacity: 0.4;
+}
+body.power-saver.t-1000 #bg-layer {
+  animation: none !important;
+}
+body.power-saver .topbar {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: rgba(10, 14, 29, 0.92);
+}
+
+/* 設定モーダル: 省電力モードトグル説明文 */
+.settings-power-saver-desc {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.55);
+  margin-top: 4px;
+  line-height: 1.5;
+}
 /* ===== END ===== */

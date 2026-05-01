@@ -4219,6 +4219,8 @@ function clearBlinkTimers() {
 }
 function setupCharBlinkAnimations() {
   clearBlinkTimers();
+  // 省電力モード or OS reduced-motion 時は瞬きOFF (発熱対策 2026-05-01)
+  if (typeof _isPowerSaverActive === 'function' && _isPowerSaverActive()) return;
   // 全 tier 対象 (LR/UR/SSR/SR/R)、 _blink.png が無いキャラは _blinkImageCache='ng' で自動skip
   document.querySelectorAll('.story-char-thumb .story-char-img').forEach(imgEl => {
     const bg = imgEl.style.backgroundImage || '';
@@ -4261,6 +4263,8 @@ let _detailBlinkTimer = null;
 function setupCharDetailBlink(c) {
   if (_detailBlinkTimer) { clearTimeout(_detailBlinkTimer); _detailBlinkTimer = null; }
   if (!c || !c.img) return;
+  // 省電力モード or OS reduced-motion 時は瞬きOFF (発熱対策 2026-05-01)
+  if (typeof _isPowerSaverActive === 'function' && _isPowerSaverActive()) return;
   // 全 tier 対象、 _blink.png が無いキャラは probe で skip される
   const imgEl = document.getElementById('char-detail-img');
   const zoomEl = document.getElementById('char-img-zoom-img');
@@ -4638,6 +4642,8 @@ let _cutinBlinkTimers = [];
 function setupCutinBlinks() {
   _cutinBlinkTimers.forEach(id => clearTimeout(id));
   _cutinBlinkTimers = [];
+  // 省電力モード or OS reduced-motion 時は瞬きOFF (発熱対策 2026-05-01)
+  if (typeof _isPowerSaverActive === 'function' && _isPowerSaverActive()) return;
   document.querySelectorAll('.story-cutin[data-tier="lr"] .story-cutin-img').forEach(imgEl => {
     const normalUrl = imgEl.getAttribute('src');
     if (!normalUrl) return;
@@ -5306,14 +5312,19 @@ function updateMasterMuteBtn() {
 
 // ───── iOS PWA: ホーム画面復帰時にBGM自動再開 (visibility/pageshow ハンドラ) ─────
 // PWA を home 画面に戻すとAudioContextがsuspend → 復帰時にOSが自動再開しないため明示的に resume + play
+// 同時に body.app-paused で背面時の CSS アニメを停止 (発熱対策 2026-05-01)
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState !== 'visible') return;
-  if (bgmAudioCtx && bgmAudioCtx.state === 'suspended') {
-    bgmAudioCtx.resume().catch(() => {});
-  }
-  if (bgmEnabled && !masterMuted && bgmAudio.paused) {
-    if (typeof _bgmPlayWithFallback === 'function') _bgmPlayWithFallback();
-    else bgmAudio.play().catch(() => {});
+  if (document.visibilityState === 'visible') {
+    document.body.classList.remove('app-paused');
+    if (bgmAudioCtx && bgmAudioCtx.state === 'suspended') {
+      bgmAudioCtx.resume().catch(() => {});
+    }
+    if (bgmEnabled && !masterMuted && bgmAudio.paused) {
+      if (typeof _bgmPlayWithFallback === 'function') _bgmPlayWithFallback();
+      else bgmAudio.play().catch(() => {});
+    }
+  } else {
+    document.body.classList.add('app-paused');
   }
 });
 window.addEventListener('pageshow', (e) => {
@@ -6540,6 +6551,18 @@ function applySettings(s) {
   // 文字サイズ (大/中/小)
   const root = document.documentElement;
   root.dataset.fontsize = s.fontSize || 'medium';
+  // 省電力モード (発熱対策 2026-05-01) — アンビエントアニメ + blur 停止
+  document.body.classList.toggle('power-saver', !!s.powerSaver);
+}
+// OS reduced-motion または ユーザー省電力モード ON 時 true
+function _isPowerSaverActive() {
+  try {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return true;
+  } catch {}
+  try {
+    const s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
+    return !!s.powerSaver;
+  } catch { return false; }
 }
 function openSettingsModal() {
   let m = document.getElementById('settings-modal');
@@ -6571,6 +6594,14 @@ function openSettingsModal() {
             <button class="settings-fontsize-btn" data-size="medium">中</button>
             <button class="settings-fontsize-btn" data-size="large">大</button>
           </div>
+        </div>
+        <div class="settings-section">
+          <div class="settings-label">🔋 省電力モード</div>
+          <label class="settings-toggle">
+            <input type="checkbox" id="settings-power-saver">
+            <span class="settings-toggle-track"></span>
+          </label>
+          <div class="settings-power-saver-desc">背景アニメ・キャラ瞬きを停止して発熱を抑えます。 (OS の省電力モード ON 時は自動有効)</div>
         </div>
         <div class="settings-section settings-offline-section">
           <div class="settings-label">📥 オフライン用に全アセット保存</div>
@@ -6619,6 +6650,16 @@ function openSettingsModal() {
         m.querySelectorAll('.settings-fontsize-btn').forEach(bb => bb.classList.toggle('active', bb.dataset.size === sz));
       });
     });
+    // 省電力モード (発熱対策 2026-05-01)
+    const psEl = m.querySelector('#settings-power-saver');
+    psEl.addEventListener('change', () => {
+      const s = loadSettings(); s.powerSaver = psEl.checked; saveSettings(s);
+      // 即座にblink loop 停止/再起動 (現在表示中のシーンに反映)
+      try { if (typeof clearBlinkTimers === 'function') clearBlinkTimers(); } catch {}
+      if (!psEl.checked) {
+        try { if (typeof setupCharBlinkAnimations === 'function') setupCharBlinkAnimations(); } catch {}
+      }
+    });
     // M4: 全アセットDL — 状態管理 (未DL数 > 0 の時だけボタン表示)
     const dlBtn = m.querySelector('#settings-offline-dl');
     const progEl = m.querySelector('#settings-offline-progress');
@@ -6662,6 +6703,7 @@ function openSettingsModal() {
   m.querySelector('#settings-bgm-volume-val').textContent = vol;
   const fs = s.fontSize || 'medium';
   m.querySelectorAll('.settings-fontsize-btn').forEach(b => b.classList.toggle('active', b.dataset.size === fs));
+  m.querySelector('#settings-power-saver').checked = !!s.powerSaver;
   m.classList.add('active');
 }
 function closeSettingsModal() {
