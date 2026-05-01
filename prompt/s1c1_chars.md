@@ -87,7 +87,7 @@ anime-style full-body portrait of a dragon emperor young man, long flowing golde
 
 ---
 
-### 8. `ur_04_ancient_sage.png` — 千夜姫 カグヤ（ロリババア・最古の賢者）
+### 8. `ur_04_ancient_sage.png` — 千夜姫 カグヤ（幼子姿の最古の賢者）
 
 **キャラ設定案**:
 - 肩書き: 虹霊界最古の賢者
