@@ -41,8 +41,9 @@ S1C3「砂塵の隊商」 の場所画像 (背景+挿絵) の DALL-E 3 用プロ
 | 9 | lost_dragon_king_omen.png | 16:9 | 挿絵 | 4-1 古龍王の予兆 | ファラー |
 | **10** | **asha_meeting.png** | 16:9 | 挿絵 | 2-1 ヴィル+アーシャ出会い | ヴィル+アーシャ (新規追加) |
 | **11** | **farewell.png** | 16:9 | 挿絵 | 4-2 別れの朝、 紫水晶を分け合う | ヴィル+サハナ二人 (新規追加、 全章の結実) |
+| **12** | **liam_oath.png** | 16:9 | 挿絵 | 1-2 リアム誓い、 三月の約束 | ヴィル+リアム (新規追加 2026-05-01) |
 
-合計 11枚 (背景6 + 挿絵5)。
+合計 12枚 (背景6 + 挿絵6)。
 
 ---
 
@@ -235,6 +236,32 @@ A horizontal 16:9 deeply emotional farewell illustration of a violet-haired drag
 
 -----
 元画像から表情や姿勢は変わってOKです
+```
+
+---
+
+# 【12】liam_oath.png — リアム誓い、 三月の約束 (挿絵、 16:9、 キャラ含む、 新規追加 2026-05-01)
+
+- **対応シーン**: 1-2 城を出て (リアムが追いかけてきて深く頭を下げ、 「三月以内に迎えに参ります」 と誓う、 主従の絆と三月の約束が成立する瞬間)
+- **本文行**: marker `不器用だけれど、 真っ直ぐな、 リアムらしい言葉だった` の後 (ヴィル独白で挿絵を腹に落とす位置)
+- **役割**: 本文インライン挿絵 (1-2 hero shot、 ヴィル+リアムの忠誠の誓い)、 16:9 横長
+- **被写体**: 紫竜王国 城門前の朝、 旅装のヴィル (馬車前) と侍従礼装のリアム (深く頭を下げて誓う)。 ヴィルが思わず微笑む瞬間
+- **添付画像 (2枚、 必須)**:
+  - `images/characters/season1/ssr/draco_lancer.png` (ヴィル、 既存)
+  - `images/characters/season1/ssr/purple_dragon_servant.png` (リアム、 S1C3 ssr_18 生成済み前提)
+
+```
+A horizontal 16:9 emotional illustration of a violet-haired dragon princess and her young royal retainer at the gates of the Purple Dragon Kingdom castle at dawn, the moment when the retainer bows deeply and swears a three-month vow to retrieve her, on the left a violet-haired dragon princess matching the first reference image with long flowing violet hair stirred by the dawn breeze, dressed in a simple commoner traveler tunic over her under-armor (not the formal royal armor), a thin desert face-cloth draped loosely around her neck (not yet pulled up), her ornate violet ceremonial spear strapped diagonally across her back as a single retained symbol of her royal blood, standing beside an open horse-drawn travel carriage and turned to look at the retainer behind her, her expression softening into a quiet involuntary smile of warmth at her loyal servant's clumsy but earnest words, on the right a young royal retainer matching the second reference image (early twenties Liam) with neatly combed dark hair with violet highlights and royal violet earnest eyes, wearing the formal Purple Dragon Kingdom retainer armor (violet-and-silver plate with intricate dragon-motif engravings, white ceremonial undertunic, royal purple cape with the kingdom silver dragon emblem), his slender ceremonial spear (named Shisetsu, the Purple Wing) held vertically at his side, his upper body bowed deeply forward in a formal vow gesture with one fist pressed against his chest in oath, his expression pained but resolute as he speaks the three-month promise, in the background the towering violet-stone gates of the Purple Dragon Kingdom castle (massive serpentine dragon reliefs carved on the gate columns, silver dragon banners flowing in the dawn breeze), morning mist drifting low, the sky transitioning from soft purple horizon to gold zenith with the seven prismatic streams of the genso flowing across the upper sky, anime fantasy illustration style with bittersweet loyal-vow atmosphere of a princess departing on a solo journey while her young retainer swears to retrieve her, royal violet and silver and dawn-gold color palette, wide cinematic horizontal composition with the carriage and gate framing the two figures.
+
+CRITICAL ANATOMY REQUIREMENTS:
+- Both characters with anatomically correct human hands of exactly five distinct well-formed fingers per hand, both arms in natural human poses with proper joint angles.
+- The retainer's right hand pressed in a fist against his chest in formal oath gesture, the left hand grips the spear shaft with all five fingers visible.
+- The princess's hands relaxed at her sides or one resting on the carriage door, all fingers properly defined.
+
+Aspect ratio 16:9, high detail.
+
+-----
+元画像から表情や姿勢は変わってOKです (ただしヴィルは「微笑み」、 リアムは「深く頭を下げた誓いの姿勢」 を維持してください)
 ```
 
 ---

@@ -4050,11 +4050,17 @@ function renderScene() {
   $("#story-progress").textContent = `${storyIdx + 1} / ${storyScenes.length}`;
   $("#story-scene-label").textContent = scene.label || '';
   $("#story-scene-label").style.display = scene.label ? '' : 'none';
-  // ヘッダの章メタにシーンラベルを追記 (例: "Season 1 — 第3章 / 2-1")
-  // シーン切替に追従して常時最新表示、 scene.label 無いシーン (プロローグ/エピローグ) は章メタのみ
+  // ヘッダの章メタにシーンラベルを追記 (例: "Season 1 — 第3章 / 2-1" / "...プロローグ" / "...エピローグ")
+  // シーン切替に追従して常時最新表示、 中表紙 (第○幕) は append しない
   const chapterInfo = STORY_FILES[currentStoryId];
   const baseMeta = chapterInfo ? chapterInfo.meta : '';
-  $("#story-meta").textContent = scene.label ? `${baseMeta} / ${scene.label}` : baseMeta;
+  let labelStr = scene.label;
+  if (!labelStr) {
+    const t = (scene.title || '');
+    if (t.startsWith('プロローグ')) labelStr = 'プロローグ';
+    else if (t.startsWith('エピローグ')) labelStr = 'エピローグ';
+  }
+  $("#story-meta").textContent = labelStr ? `${baseMeta} / ${labelStr}` : baseMeta;
   // タイトル: キャラ名リンク化 + ふりがな (sceneLabel 渡しで覚醒後リンク等の文脈切替対応)
   const titleEl = $("#story-scene-title");
   titleEl.innerHTML = applyFurigana(linkifyCharNames(escapeHtml(scene.title), scene.label));
@@ -4517,6 +4523,8 @@ const STORY_LOCATION_INLINE_CONFIG = {
     { scene: '2-11', marker: '光の中で、私の鎧が、変容した',      position: 'after',  img: '/images/locations/s1c2/ripple_saint_awakening_thumb.webp' },
   ],
   's1c3': [
+    // 1-2 リアム誓い、 三月の約束 (主従の絆 + 旅の制約成立)
+    { scene: '1-2',  marker: '不器用だけれど、 真っ直ぐな、 リアムらしい言葉だった', position: 'after',  img: '/images/locations/s1c3/liam_oath_thumb.webp' },
     // 2-1 ヴィル+アーシャ宿場町出会い (cutin から挿絵に格上げ)
     { scene: '2-1',  marker: 'アーシャと名乗ったその女',                  position: 'after',  img: '/images/locations/s1c3/asha_meeting_thumb.webp' },
     // 2-2 砂塵の襲撃: サハナ初登場、 双風刀シャマールで影喰いを斬る山場 (本文 bold削除に伴い marker 修正)
