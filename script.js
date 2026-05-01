@@ -790,39 +790,36 @@ function applyPull(result, opts) {
   }
 }
 
-// ────────────── 10連希少度計算 (多項分布) ──────────────
+// ────────────── 10連希少度計算 (B案: SSR以上数ベース、 二項分布) ──────────────
+// 2026-05-02 改訂 (野沢さん指示): 多項分布の exact distribution 計算は体感と乖離 (SR5体で「2.7% 36回に1回」等)
+// 「SSR以上の数」 を主軸に、 二項分布で算出 → 「SSR以上 X体 / 約N人に1人 / 上位X%」 のシンプル表示
 function factorial(n) {
   let r = 1;
   for (let i = 2; i <= n; i++) r *= i;
   return r;
 }
-function multinomialProb(nR, nSR, nSSR, nUR) {
-  const total = nR + nSR + nSSR + nUR;
-  const coef = factorial(total) / (factorial(nR) * factorial(nSR) * factorial(nSSR) * factorial(nUR));
-  return coef *
-    Math.pow(RATES.R, nR) *
-    Math.pow(RATES.SR, nSR) *
-    Math.pow(RATES.SSR, nSSR) *
-    Math.pow(RATES.UR, nUR);
+function _binomCoef(n, k) {
+  return factorial(n) / (factorial(k) * factorial(n - k));
 }
 
 function computeTenRollRarity(results) {
   const counts = { R: 0, SR: 0, SSR: 0, UR: 0, LR: 0 };
   for (const r of results) counts[r.tier]++;
-  // LRは極低確率なので多項計算時はURと合算して近似(R/SR/SSR/UR+LR の4項)
-  const thisP = multinomialProb(counts.R, counts.SR, counts.SSR, counts.UR + counts.LR);
-  // 今回と同等以下の確率を持つ組み合わせの合計（=「同等以上の珍しさ」確率）
+  // SSR以上 (SSR + UR + LR) の合算数で評価
+  const ssrPlusCount = counts.SSR + counts.UR + counts.LR;
+  // 二項分布: 単一抽選で SSR以上が出る確率
+  const pHigh = RATES.SSR + RATES.UR + (RATES.LR || 0);
+  // ぴったり ssrPlusCount 体出る確率 (exact)
+  const exactProb = _binomCoef(10, ssrPlusCount) * Math.pow(pHigh, ssrPlusCount) * Math.pow(1 - pHigh, 10 - ssrPlusCount);
+  // SSR以上 ≥ ssrPlusCount 体 出る確率 (累積補、「同等以上の珍しさ」)
   let rarerOrEqualProb = 0;
-  for (let nUR = 0; nUR <= 10; nUR++) {
-    for (let nSSR = 0; nSSR <= 10 - nUR; nSSR++) {
-      for (let nSR = 0; nSR <= 10 - nUR - nSSR; nSR++) {
-        const nR = 10 - nUR - nSSR - nSR;
-        const p = multinomialProb(nR, nSR, nSSR, nUR);
-        if (p <= thisP + 1e-15) rarerOrEqualProb += p;
-      }
-    }
+  for (let k = ssrPlusCount; k <= 10; k++) {
+    rarerOrEqualProb += _binomCoef(10, k) * Math.pow(pHigh, k) * Math.pow(1 - pHigh, 10 - k);
   }
-  const oneInN = thisP > 0 ? Math.round(1 / thisP) : Infinity;
+  // 「N人に1人」 = exactProb (ぴったり同じ SSR以上数の結果が出る頻度)
+  const oneInN = exactProb > 0 ? Math.round(1 / exactProb) : Infinity;
+  // 旧 thisP 互換 (一部箇所で参照される可能性、 SSR以上数ベースに置換)
+  const thisP = exactProb;
   // ランク判定: LRヒットは最上位、次にUR数、その後rarerOrEqualProbで区別
   let rank, rankClass;
   if (counts.LR >= 1) { rank = "LEGEND"; rankClass = "legend"; }
@@ -836,7 +833,7 @@ function computeTenRollRarity(results) {
   else if (counts.SR >= 4) { rank = "B+"; rankClass = "bplus"; }
   else if (counts.SR >= 2) { rank = "B"; rankClass = "b"; }
   else { rank = "C"; rankClass = "c"; }
-  return { thisP, rarerOrEqualProb, oneInN, rank, rankClass, counts };
+  return { thisP, rarerOrEqualProb, oneInN, rank, rankClass, counts, ssrPlusCount, exactProb };
 }
 
 // ────────────── HUD ──────────────
@@ -2359,15 +2356,16 @@ function showResult(results, best) {
   rarBox.appendChild(rankEl);
   const lineEl = document.createElement("div");
   lineEl.className = "rarity-line";
-  const oneInNStr = rar.oneInN >= 1e6 ? "100万回以上に1回" :
-                    rar.oneInN >= 1000 ? `約 ${(rar.oneInN/1000).toFixed(1)} 万回に1回`.replace(/\.0 万/, "万") :
-                    `約 ${rar.oneInN.toLocaleString()} 回に1回`;
+  // B案: 「SSR以上 X体」 を主軸表示
+  const oneInNStr = rar.oneInN >= 1e6 ? "100万人以上に1人" :
+                    rar.oneInN >= 1000 ? `約 ${(rar.oneInN/1000).toFixed(1)} 万人に1人`.replace(/\.0 万/, "万") :
+                    `約 ${rar.oneInN.toLocaleString()} 人に1人`;
   lineEl.innerHTML =
-    `<span>出現率 <b>${(rar.thisP * 100).toFixed(4)}%</b></span>` +
+    `<span>SSR以上 <b>${rar.ssrPlusCount}体</b></span>` +
     `<span class="dot">·</span>` +
     `<span>${oneInNStr}</span>` +
     `<span class="dot">·</span>` +
-    `<span>希少度 上位 <b>${(rar.rarerOrEqualProb * 100).toFixed(2)}%</b></span>`;
+    `<span>希少度 上位 <b>${(rar.rarerOrEqualProb * 100).toFixed(1)}%</b></span>`;
   rarBox.appendChild(lineEl);
 
   $("#result").classList.add("active");
@@ -5138,7 +5136,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260502b';
+const IMG_CACHE_VERSION = '20260502c';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
