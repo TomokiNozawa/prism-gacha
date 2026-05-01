@@ -2847,8 +2847,9 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   .feedback-btn { width: 100%; }
 }
 
-/* 設定モーダル内の要望リンクボタン */
-.settings-feedback-link {
+/* 設定モーダル内のリンクボタン (要望/履歴) — 共通スタイル */
+.settings-feedback-link,
+.settings-history-link {
   width: 100%;
   padding: 11px 14px;
   background: linear-gradient(135deg, rgba(95,255,212,0.10), rgba(200,125,255,0.10));
@@ -2859,9 +2860,22 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   text-align: left;
   transition: background 0.15s ease, border-color 0.15s ease;
 }
-.settings-feedback-link:hover {
+.settings-feedback-link:hover,
+.settings-history-link:hover {
   background: linear-gradient(135deg, rgba(95,255,212,0.20), rgba(200,125,255,0.20));
   border-color: rgba(95,255,212,0.4);
+}
+
+/* update-modal を「履歴閲覧モード」 で開いた時 (設定モーダルから) — 通知用UI を非表示にして履歴のみ見せる */
+.update-modal.history-only .update-badge,
+.update-modal.history-only .update-version,
+.update-modal.history-only .update-section-label,
+.update-modal.history-only #update-notes,
+.update-modal.history-only .update-history-toggle {
+  display: none !important;
+}
+.update-modal.history-only .update-title {
+  margin-bottom: 16px;
 }
 
 /* M4: オフライン保存セクション */

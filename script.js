@@ -6510,6 +6510,7 @@ function showPrismaeraUpdateModal(fromVer, toVer, changelog) {
 function dismissUpdateModal(reload) {
   const modal = document.getElementById('update-modal');
   if (!modal) return;
+  const isHistoryOnly = modal.classList.contains('history-only');
   try {
     if (_prismaeraTargetVersion) {
       localStorage.setItem(PRISMAERA_VERSION_LS_KEY, _prismaeraTargetVersion);
@@ -6517,11 +6518,66 @@ function dismissUpdateModal(reload) {
   } catch (e) {}
   modal.style.display = 'none';
   _unlockBodyScroll();
+  // 履歴閲覧モードの後始末 (タイトル戻し + クラス除去、 reload もしない)
+  if (isHistoryOnly) {
+    modal.classList.remove('history-only');
+    const titleEl = modal.querySelector('.update-title');
+    if (titleEl) titleEl.textContent = '新しいバージョンが届きました';
+    const histEl = document.getElementById('update-history');
+    if (histEl) histEl.style.display = 'none';
+    return;
+  }
   if (reload) {
     // PWA/ServiceWorkerキャッシュ破棄目的で location.reload(true)
     // (引数は新ブラウザで非対応でも location.reload() に fallback)
     try { location.reload(true); } catch (e) { location.reload(); }
   }
+}
+
+// 設定モーダルからアップデート履歴を任意タイミングで開く (2026-05-01)
+// update-modal を再利用するが「履歴閲覧モード」 として version 比較・閉じる時の reload を行わない
+function openVersionHistoryModal() {
+  const modal = document.getElementById('update-modal');
+  if (!modal) return;
+  // 履歴データ取得 (起動時に既に fetch 済みでなければ非同期取得)
+  const renderWith = (changelog) => {
+    if (!Array.isArray(changelog)) changelog = [];
+    // history-only モードフラグ (closeUpdateModal で reload しないため)
+    modal.classList.add('history-only');
+    _prismaeraTargetVersion = null;
+    // タイトル差し替え + version 表示・notes 非表示は CSS 側で対応
+    const titleEl = modal.querySelector('.update-title');
+    if (titleEl) titleEl.textContent = '📜 アップデート履歴';
+    const histEl = document.getElementById('update-history');
+    if (histEl) {
+      histEl.innerHTML = '';
+      changelog.forEach(entry => {
+        if (!entry) return;
+        const section = document.createElement('details');
+        section.className = 'update-history-entry';
+        const h = document.createElement('summary');
+        h.className = 'update-history-head';
+        h.textContent = 'v' + entry.version + ' (' + (entry.date || '') + ')';
+        section.appendChild(h);
+        const ul = document.createElement('ul');
+        (entry.notes || []).forEach(n => {
+          const li = document.createElement('li');
+          li.textContent = n;
+          ul.appendChild(li);
+        });
+        section.appendChild(ul);
+        histEl.appendChild(section);
+      });
+      histEl.style.display = 'block';
+    }
+    modal.style.display = 'flex';
+    _lockBodyScroll();
+  };
+  // version.json をその場で取得 (cache buster なし、 軽量)
+  fetch('/version.json?_t=' + Date.now())
+    .then(r => r.ok ? r.json() : null)
+    .then(j => renderWith(j && Array.isArray(j.changelog) ? j.changelog : []))
+    .catch(() => renderWith([]));
 }
 
 function toggleUpdateHistory() {
@@ -6612,6 +6668,9 @@ function openSettingsModal() {
             <div class="progress-text" id="settings-progress-text">0 / 0</div>
           </div>
           <div class="settings-offline-status" id="settings-offline-status"></div>
+        </div>
+        <div class="settings-section">
+          <button type="button" class="settings-history-link" onclick="closeSettingsModal();openVersionHistoryModal()">📜 アップデート履歴を見る</button>
         </div>
         <div class="settings-section">
           <button type="button" class="settings-feedback-link" onclick="closeSettingsModal();openFeedbackModal()">📨 ご意見・ご要望を送る</button>
