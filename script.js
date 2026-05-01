@@ -3750,18 +3750,29 @@ function _showChapterGallery(storyId) {
   if (!side) return;
   const outline = (typeof STORY_OUTLINE !== 'undefined') ? STORY_OUTLINE.find(c => c.id === storyId) : null;
   if (!outline) return;
-  // 場所画像を集約 (背景 + 挿絵)
+  // 場所画像を集約 (背景 + 挿絵) — ロック判定は maxReachedSceneLabel で行う
   const bgConf = (typeof LOCATION_CONFIG !== 'undefined') ? (LOCATION_CONFIG[storyId] || {}) : {};
   const inlineConf = (typeof STORY_LOCATION_INLINE_CONFIG !== 'undefined') ? (STORY_LOCATION_INLINE_CONFIG[storyId] || []) : [];
+  // 章の進捗: maxReachedSceneLabel = これまでに到達した最も先のシーン (戻っても保持)
+  const progress = (typeof state === 'object' && state && state.storyProgress) ? state.storyProgress[storyId] : null;
+  const isCompleted = !!(progress && progress.completed);
+  const maxOrd = isCompleted ? Infinity : _sceneLabelToOrd(progress && progress.maxReachedSceneLabel);
+  const lockOf = (sceneLabel) => {
+    if (isCompleted) return false;  // 完読すれば全解放
+    const ord = _sceneLabelToOrd(sceneLabel);
+    return (maxOrd < 0) || (ord > maxOrd);
+  };
   const locations = [];
   for (const sceneKey in bgConf) {
     if (bgConf[sceneKey] && bgConf[sceneKey].img) {
-      locations.push({ scene: sceneKey, kind: '背景', img: bgConf[sceneKey].img });
+      locations.push({ scene: sceneKey, kind: '背景', img: bgConf[sceneKey].img, locked: lockOf(sceneKey) });
     }
   }
   inlineConf.forEach(e => {
-    if (e && e.img) locations.push({ scene: e.scene, kind: '挿絵', img: e.img });
+    if (e && e.img) locations.push({ scene: e.scene, kind: '挿絵', img: e.img, locked: lockOf(e.scene) });
   });
+  // シーン順にソート (1-1, 1-2, ..., エピローグ)
+  locations.sort((a, b) => _sceneLabelToOrd(a.scene) - _sceneLabelToOrd(b.scene));
   // 該当章のキャラを POOL から抽出 (chapter === storyId)
   const chars = [];
   if (typeof POOL !== 'undefined') {
@@ -3785,12 +3796,20 @@ function _showChapterGallery(storyId) {
   }
   // 場所画像セクション
   if (locations.length > 0) {
+    const lockedCount = locations.filter(l => l.locked).length;
     html += `<div class="chapter-gallery-section chapter-gallery-section-loc">`;
     html += `<div class="chapter-gallery-section-title">🖼️ 場所</div>`;
+    if (lockedCount > 0 && !isCompleted) {
+      html += `<div class="chapter-gallery-lock-note">📖 未到達シーンの画像はロック中 (シーンを読むと解放)</div>`;
+    }
     html += `<div class="chapter-gallery-locations">`;
     locations.forEach((loc, idx) => {
-      html += `<div class="chapter-gallery-loc" data-img="${escapeHtml(loc.img)}" data-scene="${escapeHtml(loc.scene)}" data-idx="${idx}">`;
+      const cls = loc.locked ? 'chapter-gallery-loc locked' : 'chapter-gallery-loc';
+      html += `<div class="${cls}" data-img="${escapeHtml(loc.img)}" data-scene="${escapeHtml(loc.scene)}" data-idx="${idx}" data-locked="${loc.locked ? '1' : '0'}">`;
       html += `<img src="${escapeHtml(loc.img)}" alt="${escapeHtml(loc.scene)}" loading="lazy">`;
+      if (loc.locked) {
+        html += `<div class="chapter-gallery-loc-lockbadge">🔒</div>`;
+      }
       html += `<div class="chapter-gallery-loc-label"><span class="chapter-gallery-loc-kind">${escapeHtml(loc.kind)}</span> ${escapeHtml(loc.scene)}</div>`;
       html += `</div>`;
     });
@@ -3825,12 +3844,22 @@ function _showChapterGallery(storyId) {
     btn.addEventListener('click', () => applyTab(btn.dataset.tab));
   });
   // 場所画像 click → 拡大 (既存 openLocImageZoom 流用 + nav context で前後ナビ)
+  // ロック中の画像は click 無効、 toast で通知
+  // ナビゲーション対象は unlocked 画像のみに限定 (ロック画像をスキップ)
+  const visibleLocs = locations.filter(l => !l.locked);
   side.querySelectorAll('.chapter-gallery-loc').forEach((el) => {
     el.addEventListener('click', () => {
-      const idx = parseInt(el.dataset.idx, 10) || 0;
+      if (el.dataset.locked === '1') {
+        _showWorldMapToast('🔒 該当シーンを読むと解放されます');
+        return;
+      }
+      // ナビ対象は visibleLocs (unlocked のみ)、 該当の index を visibleLocs 内で再計算
+      const sceneKey = el.dataset.scene;
+      const visIdx = visibleLocs.findIndex(l => l.scene === sceneKey && l.img === el.dataset.img);
+      if (visIdx < 0) return;
       const thumbUrl = el.dataset.img;
       const fullUrl = thumbUrl.replace(/_thumb\.webp$/i, '.png');
-      _openLocImageZoom(fullUrl, { list: locations, index: idx });
+      _openLocImageZoom(fullUrl, { list: visibleLocs, index: visIdx });
     });
   });
   // キャラ click → キャラ詳細 (既存)
@@ -4583,8 +4612,10 @@ function renderScene() {
   // スクロール位置リセット
   const scroll = $("#story-scroll");
   if (scroll) scroll.scrollTop = 0;
-  // 進捗保存
-  saveStoryProgress(currentStoryId, storyIdx, storyScenes.length);
+  // 進捗保存 (シーンlabel も渡して maxReachedSceneLabel を更新)
+  const curScene = storyScenes[storyIdx];
+  const curSceneLabel = (curScene && curScene.label) || (curScene && curScene.title) || null;
+  saveStoryProgress(currentStoryId, storyIdx, storyScenes.length, curSceneLabel);
   // タップガイド: 章の1ページ目のみ表示
   _updateTapGuide(storyIdx === 0);
 }
@@ -5575,8 +5606,17 @@ function closeStory() {
   currentStoryPov = null;
 }
 
-// 進捗保存 (localStorage)
-function saveStoryProgress(storyId, idx, totalScenes) {
+// シーンlabel ('X-Y' 形式) を比較可能数値に変換 — '1-1'=1001, '2-3'=2003, subscene名は最後扱い
+function _sceneLabelToOrd(label) {
+  if (!label) return -1;
+  const m = String(label).match(/^(\d+)-(\d+)$/);
+  if (!m) return 999000;  // subscene title (例 'プリズマの黄昏') は章末扱い
+  return parseInt(m[1], 10) * 1000 + parseInt(m[2], 10);
+}
+
+// 進捗保存 (localStorage + state.storyProgress)
+// curSceneLabel: 現シーンの label ('X-Y' 等)、 maxReachedSceneLabel 更新用 (省略可、 後方互換)
+function saveStoryProgress(storyId, idx, totalScenes, curSceneLabel) {
   if (!storyId) return;
   // localStorage (旧形式・後方互換)
   try {
@@ -5588,10 +5628,21 @@ function saveStoryProgress(storyId, idx, totalScenes) {
   try {
     if (typeof state === 'object' && state) {
       state.storyProgress = state.storyProgress || {};
-      const total = totalScenes || (state.storyProgress[storyId] && state.storyProgress[storyId].totalScenes) || 0;
-      const wasCompleted = state.storyProgress[storyId] && state.storyProgress[storyId].completed;
+      const prev = state.storyProgress[storyId] || {};
+      const total = totalScenes || prev.totalScenes || 0;
+      const wasCompleted = prev.completed;
+      // maxReachedSceneLabel: 一度到達したシーンは戻っても保持 (単調増加)、 ロック判定はこれで行う
+      const prevMaxLabel = prev.maxReachedSceneLabel || null;
+      let newMaxLabel = prevMaxLabel;
+      if (curSceneLabel) {
+        const curOrd = _sceneLabelToOrd(curSceneLabel);
+        const prevMaxOrd = _sceneLabelToOrd(prevMaxLabel);
+        if (curOrd > prevMaxOrd) newMaxLabel = curSceneLabel;
+      }
       state.storyProgress[storyId] = {
         lastSceneIndex: idx,
+        lastSceneLabel: curSceneLabel || prev.lastSceneLabel || null,
+        maxReachedSceneLabel: newMaxLabel,
         totalScenes: total,
         lastReadAt: Date.now(),
         // 最終シーンに到達したら completed: true (一度立てたら戻さない)

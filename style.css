@@ -4948,6 +4948,35 @@ body.gasshuku-modal-open {
   margin-right: 4px;
   vertical-align: middle;
 }
+.chapter-gallery-loc.locked img {
+  filter: blur(8px) grayscale(0.6) brightness(0.5);
+}
+.chapter-gallery-loc.locked:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: none;
+  cursor: not-allowed;
+}
+.chapter-gallery-loc-lockbadge {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  pointer-events: none;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.85);
+  filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.6));
+}
+.chapter-gallery-lock-note {
+  font-size: 11px;
+  color: rgba(200, 180, 255, 0.75);
+  background: rgba(120, 100, 200, 0.12);
+  border: 1px solid rgba(200, 180, 255, 0.25);
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin: 0 0 10px;
+  letter-spacing: 0.02em;
+}
 
 /* 章マーカー active state (派閥 .active と同様の強調) */
 .world-chapter-marker.active circle:not(.chapter-pulse) {
