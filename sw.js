@@ -7,7 +7,7 @@
 //
 // HTML/JSON/Firebase API はキャッシュせず常にネットワーク優先 (更新即反映+認証/DBの鮮度維持)。
 
-const SW_VERSION = '20260501a';  // M1+M2+M3 導入: BGM プリキャッシュ + Range slice + 場所画像cache + LRU
+const SW_VERSION = '20260501b';  // S1C3 BGM 2曲追加 (prism-sands + prism-sahar)
 const STATIC_CACHE = `prismaera-static-${SW_VERSION}`;
 const BGM_CACHE    = `prismaera-bgm-${SW_VERSION}`;
 const LOC_CACHE    = `prismaera-loc-${SW_VERSION}`;
@@ -21,6 +21,8 @@ const PRECACHE_BGM = [
   '/assets/bgm/prism-church.mp3',
   '/assets/bgm/prism-aquasis.mp3',
   '/assets/bgm/prism-crimson.mp3',
+  '/assets/bgm/prism-sands.mp3',
+  '/assets/bgm/prism-sahar.mp3',
 ];
 
 // LRU上限 (entry数ベース、 サイズベースではない理由: Cache APIは個別sizeを取れないため)
