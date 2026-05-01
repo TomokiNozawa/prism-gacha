@@ -15,25 +15,29 @@
 
 - **基調**: 砂漠民族戦闘音楽 + 神話的スケール感
 - **ムード**: 勇壮 / 神秘 / 部族の力 / 古代の血脈
-- **テンポ**: 中速〜やや速 (BPM 100-120、 駆ける駱駝のような躍動感)
+- **テンポ**: アップテンポ (BPM 125-135、 全速で駆ける部族戦士の躍動感)
 - **構成**: 部族集結のホルン → 主題 (砂漠の風) → 戦闘 (古龍の鼓動) → 勝利の余韻
+
+> **🎯 野沢方針 (2026-05-01)**: BGMは基本アップテンポ系を好む (`feedback_bgm_uptempo.md`)。 派閥/戦闘テーマは BPM 120-140 を既定範囲に。
 
 ---
 
 ## Suno AI プロンプト (Style)
 
 ```
-Epic Middle Eastern tribal battle theme with ancient dragon mysticism, energetic and
-heroic. Featured instruments: bold brass horns (war-horn calls), powerful tribal drums
-(djembe + frame drum), sitar dynamic melody, kemenche (bowed lute) intense passages,
-qanun (zither) shimmering ornaments, masculine male choir chants in distant background
-(no actual lyrics, just stylized "Hai!" battle calls), ney flute soaring lead, deep
-gong impacts at climax, sand-shaker rhythmic backdrop.
-Atmosphere: desert tribe warriors charging across dunes, ancient dragon-king's spirit
-stirring beneath the sands, dragon-scale armor flashing in sunlight, banners of crimson
-and gold flowing in fierce desert wind.
-Emotional arc: gathering call → tribal march → battle clash → triumphant calm.
-BPM 110, key D minor with Phrygian dominant flavor (Middle Eastern color), bridge to
+Epic Middle Eastern tribal battle theme with ancient dragon mysticism, highly energetic
+and heroic with driving up-tempo momentum. Featured instruments: bold brass horns
+(war-horn calls), powerful tribal drums (djembe + frame drum + taiko-style hits),
+sitar dynamic melody with rapid runs, kemenche (bowed lute) intense passages, qanun
+(zither) shimmering ornaments, masculine male choir chants in distant background (no
+actual lyrics, just stylized "Hai!" battle calls), ney flute soaring lead, deep gong
+impacts at climax, sand-shaker rhythmic backdrop, driving bass percussion throughout.
+Atmosphere: desert tribe warriors charging at full speed across dunes, ancient dragon-king's
+spirit stirring beneath the sands, dragon-scale armor flashing in sunlight, banners of
+crimson and gold whipping in fierce desert wind.
+Emotional arc: rallying call → tribal sprint → battle clash → triumphant continuation
+(maintain up-tempo throughout, no slow-downs).
+BPM 130, key D minor with Phrygian dominant flavor (Middle Eastern color), bridge to
 Lydian dominant at climax for "ancient dragon mystic" lift,
 3:00 duration target, instrumental only, fantasy game faction-theme aesthetic.
 ```

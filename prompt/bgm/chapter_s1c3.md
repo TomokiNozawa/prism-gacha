@@ -13,24 +13,29 @@
 
 第3章のテーマ「血ではなく、 共に過ごした時間が家族」 を反映。 砂漠の広大さ、 古代神秘、 出会いと別れの哀愁を表現。 ヴィルとサハナが夜空の下で互いの孤独を打ち明ける山場 (3-3) のシーンに合う旋律であること。
 
-- **基調**: 砂漠系民族音楽 + ファンタジー
-- **ムード**: エキゾチック / 神秘的 / 哀愁 / 旅情
-- **テンポ**: 中速 (BPM 70-90、 ゆったりとした砂漠の歩み)
-- **構成**: 静かな導入 → 旅情の主題 → 山場 (盛り上がり) → 余韻 (静謐)
+- **基調**: 砂漠系民族音楽 + ファンタジー (アップテンポ寄り)
+- **ムード**: エキゾチック / 神秘的 / 旅情の躍動感
+- **テンポ**: アップテンポ (BPM 110-115、 駱駝が砂を蹴って進む駆動感)
+- **構成**: 駆動的な導入 → 旅情の主題 → 山場 (盛り上がり) → 余韻はテンポ維持で dynamics を落として表現
+
+> **🎯 野沢方針 (2026-05-01)**: BGMは基本アップテンポ系を好む (`feedback_bgm_uptempo.md`)。 章テーマも contemplative/slow 路線ではなく energetic mid-tempo に。 静謐シーンは BPM ではなく instrument density で表現。
 
 ---
 
 ## Suno AI プロンプト (Style)
 
 ```
-Middle Eastern desert fantasy orchestral, mystical and contemplative, slow-tempo nomadic
-journey theme. Featured instruments: sitar lead melody, oud harmonic backing, ney flute
-breaths, frame drum (daf) heartbeat rhythm, tabla accents, distant Persian female vocalize
-(wordless, ethereal), soft cello sustains, golden harp accents, faint sand-shaker percussion.
-Atmosphere: vast endless desert at twilight, ancient dragon ruins half-buried in sand,
-nomadic caravan crossing infinite dunes, two souls finding each other under starlight.
-Emotional arc: solitude → longing → revelation → peace.
-BPM 78, key D minor with Phrygian dominant flavor (Middle Eastern color),
+Middle Eastern desert fantasy orchestral with energetic forward momentum, mystical and uplifting
+nomadic journey theme. Featured instruments: sitar lead melody with driving phrasing, oud
+harmonic backing, ney flute soaring lines, frame drum (daf) energetic heartbeat rhythm,
+tabla rhythmic accents, distant Persian female vocalize (wordless, ethereal), cello pulse
+sustains, golden harp accents, sand-shaker percussion driving forward.
+Atmosphere: vast endless desert at golden hour, ancient dragon ruins half-buried in sand,
+nomadic caravan moving with purpose across infinite dunes, two souls finding each other
+under starlight, journey full of momentum and discovery.
+Emotional arc: setting out → forward journey → revelation → triumphant continuation
+(no slow-down, maintain forward motion throughout).
+BPM 110, key D minor with Phrygian dominant flavor (Middle Eastern color),
 3:00 duration target, instrumental only, fantasy game music aesthetic.
 ```
 
