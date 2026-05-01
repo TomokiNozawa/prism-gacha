@@ -7,7 +7,7 @@
 //
 // HTML/JSON/Firebase API はキャッシュせず常にネットワーク優先 (更新即反映+認証/DBの鮮度維持)。
 
-const SW_VERSION = '20260501l';  // v1.3.1k S1C1 背景画像8枚 3:4 再生成版 (LOC_CACHE 全 wipe で新画像反映)
+const SW_VERSION = '20260501o';  // v1.3.1o IMG_CACHE_VERSION + SW + cache buster 完全同期、 controllerchange 自動 reload 追加
 const STATIC_CACHE = `prismaera-static-${SW_VERSION}`;
 const BGM_CACHE    = `prismaera-bgm-${SW_VERSION}`;
 const LOC_CACHE    = `prismaera-loc-${SW_VERSION}`;
