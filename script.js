@@ -4934,12 +4934,12 @@ const BGM_LIST = [
   { id: 'dawn',    label: 'メインテーマ',     desc: 'Prism Dawn (夜明けの希望)',          duration: '2:49', file: '/assets/bgm/home.mp3' },
   { id: 'watch',   label: '第1章テーマ',      desc: 'Prism Watch (三柱の夜警)',           duration: '2:17', file: '/assets/bgm/prism-watch.mp3' },
   { id: 'tide',    label: '第2章テーマ',      desc: 'Prism Tide (虹の潮)',                 duration: '2:44', file: '/assets/bgm/prism-tide.mp3' },
-  { id: 'sands',   label: '第3章テーマ',      desc: 'Prism Sands (砂塵の鼓動)',           duration: '2:47', file: '/assets/bgm/prism-sands.mp3' },
+  { id: 'sands',   label: '第3章テーマ',      desc: 'Prism Sands (砂塵の鼓動)',           duration: '3:02', file: '/assets/bgm/prism-sands.mp3' },
   { id: 'rift',    label: '戦闘テーマ',        desc: 'Prismatic Rift Overture (虹裂の序曲)', duration: '3:08', file: '/assets/bgm/Prismatic Rift Overture.mp3' },
   { id: 'church',  label: '白焔教会テーマ',    desc: 'Prism Sanctus (白焔の祈り)',         duration: '3:09', file: '/assets/bgm/prism-church.mp3' },
   { id: 'aquasis', label: 'アクアシステーマ',  desc: 'Prism Abyss (深海の宮)',             duration: '2:59', file: '/assets/bgm/prism-aquasis.mp3' },
   { id: 'crimson', label: '紅玉海賊団テーマ',  desc: 'Prism Sailborn (紅潮の風)',          duration: '2:51', file: '/assets/bgm/prism-crimson.mp3' },
-  { id: 'sahar',   label: 'サハールテーマ',    desc: 'Prism Sahar (古龍の風)',             duration: '3:01', file: '/assets/bgm/prism-sahar.mp3' },
+  { id: 'sahar',   label: 'サハールテーマ',    desc: 'Prism Sahar (古龍の風)',             duration: '2:48', file: '/assets/bgm/prism-sahar.mp3' },
 ];
 const bgmAudio = document.getElementById("bgm-home");
 
