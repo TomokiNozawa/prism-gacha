@@ -4429,7 +4429,10 @@ const STORY_CUTIN_CONFIG = {
     // 2-11 波紋の聖女イザベルのキャラカットインは削除 (野沢指示: 場所画像 ripple_saint_awakening 挿絵で代替)
   ],
   's1c3': [
-    { scene: '3-1', charName: '古龍の語り部 ファラー' }, // 3-1 古代遺跡: ロリババア印象を強調
+    // 2-1 アーシャ初登場: 隊商長として商隊を仕切る登場シーン直後に cutin
+    { scene: '2-1', charName: '隊商長 アーシャ',         marker: 'アーシャと名乗ったその女' },
+    // 3-1 ファラー初登場: 「幼子が現れた」 の直後にロリババア印象を強調
+    { scene: '3-1', charName: '古龍の語り部 ファラー',   marker: '幼子が、 現れた' },
     // サハナ初登場 (2-2) は sand_shadeova_battle 挿絵で代替、 cutin不要
   ],
 };
@@ -4464,7 +4467,7 @@ const LOCATION_CONFIG = {
   's1c3': {
     // 各シーンの「印象深い1場面」 を 3:4 縦長背景画像として配置
     '1-1': { img: '/images/locations/s1c3/purple_dragon_palace_thumb.webp' },     // 玉座の間 (父王とヴィルの対話)
-    '1-2': { img: '/images/locations/s1c3/purple_dragon_palace_thumb.webp' },     // 城を出る (リアムと別れ)
+    // 1-2 城門前: 玉座の間と画的に乖離するため背景なし (旅立ち専用画像未生成)
     '2-1': { img: '/images/locations/s1c3/desert_caravan_thumb.webp' },           // 隊商に紛れて (アーシャの商隊)
     // 2-2 砂塵の襲撃: sand_shadeova_battle を挿絵化、 背景はグラデ (戦闘シーン動的)
     '2-3': { img: '/images/locations/s1c3/oasis_night_thumb.webp' },              // オアシスの夜 (サハナと焚き火)
@@ -4733,10 +4736,8 @@ function _buildCutinHtml(c) {
 }
 function injectStoryCutins(bodyHtml, sceneIdx) {
   const entries = STORY_CUTIN_CONFIG[currentStoryId] || [];
-  const charNames = entries
-    .filter(e => _firstAppearanceMap.get(e.charName) === sceneIdx)
-    .map(e => e.charName);
-  if (charNames.length === 0) return bodyHtml;
+  const sceneEntries = entries.filter(e => _firstAppearanceMap.get(e.charName) === sceneIdx);
+  if (sceneEntries.length === 0) return bodyHtml;
   const allChars = [
     ...((POOL && POOL.LR)  || []).map(c => ({ ...c, tier: 'LR' })),
     ...((POOL && POOL.UR)  || []).map(c => ({ ...c, tier: 'UR' })),
@@ -4744,21 +4745,35 @@ function injectStoryCutins(bodyHtml, sceneIdx) {
     ...((POOL && POOL.SR)  || []).map(c => ({ ...c, tier: 'SR' })),
     ...((POOL && POOL.R)   || []).map(c => ({ ...c, tier: 'R' })),
   ];
-  for (const charName of charNames) {
-    const c = allChars.find(x => x.name === charName);
+  for (const entry of sceneEntries) {
+    const c = allChars.find(x => x.name === entry.charName);
     if (!c) continue;
-    const tokens = charName.split(/[\s　]/);
-    const lastToken = tokens[tokens.length - 1];
-    const candidates = [charName, lastToken].filter((v, i, a) => v && a.indexOf(v) === i);
     let injected = false;
-    for (const cand of candidates) {
-      const esc = cand.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const re = new RegExp(`<p[^>]*>(?:(?!<\\/p>).)*?${esc}`);
-      const m = bodyHtml.match(re);
-      if (m && m.index >= 0) {
-        bodyHtml = bodyHtml.slice(0, m.index) + _buildCutinHtml(c) + bodyHtml.slice(m.index);
-        injected = true;
-        break;
+    // entry.marker 指定あり: marker文字列を含む <p> の **直後** に挿入 (位置を細かく制御したい時)
+    if (entry.marker) {
+      const markerIdx = bodyHtml.indexOf(entry.marker);
+      if (markerIdx >= 0) {
+        const closeP = bodyHtml.indexOf('</p>', markerIdx);
+        if (closeP >= 0) {
+          const insertAt = closeP + '</p>'.length;
+          bodyHtml = bodyHtml.slice(0, insertAt) + _buildCutinHtml(c) + bodyHtml.slice(insertAt);
+          injected = true;
+        }
+      }
+    } else {
+      // marker指定なし: char名を含む最初の <p> の **直前** に挿入 (従来挙動)
+      const tokens = entry.charName.split(/[\s　]/);
+      const lastToken = tokens[tokens.length - 1];
+      const candidates = [entry.charName, lastToken].filter((v, i, a) => v && a.indexOf(v) === i);
+      for (const cand of candidates) {
+        const esc = cand.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const re = new RegExp(`<p[^>]*>(?:(?!<\\/p>).)*?${esc}`);
+        const m = bodyHtml.match(re);
+        if (m && m.index >= 0) {
+          bodyHtml = bodyHtml.slice(0, m.index) + _buildCutinHtml(c) + bodyHtml.slice(m.index);
+          injected = true;
+          break;
+        }
       }
     }
     if (!injected) {
