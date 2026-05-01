@@ -4,25 +4,57 @@
 
 > **🎯 引き継ぎ規約**
 > - 出力ファイル: `assets/bgm/prism-sands.mp3`
-> - 想定 duration: 2:40 〜 3:00 (S1C2 prism-tide.mp3 = 2:44 と同等程度)
+> - **既存生成済み**: v1 (BPM 78、 contemplative) で生成 → `prism-sands.mp3` (2:47) として配置済
+> - **再生成用 v2** (BPM 110、 up-tempo): 野沢方針 2026-05-01 「やっぱアップテンポ系が好み」 反映、 v1 物足りない場合の再生成オプション
 > - script.js BGM_LIST 追加時に duration 計測 → mm:ss 固定値で埋める (`bash scripts/measure_bgm.sh`)
 
 ---
 
-## 楽曲コンセプト
+## 楽曲コンセプト (共通)
 
-第3章のテーマ「血ではなく、 共に過ごした時間が家族」 を反映。 砂漠の広大さ、 古代神秘、 出会いと別れの哀愁を表現。 ヴィルとサハナが夜空の下で互いの孤独を打ち明ける山場 (3-3) のシーンに合う旋律であること。
+第3章のテーマ「血ではなく、 共に過ごした時間が家族」 を反映。 砂漠の広大さ、 古代神秘、 出会いと別れの旅情を表現。 ヴィルとサハナが夜空の下で互いの孤独を打ち明ける山場 (3-3) のシーンに合う旋律であること。
+
+---
+
+## 🎵 v1 — Contemplative 原版 (BPM 78、 既存 `prism-sands.mp3` はこちら)
+
+- **基調**: 砂漠系民族音楽 + ファンタジー
+- **ムード**: エキゾチック / 神秘的 / 哀愁 / 旅情
+- **テンポ**: 中速 (BPM 70-90、 ゆったりとした砂漠の歩み)
+- **構成**: 静かな導入 → 旅情の主題 → 山場 (盛り上がり) → 余韻 (静謐)
+
+### Suno AI プロンプト (Style)
+
+```
+Middle Eastern desert fantasy orchestral, mystical and contemplative, slow-tempo nomadic
+journey theme. Featured instruments: sitar lead melody, oud harmonic backing, ney flute
+breaths, frame drum (daf) heartbeat rhythm, tabla accents, distant Persian female vocalize
+(wordless, ethereal), soft cello sustains, golden harp accents, faint sand-shaker percussion.
+Atmosphere: vast endless desert at twilight, ancient dragon ruins half-buried in sand,
+nomadic caravan crossing infinite dunes, two souls finding each other under starlight.
+Emotional arc: solitude → longing → revelation → peace.
+BPM 78, key D minor with Phrygian dominant flavor (Middle Eastern color),
+3:00 duration target, instrumental only, fantasy game music aesthetic.
+```
+
+### Suno AI プロンプト (Lyrics 欄)
+
+```
+[Instrumental]
+```
+
+---
+
+## 🎵 v2 — Up-tempo 版 (BPM 110、 野沢方針 2026-05-01)
+
+> 「やっぱアップテンポ系が好み」 を反映。 contemplative/slow を energetic forward momentum に切替、 旅情を保ちつつ駆動感を加える。 v1 が物足りない時の再生成用 (`feedback_bgm_uptempo.md`)。
 
 - **基調**: 砂漠系民族音楽 + ファンタジー (アップテンポ寄り)
 - **ムード**: エキゾチック / 神秘的 / 旅情の躍動感
 - **テンポ**: アップテンポ (BPM 110-115、 駱駝が砂を蹴って進む駆動感)
-- **構成**: 駆動的な導入 → 旅情の主題 → 山場 (盛り上がり) → 余韻はテンポ維持で dynamics を落として表現
+- **構成**: 駆動的な導入 → 旅情の主題 → 山場 → 余韻はテンポ維持で instrument density を落として表現 (BPM は落とさない)
 
-> **🎯 野沢方針 (2026-05-01)**: BGMは基本アップテンポ系を好む (`feedback_bgm_uptempo.md`)。 章テーマも contemplative/slow 路線ではなく energetic mid-tempo に。 静謐シーンは BPM ではなく instrument density で表現。
-
----
-
-## Suno AI プロンプト (Style)
+### Suno AI プロンプト (Style)
 
 ```
 Middle Eastern desert fantasy orchestral with energetic forward momentum, mystical and uplifting
@@ -39,17 +71,15 @@ BPM 110, key D minor with Phrygian dominant flavor (Middle Eastern color),
 3:00 duration target, instrumental only, fantasy game music aesthetic.
 ```
 
-## Suno AI プロンプト (Lyrics 欄)
+### Suno AI プロンプト (Lyrics 欄)
 
 ```
 [Instrumental]
 ```
 
-(歌詞なし、 完全インストゥルメンタル)
-
 ---
 
-## 用途
+## 用途 (共通)
 
 - **第3章 (s1c3) ストーリーモーダル開始時**: メインで流れる
 - **第3章ストーリー全シーン共通**: bgm autoplay
@@ -59,3 +89,14 @@ BGM_LIST 追加例:
 ```js
 { id: 'sands', label: '第3章テーマ', desc: 'Prism Sands (砂塵の鼓動)', duration: 'X:XX', file: '/assets/bgm/prism-sands.mp3' },
 ```
+
+---
+
+## 切替時の注意
+
+v2 で再生成する場合:
+1. Suno で v2 プロンプトを叩く → 出力 mp3 を Box 経由で work へ
+2. 既存 `prism-sands.mp3` をリネーム (`prism-sands_v1.mp3` 等で保管推奨) or 上書き
+3. `bash scripts/measure_bgm.sh` で duration 再計測 → script.js BGM_LIST の duration 値を更新
+4. sw.js SW_VERSION bump (cache 刷新)、 cache buster bump
+5. dev push → 動作確認 → main
