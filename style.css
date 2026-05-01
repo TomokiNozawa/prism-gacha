@@ -4647,28 +4647,25 @@ body.gasshuku-modal-open {
 }
 .world-map-canvas {
   position: relative;
-  overflow: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow: hidden;             /* Phase 2: zoom/pan 用、 既存overflow:autoスクロール廃止 */
+  touch-action: none;           /* pinch/drag を JS 側で完全制御 */
+  cursor: grab;
   background:
     radial-gradient(ellipse at 30% 30%, rgba(95, 255, 212, 0.06) 0%, transparent 40%),
     radial-gradient(ellipse at 70% 60%, rgba(200, 125, 255, 0.06) 0%, transparent 40%),
     linear-gradient(180deg, #0a1228 0%, #1a1538 100%);
 }
+.world-map-canvas:active { cursor: grabbing; }
 .world-map-canvas svg {
   display: block;
   width: 100%;
-  height: auto;
-  max-width: 1400px;
-  margin: 0 auto;
+  height: 100%;
 }
-@media (max-width: 700px) {
-  /* モバイル: SVG を 800px 固定幅にして横スクロール (テキストが読めるサイズを保つ) */
-  .world-map-canvas svg {
-    width: 800px;
-    max-width: none;
-    min-width: 800px;
-  }
+.world-zoom-layer {
+  transition: transform 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
 }
+.world-zoom-layer:active { transition: none; }  /* drag中はラグなし */
 .world-faction-node {
   cursor: pointer;
   transition: filter 0.18s ease;
@@ -4760,6 +4757,128 @@ body.gasshuku-modal-open {
 }
 .world-map-side-member.locked { opacity: 0.4; cursor: default; }
 .world-map-side-member.locked img { filter: grayscale(1); }
+
+/* ========== Phase 2: 章マーカー (主舞台ホットスポット) ========== */
+.world-chapter-marker {
+  cursor: pointer;
+  transition: filter 0.18s ease;
+}
+.world-chapter-marker:hover { filter: brightness(1.4) drop-shadow(0 0 12px rgba(255, 217, 122, 0.6)); }
+.world-chapter-marker circle:not(.chapter-pulse) {
+  fill: rgba(255, 217, 122, 0.85);
+  stroke: rgba(255, 255, 255, 0.95);
+  stroke-width: 3;
+}
+.world-chapter-marker .chapter-pulse {
+  fill: rgba(255, 217, 122, 0.25);
+  stroke: rgba(255, 217, 122, 0.7);
+  stroke-width: 2;
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: chapterMarkerPulse 2.6s ease-out infinite;
+}
+@keyframes chapterMarkerPulse {
+  0%   { transform: scale(0.85); opacity: 0.9; }
+  60%  { transform: scale(1.4);  opacity: 0;   }
+  100% { transform: scale(1.4);  opacity: 0;   }
+}
+.world-chapter-marker .chapter-icon {
+  font-size: 38px; text-anchor: middle;
+  pointer-events: none;
+  paint-order: stroke fill;
+  stroke: rgba(0,0,0,0.6); stroke-width: 2px;
+}
+.world-chapter-marker .chapter-label {
+  font-size: 22px; font-weight: 700;
+  fill: #1a1428; text-anchor: middle;
+  pointer-events: none;
+  paint-order: stroke fill;
+  stroke: rgba(255, 240, 200, 0.95); stroke-width: 4px; stroke-linejoin: round;
+}
+.world-chapter-marker.coming-soon circle:not(.chapter-pulse) {
+  fill: rgba(160, 160, 200, 0.45);
+  stroke: rgba(255, 255, 255, 0.5);
+  stroke-dasharray: 5 4;
+}
+.world-chapter-marker.coming-soon .chapter-pulse {
+  fill: rgba(160, 160, 200, 0.15);
+  stroke: rgba(160, 160, 200, 0.5);
+  animation-duration: 4s;
+}
+.world-chapter-marker.coming-soon .chapter-icon { opacity: 0.7; }
+
+/* ========== Phase 2: S2/S3 派閥ティザー (霧表現) ========== */
+.world-faction-teaser { cursor: pointer; }
+.world-faction-teaser:hover .teaser-fog { fill: rgba(180, 180, 220, 0.18); }
+.world-faction-teaser .teaser-fog {
+  fill: rgba(180, 180, 220, 0.08);
+  stroke: rgba(180, 180, 220, 0.25);
+  stroke-width: 2;
+  stroke-dasharray: 6 8;
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: teaserFogDrift 6s ease-in-out infinite;
+}
+@keyframes teaserFogDrift {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.08); }
+}
+.world-faction-teaser .teaser-core {
+  fill: rgba(80, 60, 100, 0.4);
+  stroke: rgba(200, 180, 255, 0.3);
+  stroke-width: 2;
+}
+.world-faction-teaser .teaser-q {
+  font-size: 56px; font-weight: 700;
+  fill: rgba(200, 180, 255, 0.85);
+  text-anchor: middle;
+  pointer-events: none;
+  paint-order: stroke fill;
+  stroke: rgba(0,0,0,0.7); stroke-width: 3px;
+}
+.world-faction-teaser .teaser-sub {
+  font-size: 16px; fill: rgba(200, 180, 255, 0.6);
+  text-anchor: middle;
+  pointer-events: none;
+  paint-order: stroke fill;
+  stroke: rgba(0,0,0,0.7); stroke-width: 2px;
+}
+
+/* ========== Phase 2: ズームコントロール ========== */
+.world-zoom-controls .zoom-btn {
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+.world-zoom-controls .zoom-btn:hover {
+  filter: brightness(1.5) drop-shadow(0 0 6px rgba(255, 217, 122, 0.4));
+}
+.world-zoom-controls .zoom-btn:hover circle {
+  fill: rgba(255, 217, 122, 0.25);
+}
+
+/* ========== Phase 2: ワールドマップ toast ========== */
+.world-map-toast {
+  position: absolute;
+  left: 50%; bottom: 24px;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(20, 25, 45, 0.95);
+  color: #ffd97a;
+  padding: 10px 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 217, 122, 0.4);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 5;
+  white-space: nowrap;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+.world-map-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
 /* 全モーダル共通の背景 scroll lock。 JS 側 (body.classList.add('modal-open')) と セットで機能する */
 /* iOS PWA scroll lock: 単純な overflow:hidden では効かないため、 JS で position:fixed + top:-scrollY をセット */
 body.modal-open {

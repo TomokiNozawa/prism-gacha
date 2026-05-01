@@ -3436,9 +3436,25 @@ $("#btn-gallery").addEventListener("click", openGallery);
 $("#btn-relations").addEventListener("click", openRelations);
 $("#btn-worldmap")?.addEventListener("click", openWorldMap);
 
-// ============ ワールドマップ (Phase 1) ============
-// 14派閥を世界地図風に配置 (FACTIONS の x,y 座標を流用)。 タップで右側に派閥詳細表示
+// ============ ワールドマップ (Phase 2) ============
+// Phase 1 (v1.2.3): 14派閥を世界地図風に配置 + 派閥タップで side panel
+// Phase 2 (v1.4.x): 章マーカー (主舞台にホットスポット、 タップで章へジャンプ) + S2 派閥ティザー (霧表現) + pinch-zoom/pan
 let _worldMapActiveFaction = null;
+let _worldMapZoomState = null; // { scale, tx, ty } セッション中保持
+
+// 章マーカー: 各章の主舞台座標。 公開済み章は openStory、 公開予定章 (releaseDate あり) は Coming Soon バッジ
+const STORY_CHAPTER_MARKERS = [
+  { storyId: 's1c1', label: '第1章', icon: '✨', x: 1330, y: 1130 }, // 星霊学院 academy 北西
+  { storyId: 's1c2', label: '第2章', icon: '🌊', x:  920, y: 1430 }, // アクアシス aquasis 南西
+  { storyId: 's1c3', label: '第3章', icon: '🐉', x: 1700, y: 1450 }, // 砂漠サハール (派閥未登録、 専用座標)
+  { storyId: 's1c4', label: '第4章', icon: '❄️', x: 1720, y:  130 }, // 凍土+空 (北方東部、 Coming Soon)
+];
+// S2/S3 派閥ティザー (霧表現): まだ実装されていない領域を「???」 で示す
+const STORY_FACTION_TEASER = [
+  { id: 'season2', label: '???', subLabel: '— Season 2 領域 —', x:  200, y: 1530 },
+  { id: 'season3', label: '???', subLabel: '— 始原の地 —',     x: 1900, y: 1530 },
+];
+
 function openWorldMap() {
   const m = document.getElementById('world-map');
   if (!m) return;
@@ -3513,6 +3529,8 @@ function renderWorldMap() {
   }));
   const factionsForMap = FACTIONS.map(f => factionMap[f.id]);
   let svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">`;
+  // Phase 2 zoom/pan layer: 全描画要素を内包、 transform で zoom/pan 制御
+  svg += `<g class="world-zoom-layer">`;
   // 装飾の defs: 大陸グラデ + 海洋 + 派閥ハロー
   svg += `<defs>
     <radialGradient id="land-grad" cx="50%" cy="48%" r="58%">
@@ -3597,8 +3615,71 @@ function renderWorldMap() {
       <text class="faction-count" y="${r+42}">${cnt}人</text>
     </g>`;
   });
+  // Phase 2: 章マーカー (主舞台に📖ホットスポット、 公開済はopenStory、 未公開はComing Soon)
+  STORY_CHAPTER_MARKERS.forEach(m => {
+    const isPublished = (typeof STORY_FILES !== 'undefined') && !!STORY_FILES[m.storyId];
+    const cls = isPublished ? 'world-chapter-marker' : 'world-chapter-marker coming-soon';
+    const cap = isPublished ? m.label : `${m.label} 近日`;
+    svg += `<g class="${cls}" data-story="${m.storyId}" transform="translate(${m.x},${m.y})">
+      <circle r="46" class="chapter-pulse" />
+      <circle r="38" />
+      <text class="chapter-icon" y="-4">${m.icon}</text>
+      <text class="chapter-label" y="22">${escapeHtml(cap)}</text>
+    </g>`;
+  });
+  // Phase 2: S2/S3 派閥ティザー (霧表現、 タップで Coming Soon toast)
+  STORY_FACTION_TEASER.forEach(t => {
+    svg += `<g class="world-faction-teaser" data-teaser="${t.id}" transform="translate(${t.x},${t.y})">
+      <circle r="80" class="teaser-fog" />
+      <circle r="60" class="teaser-core" />
+      <text class="teaser-q" y="20">${escapeHtml(t.label)}</text>
+      <text class="teaser-sub" y="100">${escapeHtml(t.subLabel)}</text>
+    </g>`;
+  });
+  svg += `</g>`; // close .world-zoom-layer
+  // ズームコントロール (zoom-layer の外、 viewBox 右上に固定)
+  svg += `<g class="world-zoom-controls" transform="translate(${W-180},80)">
+    <rect x="0" y="0" width="160" height="48" rx="24" fill="rgba(10,14,29,0.85)" stroke="rgba(200,180,255,0.3)" stroke-width="1.5"/>
+    <g class="zoom-btn" data-zoom="out" transform="translate(28,24)">
+      <circle r="18" fill="rgba(255,255,255,0.08)"/>
+      <text y="9" font-size="28" fill="#e8ecff" text-anchor="middle" pointer-events="none">−</text>
+    </g>
+    <g class="zoom-btn" data-zoom="reset" transform="translate(80,24)">
+      <circle r="18" fill="rgba(255,255,255,0.08)"/>
+      <text y="9" font-size="20" fill="#e8ecff" text-anchor="middle" pointer-events="none">⊙</text>
+    </g>
+    <g class="zoom-btn" data-zoom="in" transform="translate(132,24)">
+      <circle r="18" fill="rgba(255,255,255,0.08)"/>
+      <text y="9" font-size="28" fill="#e8ecff" text-anchor="middle" pointer-events="none">+</text>
+    </g>
+  </g>`;
   svg += `</svg>`;
   canvas.innerHTML = svg;
+  // Phase 2: 章マーカー click → 該当章を openStory (公開済のみ)
+  canvas.querySelectorAll('.world-chapter-marker').forEach(node => {
+    node.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const sid = node.dataset.story;
+      if (node.classList.contains('coming-soon')) {
+        _showWorldMapToast(`📅 ${sid.toUpperCase()} は近日公開予定`);
+        return;
+      }
+      closeWorldMap();
+      // closeWorldMap の unlock 後に openStory が lock し直す (タイミング差を避けて 1tick遅延)
+      setTimeout(() => { if (typeof openStory === 'function') openStory(sid); }, 50);
+    });
+  });
+  // Phase 2: S2/S3 ティザー click → Coming Soon toast
+  canvas.querySelectorAll('.world-faction-teaser').forEach(node => {
+    node.addEventListener('click', (e) => {
+      e.stopPropagation();
+      _showWorldMapToast('🌫️ 未公開領域 — 物語の進行で姿を現します');
+    });
+  });
+  // Phase 2: zoom/pan handler 設定 + zoom controls binding
+  const svgEl = canvas.querySelector('svg');
+  const zoomLayer = canvas.querySelector('.world-zoom-layer');
+  if (svgEl && zoomLayer) _setupWorldMapZoomPan(svgEl, zoomLayer);
   // クリックバインド
   canvas.querySelectorAll('.world-faction-node').forEach(node => {
     node.addEventListener('click', () => {
@@ -3654,6 +3735,143 @@ function _showFactionSide(fid) {
       const name = el.dataset.name;
       const c = getCharByName ? getCharByName(name) : null;
       if (c && typeof showCharDetail === 'function') showCharDetail(c);
+    });
+  });
+}
+
+// Phase 2: ワールドマップ用 toast (Coming Soon等) — 中央下に1.6秒表示
+let _worldMapToastTimer = null;
+function _showWorldMapToast(text) {
+  const canvas = document.getElementById('world-map-canvas');
+  if (!canvas) return;
+  let toast = canvas.querySelector('.world-map-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.className = 'world-map-toast';
+    canvas.appendChild(toast);
+  }
+  toast.textContent = text;
+  toast.classList.add('show');
+  if (_worldMapToastTimer) clearTimeout(_worldMapToastTimer);
+  _worldMapToastTimer = setTimeout(() => { toast.classList.remove('show'); }, 1600);
+}
+
+// Phase 2: pinch-zoom + pan + zoom controls
+// 仕様: scale 1〜2.5、 wheel/pinch で cursor anchored zoom、 drag で pan、 dblclick で reset
+//      派閥ノードや章マーカーの click は drag 移動量 4px未満の場合のみ通す
+function _setupWorldMapZoomPan(svg, layer) {
+  const W = 2000, H = 1600;
+  const MIN = 1.0, MAX = 2.5;
+  // セッション保持された state があれば復元
+  let scale = (_worldMapZoomState && _worldMapZoomState.scale) || 1;
+  let tx    = (_worldMapZoomState && _worldMapZoomState.tx)    || 0;
+  let ty    = (_worldMapZoomState && _worldMapZoomState.ty)    || 0;
+  // pan時の click 抑止 (pointermove 距離で判定)
+  let dragMoved = 0;
+  const update = () => {
+    // 範囲ガード: scale=1 の時は強制中央 (tx=ty=0)、 scale>1 は viewBox外に飛ばないようclamp
+    if (scale <= MIN) { scale = MIN; tx = 0; ty = 0; }
+    else {
+      const maxOff = (scale - 1) * W * 0.5;  // 横方向の最大はみ出し量 (中央基準)
+      const maxOffY = (scale - 1) * H * 0.5;
+      tx = Math.max(-maxOff, Math.min(maxOff, tx));
+      ty = Math.max(-maxOffY, Math.min(maxOffY, ty));
+    }
+    layer.setAttribute('transform', `translate(${tx},${ty}) scale(${scale})`);
+    _worldMapZoomState = { scale, tx, ty };
+  };
+  update();
+  // wheel zoom (PC)
+  svg.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const rect = svg.getBoundingClientRect();
+    const px = (e.clientX - rect.left) / rect.width * W;
+    const py = (e.clientY - rect.top)  / rect.height * H;
+    const factor = e.deltaY > 0 ? 0.9 : 1.1;
+    const newScale = Math.max(MIN, Math.min(MAX, scale * factor));
+    if (newScale === scale) return;
+    // anchor zoom: cursor 位置の SVG 座標を保持
+    tx = px - (px - tx) * (newScale / scale);
+    ty = py - (py - ty) * (newScale / scale);
+    scale = newScale;
+    update();
+  }, { passive: false });
+  // pointer drag + pinch
+  const pts = new Map();
+  let lastDist = null;
+  const onPointerDown = (e) => {
+    if (e.target.closest('.zoom-btn')) return; // ズームボタン上は capture しない
+    svg.setPointerCapture(e.pointerId);
+    pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    dragMoved = 0;
+  };
+  const onPointerMove = (e) => {
+    if (!pts.has(e.pointerId)) return;
+    const prev = pts.get(e.pointerId);
+    const dx = e.clientX - prev.x, dy = e.clientY - prev.y;
+    pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pts.size === 1) {
+      const rect = svg.getBoundingClientRect();
+      const sx = W / rect.width;
+      const sy = H / rect.height;
+      tx += dx * sx;
+      ty += dy * sy;
+      dragMoved += Math.hypot(dx, dy);
+      update();
+    } else if (pts.size === 2) {
+      const arr = [...pts.values()];
+      const dist = Math.hypot(arr[0].x - arr[1].x, arr[0].y - arr[1].y);
+      if (lastDist) {
+        const factor = dist / lastDist;
+        const newScale = Math.max(MIN, Math.min(MAX, scale * factor));
+        const rect = svg.getBoundingClientRect();
+        const cx = (arr[0].x + arr[1].x) / 2;
+        const cy = (arr[0].y + arr[1].y) / 2;
+        const px = (cx - rect.left) / rect.width * W;
+        const py = (cy - rect.top)  / rect.height * H;
+        tx = px - (px - tx) * (newScale / scale);
+        ty = py - (py - ty) * (newScale / scale);
+        scale = newScale;
+        update();
+        dragMoved += 5; // pinch 中は click 抑止
+      }
+      lastDist = dist;
+    }
+  };
+  const onPointerUp = (e) => {
+    pts.delete(e.pointerId);
+    if (pts.size < 2) lastDist = null;
+  };
+  svg.addEventListener('pointerdown',  onPointerDown);
+  svg.addEventListener('pointermove',  onPointerMove);
+  svg.addEventListener('pointerup',    onPointerUp);
+  svg.addEventListener('pointercancel', onPointerUp);
+  // drag距離が大きい時は派閥/章マーカー click を抑止 (capture 段階で stopImmediatePropagation)
+  svg.addEventListener('click', (e) => {
+    if (dragMoved > 4) { e.stopPropagation(); e.stopImmediatePropagation(); e.preventDefault(); }
+    dragMoved = 0;
+  }, true);
+  // dblclick で reset
+  svg.addEventListener('dblclick', (e) => {
+    e.preventDefault();
+    scale = 1; tx = 0; ty = 0;
+    update();
+  });
+  // ズームコントロール (+ / − / ⊙)
+  svg.querySelectorAll('.zoom-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const kind = btn.dataset.zoom;
+      if (kind === 'reset') { scale = 1; tx = 0; ty = 0; update(); return; }
+      const factor = (kind === 'in') ? 1.3 : (1 / 1.3);
+      const newScale = Math.max(MIN, Math.min(MAX, scale * factor));
+      if (newScale === scale) return;
+      // 中央 anchor zoom
+      const cx = W / 2, cy = H / 2;
+      tx = cx - (cx - tx) * (newScale / scale);
+      ty = cy - (cy - ty) * (newScale / scale);
+      scale = newScale;
+      update();
     });
   });
 }
