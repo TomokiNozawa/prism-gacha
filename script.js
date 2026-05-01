@@ -5346,7 +5346,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260502t';
+const IMG_CACHE_VERSION = '20260502u';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -5532,7 +5532,8 @@ function _persistOfflineBytes() {
 // 1 URL の容量を取得。 優先順位:
 //   (1) メモ済 _OFFLINE_URL_BYTES
 //   (2) Cache Storage に既にあれば response から Content-Length or blob().size
-//   (3) HEAD リクエスト (ネットワーク必要だが本体DLしないので軽い)
+//   (3) Range: bytes=0-0 で1バイトだけ GET → Content-Range の `bytes 0-0/<total>` を parse
+//       ※ Cloudflare Pages HEAD はContent-Length 返さない場合あるので Range が安全
 async function _fetchUrlBytes(url) {
   if (_OFFLINE_URL_BYTES.has(url)) return _OFFLINE_URL_BYTES.get(url);
   let bytes = 0;
@@ -5545,13 +5546,27 @@ async function _fetchUrlBytes(url) {
       else { try { bytes = (await r.clone().blob()).size || 0; } catch (e) {} }
     }
   } catch (e) {}
-  // (3) HEAD ネットワーク
+  // (3) Range request — 1byteだけ転送、 Content-Range から本体サイズを抜く
   if (bytes <= 0) {
     try {
-      const r = await fetch(url, { method: 'HEAD', credentials: 'omit', cache: 'no-store' });
-      if (r && r.ok) {
-        const cl = r.headers.get('content-length');
-        if (cl && /^\d+$/.test(cl)) bytes = parseInt(cl, 10);
+      const r = await fetch(url, {
+        method: 'GET',
+        credentials: 'omit',
+        cache: 'no-store',
+        headers: { 'Range': 'bytes=0-0' },
+      });
+      if (r) {
+        // Content-Range: "bytes 0-0/12345"
+        const cr = r.headers.get('content-range');
+        const m = cr && cr.match(/\/(\d+)\s*$/);
+        if (m) bytes = parseInt(m[1], 10);
+        // fallback: Range サポートなしで全body返ってきた場合は Content-Length
+        if (bytes <= 0) {
+          const cl = r.headers.get('content-length');
+          if (cl && /^\d+$/.test(cl)) bytes = parseInt(cl, 10);
+        }
+        // body は使わないので確実に解放
+        try { if (r.body && r.body.cancel) await r.body.cancel(); } catch (e) {}
       }
     } catch (e) {}
   }
@@ -6227,11 +6242,17 @@ let bgmCurrentId = localStorage.getItem("prism-bgm-current") || BGM_LIST[0].id;
 // v1.1.3: bgmMode (sequence/random/repeat) は shuffle(bool) + repeat('off'|'all'|'one') に分離
 let bgmShuffle = localStorage.getItem("prism-bgm-shuffle") === "on";
 let bgmRepeat = localStorage.getItem("prism-bgm-repeat") || 'off'; // 'off'|'all'|'one'
-// 直近 N 曲履歴 — シャッフル queue 再生成時に「最近再生した曲が新 queue 前半に来る」 違和感を防ぐ
-const BGM_RECENT_HISTORY_SIZE = 5;
+// 全曲履歴 — playlist 全曲を1度ずつ流すまで同じ曲が来ないようにする (野沢さん指示 2026-05-02)
+// 履歴上限 = 現在の playlist 長 - 1 (queue再生成時に「直近全曲-1」 が新queue先頭に来ないよう保護)
 let bgmRecentHistory = [];
 try { bgmRecentHistory = JSON.parse(localStorage.getItem("prism-bgm-recent") || '[]'); } catch (e) { bgmRecentHistory = []; }
 if (!Array.isArray(bgmRecentHistory)) bgmRecentHistory = [];
+function _bgmRecentLimit() {
+  // playlist (現在のチェック済) - 1 曲。 全曲一周保証。
+  let n = 0;
+  try { n = bgmCheckedList().length; } catch (e) { n = (typeof BGM_LIST !== 'undefined') ? BGM_LIST.length : 0; }
+  return Math.max(1, n - 1);
+}
 // v1.2.3: shuffle はキュー方式 (Fisher-Yates で全曲シャッフル → 順に消化 → 枯れたら再シャッフル)。直前曲との連続反復を構造的に防ぐ
 let bgmShuffleQueue = [];
 try { bgmShuffleQueue = JSON.parse(localStorage.getItem("prism-bgm-shuffle-queue") || '[]'); } catch (e) { bgmShuffleQueue = []; }
@@ -6502,18 +6523,21 @@ function bgmToggle() {
   else playBgm(bgmCurrentId);
 }
 
-// 再生開始した曲を recent history に記録 (LRU、 最新が末尾)
+// 再生開始した曲を recent history に記録 (LRU、 最新が末尾)。
+// 履歴上限は playlist 長 - 1 (= 全曲一周保証、 動的)。
 function _bgmRememberPlayed(id) {
   if (!id) return;
   bgmRecentHistory = bgmRecentHistory.filter(x => x !== id);
   bgmRecentHistory.push(id);
-  while (bgmRecentHistory.length > BGM_RECENT_HISTORY_SIZE) bgmRecentHistory.shift();
+  const limit = _bgmRecentLimit();
+  while (bgmRecentHistory.length > limit) bgmRecentHistory.shift();
   try { localStorage.setItem("prism-bgm-recent", JSON.stringify(bgmRecentHistory)); } catch (e) {}
 }
 
 // Fisher-Yates shuffle で id 配列をランダム並べ替え。
-// 改良 (2026-05-02): avoidFirstId だけでなく直近 BGM_RECENT_HISTORY_SIZE 曲を 「新queue 前半に置かない」 ようにする。
-// → 12曲中 5曲先まで「同じ曲」 が来ない感覚的均等性を確保 (野沢さん指摘「何曲か後にすぐ同じ曲が来る」)。
+// 改良 (2026-05-02): 直近 (playlist-1) 曲を覚え、 queue再生成時に新queue先頭がそのセットに含まれてたら
+// recent でない位置と swap → playlist が完全に一周するまで同じ曲が再登場しない。
+// 例 12曲なら、 直近11曲を avoid → 新queue先頭は 12曲ぶり (= 最後に出た 12 曲目だけ候補)。
 function _bgmGenShuffleQueue(list, avoidFirstId) {
   const ids = list.map(b => b.id);
   // Fisher-Yates 標準シャッフル
@@ -6524,23 +6548,17 @@ function _bgmGenShuffleQueue(list, avoidFirstId) {
   // 直近再生した曲 + avoidFirstId を「最近曲」 set に集める
   const recent = new Set(bgmRecentHistory);
   if (avoidFirstId) recent.add(avoidFirstId);
-  // queue が短すぎる (recent + 1 以下) なら spreading 諦め (やってもループするだけ)
-  if (ids.length > 2 && recent.size > 0 && ids.length > recent.size) {
-    const halfPoint = Math.ceil(ids.length / 2);
-    // 前半 (0..halfPoint) を走査、 recent 入りは 後半 (halfPoint..N-1) の non-recent 位置と swap
-    for (let i = 0; i < halfPoint; i++) {
-      if (!recent.has(ids[i])) continue;
-      // 後半で recent でない位置を探す
-      let swapIdx = -1;
-      for (let k = ids.length - 1; k >= halfPoint; k--) {
-        if (!recent.has(ids[k])) { swapIdx = k; break; }
+  // playlist 長と recent.size が等しいと avoid 不可 (全曲recent扱い) → spreading 諦め
+  if (ids.length > 1 && recent.size > 0 && recent.size < ids.length) {
+    // queue 先頭が recent ならば、 末尾側の non-recent 要素と swap (= 全曲一周保証)
+    if (recent.has(ids[0])) {
+      for (let k = ids.length - 1; k > 0; k--) {
+        if (!recent.has(ids[k])) {
+          [ids[0], ids[k]] = [ids[k], ids[0]];
+          break;
+        }
       }
-      if (swapIdx > 0) [ids[i], ids[swapIdx]] = [ids[swapIdx], ids[i]];
     }
-  }
-  // 追加保護: 万一先頭に avoidFirstId が来てたら 1 と swap (recent処理で大体は弾けてるはず)
-  if (avoidFirstId && ids.length > 1 && ids[0] === avoidFirstId) {
-    [ids[0], ids[1]] = [ids[1], ids[0]];
   }
   return ids;
 }
