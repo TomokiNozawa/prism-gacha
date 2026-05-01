@@ -7,7 +7,7 @@
 //
 // HTML/JSON/Firebase API はキャッシュせず常にネットワーク優先 (更新即反映+認証/DBの鮮度維持)。
 
-const SW_VERSION = '20260501o';  // v1.3.1o IMG_CACHE_VERSION + SW + cache buster 完全同期、 controllerchange 自動 reload 追加
+const SW_VERSION = '20260501p';  // v1.3.1p ワールドマップ Step B 背景画像取込 (world_map.png + 既存SVG装飾整理)
 const STATIC_CACHE = `prismaera-static-${SW_VERSION}`;
 const BGM_CACHE    = `prismaera-bgm-${SW_VERSION}`;
 const LOC_CACHE    = `prismaera-loc-${SW_VERSION}`;

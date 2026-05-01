@@ -3556,28 +3556,13 @@ function renderWorldMap() {
       <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
   </defs>`;
-  // 海洋 (背景)
-  svg += `<rect width="${W}" height="${H}" fill="url(#ocean-grad)"/>`;
-  svg += `<rect width="${W}" height="${H}" fill="url(#grid-faint)"/>`;
-  // ─── 大陸シェイプ (有機的な海岸線、 楕円より自然) ───
-  svg += `<path d="M 220,360 Q 80,800 200,1280 Q 400,1550 1000,1580 Q 1600,1550 1800,1280 Q 1920,800 1780,360 Q 1500,80 1000,140 Q 500,80 220,360 Z"
-    fill="url(#land-grad)" stroke="rgba(125,211,252,0.15)" stroke-width="3"/>`;
-  // 山脈 (西側 + 東側 連山) — 三角の繰り返し
-  let mountains = '';
-  for (let i = 0; i < 8; i++) {
-    const xw = 280 + i * 30;
-    mountains += `<polygon points="${xw-22},860 ${xw},810 ${xw+22},860" fill="rgba(180,140,200,0.15)" stroke="rgba(180,140,200,0.3)" stroke-width="1"/>`;
-    const xe = 1700 - i * 30;
-    mountains += `<polygon points="${xe-22},860 ${xe},810 ${xe+22},860" fill="rgba(180,140,200,0.15)" stroke="rgba(180,140,200,0.3)" stroke-width="1"/>`;
-  }
-  svg += mountains;
-  // 中央の森 (アイコン化された木) と中央湖
-  svg += `<circle cx="900" cy="900" r="60" fill="rgba(95,255,212,0.08)" stroke="rgba(95,255,212,0.25)" stroke-width="2"/>`;
-  svg += `<text x="900" y="918" font-size="48" text-anchor="middle">🌳</text>`;
-  // 海岸線 (大陸の南端、 波線2本)
-  svg += `<path d="M 200 1340 Q 500 1310 1000 1350 T 1820 1330" stroke="rgba(125,211,252,0.25)" stroke-width="3" fill="none"/>`;
-  svg += `<path d="M 200 1410 Q 500 1380 1000 1420 T 1820 1400" stroke="rgba(125,211,252,0.18)" stroke-width="2" fill="none"/>`;
-  svg += `<path d="M 200 1470 Q 500 1440 1000 1480 T 1820 1460" stroke="rgba(125,211,252,0.12)" stroke-width="2" fill="none"/>`;
+  // Phase 2 Step B (2026-05-01〜): 手描き風 ワールドマップ背景画像 (1792×1024) を最背面に配置
+  // 既存 SVG装飾 (大陸shape / 山脈 / 森 / 海岸線) は画像内に内包、 SVG側からは削除
+  // 派閥アイコン + 章マーカー + コンパスローズ + タイトル + S2/S3ティザー は画像の上に重ねる
+  svg += `<image href="${_appendImgCacheBuster('/images/locations/world_map.png')}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="xMidYMid slice" opacity="0.95"/>`;
+  // 派閥アイコン視認性向上: 画像の上に薄い暗オーバーレイ (グリッド + ocean tint)
+  svg += `<rect width="${W}" height="${H}" fill="url(#ocean-grad)" opacity="0.25"/>`;
+  svg += `<rect width="${W}" height="${H}" fill="url(#grid-faint)" opacity="0.5"/>`;
   // コンパスローズ (右下隅)
   svg += `<g transform="translate(1820, 230)">
     <circle r="60" fill="rgba(20,15,45,0.7)" stroke="rgba(255,217,122,0.4)" stroke-width="2"/>
@@ -5138,7 +5123,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260501o';
+const IMG_CACHE_VERSION = '20260501p';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
