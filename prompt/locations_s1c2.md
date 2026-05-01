@@ -272,23 +272,38 @@ Aspect ratio 16:9, high detail.
 
 ```
 A vast cinematic vertical illustration looking out over the deck of a fantasy
-pirate galleon called "Crimson Pearl" sailing on a moonless midnight sea —
-the night sky above shows absolutely no moon, only scattered cold pale stars
-hinting at an ominous absence, a subtle premonition of darker shadows to come.
-The deck stretches forward in the foreground with polished dark wooden planks,
-coiled ropes, and barrels. Tall masts rise into the upper portion of the frame
-with crimson sails barely visible against the starless midnight sky, edges
-just catching the faint warm glow of multiple hanging brass lanterns swaying
-gently from the masts and railings, casting amber pools of light onto the
-wooden boards. The sea stretches into pure black darkness on either side of
-the ship, only faint blue-green phosphorescence from passing waves visible
-along the hull. The composition emphasizes the vast empty sky above and the
-quiet wooden deck below, with the absent moon a held silence in the heart of
-the frame. No people visible, only the empty deck and quiet ship at peace
-before unseen danger. Anime fantasy game background painting, deep indigo
-and midnight black with warm amber lantern accents and faint phosphorescent
-sea glow, vertical composition with tall night sky dominating the upper two
-thirds and deck details in the lower third.
+pirate galleon called "Crimson Pearl" sailing on a moonless deep-evening sea —
+the night sky above shows absolutely no moon (a held silence at the heart of
+the frame, hinting at an ominous absence and a subtle premonition of darker
+shadows to come), but it is otherwise vibrant and alive: a richly visible band
+of the Milky Way stretches diagonally across the upper sky, dense fields of
+bright blue-white stars, soft auroral curtains of teal and rose at the high
+horizon catching the last memory of dusk, painting the heavens with a quiet
+luminous beauty that compensates for the missing moon.
+The deck stretches forward in the foreground with polished dark wooden planks
+warmly lit, coiled ropes, brass-bound barrels, and a varnished steering wheel
+catching highlights. Tall masts rise into the upper portion of the frame with
+fully visible crimson sails — billowing, edges catching strong warm light
+from many hanging brass lanterns (eight or more) glowing brightly along the
+masts, railings, and rigging, casting overlapping amber and golden pools of
+light across every plank, rope, and surface so the deck reads as warm and
+inviting rather than dim. A central brazier on the deck adds an additional
+warm orange glow.
+The sea on either side of the hull is alive with strong blue-green
+bioluminescent phosphorescence — bright glowing wave crests, drifting
+luminescent sea creatures, jellyfish-like motes of cyan light visible just
+below the surface, the bow's wake painting trails of vivid teal-emerald
+brilliance across the dark water.
+The composition emphasizes the layered light: warm amber deck below, vibrant
+star-filled sky above, glowing teal sea on both sides — a brightly readable
+night scene rather than a dark one.
+No people visible, only the empty deck and quiet ship at peace before
+unseen danger. Anime fantasy game background painting, dark navy and deep
+indigo base palette but well-illuminated with warm amber lantern light,
+vivid blue-green sea phosphorescence, and a luminous starlit sky, exposure
+balanced so all detail is clearly readable on a phone screen.
+Vertical composition with tall night sky dominating the upper half and
+deck details in the lower half.
 Aspect ratio 3:4, vertical orientation 1024x1536, high detail.
 
 元画像から表情や姿勢は変わってOKです
@@ -497,7 +512,7 @@ Aspect ratio 9:16, high detail.
 |---|---|---|---|---|
 | **2-1 教会の朝** | `church_morning.png` | l.33 | インライン挿絵 | 七色ステンドグラスでイザベル覚醒 (七色波紋) の伏線 |
 | **2-3 港町セラピア (夕暮れ)** | `serapia_sunset.png` | l.114 | インライン挿絵 | 陸の白×海の紅の対比、 後の橋渡し象徴 |
-| **2-4 紅玉号の夜** | `crimson_pearl_night.png` | l.166 | インライン挿絵 | 月のない夜 = 黒月の前兆を視覚的に暗示 |
+| **1-4 海賊船の夜** | `crimson_pearl_night.png` | l.166 | **背景画像 (3:4縦長)** | 月のない夜 = 黒月の前兆、 ただし船灯/星空/海の燐光で全体は明るく可読 |
 | **2-5 影喰いの群れ** | `shadeova_swarm.png` | l.213 | インライン挿絵 | 影喰い vs 七色 = 終盤決戦 (S1C7) の縮図 |
 | **2-11 波紋の聖女覚醒** | `ripple_saint_awakening.png` | l.479 | インライン挿絵 | UR覚醒、 七座級戦力の視覚化 (S1C7 黒月決戦の伏線) |
 | **4-2 朝焼けの港 (ミカと別れ、 章末)** | `serapia_dawn.png` | l.576 | **背景画像 (3:4縦長)** | 朝陽の七色 = 原虹七色が守られた象徴、 次章への希望、 s1c1/s1c3 と章末統一 |

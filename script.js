@@ -5346,7 +5346,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260502r';
+const IMG_CACHE_VERSION = '20260502s';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -5402,12 +5402,19 @@ function _prefetchChapterAssets(storyId) {
 //   - キャラ画像 (POOL の全 tier × 各キャラの原寸PNG + _thumb.webp)
 //   - 場所画像 (LOCATION_CONFIG + STORY_LOCATION_INLINE_CONFIG の img URL)
 //
-// 2026-05-02: カテゴリ別 (BGM / キャラ / 場所) に分割可能化。
+// 2026-05-02: カテゴリ別 (5分類) に分割。 内訳:
+//   bgm           : BGM全曲
+//   char_full     : キャラ画像 フル (.png)
+//   char_thumb    : キャラ画像 サムネイル (_thumb.webp)
+//   loc_full      : 場所画像 フル (.png 拡大表示用)
+//   loc_thumb     : 場所画像 サムネイル (_thumb.webp)
 // `_collectAssetUrlsByCategory()` がメイン、 `_collectAllAssetUrls()` は flat 配列の互換ラッパー。
 function _collectAssetUrlsByCategory() {
   const bgm = new Set();
-  const characters = new Set();
-  const locations = new Set();
+  const char_full = new Set();
+  const char_thumb = new Set();
+  const loc_full = new Set();
+  const loc_thumb = new Set();
   try {
     if (typeof BGM_LIST !== 'undefined') BGM_LIST.forEach(b => { if (b && b.file) bgm.add(b.file); });
   } catch (e) {}
@@ -5416,9 +5423,8 @@ function _collectAssetUrlsByCategory() {
       for (const tier of ['LR','UR','SSR','SR','R']) {
         (POOL[tier] || []).forEach(c => {
           if (!c || !c.img) return;
-          characters.add(c.img);
-          // _thumb.webp 版 (gallery で実際に使われるサイズ)
-          characters.add(c.img.replace(/\.png(\?.*)?$/i, '_thumb.webp$1'));
+          char_full.add(c.img);
+          char_thumb.add(c.img.replace(/\.png(\?.*)?$/i, '_thumb.webp$1'));
         });
       }
     }
@@ -5428,9 +5434,9 @@ function _collectAssetUrlsByCategory() {
       const conf = LOCATION_CONFIG[sid] || {};
       for (const k in conf) {
         if (conf[k] && conf[k].img) {
-          locations.add(conf[k].img);
-          // 原寸PNG (拡大表示用) も追加。 失敗しても _downloadAllAssets が無視
-          locations.add(conf[k].img.replace(/_thumb\.webp(\?.*)?$/i, '.png$1'));
+          loc_thumb.add(conf[k].img);
+          // 原寸PNG (拡大表示用) — 失敗しても _downloadAllAssets が無視
+          loc_full.add(conf[k].img.replace(/_thumb\.webp(\?.*)?$/i, '.png$1'));
         }
       }
     }
@@ -5439,21 +5445,23 @@ function _collectAssetUrlsByCategory() {
     for (const sid in STORY_LOCATION_INLINE_CONFIG) {
       (STORY_LOCATION_INLINE_CONFIG[sid] || []).forEach(e2 => {
         if (e2 && e2.img) {
-          locations.add(e2.img);
-          locations.add(e2.img.replace(/_thumb\.webp(\?.*)?$/i, '.png$1'));
+          loc_thumb.add(e2.img);
+          loc_full.add(e2.img.replace(/_thumb\.webp(\?.*)?$/i, '.png$1'));
         }
       });
     }
   } catch (e) {}
   return {
-    bgm: Array.from(bgm),
-    characters: Array.from(characters),
-    locations: Array.from(locations),
+    bgm:        Array.from(bgm),
+    char_full:  Array.from(char_full),
+    char_thumb: Array.from(char_thumb),
+    loc_full:   Array.from(loc_full),
+    loc_thumb:  Array.from(loc_thumb),
   };
 }
 function _collectAllAssetUrls() {
   const cats = _collectAssetUrlsByCategory();
-  return [...cats.bgm, ...cats.characters, ...cats.locations];
+  return [...cats.bgm, ...cats.char_full, ...cats.char_thumb, ...cats.loc_full, ...cats.loc_thumb];
 }
 
 // M4: 未DLアセットのみ並列DL — 既に SW Cache Storage にあるURLは skip
@@ -5506,25 +5514,68 @@ async function _downloadAllAssets(progressCb, urlList) {
   return { done, total, succeeded, skipped };
 }
 
-// M4: cache 件数チェック — 渡された URL list のうち caches.match で hit した件数を返す
+// M4: cache 件数 + 容量 を計測 — 渡された URL list のうち hit したものについて、
+// 件数と合計バイト数を返す。 容量取得は Content-Length 優先、 失敗時 blob().size。
+// 並列5本で全URL検査、 全URL同時 fetch しても Cache Storage 内なので軽量。
+async function _measureCacheBytes(urls) {
+  if (!urls || urls.length === 0) return { cached: 0, bytes: 0 };
+  let cached = 0, bytes = 0;
+  const CONCURRENCY = 5;
+  let idx = 0;
+  async function worker() {
+    while (idx < urls.length) {
+      const myIdx = idx++;
+      const url = urls[myIdx];
+      try {
+        const r = await caches.match(url);
+        if (!r) continue;
+        cached++;
+        // Content-Length が立っていればそれが最も軽い
+        const cl = r.headers && r.headers.get && r.headers.get('content-length');
+        if (cl && /^\d+$/.test(cl)) {
+          bytes += parseInt(cl, 10);
+        } else {
+          // fallback: blob で実体サイズ (重いが正確)
+          try {
+            const blob = await r.clone().blob();
+            bytes += blob.size || 0;
+          } catch (e) {}
+        }
+      } catch (e) {}
+    }
+  }
+  await Promise.all(Array.from({ length: CONCURRENCY }, () => worker()));
+  return { cached, bytes };
+}
+// 後方互換: 件数だけ
 async function _countCachedInUrls(urls) {
-  if (!urls || urls.length === 0) return 0;
-  const checks = await Promise.all(urls.map(async (url) => {
-    try { return (await caches.match(url)) ? 1 : 0; } catch (e) { return 0; }
-  }));
-  return checks.reduce((a, b) => a + b, 0);
+  return (await _measureCacheBytes(urls)).cached;
+}
+function _formatBytes(b) {
+  if (!b || b <= 0) return '0 MB';
+  const mb = b / 1024 / 1024;
+  if (mb >= 100) return `${mb.toFixed(0)} MB`;
+  if (mb >= 10)  return `${mb.toFixed(1)} MB`;
+  if (mb >= 1)   return `${mb.toFixed(2)} MB`;
+  // < 1 MB
+  const kb = b / 1024;
+  return `${kb.toFixed(0)} KB`;
 }
 
 // M4: 設定モーダルのDLボタン状態 refresh — SW Cache Storage 実態を確認して未DL数を計算、
 // 未DL>0 ならボタン表示+件数表示、 全DL済みならボタン非表示で「✅ 全X件保存済み」 のみ表示。
 // 「再ダウンロード」 ボタンは出さない (野沢方針: 押す必要ないボタンは見せない)。
 //
-// 2026-05-02: カテゴリ別 breakdown (BGM / キャラ / 場所) も合わせて更新。
+// 2026-05-02: 5カテゴリ細分化 + 容量 (MB) 表示。
+// breakdown UI で各カテゴリの 件数 + 容量 を表示、 個別DL用ボタン併設。
 const _OFFLINE_CAT_META = {
-  bgm:        { icon: '🎵', label: 'BGM' },
-  characters: { icon: '🧝', label: 'キャラ画像' },
-  locations:  { icon: '🗺️', label: '場所画像' },
+  bgm:        { icon: '🎵',  label: 'BGM' },
+  char_full:  { icon: '🧝',  label: 'キャラ画像 フル' },
+  char_thumb: { icon: '🌄',  label: 'キャラ サムネイル' },
+  loc_full:   { icon: '🗺️',  label: '場所画像 フル' },
+  loc_thumb:  { icon: '🌌',  label: '場所 サムネイル' },
 };
+const _OFFLINE_CAT_KEYS = ['bgm', 'char_full', 'char_thumb', 'loc_full', 'loc_thumb'];
 async function _refreshOfflineStatus(m) {
   if (!m) return;
   const dlBtn = m.querySelector('#settings-offline-dl');
@@ -5536,7 +5587,7 @@ async function _refreshOfflineStatus(m) {
   let cats, total = 0;
   try {
     cats = _collectAssetUrlsByCategory();
-    total = cats.bgm.length + cats.characters.length + cats.locations.length;
+    total = _OFFLINE_CAT_KEYS.reduce((s, k) => s + cats[k].length, 0);
     if (total === 0) {
       dlBtn.style.display = 'none';
       statusEl.textContent = '';
@@ -5546,25 +5597,23 @@ async function _refreshOfflineStatus(m) {
     statusEl.textContent = '';
     return;
   }
-  // カテゴリ別に並列でcache 件数集計
-  const [bgmCached, charCached, locCached] = await Promise.all([
-    _countCachedInUrls(cats.bgm),
-    _countCachedInUrls(cats.characters),
-    _countCachedInUrls(cats.locations),
-  ]);
-  const cached = bgmCached + charCached + locCached;
+  // カテゴリ別に並列で cache 件数 + バイト集計
+  const measures = await Promise.all(_OFFLINE_CAT_KEYS.map(k => _measureCacheBytes(cats[k])));
+  const breakdown = {};
+  let cached = 0, bytesTotal = 0;
+  _OFFLINE_CAT_KEYS.forEach((k, i) => {
+    breakdown[k] = { total: cats[k].length, cached: measures[i].cached, bytes: measures[i].bytes };
+    cached += measures[i].cached;
+    bytesTotal += measures[i].bytes;
+  });
   const missing = total - cached;
   // breakdown UI 更新
-  const breakdown = {
-    bgm:        { total: cats.bgm.length,        cached: bgmCached  },
-    characters: { total: cats.characters.length, cached: charCached },
-    locations:  { total: cats.locations.length,  cached: locCached  },
-  };
-  for (const cat of Object.keys(breakdown)) {
+  for (const cat of _OFFLINE_CAT_KEYS) {
     const row = m.querySelector(`.settings-offline-cat[data-category="${cat}"]`);
     if (!row) continue;
     const countEl = row.querySelector('.settings-offline-cat-count');
-    const catBtn = row.querySelector('.settings-offline-cat-btn');
+    const sizeEl  = row.querySelector('.settings-offline-cat-size');
+    const catBtn  = row.querySelector('.settings-offline-cat-btn');
     const t = breakdown[cat].total, c = breakdown[cat].cached, miss = t - c;
     if (countEl) {
       if (t === 0) {
@@ -5574,6 +5623,10 @@ async function _refreshOfflineStatus(m) {
       } else {
         countEl.innerHTML = `<b>${c}</b> / <b>${t}</b>`;
       }
+    }
+    if (sizeEl) {
+      if (t === 0 || c === 0) sizeEl.textContent = '';
+      else sizeEl.textContent = _formatBytes(breakdown[cat].bytes);
     }
     if (catBtn) {
       if (t === 0 || miss <= 0) {
@@ -5588,7 +5641,7 @@ async function _refreshOfflineStatus(m) {
   if (missing <= 0) {
     // 全DL済み: マスター ボタン非表示
     dlBtn.style.display = 'none';
-    statusEl.innerHTML = `✅ <b>全 ${total} 件</b> 保存済み (オフラインでも快適に動作します)`;
+    statusEl.innerHTML = `✅ <b>全 ${total} 件</b> 保存済み (合計 <b>${_formatBytes(bytesTotal)}</b>)`;
     // ストレージ使用量を併記 (取れる環境のみ)
     if (navigator.storage && navigator.storage.estimate) {
       try {
@@ -5604,7 +5657,7 @@ async function _refreshOfflineStatus(m) {
     dlBtn.style.display = '';
     if (cached > 0) {
       dlBtn.textContent = `📥 全 ${missing} 件をまとめてDL`;
-      statusEl.innerHTML = `保存済み <b>${cached}</b> / <b>${total}</b> 件 (未保存 ${missing} 件)`;
+      statusEl.innerHTML = `保存済み <b>${cached}</b> / <b>${total}</b> 件 (未保存 ${missing} 件 / 保存済 ${_formatBytes(bytesTotal)})`;
     } else {
       dlBtn.textContent = `📥 全 ${total} 件をまとめてDL`;
       statusEl.innerHTML = `<b>${total}</b> 件のアセット (下のカテゴリ別DLでも個別保存可能)`;
@@ -7920,19 +7973,36 @@ function openSettingsModal() {
               <span class="settings-offline-cat-icon">🎵</span>
               <span class="settings-offline-cat-label">BGM</span>
               <span class="settings-offline-cat-count">— / —</span>
+              <span class="settings-offline-cat-size"></span>
               <button type="button" class="settings-offline-cat-btn" data-category="bgm" hidden>📥</button>
             </div>
-            <div class="settings-offline-cat" data-category="characters">
+            <div class="settings-offline-cat" data-category="char_full">
               <span class="settings-offline-cat-icon">🧝</span>
-              <span class="settings-offline-cat-label">キャラ画像</span>
+              <span class="settings-offline-cat-label">キャラ画像 フル</span>
               <span class="settings-offline-cat-count">— / —</span>
-              <button type="button" class="settings-offline-cat-btn" data-category="characters" hidden>📥</button>
+              <span class="settings-offline-cat-size"></span>
+              <button type="button" class="settings-offline-cat-btn" data-category="char_full" hidden>📥</button>
             </div>
-            <div class="settings-offline-cat" data-category="locations">
-              <span class="settings-offline-cat-icon">🗺️</span>
-              <span class="settings-offline-cat-label">場所画像</span>
+            <div class="settings-offline-cat" data-category="char_thumb">
+              <span class="settings-offline-cat-icon">🌄</span>
+              <span class="settings-offline-cat-label">キャラ サムネイル</span>
               <span class="settings-offline-cat-count">— / —</span>
-              <button type="button" class="settings-offline-cat-btn" data-category="locations" hidden>📥</button>
+              <span class="settings-offline-cat-size"></span>
+              <button type="button" class="settings-offline-cat-btn" data-category="char_thumb" hidden>📥</button>
+            </div>
+            <div class="settings-offline-cat" data-category="loc_full">
+              <span class="settings-offline-cat-icon">🗺️</span>
+              <span class="settings-offline-cat-label">場所画像 フル</span>
+              <span class="settings-offline-cat-count">— / —</span>
+              <span class="settings-offline-cat-size"></span>
+              <button type="button" class="settings-offline-cat-btn" data-category="loc_full" hidden>📥</button>
+            </div>
+            <div class="settings-offline-cat" data-category="loc_thumb">
+              <span class="settings-offline-cat-icon">🌌</span>
+              <span class="settings-offline-cat-label">場所 サムネイル</span>
+              <span class="settings-offline-cat-count">— / —</span>
+              <span class="settings-offline-cat-size"></span>
+              <button type="button" class="settings-offline-cat-btn" data-category="loc_thumb" hidden>📥</button>
             </div>
           </div>
         </div>
