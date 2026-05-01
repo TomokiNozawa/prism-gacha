@@ -7,10 +7,12 @@
 //
 // HTML/JSON/Firebase API はキャッシュせず常にネットワーク優先 (更新即反映+認証/DBの鮮度維持)。
 
-const SW_VERSION = '20260501c';  // S1C3 BGM 2曲アップデート (野沢 v2 系再生成)
+const SW_VERSION = '20260501d';  // 「全アセットDL」 race condition 修正 (await cache.put + offline-saved cache)
 const STATIC_CACHE = `prismaera-static-${SW_VERSION}`;
 const BGM_CACHE    = `prismaera-bgm-${SW_VERSION}`;
 const LOC_CACHE    = `prismaera-loc-${SW_VERSION}`;
+// 「全アセットDL」 ボタンが直接書き込む cache (SW activate で削除されない、 SW_VERSION非依存)
+const OFFLINE_SAVED = 'prismaera-offline-saved';
 
 // プリキャッシュ対象 BGM — script.js BGM_LIST と同期 (新曲追加時はここも更新)
 const PRECACHE_BGM = [
@@ -30,6 +32,7 @@ const CACHE_LIMITS = {
   [STATIC_CACHE]: 300,
   [BGM_CACHE]:    20,    // 通常7曲、 将来拡張余地+将来削除前の世代を含めて20
   [LOC_CACHE]:    200,   // 場所画像は章追加で増えるが200で全章カバー余地あり
+  [OFFLINE_SAVED]: 500,  // 「全アセットDL」 用、 全アセット (BGM+キャラ+場所) をまとめて保存
 };
 
 const STATIC_EXT = /\.(?:css|js|png|jpg|jpeg|webp|svg|woff2?|ico)(?:\?|$)/i;
@@ -62,7 +65,8 @@ self.addEventListener('install', (event) => {
 // ───── activate: 古いcache掃除 + claim ─────
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
-    const validNames = new Set([STATIC_CACHE, BGM_CACHE, LOC_CACHE]);
+    // OFFLINE_SAVED は版を跨いで保持 (ユーザーが手動で DL したものを SW更新で消さない)
+    const validNames = new Set([STATIC_CACHE, BGM_CACHE, LOC_CACHE, OFFLINE_SAVED]);
     const keys = await caches.keys();
     await Promise.all(
       keys
@@ -128,8 +132,9 @@ async function handleAudio(req) {
   try {
     const res = await fetch(req.url, { cache: 'reload', credentials: 'omit' });
     if (res && res.ok && res.status === 200) {
-      // background で put + LRU trim (応答は遅らせない)
-      cache.put(req.url, res.clone()).then(() => trimCache(BGM_CACHE)).catch(() => {});
+      // put を await して race condition 回避 (「全アセットDL」 直後の caches.match でも確実に hit する)
+      try { await cache.put(req.url, res.clone()); } catch (e) {}
+      trimCache(BGM_CACHE);  // background
     }
     return res;
   } catch (e) {
@@ -177,15 +182,26 @@ async function makeRangeResponse(cached, rangeHeader) {
 async function staleWhileRevalidate(req, cacheName) {
   const cache = await caches.open(cacheName);
   const cached = await cache.match(req);
-  const networkPromise = fetch(req).then(res => {
+  // cached あり: 即返し、 background で revalidate (put は fire-and-forget でOK、 すでに hit するため)
+  if (cached) {
+    fetch(req).then(res => {
+      if (res && res.ok && res.type !== 'opaque') {
+        cache.put(req, res.clone()).then(() => trimCache(cacheName)).catch(() => {});
+      }
+    }).catch(() => {});
+    return cached;
+  }
+  // cache miss: network で取って put を await してから返す (race condition 回避)
+  try {
+    const res = await fetch(req);
     if (res && res.ok && res.type !== 'opaque') {
-      cache.put(req, res.clone())
-        .then(() => trimCache(cacheName))
-        .catch(() => {});
+      try { await cache.put(req, res.clone()); } catch (e) {}
+      trimCache(cacheName);  // background
     }
     return res;
-  }).catch(() => cached);
-  return cached || networkPromise;
+  } catch (e) {
+    return new Response('', { status: 504, statusText: 'Network error' });
+  }
 }
 
 // ───── LRU trim — entries が上限超えたら古い順で削除 ─────

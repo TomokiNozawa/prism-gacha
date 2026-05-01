@@ -4422,6 +4422,11 @@ function _collectAllAssetUrls() {
 // M4: 未DLアセットのみ並列DL — 既に SW Cache Storage にあるURLは skip
 // 既DL分の再fetchは無駄 + 失敗ケースを増やすので、 caches.match で実態確認 → 未cacheのみ fetch
 // progressCb(done, total, currentUrl) は 未DL分だけの進捗 (0/N)
+//
+// 2026-05-01: SW intercept待ちの race condition (cache.put 完了前に refresh が走る) で
+// DL後も「未保存N件」 が変わらない事故対策。 メインthread で明示的に
+// 'prismaera-offline-saved' cache に put することで、 SW intercept成否に関わらず
+// caches.match が確実に hit するよう defensive に書き込む。
 async function _downloadAllAssets(progressCb) {
   const allUrls = _collectAllAssetUrls();
   // 全URLを並列で cache 確認、 未cacheだけリスト化 (既DL分は再fetchしない)
@@ -4436,6 +4441,9 @@ async function _downloadAllAssets(progressCb) {
     // 全部 cache 済み → fetch 不要
     return { done: 0, total: 0, succeeded: 0, skipped };
   }
+  // メインthread から明示的に書き込む defensive cache (SW activate で削除されない、 SW_VERSION非依存)
+  let manualCache = null;
+  try { manualCache = await caches.open('prismaera-offline-saved'); } catch (e) {}
   const CONCURRENCY = 5;
   let idx = 0;
   async function worker() {
@@ -4444,7 +4452,13 @@ async function _downloadAllAssets(progressCb) {
       const url = urls[myIdx];
       try {
         const r = await fetch(url, { credentials: 'omit' });
-        if (r && r.ok) succeeded++;
+        if (r && r.ok) {
+          succeeded++;
+          // 明示的に cache に保存 (SW intercept時のrace condition回避)
+          if (manualCache) {
+            try { await manualCache.put(url, r.clone()); } catch (e) {}
+          }
+        }
       } catch (e) { /* 失敗無視 */ }
       done++;
       try { progressCb && progressCb(done, total, url); } catch (e) {}
