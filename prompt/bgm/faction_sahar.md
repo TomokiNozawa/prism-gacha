@@ -51,7 +51,7 @@ Lydian dominant at climax for "ancient dragon mystic" lift,
 
 ## 🎵 v2 — Up-tempo 版 ★現行 (BPM 130、 野沢方針 2026-05-01、 現 `prism-sahar.mp3` 2:48 はこれ)
 
-> 「やっぱアップテンポ系が好み」 を反映 (`feedback_bgm_uptempo.md`)。 派閥/戦闘テーマ既定範囲 (BPM 120-140) に揃えた版。 **野沢が v1 から差し替えて運用中**。
+> 「やっぱアップテンポ系が好み」 を反映 (`feedback_bgm_uptempo.md`)。 派閥/戦闘テーマ既定範囲 (BPM 120-140) に揃えた版。 **野沢さんが v1 から差し替えて運用中**。
 
 - **基調**: 砂漠民族戦闘音楽 + 神話的スケール感
 - **ムード**: 勇壮 / 神秘 / 部族の力 / 古代の血脈

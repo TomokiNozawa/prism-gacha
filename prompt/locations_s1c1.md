@@ -514,7 +514,7 @@ Aspect ratio 16:9, high detail.
 ## 使い方メモ
 
 - **コピペ完結**: 各 ``` ブロック内の英語プロンプトをそのまま ChatGPT (DALL-E 3) にコピペ → そのまま画像生成可能 (`Aspect ratio 3:4, vertical orientation 1024x1536, high detail.` まで本文に含めてある、 追記不要)
-- **比率方針 (野沢確定 2026-04-30、 2026-05-01 patch)**: 背景画像 = **3:4 縦長 (1024×1536)** 統一 (旧 9:16 から更新、 ChatGPT/DALL-E 3 の縦長標準サイズに合わせて再生成)
+- **比率方針 (野沢さん確定 2026-04-30、 2026-05-01 patch)**: 背景画像 = **3:4 縦長 (1024×1536)** 統一 (旧 9:16 から更新、 ChatGPT/DALL-E 3 の縦長標準サイズに合わせて再生成)
 - **添付画像 (キャラリファレンス)**: 各セクションの「添付画像」 欄記載のキャラ画像を ChatGPT に手動添付してから生成。 添付があると顔立ち・衣装が安定する
 - **生成画像の保存先**: `/c/Users/t2262/prism-gacha-work/images/locations/s1c1/{ファイル名}.png`
 - **サムネ化**: 生成完了後、 `images/locations/s1c1/{name}_thumb.webp` を Pillow Lanczos で自動生成 (Claude が生成スクリプト実行)

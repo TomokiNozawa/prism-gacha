@@ -219,4 +219,4 @@ Aspect ratio 16:9, high detail.
 | ヴォイドラ眷属 | S1C7 / S2C5 | ヴォイドラ直属の上位影喰い、 知性あり |
 | 「無」 (concept) | S3C5 無の到来 | 全色を呑む究極存在、 影喰いとは別系統だが類縁 |
 
-ストーリー進行に応じて随時追加。 outline.md と本文を踏まえて Claude が生成、 野沢が ChatGPT で画像化。
+ストーリー進行に応じて随時追加。 outline.md と本文を踏まえて Claude が生成、 野沢さんが ChatGPT で画像化。

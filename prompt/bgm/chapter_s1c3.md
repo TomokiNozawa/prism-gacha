@@ -47,7 +47,7 @@ BPM 78, key D minor with Phrygian dominant flavor (Middle Eastern color),
 
 ## 🎵 v2 — Up-tempo 版 ★現行 (BPM 110、 野沢方針 2026-05-01、 現 `prism-sands.mp3` 3:02 はこれ)
 
-> 「やっぱアップテンポ系が好み」 を反映 (`feedback_bgm_uptempo.md`)。 contemplative/slow を energetic forward momentum に切替、 旅情を保ちつつ駆動感を加える。 **野沢が v1 から差し替えて運用中**。
+> 「やっぱアップテンポ系が好み」 を反映 (`feedback_bgm_uptempo.md`)。 contemplative/slow を energetic forward momentum に切替、 旅情を保ちつつ駆動感を加える。 **野沢さんが v1 から差し替えて運用中**。
 
 - **基調**: 砂漠系民族音楽 + ファンタジー (アップテンポ寄り)
 - **ムード**: エキゾチック / 神秘的 / 旅情の躍動感
