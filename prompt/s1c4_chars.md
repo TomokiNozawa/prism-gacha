@@ -6,8 +6,9 @@ POV: アルテミス (既存 UR `dragon_emperor.png`、 龍国十国の覇者)
 - ニーヴル: `frozen tundra under pale blue moonlight`
 - ゼノニア: `steampunk floating fortress sky with brass cogs`
 
-**tier配分**: UR 2 / SSR 3 / SR 3 / R 2 = 10体 (s1c3 と同規模、 章規模圧縮)
-**派閥分け**: ニーヴル 6体 (UR1+SSR2+SR2+R1) + ゼノニア 4体 (UR1+SSR1+SR1+R1)
+**tier配分** (2026-05-01 outline.md 元構想 +20体に更新): UR 2 / SSR 5 / SR 5 / R 3 = **20体**
+**派閥分け**: ニーヴル 11体 (UR1+SSR3+SR3+R2 + 補助1) + ゼノニア 9体 (UR1+SSR2+SR2+R1 + 補助1)
+※ 当初 10体構成だったが outline.md「規模20キャラ」 整合のため +10体追加 (野沢さん指摘 2026-05-01)
 
 **UR2体の構成**:
 - UR10 グレイル (氷帝): 第三の覇者候補、 アルテミスと一騎打ちで引き分け、 互いを認め合う山場の相手 → **S2 龍帝退位後の継承候補1人 (outline.md S1C4伏線「次に龍を譲る相手」)**。 凍土の覇王オーラ + 氷の双剣
@@ -149,18 +150,158 @@ anime-style full-body portrait of a young sky-fortress girl 12-13 years old name
 
 ---
 
+---
+
+## 【追加 +10体】 outline.md 元構想 20体整合 (2026-05-01 追加)
+
+ニーヴル +5体 (SSR2 / SR2 / R1) + ゼノニア +5体 (SSR2 / SR2 / R1)。 既存10体と合算して 20体。
+
+---
+
+### 11. `ssr_22_ice_regent.png` — 摂政 ヴァルキ（氷霊王国ニーヴル・氷の儀礼笏・先代右腕・凍土外交）
+
+**派閥**: 氷霊王国ニーヴル / **役割**: グレイル先代 (前帝) の右腕、 凍土外交を司る摂政、 グレイル即位以降は補佐に回る / **武器**: 氷の儀礼笏ファルキル (儀礼武器、 凍気を放つ象徴) / **設定**: 28歳、 銀の長髪を編み込み、 知略の女性政治家、 グレイルへの忠誠は揺るがない
+
+```
+anime-style full-body portrait of a young ice regent woman 28 years old named Valki, fair pale skin with a cool icy luminance, long silver-white hair intricately braided down her back with frost-crystal hairpins, sharp intelligent pale-cyan eyes radiating composed political acumen, ornate ice regent ceremonial attire — pale-blue formal court robe with extensive silver and white embroidery of frost-crystal patterns and the Niiruru ice-emblem, layered ivory inner robe with high collar, deep-navy ceremonial overcoat draping behind her, ornate silver-threaded waist sash, white silver-trimmed ceremonial boots, multiple silver bangles and a frost-crystal pendant on her chest, holding a tall ornate silver ceremonial scepter named Falkil topped with a faceted pale-blue ice crystal radiating gentle prismatic frost light, dignified poised stance like a politician in a moment of state council, expression of calm composed authority, frozen tundra under pale blue moonlight with the ice palace of Niiruru visible in the distance and the seven prismatic streams of the genso flowing through the moonlit night sky, cinematic rim lighting with cool silver-blue glow and crystalline frost particles, detailed linework, high-quality illustration, CRITICAL ANATOMY REQUIREMENTS: anatomically correct human hands with exactly five distinct well-formed fingers per hand, the hand gripping the scepter shows all five fingers firmly around the shaft, both arms in natural human poses with proper joint angles, original character, no logos, no text, no watermark
+
+元画像から表情や姿勢は変わってOKです
+```
+
+---
+
+### 12. `ssr_23_north_swordmaster.png` — 北方剣聖 ハグル（氷霊王国ニーヴル・氷剣双剣ヘルファング・グレイル剣師・古代氷霊の血）
+
+**派閥**: 氷霊王国ニーヴル / **役割**: グレイルの剣師、 古代氷霊の血を強く引く者で年齢曖昧、 26-27歳の若き剣聖。 グレイル即位後も剣の指南役を続ける / **武器**: 氷剣双剣ヘルファング (二振りの長剣、 ニフルとヘイルの先代型) / **設定**: 古龍の血を引く者と同じく実年齢曖昧、 寡黙、 弟子グレイルへの深い信頼
+
+```
+anime-style full-body portrait of a young north sword saint man 26-27 years old named Hagul with the strong blood of ancient ice spirits making his presence ambiguous beyond his apparent age, fair pale skin with a cool icy luminance, sleek shoulder-length silver-white hair flowing with frost particles, sharp piercing pale-cyan eyes that hold a gravitas beyond his years, faint frost-rune mark on his temple, north sword master attire — pale-blue layered tunic with white fur trim and silver chest piece engraved with frost-crystal patterns, layered deep-navy mantle with frost-touched fur lining, sturdy silver-trimmed leather warrior boots, leather forearm guards, holding twin long ice-blue swords named Hellfang one in each hand with frost vapor drifting from each blade in a poised guard stance, dynamic composed sword saint stance like a young master rooted in his craft, frozen tundra under pale blue moonlight with the snowy training ground visible behind him and the seven prismatic streams of the genso flowing through the moonlit night sky, cinematic rim lighting with cool silver-blue glow and crystalline snow particles, composed stoic expression with the depth of an ancient master in a young face, detailed linework, high-quality illustration, CRITICAL ANATOMY REQUIREMENTS: anatomically correct human hands with exactly five distinct well-formed fingers per hand, both hands gripping the twin sword hilts firmly with all five fingers visible and properly positioned, both arms in natural combat-ready poses with proper joint angles, original character, no logos, no text, no watermark
+
+元画像から表情や姿勢は変わってOKです
+```
+
+---
+
+### 13. `ssr_24_sky_scholar.png` — 空挺城首席学者 ゼピル（空挺城ゼノニア・蒸気魔導書+羅針盤・ヴァーレの師・神童学者）
+
+**派閥**: 空挺城ゼノニア / **役割**: ゼノニア機械工学の理論を確立した若き神童学者、 ヴァーレ女皇の師、 S2C3「沈黙の塔」 機械文明覚醒の理論家 / **武器**: 蒸気魔導書 + 真鍮羅針盤 (戦闘では電撃の魔導と機械式分析を併用) / **設定**: 28歳、 学者風の落ち着き、 細身の眼鏡 (技術を解析する象徴)
+
+```
+anime-style full-body portrait of a young prodigy sky-fortress chief scholar man 28 years old named Zepil, fair skin with a warm peach undertone, neatly combed chestnut-brown hair with brass-rimmed monocle goggles pushed up on his forehead, intelligent emerald-green eyes glowing with scholarly insight behind small round brass-rimmed eyeglasses, ornate steampunk scholar attire — long deep-emerald scholar coat with extensive brass embroidery and brass clockwork buttons, ivory undertunic with high collar and brass cufflinks, deep-emerald slim trousers tucked into knee-high polished brass-buckled boots, multiple brass rings on his fingers, holding a leather-bound steam-magic tome named Aetherion in one hand with rainbow runes glowing on its open pages and an ornate brass mechanical compass in the other hand with prismatic rainbow light radiating from its rotating gears, dignified composed scholar stance like a young theorist mid-lecture, expression of intelligent calm authority of a young master scholar, steampunk floating fortress sky with brass cogs with the great library of Zenonia visible in the background and the seven prismatic streams of the genso flowing through the warm sunset sky, cinematic rim lighting with warm sunset amber glow and brass dust particles, detailed linework, high-quality illustration, CRITICAL ANATOMY REQUIREMENTS: anatomically correct human hands with exactly five distinct well-formed fingers per hand, both hands properly positioned all five fingers visible (one holding the tome, the other holding the compass), both arms in natural human poses with proper joint angles, original character, no logos, no text, no watermark
+
+元画像から表情や姿勢は変わってOKです
+```
+
+---
+
+### 14. `ssr_25_brass_foreman.png` — 真鍮の女将 ハーニア（空挺城ゼノニア・大型レンチハンマー・若き工房長・ベルの師匠）
+
+**派閥**: 空挺城ゼノニア / **役割**: ゼノニア整備工房の親方、 ベル整備士の師匠、 ガリオン総監の蒸気砲鎧の整備担当 / **武器**: 大型レンチハンマー (整備工具兼戦闘武器、 重撃で蒸気を散らす) / **設定**: 25-26歳、 銅赤のショートカット、 たくましい工房長気質、 ヴァーレへの信頼厚い
+
+```
+anime-style full-body portrait of a young brass foreman woman 25-26 years old named Hania, fair skin with a warm peach undertone with subtle soot smudges on her cheek and forearms, sleek copper-red short bob hair with brass goggles pushed up on her forehead, sharp confident emerald-green eyes radiating workshop master authority, ornate steampunk foreman attire — fitted deep-emerald work jacket with rolled-up sleeves and brass embroidered collar, brown leather chest harness with multiple tool loops and brass pressure gauges, fitted brown work pants reinforced at the knees with leather patches, knee-high brown leather boots with brass buckles, brown leather work gloves with the fingertips cut off, brass tool belt with hanging wrenches and small mechanical parts, holding a large polished brass wrench-hammer with both hands resting it on her shoulder like a confident foreman, dynamic confident stance like a young workshop master surveying her domain, expression of grounded authority and warm workshop pride, steampunk floating fortress sky with brass cogs with the great workshop forge platform behind her with hanging tools and partially assembled brass machines and the seven prismatic streams of the genso flowing through the warm sunset sky, cinematic rim lighting with warm forge-fire amber glow and brass dust and steam particles, detailed linework, high-quality illustration, CRITICAL ANATOMY REQUIREMENTS: anatomically correct human hands with exactly five distinct well-formed fingers per hand, both hands gripping the wrench-hammer firmly with all five fingers visible and properly positioned, both arms with athletic musculature in natural human poses with proper joint angles, original character, no logos, no text, no watermark
+
+元画像から表情や姿勢は変わってOKです
+```
+
+---
+
+### 15. `sr_22_ice_apprentice.png` — 氷塔の見習い騎士 アスラ（氷霊王国ニーヴル・氷剣ショートソード・リオネの後輩）
+
+**派閥**: 氷霊王国ニーヴル / **役割**: ニーヴル氷塔聖騎士団の見習い、 リオネ筆頭聖騎士の後輩、 氷帝近衛 / **武器**: 氷剣ショートソード (片手剣) / **設定**: 17-18歳、 銀髪のミディアム、 真面目で真っ直ぐ、 リオネへの憧れ
+
+```
+anime-style full-body portrait of a young ice paladin apprentice woman 17-18 years old named Asra, fair pale skin with a cool icy luminance, sleek silver-white shoulder-length straight hair with a pale-blue ribbon tying half-up, bright earnest pale-blue eyes radiating youthful paladin discipline, traditional ice paladin apprentice armor — silver lighter plate breastplate with simpler frost-crystal engravings (apprentice grade) and pale-blue trim, layered white tabard with the Niiruru ice-emblem, silver smaller pauldrons, pale-blue cape draping behind her, silver greaves and gauntlets, holding a single ice-blue short sword in one hand at her side with the other hand resting at her waist near her sheath, confident upright stance like an apprentice eager to prove herself, expression of earnest youthful determination, frozen tundra under pale blue moonlight with the ice tower of Niiruru visible in the distance and the seven prismatic streams of the genso visible through the moonlit night sky, cinematic rim lighting with cool silver-blue glow and crystalline snow particles, detailed linework, high-quality illustration, CRITICAL ANATOMY REQUIREMENTS: anatomically correct human hands with exactly five distinct well-formed fingers per hand, the hand gripping the short sword firmly with all five fingers visible, both arms in natural human poses with proper joint angles, original character, no logos, no text, no watermark
+
+元画像から表情や姿勢は変わってOKです
+```
+
+---
+
+### 16. `sr_23_frost_priestess.png` — 凍土の祭司 イル（氷霊王国ニーヴル・氷の鈴杖・ユーリスの妹・神事補佐）
+
+**派閥**: 氷霊王国ニーヴル / **役割**: ユーリス氷霜の巫女の妹、 凍土神事の補佐、 神殿守り / **武器**: 氷の鈴杖 (神事用、 戦闘では氷柱を呼ぶ) / **設定**: 20歳、 銀の長髪 (姉と同じ色)、 静謐、 姉への深い敬愛
+
+```
+anime-style full-body portrait of a young frost priestess woman 20 years old named Il, fair pale skin with a cool icy luminance, long flowing silver-white hair (same color as her elder sister Yuris) reaching past her shoulders with frost-crystal ornaments, calm serene pale-cyan eyes radiating gentle priestess devotion, ceremonial frost priestess miko-style attire — flowing pale-blue layered miko robes with silver embroidery of frost crystal patterns (simpler than her sister's), layered ivory inner robes with high collar, pale-blue waist sash with hanging silver crystal pendants, white socks and traditional frost-rimmed sandals, multiple silver bangles on her wrists, holding a tall silver bell staff with frost crystal bells radiating soft prismatic chime light, dignified poised stance with the bell staff held vertically beside her like a priestess in serene neutral state, expression of calm gentle devotion, frozen tundra under pale blue moonlight with a small ice shrine visible in the background and the seven prismatic streams of the genso flowing through the moonlit night sky, cinematic rim lighting with cool silver-blue glow and prismatic frost particles drifting around her, detailed linework, high-quality illustration, CRITICAL ANATOMY REQUIREMENTS: anatomically correct human hands with exactly five distinct well-formed fingers per hand, the hand gripping the bell staff shows all five fingers firmly around it, both arms in natural human poses with proper joint angles, original character, no logos, no text, no watermark
+
+元画像から表情や姿勢は変わってOKです
+```
+
+---
+
+### 17. `sr_24_steam_gunner.png` — 蒸気砲手 ヴィン（空挺城ゼノニア・蒸気ライフル・ガリオン副官）
+
+**派閥**: 空挺城ゼノニア / **役割**: ゼノニア軍の砲手、 ガリオン総監の副官、 蒸気ライフルの名手 / **武器**: 蒸気ライフル (長銃身、 蒸気駆動) / **設定**: 22-23歳、 黒髪のバックスリック、 落ち着いた狙撃手気質
+
+```
+anime-style full-body portrait of a young steam gunner man 22-23 years old named Vin, fair skin with a warm tan, sleek black hair slicked back with brass goggles pushed up on his forehead, sharp focused amber-gold eyes radiating disciplined sniper concentration, steampunk military attire — fitted deep-emerald military officer jacket with brass embroidery and brass buttons (subtler than the general's), ivory undertunic with high collar, deep-emerald military pants tucked into knee-high polished brass-buckled boots, brown leather chest harness with brass ammunition cartridges, brown leather shoulder strap with brass scope holders, holding a long steam-driven brass rifle with copper pipes and a brass scope on its top in a poised marksman stance with the rifle held diagonally across his body, confident composed marksman stance, steampunk floating fortress sky with brass cogs with floating airships in mid-distance under a warm sunset sky with the seven prismatic streams of the genso visible through the upper sky, cinematic rim lighting with warm sunset amber glow and brass dust particles, expression of focused composure, detailed linework, high-quality illustration, CRITICAL ANATOMY REQUIREMENTS: anatomically correct human hands with exactly five distinct well-formed fingers per hand, both hands gripping the rifle firmly with all five fingers visible (front hand on the barrel guard, rear hand on the trigger grip), both arms in natural marksman poses with proper joint angles, original character, no logos, no text, no watermark
+
+元画像から表情や姿勢は変わってOKです
+```
+
+---
+
+### 18. `sr_25_sky_machinist.png` — 空挺機関士 ジン（空挺城ゼノニア・スパナ二刀流・ベルの幼馴染）
+
+**派閥**: 空挺城ゼノニア / **役割**: ゼノニア機関室の機関士、 ベル整備士の幼馴染、 蒸気エンジンを最も知る男 / **武器**: 大型スパナ二刀流 (整備工具を双剣風に振るう) / **設定**: 21歳、 銅茶のミディアム、 朗らかで頼れる、 ベルとの息が合う
+
+```
+anime-style full-body portrait of a young sky-fortress machinist man 21 years old named Jin, fair skin with a warm peach undertone with subtle soot smudges on his cheek, messy copper-brown medium hair with brass goggles pushed up on his forehead, bright friendly emerald-green eyes radiating young engineer confidence, steampunk machinist attire — fitted deep-emerald work jumpsuit unzipped to the waist showing an ivory inner shirt, brown leather work apron tied at the waist with multiple tool pockets, fitted brown work pants tucked into knee-high brown leather boots with brass buckles, brown leather work gloves with the fingertips exposed, brass tool belt with hanging wrenches, holding two large polished brass wrenches one in each hand crossed in front of him in a dual-blade fighting stance, dynamic energetic stance like a young engineer ready to fix anything, bright confident grin expression of an engineer who loves his craft, steampunk floating fortress sky with brass cogs with the great engine room platform visible behind him with brass pipes and rotating gears and the seven prismatic streams of the genso visible through the upper sky, cinematic rim lighting with warm forge-amber glow and brass dust and steam particles, detailed linework, high-quality illustration, CRITICAL ANATOMY REQUIREMENTS: anatomically correct human hands with exactly five distinct well-formed fingers per hand, both hands gripping the wrench handles firmly with all five fingers visible and properly positioned, both arms in natural athletic human poses with proper joint angles, original character, no logos, no text, no watermark
+
+元画像から表情や姿勢は変わってOKです
+```
+
+---
+
+### 19. `r_16_snow_girl.png` — 雪原の少女 ミウ（氷霊王国ニーヴル・氷玉投げ・アルクの幼馴染）
+
+**派閥**: 氷霊王国ニーヴル / **役割**: ニーヴル雪原村の少女、 アルク少年の幼馴染、 雪豹に憧れる / **武器**: 氷玉 (アルクと同じく手のひら大の凍気球) / **設定**: 11-12歳少女、 銀のショートカット、 シエラ姉 (狩人) のような猟師に憧れる
+
+```
+anime-style full-body portrait of a young snow village girl 11-12 years old named Miu from a Niiruru snowy village, fair pale skin with a healthy youthful glow and rosy cheeks from the cold, messy silver-white short bob hair, bright curious pale-cyan eyes radiating girlish wonder, traditional frost village child attire — pale-blue thick wool dress with white fur trim at the collar and cuffs, layered white fur scarf wrapped multiple times around her neck, fitted pale-blue thick wool leggings tucked into white-fur-lined boots, brown leather mittens with the right hand un-mittened, holding a small glowing pale-blue ice orb in her bare right hand ready to throw, natural energetic standing pose like a curious village girl looking forward to the next adventure, bright cheerful expression of pure youthful wonder, frozen tundra under pale blue moonlight with snowy village houses and a distant snow leopard silhouette visible in mid-distance and the seven prismatic streams of the genso visible through the night sky, soft daylight balanced with the moonlit blue, detailed linework, high-quality illustration, CRITICAL ANATOMY REQUIREMENTS: anatomically correct human hands with exactly five distinct well-formed fingers per hand, both arms in natural childlike poses with proper joint angles, original character, no logos, no text, no watermark
+
+元画像から表情や姿勢は変わってOKです
+```
+
+---
+
+### 20. `r_17_sky_boy.png` — 空の少年 ピット（空挺城ゼノニア・小型レンチ・ピピの兄）
+
+**派閥**: 空挺城ゼノニア / **役割**: ゼノニア郊外の整備見習い少年、 ピピの兄、 工房通いの修行中 / **武器**: 小型レンチ (整備工具) / **設定**: 14歳少年、 銅赤のショートカット、 真面目な兄、 ピピへの面倒見良し
+
+```
+anime-style full-body portrait of a young sky-fortress boy 14 years old named Pitto from the Zenonia suburbs, fair skin with a warm peach undertone with a small soot smudge on his cheek, messy short copper-red hair with brass goggles pushed up on his forehead, bright earnest emerald-green eyes radiating young apprentice determination, simple steampunk apprentice attire — fitted deep-emerald work jacket with rolled-up sleeves, brown leather work apron with multiple tool pockets, fitted brown work pants tucked into brown leather lace-up boots, brown leather work gloves with the fingertips exposed, holding a small polished brass wrench in one hand pointed slightly upward like a young squire's first sword, natural standing pose like a young brother proud to be helping at the workshop, bright earnest expression of youthful determination, steampunk floating fortress sky with brass cogs with small workshop platform and floating airships in mid-distance under a warm sunset sky with the seven prismatic streams of the genso visible through the upper sky, soft warm daylight balanced, detailed linework, high-quality illustration, CRITICAL ANATOMY REQUIREMENTS: anatomically correct human hands with exactly five distinct well-formed fingers per hand, both arms in natural youthful human poses with proper joint angles, original character, no logos, no text, no watermark
+
+元画像から表情や姿勢は変わってOKです
+```
+
+---
+
 ## メタデータ参照: シーン対応 (本文執筆後に追記)
 
 | キャラ | 主登場シーン | 役割 |
 |---|---|---|
-| グレイル | 2-2 (一騎打ち) / 3-3 (山場、 二人で空を見上げる) | 章ヒロイン相方 |
-| ヴァーレ | 3-1 (空挺城外交) | 別軸の覇者候補 |
-| リオネ | 1-3 (氷塔到着) / 2-1 (グレイル従者) | グレイル副官 |
-| ガリオン | 3-1 (空挺城) | ヴァーレ副官 |
-| ユーリス | 4-1 (予言、 「次に龍を譲る相手」 示唆) | 伏線回収 |
-| イズン / シエラ | 2-1 (氷塔到着) | ニーヴル戦力 |
-| ベル / ピピ | 3-1 (空挺城) | ゼノニア生活感 |
-| アルク | 1-3 (雪原村通過) | 民の代表 |
+| グレイル UR | 2-1 (謁見) / 2-2 (一騎打ち) / 3-2 (襲撃共闘) / 3-3 (山場) / 4-2 (別れ) | 章ヒロイン相方 |
+| ヴァーレ UR | 3-1 (空挺城外交) | 別軸の覇者候補 |
+| ヴァルキ SSR | 2-1 (摂政紹介) | 凍土外交 |
+| ハグル SSR | 2-1 (剣師紹介) / 2-2 (一騎打ち見守り) | グレイル剣師 |
+| リオネ SSR | 1-3 (氷塔到着) / 2-1 (案内) / 4-2 (別れ) | グレイル副官 |
+| ゼピル SSR | 3-1 (空挺城・学者談義) | ヴァーレの師 |
+| ハーニア SSR | 3-1 (空挺城・工房) | 工房親方 |
+| ガリオン SSR | 3-1 (空挺城) / 3-2 (襲撃 駆け付け) | ヴァーレ右腕 |
+| ユーリス SSR | 4-1 (予言、 「次に龍を譲る相手」 示唆) | 伏線回収 |
+| イズン SR | 2-1 (氷塔到着) / 3-2 (襲撃共闘) | ニーヴル戦力 |
+| シエラ SR | 2-1 (氷塔到着) / 3-2 (襲撃共闘) | ニーヴル狩人 |
+| アスラ SR | 3-2 (襲撃共闘) | リオネ後輩 |
+| イル SR | 4-1 (予言補佐) | ユーリス妹 |
+| ヴィン SR | 3-1 (空挺城) | ガリオン副官 |
+| ジン SR | 3-1 (空挺城・工房) | ベル幼馴染 |
+| ベル SR | 3-1 (空挺城) | ゼノニア整備士 |
+| アルク R | 1-3 (雪原村通過) | ニーヴル民の代表 |
+| ミウ R | 1-3 (雪原村通過) | アルク幼馴染 |
+| ピピ R | 3-1 (空挺城) | ゼノニア整備見習い |
+| ピット R | 3-1 (空挺城) | ピピ兄 |
 
 ## ChatGPT 添付画像 (リファ用、 該当キャラ生成時に必要)
 - アルテミス: 既存 `images/characters/season1/ur/dragon_emperor.png` (山場 3-3 でグレイルと並び立つ姿の参考)

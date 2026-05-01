@@ -251,18 +251,62 @@ anime fantasy game illustration of a prophetic oracle scene in a small ice shrin
 
 ---
 
+# 【11】frost_swordmaster_sparring.png — ハグル+グレイルの剣師教え (挿絵、 16:9、 キャラ含む)
+
+> **添付リファ画像 (2枚必須)**:
+> - `images/characters/season1/ssr/north_swordmaster.png` (ハグル — 生成後)
+> - `images/characters/season1/ur/ice_emperor.png` (グレイル — 生成後)
+
+- **対応シーン**: 2-1 氷宮殿の謁見の途中、 ハグル剣師が紹介されるシーン (or 一騎打ち前夜の修行回想)
+- **本文行**: `STORY/s1c4.md` (リライト後に追記、 marker 候補: 「剣師に教わった構えだ」 等)
+- **役割**: 本文インライン挿絵、 ハグル (グレイル剣師) の存在を絵で示す
+- **被写体**: ハグル (年齢曖昧の若き剣聖、 双剣ヘルファング) が氷柱の前に立ち、 グレイル (氷帝) が片膝をついて剣を捧げる伝授風構図
+- **ストーリー使用**: ✅ s1c4 2-1 挿絵
+- **コード参照**: `STORY_LOCATION_INLINE_CONFIG['s1c4']` (2-1 marker)
+
+```
+anime fantasy game illustration of a sword master and his student in a snow training ground at twilight, on the left North Sword Saint Hagul standing tall in his north sword master attire holding twin ice swords Hellfang in a guard pose with quiet authority, on the right young Ice Emperor Glayl kneeling on one knee with his head bowed in respect his twin ice swords Nifl and Heil placed crossed before him on the snow as a gesture of receiving instruction, the master and student facing each other in three-quarter view connected by mutual unspoken trust, frozen tundra training ground at twilight with crystalline ice pillars rising around them and Niiruru ice palace silhouetted in the distance, the seven prismatic streams of the genso visible faintly through the violet twilight sky, soft pale-blue moonlight beginning to emerge mixed with last orange of sunset, atmosphere of solemn transmission between an ancient-blooded master and his coronated student, dramatic rim light with cool silver-blue glow and warm twilight amber accents, crystalline frost vapor drifting around them, cinematic composition, anime fantasy game illustration painting style, high detail, Aspect ratio 16:9, horizontal orientation 1672x941, CRITICAL ANATOMY REQUIREMENTS: anatomically correct human hands with exactly five distinct well-formed fingers per hand, Hagul both hands gripping the twin sword hilts firmly with all five fingers visible, Glayl both hands resting on his thigh with all five fingers visible, both arms of both characters in natural ceremonial poses with proper joint angles, original character setting, no logos, no text, no watermark.
+
+元画像から表情や姿勢は変わってOKです (剣の伝授構図に最適化)
+```
+
+---
+
+# 【12】zenonia_workshop.png — ハーニア+ベル+ピットの工房 (挿絵、 16:9、 キャラ含む)
+
+> **添付リファ画像 (3枚必須)**:
+> - `images/characters/season1/ssr/brass_foreman.png` (ハーニア — 生成後)
+> - `images/characters/season1/sr/sky_engineer.png` (ベル — 生成後)
+> - `images/characters/season1/r/sky_boy.png` (ピット — 生成後)
+
+- **対応シーン**: 3-1 空挺城ゼノニア外交シーン末尾、 整備工房の様子を描く生活感シーン
+- **本文行**: `STORY/s1c4.md` (リライト後に追記、 marker 候補: 「整備工房から、 元気な声が響いた」 等)
+- **役割**: 本文インライン挿絵、 ゼノニア機械文明の温度感 (生活レベル) を可視化、 S2C3「沈黙の塔」 前奏としての文化背景
+- **被写体**: ハーニア (工房親方) が中央でレンチハンマーを担いで指示、 ベル (整備士) が右で部品を手に持って向き合う、 ピット (見習い少年) が左で工具を運ぶ、 ゼノニア大工房の真鍮歯車が回る背景
+- **ストーリー使用**: ✅ s1c4 3-1 挿絵 (生活感)
+- **コード参照**: `STORY_LOCATION_INLINE_CONFIG['s1c4']` (3-1 marker、 vaire_diplomacy の後ろ)
+
+```
+anime fantasy game illustration of a busy steampunk workshop interior in Zenonia floating fortress, in the center stands brass foreman Hania resting her large brass wrench-hammer on her shoulder in a confident foreman stance giving instructions, on the right young sky engineer Bell standing across from her holding a brass mechanical part in both hands listening attentively, on the left young sky boy Pitto walking past carrying a small brass wrench and a copper pipe like a young apprentice helping out, the three workshop members of three generations together in their craft, large workshop floor background with brass forges glowing with embers, hanging tools and partially assembled brass machines, large rotating brass cogs visible on the back wall, scaffolding rising into the upper portion with airship parts in mid-construction, warm forge-fire amber light mixed with daylight from a high window, the seven prismatic streams of the genso visible faintly through the high window, atmosphere of working craft pride and the warm noise of a living workshop, dramatic rim lighting with warm forge-amber glow and brass dust and steam particles, cinematic composition, anime fantasy game illustration painting style, high detail, Aspect ratio 16:9, horizontal orientation 1672x941, CRITICAL ANATOMY REQUIREMENTS: anatomically correct human hands with exactly five distinct well-formed fingers per hand, Hania both hands gripping the wrench-hammer firmly with all five fingers visible, Bell both hands holding the mechanical part with all five fingers visible, Pitto both hands carrying the wrench and pipe with all five fingers visible, all arms of all three characters in natural workshop human poses with proper joint angles, original character setting, no logos, no text, no watermark.
+
+元画像から表情や姿勢は変わってOKです (3人工房構図に最適化)
+```
+
+---
+
 ## 整合性チェック (生成前確認)
 
 - [x] S1C3 エピローグ予言「凍土と空が、 揺れる」 と S1C4 の凍土+空挺城 設定一致 (背景3 + 4)
 - [x] アルテミス凸秘話 #1「ヒノオウとの夜」 と回想挿絵 (#8) 完全整合
 - [x] グレイル「凍土の戦力」 → S1C7 黒月決戦予兆 (山場挿絵 #5 + 一騎打ち #7 で覇王オーラ強調)
-- [x] ヴァーレ機械文明 → S2C3「沈黙の塔」 前奏 (#9 で真鍮歯車翼を視覚化)
+- [x] ヴァーレ機械文明 → S2C3「沈黙の塔」 前奏 (#9 で真鍮歯車翼 + #12 で工房を視覚化)
 - [x] ユーリス予言「龍を譲る相手」 → S2 龍帝退位 (#10 で伏線回収シーン明示)
 - [x] エピローグ「次は、 西だ」 → S1C5 銀霜引き (#6 観測者の場で展開)
 - [x] 派閥背景キーワード `_common.md` 準拠 (frozen tundra / steampunk floating fortress / imperial jade)
+- [x] **追加 (2026-05-01 +20体構成対応)**: ハグル (グレイル剣師、 #11) + ハーニア+ベル+ピット (工房3人、 #12) を挿絵で正式登場、 凍土の血脈 + 機械文明の温度感を強化
 
 ## 生成順序 (推奨)
 
-1. キャラ画像 (`prompt/s1c4_chars.md`) を全部生成 → リファ画像が揃う
+1. キャラ画像 (`prompt/s1c4_chars.md` 全20体) を全部生成 → リファ画像が揃う
 2. 純風景 5枚を先行生成 (#1, #2, #3, #4, #6) — リファ不要、 即生成可
-3. キャラ含む 5枚 を後で生成 (#5, #7, #8, #9, #10) — 該当キャラ画像が揃ってから
+3. キャラ含む 7枚 を後で生成 (#5, #7, #8, #9, #10, #11, #12) — 該当キャラ画像が揃ってから
