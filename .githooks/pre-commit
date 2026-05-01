@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# Prismaera repo pre-commit hook
+# - prompt md ルール自動チェック (CLAUDE.md「キャラ含む全画像で末尾文言必須」)
+# 違反があれば commit abort
+#
+# Setup (一度だけ各PCで): git config core.hooksPath .githooks
+
+set -e
+
+if [ ! -d prompt ]; then
+  exit 0
+fi
+
+if command -v py >/dev/null 2>&1; then
+  PY_CMD="py"
+elif command -v python >/dev/null 2>&1; then
+  PY_CMD="python"
+else
+  echo "[pre-commit] ⚠️ Python not found, skipping prompt rule check"
+  exit 0
+fi
+
+PYTHONIOENCODING=utf-8 $PY_CMD scripts/check_prompt_rules.py
+RC=$?
+
+if [ $RC -ne 0 ]; then
+  echo ""
+  echo "[pre-commit] ❌ prompt md ルール違反 → commit abort"
+  echo "  scripts/check_prompt_rules.py の指摘を修正してから再度 commit してください"
+  exit 1
+fi
+
+exit 0

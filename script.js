@@ -1990,6 +1990,12 @@ async function summonOne(result, opts = {}) {
   const showLadder = opts.showLadder !== false;
   setStageTier(tier);
 
+  // 高tier ヒット時は演出開始前にキャラ画像 preload (画像読み込みが演出に追いつかない問題対策、 D 案)
+  // R/SR は起動時 _prefetchLowTierThumbs で先読み済 (大半キャッシュ命中)、 高tier はここで preload + 短時間待機
+  if (isHigh) {
+    await _preloadCharImagesWithTimeout(result, 600);
+  }
+
   // ─ 溜め: SSR/UR/LRは長めの沈黙で期待感 ─
   if (isHigh) {
     stage.classList.add("charge-up");
@@ -3750,17 +3756,16 @@ function _showChapterGallery(storyId) {
   if (!side) return;
   const outline = (typeof STORY_OUTLINE !== 'undefined') ? STORY_OUTLINE.find(c => c.id === storyId) : null;
   if (!outline) return;
-  // 場所画像を集約 (背景 + 挿絵) — ロック判定は maxReachedSceneLabel で行う
+  // 場所画像を集約 (背景 + 挿絵) — ロック判定は scenesReached (実際に開いたシーンの記録) で行う
   const bgConf = (typeof LOCATION_CONFIG !== 'undefined') ? (LOCATION_CONFIG[storyId] || {}) : {};
   const inlineConf = (typeof STORY_LOCATION_INLINE_CONFIG !== 'undefined') ? (STORY_LOCATION_INLINE_CONFIG[storyId] || []) : [];
-  // 章の進捗: maxReachedSceneLabel = これまでに到達した最も先のシーン (戻っても保持)
+  // 章の進捗: scenesReached = { 'X-Y': 1, ... } 実際に開いたシーンのみ 1
   const progress = (typeof state === 'object' && state && state.storyProgress) ? state.storyProgress[storyId] : null;
   const isCompleted = !!(progress && progress.completed);
-  const maxOrd = isCompleted ? Infinity : _sceneLabelToOrd(progress && progress.maxReachedSceneLabel);
+  const reached = (progress && progress.scenesReached) || {};
   const lockOf = (sceneLabel) => {
     if (isCompleted) return false;  // 完読すれば全解放
-    const ord = _sceneLabelToOrd(sceneLabel);
-    return (maxOrd < 0) || (ord > maxOrd);
+    return !reached[sceneLabel];     // 実際に開いたシーン (=1) のみ表示、 未訪問は ロック
   };
   const locations = [];
   for (const sceneKey in bgConf) {
@@ -5631,26 +5636,23 @@ function saveStoryProgress(storyId, idx, totalScenes, curSceneLabel) {
       const prev = state.storyProgress[storyId] || {};
       const total = totalScenes || prev.totalScenes || 0;
       const wasCompleted = prev.completed;
-      // maxReachedSceneLabel: 「順次到達 (前回 lastSceneIndex + 1 で進んだ場合)」 のみ更新
-      // 目次ジャンプや prev で飛んだ場合は更新しない (読まずに先のシーン画像が見えてしまう問題対策)
+      // scenesReached: 「実際にそのページを開いたシーン」 を 1 として記録 (上書き不可、 単調追加)
+      // 目次ジャンプ・順次・戻る、 どんなナビ手段でも「開いたシーン」 だけが解放される (ユーザー仕様 2026-05-01)
+      const reached = (prev.scenesReached && typeof prev.scenesReached === 'object') ? { ...prev.scenesReached } : {};
+      if (curSceneLabel) reached[curSceneLabel] = 1;
+      // 後方互換: maxReachedSceneLabel も並行更新 (旧仕様参照箇所が残っていた場合のフォールバック用)
       const prevMaxLabel = prev.maxReachedSceneLabel || null;
       let newMaxLabel = prevMaxLabel;
       if (curSceneLabel) {
         const curOrd = _sceneLabelToOrd(curSceneLabel);
         const prevMaxOrd = _sceneLabelToOrd(prevMaxLabel);
-        const prevIdx = prev.lastSceneIndex;
-        // 初回 (進捗ゼロ) で idx=0 (1-1相当) なら max を初期設定
-        const isFirstAccess = (typeof prevIdx !== 'number');
-        // 順次到達 = 前回 idx + 1 (next/swipe でシーン1個ずつ進んだ場合のみ)
-        const isSequentialAdvance = (typeof prevIdx === 'number') && (idx === prevIdx + 1);
-        if (curOrd > prevMaxOrd && (isFirstAccess || isSequentialAdvance)) {
-          newMaxLabel = curSceneLabel;
-        }
+        if (curOrd > prevMaxOrd) newMaxLabel = curSceneLabel;
       }
       state.storyProgress[storyId] = {
         lastSceneIndex: idx,
         lastSceneLabel: curSceneLabel || prev.lastSceneLabel || null,
         maxReachedSceneLabel: newMaxLabel,
+        scenesReached: reached,
         totalScenes: total,
         lastReadAt: Date.now(),
         // 最終シーンに到達したら completed: true (一度立てたら戻さない)
@@ -7273,7 +7275,62 @@ document.addEventListener('keydown', e => {
 document.addEventListener('DOMContentLoaded', () => {
   const am = document.getElementById('account-modal');
   if (am) am.addEventListener('click', e => { if (e.target === am) closeAccountModal(); });
+  // D 案: 起動 1.5秒後に R/SR サムネを background prefetch (新規ユーザーの初回ガチャ画像読み込み対策)
+  setTimeout(_prefetchLowTierThumbs, 1500);
 });
+
+// ============================================================
+// ガチャ画像 prefetch / preload (D 案: 起動時 R/SR + 高tier on-demand)
+// ============================================================
+let _lowTierPrefetched = false;
+function _prefetchLowTierThumbs() {
+  if (_lowTierPrefetched) return;
+  if (typeof POOL === 'undefined') return;
+  _lowTierPrefetched = true;
+  // R + SR の _thumb.webp + .png を低優先度 background fetch (sw.js が傍受してキャッシュ)
+  // 約90-100枚 / 5-8MB 想定、 1回のみ実行 (idempotent)
+  const urls = new Set();
+  for (const tier of ['R', 'SR']) {
+    (POOL[tier] || []).forEach(c => {
+      if (!c || !c.img) return;
+      urls.add(c.img);
+      urls.add(c.img.replace(/\.png$/i, '_thumb.webp'));
+    });
+  }
+  console.log(`[prefetch] R/SR thumbs: ${urls.size} URLs`);
+  for (const url of urls) {
+    try { fetch(url, { credentials: 'omit', priority: 'low' }).catch(() => {}); } catch (e) {}
+  }
+}
+
+// 高tier (SSR/UR/LR) ヒット時に演出開始前にキャラ画像を preload + 短時間待機
+// timeout 内に load 完了したら即 resolve、 超えたら諦めて続行 (演出継続を妨げない)
+function _preloadCharImagesWithTimeout(result, timeoutMs) {
+  return new Promise((resolve) => {
+    if (!result) return resolve();
+    // result が単発 (object) と 10連 (array) の両方ありうる
+    const items = Array.isArray(result) ? result : [result];
+    const urls = new Set();
+    items.forEach(c => {
+      if (c && c.img) {
+        urls.add(c.img);
+        urls.add(c.img.replace(/\.png$/i, '_thumb.webp'));
+      }
+    });
+    if (urls.size === 0) return resolve();
+    let pending = urls.size;
+    let done = false;
+    const finish = () => { if (!done) { done = true; resolve(); } };
+    const onAny = () => { pending -= 1; if (pending <= 0) finish(); };
+    for (const url of urls) {
+      const img = new Image();
+      img.onload = onAny;
+      img.onerror = onAny;
+      img.src = url;
+    }
+    setTimeout(finish, timeoutMs);  // タイムアウトで強制 resolve (演出を待たせすぎない)
+  });
+}
 
 // ============================================================
 // バージョン通知: version.json と localStorage を比較して
