@@ -2503,7 +2503,7 @@ function renderGalleryByTab() {
       // cache buster 付きで サムネ更新時にブラウザキャッシュ刷新
       const img = document.createElement("img");
       img.className = "gallery-card-img";
-      img.src = (c.img || '').replace(/\.png$/i, '_thumb.webp') + '?v=20260430aa';
+      img.src = (c.img || '').replace(/\.png(\?.*)?$/i, '_thumb.webp$1') + '?v=20260430aa';
       img.alt = c.name;
       img.loading = "lazy";
       img.decoding = "async";
@@ -3293,7 +3293,7 @@ function openLocImageZoom(src) {
   const z = document.getElementById('char-img-zoom');
   const img = document.getElementById('char-img-zoom-img');
   if (!z || !img || !src) return;
-  const fullSrc = src.replace(/_thumb\.webp$/i, '.png');
+  const fullSrc = src.replace(/_thumb\.webp(\?.*)?$/i, '.png$1');
   img.src = fullSrc;
   // 原寸PNGが404 の場合は thumb webp にフォールバック
   img.onerror = function () {
@@ -3863,7 +3863,7 @@ function _showChapterGallery(storyId) {
       const visIdx = visibleLocs.findIndex(l => l.scene === sceneKey && l.img === el.dataset.img);
       if (visIdx < 0) return;
       const thumbUrl = el.dataset.img;
-      const fullUrl = thumbUrl.replace(/_thumb\.webp$/i, '.png');
+      const fullUrl = thumbUrl.replace(/_thumb\.webp(\?.*)?$/i, '.png$1');
       _openLocImageZoom(fullUrl, { list: visibleLocs, index: visIdx });
     });
   });
@@ -3922,7 +3922,7 @@ function _locZoomNavGo(dir) {
   _locZoomNav.index = newIdx;
   const next = list[newIdx];
   if (!next || !next.img) return;
-  const fullSrc = next.img.replace(/_thumb\.webp$/i, '.png');
+  const fullSrc = next.img.replace(/_thumb\.webp(\?.*)?$/i, '.png$1');
   const img = document.getElementById('char-img-zoom-img');
   if (img) {
     img.src = fullSrc;
@@ -4970,7 +4970,7 @@ function setupCharBlinkAnimations() {
     const m = bg.match(/url\(['"]?([^'")]+)['"]?\)/);
     if (!m) return;
     const normalUrl = m[1];
-    const blinkUrl = normalUrl.replace(/\.(png|jpg|jpeg|webp)$/i, '_blink.$1');
+    const blinkUrl = normalUrl.replace(/\.(png|jpg|jpeg|webp)(\?.*)?$/i, '_blink.$1$2');
     const cached = _blinkImageCache.get(blinkUrl);
     if (cached === 'ng') return; // 過去に存在しないと判明した
     if (cached === 'ok') { _startBlinkLoop(imgEl, normalUrl, blinkUrl); return; }
@@ -5014,7 +5014,7 @@ function setupCharDetailBlink(c) {
   const zoomEl = document.getElementById('char-img-zoom-img');
   if (!imgEl) return;
   const normalUrl = c.img;
-  const blinkUrl = normalUrl.replace(/\.(png|jpg|jpeg|webp)$/i, '_blink.$1');
+  const blinkUrl = normalUrl.replace(/\.(png|jpg|jpeg|webp)(\?.*)?$/i, '_blink.$1$2');
   const cached = _blinkImageCache.get(blinkUrl);
   if (cached === 'ng') return;
   if (cached === 'ok') { _startDetailBlinkLoop(imgEl, zoomEl, normalUrl, blinkUrl); return; }
@@ -5136,6 +5136,42 @@ const STORY_LOCATION_INLINE_CONFIG = {
   ],
 };
 
+// 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
+// SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
+const IMG_CACHE_VERSION = '20260501l';
+function _appendImgCacheBuster(url) {
+  if (!url || typeof url !== 'string') return url;
+  if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
+  // 既存の ?v= は除去 (旧版上書き)
+  const cleaned = url.replace(/\?v=[^&?]*/, '');
+  const sep = cleaned.includes('?') ? '&' : '?';
+  return cleaned + sep + 'v=' + IMG_CACHE_VERSION;
+}
+(function _initImgCacheBusters() {
+  if (typeof LOCATION_CONFIG !== 'undefined') {
+    for (const sid in LOCATION_CONFIG) {
+      const conf = LOCATION_CONFIG[sid] || {};
+      for (const sk in conf) {
+        if (conf[sk] && conf[sk].img) conf[sk].img = _appendImgCacheBuster(conf[sk].img);
+      }
+    }
+  }
+  if (typeof STORY_LOCATION_INLINE_CONFIG !== 'undefined') {
+    for (const sid in STORY_LOCATION_INLINE_CONFIG) {
+      (STORY_LOCATION_INLINE_CONFIG[sid] || []).forEach(e => {
+        if (e && e.img) e.img = _appendImgCacheBuster(e.img);
+      });
+    }
+  }
+  if (typeof POOL !== 'undefined') {
+    for (const tier of ['LR', 'UR', 'SSR', 'SR', 'R']) {
+      (POOL[tier] || []).forEach(c => {
+        if (c && c.img) c.img = _appendImgCacheBuster(c.img);
+      });
+    }
+  }
+})();
+
 // M2: 章別場所画像 オンデマンドプリキャッシュ
 // openStory() 開始時に呼び、 当該章の LOCATION_CONFIG + STORY_LOCATION_INLINE_CONFIG の全画像URLを
 // background fetch する。 SW (sw.js) が傍受して LOC_CACHE に put → 2回目以降は瞬時表示 (フラッシュ消失)。
@@ -5169,7 +5205,7 @@ function _collectAllAssetUrls() {
           if (!c || !c.img) return;
           urls.add(c.img);
           // _thumb.webp 版 (gallery で実際に使われるサイズ)
-          urls.add(c.img.replace(/\.png$/i, '_thumb.webp'));
+          urls.add(c.img.replace(/\.png(\?.*)?$/i, '_thumb.webp$1'));
         });
       }
     }
@@ -5181,7 +5217,7 @@ function _collectAllAssetUrls() {
         if (conf[k] && conf[k].img) {
           urls.add(conf[k].img);
           // 原寸PNG (拡大表示用) も追加。 失敗しても _downloadAllAssets が無視
-          urls.add(conf[k].img.replace(/_thumb\.webp$/i, '.png'));
+          urls.add(conf[k].img.replace(/_thumb\.webp(\?.*)?$/i, '.png$1'));
         }
       }
     }
@@ -5191,7 +5227,7 @@ function _collectAllAssetUrls() {
       (STORY_LOCATION_INLINE_CONFIG[sid] || []).forEach(e2 => {
         if (e2 && e2.img) {
           urls.add(e2.img);
-          urls.add(e2.img.replace(/_thumb\.webp$/i, '.png'));
+          urls.add(e2.img.replace(/_thumb\.webp(\?.*)?$/i, '.png$1'));
         }
       });
     }
@@ -5442,7 +5478,7 @@ function injectStoryLocationInlines(bodyHtml, sceneIdx) {
   for (const e of entries) {
     if (!e.img) continue;
     // タップで拡大: data-fullsrc に原寸PNG (thumb→.png 置換) を持たせ、 click で zoom モーダル
-    const fullSrc = e.img.replace(/_thumb\.webp$/i, '.png');
+    const fullSrc = e.img.replace(/_thumb\.webp(\?.*)?$/i, '.png$1');
     const cardHtml = `<div class="story-location-inline" onclick="openLocImageZoom('${fullSrc}')" role="button" tabindex="0" aria-label="拡大表示" title="タップで拡大"><img class="story-location-inline-img" src="${e.img}" alt="" loading="lazy" decoding="async"></div>`;
     let injected = false;
     if (e.marker) {
@@ -5483,7 +5519,7 @@ function setupCutinBlinks() {
   document.querySelectorAll('.story-cutin[data-tier="lr"] .story-cutin-img').forEach(imgEl => {
     const normalUrl = imgEl.getAttribute('src');
     if (!normalUrl) return;
-    const blinkUrl = normalUrl.replace(/\.(png|jpg|jpeg|webp)$/i, '_blink.$1');
+    const blinkUrl = normalUrl.replace(/\.(png|jpg|jpeg|webp)(\?.*)?$/i, '_blink.$1$2');
     const cached = _blinkImageCache.get(blinkUrl);
     if (cached === 'ng') return;
     if (cached === 'ok') { _startCutinBlinkLoop(imgEl, normalUrl, blinkUrl); return; }
@@ -7294,7 +7330,7 @@ function _prefetchLowTierThumbs() {
     (POOL[tier] || []).forEach(c => {
       if (!c || !c.img) return;
       urls.add(c.img);
-      urls.add(c.img.replace(/\.png$/i, '_thumb.webp'));
+      urls.add(c.img.replace(/\.png(\?.*)?$/i, '_thumb.webp$1'));
     });
   }
   console.log(`[prefetch] R/SR thumbs: ${urls.size} URLs`);
@@ -7314,7 +7350,7 @@ function _preloadCharImagesWithTimeout(result, timeoutMs) {
     items.forEach(c => {
       if (c && c.img) {
         urls.add(c.img);
-        urls.add(c.img.replace(/\.png$/i, '_thumb.webp'));
+        urls.add(c.img.replace(/\.png(\?.*)?$/i, '_thumb.webp$1'));
       }
     });
     if (urls.size === 0) return resolve();
