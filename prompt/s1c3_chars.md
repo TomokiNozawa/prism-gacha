@@ -44,12 +44,19 @@ anime-style full-body portrait of a young desert nomad princess named Sahana, 17
 
 ---
 
-### 2. `ur_09_dragon_sage.png` — 古龍の語り部 ファラー（古龍砂漠サハール・古龍杖ジナ・千年記憶+古龍王シルエット）
+### 2. `ur_09_dragon_sage.png` — 古龍の語り部 ファラー（ロリババア・古龍砂漠サハール・古龍杖ジナ・千年記憶+古龍王シルエット）
 
-**派閥**: 古龍砂漠サハール / **役割**: 古龍の末裔の老女、 「失われた古龍王」 の伝承を語る、 千年級の知恵 / **武器**: 古龍杖ジナ (紫水晶を頂いた長杖、 古龍の鱗を埋め込んだ) / **伏線**: S2 古龍王覚醒のキーパーソン、 S2C4 記憶の海で再登場 — 背後の colossal sleeping dragon silhouette は必ず焼き付け、 観測者三柱 (カグヤ・ノクス・セラフィエル) との遠縁を示唆する千年記憶の浮遊光を散らす
+**派閥**: 古龍砂漠サハール / **役割**: 古龍の末裔の少女 (見た目8-10歳幼女、 実年齢千年級のロリババア)、 「失われた古龍王」 の伝承を語る、 千年級の知恵 / **武器**: 古龍杖ジナ (紫水晶を頂いた、 自分の身長の3倍はある長杖、 古龍の鱗を埋め込んだ) / **伏線**: S2 古龍王覚醒のキーパーソン、 S2C4 記憶の海で再登場 — 背後の colossal sleeping dragon silhouette は必ず焼き付け、 観測者三柱 (カグヤ・ノクス・セラフィエル) との遠縁を示唆する千年記憶の浮遊光を散らす
+
+**⚠️ カグヤとの差別化** (両者ロリババア被り回避):
+- 体格: カグヤ tiny petite (5-6歳級) vs ファラー 8-10歳級 (少し大きめ)
+- 種族特徴: カグヤ 白狐耳9尾+額月紋 vs ファラー 額の古龍鱗紋 (角・尾なし)
+- スタイル: カグヤ 和風 junihitoe (十二単) vs ファラー ペルシャ・エジプト混合 砂漠
+- 雰囲気: カグヤ playful「うむ千年やっとるでな」 vs ファラー solemn ancient prophet「〜じゃ」「わし」「お主」
+- 派閥: カグヤ 観測者七座 第二席 vs ファラー 古龍砂漠サハール
 
 ```
-anime-style full-body portrait of an ancient dragon-blooded sage woman named Fara, weathered sun-tanned dark-honey skin with fine wisdom lines around her eyes, very long silver hair in a single thick braid falling past her waist with iridescent dragon-scale ornaments woven into the braid, deep amethyst-violet eyes glowing with prismatic ancient knowledge seeing far beyond, intricate dragon-scale glyph mark on her forehead radiating soft rainbow light, layered ceremonial sage robes blending ancient Persian and Egyptian aesthetics — deep-violet outer robe with extensive gold dragon-scale embroidery flowing along hem and sleeves, layered iridescent silk shawl over her shoulders, wide ornate belt embedded with shimmering rainbow dragon-scale fragments, holding a tall ornate ceremonial staff named Jhina topped with a massive faceted amethyst crystal radiating prismatic violet-rainbow light beams, the staff body wrapped with dragon scales and prayer cords, heroic divine stance with rainbow aura, majestic ancient sage presence with floating translucent memory-images of past dragons drifting around her like glowing wisps, behind her a colossal translucent silhouette of an immense ancient sleeping dragon king coiling through the sky in violet-rainbow mist, golden dune under twin stars and ancient dragon statues with the seven prismatic streams of the genso flowing across the night sky, dramatic rim light with prismatic glow and floating golden dust, detailed linework, high-quality illustration, CRITICAL ANATOMY REQUIREMENTS: anatomically correct human hands with exactly five distinct well-formed fingers per hand, the hand gripping the staff firmly with all five fingers visible and properly positioned, both arms in natural elderly human poses with proper joint angles slightly relaxed, original character, no logos, no text, no watermark
+anime-style full-body portrait of a tiny ancient dragon-blooded sage girl named Fara who appears 8-10 years old but radiates centuries of presence, sun-tanned warm-honey skin with delicate childlike features, very long silver hair in a single thick braid falling past her ankles trailing on the ground with iridescent dragon-scale ornaments woven into the braid, deep amethyst-violet eyes glowing with prismatic ancient knowledge seeing far beyond her childlike face, intricate dragon-scale glyph mark on her forehead radiating soft rainbow light, layered ceremonial sage robes blending ancient Persian and Egyptian aesthetics in oversized form — deep-violet outer robe with extensive gold dragon-scale embroidery flowing along hem and sleeves much too large for her tiny frame and pooling around her bare feet, layered iridescent silk shawls trailing on the ground, wide ornate belt embedded with shimmering rainbow dragon-scale fragments wrapped multiple times around her small waist, holding a tall ornate ceremonial staff named Jhina that is roughly three times her own height topped with a massive faceted amethyst crystal radiating prismatic violet-rainbow light beams, the staff body wrapped with dragon scales and prayer cords, heroic dignified stance with rainbow aura, majestic ancient sage presence in a child body with floating translucent memory-images of past dragons drifting around her like glowing wisps, behind her a colossal translucent silhouette of an immense ancient sleeping dragon king coiling through the sky in violet-rainbow mist, golden dune under twin stars and ancient dragon statues with the seven prismatic streams of the genso flowing across the night sky, dramatic rim light with prismatic glow and floating golden dust, serene composed sage-like expression with subtle knowing smile showing centuries of wisdom in a child face, detailed linework, high-quality illustration, CRITICAL ANATOMY REQUIREMENTS: anatomically correct human hands with exactly five distinct well-formed fingers per hand, the hand gripping the tall staff firmly with all five fingers visible and properly positioned, both arms in natural childlike human poses with proper joint angles, original character, no logos, no text, no watermark
 ```
 
 ---
@@ -145,7 +152,7 @@ anime-style full-body portrait of an elderly desert storyteller man in his sixti
 | # | tier | 名前 | section header | 実保存slug | 派閥 | 伏線 |
 |---|---|---|---|---|---|---|
 | 1 | UR | サハナ (砂海王女) | `ur_08_desert_princess` | `desert_princess` | 古龍砂漠サハール | S1C7 七座級風使い再登場 |
-| 2 | UR | ファラー (古龍の語り部) | `ur_09_dragon_sage` | `dragon_sage` | 古龍砂漠サハール | S2 古龍王覚醒キーパーソン / S2C4 記憶の海 |
+| 2 | UR | ファラー (古龍の語り部、 ロリババア) | `ur_09_dragon_sage` | `dragon_sage` | 古龍砂漠サハール | S2 古龍王覚醒キーパーソン / S2C4 記憶の海 |
 | 3 | SSR | アーシャ (隊商長) | `ssr_16_caravan_leader` | `caravan_leader` | 古龍砂漠サハール | — |
 | 4 | SSR | グラン (砂牙の老戦士) | `ssr_17_desert_veteran` | `desert_veteran` | 古龍砂漠サハール | tribe_battle 挿絵連動 |
 | 5 | SSR | リアム (紫竜の侍従) | `ssr_18_purple_dragon_servant` | `purple_dragon_servant` | 紫竜王国 | — |
