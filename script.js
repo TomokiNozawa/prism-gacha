@@ -1990,10 +1990,12 @@ async function summonOne(result, opts = {}) {
   const showLadder = opts.showLadder !== false;
   setStageTier(tier);
 
-  // 高tier ヒット時は演出開始前にキャラ画像 preload (画像読み込みが演出に追いつかない問題対策、 D 案)
-  // R/SR は起動時 _prefetchLowTierThumbs で先読み済 (大半キャッシュ命中)、 高tier はここで preload + 短時間待機
+  // 演出開始前にキャラ画像 preload (画像読み込みが演出に追いつかない問題対策、 D 案)
+  // 高tier (SSR/UR/LR): 600ms timeout で確実 preload、 R/SR: 起動時 prefetch 済前提だが念のため 200ms 短い preload
   if (isHigh) {
     await _preloadCharImagesWithTimeout(result, 600);
+  } else {
+    await _preloadCharImagesWithTimeout(result, 200);
   }
 
   // ─ 溜め: SSR/UR/LRは長めの沈黙で期待感 ─
@@ -5128,7 +5130,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260501s';
+const IMG_CACHE_VERSION = '20260502a';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -7301,8 +7303,8 @@ document.addEventListener('keydown', e => {
 document.addEventListener('DOMContentLoaded', () => {
   const am = document.getElementById('account-modal');
   if (am) am.addEventListener('click', e => { if (e.target === am) closeAccountModal(); });
-  // D 案: 起動 1.5秒後に R/SR サムネを background prefetch (新規ユーザーの初回ガチャ画像読み込み対策)
-  setTimeout(_prefetchLowTierThumbs, 1500);
+  // D 案: 起動直後に R/SR サムネを background prefetch (新規ユーザーの初回ガチャ画像読み込み対策、 即実行)
+  _prefetchLowTierThumbs();
 });
 
 // ============================================================
