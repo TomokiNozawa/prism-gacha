@@ -3561,9 +3561,10 @@ function renderWorldMap() {
   // Phase 2 Step B (2026-05-01〜): 手描き風 ワールドマップ背景画像 (1792×1024) を最背面に配置
   // 既存 SVG装飾 (大陸shape / 山脈 / 森 / 海岸線) は画像内に内包、 SVG側からは削除
   // 派閥アイコン + 章マーカー + コンパスローズ + タイトル + S2/S3ティザー は画像の上に重ねる
-  // viewBox 2000x1600 (5:4) に対し画像 1792x1024 (16:9) なので preserveAspectRatio="xMidYMid meet" で全画像表示+上下に余白
-  // 余白部分は .world-map-canvas の dark gradient で自然に埋まる
-  svg += `<image href="${_appendImgCacheBuster('/images/locations/world_map.png')}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="xMidYMid meet" opacity="0.95"/>`;
+  // viewBox 2000x1600 (5:4) に対し画像 1792x1024 (16:9) のため、 派閥アイコン (画像範囲外に出る上下) を画像内に収めるため "slice" を採用
+  // (「meet」 だと上下に黒余白ができて派閥アイコン+ティザーが画像外に出てしまう、 ユーザー指示で slice に戻す 2026-05-01)
+  // 副作用: 画像の左右約400pxが trim される (中央維持)、 ただし派閥配置の整合性を優先
+  svg += `<image href="${_appendImgCacheBuster('/images/locations/world_map.png')}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="xMidYMid slice" opacity="0.95"/>`;
   // 派閥アイコン視認性向上: 画像の上に薄い暗オーバーレイ (ocean tint のみ、 グリッドは画像と被るので除去)
   svg += `<rect width="${W}" height="${H}" fill="url(#ocean-grad)" opacity="0.2"/>`;
   // コンパスローズ (右下隅)
@@ -5127,7 +5128,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260501r';
+const IMG_CACHE_VERSION = '20260501s';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
