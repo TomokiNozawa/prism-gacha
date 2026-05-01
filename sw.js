@@ -7,7 +7,7 @@
 //
 // HTML/JSON/Firebase API はキャッシュせず常にネットワーク優先 (更新即反映+認証/DBの鮮度維持)。
 
-const SW_VERSION = '20260502v';  // v1.3.2+ s1c4 整合性修正 (RUBY/イル部分一致/即位3年) + 排出率モーダル + ホームティザー s1c5 + ふりがな辞書拡張
+const SW_VERSION = '20260502w';  // v1.3.2+ 天井撤廃 + 排出率改善 + s1c4整合性 + NEW消去 + 凸数表示 + ラベル色分け + データ表記 + オフライン優先 + ルール8 + 相関図ワールドマップ揃え
 const STATIC_CACHE = `prismaera-static-${SW_VERSION}`;
 const BGM_CACHE    = `prismaera-bgm-${SW_VERSION}`;
 const LOC_CACHE    = `prismaera-loc-${SW_VERSION}`;
@@ -96,13 +96,12 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 場所画像 — 専用cache (LOC_CACHE) で stale-while-revalidate
+  // 場所画像 — 専用cache (LOC_CACHE) で stale-while-revalidate (OFFLINE_SAVED 最優先)
   if (LOC_PATH.test(path)) {
     event.respondWith(staleWhileRevalidate(req, LOC_CACHE));
     return;
   }
-
-  // その他静的アセット (キャラ画像/CSS/JS/フォント等) — 既存挙動
+  // その他静的アセット (キャラ画像/CSS/JS/フォント等) — 既存挙動 (OFFLINE_SAVED 最優先)
   if (STATIC_EXT.test(path + url.search)) {
     event.respondWith(staleWhileRevalidate(req, STATIC_CACHE));
     return;
@@ -115,10 +114,14 @@ async function handleAudio(req) {
   const cache = await caches.open(BGM_CACHE);
   const range = req.headers.get('range');
 
+  // 手動DL cache (OFFLINE_SAVED) を最優先で確認
+  let saved = null;
+  try { saved = await caches.match(req.url, { cacheName: OFFLINE_SAVED }); } catch (e) {}
+
   if (range) {
-    // Range request: cache に full file あれば slice して 206 を作る
+    // Range request: cache (OFFLINE_SAVED 優先 → BGM_CACHE) に full file あれば slice して 206 を作る
     // Cache APIは Vary header無視で URL ベース match するので ignoreVary不要
-    const cached = await cache.match(req.url);
+    const cached = saved || await cache.match(req.url);
     if (cached) {
       try {
         return await makeRangeResponse(cached, range);
@@ -130,7 +133,8 @@ async function handleAudio(req) {
     return fetch(req);
   }
 
-  // Range なし: cache優先、 cache miss なら network経由でcache充填
+  // Range なし: cache優先 (OFFLINE_SAVED 優先 → BGM_CACHE)、 cache miss なら network経由でcache充填
+  if (saved) return saved;
   const cached = await cache.match(req.url);
   if (cached) return cached;
   try {
@@ -183,7 +187,15 @@ async function makeRangeResponse(cached, rangeHeader) {
 }
 
 // ───── staleWhileRevalidate (静的+場所画像 共通) ─────
+// 2026-05-02: 「データ保存」 で OFFLINE_SAVED に手動DL したものは オンライン時も最優先で返す
+// → 画像読込が体感的に遅い問題を解消 (野沢さん指摘「ダウンロードしてるのに画像読み込み遅い」)。
+// OFFLINE_SAVED は手動DL なので revalidate 不要 (バージョン更新は SW_VERSION bump で全 cache 再構築)。
 async function staleWhileRevalidate(req, cacheName) {
+  // 手動DL cache を最優先で返す (cache hit → 即返し、 ネットワーク不要)
+  try {
+    const savedCached = await caches.match(req, { cacheName: OFFLINE_SAVED });
+    if (savedCached) return savedCached;
+  } catch (e) {}
   const cache = await caches.open(cacheName);
   const cached = await cache.match(req);
   // cached あり: 即返し、 background で revalidate (put は fire-and-forget でOK、 すでに hit するため)

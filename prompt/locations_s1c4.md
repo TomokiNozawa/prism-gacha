@@ -294,6 +294,50 @@ anime fantasy game illustration of a busy steampunk workshop interior in Zenonia
 
 ---
 
+# 【13】jade_throne.png — 1-1 翡翠の玉座 (挿絵、 16:9、 アルテミス + 双大剣)
+
+> **添付リファ画像 (1枚必須)**:
+> - `images/characters/season1/lr/dragon_emperor.png` (アルテミス — 既存 LR キャラ画像)
+
+- **対応シーン**: 1-1 龍国 翡翠の玉座 (朝の謁見、 ニーヴルからの新帝即位の親書を受け取るシーン)
+- **本文行**: `STORY/s1c4.md` l.39〜「翡翠の柱が立ち並ぶ玉座の間」 / l.18〜「玉座の脇に、 双大剣『陰陽』 が静かに立てかけられていた」
+- **役割**: 本文インライン挿絵、 第4章 冒頭で 龍国 (中央大陸の覇者) と 龍帝アルテミス の世界観を導入
+- **被写体**: 玉座に座る龍帝アルテミス (千年生きた覇王の威厳)、 玉座の脇に立てかけられた双大剣『陰陽』 (柄に紅い組紐)、 翡翠の柱、 黄金の灯篭、 天井の龍の彫刻
+- **ストーリー使用**: ✅ s1c4 1-1 挿絵 (章開幕)
+- **コード参照**: `STORY_LOCATION_INLINE_CONFIG['s1c4']` (1-1 marker、 chapter opening)
+
+```
+anime fantasy game illustration of a vast jade throne hall in the central continent's Dragon Empire palace at dawn, the Dragon Emperor Artemis matching the reference image — black-and-jade imperial robes with violet dragon embroidery, long flowing dark hair, ancient yet youthful dignity in his eyes, jade dragon-shaped crown — sitting on the central throne with a calm thousand-year-old composure, the throne built of polished jade and gold with five tiers of stone steps leading up to it, leaning against the side of the throne stands his twin great sword "Yin-Yang" — two paired blades in matching scabbards with crimson silk cords tied around their hilts, the cords slightly worn from a millennium of use, jade pillars rise on both sides of the hall lined with golden lanterns gently exhaling soft mist, the high ceiling carved with a coiling dragon shadow, morning jade light filtering through tall arched windows behind the throne casting cool jade-green shafts across the polished floor, an old vassal in ceremonial robes kneels in the lower foreground holding up a sealed silver letter (the Niflheim coronation announcement) with both hands, atmosphere of imperial morning audience, ancient yet alive realm, dramatic perspective looking up toward the throne emphasizing scale, jade-green and golden palette with warm amber lantern accents, cinematic composition, anime fantasy game illustration painting style, high detail, Aspect ratio 16:9, horizontal orientation 1672x941,
+CRITICAL ANATOMY REQUIREMENTS: anatomically correct human hands with exactly five distinct well-formed fingers per hand, Artemis hands resting on the armrests of the throne with all five fingers visible on each hand, the kneeling vassal both hands holding up the silver letter with all five fingers visible per hand, both arms of all characters in natural anatomical poses with proper joint angles, no extra digits, no fused fingers, no asymmetrical proportions, original character setting, no logos, no text, no watermark.
+
+元画像から表情や姿勢は変わってOKです (玉座+双大剣の縦アクセント構図に最適化)
+```
+
+---
+
+# 【14】snowfield_villagers.png — 1-3 雪原村のアルク&ミウ (挿絵、 16:9、 R2人 + アルテミス遠景)
+
+> **添付リファ画像 (3枚必須)**:
+> - `images/characters/season1/lr/dragon_emperor.png` (アルテミス LR — 馬上、 遠景)
+> - `images/characters/season1/r/snow_boy.png` (アルク R — 雪原少年、 生成後)
+> - `images/characters/season1/r/snow_girl.png` (ミウ R — 雪原少女、 生成後)
+
+- **対応シーン**: 1-3 雪原を行く中盤、 雪原村でアルク&ミウ (銀髪の少年少女) が龍帝の隊列に駆け寄るシーン
+- **本文行**: `STORY/s1c4.md` l.152〜「途中、 小さな雪原村を通った。 村の入り口で、 銀髪の少年が二人、 雪玉を投げ合って遊んでいた」 / l.156「お、 龍帝様だっ……!」 / l.160「ミウ、 と少年は彼女を呼んだ」
+- **役割**: 本文インライン挿絵、 凍土の民の温度 (子供の純朴さ) を可視化、 R 2 人 (アルク+ミウ) の正式登場シーン
+- **被写体**: 中央〜右に 銀髪の少年アルク (元気いっぱい、 飛び跳ね) と 銀髪の少女ミウ (隣で叱る姿勢)、 左やや遠景に 馬上の龍帝アルテミス (見下ろしながら微笑、 旅装の濃紫衣)、 雪原村の入り口、 雪に半分埋まった木造家屋、 凍る息、 朝の薄陽
+- **ストーリー使用**: ✅ s1c4 1-3 挿絵 (R 2人デビュー)
+- **コード参照**: `STORY_LOCATION_INLINE_CONFIG['s1c4']` (1-3 marker、 雪原村スポット)
+
+```
+anime fantasy game illustration of a small snowy frontier village at the edge of the Niflheim tundra at early morning, in the center foreground two silver-haired children matching the second and third reference images — on the right young boy Aruku with short silver hair, bright excited eyes, snow-dusted winter coat, mid-leap with one arm raised pointing up at the visitor, snow flecks falling around him; next to him on his left young girl Mewu with longer silver hair tied back, warm but slightly stricter expression scolding him with one hand on her hip, matching winter coat, both children with frozen breath visible in the cold air; on the left middle ground the Dragon Emperor Artemis matching the first reference image — black-and-jade imperial robes under a violet travel cloak, hooded loosely, mounted on a tall dark horse looking down at the children with a faint warm smile, his twin great sword "Yin-Yang" sheathed at his side; behind him faintly visible silhouettes of the imperial guards on horses; in the wider background a small snow village of wooden snow-buried houses with smoke rising from chimneys, a frozen wooden gate, the vast white tundra stretching to the horizon under a soft pale-blue dawn sky with the seven prismatic streams of the genso faintly visible above; atmosphere of cold but warm-hearted commoners encountering distant majesty, the children unafraid and full of childlike wonder; soft cool blue dawn lighting with warm pink-amber sunrise accents on the eastern horizon; dramatic horizontal composition with the children dominant in foreground and Artemis as the contrast figure in mid-ground; cinematic composition, anime fantasy game illustration painting style, high detail, Aspect ratio 16:9, horizontal orientation 1672x941,
+CRITICAL ANATOMY REQUIREMENTS: anatomically correct human hands with exactly five distinct well-formed fingers per hand, Aruku raised hand pointing up with all five fingers visible, Mewu hand on hip with all five fingers visible, Artemis both hands holding the reins with all five fingers visible per hand, both arms of all three characters in natural anatomical positions with proper joint angles, no extra digits, no fused fingers, original character setting, no logos, no text, no watermark.
+
+元画像から表情や姿勢は変わってOKです (子供2人 + 馬上龍帝の対比構図に最適化)
+```
+
+---
+
 ## 整合性チェック (生成前確認)
 
 - [x] S1C3 エピローグ予言「凍土と空が、 揺れる」 と S1C4 の凍土+空挺城 設定一致 (背景3 + 4)

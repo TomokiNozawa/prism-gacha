@@ -1593,7 +1593,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 }
 .rate-detail-row {
   display: grid;
-  grid-template-columns: 60px 80px 1fr 1fr;
+  grid-template-columns: 56px 80px 1fr 1fr;
   align-items: center;
   gap: 8px;
   padding: 5px 6px;
@@ -1601,6 +1601,15 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   font-size: 12px;
 }
 .rate-detail-row.pickup-empty { opacity: 0.55; }
+.rate-detail-row.pickup-empty .rate-detail-each { grid-column: 3 / -1; }
+.rate-detail-ratio {
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  color: rgba(255,217,122,0.95);
+  letter-spacing: 0.02em;
+}
+.rate-detail-ratio b { color: #ffd84d; font-weight: 700; }
+.rate-detail-each b { color: #5fffd4; font-weight: 700; }
 .rate-detail-row .rate-detail-tier {
   font-weight: 700; letter-spacing: 0.08em;
   text-align: center; padding: 2px 4px;
@@ -1655,10 +1664,12 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 }
 @media (max-width: 480px) {
   .rate-detail-row {
-    grid-template-columns: 50px 70px 1fr;
+    grid-template-columns: 46px 1fr 1fr;
     font-size: 11px;
+    gap: 6px;
   }
-  .rate-detail-each { display: none; }
+  .rate-detail-pct { display: none; }  /* 通常ガチャは tier別 % を非表示で each だけ残す */
+  .rate-detail-row.pickup-empty .rate-detail-each { grid-column: 2 / -1; }
 }
 
 /* ランク表モーダル */
@@ -1970,6 +1981,16 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   color: #111; z-index: 2;
   box-shadow: 0 0 10px rgba(255,216,77,0.7);
   animation: new-pulse 1.2s ease-in-out infinite alternate;
+}
+.gallery-card .card-dup {
+  position: absolute; top: 6px; left: 6px;
+  font-size: 10px; font-weight: 900; letter-spacing: 0.04em;
+  padding: 2px 6px; border-radius: 3px;
+  background: linear-gradient(135deg, rgba(125,211,252,0.92), rgba(200,125,255,0.92));
+  color: #fff; z-index: 2;
+  box-shadow: 0 0 10px rgba(125,211,252,0.5);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
 .gallery-card .card-name {
   position: absolute; bottom: 0; left: 0; right: 0;
@@ -3256,6 +3277,42 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   .settings-offline-cat-count { min-width: 44px; font-size: 10.5px; }
   .settings-offline-cat-size  { min-width: 46px; font-size: 10px; }
   .settings-offline-cat-btn   { min-width: 44px; padding: 4px 6px; font-size: 10px; }
+}
+
+/* 相関図 focus banner (派閥クリックで表示) */
+.relations-focus-banner[hidden] { display: none; }
+.relations-focus-banner {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px;
+  padding: 8px 14px;
+  margin: 4px 8px 0;
+  background: linear-gradient(135deg, rgba(125,211,252,0.18), rgba(200,125,255,0.18));
+  border: 1px solid rgba(125,211,252,0.4);
+  border-radius: 10px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.92);
+  font-weight: 600;
+  z-index: 5;
+}
+.relations-focus-banner button {
+  padding: 5px 12px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 6px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 12px; font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.relations-focus-banner button:hover {
+  background: rgba(255,255,255,0.22);
+}
+.rel-faction-label, .rel-faction-bg {
+  transition: opacity 0.25s ease;
+}
+.rel-faction-label:hover {
+  text-decoration: underline;
 }
 
 /* M5: オフライン indicator バナー */
@@ -4881,6 +4938,15 @@ body.has-offline-banner .topbar { margin-top: 30px; }
   color: #111; z-index: 2;
   box-shadow: 0 0 10px rgba(255,216,77,0.6);
 }
+.hgcard-dup {
+  position: absolute; bottom: 4px; right: 4px;
+  font-size: 9px; font-weight: 900; letter-spacing: 0.04em;
+  padding: 2px 5px; border-radius: 3px;
+  background: linear-gradient(135deg, rgba(125,211,252,0.85), rgba(200,125,255,0.85));
+  color: #111; z-index: 2;
+  box-shadow: 0 0 10px rgba(125,211,252,0.5);
+  font-variant-numeric: tabular-nums;
+}
 
 /* ───── 履歴モーダル ───── */
 .history-modal {
@@ -5279,12 +5345,26 @@ body.gasshuku-modal-open {
   display: inline-block;
   padding: 1px 5px;
   border-radius: 999px;
-  background: rgba(255, 217, 122, 0.25);
-  border: 1px solid rgba(255, 217, 122, 0.5);
-  color: #fcd34d;
   font-size: 9px;
   margin-right: 4px;
   vertical-align: middle;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.chapter-gallery-loc-kind.kind-bg {
+  background: rgba(125,211,252,0.25);
+  border: 1px solid rgba(125,211,252,0.55);
+  color: #7dd3fc;
+}
+.chapter-gallery-loc-kind.kind-ill {
+  background: rgba(252,165,89,0.25);
+  border: 1px solid rgba(252,165,89,0.55);
+  color: #fca559;
+}
+.chapter-gallery-loc-kind.kind-other {
+  background: rgba(255, 217, 122, 0.25);
+  border: 1px solid rgba(255, 217, 122, 0.5);
+  color: #fcd34d;
 }
 .chapter-gallery-loc.locked img {
   filter: blur(8px) grayscale(0.6) brightness(0.5);

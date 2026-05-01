@@ -556,7 +556,9 @@ const POOL = {
 
 // ────────────── Settings ──────────────
 const PRICE_PER_ROLL = 300;
-const PITY = 180;            // 天井
+// 天井システム廃止 (2026-05-02 野沢さん指示「無限にガチャ引けるし、 天井システム撤廃」)
+// 後方互換のため定数は残す (Infinity) が、 rollOne 内で参照しない。 state.pity は累計参考値として保持
+const PITY = Infinity;
 // LR(Legend Rare) = 唯一の伝説枠、確率は R から 0.5% 移譲
 const RATES = { R: 0.645, SR: 0.25, SSR: 0.07, UR: 0.03, LR: 0.005 };
 
@@ -859,8 +861,7 @@ const PICKUP_CHAPTER = 's1c4';  // 最新章固定 (S1C5公開時に 's1c5' へ�
 const PICKUP_WEIGHT = 2;
 
 function rollOne(opts = {}) {
-  // 天井: UR確定(LRではなく)
-  if (state.pity >= PITY - 1) return pickTier("UR", opts);
+  // 天井廃止 (2026-05-02): 純粋確率のみ。 state.pity は記録としてはまだ更新するが UR 確定処理なし
   const r = Math.random();
   let acc = 0;
   // LRから順に判定（稀なtierから降順）
@@ -1052,7 +1053,7 @@ function showRateDetail() {
       <span class="rate-detail-each">1体あたり ${tierEach}%</span>
     </div>`;
   }
-  // ピックアップ 表 (該当章キャラの tier 内シェア)
+  // ピックアップ 「通常 vs ピックアップ」 比較表 (1体あたり何倍引きやすいか)
   let pickupRows = '';
   let pickupCharsBlock = '';
   for (const tier of ['LR', 'UR', 'SSR', 'SR', 'R']) {
@@ -1060,12 +1061,12 @@ function showRateDetail() {
     const pickups = all.filter(c => c.chapter === PICKUP_CHAPTER);
     if (all.length === 0) continue;
     const tierPct = (RATES[tier] || 0) * 100;
+    const normalEach = tierPct / all.length;
     if (pickups.length === 0) {
       pickupRows += `<div class="rate-detail-row tier-${tier.toLowerCase()} pickup-empty">
         <span class="rate-detail-tier">${tier}</span>
-        <span class="rate-detail-pct">${tierPct.toFixed(2)}%</span>
-        <span class="rate-detail-cnt">${chapLabel}該当 0体</span>
-        <span class="rate-detail-each">通常排出のみ</span>
+        <span class="rate-detail-cnt">該当 0体</span>
+        <span class="rate-detail-each" colspan="2">通常通り (${normalEach.toFixed(3)}%/1体)</span>
       </div>`;
       continue;
     }
@@ -1073,16 +1074,17 @@ function showRateDetail() {
     const pickupShare = (pickups.length * PICKUP_WEIGHT) / totalWeight;
     const pickupTierPct = tierPct * pickupShare;
     const pickupEach = pickupTierPct / pickups.length;
+    const ratio = normalEach > 0 ? pickupEach / normalEach : 0;
     pickupRows += `<div class="rate-detail-row tier-${tier.toLowerCase()}">
       <span class="rate-detail-tier">${tier}</span>
-      <span class="rate-detail-pct">${pickupTierPct.toFixed(2)}%</span>
-      <span class="rate-detail-cnt">${pickups.length}体 ピックアップ</span>
-      <span class="rate-detail-each">1体あたり ${pickupEach.toFixed(3)}%</span>
+      <span class="rate-detail-cnt">★ ${pickups.length}体</span>
+      <span class="rate-detail-each">1体あたり <b>${pickupEach.toFixed(3)}%</b></span>
+      <span class="rate-detail-ratio">通常の <b>${ratio.toFixed(2)}倍</b> 引きやすい</span>
     </div>`;
     pickupCharsBlock += `<div class="rate-detail-pickup-tier-block">
-      <div class="rate-detail-pickup-tier-head"><span class="rate-detail-tier tier-${tier.toLowerCase()}">${tier}</span> ピックアップ対象 (${pickups.length}体)</div>
+      <div class="rate-detail-pickup-tier-head"><span class="rate-detail-tier tier-${tier.toLowerCase()}">${tier}</span> ★ピックアップ ${pickups.length}体</div>
       <div class="rate-detail-pickup-chars">
-        ${pickups.map(c => `<span class="rate-detail-pickup-char tier-${tier.toLowerCase()}">${escapeHtml(c.name)}</span>`).join('')}
+        ${pickups.map(c => `<span class="rate-detail-pickup-char tier-${tier.toLowerCase()}">★ ${escapeHtml(c.name)}</span>`).join('')}
       </div>
     </div>`;
   }
@@ -1098,17 +1100,17 @@ function showRateDetail() {
           <div class="rate-detail-table">${normalRows}</div>
         </div>
         <div class="rate-detail-section">
-          <h3>📖 ${chapLabel} ピックアップガチャ (重み ×${PICKUP_WEIGHT})</h3>
-          <p class="rate-detail-desc">${chapLabel} に所属するキャラは tier 内で <b>×${PICKUP_WEIGHT}</b> の重み (= 通常時より排出率上昇)。 tier 自体の確率 (${(RATES.R*100).toFixed(0)}/${(RATES.SR*100).toFixed(0)}/${(RATES.SSR*100).toFixed(0)}/${(RATES.UR*100).toFixed(0)}%) は変わらない。</p>
+          <h3>📖 ${chapLabel} ピックアップガチャ</h3>
+          <p class="rate-detail-desc">通常ガチャの tier 別確率 (LR/UR/SSR/SR/R 0.5/3/7/25/64.5%) は <b>そのまま</b>。 各 tier 内で <b>${chapLabel}キャラ (★) が約 ×${PICKUP_WEIGHT} 倍引きやすく</b> なる仕組み。</p>
           <div class="rate-detail-table">${pickupRows}</div>
         </div>
         <div class="rate-detail-section">
-          <h3>📋 ${chapLabel} ピックアップ対象キャラ</h3>
+          <h3>📋 ${chapLabel} ピックアップ対象キャラ (★)</h3>
           ${pickupCharsBlock || '<p class="rate-detail-desc">該当キャラなし</p>'}
         </div>
       </div>
       <div class="rate-detail-note">
-        ガチャ確率は試行ごとに独立 (前の結果は次に影響しない)。 LR は天井システム ${typeof PITY === 'number' ? PITY : 100}連で確定獲得。
+        ガチャ確率は試行ごとに独立 (前の結果は次に影響しない)。 <b>天井システムなし</b> — 純粋に確率のみ。
       </div>
     </div>
   `;
@@ -1276,6 +1278,16 @@ function renderHomeGallery() {
       nm.className = 'hgcard-name';
       nm.textContent = c.name;
       card.appendChild(nm);
+      // 凸数バッジ (1凸以上の時だけ表示、 NEW と同時表示OK)
+      const dupKey = c.tier + '_' + c.name;
+      const dupCnt = (state.dupCounts && state.dupCounts[dupKey]) || 0;
+      if (dupCnt > 0) {
+        const dupB = document.createElement('div');
+        dupB.className = 'hgcard-dup';
+        const dupMax = (typeof MAX_DUPS !== 'undefined' && MAX_DUPS[c.tier]) || 0;
+        dupB.textContent = `${dupCnt}凸${dupMax > 0 && dupCnt >= dupMax ? '✨' : ''}`;
+        card.appendChild(dupB);
+      }
       if (typeof isNewUnlocked === 'function' && isNewUnlocked(c)) {
         const newB = document.createElement('div');
         newB.className = 'hgcard-new';
@@ -2812,6 +2824,16 @@ function renderGalleryByTab() {
       card.appendChild(newB);
     }
     if (unlocked) {
+      // 凸数バッジ (1凸以上の時だけ表示)
+      const dupKey = c.tier + '_' + c.name;
+      const dupCnt = (state.dupCounts && state.dupCounts[dupKey]) || 0;
+      if (dupCnt > 0) {
+        const dupB = document.createElement('div');
+        dupB.className = 'card-dup';
+        const dupMax = (typeof MAX_DUPS !== 'undefined' && MAX_DUPS[c.tier]) || 0;
+        dupB.textContent = `${dupCnt}凸${dupMax > 0 && dupCnt >= dupMax ? '✨' : ''}`;
+        card.appendChild(dupB);
+      }
       const nm = document.createElement("div");
       nm.className = "card-name";
       nm.textContent = c.name;
@@ -3003,22 +3025,24 @@ function navCharDetail(delta) {
 // ═════════════ 相関図 ═════════════
 // 派閥 (faction) ごとに島状配置。座標は SVG viewBox 2000x1400 内の絶対座標
 // yomi: ふりがな (派閥名上に小さく表示)
+// 派閥座標 — ワールドマップ FACTION_WORLD_COORDS と同じ位置に揃え (野沢さん指示 2026-05-02)
+// 相関図とワールドマップで派閥位置が一致 → 地理感覚と相関の理解が同期
 const FACTIONS = [
-  { id: 'genso',   label: '原虹・観測者',     yomi: 'げんそう・かんそくしゃ', x: 1000, y:  170, color: '#fff8d4' },
-  { id: 'rulers',  label: '十国の覇者',       yomi: 'じっこくのはしゃ',     x: 1000, y:  500, color: '#ffd97a' },
-  { id: 'church',  label: '白焔教会',          yomi: 'はくえんきょうかい',   x:  280, y:  260, color: '#e3f0ff' },
-  { id: 'dragon',  label: '紫竜王国',          yomi: 'しりゅうおうこく',     x:  280, y:  600, color: '#d6c5ff' },
-  { id: 'redwing', label: '紅翼皇家',          yomi: 'こうよくこうか',       x:  280, y:  970, color: '#ffc0c0' },
-  { id: 'yakai',   label: '夜焔郷・影衆',      yomi: 'やえんごう・かげしゅう', x: 1720, y:  260, color: '#ffaaaa' },
-  { id: 'wolf',    label: '月牙狼族',          yomi: 'げつがろうぞく',       x: 1720, y:  520, color: '#cccccc' },
-  { id: 'forest',  label: '深緑樹海',          yomi: 'しんりょくじゅかい',   x: 1720, y:  760, color: '#b8e0b0' },
-  { id: 'silver',  label: '銀霜王国',          yomi: 'ぎんそうおうこく',     x: 1720, y: 1010, color: '#cce0ff' },
-  { id: 'tower',   label: '黒曜塔',            yomi: 'こくようとう',         x:  600, y: 1230, color: '#a0a0c0' },
-  { id: 'seventh', label: '第七天',            yomi: 'だいしちてん',         x: 1000, y:  830, color: '#ffb070' },
-  { id: 'academy', label: '星霊学院',          yomi: 'せいれいがくいん',     x: 1400, y: 1230, color: '#b0d0ff' },
-  // S1C2 追加
-  { id: 'aquasis', label: '海淵都市アクアシス', yomi: 'かいえんとし・あくあしす', x: 1000, y: 1320, color: '#7dd3fc' },
-  { id: 'crimson', label: '紅玉海賊団',         yomi: 'こうぎょくかいぞくだん',   x:  300, y: 1330, color: '#ff8888' },
+  { id: 'genso',   label: '原虹・観測者',     yomi: 'げんそう・かんそくしゃ', x: 1000, y:  140, color: '#fff8d4' },
+  { id: 'rulers',  label: '十国の覇者',       yomi: 'じっこくのはしゃ',     x: 1000, y:  450, color: '#ffd97a' },
+  { id: 'tower',   label: '黒曜塔',            yomi: 'こくようとう',         x: 1000, y:  720, color: '#a0a0c0' },
+  { id: 'church',  label: '白焔教会',          yomi: 'はくえんきょうかい',   x:  450, y:  380, color: '#e3f0ff' },
+  { id: 'forest',  label: '深緑樹海',          yomi: 'しんりょくじゅかい',   x:  280, y:  720, color: '#b8e0b0' },
+  { id: 'wolf',    label: '月牙狼族',          yomi: 'げつがろうぞく',       x:  330, y: 1010, color: '#cccccc' },
+  { id: 'silver',  label: '銀霜王国',          yomi: 'ぎんそうおうこく',     x:  500, y: 1250, color: '#cce0ff' },
+  { id: 'dragon',  label: '紫竜王国',          yomi: 'しりゅうおうこく',     x: 1550, y:  380, color: '#d6c5ff' },
+  { id: 'redwing', label: '紅翼皇家',          yomi: 'こうよくこうか',       x: 1720, y:  720, color: '#ffc0c0' },
+  { id: 'yakai',   label: '夜焔郷・影衆',      yomi: 'やえんごう・かげしゅう', x: 1670, y: 1010, color: '#ffaaaa' },
+  { id: 'seventh', label: '第七天',            yomi: 'だいしちてん',         x: 1500, y: 1250, color: '#ffb070' },
+  { id: 'academy', label: '星霊学院',          yomi: 'せいれいがくいん',     x: 1000, y: 1180, color: '#b0d0ff' },
+  // S1C2 追加 (海域)
+  { id: 'aquasis', label: '海淵都市アクアシス', yomi: 'かいえんとし・あくあしす', x:  800, y: 1450, color: '#7dd3fc' },
+  { id: 'crimson', label: '紅玉海賊団',         yomi: 'こうぎょくかいぞくだん',   x: 1300, y: 1450, color: '#ff8888' },
 ];
 
 // キャラの所属派閥マップ (name → factionId, dx, dy: 派閥中心からの相対オフセット)
@@ -3192,25 +3216,56 @@ function getCharByName(name) {
   return null;
 }
 
-function openRelations() {
+// 相関図 focus state — 派閥クリックで該当派閥の相関のみハイライト (野沢さん指示 2026-05-02)
+let _relationsFocusFaction = null;
+function setRelationsFocus(facId) {
+  _relationsFocusFaction = (_relationsFocusFaction === facId) ? null : facId;
+  _redrawRelationsCanvas();
+}
+function clearRelationsFocus() {
+  _relationsFocusFaction = null;
+  _redrawRelationsCanvas();
+}
+function _redrawRelationsCanvas() {
   const canvas = document.getElementById('relations-canvas');
-  // SVG構築
-  const W = 2000, H = 1600;  // S1C2 で底辺派閥追加 (aquasis y:1320, crimson y:1330) のため余裕を1400→1600に
-  const svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+  if (!canvas) return;
+  const W = 2000, H = 1600;
+  canvas.innerHTML = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
     <defs>${renderArrowMarkers()}</defs>
     ${renderFactionBg()}
     ${renderRelationLines()}
     ${renderFactionLabels()}
     ${renderCharNodes()}
   </svg>`;
-  canvas.innerHTML = svg;
-  document.getElementById('relations').classList.add('active');
-
-  // クリックでキャラ詳細にジャンプ (ドラッグと区別するため移動量チェック)
-  // 相関図は背後に残す → 詳細を閉じたら相関図に戻る
+  _bindRelationsClickHandlers(canvas);
+  // focus 中なら focus 派閥位置に center scroll
+  if (_relationsFocusFaction) {
+    const f = FACTIONS.find(ff => ff.id === _relationsFocusFaction);
+    if (f) {
+      const sw = canvas.scrollWidth, sh = canvas.scrollHeight;
+      const fx = (f.x / W) * sw - canvas.clientWidth / 2;
+      const fy = (f.y / H) * sh - canvas.clientHeight / 2;
+      canvas.scrollTo({ left: fx, top: fy, behavior: 'smooth' });
+    }
+  }
+  // focus 表示用「全表示に戻る」 ボタン
+  const banner = document.getElementById('relations-focus-banner');
+  if (banner) {
+    if (_relationsFocusFaction) {
+      const f = FACTIONS.find(ff => ff.id === _relationsFocusFaction);
+      banner.innerHTML = `<span>📍 ${f ? f.label : ''} に絞り込み中</span> <button type="button" onclick="clearRelationsFocus()">✕ 全表示に戻る</button>`;
+      banner.hidden = false;
+    } else {
+      banner.hidden = true;
+      banner.innerHTML = '';
+    }
+  }
+}
+function _bindRelationsClickHandlers(canvas) {
+  // キャラタップ → 詳細
   canvas.querySelectorAll('[data-char-name]').forEach(el => {
     el.addEventListener('click', e => {
-      if (relationsDragMoved) return; // ドラッグ後の偽クリックを無視
+      if (relationsDragMoved) return;
       const name = el.dataset.charName;
       const c = getCharByName(name);
       if (c && isUnlocked(c)) {
@@ -3221,8 +3276,34 @@ function openRelations() {
       }
     });
   });
+  // 派閥タップ (背景円 + ラベル) → focus 切替
+  canvas.querySelectorAll('[data-faction-id]').forEach(el => {
+    el.addEventListener('click', e => {
+      if (relationsDragMoved) return;
+      e.stopPropagation();
+      setRelationsFocus(el.dataset.factionId);
+    });
+  });
+}
+window.clearRelationsFocus = clearRelationsFocus;
 
-  // 初期位置: 中央寄せ (派閥中心 800,550 が見えるように)
+function openRelations() {
+  // focus state リセット
+  _relationsFocusFaction = null;
+  const canvas = document.getElementById('relations-canvas');
+  // banner エレメント (focus 中のみ表示) を準備
+  let banner = document.getElementById('relations-focus-banner');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'relations-focus-banner';
+    banner.className = 'relations-focus-banner';
+    banner.hidden = true;
+    canvas.parentElement.insertBefore(banner, canvas);
+  }
+  _redrawRelationsCanvas();
+  document.getElementById('relations').classList.add('active');
+
+  // 初期位置: 中央寄せ
   setTimeout(() => {
     const sw = canvas.scrollWidth, sh = canvas.scrollHeight;
     canvas.scrollLeft = (sw - canvas.clientWidth) / 2;
@@ -3405,20 +3486,28 @@ function getCharPos(name) {
   return { x: f.x + meta.dx, y: f.y + meta.dy };
 }
 
+function _factionDimOpacity(facId) {
+  // focus なし → 1.0、 focus あり&一致 → 1.0、 focus あり&不一致 → 0.18
+  if (!_relationsFocusFaction) return 1.0;
+  return _relationsFocusFaction === facId ? 1.0 : 0.18;
+}
+
 function renderFactionBg() {
   return FACTIONS.map(f => {
     // 派閥領域を半透明の背景円で示す (新スケールに合わせ半径175)
     const r = 175;
-    return `<circle cx="${f.x}" cy="${f.y + 40}" r="${r}" fill="${f.color}" fill-opacity="0.06" stroke="${f.color}" stroke-opacity="0.25" stroke-width="1.5" stroke-dasharray="4,4"/>`;
+    const op = _factionDimOpacity(f.id);
+    return `<circle data-faction-id="${f.id}" class="rel-faction-bg" cx="${f.x}" cy="${f.y + 40}" r="${r}" fill="${f.color}" fill-opacity="${0.06 * op}" stroke="${f.color}" stroke-opacity="${0.25 * op}" stroke-width="1.5" stroke-dasharray="4,4" style="cursor:pointer"/>`;
   }).join('');
 }
 
 function renderFactionLabels() {
   return FACTIONS.map(f => {
+    const op = _factionDimOpacity(f.id);
     const yomiTxt = f.yomi
-      ? `<text x="${f.x}" y="${f.y - 137}" text-anchor="middle" fill="${f.color}" font-size="11" letter-spacing="2" opacity="0.7" style="text-shadow: 0 0 6px rgba(0,0,0,0.8)">${f.yomi}</text>`
+      ? `<text x="${f.x}" y="${f.y - 137}" text-anchor="middle" fill="${f.color}" font-size="11" letter-spacing="2" opacity="${0.7 * op}" style="text-shadow: 0 0 6px rgba(0,0,0,0.8)">${f.yomi}</text>`
       : '';
-    return `${yomiTxt}<text x="${f.x}" y="${f.y - 115}" text-anchor="middle" fill="${f.color}" font-size="22" font-weight="700" letter-spacing="2" style="text-shadow: 0 0 8px rgba(0,0,0,0.8)">${f.label}</text>`;
+    return `${yomiTxt}<text data-faction-id="${f.id}" class="rel-faction-label" x="${f.x}" y="${f.y - 115}" text-anchor="middle" fill="${f.color}" font-size="22" font-weight="700" letter-spacing="2" opacity="${op}" style="cursor:pointer; text-shadow: 0 0 8px rgba(0,0,0,0.8)">${f.label}</text>`;
   }).join('');
 }
 
@@ -3466,7 +3555,15 @@ function renderRelationLines() {
         y2 = y2 - (dyL / lineLen) * trim;
       }
       const marker = style.directed ? `marker-end="url(#arrow-${r.type})"` : '';
-      lines.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${style.color}" stroke-opacity="0.65" stroke-width="${style.w}" ${dash} ${marker}/>`);
+      // focus 中は両端のキャラが focus 派閥所属でない関係線を dim
+      let lineOp = 0.65;
+      if (_relationsFocusFaction) {
+        const fa = (CHAR_FACTION[r.a] || {}).f;
+        const fb = (CHAR_FACTION[r.b] || {}).f;
+        const inFocus = (fa === _relationsFocusFaction) || (fb === _relationsFocusFaction);
+        lineOp = inFocus ? 0.85 : 0.10;
+      }
+      lines.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${style.color}" stroke-opacity="${lineOp}" stroke-width="${style.w}" ${dash} ${marker}/>`);
 
       // ラベル位置の計算
       const baseOffset = lineLen < 200 ? 26 : 14;
@@ -3527,7 +3624,11 @@ function renderCharNodes() {
     const unlocked = isUnlocked(c);
     const tierColor = TIER_COLORS[c.tier][0];
     const r = c.tier === 'LR' ? 36 : c.tier === 'UR' ? 32 : c.tier === 'SSR' ? 28 : 24;
-    const opacity = unlocked ? 1 : 0.3;
+    let opacity = unlocked ? 1 : 0.3;
+    // focus 中: focus 派閥のキャラだけ通常 opacity、 他は dim
+    if (_relationsFocusFaction && meta.f !== _relationsFocusFaction) {
+      opacity = opacity * 0.18;
+    }
     const cursor = unlocked ? 'pointer' : 'default';
     // 画像を clipPath で円形クリップ
     const clipId = `clip-${name.replace(/[\s ]/g, '_')}`;
@@ -3689,6 +3790,9 @@ function closeCharDetail() {
   $("#char-detail").classList.remove("active");
   $("#char-img-zoom").classList.remove("active");
   _unlockBodyScroll();
+  // 詳細閉じた時にホーム/図鑑カードのNEWバッジを再描画 (galleryViewed 反映)
+  try { if (typeof renderHomeGallery === 'function') renderHomeGallery(); } catch (e) {}
+  try { if ($("#gallery").classList.contains("active") && typeof renderGalleryByTab === 'function') renderGalleryByTab(); } catch (e) {}
 }
 
 // ────────────── Bindings ──────────────
@@ -4101,7 +4205,8 @@ function _showChapterGallery(storyId) {
       if (loc.locked) {
         html += `<div class="chapter-gallery-loc-lockbadge">🔒</div>`;
       }
-      html += `<div class="chapter-gallery-loc-label"><span class="chapter-gallery-loc-kind">${escapeHtml(loc.kind)}</span> ${escapeHtml(loc.scene)}</div>`;
+      const kindCls = loc.kind === '背景' ? 'kind-bg' : (loc.kind === '挿絵' ? 'kind-ill' : 'kind-other');
+      html += `<div class="chapter-gallery-loc-label"><span class="chapter-gallery-loc-kind ${kindCls}">${escapeHtml(loc.kind)}</span> ${escapeHtml(loc.scene)}</div>`;
       html += `</div>`;
     });
     html += `</div>`;
@@ -5476,7 +5581,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260502v';
+const IMG_CACHE_VERSION = '20260502w';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -8200,8 +8305,8 @@ function openSettingsModal() {
           <div class="settings-power-saver-desc">背景アニメ・キャラ瞬きを停止して発熱を抑えます。 (OS の省電力モード ON 時は自動有効)</div>
         </div>
         <div class="settings-section settings-offline-section">
-          <div class="settings-label">📥 オフライン用にアセット保存</div>
-          <div class="settings-offline-desc">BGM・キャラ画像・場所画像を端末にキャッシュ。 通信が不安定な場所でもサクサク動きます。 カテゴリ別にDL可能 (BGMだけ、 場所画像だけ等)。</div>
+          <div class="settings-label">📥 オフライン用にデータ保存</div>
+          <div class="settings-offline-desc">BGM・キャラ画像・場所画像のデータを端末にキャッシュ。 通信不安定でもサクサク動き、 オンラインでも保存済みデータから優先読込します (画像表示が速くなる)。 カテゴリ別にDL可能 (BGMだけ、 場所画像だけ等)。</div>
           <button type="button" class="settings-offline-dl" id="settings-offline-dl">📥 ダウンロード開始</button>
           <div class="settings-offline-progress" id="settings-offline-progress" hidden>
             <div class="progress-bar"><div class="progress-fill" id="settings-progress-fill"></div></div>
@@ -8335,7 +8440,7 @@ function openSettingsModal() {
       // マスター: 全カテゴリ
       dlBtn.addEventListener('click', () => {
         if (dlBtn.disabled) return;
-        _runDownload(null, '全アセット');
+        _runDownload(null, '全データ');
       });
     }
     // カテゴリ別ボタン
