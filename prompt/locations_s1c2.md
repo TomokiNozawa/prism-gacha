@@ -248,41 +248,38 @@ Aspect ratio 16:9, high detail.
 
 ---
 
-## 【8】crimson_pearl_night.png — 2-4 海賊船の夜
+## 【8】crimson_pearl_night.png — 第一幕 1-4 海賊船の夜 (背景)
 
-- **対応シーン**: 2-4 海賊船の夜 (船上対話、 一夜の小休止)
+- **対応シーン**: **第一幕 1-4 海賊船の夜** (船上対話、 一夜の小休止) ※新4幕統合後の番号
 - **本文行**: `STORY/s1c2.md` l.166〜「紅玉号——シャンティの船は、 思ったよりも、 ずっと整然としていた」 / l.205「月のない夜だった」
-- **役割**: 本文インライン挿絵 (戦闘前の静かな夜)
-- **被写体**: 紅玉号甲板、 月のない夜、 ランタンの灯、 シャンティ (船尾煙草) + ケイレブ + ミカ
-- **ストーリー全体との整合**: 「月のない夜」 = 後の「黒月の前兆」 (S1C5/C7) を視覚的に暗示。 月のない夜の海はまだ静かだが、 影喰い襲来直前の不穏さを孕む。 ストーリー全体で「月のない夜」 が再登場する時の伏線
+- **役割**: **シーン背景** (純風景、 3:4 縦長) — シーン全体に被さるムード背景
+- **被写体**: 紅玉号の甲板と月のない夜空、 マスト + ランタン + 紅い帆、 海と星の境界
+- **ストーリー全体との整合**: 「月のない夜」 = 後の「黒月の前兆」 (S1C5/C7) を視覚的に暗示。 影喰い襲来直前の不穏さを静かな夜に孕ませる。 v1.3.1 patch で挿絵 (16:9) → 背景 (3:4) に格上げ、 キャラ含めない純風景に変更 (キャラはストーリー本文の語りに任せる)
 - **ストーリー使用**: ✅
-- **コード参照**: `LOCATION_CONFIG['s1c2']['2-4']` (実装後)
+- **コード参照**: `LOCATION_CONFIG['s1c2']['1-4']` (登録済)
 
-> **添付画像** (生成時):
-> - `images/characters/season1/ssr/pirate_captain.png` (シャンティ SSR、 船尾で煙草)
-> - `images/characters/season1/sr/pirate_firstmate.png` (ケイレブ SR、 中央甲板)
-> - `images/characters/season1/r/pirate_cabin_girl.png` (ミカ R、 甲板を駆ける)
+> **添付画像** (生成時): 不要 (純風景、 キャラリファ不要)
 
 ```
-The deck of a pirate galleon at night, on a moonless sea — the night sky shows
-absolutely no moon, only scattered cold stars, hinting at an ominous absence.
-The ship "Crimson Pearl" cuts through dark water, its crimson sails barely visible
-against a starless midnight sky. Lanterns hang from the masts and railings,
-casting warm amber pools of light onto polished wooden planks.
-At the stern: a bold female pirate captain matching the first reference image —
-red coat, large feathered tricorn hat, twin curved blades on her waist —
-leans against the railing, smoking a thin pipe, the ember glowing red.
-Mid-deck: a young male first mate matching the second reference image — black hair,
-amber eyes, friendly composed smile, twin curved swords crossed on his back —
-stands attentively. Forward of the deck: a young girl apprentice pirate matching
-the third reference image — short brown hair, a small dagger at her belt —
-runs across the deck with wide curious eyes.
-The sea stretches into pure black darkness beyond, only faint phosphorescence
-from passing waves visible. The mood is heavy with anticipation,
-a calm before unseen danger — the absent moon a subtle hint of greater shadows to come.
-Anime fantasy illustration, deep indigo and black with warm amber lantern accents,
-side-angle shot from mid-deck height.
-Aspect ratio 16:9, high detail.
+A vast cinematic vertical illustration looking out over the deck of a fantasy
+pirate galleon called "Crimson Pearl" sailing on a moonless midnight sea —
+the night sky above shows absolutely no moon, only scattered cold pale stars
+hinting at an ominous absence, a subtle premonition of darker shadows to come.
+The deck stretches forward in the foreground with polished dark wooden planks,
+coiled ropes, and barrels. Tall masts rise into the upper portion of the frame
+with crimson sails barely visible against the starless midnight sky, edges
+just catching the faint warm glow of multiple hanging brass lanterns swaying
+gently from the masts and railings, casting amber pools of light onto the
+wooden boards. The sea stretches into pure black darkness on either side of
+the ship, only faint blue-green phosphorescence from passing waves visible
+along the hull. The composition emphasizes the vast empty sky above and the
+quiet wooden deck below, with the absent moon a held silence in the heart of
+the frame. No people visible, only the empty deck and quiet ship at peace
+before unseen danger. Anime fantasy game background painting, deep indigo
+and midnight black with warm amber lantern accents and faint phosphorescent
+sea glow, vertical composition with tall night sky dominating the upper two
+thirds and deck details in the lower third.
+Aspect ratio 3:4, vertical orientation 1024x1536, high detail.
 ```
 
 ---
