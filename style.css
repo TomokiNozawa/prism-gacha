@@ -218,7 +218,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 }
 .cta-card-rate {
   /* hero-copy から CTA カード内に移動 (2026-05-01)、 既存 .rate スタイルを継承しつつ少し小さめに */
-  display: flex; gap: 6px; flex-wrap: wrap;
+  display: flex; gap: 6px; flex-wrap: wrap; align-items: center;
   font-size: 10px;
 }
 .cta-card-rate span {
@@ -1507,26 +1507,26 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   color: #ffd97a;
 }
 
-/* 排出率詳細 トリガー (ホーム cta-row 下) */
-.rate-detail-link {
-  margin: 6px auto 0;
-  padding: 7px 16px;
-  background: linear-gradient(135deg, rgba(125,211,252,0.14), rgba(200,125,255,0.14));
-  border: 1px solid rgba(255,255,255,0.18);
-  border-radius: 10px;
-  color: rgba(255,255,255,0.85);
+/* 排出率詳細 トリガー (cta-card-rate 内 inline) */
+.rate-detail-inline {
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  width: 26px; height: 26px;
+  margin-left: auto;
+  padding: 0;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 50%;
+  color: rgba(255,255,255,0.92);
   font-family: inherit;
-  font-size: 12px; font-weight: 600;
-  letter-spacing: 0.05em;
+  font-size: 13px;
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease;
-  min-height: 32px;
-  display: block;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
 }
-.rate-detail-link:hover {
-  background: linear-gradient(135deg, rgba(125,211,252,0.28), rgba(200,125,255,0.28));
-  border-color: rgba(125,211,252,0.5);
-  color: #fff;
+.rate-detail-inline:hover {
+  background: linear-gradient(135deg, rgba(125,211,252,0.32), rgba(200,125,255,0.32));
+  border-color: rgba(125,211,252,0.55);
+  transform: scale(1.1);
 }
 
 /* 排出率詳細モーダル (rank-table-modal と同等の最前面) */
@@ -1974,7 +1974,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   color: #111;
 }
 .gallery-card .card-new {
-  position: absolute; top: 6px; right: 6px;
+  position: absolute; top: 6px; left: 6px;
   font-size: 9px; font-weight: 900; letter-spacing: 0.08em;
   padding: 2px 6px; border-radius: 3px;
   background: linear-gradient(90deg, #ff5faa, #ffd84d);
@@ -1983,7 +1983,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   animation: new-pulse 1.2s ease-in-out infinite alternate;
 }
 .gallery-card .card-dup {
-  position: absolute; top: 6px; left: 6px;
+  position: absolute; top: 6px; right: 6px;
   font-size: 10px; font-weight: 900; letter-spacing: 0.04em;
   padding: 2px 6px; border-radius: 3px;
   background: linear-gradient(135deg, rgba(125,211,252,0.92), rgba(200,125,255,0.92));
@@ -3313,6 +3313,10 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 }
 .rel-faction-label:hover {
   text-decoration: underline;
+}
+.relations-zoom-layer {
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: center;
 }
 
 /* M5: オフライン indicator バナー */
@@ -4931,7 +4935,7 @@ body.has-offline-banner .topbar { margin-top: 30px; }
   pointer-events: none;
 }
 .hgcard-new {
-  position: absolute; top: 4px; right: 4px;
+  position: absolute; top: 4px; left: 4px;
   font-size: 9px; font-weight: 900; letter-spacing: 0.05em;
   padding: 2px 5px; border-radius: 3px;
   background: linear-gradient(90deg, #ff5faa, #ffd84d);
@@ -4939,13 +4943,14 @@ body.has-offline-banner .topbar { margin-top: 30px; }
   box-shadow: 0 0 10px rgba(255,216,77,0.6);
 }
 .hgcard-dup {
-  position: absolute; bottom: 4px; right: 4px;
+  position: absolute; top: 4px; right: 4px;
   font-size: 9px; font-weight: 900; letter-spacing: 0.04em;
   padding: 2px 5px; border-radius: 3px;
-  background: linear-gradient(135deg, rgba(125,211,252,0.85), rgba(200,125,255,0.85));
-  color: #111; z-index: 2;
+  background: linear-gradient(135deg, rgba(125,211,252,0.92), rgba(200,125,255,0.92));
+  color: #fff; z-index: 2;
   box-shadow: 0 0 10px rgba(125,211,252,0.5);
   font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
 
 /* ───── 履歴モーダル ───── */

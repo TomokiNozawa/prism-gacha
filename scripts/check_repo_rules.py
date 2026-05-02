@@ -268,6 +268,47 @@ def check_chapter_completeness():
     return checked
 
 
+def check_story_pov_header():
+    """ルール9 (BLOCKER): STORY/s1cN.md 冒頭に `**POV**: 名前` 形式の宣言が必要。
+    無いと openStory が POV 抽出失敗 → currentStoryPov=null → renderSceneChars の POV 救済が全 scene で skip
+    → 「シーン登場リスト 1人目」 が POV にならない (s1c4 で発生した『ボロボロ』の根本原因)。
+    """
+    story_dir = ROOT / 'STORY'
+    if not story_dir.exists():
+        return 0
+    checked = 0
+    for path in sorted(story_dir.glob('s1c*.md')):
+        text = path.read_text(encoding='utf-8')
+        head = '\n'.join(text.split('\n')[:15])
+        m = re.search(r'\*\*POV\*\*\s*[:：]\s*([^\n(（]+)', head)
+        if not m:
+            violations.append(
+                f"[ルール9 POV header 不正 BLOCKER] STORY/{path.name} 冒頭 15行に `**POV**: 名前` 形式の宣言なし\n"
+                f"      → openStory の regex `\\*\\*POV\\*\\*\\s*[:：]` にマッチせず POV 救済ロジックが全シーン skip\n"
+                f"      → ファイル冒頭 (タイトル h1 直後) に `**POV**: 龍帝 アルテミス (略歴)` 形式で追加要"
+            )
+        else:
+            # POV 名が STORY_OUTLINE.povCharName と一致するか確認
+            pov_name = m.group(1).strip()
+            sid_match = re.match(r'(s1c\d+)\.md', path.name)
+            if sid_match:
+                # script.js から STORY_OUTLINE povCharName を抽出
+                script = ROOT / 'script.js'
+                if script.exists():
+                    js = script.read_text(encoding='utf-8')
+                    pat = re.compile(rf"id:\s*'{sid_match.group(1)}'[^}}]*?povCharName:\s*'([^']+)'")
+                    om = pat.search(js)
+                    if om and om.group(1) != pov_name:
+                        # 部分一致なら OK (例: STORY_OUTLINE='龍帝 アルテミス' / md='龍帝 アルテミス (...)')
+                        if not pov_name.startswith(om.group(1)) and not om.group(1).startswith(pov_name):
+                            warnings_only.append(
+                                f"[ルール9-2 POV名不一致] STORY/{path.name} の **POV**: '{pov_name}' と STORY_OUTLINE['{sid_match.group(1)}'].povCharName='{om.group(1)}' が一致しない\n"
+                                f"      → どちらかに揃える要 (POOL の正確な name と一致が望ましい)"
+                            )
+        checked += 1
+    return checked
+
+
 def check_short_kana_collisions(pool_chars_by_chap=None):
     """ルール8 (WARNING): 短いカタカナキャラ名 (2-3文字) が他のカタカナ単語に部分一致しないか
     例: 「イル」 (祭司 R) が 「ヘイル」 「イルディラ」 にマッチ → char-detail 誤発火
@@ -414,6 +455,8 @@ print(f"  ルール4 (章構造): {n4}章 検査 [BLOCKER]")
 n7 = check_chapter_completeness()
 print(f"  ルール7 (章追加漏れ): {n7}章 検査 [BLOCKER]")
 # ルール7-6 (ホームティザー) は 7 内部で BLOCKER 化済み (2026-05-02)
+n9 = check_story_pov_header()
+print(f"  ルール9 (POV header 形式): {n9}章 検査 [BLOCKER]")
 
 # === Warning ルール (commit はブロックせず、 開発者手動 review) ===
 violations_blocker = list(violations)  # ここまでが blocker 違反

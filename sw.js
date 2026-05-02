@@ -7,7 +7,7 @@
 //
 // HTML/JSON/Firebase API はキャッシュせず常にネットワーク優先 (更新即反映+認証/DBの鮮度維持)。
 
-const SW_VERSION = '20260502w';  // v1.3.2+ 天井撤廃 + 排出率改善 + s1c4整合性 + NEW消去 + 凸数表示 + ラベル色分け + データ表記 + オフライン優先 + ルール8 + 相関図ワールドマップ揃え
+const SW_VERSION = '20260502x';  // v1.3.2+ R2追加(ミウ/ピット)+R凸秘話4+POV header BLOCKER化+ルール9+WM Esc修正+排出率inline ボタン+凸右上+相関図 zoom-focus+OFFLINE_SAVED ignoreSearch
 const STATIC_CACHE = `prismaera-static-${SW_VERSION}`;
 const BGM_CACHE    = `prismaera-bgm-${SW_VERSION}`;
 const LOC_CACHE    = `prismaera-loc-${SW_VERSION}`;
@@ -114,9 +114,9 @@ async function handleAudio(req) {
   const cache = await caches.open(BGM_CACHE);
   const range = req.headers.get('range');
 
-  // 手動DL cache (OFFLINE_SAVED) を最優先で確認
+  // 手動DL cache (OFFLINE_SAVED) を最優先で確認 (ignoreSearch:true で cache buster の差異許容)
   let saved = null;
-  try { saved = await caches.match(req.url, { cacheName: OFFLINE_SAVED }); } catch (e) {}
+  try { saved = await caches.match(req.url, { cacheName: OFFLINE_SAVED, ignoreSearch: true }); } catch (e) {}
 
   if (range) {
     // Range request: cache (OFFLINE_SAVED 優先 → BGM_CACHE) に full file あれば slice して 206 を作る
@@ -192,8 +192,9 @@ async function makeRangeResponse(cached, rangeHeader) {
 // OFFLINE_SAVED は手動DL なので revalidate 不要 (バージョン更新は SW_VERSION bump で全 cache 再構築)。
 async function staleWhileRevalidate(req, cacheName) {
   // 手動DL cache を最優先で返す (cache hit → 即返し、 ネットワーク不要)
+  // ignoreSearch:true で cache buster (?v=xxx) の差異も許容 → 「DL したのに別 buster で読まれて遅い」 事故防止
   try {
-    const savedCached = await caches.match(req, { cacheName: OFFLINE_SAVED });
+    const savedCached = await caches.match(req, { cacheName: OFFLINE_SAVED, ignoreSearch: true });
     if (savedCached) return savedCached;
   } catch (e) {}
   const cache = await caches.open(cacheName);

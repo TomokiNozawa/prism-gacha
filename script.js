@@ -536,20 +536,34 @@ const POOL = {
       desc: "二十二-二十三歳の若き語り部。 昨年、 祖父が遺した物語の杖 (古龍の歯入り) と語り部の役を受け継いだ。 砂漠夜営の焚き火の前で子供たちに祖父の話を語り継ぐ。 ファラー婆さんとは別系統の遊牧民側伝承の継承者。",
       img: `${S1}/r/young_storyteller.png`,
     },
-    // ===== S1C4 追加 (R2、 凍土の少年+空挺の少年) =====
+    // ===== S1C4 追加 (R4、 凍土+空挺の子供たち) =====
     {
       name: "凍土の少年 アルク", season: 1, chapter: 's1c4',
       title: "ニーヴル雪原村の子、 凍土の冒険心",
-      caption: "おうへい様だっ……!",
-      desc: "ニーヴル雪原村の少年、 十一-十二歳。 銀髪のショート、 元気で好奇心旺盛。 氷玉投げが得意。 イズン兄に憧れて、 「いつか戦士になる!」 と意気込む。 ミウは幼馴染。",
+      caption: "お、 龍帝様だっ……!",
+      desc: "ニーヴル雪原村の少年、 十一-十二歳。 銀髪のショート、 元気で好奇心旺盛。 氷玉投げが得意。 イズン兄に憧れて、 「いつか戦士になる!」 と意気込む。 ミウは幼馴染で、 ふたりで雪原を駆け回って育った。",
       img: `${S1}/r/frost_boy.png`,
+    },
+    {
+      name: "雪原の少女 ミウ", season: 1, chapter: 's1c4',
+      title: "ニーヴル雪原村の少女、 凍土の温度",
+      caption: "アルクっ! 失礼でしょ!",
+      desc: "ニーヴル雪原村の少女、 十一-十二歳。 銀髪のロング、 アルクの幼馴染。 落ち着いて礼儀正しく、 アルクの強がりを優しく窘める姉貴肌。 雪玉作りが上手で、 凍土の民の温もりを体現する子。",
+      img: `${S1}/r/snow_girl.png`,
     },
     {
       name: "空の少女 ピピ", season: 1, chapter: 's1c4',
       title: "ゼノニア郊外の整備見習い",
       caption: "ねじまわしっ! あったよっ!",
-      desc: "ゼノニア郊外の整備見習いの少女、 十二-十三歳。 朱色ショート、 朗らかで活発。 ねじまわしを工具兼武器に。 ベル姉に憧れ、 工房通いを始めた。",
+      desc: "ゼノニア郊外の整備見習いの少女、 十二-十三歳。 朱色ショート、 朗らかで活発。 ねじまわしを工具兼武器に。 ベル姉に憧れ、 工房通いを始めた。 兄ピットの隣で育ち、 兄を超えるのが目下の目標。",
       img: `${S1}/r/sky_girl.png`,
+    },
+    {
+      name: "空の少年 ピット", season: 1, chapter: 's1c4',
+      title: "ゼノニア郊外の整備見習い、 ピピの兄",
+      caption: "妹に追い越されないようにしないと……!",
+      desc: "ゼノニア郊外の整備見習いの少年、 十三-十四歳。 朱色ミディアム、 ピピの兄。 小型レンチを腰に下げ、 妹より先に工房を志した先輩。 ピピが急成長してきて、 兄として焦りつつも自慢に思う複雑な心境。",
+      img: `${S1}/r/sky_boy.png`,
     },
   ],
 };
@@ -824,6 +838,19 @@ const LORE_BY_KEY = {
   ],
   "R_砂風の語り部 ナドラ": [
     { title: "祖父の杖、 古龍の歯", body: "ナドラの物語の杖の先には、 古龍の歯が埋まっている。 六十年前、 まだ若き日の祖父が砂漠の奥で迷った時、 一頭の古龍に出会った。 古龍は何も言わず、 祖父に自分の歯を一本くれた——『これを持って帰れ。 物語の鍵じゃ』。 祖父は六十年、 その歯を持って物語を語り続けた。 そして昨年、 祖父は静かに息を引き取り、 物語の杖と語り部の役をナドラに託した。 ナドラはまだ二十二、 杖は身に余るほど立派。 けれど祖父の話を子供たちに語り続けるたび、 ナドラは祖父の声と自分の声が重なる瞬間を感じる。 ファラー婆さんは『あれは古龍王の使いの竜じゃろう』 と言うが、 ナドラは確かめない——確かめれば、 物語が終わってしまうから。" },
+  ],
+  // ===== S1C4 R 凸秘話 =====
+  "R_凍土の少年 アルク": [
+    { title: "イズン兄の、 小さな氷の刃", body: "アルクが憧れる『イズン兄』 とは、 氷牙の戦士イズン (SR)。 ニーヴル防衛の若き双斧使いで、 雪原村に時々顔を出しては子供たちに氷の握り方を教えてくれる。 アルクは小さな手で重い氷玉を握り、 「いつか僕も双斧を振るって戦士になる」 と毎晩想像してから眠る。 ある冬の夜、 イズン兄はアルクに小さな氷の刃を彫って渡した。 「これは、 おもちゃじゃない。 戦士を志す者の、 最初の友だ」 ——。 アルクは今もそれを枕の下に隠して持っている。 龍帝の馬上の双大剣を見上げた朝、 アルクが思わず「龍帝様だっ!」 と叫んだのは、 あの氷の刃を握り締めながら見上げた憧れの全部だった。" },
+  ],
+  "R_雪原の少女 ミウ": [
+    { title: "ミウと、 雪豹を追う背中", body: "ミウが密かに憧れているのは、 雪原村のはじっこに住む若い猟師——名はシエラ。 氷の弓を背負い、 雪豹を一矢で仕留める伝説の腕前。 ミウは10歳の冬、 シエラ姉が雪原に立ち、 風を読んで矢を引き絞る背中を見て、 「私もあの背中を追いたい」 と決意した。 アルクが「戦士になる!」 と武芸に憧れる傍ら、 ミウは静かに「私は雪豹を追う猟師になる」 と返している。 二人の夢は別々だが、 雪原を駆ける子供時代だけは確かに一緒。 ミウがアルクを叱るのは、 アルクが粗忽だからじゃない——その騒ぎで、 ミウが追っていた静かな雪豹の足跡が消えてしまうから。 内緒の理由だ。" },
+  ],
+  "R_空の少女 ピピ": [
+    { title: "ピピと、 盗み見たねじまわし", body: "ピピが工房通いを始めたのは、 ベル姉 (空挺整備士、 SR) のねじまわしを盗み見たのがきっかけ。 ベル姉が真鍮歯車を手早く組み上げる姿に、 ピピは「私もあれを直してみたい」 と工房に駆け込んだ。 兄ピットの後を追って入ったはずの工房で、 気づけばピピの方が手先が器用で、 ベル姉に「ピピちゃんはセンスあるね」 と褒められる始末。 ピット兄は喜びと焦りの混じった顔で見守り、 ハーニア親方は二人の競い合いを楽しんでいる。 ピピのねじまわしは、 ベル姉の使い古しを譲り受けた一本——握り締めるたび、 「いつかベル姉と並んで真鍮を組む」 という小さな誓いが、 朱色の髪のピピの中で静かに芯を成している。" },
+  ],
+  "R_空の少年 ピット": [
+    { title: "ピットと、 兄の責任", body: "ピットがゼノニア工房に入ったのは13歳の春。 一年早く始めたはずの修行を、 12歳の妹ピピは半年で追い越そうとしている。 「妹に負けないように」 と毎朝、 ピットは誰よりも早く工房に入り、 真鍮歯車の油塗りから始める。 ベル姉は彼を『真面目な弟分』 と呼び、 焦らずやれと諭してくれる。 だが、 ピットは知っている。 兄として後ろを歩かせるのが嫌なのではなく、 ピピが眩しすぎて、 自分も光らないと並んで歩けないのだ、 と。 龍帝アルテミスが工房を訪れた日、 ピットが緊張した面持ちで一礼したのも、 妹に「兄として恥ずかしくない姿」 を見せたかった、 ただそれだけ。 兄妹の朱色は、 同じ朝陽を浴びて伸びていく。" },
   ],
 };
 
@@ -1110,7 +1137,7 @@ function showRateDetail() {
         </div>
       </div>
       <div class="rate-detail-note">
-        ガチャ確率は試行ごとに独立 (前の結果は次に影響しない)。 <b>天井システムなし</b> — 純粋に確率のみ。
+        ガチャ確率は試行ごとに独立 (前の結果は次に影響しない)。
       </div>
     </div>
   `;
@@ -1284,8 +1311,7 @@ function renderHomeGallery() {
       if (dupCnt > 0) {
         const dupB = document.createElement('div');
         dupB.className = 'hgcard-dup';
-        const dupMax = (typeof MAX_DUPS !== 'undefined' && MAX_DUPS[c.tier]) || 0;
-        dupB.textContent = `${dupCnt}凸${dupMax > 0 && dupCnt >= dupMax ? '✨' : ''}`;
+        dupB.textContent = `${dupCnt}凸`;
         card.appendChild(dupB);
       }
       if (typeof isNewUnlocked === 'function' && isNewUnlocked(c)) {
@@ -2830,8 +2856,7 @@ function renderGalleryByTab() {
       if (dupCnt > 0) {
         const dupB = document.createElement('div');
         dupB.className = 'card-dup';
-        const dupMax = (typeof MAX_DUPS !== 'undefined' && MAX_DUPS[c.tier]) || 0;
-        dupB.textContent = `${dupCnt}凸${dupMax > 0 && dupCnt >= dupMax ? '✨' : ''}`;
+        dupB.textContent = `${dupCnt}凸`;
         card.appendChild(dupB);
       }
       const nm = document.createElement("div");
@@ -3107,6 +3132,11 @@ const CHAR_FACTION = {
   '白焔教会見習い巫女 ルーナ':   { f: 'church',  dx:  -60, dy:  130 },
   '白焔教会騎士 ラナス':         { f: 'church',  dx:  120, dy:  100 },
   '白焔教会従士 リッカ':         { f: 'church',  dx:  140, dy:  -10 },
+  // S1C4 R 追加 (silver=ニーヴル雪原、 gen=ゼノニア空挺は派閥未制定なので便宜上 redwing 圏に隣接)
+  '凍土の少年 アルク':           { f: 'silver',  dx:  -90, dy:  130 },
+  '雪原の少女 ミウ':             { f: 'silver',  dx:   90, dy:  130 },
+  '空の少女 ピピ':               { f: 'redwing', dx:  -80, dy:  130 },
+  '空の少年 ピット':             { f: 'redwing', dx:   80, dy:  130 },
 };
 // 注: こはね は 夜焔郷 配置 (1か所のみ)。星霊学院との関連は線で表現
 
@@ -3230,23 +3260,31 @@ function _redrawRelationsCanvas() {
   const canvas = document.getElementById('relations-canvas');
   if (!canvas) return;
   const W = 2000, H = 1600;
-  canvas.innerHTML = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
-    <defs>${renderArrowMarkers()}</defs>
-    ${renderFactionBg()}
-    ${renderRelationLines()}
-    ${renderFactionLabels()}
-    ${renderCharNodes()}
-  </svg>`;
-  _bindRelationsClickHandlers(canvas);
-  // focus 中なら focus 派閥位置に center scroll
+  // focus 中: 派閥を画面中央に + scale 拡大 (SVG g transform、 0.4s smooth)
+  let zoomTransform = '';
   if (_relationsFocusFaction) {
     const f = FACTIONS.find(ff => ff.id === _relationsFocusFaction);
     if (f) {
-      const sw = canvas.scrollWidth, sh = canvas.scrollHeight;
-      const fx = (f.x / W) * sw - canvas.clientWidth / 2;
-      const fy = (f.y / H) * sh - canvas.clientHeight / 2;
-      canvas.scrollTo({ left: fx, top: fy, behavior: 'smooth' });
+      const scale = 2.0;  // 派閥半径175 × 2.0 = 350px (1派閥が viewBox の ~22% を占有)
+      const tx = W / 2 - f.x * scale;
+      const ty = H / 2 - f.y * scale;
+      zoomTransform = `transform="translate(${tx} ${ty}) scale(${scale})"`;
     }
+  }
+  canvas.innerHTML = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+    <defs>${renderArrowMarkers()}</defs>
+    <g class="relations-zoom-layer" ${zoomTransform}>
+      ${renderFactionBg()}
+      ${renderRelationLines()}
+      ${renderFactionLabels()}
+      ${renderCharNodes()}
+    </g>
+  </svg>`;
+  _bindRelationsClickHandlers(canvas);
+  // focus 中は scrollを中央にリセット (SVG transform で既に中央配置済なので canvas scroll は不要)
+  if (_relationsFocusFaction) {
+    const sw = canvas.scrollWidth, sh = canvas.scrollHeight;
+    canvas.scrollTo({ left: (sw - canvas.clientWidth) / 2, top: (sh - canvas.clientHeight) / 2, behavior: 'smooth' });
   }
   // focus 表示用「全表示に戻る」 ボタン
   const banner = document.getElementById('relations-focus-banner');
@@ -3862,6 +3900,12 @@ let _worldMapIsOpen = false;
 function openWorldMap() {
   const m = document.getElementById('world-map');
   if (!m) return;
+  // 状態不整合の自己修復: 内部 open フラグ true なのに UI 上は hidden の場合、 lock pair が壊れてる
+  // ボタン反応しない事故対策 (野沢さん指摘 2026-05-02「WM中に何かクリック後 Esc で反応しなくなる」)
+  if (_worldMapIsOpen && m.hasAttribute('hidden')) {
+    _worldMapIsOpen = false;
+    _unlockBodyScroll();
+  }
   renderWorldMap();
   m.removeAttribute('hidden');
   if (!_worldMapIsOpen) {
@@ -3876,6 +3920,14 @@ function closeWorldMap() {
   if (_worldMapIsOpen) {
     _unlockBodyScroll();
     _worldMapIsOpen = false;
+  } else {
+    // 既に false なのに hidden が外れていた状態 → modalDepth fallback で強制リセット
+    if (typeof _modalDepth !== 'undefined' && _isAllModalsHidden && _isAllModalsHidden()) {
+      _modalDepth = 0;
+      document.body.classList.remove('modal-open');
+      document.documentElement.classList.remove('modal-open');
+      document.body.style.top = '';
+    }
   }
 }
 // 派閥ID → 領地アイコン絵文字 (ファンタジー世界観の象徴を一発で伝える)
@@ -5581,7 +5633,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260502w';
+const IMG_CACHE_VERSION = '20260502x';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -7217,13 +7269,7 @@ document.addEventListener("keydown", e => {
     if (e.key === "Escape") { e.preventDefault(); closeStoryList(); }
     return;
   }
-  // ワールドマップモーダル
-  const _wmm = document.getElementById('world-map');
-  if (_wmm && !_wmm.hasAttribute('hidden')) {
-    if (e.key === "Escape") { e.preventDefault(); closeWorldMap(); }
-    return;
-  }
-  // キャラ詳細 > 図鑑 > 結果 > ステージ の優先順で Esc処理
+  // キャラ詳細 (worldmap より優先 — 野沢さん指摘 2026-05-02 「WMからキャラ詳細出した時 Esc で キャラじゃなくWMが閉じる」)
   if ($("#char-detail").classList.contains("active")) {
     if (e.key === "Escape") {
       // 拡大中なら拡大だけ閉じる、そうでなければ詳細閉じる
@@ -7237,6 +7283,12 @@ document.addEventListener("keydown", e => {
     } else if (e.key === "ArrowRight") {
       e.preventDefault(); navCharDetail(1);
     }
+    return;
+  }
+  // ワールドマップモーダル (キャラ詳細より低優先)
+  const _wmm = document.getElementById('world-map');
+  if (_wmm && !_wmm.hasAttribute('hidden')) {
+    if (e.key === "Escape") { e.preventDefault(); closeWorldMap(); }
     return;
   }
   if ($("#gallery").classList.contains("active")) {
