@@ -280,6 +280,28 @@ def check_chapter_completeness():
                 f"[ルール7-6 ティザー古い BLOCKER] index.html story-next-teaser が「第{teaser_chap_num}章」 を指しているが、 最新公開章は「第{last_num}章」 (s1c{last_num})、 次章ティザーは「第{next_num}章」 にすべき\n"
                 f"      → index.html story-next-teaser を 第{next_num}章 (s1c{next_num}) のティザーに更新要 (STORY_OUTLINE['s1c{next_num}'].tagline 参照)"
             )
+
+    # 7. 次章 STORY_OUTLINE.releaseDate チェック (BLOCKER 2026-05-02 野沢さん指示「章末ページのチェックも自動確認入れて」)
+    # 最新公開章 + 1 の STORY_OUTLINE エントリに releaseDate がないと、 章末 Coming Soon カード + ホーム画面ティザーの両方で
+    # 「📅 公開予定 — お楽しみに」 fallback 表示になる。 公開予定が決まっている前提なので、 必須化。
+    if sf_ids:
+        last_num = int(re.match(r's1c(\d+)', sf_ids[-1]).group(1))
+        next_id = f"s1c{last_num + 1}"
+        # STORY_OUTLINE 全体抽出して next_id エントリの releaseDate を検査
+        m_outline = re.search(r'const STORY_OUTLINE\s*=\s*\[([\s\S]*?)\n\];', text)
+        if m_outline:
+            outline_text = m_outline.group(1)
+            # 各エントリ行を抽出 (1行1エントリ前提)
+            entry_pattern = re.compile(r"\{\s*id:\s*'(s1c\d+)'[^}]*\}")
+            for em in entry_pattern.finditer(outline_text):
+                if em.group(1) == next_id:
+                    entry = em.group(0)
+                    if 'releaseDate' not in entry:
+                        violations.append(
+                            f"[ルール7-7 次章公開予定日 BLOCKER] STORY_OUTLINE['{next_id}'] に releaseDate が未設定\n"
+                            f"      → 章末 Coming Soon カード + ホーム画面ティザーで「📅 公開予定 — お楽しみに」 fallback になる、 releaseDate: 'YYYY-MM-DD' を必ず追加 (野沢さん指示 2026-05-02 「ホーム画面と同様に公開予定日入れといて」)"
+                        )
+                    break
     return checked
 
 
