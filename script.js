@@ -5754,7 +5754,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260502f';
+const IMG_CACHE_VERSION = '20260502g';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -7644,6 +7644,13 @@ async function logVisitAndStreak(user) {
       devRef.child('utm').transaction(c => c || inflow.utm);
       devRef.child('landingUrl').transaction(c => c || inflow.landingUrl);
     }
+    // 既存ゲスト/登録ユーザーの localStorage state.total を Firebase に sync (admin 表示用)
+    // 過去にガチャした人も 1度起動すれば admin に数字が反映される。 transaction で Math.max なので減らない
+    try {
+      if (typeof state !== 'undefined' && state && typeof state.total === 'number' && state.total > 0) {
+        devRef.child('totalRolls').transaction(c => Math.max(c || 0, state.total));
+      }
+    } catch (e) {}
   } catch (e) { console.warn('[visit] device log failed', e); }
   if (!user) return;
   // ログイン済: users[uid] にも firstVisitAt/lastVisitAt + streak + deviceType履歴 + PWA flag
