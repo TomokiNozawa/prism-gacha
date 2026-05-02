@@ -3414,6 +3414,10 @@ body.has-offline-banner .topbar { margin-top: 30px; }
   .auto-precache-title { font-size: 14px; }
   .auto-precache-sub { font-size: 11px; }
 }
+@keyframes wm-pulse {
+  0%, 100% { opacity: 0.45; transform: scaleX(0.85); transform-origin: left; }
+  50%      { opacity: 0.95; transform: scaleX(1); transform-origin: left; }
+}
 
 /* ───── 最終シーン用 次章/一覧ナビゲーション ───── */
 .story-end-nav {

@@ -1034,11 +1034,11 @@ function renderUsers(users, uidToNickname, guestDevices) {
       const tag = d.retroactive ? ' <span style="font-size:10px;color:#fcd34d">過去</span>' : '';
       row.innerHTML = `
         <div class="u-nickname dim">${d.nickname}${tag}</div>
-        <div class="u-count ${d.total === 0 ? 'dim' : ''}">${d.total}</div>
+        <div class="u-count ${d.total === 0 ? 'dim' : ''}">${d.total > 0 ? d.total : '—'}</div>
         <div class="u-count col-ur dim">—</div>
         <div class="u-count col-lr dim">—</div>
         <div class="u-count col-dup dim">—</div>
-        <div class="u-count col-gasshuku ${d.gasshukuCnt === 0 ? 'dim' : ''}">${d.gasshukuCnt}</div>
+        <div class="u-count col-gasshuku ${d.gasshukuCnt === 0 ? 'dim' : ''}">${d.gasshukuCnt > 0 ? d.gasshukuCnt : '—'}</div>
         <div class="u-story dim">—</div>
         <div class="u-streak dim col-streak">—</div>
         <div class="u-lastlogin col-registered">${d.registeredAt}</div>

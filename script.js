@@ -3986,7 +3986,7 @@ const STORY_FACTION_TEASER = [
 // 2026-05-02 修正: hidden attribute だけで判定すると、 char-detail/img-zoom 等の経由で
 // hidden state が想定外に変化した時に lock pair が崩れて button 反応しなくなる問題対策
 let _worldMapIsOpen = false;
-function openWorldMap() {
+async function openWorldMap() {
   const m = document.getElementById('world-map');
   if (!m) return;
   // 状態不整合の自己修復: 内部 open フラグ true なのに UI 上は hidden の場合、 lock pair が壊れてる
@@ -3994,6 +3994,16 @@ function openWorldMap() {
   if (_worldMapIsOpen && m.hasAttribute('hidden')) {
     _worldMapIsOpen = false;
     _unlockBodyScroll();
+  }
+  // ワールドマップ画像 (約 3.5MB) を事前 fetch — 未cacheなら 「読込中」 オーバーレイ
+  const wmUrl = _appendImgCacheBuster('/images/locations/world_map.png');
+  let wmCached = false;
+  try { wmCached = !!(await caches.match(wmUrl)); } catch (e) {}
+  if (!wmCached) {
+    const ov = document.getElementById('world-map-loading-overlay');
+    if (ov) ov.hidden = false;
+    try { await fetch(wmUrl, { credentials: 'omit' }); } catch (e) { /* オフライン等は無視、 SVG 内 image が再試行する */ }
+    if (ov) ov.hidden = true;
   }
   renderWorldMap();
   m.removeAttribute('hidden');
@@ -5744,7 +5754,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260502e';
+const IMG_CACHE_VERSION = '20260502f';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -8231,14 +8241,7 @@ function _isChapterReleased(chapterId) {
 async function _autoPrecacheGachaImages() {
   if (_autoPrecacheRunning) return;
   if (typeof POOL === 'undefined') return;
-  // 24h cooldown (連続起動で毎回走らない)
-  const lastRunKey = 'prism-auto-precache-at';
-  const last = parseInt(localStorage.getItem(lastRunKey) || '0', 10);
-  if (Date.now() - last < 86400000) {
-    console.log('[auto-precache] within 24h cooldown, skip');
-    return;
-  }
-  // 容量節約モードユーザーは skip
+  // 容量節約モードユーザーは skip (cellular でも自動DL したくない場合のため)
   if (navigator.connection && navigator.connection.saveData) {
     console.log('[auto-precache] save-data mode, skip');
     return;
@@ -8256,31 +8259,50 @@ async function _autoPrecacheGachaImages() {
     });
   }
   if (thumbUrls.length === 0) { _autoPrecacheRunning = false; return; }
-  console.log(`[auto-precache] thumb=${thumbUrls.length}, full=${fullUrls.length}`);
+  // 事前 cache check: 全部キャッシュ済ならオーバーレイ表示せず即終了 (リロード時の高速復帰)
+  const allUrls = [...thumbUrls, ...fullUrls];
+  let missingThumbs = thumbUrls.length;
+  let missingFulls = fullUrls.length;
+  try {
+    const thumbCached = await Promise.all(thumbUrls.map(u => caches.match(u).then(r => !!r).catch(() => false)));
+    const fullCached = await Promise.all(fullUrls.map(u => caches.match(u).then(r => !!r).catch(() => false)));
+    missingThumbs = thumbCached.filter(c => !c).length;
+    missingFulls = fullCached.filter(c => !c).length;
+  } catch (e) {
+    console.warn('[auto-precache] cache check failed', e);
+  }
+  console.log(`[auto-precache] missing thumb=${missingThumbs}/${thumbUrls.length}, full=${missingFulls}/${fullUrls.length}`);
+  if (missingThumbs === 0 && missingFulls === 0) {
+    // 全 cache 済 → オーバーレイなしで即進行
+    _autoPrecacheRunning = false;
+    return;
+  }
   const ov = document.getElementById('auto-precache-overlay');
   const fillEl = ov && ov.querySelector('.auto-precache-fill');
   const textEl = ov && ov.querySelector('.auto-precache-text');
-  // 段階1: thumb (オーバーレイ表示)
-  if (ov) ov.hidden = false;
-  try {
-    await _downloadAllAssets((done, total) => {
-      if (_autoPrecacheSkipped) return;
-      const pct = total ? Math.round(done / total * 100) : 0;
-      if (fillEl) fillEl.style.width = pct + '%';
-      if (textEl) textEl.textContent = `${done} / ${total} (${pct}%)`;
-    }, thumbUrls);
-  } catch (e) { console.warn('[auto-precache] thumb DL error', e); }
-  if (ov) ov.hidden = true;
-  // 段階2: full PNG (バックグラウンド、 オーバーレイなし)
-  if (!_autoPrecacheSkipped) {
+  const subEl = ov && ov.querySelector('.auto-precache-sub');
+  // 段階1: thumb 未DL あれば オーバーレイ表示 + DL
+  if (missingThumbs > 0) {
+    if (subEl) subEl.textContent = `スムーズに遊べるよう、 公開済キャラの画像 ${missingThumbs}件を読み込みます`;
+    if (ov) ov.hidden = false;
+    try {
+      await _downloadAllAssets((done, total) => {
+        if (_autoPrecacheSkipped) return;
+        const pct = total ? Math.round(done / total * 100) : 0;
+        if (fillEl) fillEl.style.width = pct + '%';
+        if (textEl) textEl.textContent = `${done} / ${total} (${pct}%)`;
+      }, thumbUrls);
+    } catch (e) { console.warn('[auto-precache] thumb DL error', e); }
+    if (ov) ov.hidden = true;
+  }
+  // 段階2: full PNG 未DL あれば バックグラウンドで DL (オーバーレイなし)
+  if (missingFulls > 0 && !_autoPrecacheSkipped) {
     setTimeout(async () => {
       try {
         await _downloadAllAssets(null, fullUrls);
       } catch (e) { console.warn('[auto-precache] full DL error', e); }
     }, 1500);
   }
-  // cooldown 記録 (thumb DL 完了時点)
-  localStorage.setItem(lastRunKey, String(Date.now()));
   _autoPrecacheRunning = false;
 }
 
