@@ -5457,7 +5457,7 @@ const STORY_OUTLINE = [
   { id: 's1c2', meta: 'Season 1 — 第2章', title: '南方海域の異変',     icon: '🌊', tagline: '信じる対象は、 外にあるとは限らない',                                povCharName: 'イザベル' },
   { id: 's1c3', meta: 'Season 1 — 第3章', title: '砂塵の隊商',         icon: '🐉', tagline: '血ではなく、 共に過ごした時間が家族を作る',                          povCharName: '竜爵 ヴィル' },
   { id: 's1c4', meta: 'Season 1 — 第4章', title: '凍土と空',           icon: '❄️', tagline: '強者の頂は、 孤独を共に分かち合うことで初めて温かい', releaseDate: '2026-05-02', povCharName: '龍帝 アルテミス' },
-  { id: 's1c5', meta: 'Season 1 — 第5章', title: '黒月の予兆',         icon: '🌑', tagline: '銀霜の月が黒く欠ける夜、 仮面の下のもう一人の自分が、 静かに立ち上がる ─ 光と影、 二つの私の境界で',                       povCharName: '仮面騎士 シオン' },
+  { id: 's1c5', meta: 'Season 1 — 第5章', title: '黒月の予兆',         icon: '🌑', tagline: '銀霜の月が黒く欠ける夜、 仮面の下のもう一人の自分が、 静かに立ち上がる ─ 光と影、 二つの私の境界で', releaseDate: '2026-05-06', povCharName: '仮面騎士 シオン' },
   { id: 's1c6', meta: 'Season 1 — 第6章', title: '七座満つる',         icon: '🌈', tagline: '違っていても、 同じ目的を持つ仲間でいられる',                       povCharName: 'セラフィエル' },
   { id: 's1c7', meta: 'Season 1 — 第7章', title: '黒月決戦',           icon: '☄️', tagline: '影を消すのではなく、 共に在ると認める',                              povCharName: '虹意 プリズマ' },
 ];
@@ -5485,9 +5485,13 @@ function buildEndNavHtml(storyId) {
     // 次章未公開: Coming Soon teaser カード
     let releaseLabel = '📅 公開予定 — お楽しみに';
     if (next.releaseDate) {
-      // YYYY-MM-DD → YYYY/M/D (ゼロ埋めなし、 軽い表記)
+      // YYYY-MM-DD → YYYY/MM/DD (ゼロ埋め2桁、 ホーム画面ティザーと同形式、 feedback_datetime_format.md 準拠)
       const [y, m, d] = next.releaseDate.split('-').map(s => parseInt(s, 10));
-      if (y && m && d) releaseLabel = `📅 <b>${y}/${m}/${d}</b> 公開予定`;
+      if (y && m && d) {
+        const mm = String(m).padStart(2, '0');
+        const dd = String(d).padStart(2, '0');
+        releaseLabel = `📅 <b>${y}/${mm}/${dd}</b> 公開予定`;
+      }
     }
     html += `<div class="story-end-nav-teaser">
       <div class="story-end-nav-teaser-badge">Coming Soon</div>
@@ -5729,7 +5733,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260502zb';
+const IMG_CACHE_VERSION = '20260502zc';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
