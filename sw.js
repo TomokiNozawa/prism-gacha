@@ -7,7 +7,7 @@
 //
 // HTML/JSON/Firebase API はキャッシュせず常にネットワーク優先 (更新即反映+認証/DBの鮮度維持)。
 
-const SW_VERSION = '20260502x';  // v1.3.2+ R2追加(ミウ/ピット)+R凸秘話4+POV header BLOCKER化+ルール9+WM Esc修正+排出率inline ボタン+凸右上+相関図 zoom-focus+OFFLINE_SAVED ignoreSearch
+const SW_VERSION = '20260502y';  // v1.3.2+ LR 0.5%表示 + WM 紅翼皇家 Esc 修正 + 相関図 viewBox zoom + s1c4 全 20キャラ凸秘話完成
 const STATIC_CACHE = `prismaera-static-${SW_VERSION}`;
 const BGM_CACHE    = `prismaera-bgm-${SW_VERSION}`;
 const LOC_CACHE    = `prismaera-loc-${SW_VERSION}`;

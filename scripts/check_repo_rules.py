@@ -299,10 +299,18 @@ def check_story_pov_header():
                     pat = re.compile(rf"id:\s*'{sid_match.group(1)}'[^}}]*?povCharName:\s*'([^']+)'")
                     om = pat.search(js)
                     if om and om.group(1) != pov_name:
-                        # 部分一致なら OK (例: STORY_OUTLINE='龍帝 アルテミス' / md='龍帝 アルテミス (...)')
-                        if not pov_name.startswith(om.group(1)) and not om.group(1).startswith(pov_name):
+                        # 部分一致なら OK: md フルネーム vs outline 短名 etc.
+                        # 例: md='龍帝 アルテミス' / outline='龍帝 アルテミス' OK
+                        # 例: md='鈴宮 ちさと' / outline='ちさと' (POOL に 'ちさと' が登録) → token 一致で OK
+                        ouv = om.group(1)
+                        token_match = (
+                            pov_name.startswith(ouv) or pov_name.endswith(ouv) or
+                            ouv.startswith(pov_name) or ouv.endswith(pov_name) or
+                            ouv in pov_name.split() or pov_name in ouv.split()
+                        )
+                        if not token_match:
                             warnings_only.append(
-                                f"[ルール9-2 POV名不一致] STORY/{path.name} の **POV**: '{pov_name}' と STORY_OUTLINE['{sid_match.group(1)}'].povCharName='{om.group(1)}' が一致しない\n"
+                                f"[ルール9-2 POV名不一致] STORY/{path.name} の **POV**: '{pov_name}' と STORY_OUTLINE['{sid_match.group(1)}'].povCharName='{ouv}' が一致しない\n"
                                 f"      → どちらかに揃える要 (POOL の正確な name と一致が望ましい)"
                             )
         checked += 1
