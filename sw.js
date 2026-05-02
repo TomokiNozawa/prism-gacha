@@ -7,7 +7,7 @@
 //
 // HTML/JSON/Firebase API はキャッシュせず常にネットワーク優先 (更新即反映+認証/DBの鮮度維持)。
 
-const SW_VERSION = '20260502zc';  // v1.3.2+ 章末予告ティザーに公開予定日 (📅 2026/05/06) 表示 + ゼロ埋め M/D
+const SW_VERSION = '20260502a';  // v1.4.0 第4章「凍土と空」 公開 (Season 1 — 第4章 release)
 const STATIC_CACHE = `prismaera-static-${SW_VERSION}`;
 const BGM_CACHE    = `prismaera-bgm-${SW_VERSION}`;
 const LOC_CACHE    = `prismaera-loc-${SW_VERSION}`;
