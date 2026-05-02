@@ -5744,7 +5744,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260502d';
+const IMG_CACHE_VERSION = '20260502e';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -8176,6 +8176,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (am) am.addEventListener('click', e => { if (e.target === am) closeAccountModal(); });
   // D 案: 起動直後に R/SR サムネを background prefetch (新規ユーザーの初回ガチャ画像読み込み対策、 即実行)
   _prefetchLowTierThumbs();
+  // 起動から少し経った後に 公開済章の全ガチャキャラ画像を自動事前ダウンロード (24h cooldown)
+  setTimeout(() => { _autoPrecacheGachaImages().catch(() => {}); }, 2500);
 });
 
 // ============================================================
@@ -8200,6 +8202,86 @@ function _prefetchLowTierThumbs() {
   for (const url of urls) {
     try { fetch(url, { credentials: 'omit', priority: 'low' }).catch(() => {}); } catch (e) {}
   }
+}
+
+// ============================================================
+// 起動時 自動事前ダウンロード (公開済章のガチャ排出キャラ画像)
+// 段階1: thumb (オーバーレイ表示) → 段階2: full PNG (バックグラウンド)
+// 24h以内に走った後はスキップ (localStorage で cooldown 管理)
+// 「スキップ」 ボタンで即中断可能、 ガチャ時の on-demand preload にフォールバック
+// ============================================================
+let _autoPrecacheSkipped = false;
+let _autoPrecacheRunning = false;
+function _skipAutoPrecache() {
+  _autoPrecacheSkipped = true;
+  const ov = document.getElementById('auto-precache-overlay');
+  if (ov) ov.hidden = true;
+  // スキップ時は cooldown を記録しない (次回起動時に再試行)
+}
+function _isChapterReleased(chapterId) {
+  if (typeof STORY_FILES === 'undefined' || !STORY_FILES[chapterId]) return false;
+  if (typeof STORY_OUTLINE === 'undefined') return true;
+  const o = STORY_OUTLINE.find(x => x && x.id === chapterId);
+  if (o && o.releaseDate) {
+    const ts = new Date(o.releaseDate).getTime();
+    if (!isNaN(ts) && ts > Date.now()) return false;
+  }
+  return true;
+}
+async function _autoPrecacheGachaImages() {
+  if (_autoPrecacheRunning) return;
+  if (typeof POOL === 'undefined') return;
+  // 24h cooldown (連続起動で毎回走らない)
+  const lastRunKey = 'prism-auto-precache-at';
+  const last = parseInt(localStorage.getItem(lastRunKey) || '0', 10);
+  if (Date.now() - last < 86400000) {
+    console.log('[auto-precache] within 24h cooldown, skip');
+    return;
+  }
+  // 容量節約モードユーザーは skip
+  if (navigator.connection && navigator.connection.saveData) {
+    console.log('[auto-precache] save-data mode, skip');
+    return;
+  }
+  _autoPrecacheRunning = true;
+  // 公開済章のキャラだけ集計 (releaseDate <= now かつ STORY_FILES に登録済)
+  const thumbUrls = [];
+  const fullUrls = [];
+  for (const tier of ['LR', 'UR', 'SSR', 'SR', 'R']) {
+    (POOL[tier] || []).forEach(c => {
+      if (!c || !c.img || !c.chapter) return;
+      if (!_isChapterReleased(c.chapter)) return;
+      fullUrls.push(c.img);
+      thumbUrls.push(toThumbUrl(c.img));
+    });
+  }
+  if (thumbUrls.length === 0) { _autoPrecacheRunning = false; return; }
+  console.log(`[auto-precache] thumb=${thumbUrls.length}, full=${fullUrls.length}`);
+  const ov = document.getElementById('auto-precache-overlay');
+  const fillEl = ov && ov.querySelector('.auto-precache-fill');
+  const textEl = ov && ov.querySelector('.auto-precache-text');
+  // 段階1: thumb (オーバーレイ表示)
+  if (ov) ov.hidden = false;
+  try {
+    await _downloadAllAssets((done, total) => {
+      if (_autoPrecacheSkipped) return;
+      const pct = total ? Math.round(done / total * 100) : 0;
+      if (fillEl) fillEl.style.width = pct + '%';
+      if (textEl) textEl.textContent = `${done} / ${total} (${pct}%)`;
+    }, thumbUrls);
+  } catch (e) { console.warn('[auto-precache] thumb DL error', e); }
+  if (ov) ov.hidden = true;
+  // 段階2: full PNG (バックグラウンド、 オーバーレイなし)
+  if (!_autoPrecacheSkipped) {
+    setTimeout(async () => {
+      try {
+        await _downloadAllAssets(null, fullUrls);
+      } catch (e) { console.warn('[auto-precache] full DL error', e); }
+    }, 1500);
+  }
+  // cooldown 記録 (thumb DL 完了時点)
+  localStorage.setItem(lastRunKey, String(Date.now()));
+  _autoPrecacheRunning = false;
 }
 
 // 高tier (SSR/UR/LR) ヒット時に演出開始前にキャラ画像を preload + 短時間待機
