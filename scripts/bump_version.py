@@ -53,7 +53,8 @@ def next_version(current: str, mode: str) -> str:
 
 def bump_cache_buster(text: str) -> tuple[str, bool]:
     today = date.today().strftime("%Y%m%d")
-    pattern = re.compile(r"\?v=\d{8}[a-z]")
+    # suffix は 1〜2文字 a-z (1日に z を超えて zb/zc... と続けるケース対応)
+    pattern = re.compile(r"\?v=\d{8}[a-z]{1,2}")
     changed = False
 
     def repl(m: re.Match[str]) -> str:

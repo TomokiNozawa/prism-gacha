@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.3.2 — 演出&ゲームロジック (Season 1 第1〜2章)
+   Prismaera v1.4.0 — 演出&ゲームロジック (Season 1 第1〜2章)
    ============================================================ */
 "use strict";
 
@@ -96,6 +96,21 @@ const POOL = {
       caption: "わしはカグヤを覚えておる。 ノクスもセラフィエルも。",
       desc: "見た目は8-10歳の幼女、 中身は千年級。 古龍の血を最も濃く引く一族の長老。 古龍杖ジナを携え、 失われた古龍王の伝承を守る。 幼子の姿のまま、 千年の知恵と杖を振るう。 観測者三柱と千年前を共有する縁を持つ。 ヴィルを『次の千年の鍵』 と密かに見定めている。",
       img: `${S1}/ur/dragon_sage.png`,
+    },
+    // ===== S1C4 追加 (UR2、 凍土の覇者+空挺の女皇) =====
+    {
+      name: "氷帝 グレイル", season: 1, chapter: 's1c4',
+      title: "凍土の若き覇王、 第三の覇者候補",
+      caption: "凍土の寒さではない。 別の寒さだ。",
+      desc: "氷霊王国ニーヴルの若き氷帝、 二十六。 古代氷霊の血を強く引く者で、 実年齢は本人も知らない。 双の氷剣ニフルとヘイルで凍土を統べる。 アルテミスとの一騎打ちで引き分け、 互いを「戦友」 と認め合う山場の相手。 龍国の覇者と並ぶ「第三の覇者候補」 として黒月決戦の隣に立つ約束を交わす。",
+      img: `${S1}/ur/ice_emperor.png`,
+    },
+    {
+      name: "空挺女皇 ヴァーレ", season: 1, chapter: 's1c4',
+      title: "蒸気と歯車の若き女皇、 機械文明の継承者",
+      caption: "沈黙の塔が、 もう一度動く時が来る。",
+      desc: "空挺城ゼノニアの神童女皇、 二十六-二十七。 機械工学と魔導を融合させた蒸気帝国の若き戴冠者。 蒸気魔導杖オラリオンと真鍮歯車の翼を従え、 観測者七座の手にすら届かぬ「もう一つの道」 を歩む。 アルテミスとの外交で「機械と魔導の融合」 が世界に何をもたらすかを示唆。 ゼピル学者を師に持つ。",
+      img: `${S1}/ur/sky_empress.png`,
     },
   ],
   SSR: [
@@ -197,6 +212,56 @@ const POOL = {
       caption: "ヴィル殿下、 必ずお迎えに参ります。",
       desc: "紫竜王国の若き侍従。 ヴィルが城を抜けた朝に砂時計で三月を計り、 期限内に戻らなければ単騎で迎えに行くと決めていた。 父も侍従だった世襲で、 細身の儀礼槍『紫翼』 を継ぐ。 ヴィル殿下を『家族』 と思っている、 不器用なだけ真っ直ぐな青年。",
       img: `${S1}/ssr/purple_dragon_servant.png`,
+    },
+    // ===== S1C4 追加 (SSR7、 ニーヴル+ゼノニア の主要キャラ) =====
+    {
+      name: "氷塔の聖騎士 リオネ", season: 1, chapter: 's1c4',
+      title: "ニーヴル筆頭聖騎士、 グレイル直属",
+      caption: "陛下の背は、 私が守ります。",
+      desc: "氷霊王国ニーヴルの筆頭聖騎士、 二十四-二十五。 銀のショートカットに凛とした聖騎士気質。 氷剣ホークフロストの使い手。 グレイル氷帝への絶対忠誠を持ち、 凍土の盾として戦場に立つ。 アスラ見習い騎士の指南役。",
+      img: `${S1}/ssr/ice_paladin.png`,
+    },
+    {
+      name: "空挺城総監 ガリオン", season: 1, chapter: 's1c4',
+      title: "ゼノニア大将軍、 ヴァーレ女皇の右腕",
+      caption: "蒸気砲、 装填完了。",
+      desc: "空挺城ゼノニアの大将軍、 二十七-二十八。 蒸気砲付き巨腕鎧と巨大シールドを纏う。 ヴァーレ女皇の右腕として軍事を統べ、 寡黙ながら部下からの信頼厚い。 ヴィン砲手 副官。",
+      img: `${S1}/ssr/sky_general.png`,
+    },
+    {
+      name: "氷霜の巫女 ユーリス", season: 1, chapter: 's1c4',
+      title: "凍土の予言者、 神事の継承者",
+      caption: "次に龍を譲る相手を、 もうあなたは知っているはずです。",
+      desc: "ニーヴル神事を司る若き巫女、 二十二-二十三。 氷の予言杖イルディラから七色の予言光を放つ。 アルテミス龍帝に「次に龍を譲る相手」 を示唆する伏線回収者。 妹のイル祭司と神殿を守る。",
+      img: `${S1}/ssr/frost_oracle.png`,
+    },
+    {
+      name: "摂政 ヴァルキ", season: 1, chapter: 's1c4',
+      title: "ニーヴル摂政、 凍土外交の知略",
+      caption: "陛下の即位、 私が支えます。",
+      desc: "氷霊王国ニーヴルの摂政、 二十八。 グレイル先代 (前帝) の右腕として凍土の外交を司り、 グレイル即位後も摂政として内政を担う。 銀の長髪を編み込んだ女政治家、 知略の人。",
+      img: `${S1}/ssr/ice_regent.png`,
+    },
+    {
+      name: "北方剣聖 ハグル", season: 1, chapter: 's1c4',
+      title: "グレイル剣師、 古代氷霊の血を引く者",
+      caption: "(沈黙、 一礼)",
+      desc: "グレイル氷帝の剣師、 二十六-二十七。 古代氷霊の血を強く引く者で実年齢は本人も知らない。 双の氷剣ヘルファング (ニフルとヘイルの先代型) の使い手。 寡黙、 弟子グレイルへの信頼は揺らがない。",
+      img: `${S1}/ssr/north_swordmaster.png`,
+    },
+    {
+      name: "空挺城首席学者 ゼピル", season: 1, chapter: 's1c4',
+      title: "ヴァーレ女皇の師、 機械工学の理論家",
+      caption: "沈黙の塔の文献、 いずれ陛下にも。",
+      desc: "ゼノニア機械工学の理論を確立した若き神童学者、 二十八。 蒸気魔導書と真鍮羅針盤を扱う。 ヴァーレ女皇の師でありながら、 同じ研究を異なる立場で進める「同志」。 S2「沈黙の塔」 機械文明覚醒の理論家。",
+      img: `${S1}/ssr/sky_scholar.png`,
+    },
+    {
+      name: "真鍮の女将 ハーニア", season: 1, chapter: 's1c4',
+      title: "ゼノニア工房親方、 ベルの師匠",
+      caption: "また、 来てくださいよ陛下!",
+      desc: "ゼノニア整備工房の親方、 二十五-二十六。 銅赤ショートカット、 大型レンチハンマーを担ぐたくましい工房長。 ベル整備士の師匠、 ガリオン総監の蒸気砲鎧の整備担当。 機械文明の温度を支える人。",
+      img: `${S1}/ssr/brass_foreman.png`,
     },
   ],
   SR: [
@@ -327,6 +392,56 @@ const POOL = {
       desc: "十六-十七歳の若き戦士。 十一歳の時にサハナに助けられて以来、 双短剣で姉の双剣シャマールを真似てきた。 ティナを実の妹のように見守る。 一族の未来を担う次世代の戦士。",
       img: `${S1}/sr/young_desert_warrior.png`,
     },
+    // ===== S1C4 追加 (SR7、 ニーヴル+ゼノニア の戦士+整備士+祭司+狩人) =====
+    {
+      name: "氷牙の戦士 イズン", season: 1, chapter: 's1c4',
+      title: "ニーヴル若き戦士、 グレイル氷帝に憧れる",
+      caption: "陛下の隣で、 戦いたいんだ!",
+      desc: "ニーヴルの若き戦士、 十九-二十歳。 銀髪のロングサイドテール、 元気で熱血。 氷の双斧フリムリで凍土の前線を戦う。 グレイル氷帝への憧れ深く、 「いつか陛下の隣で戦う」 が夢。",
+      img: `${S1}/sr/ice_warrior.png`,
+    },
+    {
+      name: "空挺整備士 ベル", season: 1, chapter: 's1c4',
+      title: "ゼノニア機械工房の若き整備士、 ハーニアの弟子",
+      caption: "ご無事でー!",
+      desc: "ゼノニア機械工房の整備士、 二十-二十一。 朱色ショートカットに溌剌とした若き機械工女。 大型スパナと軽機関銃を扱う。 ハーニア親方を師に持ち、 機械への深い愛情を燃やす。 ジン機関士の幼馴染。",
+      img: `${S1}/sr/sky_engineer.png`,
+    },
+    {
+      name: "凍土の狩人 シエラ", season: 1, chapter: 's1c4',
+      title: "ニーヴル猟師、 雪豹シロの相棒",
+      caption: "(無言で氷弓を構える)",
+      desc: "ニーヴルの若き狩人、 二十一-二十二。 銀髪ロングストレート、 寡黙で集中力の塊。 氷の長弓グレシエルで凍土の獣道を熟知。 雪豹「シロ」 を相棒にする。",
+      img: `${S1}/sr/frost_hunter.png`,
+    },
+    {
+      name: "氷塔の見習い騎士 アスラ", season: 1, chapter: 's1c4',
+      title: "リオネ筆頭聖騎士の後輩",
+      caption: "リオネ姉さま、 私も!",
+      desc: "ニーヴル氷塔聖騎士団の見習い、 十七-十八。 銀髪ミディアムに真面目で真っ直ぐな性格。 氷剣ショートソードを扱う。 リオネ筆頭聖騎士への憧れ深く、 凍り影喰い襲撃で命懸けの援護を見せた。",
+      img: `${S1}/sr/ice_apprentice.png`,
+    },
+    {
+      name: "凍土の祭司 イル", season: 1, chapter: 's1c4',
+      title: "ユーリスの実妹、 神事の補佐",
+      caption: "(鈴杖を鳴らす)",
+      desc: "ニーヴル神事の補佐役、 二十歳。 ユーリス氷霜の巫女の実妹。 銀の長髪 (姉と同色) と静謐な気配。 氷の鈴杖で神事の始まりを告げる。 姉への深い敬愛を持つ。",
+      img: `${S1}/sr/frost_priestess.png`,
+    },
+    {
+      name: "蒸気砲手 ヴィン", season: 1, chapter: 's1c4',
+      title: "ガリオン総監の副官、 ゼノニア軍の名手",
+      caption: "(蒸気ライフルを担いで沈黙)",
+      desc: "ゼノニア軍の砲手、 二十二-二十三。 黒髪のバックスリックに落ち着いた狙撃手気質。 蒸気ライフルの名手、 ガリオン総監の副官として軍事を支える。",
+      img: `${S1}/sr/steam_gunner.png`,
+    },
+    {
+      name: "空挺機関士 ジン", season: 1, chapter: 's1c4',
+      title: "ベル整備士の幼馴染、 蒸気エンジンの専門家",
+      caption: "ベル、 ねじ持ってこいよ。",
+      desc: "ゼノニア機関室の機関士、 二十一。 朱茶のミディアムに朗らかで頼れる性格。 大型スパナを二刀流で振るう。 ベル整備士の幼馴染、 機械工房での息の合った職人の応酬は工房名物。",
+      img: `${S1}/sr/sky_machinist.png`,
+    },
   ],
   R: [
     {
@@ -421,12 +536,43 @@ const POOL = {
       desc: "二十二-二十三歳の若き語り部。 昨年、 祖父が遺した物語の杖 (古龍の歯入り) と語り部の役を受け継いだ。 砂漠夜営の焚き火の前で子供たちに祖父の話を語り継ぐ。 ファラー婆さんとは別系統の遊牧民側伝承の継承者。",
       img: `${S1}/r/young_storyteller.png`,
     },
+    // ===== S1C4 追加 (R4、 凍土+空挺の子供たち) =====
+    {
+      name: "凍土の少年 アルク", season: 1, chapter: 's1c4',
+      title: "ニーヴル雪原村の子、 凍土の冒険心",
+      caption: "お、 龍帝様だっ……!",
+      desc: "ニーヴル雪原村の少年、 十一-十二歳。 銀髪のショート、 元気で好奇心旺盛。 氷玉投げが得意。 イズン兄に憧れて、 「いつか戦士になる!」 と意気込む。 ミウは幼馴染で、 ふたりで雪原を駆け回って育った。",
+      img: `${S1}/r/frost_boy.png`,
+    },
+    {
+      name: "雪原の少女 ミウ", season: 1, chapter: 's1c4',
+      title: "ニーヴル雪原村の少女、 凍土の温度",
+      caption: "アルクっ! 失礼でしょ!",
+      desc: "ニーヴル雪原村の少女、 十一-十二歳。 銀髪のロング、 アルクの幼馴染。 落ち着いて礼儀正しく、 アルクの強がりを優しく窘める姉貴肌。 雪玉作りが上手で、 凍土の民の温もりを体現する子。",
+      img: `${S1}/r/snow_girl.png`,
+    },
+    {
+      name: "空の少女 ピピ", season: 1, chapter: 's1c4',
+      title: "ゼノニア郊外の整備見習い",
+      caption: "ねじまわしっ! あったよっ!",
+      desc: "ゼノニア郊外の整備見習いの少女、 十二-十三歳。 朱色ショート、 朗らかで活発。 ねじまわしを工具兼武器に。 ベル姉に憧れ、 工房通いを始めた。 兄ピットの隣で育ち、 兄を超えるのが目下の目標。",
+      img: `${S1}/r/sky_girl.png`,
+    },
+    {
+      name: "空の少年 ピット", season: 1, chapter: 's1c4',
+      title: "ゼノニア郊外の整備見習い、 ピピの兄",
+      caption: "妹に追い越されないようにしないと……!",
+      desc: "ゼノニア郊外の整備見習いの少年、 十三-十四歳。 朱色ミディアム、 ピピの兄。 小型レンチを腰に下げ、 妹より先に工房を志した先輩。 ピピが急成長してきて、 兄として焦りつつも自慢に思う複雑な心境。",
+      img: `${S1}/r/sky_boy.png`,
+    },
   ],
 };
 
 // ────────────── Settings ──────────────
 const PRICE_PER_ROLL = 300;
-const PITY = 180;            // 天井
+// 天井システム廃止 (2026-05-02 野沢さん指示「無限にガチャ引けるし、 天井システム撤廃」)
+// 後方互換のため定数は残す (Infinity) が、 rollOne 内で参照しない。 state.pity は累計参考値として保持
+const PITY = Infinity;
 // LR(Legend Rare) = 唯一の伝説枠、確率は R から 0.5% 移譲
 const RATES = { R: 0.645, SR: 0.25, SSR: 0.07, UR: 0.03, LR: 0.005 };
 
@@ -693,6 +839,97 @@ const LORE_BY_KEY = {
   "R_砂風の語り部 ナドラ": [
     { title: "祖父の杖、 古龍の歯", body: "ナドラの物語の杖の先には、 古龍の歯が埋まっている。 六十年前、 まだ若き日の祖父が砂漠の奥で迷った時、 一頭の古龍に出会った。 古龍は何も言わず、 祖父に自分の歯を一本くれた——『これを持って帰れ。 物語の鍵じゃ』。 祖父は六十年、 その歯を持って物語を語り続けた。 そして昨年、 祖父は静かに息を引き取り、 物語の杖と語り部の役をナドラに託した。 ナドラはまだ二十二、 杖は身に余るほど立派。 けれど祖父の話を子供たちに語り続けるたび、 ナドラは祖父の声と自分の声が重なる瞬間を感じる。 ファラー婆さんは『あれは古龍王の使いの竜じゃろう』 と言うが、 ナドラは確かめない——確かめれば、 物語が終わってしまうから。" },
   ],
+  // ===== S1C4 UR 凸秘話 =====
+  "UR_氷帝 グレイル": [
+    { title: "即位の夜の屋上", body: "グレイルが氷帝の冠を頂いた夜、 戴冠式が終わり、 全ての臣下が下がった後、 グレイルは一人で氷宮殿の屋上に立った。 凍土が地平まで見渡せる場所——『これからの千里、 この双肩で守るのか』 と、 二十六歳の彼は呟いた。 ヴァルキ摂政が後ろから「お一人で十分です」 と声をかけたのは、 半刻が過ぎてからのこと。 龍帝アルテミスに『私も、 帝位に就いたばかりです』 と告げる時、 グレイルが思い出すのは、 この屋上の、 凍土の寒さよりも深い、 もう一つの寒さだ。" },
+    { title: "ニフルとヘイルの伝承", body: "双の氷剣『ニフル』 と『ヘイル』。 千年前、 古代氷霊王 (今は名も消えた) が振るったとされる伝承の刀。 氷霊の血を強く引く者にしか共鳴しない。 グレイルが十六歳の頃、 父帝が静かに彼に渡した——『これは、 おまえに眠っていた血が呼んだ刀だ。 名乗らせるな。 刀の名は、 持ち主の口から出すものではない』。 龍帝との一騎打ちで、 グレイルが二刀の名を名乗らなかったのは、 父の言葉を守ったから。 アルテミスが既に名を知っていたのは、 千年前の伝承を直接聞いていたからだ。" },
+    { title: "ハグル剣師の言葉", body: "グレイルが氷帝として即位する直前、 北方剣聖ハグルは静かに告げた——『陛下。 双剣はもう、 教えることがありません。 あとは、 振るう相手が決めます』。 ハグルが二十年かけて教えた最後の一言。 グレイルはそれを受けて、 玉座よりも先に、 一騎打ちの場へ赴く決意を固めた——『振るう相手が、 私を作る』 と。 龍帝との二十歩の距離で交わった双剣の瞬間、 グレイルは生まれて初めて『この刀は、 私のものだ』 と感じた。 ハグルの言葉は、 そこで完成した。" },
+    { title: "三人目の戦友の予感", body: "凍土の夜、 雪原で龍帝と並んで星空を見上げた半刻——グレイルはひそかに心の中で、 一つの問いを反芻していた。 『もし陛下に、 私が、 三人目の戦友になれるなら、 千年の孤独は、 私の二十六年で、 少しは温められるだろうか』。 焔帝ヒノオウとアルテミスが千年かけて辿り着いた『戦友』 という距離に、 即位したばかりの自分が並べるとは思っていなかった。 だが、 並んで立った半刻、 グレイルは初めて『一人ではない頂』 を知った。 凍土の冷気の中で、 彼の双肩は、 確かに少し軽くなった。" },
+  ],
+  "UR_空挺女皇 ヴァーレ": [
+    { title: "機械文明の女皇、 二十二の頂", body: "空挺城ゼノニアの女皇ヴァーレは、 二十二歳で帝位を継いだ。 父帝が病床で告げた最後の一言——『真鍮の音は、 心臓の音だ。 民の心臓を、 おまえが守れ』。 ヴァーレは戴冠式で、 玉座ではなく工房を選んだ——『私の即位の儀は、 工房で行う。 ハーニア親方の真鍮歯車の前で、 民の手と私の手を、 同じ油で汚す』。 ゼノニアの民は、 その日から、 女皇を『真鍮の女皇』 と呼ぶようになった。" },
+    { title: "ハーニア親方の手の温度", body: "ヴァーレが幼少期、 母を早く失い、 父帝が政務で多忙な時、 彼女を抱きしめてくれたのはハーニア親方だった。 真鍮で煤けた大きな手で、 ヴァーレの背を撫でながら——『お嬢さま、 真鍮は、 触れた者を裏切りません。 触れ続ければ、 必ず温かい音を返してくれます』。 ヴァーレが二十二歳の今、 玉座に座っても、 手のひらに残る感触はあの日の親方の手の温度だ。 龍帝との同盟交渉で『ゼノニアは武力ではなく真鍮で語る国です』 と告げた時、 ヴァーレの背中を支えていたのは、 ハーニアの手の温度だった。" },
+    { title: "ゼピル学者の助言", body: "ヴァーレ即位の翌朝、 首席学者ゼピルが一通の書簡を捧げた——『陛下。 機械文明は、 言葉を失った時に、 真鍮を凶器にします。 どうか、 言葉を持ち続けてください』。 ヴァーレはその日から、 政務の合間に必ずゼピルを呼び、 一刻の対話を欠かさない。 龍帝アルテミスとの同盟交渉で、 ヴァーレが『同盟は、 言葉と言葉の橋です』 と告げた時、 ゼピルは静かに頷いた——『陛下は、 ご自身で橋を作られました』。 真鍮文明の若き女皇は、 言葉を最も重い真鍮として磨いている。" },
+    { title: "アルテミスとの空の頂", body: "ヴァーレと龍帝の同盟交渉が終わった夜、 二人はゼノニアの空挺城の最上階——雲の上の展望塔——に並んで立った。 アルテミスがふと言った——『空の頂は、 凍土の頂とは違う温度だ』。 ヴァーレは微笑んで返した——『陛下、 どちらも頂は孤独です。 でも、 こうして同じ夜空を見られるなら、 孤独は半分になります』。 千年の覇王が、 即位して間もない女皇の言葉に、 静かに頷いた。 その夜、 ヴァーレは初めて、 父帝の遺言『民の心臓を守れ』 の続きが分かった気がした——『そして、 自分の心臓も、 誰かと分かち合え』、 と。" },
+  ],
+  // ===== S1C4 SSR 凸秘話 =====
+  "SSR_氷塔の聖騎士 リオネ": [
+    { title: "グレイル直属の聖騎士", body: "リオネは二十四歳、 氷塔の聖騎士団の若き精鋭。 グレイル氷帝が即位する前から彼に仕えていた。 リオネが『陛下』 と呼ばずに『若様』 と呼んでいた頃、 グレイルはまだ氷霊の血の重さに苦しんでいた。 リオネは寡黙な剣で、 ただ隣に立ち続けた。 即位の夜、 グレイルが初めて『陛下と呼んでくれ』 と告げた時、 リオネは深く礼をして、 涙を見せずにただ頷いた。 凍土の聖騎士の真価は、 言葉ではなく、 隣の沈黙にある。" },
+    { title: "ユーリスの予言を受けた夜", body: "リオネが氷霜の巫女ユーリスから直接予言を受けたのは一度だけ——『リオネ。 おまえは、 陛下の影になりたいか、 隣に立ちたいか』。 リオネは即答した——『隣です。 影は寒いから』。 ユーリスは静かに笑った——『なら、 おまえの剣は、 陛下の凍気を分けて持つことになる』。 以来、 リオネの聖剣は、 振るうたびに微かな氷霊の気配を纏うようになった。 グレイルが知らない、 リオネだけの秘密だ。" },
+    { title: "雪原村を守った夜", body: "三年前、 凍土の影喰いがニーヴル雪原村を襲撃した夜——リオネは単身で六体の影喰いを退けた。 雪原村のアルクとミウは、 まだ六歳だった。 リオネが『大丈夫だ。 朝が来る』 と告げた時、 二人の銀髪の子供は、 涙を堪えて頷いた。 その夜、 リオネは雪原村の入口で朝まで立哨した。 アルクが今、 「いつか戦士になる!」 と叫ぶのは、 あの夜のリオネの背中を覚えているからだ。 リオネ自身は、 子供たちが自分を覚えていることを知らない。" },
+  ],
+  "SSR_空挺城総監 ガリオン": [
+    { title: "空挺城の鉄則", body: "ガリオンは三十二歳、 ヴァーレ女皇即位前から空挺城の総監を務めている。 彼の鉄則は三つ——『一、 真鍮を錆びさせない。 二、 民の手を冷やさない。 三、 女皇の言葉を歪めない』。 父も祖父も総監だった、 ゼノニア最古の家系の三代目。 ヴァーレ女皇が即位した日、 ガリオンは深く礼をして告げた——『陛下。 私は陛下の盾でも矛でもありません。 真鍮の蝶番です。 開けたい扉と、 閉じたい扉を、 陛下に従って動かします』。" },
+    { title: "ヴァーレ女皇への忠誠", body: "ガリオンの忠誠は、 ヴァーレ女皇への盲従ではない。 彼女が誤った決断をしようとした時、 ガリオンは一度だけ反論する。 二度は反論しない。 ヴァーレが『一度の反論で、 一度だけ私の心が揺れる』 と言ったのを、 ガリオンは知っている。 龍帝との同盟交渉の前日、 ガリオンは静かに告げた——『陛下。 同盟は、 ゼノニアの空を半分譲ることになります。 それでも、 締びますか』。 ヴァーレは微笑んで頷いた。 ガリオンも、 二度目を言わずに頷いた。" },
+    { title: "ニーヴル ↔ ゼノニアの橋渡し", body: "ニーヴル氷帝とゼノニア女皇が同時に即位した翌月、 ガリオンは密かにニーヴルの摂政ヴァルキへ書簡を送った——『お互いの民を、 知り合わせる時間が要る。 お先に、 私から』。 ヴァルキは即座に返した——『私からも。 半月後、 ハグルとリオネを派遣します』。 二人の総監・摂政が結んだ静かな対話が、 凍土と空の同盟の最初の橋になった。 ヴァーレもグレイルも、 後でその経緯を知り、 二人を称賛した——『私たちの即位は、 おまえたちの背中の上に立てた』。" },
+  ],
+  "SSR_氷霜の巫女 ユーリス": [
+    { title: "氷の予言杖イルディラ", body: "ユーリスの予言杖『イルディラ』 は、 古代氷霊の巫女が代々受け継ぐ唯一物。 杖の頂の氷晶は、 千年前から欠けず、 折れず、 七色の予言光を絶やさない。 ユーリスは二十二歳でこの杖を継いだ。 杖は持ち主を選ぶ——『心の濁りが映る氷晶』。 ユーリスが純粋すぎるから杖が応えるのではなく、 純粋であろうとし続ける意志に応えるのだ、 と先代の巫女は告げた。 ユーリス自身は、 まだその意味を完全には分かっていない——『迷うたび、 イルディラは曇るのです』。" },
+    { title: "妹イルへの教え", body: "ユーリスには十歳年下の実妹イル (R) がいる。 二十歳の若き祭司。 ユーリスは妹に厳しい——『神事は、 鈴杖の鳴らし方ひとつで信頼が崩れます』。 だがユーリスが妹に最も伝えたい教えは別にある——『イル、 予言を恐れてはいけない。 でも、 予言に頼ってもいけない。 予言は、 進む者の背中を押すものです。 進まない者の道標ではないのです』。 イルが姉の鈴杖を鳴らすたび、 ユーリスは静かに見守る。 妹は、 自分とは違う道を歩むだろうと予感している。" },
+    { title: "龍帝への予言『次に龍を譲る相手』", body: "ユーリスがアルテミスに告げた予言——『陛下、 千年の双肩は、 やがて譲る時が来ます。 譲る相手を、 陛下は今夜知るでしょう』。 アルテミスは予言を聞いて、 ユーリスに礼を返し、 何も言わずに神殿を出た。 ユーリスは陛下の背中を見て、 心の中で続けた——『陛下、 譲る相手はグレイル氷帝ではありません。 まだ生まれていません。 でも、 グレイル氷帝が、 その譲り渡しの時を見守る一人になるでしょう』。 千年の覇王の譲位は、 S2 への大きな伏線。 ユーリスはそれを、 一人で抱えている。" },
+  ],
+  "SSR_摂政 ヴァルキ": [
+    { title: "先代帝の右腕として", body: "ヴァルキは二十八歳。 グレイルの父——先代氷帝——の摂政として十年仕えた。 先代帝が病に倒れた時、 ヴァルキはまだ十八歳だったが、 政務を一手に引き受けて凍土を守った。 先代帝が崩御する前夜、 彼は静かに告げた——『ヴァルキ。 グレイルを、 おまえが立ててくれ。 私が望むのは、 おまえが私の影でなく、 あの子の足元の石になることだ』。 ヴァルキは涙を見せず、 ただ頷いた。 翌朝、 先代帝は静かに眠り、 グレイルの即位の準備が始まった。" },
+    { title: "グレイル即位の夜の助言", body: "グレイルが即位の儀の夜、 屋上から一人で凍土を見渡していた時——ヴァルキは黙って後ろに立っていた。 半刻ほど沈黙して、 彼女は告げた——『陛下。 お一人で十分です。 ですが、 お一人でいなくても十分です。 摂政の私が、 ここに居続けることを、 どうかお許しください』。 グレイルは振り向かず、 ただ頷いた。 ヴァルキはその場を動かなかった。 二人の沈黙が、 翌朝の朝陽まで続いた。 グレイルが今でも『摂政』 と短く呼ぶ時、 その声には、 あの夜の屋上の温度が混ざっている。" },
+    { title: "凍土の内政、 民の温度", body: "ヴァルキの内政の鉄則は『凍土を凍らせない』。 凍土の民は寒さに慣れているが、 心まで凍らせてはならない、 が彼女の信念。 雪原村に毎月、 摂政自ら温かい綿布と燃料を運ぶ。 アルクとミウの祖母は、 ヴァルキの綿布を毎冬大切に使っている。 ヴァルキは『綿布は、 凍土の摂政としての署名だ』 と笑う。 龍帝が雪原村を通過した日、 ミウとアルクが「お、 龍帝様だっ!」 と駆け寄れたのは、 ヴァルキの綿布が凍土の子供たちに『偉い人は近い』 という温度を教えていたからだ。" },
+  ],
+  "SSR_北方剣聖 ハグル": [
+    { title: "グレイルの剣師として", body: "ハグルは二十六、 七歳の見た目だが、 古代氷霊の血を強く引く長命種で、 実年齢は本人も明かさない。 グレイルの父——先代氷帝——の代から剣師を務めている。 グレイルが八歳で初めて木剣を握った日、 ハグルは静かに告げた——『若様。 双剣は、 二つの心です。 振るう前に、 二つの心を並べてください』。 グレイルが二十六年、 双剣を磨き続けた根底には、 ハグルの最初のこの一言がある。" },
+    { title: "双剣ヘルファング", body: "ハグルが背に負う双剣『ヘルファング』 は、 古代氷霊の刀職人が一千年前に打った最後の対作。 ニフル・ヘイルの兄弟刀とも言われ、 振るうと氷霊の気配が応える。 ハグルは普段、 ヘルファングを抜かない。 二十年で抜いたのは三度のみ——一度は、 グレイル先代帝を救うため。 二度目は、 凍土の影喰い大襲来で雪原村を守るため。 三度目は、 グレイルが即位する前夜の最後の修行で、 弟子の双剣を受け止めるため。 三度目が、 ハグル自身が最も嬉しかった抜剣だった。" },
+    { title: "龍帝の双大剣『陰陽』 を見て悟った道", body: "ハグルがアルテミスの双大剣『陰陽』 を初めて目にした時、 彼の中で何かが解けた——『あの双剣は、 千年振るって、 千年研いで、 千年血を吸って、 千年涙を吸ってきた、 という形をしている』。 ハグルは自分のヘルファングを、 一千年経っても陰陽のような顔になりたい、 と密かに願った。 グレイルが龍帝と一騎打ちした夜、 ハグルは弟子の背中を見ながら、 自分の道もまだ続いていることを確信した——『私の二十年は、 まだ序章だ』。" },
+  ],
+  "SSR_空挺城首席学者 ゼピル": [
+    { title: "空挺城の首席学者", body: "ゼピルは四十二歳。 ヴァーレ女皇即位前から空挺城の首席学者を務める、 ゼノニア機械文明の知の中枢。 真鍮歯車の設計図、 蒸気機関の制御理論、 空挺戦の戦術——全てゼピルの頭の中にある。 だが彼の最も大切な研究テーマは『機械文明と人の心の境界』。 機械が人の心を超えてはいけない、 が彼の信念。 ヴァーレ女皇即位の朝、 ゼピルは『陛下、 機械文明は心の延長です。 心を超えてはいけません』 と告げた。" },
+    { title: "ヴァーレ女皇への助言", body: "ゼピルがヴァーレ女皇に毎朝捧げる助言は短い——『陛下、 今日は、 民の手を一つだけ握ってください』。 ヴァーレはその日、 必ず工房や市場で誰か一人の手を握る。 真鍮で煤けた手、 機械油で汚れた手、 子供の小さな手——様々な手の温度を覚えて、 政務に戻る。 ゼピルの助言の意味は、 ヴァーレ自身が二十二歳で完全には分かっていない。 だが続けている——『分からないからこそ、 続ける価値がある』 とゼピル先生は言う。" },
+    { title: "龍帝との対談", body: "ゼピルが龍帝アルテミスと一刻だけ二人で対談した時、 龍帝は問うた——『学者よ。 千年、 人の心は変わったと思うか』。 ゼピルは即答した——『陛下、 変わりませんでした。 だから機械文明も、 千年前と同じ役割を担っています——心を、 ほんの少し延長すること』。 アルテミスは静かに笑った——『おまえたちの真鍮は、 私の千年と同じ年齢かもしれない』。 ゼピルはこの一言を、 ヴァーレ女皇に伝えた。 ヴァーレはそれを、 戴冠式の追記として真鍮の銘板に彫らせた——『真鍮は、 千年の心と同い年』。" },
+  ],
+  "SSR_真鍮の女将 ハーニア": [
+    { title: "真鍮の女将、 工房の母", body: "ハーニアは三十八歳、 空挺城ゼノニアの大工房の親方。 真鍮ハンマーを担いだ姿で『お嬢さま、 こっち!』 と女皇を呼ぶのは、 ゼノニアでハーニアだけ。 ヴァーレが幼少期から工房に通い、 ハーニアの背中を見て育った。 ハーニアにとって、 ヴァーレは『工房の娘』、 ピットとピピは『工房の孫』、 ベルとヴィンとジンは『工房の弟妹』 だ。 真鍮ハンマーの音が、 ハーニアの母性の鼓動なのだ。" },
+    { title: "ベル + ピット + ピピの指導", body: "ハーニアが工房の若手 (ベル / ピット / ピピ / ヴィン / ジン) を叱る時、 必ず一度は笑う——『おい、 真鍮を泣かせるな! 機嫌を取ってやれ!』。 真鍮を擬人化する叱り方が、 ハーニア流。 ピピが工房に初めて来た日、 ハーニアは大笑いして言った——『ベル! おまえの後継ぎ、 来たぞ!』。 ベルもピットも複雑な顔で笑った。 ハーニアは知っている——若手の競い合いを、 親方が言葉で煽れば、 工房はもっと温かくなる、 と。" },
+    { title: "龍帝が工房を訪れた朝", body: "龍帝アルテミスが空挺城の工房を訪れた朝、 ハーニアは普段通り真鍮ハンマーを担いで作業していた。 龍帝が静かに見学する中、 ハーニアは振り向いて告げた——『陛下、 真鍮を握ってみますか』。 龍帝は微笑んで頷き、 大きな手で小さな歯車を握った。 ハーニアは一瞬、 千年振るった双大剣の手と、 真鍮の歯車の組み合わせの異質さに、 思わず笑った——『陛下の手は、 千年握っても、 まだ温かいですね』。 龍帝は『おまえの真鍮の方が、 もっと温かいぞ』 と返した。 ハーニアの母性は、 千年の覇王にも届いた。" },
+  ],
+  // ===== S1C4 SR 凸秘話 =====
+  "SR_氷牙の戦士 イズン": [
+    { title: "氷牙の戦士、 アルクの兄貴分", body: "イズンは二十二歳、 凍土の若き双斧使い。 雪原村に時々顔を出して、 アルクら子供たちに氷の握り方を教える。 アルクが『イズン兄!』 と呼ぶたび、 イズンは少し照れた顔をする——『俺の弟は、 おまえじゃないけどな』。 でもイズンは、 アルクが彫った小さな氷の彫像を、 自分の家に飾っている。 子供の真っ直ぐな憧れは、 戦士の重い双斧を、 ほんの少し軽くしてくれる。" },
+    { title: "凍土の影喰い襲撃で初めて死を見た夜", body: "三年前の凍土の影喰い大襲来——イズンはまだ十九歳の見習い戦士で、 リオネ聖騎士の隣で剣を振るった。 その夜、 イズンは初めて、 同期の戦士が影喰いに飲み込まれて消える瞬間を見た。 凍土の朝、 イズンは雪に膝をついて泣いた。 リオネは何も言わず、 隣に立ち続けた。 アルクには言わない夜だ。 だがアルクが「戦士になる!」 と叫ぶたび、 イズンは静かに思う——『戦士は、 泣ける者だけがなれる』。" },
+  ],
+  "SR_空挺整備士 ベル": [
+    { title: "空挺整備士、 工房の先輩", body: "ベルは十八歳。 ハーニア親方の弟子として三年目の若き整備士。 真鍮歯車の修理が特に得意で、 ピット (兄) もピピ (妹) もベルの後を追って工房に来た。 ベルは『先輩』 と呼ばれることに少し緊張する——『私もまだ、 ハーニア親方に怒られる側です』。 だが弟子のピピが目を輝かせて『ベル姉』 と呼ぶたび、 ベルは少し胸が温かくなる——『先輩って、 こういうことか』。" },
+    { title: "ねじまわしを ピピに譲った日", body: "ベルが愛用していた小さなねじまわしを、 ピピが盗み見ていることに気づいた日——ベルは黙って、 翌朝そのねじまわしをピピの机に置いた。 ピピは振り向いて、 涙目で叫んだ——『ベル姉! 盗み見してないよ! 本当に!』。 ベルは笑って答えた——『分かってる。 だから譲るの』。 ハーニア親方は遠くから二人を見て、 真鍮ハンマーで自分の頬を叩いて笑った。 工房の朝が、 また温かくなった。" },
+  ],
+  "SR_凍土の狩人 シエラ": [
+    { title: "凍土の狩人、 雪豹を追う", body: "シエラは二十歳、 ニーヴル雪原村の若き狩人。 氷の弓を背負い、 雪豹を一矢で仕留める。 父も祖父も狩人だった、 雪原村最古の狩人家系の三代目。 シエラの狩りの流儀は『静寂』——足音、 息、 心拍、 全てを雪原に預けてから、 一矢を放つ。 雪原の朝、 シエラの背中は、 風の一部のように溶ける。" },
+    { title: "ミウが私を見つめている夜", body: "シエラが狩りの帰り、 雪原村の入口で振り向いた時——銀髪の少女ミウが、 こちらを真っ直ぐ見つめていることに気づいた。 ミウは慌てて目を逸らした。 シエラは微笑んで通り過ぎた。 翌朝、 シエラは雪豹を追う支度をしながら、 思った——『あの子は、 雪豹を見ているんじゃない。 私の背中を見ている』。 シエラは少し誇らしく、 少し責任を感じた。 雪原の風の中で、 シエラの矢は、 一つ重くなった。 ミウは知らない、 シエラが密かに、 自分のために狩りを少しだけ丁寧にしていることを。" },
+  ],
+  "SR_氷塔の見習い騎士 アスラ": [
+    { title: "氷塔の見習い騎士、 リオネ姉分", body: "アスラは十七歳、 氷塔の聖騎士団の見習い。 リオネ聖騎士に憧れて、 二年前に入団した。 リオネはアスラを『見習い』 と呼ぶが、 アスラは内心『リオネ姉』 と呼んでいる——『姉と呼ぶには、 まだ実力が足りないから』。 アスラの剣は若く、 まだリオネの聖剣の影にも届かない。 でもアスラは知っている——『姉と呼べる日が来るまで、 私は剣を磨き続ける』。" },
+    { title: "グレイル氷帝への憧れ", body: "アスラは見習い時代の初日、 氷宮殿の謁見で初めてグレイル氷帝を見た。 即位の儀の翌日のことだ。 グレイルは静かに玉座から降りて、 アスラに告げた——『見習いよ。 私もまだ、 氷帝になったばかりだ。 一緒に、 育とう』。 アスラは涙を堪えて頷いた。 以来、 アスラの剣には、 リオネ姉への憧れと、 グレイル陛下への忠誠が、 二重の刃として宿っている。 凍土の影喰い襲撃の時、 アスラは初めて剣を振るう機会を得る——その日が、 すぐ来るとは、 まだ知らない。" },
+  ],
+  "SR_凍土の祭司 イル": [
+    { title: "凍土の祭司、 ユーリス姉の鈴杖", body: "イルは二十歳、 氷霜の巫女ユーリスの実妹。 凍土神事の補佐役として、 姉の予言の場で鈴杖を鳴らす。 鈴杖は神事の始まりと終わりを告げる音——『リン』 という小さな響き。 イルはこの音を、 子供の頃から練習してきた。 姉のイルディラ (予言杖) は重く、 妹の鈴杖は軽い。 だがイルは知っている——『姉の予言は、 私の鈴の音の中で生まれる』。" },
+    { title: "予言を支える静謐", body: "ユーリスが予言を告げる時、 イルは姉の背後で鈴杖を握って息を止める。 予言の言葉が降り注ぐ間、 イルは一切の音を立てない。 予言の終わりに、 もう一度『リン』 と鳴らす——『神事、 終了』。 龍帝アルテミスが神殿を出る時、 イルの鈴杖の音が、 雪原に静かに溶けた。 アルテミスは振り向かなかったが、 心の中で『あの妹の音は、 姉の予言と同じ重さだ』 と気づいた。 イル自身は知らない——千年の覇王が、 自分の鈴の音を覚えたことを。" },
+  ],
+  "SR_蒸気砲手 ヴィン": [
+    { title: "蒸気砲手、 工房の若手", body: "ヴィンは十九歳、 ハーニア親方の弟子の蒸気砲手。 真鍮の砲身を担いで、 空挺戦で煙と火薬の臭いに包まれて生きる。 ベルが整備、 ジンが機関、 ヴィンが砲手——三人で一つのチーム。 ヴィンは寡黙だが、 砲身を磨くたびに『今日は、 一発で当てる』 と心に誓う。 親方ハーニアは『ヴィン、 おまえの寡黙は、 砲弾の重さと同じだ』 と笑う。" },
+    { title: "空挺戦の初陣", body: "ヴィンの初陣は十七歳——ゼノニア郊外で蒸気船を襲った空賊団との戦い。 ヴィンは緊張で手が震え、 砲弾を二発外した。 三発目が当たった時、 ヴィンは涙を流した——『俺の砲弾が、 誰かを傷つけた』。 親方ハーニアは戦の後、 ヴィンの肩を真鍮で煤けた手で叩いた——『ヴィン、 おまえは砲手として正しい。 砲弾の重さを、 ちゃんと感じている』。 ヴィンは以来、 砲を撃つたびに、 砲弾の重さを心で量る。 凍土の影喰い襲撃で、 ヴィンは初めて『迷わずに撃てる相手』 と出会う。" },
+  ],
+  "SR_空挺機関士 ジン": [
+    { title: "空挺機関士、 真鍮の鼓動を読む", body: "ジンは二十一歳、 ハーニア親方の弟子の機関士。 蒸気機関の鼓動を耳で読む特技がある——『今日のボイラーは、 機嫌が悪い』 『歯車が、 半拍ずれている』。 ジン以外の整備士には聞こえない音を、 ジンは耳の中で正確に聞き分ける。 親方ハーニアは『ジンの耳は、 真鍮の通訳だ』 と笑う。 ジンは寡黙だが、 機関に向かうと、 一日中静かに歯車と対話している。" },
+    { title: "ピットへ手を貸した若き先輩", body: "ジンが工房で最初にピットに声をかけたのは、 ピットがまだ十三歳の春——『おまえ、 ボイラーの音、 一回聞いてみるか?』。 ピットは緊張して頷いた。 ジンはボイラーの脇でピットの耳を機関に近づけた——『リズム、 聞こえるか? 真鍮の心臓だ』。 ピットは涙目で頷いた——『聞こえた! 速い、 速い、 遅い、 速い』。 ジンは笑った——『おまえ、 才能ある』。 ピットは以来、 ジンを密かに『耳の先輩』 と呼んでいる。 ジン自身は、 そう呼ばれていることを知らない。" },
+  ],
+  // ===== S1C4 R 凸秘話 =====
+  "R_凍土の少年 アルク": [
+    { title: "イズン兄の、 小さな氷の刃", body: "アルクが憧れる『イズン兄』 とは、 氷牙の戦士イズン (SR)。 ニーヴル防衛の若き双斧使いで、 雪原村に時々顔を出しては子供たちに氷の握り方を教えてくれる。 アルクは小さな手で重い氷玉を握り、 「いつか僕も双斧を振るって戦士になる」 と毎晩想像してから眠る。 ある冬の夜、 イズン兄はアルクに小さな氷の刃を彫って渡した。 「これは、 おもちゃじゃない。 戦士を志す者の、 最初の友だ」 ——。 アルクは今もそれを枕の下に隠して持っている。 龍帝の馬上の双大剣を見上げた朝、 アルクが思わず「龍帝様だっ!」 と叫んだのは、 あの氷の刃を握り締めながら見上げた憧れの全部だった。" },
+  ],
+  "R_雪原の少女 ミウ": [
+    { title: "ミウと、 雪豹を追う背中", body: "ミウが密かに憧れているのは、 雪原村のはじっこに住む若い猟師——名はシエラ。 氷の弓を背負い、 雪豹を一矢で仕留める伝説の腕前。 ミウは10歳の冬、 シエラ姉が雪原に立ち、 風を読んで矢を引き絞る背中を見て、 「私もあの背中を追いたい」 と決意した。 アルクが「戦士になる!」 と武芸に憧れる傍ら、 ミウは静かに「私は雪豹を追う猟師になる」 と返している。 二人の夢は別々だが、 雪原を駆ける子供時代だけは確かに一緒。 ミウがアルクを叱るのは、 アルクが粗忽だからじゃない——その騒ぎで、 ミウが追っていた静かな雪豹の足跡が消えてしまうから。 内緒の理由だ。" },
+  ],
+  "R_空の少女 ピピ": [
+    { title: "ピピと、 盗み見たねじまわし", body: "ピピが工房通いを始めたのは、 ベル姉 (空挺整備士、 SR) のねじまわしを盗み見たのがきっかけ。 ベル姉が真鍮歯車を手早く組み上げる姿に、 ピピは「私もあれを直してみたい」 と工房に駆け込んだ。 兄ピットの後を追って入ったはずの工房で、 気づけばピピの方が手先が器用で、 ベル姉に「ピピちゃんはセンスあるね」 と褒められる始末。 ピット兄は喜びと焦りの混じった顔で見守り、 ハーニア親方は二人の競い合いを楽しんでいる。 ピピのねじまわしは、 ベル姉の使い古しを譲り受けた一本——握り締めるたび、 「いつかベル姉と並んで真鍮を組む」 という小さな誓いが、 朱色の髪のピピの中で静かに芯を成している。" },
+  ],
+  "R_空の少年 ピット": [
+    { title: "ピットと、 兄の責任", body: "ピットがゼノニア工房に入ったのは13歳の春。 一年早く始めたはずの修行を、 12歳の妹ピピは半年で追い越そうとしている。 「妹に負けないように」 と毎朝、 ピットは誰よりも早く工房に入り、 真鍮歯車の油塗りから始める。 ベル姉は彼を『真面目な弟分』 と呼び、 焦らずやれと諭してくれる。 だが、 ピットは知っている。 兄として後ろを歩かせるのが嫌なのではなく、 ピピが眩しすぎて、 自分も光らないと並んで歩けないのだ、 と。 龍帝アルテミスが工房を訪れた日、 ピットが緊張した面持ちで一礼したのも、 妹に「兄として恥ずかしくない姿」 を見せたかった、 ただそれだけ。 兄妹の朱色は、 同じ朝陽を浴びて伸びていく。" },
+  ],
 };
 
 function loadState() {
@@ -725,12 +962,11 @@ function saveState() {
 
 // ────────────── Rolling ──────────────
 // ピックアップ章: 該当章のキャラだけ重み×2、 他は×1。 章全体のtier比率(R65/SR25/SSR7/UR3)は維持。
-const PICKUP_CHAPTER = 's1c3';  // 最新章固定 (S1C4公開時に 's1c4' へ手動更新)
+const PICKUP_CHAPTER = 's1c4';  // 最新章固定 (S1C5公開時に 's1c5' へ手動更新)
 const PICKUP_WEIGHT = 2;
 
 function rollOne(opts = {}) {
-  // 天井: UR確定(LRではなく)
-  if (state.pity >= PITY - 1) return pickTier("UR", opts);
+  // 天井廃止 (2026-05-02): 純粋確率のみ。 state.pity は記録としてはまだ更新するが UR 確定処理なし
   const r = Math.random();
   let acc = 0;
   // LRから順に判定（稀なtierから降順）
@@ -790,54 +1026,212 @@ function applyPull(result, opts) {
   }
 }
 
-// ────────────── 10連希少度計算 (多項分布) ──────────────
+// ────────────── 10連希少度計算 (体感偏差値 + SSR以上数 ハイブリッド) ──────────────
+// 2026-05-02 改訂 (野沢さん指示): 体感「25=最低、 50=平均、 75=上位」 にマッピング
+// 数学的偏差値 (σ=27.33) では振れ幅 40-60 に集中して直感的でないため、 区分線形で広げる
+// スコア = 各 tier × 重み (1/3/10/30/100) の合計
+const SCORE_WEIGHTS = { R: 1, SR: 3, SSR: 10, UR: 30, LR: 100 };
+// 体感マッピング (線形補間):
+//   score 10  (R10、 最低) → T 25
+//   score 35  (期待値、 平均) → T 50
+//   score 100 (UR大爆発 or LRヒット圏) → T 75
+//   score 200 (UR3+SSR豊富、 上位 1%以下) → T 90
+//   score 300+ (理論的超上位) → T 99 cap
+function scoreToTScore(score) {
+  if (score <= 10) return 25;
+  if (score <= 35) return Math.round(25 + (score - 10) * 25 / 25);   // 25→50
+  if (score <= 100) return Math.round(50 + (score - 35) * 25 / 65);  // 50→75
+  if (score <= 200) return Math.round(75 + (score - 100) * 15 / 100); // 75→90
+  return Math.min(99, Math.round(90 + (score - 200) / 100));          // 90→99 cap
+}
+
 function factorial(n) {
   let r = 1;
   for (let i = 2; i <= n; i++) r *= i;
   return r;
 }
-function multinomialProb(nR, nSR, nSSR, nUR) {
-  const total = nR + nSR + nSSR + nUR;
-  const coef = factorial(total) / (factorial(nR) * factorial(nSR) * factorial(nSSR) * factorial(nUR));
-  return coef *
-    Math.pow(RATES.R, nR) *
-    Math.pow(RATES.SR, nSR) *
-    Math.pow(RATES.SSR, nSSR) *
-    Math.pow(RATES.UR, nUR);
+function _binomCoef(n, k) {
+  return factorial(n) / (factorial(k) * factorial(n - k));
 }
 
 function computeTenRollRarity(results) {
   const counts = { R: 0, SR: 0, SSR: 0, UR: 0, LR: 0 };
   for (const r of results) counts[r.tier]++;
-  // LRは極低確率なので多項計算時はURと合算して近似(R/SR/SSR/UR+LR の4項)
-  const thisP = multinomialProb(counts.R, counts.SR, counts.SSR, counts.UR + counts.LR);
-  // 今回と同等以下の確率を持つ組み合わせの合計（=「同等以上の珍しさ」確率）
-  let rarerOrEqualProb = 0;
-  for (let nUR = 0; nUR <= 10; nUR++) {
-    for (let nSSR = 0; nSSR <= 10 - nUR; nSSR++) {
-      for (let nSR = 0; nSR <= 10 - nUR - nSSR; nSR++) {
-        const nR = 10 - nUR - nSSR - nSR;
-        const p = multinomialProb(nR, nSR, nSSR, nUR);
-        if (p <= thisP + 1e-15) rarerOrEqualProb += p;
-      }
-    }
+  // SSR以上 (SSR + UR + LR) の合算数
+  const ssrPlusCount = counts.SSR + counts.UR + counts.LR;
+  // 重み付きスコア
+  let score = 0;
+  for (const tier of ['R', 'SR', 'SSR', 'UR', 'LR']) {
+    score += counts[tier] * SCORE_WEIGHTS[tier];
   }
-  const oneInN = thisP > 0 ? Math.round(1 / thisP) : Infinity;
-  // ランク判定: LRヒットは最上位、次にUR数、その後rarerOrEqualProbで区別
+  // 体感偏差値: 25=最低 (R10)、 50=平均 (期待値スコア35)、 75=上位 (UR大爆発)、 99=理論上限
+  const tScore = scoreToTScore(score);
+  // 旧互換 (一部参照箇所のため値だけ維持)
+  const pHigh = RATES.SSR + RATES.UR + (RATES.LR || 0);
+  const exactProb = _binomCoef(10, ssrPlusCount) * Math.pow(pHigh, ssrPlusCount) * Math.pow(1 - pHigh, 10 - ssrPlusCount);
+  let rarerOrEqualProb = 0;
+  for (let k = ssrPlusCount; k <= 10; k++) {
+    rarerOrEqualProb += _binomCoef(10, k) * Math.pow(pHigh, k) * Math.pow(1 - pHigh, 10 - k);
+  }
+  const oneInN = exactProb > 0 ? Math.round(1 / exactProb) : Infinity;
+  const thisP = exactProb;
+  // ランク判定: 偏差値ベース (G/F/E/D/C/B/A/S/SS + LEGEND)
+  // 75+ は全部 SS に統合 (SSS 廃止、 野沢さん指示 2026-05-02)、 LR ヒットは別格 LEGEND
   let rank, rankClass;
-  if (counts.LR >= 1) { rank = "LEGEND"; rankClass = "legend"; }
-  else if (counts.UR >= 3) { rank = "SSS"; rankClass = "sss"; }
-  else if (counts.UR >= 2) { rank = "SS"; rankClass = "ss"; }
-  else if (counts.UR >= 1 && counts.SSR >= 2) { rank = "SS"; rankClass = "ss"; }
-  else if (counts.UR >= 1) { rank = "S+"; rankClass = "splus"; }
-  else if (counts.SSR >= 3) { rank = "S"; rankClass = "s"; }
-  else if (counts.SSR >= 2) { rank = "A+"; rankClass = "aplus"; }
-  else if (counts.SSR >= 1) { rank = "A"; rankClass = "a"; }
-  else if (counts.SR >= 4) { rank = "B+"; rankClass = "bplus"; }
-  else if (counts.SR >= 2) { rank = "B"; rankClass = "b"; }
-  else { rank = "C"; rankClass = "c"; }
-  return { thisP, rarerOrEqualProb, oneInN, rank, rankClass, counts };
+  if (counts.LR >= 1)        { rank = "LEGEND"; rankClass = "legend"; }
+  else if (tScore >= 75)     { rank = "SS";  rankClass = "ss";  }
+  else if (tScore >= 65)     { rank = "S";   rankClass = "s";   }
+  else if (tScore >= 60)     { rank = "A";   rankClass = "a";   }
+  else if (tScore >= 55)     { rank = "B";   rankClass = "b";   }
+  else if (tScore >= 50)     { rank = "C";   rankClass = "c";   }
+  else if (tScore >= 45)     { rank = "D";   rankClass = "d";   }
+  else if (tScore >= 40)     { rank = "E";   rankClass = "e";   }
+  else if (tScore >= 35)     { rank = "F";   rankClass = "f";   }
+  else                       { rank = "G";   rankClass = "g";   }
+  return { thisP, rarerOrEqualProb, oneInN, rank, rankClass, counts, ssrPlusCount, exactProb, score, tScore };
 }
+
+// ランク表 popup (ガチャ結果モーダルから「ランク表 (?)」 で開く)
+function showRankTable() {
+  let modal = document.getElementById('rank-table-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'rank-table-modal';
+    modal.className = 'rank-table-modal';
+    modal.innerHTML = `
+      <div class="rank-table-card">
+        <div class="rank-table-head">
+          <div class="rank-table-title">📊 ランク表</div>
+          <button type="button" class="rank-table-close" onclick="closeRankTable()" aria-label="閉じる">×</button>
+        </div>
+        <div class="rank-table-body">
+          <div class="rank-table-row rank-table-row-legend"><span class="rarity-rank rank-legend">LEGEND</span><span class="rank-table-range">LR ヒット</span><span class="rank-table-desc">最高峰 (LR 出現)</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-ss">SS</span><span class="rank-table-range">75 以上</span><span class="rank-table-desc">大爆発 (UR 複数 or 高 SSR)</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-s">S</span><span class="rank-table-range">65〜74</span><span class="rank-table-desc">高位 (UR ヒット)</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-a">A</span><span class="rank-table-range">60〜64</span><span class="rank-table-desc">上位 (SSR 複数体)</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-b">B</span><span class="rank-table-range">55〜59</span><span class="rank-table-desc">平均より少し上 (SSR ヒット)</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-c">C</span><span class="rank-table-range">50〜54</span><span class="rank-table-desc">平均 (期待値ど真ん中)</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-d">D</span><span class="rank-table-range">45〜49</span><span class="rank-table-desc">平均より少し下 (SR 多め)</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-e">E</span><span class="rank-table-range">40〜44</span><span class="rank-table-desc">下寄り (SR 数体)</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-f">F</span><span class="rank-table-range">35〜39</span><span class="rank-table-desc">やや不運 (SR 少なめ)</span></div>
+          <div class="rank-table-row"><span class="rarity-rank rank-g">G</span><span class="rank-table-range">偏差値 〜34</span><span class="rank-table-desc">不運 (R が大半)</span></div>
+        </div>
+        <div class="rank-table-note">
+          偏差値は重み付きスコア (R=1 / SR=3 / SSR=10 / UR=30 / LR=100) を体感マッピング (25=最低 / 50=平均 / 75=上位 / 99=理論上限) に変換した値。
+          LR が出た瞬間に偏差値関係なく LEGEND ランクが発火。
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeRankTable(); });
+  }
+  modal.classList.add('active');
+}
+function closeRankTable() {
+  const modal = document.getElementById('rank-table-modal');
+  if (modal) modal.classList.remove('active');
+}
+
+// 排出率詳細 popup (ホームの「📊 排出率詳細」 ボタンで開く)。 lazy 構築 + 開く度に再描画 (PICKUP_CHAPTER 切替対応)。
+function showRateDetail() {
+  let modal = document.getElementById('rate-detail-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'rate-detail-modal';
+    modal.className = 'rate-detail-modal';
+    document.body.appendChild(modal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeRateDetail(); });
+  }
+  const chapMatch = String(PICKUP_CHAPTER || '').match(/s\d+c(\d+)/);
+  const chapLabel = chapMatch ? `第${chapMatch[1]}章` : PICKUP_CHAPTER;
+  // 通常ガチャ 表
+  let normalRows = '';
+  for (const tier of ['LR', 'UR', 'SSR', 'SR', 'R']) {
+    const pct = (RATES[tier] || 0) * 100;
+    if (pct <= 0) continue;
+    const cnt = (POOL[tier] || []).length;
+    const tierEach = cnt > 0 ? (pct / cnt).toFixed(3) : '—';
+    normalRows += `<div class="rate-detail-row tier-${tier.toLowerCase()}">
+      <span class="rate-detail-tier">${tier}</span>
+      <span class="rate-detail-pct">${pct.toFixed(2)}%</span>
+      <span class="rate-detail-cnt">${cnt}体</span>
+      <span class="rate-detail-each">1体あたり ${tierEach}%</span>
+    </div>`;
+  }
+  // ピックアップ 「通常 vs ピックアップ」 比較表 (1体あたり何倍引きやすいか)
+  let pickupRows = '';
+  let pickupCharsBlock = '';
+  for (const tier of ['LR', 'UR', 'SSR', 'SR', 'R']) {
+    const all = POOL[tier] || [];
+    const pickups = all.filter(c => c.chapter === PICKUP_CHAPTER);
+    if (all.length === 0) continue;
+    const tierPct = (RATES[tier] || 0) * 100;
+    const normalEach = tierPct / all.length;
+    if (pickups.length === 0) {
+      pickupRows += `<div class="rate-detail-row tier-${tier.toLowerCase()} pickup-empty">
+        <span class="rate-detail-tier">${tier}</span>
+        <span class="rate-detail-cnt">該当 0体</span>
+        <span class="rate-detail-each" colspan="2">通常通り (${normalEach.toFixed(3)}%/1体)</span>
+      </div>`;
+      continue;
+    }
+    const totalWeight = pickups.length * PICKUP_WEIGHT + (all.length - pickups.length) * 1;
+    const pickupShare = (pickups.length * PICKUP_WEIGHT) / totalWeight;
+    const pickupTierPct = tierPct * pickupShare;
+    const pickupEach = pickupTierPct / pickups.length;
+    const ratio = normalEach > 0 ? pickupEach / normalEach : 0;
+    pickupRows += `<div class="rate-detail-row tier-${tier.toLowerCase()}">
+      <span class="rate-detail-tier">${tier}</span>
+      <span class="rate-detail-cnt">★ ${pickups.length}体</span>
+      <span class="rate-detail-each">1体あたり <b>${pickupEach.toFixed(3)}%</b></span>
+      <span class="rate-detail-ratio">通常の <b>${ratio.toFixed(2)}倍</b> 引きやすい</span>
+    </div>`;
+    pickupCharsBlock += `<div class="rate-detail-pickup-tier-block">
+      <div class="rate-detail-pickup-tier-head"><span class="rate-detail-tier tier-${tier.toLowerCase()}">${tier}</span> ★ピックアップ ${pickups.length}体</div>
+      <div class="rate-detail-pickup-chars">
+        ${pickups.map(c => `<span class="rate-detail-pickup-char tier-${tier.toLowerCase()}">★ ${escapeHtml(c.name)}</span>`).join('')}
+      </div>
+    </div>`;
+  }
+  modal.innerHTML = `
+    <div class="rate-detail-card">
+      <div class="rate-detail-head">
+        <div class="rate-detail-title">📊 排出率詳細</div>
+        <button type="button" class="rate-detail-close" onclick="closeRateDetail()" aria-label="閉じる">×</button>
+      </div>
+      <div class="rate-detail-body">
+        <div class="rate-detail-section">
+          <h3>🎴 通常ガチャ (全キャラ均等)</h3>
+          <div class="rate-detail-table">${normalRows}</div>
+        </div>
+        <div class="rate-detail-section">
+          <h3>📖 ${chapLabel} ピックアップガチャ</h3>
+          <p class="rate-detail-desc">通常ガチャの tier 別確率 (LR/UR/SSR/SR/R 0.5/3/7/25/64.5%) は <b>そのまま</b>。 各 tier 内で <b>${chapLabel}キャラ (★) が約 ×${PICKUP_WEIGHT} 倍引きやすく</b> なる仕組み。</p>
+          <div class="rate-detail-table">${pickupRows}</div>
+        </div>
+        <div class="rate-detail-section">
+          <h3>📋 ${chapLabel} ピックアップ対象キャラ (★)</h3>
+          ${pickupCharsBlock || '<p class="rate-detail-desc">該当キャラなし</p>'}
+        </div>
+      </div>
+      <div class="rate-detail-note">
+        ガチャ確率は試行ごとに独立 (前の結果は次に影響しない)。
+      </div>
+    </div>
+  `;
+  modal.classList.add('active');
+  _lockBodyScroll();
+}
+function closeRateDetail() {
+  const modal = document.getElementById('rate-detail-modal');
+  if (!modal) return;
+  if (modal.classList.contains('active')) {
+    modal.classList.remove('active');
+    _unlockBodyScroll();
+  }
+}
+window.showRateDetail = showRateDetail;
+window.closeRateDetail = closeRateDetail;
 
 // ────────────── HUD ──────────────
 const $ = s => document.querySelector(s);
@@ -925,7 +1319,7 @@ function _unlockBodyScroll() {
   }
 }
 function _isAllModalsHidden() {
-  const checkActive = ['#char-detail', '#story-modal', '#bgm-panel', '#feedback-modal', '#history-modal', '#migration-modal', '#update-modal', '#account-modal', '#welcome-modal', '#settings-modal', '#account-prompt', '#story-list-modal', '#world-map', '#char-img-zoom', '#relations', '#gallery'];
+  const checkActive = ['#char-detail', '#story-modal', '#bgm-panel', '#feedback-modal', '#history-modal', '#migration-modal', '#update-modal', '#account-modal', '#welcome-modal', '#settings-modal', '#account-prompt', '#story-list-modal', '#world-map', '#char-img-zoom', '#relations', '#gallery', '#result', '#rank-table-modal', '#rate-detail-modal'];
   for (const sel of checkActive) {
     const el = document.querySelector(sel);
     if (!el) continue;
@@ -989,6 +1383,15 @@ function renderHomeGallery() {
       nm.className = 'hgcard-name';
       nm.textContent = c.name;
       card.appendChild(nm);
+      // 凸数バッジ (1凸以上の時だけ表示、 NEW と同時表示OK)
+      const dupKey = c.tier + '_' + c.name;
+      const dupCnt = (state.dupCounts && state.dupCounts[dupKey]) || 0;
+      if (dupCnt > 0) {
+        const dupB = document.createElement('div');
+        dupB.className = 'hgcard-dup';
+        dupB.textContent = `${dupCnt}凸`;
+        card.appendChild(dupB);
+      }
       if (typeof isNewUnlocked === 'function' && isNewUnlocked(c)) {
         const newB = document.createElement('div');
         newB.className = 'hgcard-new';
@@ -1990,10 +2393,12 @@ async function summonOne(result, opts = {}) {
   const showLadder = opts.showLadder !== false;
   setStageTier(tier);
 
-  // 高tier ヒット時は演出開始前にキャラ画像 preload (画像読み込みが演出に追いつかない問題対策、 D 案)
-  // R/SR は起動時 _prefetchLowTierThumbs で先読み済 (大半キャッシュ命中)、 高tier はここで preload + 短時間待機
+  // 演出開始前にキャラ画像 preload (画像読み込みが演出に追いつかない問題対策、 D 案)
+  // 高tier (SSR/UR/LR): 600ms timeout で確実 preload、 R/SR: 起動時 prefetch 済前提だが念のため 200ms 短い preload
   if (isHigh) {
     await _preloadCharImagesWithTimeout(result, 600);
+  } else {
+    await _preloadCharImagesWithTimeout(result, 200);
   }
 
   // ─ 溜め: SSR/UR/LRは長めの沈黙で期待感 ─
@@ -2342,7 +2747,7 @@ function showResult(results, best) {
   const nSSR = results.filter(r => r.tier === "SSR").length;
   const nNew = results.filter(r => r.isNew).length;
   let title = hasLR ? `👑 LEGEND ×${nLR} 降臨!!!` :
-              hasUR ? `🌈 UR ×${nUR} 確定!!` :
+              hasUR ? `🌈 UR ×${nUR} 獲得!!` :
               hasSSR ? `✨ SSR ×${nSSR} 獲得!` : "10連結果";
   if (nNew > 0) title += `  /  NEW ×${nNew}`;
   $("#result-title").textContent = title;
@@ -2357,15 +2762,13 @@ function showResult(results, best) {
   rarBox.appendChild(rankEl);
   const lineEl = document.createElement("div");
   lineEl.className = "rarity-line";
-  const oneInNStr = rar.oneInN >= 1e6 ? "100万回以上に1回" :
-                    rar.oneInN >= 1000 ? `約 ${(rar.oneInN/1000).toFixed(1)} 万回に1回`.replace(/\.0 万/, "万") :
-                    `約 ${rar.oneInN.toLocaleString()} 回に1回`;
+  // 偏差値 + SSR以上数 + ランク表ヘルプ (50=平均、 60+=上位16%、 70+=上位2.3% の感覚)
   lineEl.innerHTML =
-    `<span>出現率 <b>${(rar.thisP * 100).toFixed(4)}%</b></span>` +
+    `<span>偏差値 <b>${rar.tScore}</b></span>` +
     `<span class="dot">·</span>` +
-    `<span>${oneInNStr}</span>` +
+    `<span>SSR以上 <b>${rar.ssrPlusCount}体</b></span>` +
     `<span class="dot">·</span>` +
-    `<span>希少度 上位 <b>${(rar.rarerOrEqualProb * 100).toFixed(2)}%</b></span>`;
+    `<button type="button" class="rank-help-btn" onclick="showRankTable()" title="ランク表を表示">ランク表 (?)</button>`;
   rarBox.appendChild(lineEl);
 
   $("#result").classList.add("active");
@@ -2525,6 +2928,15 @@ function renderGalleryByTab() {
       card.appendChild(newB);
     }
     if (unlocked) {
+      // 凸数バッジ (1凸以上の時だけ表示)
+      const dupKey = c.tier + '_' + c.name;
+      const dupCnt = (state.dupCounts && state.dupCounts[dupKey]) || 0;
+      if (dupCnt > 0) {
+        const dupB = document.createElement('div');
+        dupB.className = 'card-dup';
+        dupB.textContent = `${dupCnt}凸`;
+        card.appendChild(dupB);
+      }
       const nm = document.createElement("div");
       nm.className = "card-name";
       nm.textContent = c.name;
@@ -2716,22 +3128,24 @@ function navCharDetail(delta) {
 // ═════════════ 相関図 ═════════════
 // 派閥 (faction) ごとに島状配置。座標は SVG viewBox 2000x1400 内の絶対座標
 // yomi: ふりがな (派閥名上に小さく表示)
+// 派閥座標 — ワールドマップ FACTION_WORLD_COORDS と同じ位置に揃え (野沢さん指示 2026-05-02)
+// 相関図とワールドマップで派閥位置が一致 → 地理感覚と相関の理解が同期
 const FACTIONS = [
-  { id: 'genso',   label: '原虹・観測者',     yomi: 'げんそう・かんそくしゃ', x: 1000, y:  170, color: '#fff8d4' },
-  { id: 'rulers',  label: '十国の覇者',       yomi: 'じっこくのはしゃ',     x: 1000, y:  500, color: '#ffd97a' },
-  { id: 'church',  label: '白焔教会',          yomi: 'はくえんきょうかい',   x:  280, y:  260, color: '#e3f0ff' },
-  { id: 'dragon',  label: '紫竜王国',          yomi: 'しりゅうおうこく',     x:  280, y:  600, color: '#d6c5ff' },
-  { id: 'redwing', label: '紅翼皇家',          yomi: 'こうよくこうか',       x:  280, y:  970, color: '#ffc0c0' },
-  { id: 'yakai',   label: '夜焔郷・影衆',      yomi: 'やえんごう・かげしゅう', x: 1720, y:  260, color: '#ffaaaa' },
-  { id: 'wolf',    label: '月牙狼族',          yomi: 'げつがろうぞく',       x: 1720, y:  520, color: '#cccccc' },
-  { id: 'forest',  label: '深緑樹海',          yomi: 'しんりょくじゅかい',   x: 1720, y:  760, color: '#b8e0b0' },
-  { id: 'silver',  label: '銀霜王国',          yomi: 'ぎんそうおうこく',     x: 1720, y: 1010, color: '#cce0ff' },
-  { id: 'tower',   label: '黒曜塔',            yomi: 'こくようとう',         x:  600, y: 1230, color: '#a0a0c0' },
-  { id: 'seventh', label: '第七天',            yomi: 'だいしちてん',         x: 1000, y:  830, color: '#ffb070' },
-  { id: 'academy', label: '星霊学院',          yomi: 'せいれいがくいん',     x: 1400, y: 1230, color: '#b0d0ff' },
-  // S1C2 追加
-  { id: 'aquasis', label: '海淵都市アクアシス', yomi: 'かいえんとし・あくあしす', x: 1000, y: 1320, color: '#7dd3fc' },
-  { id: 'crimson', label: '紅玉海賊団',         yomi: 'こうぎょくかいぞくだん',   x:  300, y: 1330, color: '#ff8888' },
+  { id: 'genso',   label: '原虹・観測者',     yomi: 'げんそう・かんそくしゃ', x: 1000, y:  140, color: '#fff8d4' },
+  { id: 'rulers',  label: '十国の覇者',       yomi: 'じっこくのはしゃ',     x: 1000, y:  450, color: '#ffd97a' },
+  { id: 'tower',   label: '黒曜塔',            yomi: 'こくようとう',         x: 1000, y:  720, color: '#a0a0c0' },
+  { id: 'church',  label: '白焔教会',          yomi: 'はくえんきょうかい',   x:  450, y:  380, color: '#e3f0ff' },
+  { id: 'forest',  label: '深緑樹海',          yomi: 'しんりょくじゅかい',   x:  280, y:  720, color: '#b8e0b0' },
+  { id: 'wolf',    label: '月牙狼族',          yomi: 'げつがろうぞく',       x:  330, y: 1010, color: '#cccccc' },
+  { id: 'silver',  label: '銀霜王国',          yomi: 'ぎんそうおうこく',     x:  500, y: 1250, color: '#cce0ff' },
+  { id: 'dragon',  label: '紫竜王国',          yomi: 'しりゅうおうこく',     x: 1550, y:  380, color: '#d6c5ff' },
+  { id: 'redwing', label: '紅翼皇家',          yomi: 'こうよくこうか',       x: 1720, y:  720, color: '#ffc0c0' },
+  { id: 'yakai',   label: '夜焔郷・影衆',      yomi: 'やえんごう・かげしゅう', x: 1670, y: 1010, color: '#ffaaaa' },
+  { id: 'seventh', label: '第七天',            yomi: 'だいしちてん',         x: 1500, y: 1250, color: '#ffb070' },
+  { id: 'academy', label: '星霊学院',          yomi: 'せいれいがくいん',     x: 1000, y: 1180, color: '#b0d0ff' },
+  // S1C2 追加 (海域)
+  { id: 'aquasis', label: '海淵都市アクアシス', yomi: 'かいえんとし・あくあしす', x:  800, y: 1450, color: '#7dd3fc' },
+  { id: 'crimson', label: '紅玉海賊団',         yomi: 'こうぎょくかいぞくだん',   x: 1300, y: 1450, color: '#ff8888' },
 ];
 
 // キャラの所属派閥マップ (name → factionId, dx, dy: 派閥中心からの相対オフセット)
@@ -2796,6 +3210,11 @@ const CHAR_FACTION = {
   '白焔教会見習い巫女 ルーナ':   { f: 'church',  dx:  -60, dy:  130 },
   '白焔教会騎士 ラナス':         { f: 'church',  dx:  120, dy:  100 },
   '白焔教会従士 リッカ':         { f: 'church',  dx:  140, dy:  -10 },
+  // S1C4 R 追加 (silver=ニーヴル雪原、 gen=ゼノニア空挺は派閥未制定なので便宜上 redwing 圏に隣接)
+  '凍土の少年 アルク':           { f: 'silver',  dx:  -90, dy:  130 },
+  '雪原の少女 ミウ':             { f: 'silver',  dx:   90, dy:  130 },
+  '空の少女 ピピ':               { f: 'redwing', dx:  -80, dy:  130 },
+  '空の少年 ピット':             { f: 'redwing', dx:   80, dy:  130 },
 };
 // 注: こはね は 夜焔郷 配置 (1か所のみ)。星霊学院との関連は線で表現
 
@@ -2905,25 +3324,64 @@ function getCharByName(name) {
   return null;
 }
 
-function openRelations() {
+// 相関図 focus state — 派閥クリックで該当派閥の相関のみハイライト (野沢さん指示 2026-05-02)
+let _relationsFocusFaction = null;
+function setRelationsFocus(facId) {
+  _relationsFocusFaction = (_relationsFocusFaction === facId) ? null : facId;
+  _redrawRelationsCanvas();
+}
+function clearRelationsFocus() {
+  _relationsFocusFaction = null;
+  _redrawRelationsCanvas();
+}
+function _redrawRelationsCanvas() {
   const canvas = document.getElementById('relations-canvas');
-  // SVG構築
-  const W = 2000, H = 1600;  // S1C2 で底辺派閥追加 (aquasis y:1320, crimson y:1330) のため余裕を1400→1600に
-  const svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+  if (!canvas) return;
+  const W = 2000, H = 1600;
+  // focus 中: SVG viewBox 自体を派閥中心の縮小範囲に切替 → 自然に画面中央拡大表示
+  // (transform 戦略は g 内が viewBox cliped で見切れる問題があったため viewBox 切替に変更)
+  let viewBoxAttr = `0 0 ${W} ${H}`;
+  if (_relationsFocusFaction) {
+    const f = FACTIONS.find(ff => ff.id === _relationsFocusFaction);
+    if (f) {
+      const scale = 2.4;
+      const focusW = W / scale, focusH = H / scale;
+      const fx = Math.max(0, Math.min(W - focusW, f.x - focusW / 2));
+      const fy = Math.max(0, Math.min(H - focusH, f.y - focusH / 2));
+      viewBoxAttr = `${fx} ${fy} ${focusW} ${focusH}`;
+    }
+  }
+  canvas.innerHTML = `<svg viewBox="${viewBoxAttr}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" class="relations-svg${_relationsFocusFaction ? ' focused' : ''}">
     <defs>${renderArrowMarkers()}</defs>
     ${renderFactionBg()}
     ${renderRelationLines()}
     ${renderFactionLabels()}
     ${renderCharNodes()}
   </svg>`;
-  canvas.innerHTML = svg;
-  document.getElementById('relations').classList.add('active');
-
-  // クリックでキャラ詳細にジャンプ (ドラッグと区別するため移動量チェック)
-  // 相関図は背後に残す → 詳細を閉じたら相関図に戻る
+  _bindRelationsClickHandlers(canvas);
+  // focus 中は SVG が画面中央に派閥を表示するので canvas scroll は中央に reset
+  if (_relationsFocusFaction) {
+    const sw = canvas.scrollWidth, sh = canvas.scrollHeight;
+    canvas.scrollTo({ left: (sw - canvas.clientWidth) / 2, top: (sh - canvas.clientHeight) / 2, behavior: 'smooth' });
+  }
+  // focus 表示用「全表示に戻る」 ボタン
+  const banner = document.getElementById('relations-focus-banner');
+  if (banner) {
+    if (_relationsFocusFaction) {
+      const f = FACTIONS.find(ff => ff.id === _relationsFocusFaction);
+      banner.innerHTML = `<span>📍 ${f ? f.label : ''} に絞り込み中</span> <button type="button" onclick="clearRelationsFocus()">✕ 全表示に戻る</button>`;
+      banner.hidden = false;
+    } else {
+      banner.hidden = true;
+      banner.innerHTML = '';
+    }
+  }
+}
+function _bindRelationsClickHandlers(canvas) {
+  // キャラタップ → 詳細
   canvas.querySelectorAll('[data-char-name]').forEach(el => {
     el.addEventListener('click', e => {
-      if (relationsDragMoved) return; // ドラッグ後の偽クリックを無視
+      if (relationsDragMoved) return;
       const name = el.dataset.charName;
       const c = getCharByName(name);
       if (c && isUnlocked(c)) {
@@ -2934,8 +3392,34 @@ function openRelations() {
       }
     });
   });
+  // 派閥タップ (背景円 + ラベル) → focus 切替
+  canvas.querySelectorAll('[data-faction-id]').forEach(el => {
+    el.addEventListener('click', e => {
+      if (relationsDragMoved) return;
+      e.stopPropagation();
+      setRelationsFocus(el.dataset.factionId);
+    });
+  });
+}
+window.clearRelationsFocus = clearRelationsFocus;
 
-  // 初期位置: 中央寄せ (派閥中心 800,550 が見えるように)
+function openRelations() {
+  // focus state リセット
+  _relationsFocusFaction = null;
+  const canvas = document.getElementById('relations-canvas');
+  // banner エレメント (focus 中のみ表示) を準備
+  let banner = document.getElementById('relations-focus-banner');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'relations-focus-banner';
+    banner.className = 'relations-focus-banner';
+    banner.hidden = true;
+    canvas.parentElement.insertBefore(banner, canvas);
+  }
+  _redrawRelationsCanvas();
+  document.getElementById('relations').classList.add('active');
+
+  // 初期位置: 中央寄せ
   setTimeout(() => {
     const sw = canvas.scrollWidth, sh = canvas.scrollHeight;
     canvas.scrollLeft = (sw - canvas.clientWidth) / 2;
@@ -3118,20 +3602,28 @@ function getCharPos(name) {
   return { x: f.x + meta.dx, y: f.y + meta.dy };
 }
 
+function _factionDimOpacity(facId) {
+  // focus なし → 1.0、 focus あり&一致 → 1.0、 focus あり&不一致 → 0.18
+  if (!_relationsFocusFaction) return 1.0;
+  return _relationsFocusFaction === facId ? 1.0 : 0.18;
+}
+
 function renderFactionBg() {
   return FACTIONS.map(f => {
     // 派閥領域を半透明の背景円で示す (新スケールに合わせ半径175)
     const r = 175;
-    return `<circle cx="${f.x}" cy="${f.y + 40}" r="${r}" fill="${f.color}" fill-opacity="0.06" stroke="${f.color}" stroke-opacity="0.25" stroke-width="1.5" stroke-dasharray="4,4"/>`;
+    const op = _factionDimOpacity(f.id);
+    return `<circle data-faction-id="${f.id}" class="rel-faction-bg" cx="${f.x}" cy="${f.y + 40}" r="${r}" fill="${f.color}" fill-opacity="${0.06 * op}" stroke="${f.color}" stroke-opacity="${0.25 * op}" stroke-width="1.5" stroke-dasharray="4,4" style="cursor:pointer"/>`;
   }).join('');
 }
 
 function renderFactionLabels() {
   return FACTIONS.map(f => {
+    const op = _factionDimOpacity(f.id);
     const yomiTxt = f.yomi
-      ? `<text x="${f.x}" y="${f.y - 137}" text-anchor="middle" fill="${f.color}" font-size="11" letter-spacing="2" opacity="0.7" style="text-shadow: 0 0 6px rgba(0,0,0,0.8)">${f.yomi}</text>`
+      ? `<text x="${f.x}" y="${f.y - 137}" text-anchor="middle" fill="${f.color}" font-size="11" letter-spacing="2" opacity="${0.7 * op}" style="text-shadow: 0 0 6px rgba(0,0,0,0.8)">${f.yomi}</text>`
       : '';
-    return `${yomiTxt}<text x="${f.x}" y="${f.y - 115}" text-anchor="middle" fill="${f.color}" font-size="22" font-weight="700" letter-spacing="2" style="text-shadow: 0 0 8px rgba(0,0,0,0.8)">${f.label}</text>`;
+    return `${yomiTxt}<text data-faction-id="${f.id}" class="rel-faction-label" x="${f.x}" y="${f.y - 115}" text-anchor="middle" fill="${f.color}" font-size="22" font-weight="700" letter-spacing="2" opacity="${op}" style="cursor:pointer; text-shadow: 0 0 8px rgba(0,0,0,0.8)">${f.label}</text>`;
   }).join('');
 }
 
@@ -3179,7 +3671,15 @@ function renderRelationLines() {
         y2 = y2 - (dyL / lineLen) * trim;
       }
       const marker = style.directed ? `marker-end="url(#arrow-${r.type})"` : '';
-      lines.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${style.color}" stroke-opacity="0.65" stroke-width="${style.w}" ${dash} ${marker}/>`);
+      // focus 中は両端のキャラが focus 派閥所属でない関係線を dim
+      let lineOp = 0.65;
+      if (_relationsFocusFaction) {
+        const fa = (CHAR_FACTION[r.a] || {}).f;
+        const fb = (CHAR_FACTION[r.b] || {}).f;
+        const inFocus = (fa === _relationsFocusFaction) || (fb === _relationsFocusFaction);
+        lineOp = inFocus ? 0.85 : 0.10;
+      }
+      lines.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${style.color}" stroke-opacity="${lineOp}" stroke-width="${style.w}" ${dash} ${marker}/>`);
 
       // ラベル位置の計算
       const baseOffset = lineLen < 200 ? 26 : 14;
@@ -3240,7 +3740,11 @@ function renderCharNodes() {
     const unlocked = isUnlocked(c);
     const tierColor = TIER_COLORS[c.tier][0];
     const r = c.tier === 'LR' ? 36 : c.tier === 'UR' ? 32 : c.tier === 'SSR' ? 28 : 24;
-    const opacity = unlocked ? 1 : 0.3;
+    let opacity = unlocked ? 1 : 0.3;
+    // focus 中: focus 派閥のキャラだけ通常 opacity、 他は dim
+    if (_relationsFocusFaction && meta.f !== _relationsFocusFaction) {
+      opacity = opacity * 0.18;
+    }
     const cursor = unlocked ? 'pointer' : 'default';
     // 画像を clipPath で円形クリップ
     const clipId = `clip-${name.replace(/[\s ]/g, '_')}`;
@@ -3402,6 +3906,9 @@ function closeCharDetail() {
   $("#char-detail").classList.remove("active");
   $("#char-img-zoom").classList.remove("active");
   _unlockBodyScroll();
+  // 詳細閉じた時にホーム/図鑑カードのNEWバッジを再描画 (galleryViewed 反映)
+  try { if (typeof renderHomeGallery === 'function') renderHomeGallery(); } catch (e) {}
+  try { if ($("#gallery").classList.contains("active") && typeof renderGalleryByTab === 'function') renderGalleryByTab(); } catch (e) {}
 }
 
 // ────────────── Bindings ──────────────
@@ -3411,6 +3918,7 @@ $("#btn-ten").addEventListener("click", () => doTen());
 // ピックアップガチャ
 $("#btn-single-pickup")?.addEventListener("click", () => doSingle({ pickup: PICKUP_CHAPTER }));
 $("#btn-ten-pickup")?.addEventListener("click", () => doTen({ pickup: PICKUP_CHAPTER }));
+$("#btn-rate-detail")?.addEventListener("click", () => showRateDetail());
 
 // ピックアップ章ラベルを PICKUP_CHAPTER から自動更新 (HTMLハードコード回避、 章バンプ時の更新漏れ防止)
 function updatePickupChapterLabels() {
@@ -3463,20 +3971,48 @@ const STORY_FACTION_TEASER = [
   { id: 'season3', label: '???', subLabel: '— 始原の地 —',     x: 1850, y: 1500 },
 ];
 
+// ワールドマップ open/close 状態管理 (hidden attribute ではなく内部フラグで lock pair を厳密管理)
+// 2026-05-02 修正: hidden attribute だけで判定すると、 char-detail/img-zoom 等の経由で
+// hidden state が想定外に変化した時に lock pair が崩れて button 反応しなくなる問題対策
+let _worldMapIsOpen = false;
 function openWorldMap() {
   const m = document.getElementById('world-map');
   if (!m) return;
-  if (!m.hasAttribute('hidden')) return; // 既に開いている場合は何もしない (二重 lock 防止)
+  // 状態不整合の自己修復: 内部 open フラグ true なのに UI 上は hidden の場合、 lock pair が壊れてる
+  // ボタン反応しない事故対策 (野沢さん指摘 2026-05-02「WM中に何かクリック後 Esc で反応しなくなる」)
+  if (_worldMapIsOpen && m.hasAttribute('hidden')) {
+    _worldMapIsOpen = false;
+    _unlockBodyScroll();
+  }
   renderWorldMap();
   m.removeAttribute('hidden');
-  _lockBodyScroll();
+  if (!_worldMapIsOpen) {
+    _lockBodyScroll();
+    _worldMapIsOpen = true;
+  }
 }
 function closeWorldMap() {
   const m = document.getElementById('world-map');
   if (!m) return;
-  if (m.hasAttribute('hidden')) return; // 既に閉じている → unlock しない
   m.setAttribute('hidden', '');
-  _unlockBodyScroll();
+  // 内部状態を完全リセット (派閥 active state / side panel) — 次回 open 時に汚れた状態が残らないように
+  _worldMapActiveFaction = null;
+  const side = document.getElementById('world-map-side');
+  if (side) side.innerHTML = '<div class="world-map-side-empty">📍 派閥をタップして詳細表示</div>';
+  if (_worldMapIsOpen) {
+    _unlockBodyScroll();
+    _worldMapIsOpen = false;
+  }
+  // 全モーダル閉じてれば scroll lock を強制解除 (state mismatch fallback) — modalDepth 漏れによる「WMボタン反応しない」 事故対策
+  if (typeof _modalDepth !== 'undefined' && _isAllModalsHidden && _isAllModalsHidden()) {
+    if (_modalDepth !== 0) _modalDepth = 0;
+    document.body.classList.remove('modal-open');
+    document.documentElement.classList.remove('modal-open');
+    document.body.style.top = '';
+    if (typeof _savedScrollY !== 'undefined') {
+      try { window.scrollTo(0, _savedScrollY); } catch (e) {}
+    }
+  }
 }
 // 派閥ID → 領地アイコン絵文字 (ファンタジー世界観の象徴を一発で伝える)
 const FACTION_ICONS = {
@@ -3805,7 +4341,8 @@ function _showChapterGallery(storyId) {
       if (loc.locked) {
         html += `<div class="chapter-gallery-loc-lockbadge">🔒</div>`;
       }
-      html += `<div class="chapter-gallery-loc-label"><span class="chapter-gallery-loc-kind">${escapeHtml(loc.kind)}</span> ${escapeHtml(loc.scene)}</div>`;
+      const kindCls = loc.kind === '背景' ? 'kind-bg' : (loc.kind === '挿絵' ? 'kind-ill' : 'kind-other');
+      html += `<div class="chapter-gallery-loc-label"><span class="chapter-gallery-loc-kind ${kindCls}">${escapeHtml(loc.kind)}</span> ${escapeHtml(loc.scene)}</div>`;
       html += `</div>`;
     });
     html += `</div>`;
@@ -4153,7 +4690,7 @@ const STORY_FILES = {
   s1c1: { title: '序: 七座の使命', meta: 'Season 1 — 第1章', file: 'STORY/s1c1.md' },
   s1c2: { title: '南方海域の異変', meta: 'Season 1 — 第2章', file: 'STORY/s1c2.md' },
   s1c3: { title: '砂塵の隊商', meta: 'Season 1 — 第3章', file: 'STORY/s1c3.md' },
-  // s1c4 は v1.4.0 main release 時に追加 (本文 + キャラ + 場所画像 + BGM 揃ってから)
+  s1c4: { title: '凍土と空',     meta: 'Season 1 — 第4章', file: 'STORY/s1c4.md' },
 };
 
 function escapeHtml(s) {
@@ -4247,6 +4784,28 @@ const FURIGANA = {
   '地底市': 'ちていし',
   '黒月衆': 'こくげつしゅう',
   '沈黙の塔': 'ちんもくのとう',
+  // S1C4 (凍土と空) で頻出する難読語
+  '氷帝': 'ひょうてい',
+  '北方剣聖': 'ほっぽうけんせい',
+  '凍土': 'とうど',
+  '雪原': 'せつげん',
+  '予言杖': 'よげんづえ',
+  '氷宮殿': 'こおりきゅうでん',
+  '氷霊': 'ひょうれい',
+  '玉座': 'ぎょくざ',
+  '翡翠': 'ひすい',
+  '双大剣': 'そうだいけん',
+  '陰陽': 'いんよう',
+  '近衛': 'このえ',
+  '摂政': 'せっしょう',
+  '黒刃': 'くろは',
+  '虹晶': 'こうしょう',
+  '銀霜': 'ぎんそう',
+  '剣聖': 'けんせい',
+  '鈴杖': 'れいじょう',
+  '巫女': 'みこ',
+  '神事': 'しんじ',
+  '聖域': 'せいいき',
 };
 
 // HTMLテキストノード内のキャラ名を <a class="char-link"> でラップ
@@ -4304,9 +4863,18 @@ function linkifyCharNames(html, sceneLabel, sceneTitle) {
   }
   candidates.sort((a, b) => b.name.length - a.name.length);
 
-  // 名前内の半角/全角スペース位置に「、」「,」「・」も許容する正規表現を生成
+  // 名前内の半角/全角スペース位置に「、」「,」「・」も許容する正規表現を生成。
+  // 2026-05-02 修正: 短い純カタカナ名 (例「イル」 2文字) が他のカタカナ語の部分文字列
+  //   ヘ「イル」 / 「イル」ディラ にマッチする事故対策。 前後カタカナ拒否の lookbehind/lookahead を付ける。
   const escapeRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const buildFlexRe = name => new RegExp(name.split(/[\s ]+/).map(escapeRe).join('[\\s 、,・]?'), 'g');
+  const buildFlexRe = name => {
+    const escaped = name.split(/[\s ]+/).map(escapeRe).join('[\\s 、,・]?');
+    const isPureKatakana = /^[ァ-ヶー]+$/.test(name);
+    if (isPureKatakana && name.length <= 3) {
+      return new RegExp(`(?<![ァ-ヶー])${escaped}(?![ァ-ヶー])`, 'g');
+    }
+    return new RegExp(escaped, 'g');
+  };
 
   function walk(node) {
     if (node.nodeType === Node.TEXT_NODE) {
@@ -4345,33 +4913,31 @@ function linkifyCharNames(html, sceneLabel, sceneTitle) {
   return tmp.innerHTML;
 }
 
-// HTMLの中のテキストノードだけにふりがなを適用 (タグ内属性は対象外)
+// HTMLの中のテキストノードだけにふりがなを適用 (タグ内属性は対象外)。
+// 2026-05-02 修正: 旧 2-pass 実装 (RUBY${term} marker → <ruby> 置換) はバグ:
+//   短い term の検索が、 直前に置いた marker 文字列「RUBY」 自体に hit して
+//   多重 marker 化 → 表示に「RUBY」 という生文字が残る事故が発生。
+// 1-pass regex で long-first / mutual-exclusive 置換に変更。
 function applyFurigana(html) {
   const tmp = document.createElement('div');
   tmp.innerHTML = html;
   const keys = Object.keys(FURIGANA).sort((a, b) => b.length - a.length);
+  if (keys.length === 0) return tmp.innerHTML;
+  const escapeRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const pattern = new RegExp(keys.map(escapeRe).join('|'), 'g');
   function walk(node) {
     if (node.nodeType === Node.TEXT_NODE) {
-      let text = node.textContent;
-      let changed = false;
-      for (const term of keys) {
-        if (text.includes(term)) {
-          text = text.split(term).join(`RUBY${term}`);
-          changed = true;
-        }
-      }
-      if (changed) {
-        let html = text;
-        for (const term of keys) {
-          const yomi = FURIGANA[term];
-          html = html.split(`RUBY${term}`).join(`<ruby>${term}<rt>${yomi}</rt></ruby>`);
-        }
-        const span = document.createElement('span');
-        span.innerHTML = html;
-        const frag = document.createDocumentFragment();
-        while (span.firstChild) frag.appendChild(span.firstChild);
-        node.parentNode.replaceChild(frag, node);
-      }
+      const text = node.textContent;
+      pattern.lastIndex = 0;
+      if (!pattern.test(text)) return;
+      pattern.lastIndex = 0;
+      const replaced = text.replace(pattern, m => `<ruby>${m}<rt>${FURIGANA[m]}</rt></ruby>`);
+      if (replaced === text) return;
+      const span = document.createElement('span');
+      span.innerHTML = replaced;
+      const frag = document.createDocumentFragment();
+      while (span.firstChild) frag.appendChild(span.firstChild);
+      node.parentNode.replaceChild(frag, node);
     } else if (node.nodeType === Node.ELEMENT_NODE) {
       if (node.tagName === 'RUBY' || node.tagName === 'CODE' || node.tagName === 'PRE') return;
       Array.from(node.childNodes).forEach(walk);
@@ -4873,6 +5439,13 @@ const STORY_ACT_INTROS = {
     '第三幕 — 古龍の気配':              '砂漠の遺跡で、 私は古き者の眼差しに出会う。\n— ヴィル',
     '第四幕 — 帰還':                    '答えを得たかは、 まだ分からない。 けれど、 帰る時が来た。\n— ヴィル',
   },
+  's1c4': {
+    'Season 1 第4章 — 凍土と空':        '千年生きた覇王が、 三人目の戦友を見出す日の話だ。\n— 龍帝 アルテミス',
+    '第一幕 — 都を発つ':                '凍土へ向かう旅は、 千年に一度の歩み。 私の中で、 何かが動き始めている。\n— アルテミス',
+    '第二幕 — 氷の都':                  '氷帝という男に会う。 言葉ではなく、 剣で語る相手だ。\n— アルテミス',
+    '第三幕 — 凍土の対話':              '孤独を分かち合える相手と、 雪原で空を見上げる夜。\n— アルテミス',
+    '第四幕 — 帰路':                    '次に龍を譲る相手を、 私はもう、 知っているのかもしれない。\n— アルテミス',
+  },
 };
 
 // 全章の outline (公開順、 公開済 + 将来予定)。 STORY_FILES (公開済) との差分で「Coming Soon teaser」 を出す
@@ -4884,7 +5457,7 @@ const STORY_OUTLINE = [
   { id: 's1c2', meta: 'Season 1 — 第2章', title: '南方海域の異変',     icon: '🌊', tagline: '信じる対象は、 外にあるとは限らない',                                povCharName: 'イザベル' },
   { id: 's1c3', meta: 'Season 1 — 第3章', title: '砂塵の隊商',         icon: '🐉', tagline: '血ではなく、 共に過ごした時間が家族を作る',                          povCharName: '竜爵 ヴィル' },
   { id: 's1c4', meta: 'Season 1 — 第4章', title: '凍土と空',           icon: '❄️', tagline: '強者の頂は、 孤独を共に分かち合うことで初めて温かい', releaseDate: '2026-05-02', povCharName: '龍帝 アルテミス' },
-  { id: 's1c5', meta: 'Season 1 — 第5章', title: '黒月の予兆',         icon: '🌑', tagline: '自分の中の影を見つめ、 抱きしめてから手放す',                       povCharName: '仮面騎士 シオン' },
+  { id: 's1c5', meta: 'Season 1 — 第5章', title: '黒月の予兆',         icon: '🌑', tagline: '銀霜の月が黒く欠ける夜、 仮面の下のもう一人の自分が、 静かに立ち上がる ─ 光と影、 二つの私の境界で', releaseDate: '2026-05-06', povCharName: '仮面騎士 シオン' },
   { id: 's1c6', meta: 'Season 1 — 第6章', title: '七座満つる',         icon: '🌈', tagline: '違っていても、 同じ目的を持つ仲間でいられる',                       povCharName: 'セラフィエル' },
   { id: 's1c7', meta: 'Season 1 — 第7章', title: '黒月決戦',           icon: '☄️', tagline: '影を消すのではなく、 共に在ると認める',                              povCharName: '虹意 プリズマ' },
 ];
@@ -4912,9 +5485,13 @@ function buildEndNavHtml(storyId) {
     // 次章未公開: Coming Soon teaser カード
     let releaseLabel = '📅 公開予定 — お楽しみに';
     if (next.releaseDate) {
-      // YYYY-MM-DD → YYYY/M/D (ゼロ埋めなし、 軽い表記)
+      // YYYY-MM-DD → YYYY/MM/DD (ゼロ埋め2桁、 ホーム画面ティザーと同形式、 feedback_datetime_format.md 準拠)
       const [y, m, d] = next.releaseDate.split('-').map(s => parseInt(s, 10));
-      if (y && m && d) releaseLabel = `📅 <b>${y}/${m}/${d}</b> 公開予定`;
+      if (y && m && d) {
+        const mm = String(m).padStart(2, '0');
+        const dd = String(d).padStart(2, '0');
+        releaseLabel = `📅 <b>${y}/${mm}/${dd}</b> 公開予定`;
+      }
     }
     html += `<div class="story-end-nav-teaser">
       <div class="story-end-nav-teaser-badge">Coming Soon</div>
@@ -5061,6 +5638,15 @@ const LOCATION_CONFIG = {
     // 第三幕 3-3 波紋の聖女: ripple_saint_awakening を挿絵化、 キャラカットイン削除
     '4-2': { img: '/images/locations/s1c2/serapia_dawn_thumb.webp' },            // 第四幕 4-2 朝焼けの港 (ミカと別れ)
   },
+  's1c4': {
+    // 第4章「凍土と空」 背景 (3:4縦長 + 1枚 16:9横長 = snow_field_silence は 3:4縦)
+    '1-1': { img: '/images/locations/s1c4/imperial_jade_palace_thumb.webp' },         // プロローグ/1-1 龍国玉座
+    '1-3': { img: '/images/locations/s1c4/frozen_tundra_journey_thumb.webp' },        // 1-3 雪原を行く
+    '2-1': { img: '/images/locations/s1c4/niiruru_ice_palace_thumb.webp' },           // 2-1 氷宮殿の謁見
+    '3-1': { img: '/images/locations/s1c4/zenonia_floating_fortress_thumb.webp' },    // 3-1 空挺城ゼノニア
+    '3-3': { img: '/images/locations/s1c4/snow_field_silence_thumb.webp' },           // 3-3 山場 雪原で空を見上げる (アルテミス+グレイル)
+    '銀霜の月に呼ばれる者': { img: '/images/locations/s1c4/observer_prophecy_realm_thumb.webp' },  // エピローグ subscene
+  },
   's1c3': {
     // 各シーンの「印象深い1場面」 を 3:4 縦長背景画像として配置
     '1-1': { img: '/images/locations/s1c3/purple_dragon_palace_thumb.webp' },     // 玉座の間 (父王とヴィルの対話)
@@ -5110,6 +5696,25 @@ const STORY_LOCATION_INLINE_CONFIG = {
     // 第三幕 3-3 波紋の聖女 (旧 5-3 → 3-3): 覚醒の絶頂を挿絵で (キャラカットイン削除)
     { scene: '3-3',  marker: '光の中で、私の鎧が、変容した',      position: 'after',  img: '/images/locations/s1c2/ripple_saint_awakening_thumb.webp' },
   ],
+  's1c4': [
+    // 第4章 挿絵 (16:9横、 全 8枚)
+    // 第一幕 1-1: 翡翠の玉座 — 章開幕、 アルテミス + 双大剣『陰陽』
+    { scene: '1-1',  marker: '玉座の脇に、 双大剣『陰陽』 が静かに立てかけられていた', position: 'after',  img: '/images/locations/s1c4/jade_throne_thumb.webp' },
+    // 第一幕 1-3: 雪原村でアルク&ミウ (R2人 デビュー) が龍帝隊列に駆け寄る
+    { scene: '1-3',  marker: '銀髪の少年が二人、 雪玉を投げ合って遊んでいた',    position: 'after',  img: '/images/locations/s1c4/snowfield_villagers_thumb.webp' },
+    // 第二幕 2-1: 氷宮殿の謁見、 北方剣聖ハグル + 氷帝グレイル の剣師教え構図
+    { scene: '2-1',  marker: '右側に立つのは、 銀髪の若き剣士。 北方剣聖ハグル', position: 'after',  img: '/images/locations/s1c4/frost_swordmaster_sparring_thumb.webp' },
+    // 第二幕 2-2: 氷帝グレイル vs 龍帝アルテミス 一騎打ち
+    { scene: '2-2',  marker: '五合目で、 私は双剣を交差させた',                   position: 'before', img: '/images/locations/s1c4/duel_ice_vs_dragon_thumb.webp' },
+    // 第二幕 2-3: アルテミス&ヒノオウ 千年前の回想 (戦友が並ぶ夜)
+    { scene: '2-3',  marker: 'ふと、 古い戦場の記憶が、 不意に蘇った',           position: 'after',  img: '/images/locations/s1c4/flashback_artemis_hinoo_thumb.webp' },
+    // 第三幕 3-1: 空挺城ゼノニア 三国会談シーン (ヴァーレ女皇)
+    { scene: '3-1',  marker: 'ヴァーレが、 静かに口を開いた',                     position: 'before', img: '/images/locations/s1c4/vaire_diplomacy_thumb.webp' },
+    // 第三幕 3-1: ゼノニア整備工房の生活感 (ハーニア親方+ベル整備士+ピット見習い)
+    { scene: '3-1',  marker: '整備工房から元気な声が響いた',                       position: 'after',  img: '/images/locations/s1c4/zenonia_workshop_thumb.webp' },
+    // 第四幕 4-1: 観測者三柱 ユーリス予言シーン (氷の小神殿)
+    { scene: '4-1',  marker: '氷の小さな神殿の中央に、 ユーリスは立っていた',     position: 'after',  img: '/images/locations/s1c4/frost_oracle_prophecy_thumb.webp' },
+  ],
   's1c3': [
     // 1-2 リアム誓い、 三月の約束 (主従の絆 + 旅の制約成立)
     { scene: '1-2',  marker: '不器用だけれど、 真っ直ぐな、 リアムらしい言葉だった', position: 'after',  img: '/images/locations/s1c3/liam_oath_thumb.webp' },
@@ -5128,7 +5733,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260501t';
+const IMG_CACHE_VERSION = '20260502a';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -5183,19 +5788,30 @@ function _prefetchChapterAssets(storyId) {
 //   - BGM 全曲 (BGM_LIST.file)
 //   - キャラ画像 (POOL の全 tier × 各キャラの原寸PNG + _thumb.webp)
 //   - 場所画像 (LOCATION_CONFIG + STORY_LOCATION_INLINE_CONFIG の img URL)
-function _collectAllAssetUrls() {
-  const urls = new Set();
+//
+// 2026-05-02: カテゴリ別 (5分類) に分割。 内訳:
+//   bgm           : BGM全曲
+//   char_full     : キャラ画像 フル (.png)
+//   char_thumb    : キャラ画像 サムネイル (_thumb.webp)
+//   loc_full      : 場所画像 フル (.png 拡大表示用)
+//   loc_thumb     : 場所画像 サムネイル (_thumb.webp)
+// `_collectAssetUrlsByCategory()` がメイン、 `_collectAllAssetUrls()` は flat 配列の互換ラッパー。
+function _collectAssetUrlsByCategory() {
+  const bgm = new Set();
+  const char_full = new Set();
+  const char_thumb = new Set();
+  const loc_full = new Set();
+  const loc_thumb = new Set();
   try {
-    if (typeof BGM_LIST !== 'undefined') BGM_LIST.forEach(b => { if (b && b.file) urls.add(b.file); });
+    if (typeof BGM_LIST !== 'undefined') BGM_LIST.forEach(b => { if (b && b.file) bgm.add(b.file); });
   } catch (e) {}
   try {
     if (typeof POOL !== 'undefined') {
       for (const tier of ['LR','UR','SSR','SR','R']) {
         (POOL[tier] || []).forEach(c => {
           if (!c || !c.img) return;
-          urls.add(c.img);
-          // _thumb.webp 版 (gallery で実際に使われるサイズ)
-          urls.add(c.img.replace(/\.png(\?.*)?$/i, '_thumb.webp$1'));
+          char_full.add(c.img);
+          char_thumb.add(c.img.replace(/\.png(\?.*)?$/i, '_thumb.webp$1'));
         });
       }
     }
@@ -5205,9 +5821,9 @@ function _collectAllAssetUrls() {
       const conf = LOCATION_CONFIG[sid] || {};
       for (const k in conf) {
         if (conf[k] && conf[k].img) {
-          urls.add(conf[k].img);
-          // 原寸PNG (拡大表示用) も追加。 失敗しても _downloadAllAssets が無視
-          urls.add(conf[k].img.replace(/_thumb\.webp(\?.*)?$/i, '.png$1'));
+          loc_thumb.add(conf[k].img);
+          // 原寸PNG (拡大表示用) — 失敗しても _downloadAllAssets が無視
+          loc_full.add(conf[k].img.replace(/_thumb\.webp(\?.*)?$/i, '.png$1'));
         }
       }
     }
@@ -5216,13 +5832,23 @@ function _collectAllAssetUrls() {
     for (const sid in STORY_LOCATION_INLINE_CONFIG) {
       (STORY_LOCATION_INLINE_CONFIG[sid] || []).forEach(e2 => {
         if (e2 && e2.img) {
-          urls.add(e2.img);
-          urls.add(e2.img.replace(/_thumb\.webp(\?.*)?$/i, '.png$1'));
+          loc_thumb.add(e2.img);
+          loc_full.add(e2.img.replace(/_thumb\.webp(\?.*)?$/i, '.png$1'));
         }
       });
     }
   } catch (e) {}
-  return Array.from(urls);
+  return {
+    bgm:        Array.from(bgm),
+    char_full:  Array.from(char_full),
+    char_thumb: Array.from(char_thumb),
+    loc_full:   Array.from(loc_full),
+    loc_thumb:  Array.from(loc_thumb),
+  };
+}
+function _collectAllAssetUrls() {
+  const cats = _collectAssetUrlsByCategory();
+  return [...cats.bgm, ...cats.char_full, ...cats.char_thumb, ...cats.loc_full, ...cats.loc_thumb];
 }
 
 // M4: 未DLアセットのみ並列DL — 既に SW Cache Storage にあるURLは skip
@@ -5233,8 +5859,9 @@ function _collectAllAssetUrls() {
 // DL後も「未保存N件」 が変わらない事故対策。 メインthread で明示的に
 // 'prismaera-offline-saved' cache に put することで、 SW intercept成否に関わらず
 // caches.match が確実に hit するよう defensive に書き込む。
-async function _downloadAllAssets(progressCb) {
-  const allUrls = _collectAllAssetUrls();
+async function _downloadAllAssets(progressCb, urlList) {
+  // 2026-05-02: urlList 渡しで category 別 DL に対応。 省略時は全アセット (従来通り)
+  const allUrls = urlList || _collectAllAssetUrls();
   // 全URLを並列で cache 確認、 未cacheだけリスト化 (既DL分は再fetchしない)
   const checks = await Promise.all(allUrls.map(async (url) => {
     try { return [url, !!(await caches.match(url))]; } catch (e) { return [url, false]; }
@@ -5274,9 +5901,122 @@ async function _downloadAllAssets(progressCb) {
   return { done, total, succeeded, skipped };
 }
 
+// M4: URL → bytes 永続化マップ。 一度測ったら localStorage に保存、 以後 instant に参照可能。
+// 静的アセットは URL 不変なら size 不変なので safely cache 可能。
+const _OFFLINE_URL_BYTES = new Map();
+const _OFFLINE_BYTES_LS_KEY = 'prism-offline-url-bytes';
+try {
+  const stored = JSON.parse(localStorage.getItem(_OFFLINE_BYTES_LS_KEY) || '{}');
+  for (const k in stored) { if (typeof stored[k] === 'number' && stored[k] > 0) _OFFLINE_URL_BYTES.set(k, stored[k]); }
+} catch (e) {}
+function _persistOfflineBytes() {
+  try {
+    const obj = {};
+    for (const [k, v] of _OFFLINE_URL_BYTES) obj[k] = v;
+    localStorage.setItem(_OFFLINE_BYTES_LS_KEY, JSON.stringify(obj));
+  } catch (e) {}
+}
+// 1 URL の容量を取得。 優先順位:
+//   (1) メモ済 _OFFLINE_URL_BYTES
+//   (2) Cache Storage に既にあれば response から Content-Length or blob().size
+//   (3) Range: bytes=0-0 で1バイトだけ GET → Content-Range の `bytes 0-0/<total>` を parse
+//       ※ Cloudflare Pages HEAD はContent-Length 返さない場合あるので Range が安全
+async function _fetchUrlBytes(url) {
+  if (_OFFLINE_URL_BYTES.has(url)) return _OFFLINE_URL_BYTES.get(url);
+  let bytes = 0;
+  // (2) cache 経由
+  try {
+    const r = await caches.match(url);
+    if (r) {
+      const cl = r.headers && r.headers.get && r.headers.get('content-length');
+      if (cl && /^\d+$/.test(cl)) bytes = parseInt(cl, 10);
+      else { try { bytes = (await r.clone().blob()).size || 0; } catch (e) {} }
+    }
+  } catch (e) {}
+  // (3) Range request — 1byteだけ転送、 Content-Range から本体サイズを抜く
+  if (bytes <= 0) {
+    try {
+      const r = await fetch(url, {
+        method: 'GET',
+        credentials: 'omit',
+        cache: 'no-store',
+        headers: { 'Range': 'bytes=0-0' },
+      });
+      if (r) {
+        // Content-Range: "bytes 0-0/12345"
+        const cr = r.headers.get('content-range');
+        const m = cr && cr.match(/\/(\d+)\s*$/);
+        if (m) bytes = parseInt(m[1], 10);
+        // fallback: Range サポートなしで全body返ってきた場合は Content-Length
+        if (bytes <= 0) {
+          const cl = r.headers.get('content-length');
+          if (cl && /^\d+$/.test(cl)) bytes = parseInt(cl, 10);
+        }
+        // body は使わないので確実に解放
+        try { if (r.body && r.body.cancel) await r.body.cancel(); } catch (e) {}
+      }
+    } catch (e) {}
+  }
+  if (bytes > 0) _OFFLINE_URL_BYTES.set(url, bytes);
+  return bytes;
+}
+// urls を並列で計測 → cached件数 + cachedBytes + totalBytes(全URLの合計サイズ予測)。
+// concurrency 高め (20) で 250URLs 程度なら数秒で完了。
+async function _measureUrlsTotal(urls) {
+  if (!urls || urls.length === 0) return { cached: 0, cachedBytes: 0, totalBytes: 0 };
+  let cached = 0, cachedBytes = 0, totalBytes = 0;
+  const CONCURRENCY = 20;
+  let idx = 0;
+  async function worker() {
+    while (idx < urls.length) {
+      const myIdx = idx++;
+      const url = urls[myIdx];
+      const sz = await _fetchUrlBytes(url);
+      totalBytes += sz;
+      try {
+        const r = await caches.match(url);
+        if (r) { cached++; cachedBytes += sz; }
+      } catch (e) {}
+    }
+  }
+  await Promise.all(Array.from({ length: CONCURRENCY }, () => worker()));
+  _persistOfflineBytes();
+  return { cached, cachedBytes, totalBytes };
+}
+// 後方互換: 件数だけ
+async function _countCachedInUrls(urls) {
+  return (await _measureUrlsTotal(urls)).cached;
+}
+// 後方互換: cached + cached容量だけ (HEAD なし、 ローカルcache のみ)
+async function _measureCacheBytes(urls) {
+  const r = await _measureUrlsTotal(urls);
+  return { cached: r.cached, bytes: r.cachedBytes };
+}
+function _formatBytes(b) {
+  if (!b || b <= 0) return '0 MB';
+  const mb = b / 1024 / 1024;
+  if (mb >= 100) return `${mb.toFixed(0)} MB`;
+  if (mb >= 10)  return `${mb.toFixed(1)} MB`;
+  if (mb >= 1)   return `${mb.toFixed(2)} MB`;
+  // < 1 MB
+  const kb = b / 1024;
+  return `${kb.toFixed(0)} KB`;
+}
+
 // M4: 設定モーダルのDLボタン状態 refresh — SW Cache Storage 実態を確認して未DL数を計算、
 // 未DL>0 ならボタン表示+件数表示、 全DL済みならボタン非表示で「✅ 全X件保存済み」 のみ表示。
 // 「再ダウンロード」 ボタンは出さない (野沢方針: 押す必要ないボタンは見せない)。
+//
+// 2026-05-02: 5カテゴリ細分化 + 容量 (MB) 表示。
+// breakdown UI で各カテゴリの 件数 + 容量 を表示、 個別DL用ボタン併設。
+const _OFFLINE_CAT_META = {
+  bgm:        { icon: '🎵',  label: 'BGM' },
+  char_full:  { icon: '🧝',  label: 'キャラ画像 フル' },
+  char_thumb: { icon: '🌄',  label: 'キャラ サムネイル' },
+  loc_full:   { icon: '🗺️',  label: '場所画像 フル' },
+  loc_thumb:  { icon: '🌌',  label: '場所 サムネイル' },
+};
+const _OFFLINE_CAT_KEYS = ['bgm', 'char_full', 'char_thumb', 'loc_full', 'loc_thumb'];
 async function _refreshOfflineStatus(m) {
   if (!m) return;
   const dlBtn = m.querySelector('#settings-offline-dl');
@@ -5285,29 +6025,75 @@ async function _refreshOfflineStatus(m) {
   if (!dlBtn || !statusEl) return;
   // 確認中表示 (caches.match × 全URLで数百ms程度かかる場合あり)
   statusEl.textContent = '確認中…';
-  let total = 0, cached = 0;
+  let cats, total = 0;
   try {
-    const urls = _collectAllAssetUrls();
-    total = urls.length;
+    cats = _collectAssetUrlsByCategory();
+    total = _OFFLINE_CAT_KEYS.reduce((s, k) => s + cats[k].length, 0);
     if (total === 0) {
       dlBtn.style.display = 'none';
       statusEl.textContent = '';
       return;
     }
-    const checks = await Promise.all(urls.map(async (url) => {
-      try { return (await caches.match(url)) ? 1 : 0; } catch (e) { return 0; }
-    }));
-    cached = checks.reduce((a, b) => a + b, 0);
   } catch (e) {
     statusEl.textContent = '';
     return;
   }
+  // カテゴリ別に並列で cache 件数 + 全URL予測バイト集計 (HEAD でメモ化、 2回目以降 instant)
+  const measures = await Promise.all(_OFFLINE_CAT_KEYS.map(k => _measureUrlsTotal(cats[k])));
+  const breakdown = {};
+  let cached = 0, cachedBytes = 0, totalBytes = 0;
+  _OFFLINE_CAT_KEYS.forEach((k, i) => {
+    breakdown[k] = {
+      total: cats[k].length,
+      cached: measures[i].cached,
+      cachedBytes: measures[i].cachedBytes,
+      totalBytes: measures[i].totalBytes,
+    };
+    cached += measures[i].cached;
+    cachedBytes += measures[i].cachedBytes;
+    totalBytes += measures[i].totalBytes;
+  });
   const missing = total - cached;
+  const missingBytes = Math.max(0, totalBytes - cachedBytes);
+  // breakdown UI 更新 — 各行に「件数 / 容量 (済 + 予測総量)」 を表示
+  for (const cat of _OFFLINE_CAT_KEYS) {
+    const row = m.querySelector(`.settings-offline-cat[data-category="${cat}"]`);
+    if (!row) continue;
+    const countEl = row.querySelector('.settings-offline-cat-count');
+    const sizeEl  = row.querySelector('.settings-offline-cat-size');
+    const catBtn  = row.querySelector('.settings-offline-cat-btn');
+    const b = breakdown[cat];
+    const t = b.total, c = b.cached, miss = t - c;
+    const missBytes = Math.max(0, b.totalBytes - b.cachedBytes);
+    if (countEl) {
+      if (t === 0) countEl.textContent = '— / —';
+      else if (miss <= 0) countEl.innerHTML = `✅ <b>${t}</b>件`;
+      else countEl.innerHTML = `<b>${c}</b> / <b>${t}</b>`;
+    }
+    if (sizeEl) {
+      // 0件 → 空
+      // 全DL済 → 容量だけ (例 "47.4 MB")
+      // 部分DL → "47.4 / 250 MB"
+      // 未DL  → "≈ 250 MB"
+      if (t === 0) sizeEl.textContent = '';
+      else if (miss <= 0) sizeEl.textContent = _formatBytes(b.cachedBytes);
+      else if (c > 0) sizeEl.textContent = `${_formatBytes(b.cachedBytes)} / ${_formatBytes(b.totalBytes)}`;
+      else sizeEl.textContent = `≈ ${_formatBytes(b.totalBytes)}`;
+    }
+    if (catBtn) {
+      if (t === 0 || miss <= 0) {
+        catBtn.hidden = true;
+      } else {
+        catBtn.hidden = false;
+        catBtn.textContent = `📥 ${miss}件 (${_formatBytes(missBytes)})`;
+      }
+    }
+  }
   if (progEl) progEl.hidden = true;
   if (missing <= 0) {
-    // 全DL済み: ボタン非表示
+    // 全DL済み: マスター ボタン非表示
     dlBtn.style.display = 'none';
-    statusEl.innerHTML = `✅ <b>全 ${total} 件</b> 保存済み (オフラインでも快適に動作します)`;
+    statusEl.innerHTML = `✅ <b>全 ${total} 件</b> 保存済み (合計 <b>${_formatBytes(cachedBytes)}</b>)`;
     // ストレージ使用量を併記 (取れる環境のみ)
     if (navigator.storage && navigator.storage.estimate) {
       try {
@@ -5319,14 +6105,13 @@ async function _refreshOfflineStatus(m) {
       } catch (e) {}
     }
   } else {
-    // 未DLあり: ボタン表示
+    // 未DLあり: マスター ボタン表示 (容量併記)
     dlBtn.style.display = '';
+    dlBtn.textContent = `📥 全 ${missing} 件 (${_formatBytes(missingBytes)}) をまとめてDL`;
     if (cached > 0) {
-      dlBtn.textContent = `📥 未保存 ${missing} 件をダウンロード`;
-      statusEl.innerHTML = `保存済み <b>${cached}</b> / <b>${total}</b> 件 (未保存 ${missing} 件)`;
+      statusEl.innerHTML = `保存済み <b>${cached}</b> / <b>${total}</b> 件 (${_formatBytes(cachedBytes)} / 全 ${_formatBytes(totalBytes)})`;
     } else {
-      dlBtn.textContent = `📥 ダウンロード開始`;
-      statusEl.innerHTML = `<b>${total}</b> 件のアセット (BGM・キャラ画像・場所画像)`;
+      statusEl.innerHTML = `<b>${total}</b> 件のアセット (DL予測 <b>${_formatBytes(totalBytes)}</b>)`;
     }
   }
 }
@@ -5351,7 +6136,10 @@ const STORY_POV_EXCLUDE_SCENES = {
     // 観測者三柱 (カグヤ + ノクス + セラフィエル) — POV (ヴィル) ではないので除外
     '凍土の三柱',
   ],
-  // s1c4 は v1.4.0 main release 時に追加 (本文公開と同時)
+  's1c4': [
+    // 観測者三柱 (カグヤ + ノクス + セラフィエル) — POV (アルテミス) ではないので除外
+    '銀霜の月に呼ばれる者',
+  ],
 };
 
 // シーン依存のキャラリンク remap — 同じ単独名 (例: 「イザベル」) でも、 シーン進行に応じて別キャラ (例: 覚醒後 UR) にリンク先を切替える。
@@ -5761,7 +6549,7 @@ $("#story-modal").addEventListener('click', e => {
   // 拡大画像モーダルが active な間は story-modal の click を一切処理しない
   // (画像 backdrop click → closeImgZoom が同タイミングで story-modal の close を呼ぶ事故防止)
   if (document.getElementById('char-img-zoom').classList.contains('active')) return;
-  if (e.target.id === 'story-modal') closeStory();
+  if (e.target.id === 'story-modal') { closeStory(); openStoryList(); }
 });
 // stageクリックで前後ページ: 左半分=前へ、右半分=次へ
 $("#story-stage").addEventListener('click', e => {
@@ -5825,6 +6613,10 @@ const BGM_LIST = [
   { id: 'aquasis', label: 'アクアシステーマ',  desc: 'Prism Abyss (深海の宮)',             duration: '2:59', file: '/assets/bgm/prism-aquasis.mp3' },
   { id: 'crimson', label: '紅玉海賊団テーマ',  desc: 'Prism Sailborn (紅潮の風)',          duration: '2:51', file: '/assets/bgm/prism-crimson.mp3' },
   { id: 'sahar',   label: 'サハールテーマ',    desc: 'Prism Sahar (古龍の風)',             duration: '2:48', file: '/assets/bgm/prism-sahar.mp3' },
+  // ===== S1C4 追加 (3曲: 章テーマ + 派閥BGM x2) =====
+  { id: 'frost',    label: '第4章テーマ',      desc: 'Prism Frost (凍空の鼓動)',           duration: '2:53', file: '/assets/bgm/prism-frost.mp3' },
+  { id: 'niflheim', label: 'ニーヴルテーマ',   desc: 'Prism Niflheim (氷霊の歌)',          duration: '3:09', file: '/assets/bgm/prism-niflheim.mp3' },
+  { id: 'aether',   label: 'ゼノニアテーマ',   desc: 'Prism Aether (蒸気の鼓動)',          duration: '3:08', file: '/assets/bgm/prism-aether.mp3' },
 ];
 const bgmAudio = document.getElementById("bgm-home");
 
@@ -5837,6 +6629,17 @@ let bgmCurrentId = localStorage.getItem("prism-bgm-current") || BGM_LIST[0].id;
 // v1.1.3: bgmMode (sequence/random/repeat) は shuffle(bool) + repeat('off'|'all'|'one') に分離
 let bgmShuffle = localStorage.getItem("prism-bgm-shuffle") === "on";
 let bgmRepeat = localStorage.getItem("prism-bgm-repeat") || 'off'; // 'off'|'all'|'one'
+// 全曲履歴 — playlist 全曲を1度ずつ流すまで同じ曲が来ないようにする (野沢さん指示 2026-05-02)
+// 履歴上限 = 現在の playlist 長 - 1 (queue再生成時に「直近全曲-1」 が新queue先頭に来ないよう保護)
+let bgmRecentHistory = [];
+try { bgmRecentHistory = JSON.parse(localStorage.getItem("prism-bgm-recent") || '[]'); } catch (e) { bgmRecentHistory = []; }
+if (!Array.isArray(bgmRecentHistory)) bgmRecentHistory = [];
+function _bgmRecentLimit() {
+  // playlist (現在のチェック済) - 1 曲。 全曲一周保証。
+  let n = 0;
+  try { n = bgmCheckedList().length; } catch (e) { n = (typeof BGM_LIST !== 'undefined') ? BGM_LIST.length : 0; }
+  return Math.max(1, n - 1);
+}
 // v1.2.3: shuffle はキュー方式 (Fisher-Yates で全曲シャッフル → 順に消化 → 枯れたら再シャッフル)。直前曲との連続反復を構造的に防ぐ
 let bgmShuffleQueue = [];
 try { bgmShuffleQueue = JSON.parse(localStorage.getItem("prism-bgm-shuffle-queue") || '[]'); } catch (e) { bgmShuffleQueue = []; }
@@ -6107,15 +6910,42 @@ function bgmToggle() {
   else playBgm(bgmCurrentId);
 }
 
-// Fisher-Yates shuffle で id 配列をランダム並べ替え。avoidFirstId が先頭に来たら2番目と入替(連続反復防止)
+// 再生開始した曲を recent history に記録 (LRU、 最新が末尾)。
+// 履歴上限は playlist 長 - 1 (= 全曲一周保証、 動的)。
+function _bgmRememberPlayed(id) {
+  if (!id) return;
+  bgmRecentHistory = bgmRecentHistory.filter(x => x !== id);
+  bgmRecentHistory.push(id);
+  const limit = _bgmRecentLimit();
+  while (bgmRecentHistory.length > limit) bgmRecentHistory.shift();
+  try { localStorage.setItem("prism-bgm-recent", JSON.stringify(bgmRecentHistory)); } catch (e) {}
+}
+
+// Fisher-Yates shuffle で id 配列をランダム並べ替え。
+// 改良 (2026-05-02): 直近 (playlist-1) 曲を覚え、 queue再生成時に新queue先頭がそのセットに含まれてたら
+// recent でない位置と swap → playlist が完全に一周するまで同じ曲が再登場しない。
+// 例 12曲なら、 直近11曲を avoid → 新queue先頭は 12曲ぶり (= 最後に出た 12 曲目だけ候補)。
 function _bgmGenShuffleQueue(list, avoidFirstId) {
   const ids = list.map(b => b.id);
+  // Fisher-Yates 標準シャッフル
   for (let i = ids.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [ids[i], ids[j]] = [ids[j], ids[i]];
   }
-  if (avoidFirstId && ids.length > 1 && ids[0] === avoidFirstId) {
-    [ids[0], ids[1]] = [ids[1], ids[0]];
+  // 直近再生した曲 + avoidFirstId を「最近曲」 set に集める
+  const recent = new Set(bgmRecentHistory);
+  if (avoidFirstId) recent.add(avoidFirstId);
+  // playlist 長と recent.size が等しいと avoid 不可 (全曲recent扱い) → spreading 諦め
+  if (ids.length > 1 && recent.size > 0 && recent.size < ids.length) {
+    // queue 先頭が recent ならば、 末尾側の non-recent 要素と swap (= 全曲一周保証)
+    if (recent.has(ids[0])) {
+      for (let k = ids.length - 1; k > 0; k--) {
+        if (!recent.has(ids[k])) {
+          [ids[0], ids[k]] = [ids[k], ids[0]];
+          break;
+        }
+      }
+    }
   }
   return ids;
 }
@@ -6228,6 +7058,8 @@ bgmAudio.addEventListener('play', () => {
   if (bgmAudio.dataset.bgmPlayLogged === bgmCurrentId) return;
   bgmAudio.dataset.bgmPlayLogged = bgmCurrentId;
   _logBgmEvent('play', bgmCurrentId);
+  // ランダム queue 再生成時の repeat 防止用、 再生開始した曲を履歴に記録
+  _bgmRememberPlayed(bgmCurrentId);
 });
 bgmAudio.addEventListener('ended', () => {
   localStorage.setItem('prism-bgm-last-time', '0');
@@ -6462,7 +7294,20 @@ if (_btnHistory) _btnHistory.addEventListener("click", openHistoryModal);
 
 document.addEventListener("keydown", e => {
   if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
-  // === 最優先: 拡大画像モーダル (z-index 260、 全モーダル中の最上位) ===
+  // === 最優先: ランク表モーダル (z-index 280、 全モーダル中で最上位 ===
+  // result + ランク表 同時 open 時の「Esc で result 閉じてランク表残る」 バグ対策 (野沢さん指摘 2026-05-02)
+  const _rtm = document.getElementById('rank-table-modal');
+  if (_rtm && _rtm.classList.contains('active')) {
+    if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); closeRankTable(); }
+    return;  // ランク表 active 中は他のキー処理 (Space/Enter 等) も全block
+  }
+  // 排出率詳細モーダル (ランク表と同様の最優先扱い)
+  const _rdm = document.getElementById('rate-detail-modal');
+  if (_rdm && _rdm.classList.contains('active')) {
+    if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); closeRateDetail(); }
+    return;
+  }
+  // === 拡大画像モーダル (z-index 260、 ランク表より下) ===
   // active 中は他の Esc 処理 (story-modal の closeStory 等) を完全に通さない
   const _ciz = document.getElementById('char-img-zoom');
   if (_ciz && _ciz.classList.contains('active')) {
@@ -6524,13 +7369,7 @@ document.addEventListener("keydown", e => {
     if (e.key === "Escape") { e.preventDefault(); closeStoryList(); }
     return;
   }
-  // ワールドマップモーダル
-  const _wmm = document.getElementById('world-map');
-  if (_wmm && !_wmm.hasAttribute('hidden')) {
-    if (e.key === "Escape") { e.preventDefault(); closeWorldMap(); }
-    return;
-  }
-  // キャラ詳細 > 図鑑 > 結果 > ステージ の優先順で Esc処理
+  // キャラ詳細 (worldmap より優先 — 野沢さん指摘 2026-05-02 「WMからキャラ詳細出した時 Esc で キャラじゃなくWMが閉じる」)
   if ($("#char-detail").classList.contains("active")) {
     if (e.key === "Escape") {
       // 拡大中なら拡大だけ閉じる、そうでなければ詳細閉じる
@@ -6544,6 +7383,12 @@ document.addEventListener("keydown", e => {
     } else if (e.key === "ArrowRight") {
       e.preventDefault(); navCharDetail(1);
     }
+    return;
+  }
+  // ワールドマップモーダル (キャラ詳細より低優先)
+  const _wmm = document.getElementById('world-map');
+  if (_wmm && !_wmm.hasAttribute('hidden')) {
+    if (e.key === "Escape") { e.preventDefault(); closeWorldMap(); }
     return;
   }
   if ($("#gallery").classList.contains("active")) {
@@ -6567,7 +7412,7 @@ document.addEventListener("keydown", e => {
       if (e.key === "Escape") { e.preventDefault(); toggleStoryToc(); return; }
     }
     if (e.key === "t" || e.key === "T") { e.preventDefault(); toggleStoryToc(); return; }
-    if (e.key === "Escape") { e.preventDefault(); closeStory(); }
+    if (e.key === "Escape") { e.preventDefault(); closeStory(); openStoryList(); }
     else if (e.key === "Enter" || e.key === "ArrowRight") {
       e.preventDefault(); storyNext();
     }
@@ -6606,6 +7451,9 @@ document.addEventListener("keydown", e => {
     return;
   }
   if (busy) return;
+  // モーダル open 中は Space/Enter による裏ガチャ抑止 (野沢さん指摘 2026-05-02 Space バグ対策)
+  // _isAllModalsHidden は ranking/result/char-detail/story 等 主要モーダルを網羅チェック
+  if (typeof _isAllModalsHidden === 'function' && !_isAllModalsHidden()) return;
   if (e.key === " ") { e.preventDefault(); doSingle(); }
   else if (e.key === "Enter") { e.preventDefault(); doTen(); }
   else if (e.key === "g" || e.key === "G") { e.preventDefault(); openGallery(); }
@@ -7298,8 +8146,8 @@ document.addEventListener('keydown', e => {
 document.addEventListener('DOMContentLoaded', () => {
   const am = document.getElementById('account-modal');
   if (am) am.addEventListener('click', e => { if (e.target === am) closeAccountModal(); });
-  // D 案: 起動 1.5秒後に R/SR サムネを background prefetch (新規ユーザーの初回ガチャ画像読み込み対策)
-  setTimeout(_prefetchLowTierThumbs, 1500);
+  // D 案: 起動直後に R/SR サムネを background prefetch (新規ユーザーの初回ガチャ画像読み込み対策、 即実行)
+  _prefetchLowTierThumbs();
 });
 
 // ============================================================
@@ -7609,14 +8457,51 @@ function openSettingsModal() {
           <div class="settings-power-saver-desc">背景アニメ・キャラ瞬きを停止して発熱を抑えます。 (OS の省電力モード ON 時は自動有効)</div>
         </div>
         <div class="settings-section settings-offline-section">
-          <div class="settings-label">📥 オフライン用に全アセット保存</div>
-          <div class="settings-offline-desc">BGM・キャラ画像・場所画像を端末にキャッシュ。 通信が不安定な場所でもサクサク動きます。</div>
+          <div class="settings-label">📥 オフライン用にデータ保存</div>
+          <div class="settings-offline-desc">BGM・キャラ画像・場所画像のデータを端末にキャッシュ。 通信不安定でもサクサク動き、 オンラインでも保存済みデータから優先読込します (画像表示が速くなる)。 カテゴリ別にDL可能 (BGMだけ、 場所画像だけ等)。</div>
           <button type="button" class="settings-offline-dl" id="settings-offline-dl">📥 ダウンロード開始</button>
           <div class="settings-offline-progress" id="settings-offline-progress" hidden>
             <div class="progress-bar"><div class="progress-fill" id="settings-progress-fill"></div></div>
             <div class="progress-text" id="settings-progress-text">0 / 0</div>
           </div>
           <div class="settings-offline-status" id="settings-offline-status"></div>
+          <div class="settings-offline-breakdown">
+            <div class="settings-offline-cat" data-category="bgm">
+              <span class="settings-offline-cat-icon">🎵</span>
+              <span class="settings-offline-cat-label">BGM</span>
+              <span class="settings-offline-cat-count">— / —</span>
+              <span class="settings-offline-cat-size"></span>
+              <button type="button" class="settings-offline-cat-btn" data-category="bgm" hidden>📥</button>
+            </div>
+            <div class="settings-offline-cat" data-category="char_full">
+              <span class="settings-offline-cat-icon">🧝</span>
+              <span class="settings-offline-cat-label">キャラ画像 フル</span>
+              <span class="settings-offline-cat-count">— / —</span>
+              <span class="settings-offline-cat-size"></span>
+              <button type="button" class="settings-offline-cat-btn" data-category="char_full" hidden>📥</button>
+            </div>
+            <div class="settings-offline-cat" data-category="char_thumb">
+              <span class="settings-offline-cat-icon">🌄</span>
+              <span class="settings-offline-cat-label">キャラ サムネイル</span>
+              <span class="settings-offline-cat-count">— / —</span>
+              <span class="settings-offline-cat-size"></span>
+              <button type="button" class="settings-offline-cat-btn" data-category="char_thumb" hidden>📥</button>
+            </div>
+            <div class="settings-offline-cat" data-category="loc_full">
+              <span class="settings-offline-cat-icon">🗺️</span>
+              <span class="settings-offline-cat-label">場所画像 フル</span>
+              <span class="settings-offline-cat-count">— / —</span>
+              <span class="settings-offline-cat-size"></span>
+              <button type="button" class="settings-offline-cat-btn" data-category="loc_full" hidden>📥</button>
+            </div>
+            <div class="settings-offline-cat" data-category="loc_thumb">
+              <span class="settings-offline-cat-icon">🌌</span>
+              <span class="settings-offline-cat-label">場所 サムネイル</span>
+              <span class="settings-offline-cat-count">— / —</span>
+              <span class="settings-offline-cat-size"></span>
+              <button type="button" class="settings-offline-cat-btn" data-category="loc_thumb" hidden>📥</button>
+            </div>
+          </div>
         </div>
         <div class="settings-section">
           <button type="button" class="settings-history-link" onclick="closeSettingsModal();openVersionHistoryModal()">📜 アップデート履歴を見る</button>
@@ -7674,32 +8559,53 @@ function openSettingsModal() {
     const fillEl = m.querySelector('#settings-progress-fill');
     const textEl = m.querySelector('#settings-progress-text');
     const statusEl = m.querySelector('#settings-offline-status');
+    // M4: マスター + カテゴリ別 DL を共通化 (urlList 渡しで対応)。
+    // running中は他ボタンも disabled にして parallel DL を防ぐ
+    const _allDlBtns = () => Array.from(m.querySelectorAll('#settings-offline-dl, .settings-offline-cat-btn'));
+    async function _runDownload(urlList, label) {
+      const btns = _allDlBtns();
+      btns.forEach(b => b.disabled = true);
+      const origText = dlBtn.textContent;
+      dlBtn.textContent = `📥 ダウンロード中… (${label})`;
+      progEl.hidden = false;
+      fillEl.style.width = '0%';
+      textEl.textContent = '準備中…';
+      statusEl.textContent = '';
+      try {
+        await _downloadAllAssets((done, total) => {
+          const pct = total ? Math.round(done / total * 100) : 0;
+          fillEl.style.width = pct + '%';
+          textEl.textContent = `${done} / ${total} (${pct}%)`;
+        }, urlList);
+        localStorage.setItem('prism-offline-saved-at', new Date().toISOString());
+        progEl.hidden = true;
+        // DL完了後、 cache 実態を見て状態 refresh
+        await _refreshOfflineStatus(m);
+      } catch (e) {
+        statusEl.textContent = `⚠️ エラー: ${e && e.message || e}`;
+        dlBtn.textContent = origText;
+      } finally {
+        btns.forEach(b => b.disabled = false);
+      }
+    }
     if (dlBtn) {
-      dlBtn.addEventListener('click', async () => {
+      // マスター: 全カテゴリ
+      dlBtn.addEventListener('click', () => {
         if (dlBtn.disabled) return;
-        dlBtn.disabled = true;
-        dlBtn.textContent = '📥 ダウンロード中…';
-        progEl.hidden = false;
-        fillEl.style.width = '0%';
-        textEl.textContent = '準備中…';
-        statusEl.textContent = '';
-        try {
-          await _downloadAllAssets((done, total) => {
-            const pct = total ? Math.round(done / total * 100) : 0;
-            fillEl.style.width = pct + '%';
-            textEl.textContent = `${done} / ${total} (${pct}%)`;
-          });
-          localStorage.setItem('prism-offline-saved-at', new Date().toISOString());
-          progEl.hidden = true;
-          // DL完了後、 cache 実態を見て状態 refresh
-          await _refreshOfflineStatus(m);
-        } catch (e) {
-          statusEl.textContent = `⚠️ エラー: ${e && e.message || e}`;
-        } finally {
-          dlBtn.disabled = false;
-        }
+        _runDownload(null, '全データ');
       });
     }
+    // カテゴリ別ボタン
+    m.querySelectorAll('.settings-offline-cat-btn').forEach(catBtn => {
+      catBtn.addEventListener('click', () => {
+        if (catBtn.disabled) return;
+        const cat = catBtn.dataset.category;
+        const cats = _collectAssetUrlsByCategory();
+        const urls = cats[cat] || [];
+        const label = (_OFFLINE_CAT_META[cat] && _OFFLINE_CAT_META[cat].label) || cat;
+        _runDownload(urls, label);
+      });
+    });
   }
   // 開く度に cache 実態確認 → ボタン表示/非表示判定
   _refreshOfflineStatus(m);

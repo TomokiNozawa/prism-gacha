@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.3.2 — 演出スタイル (Season 1 第1章)
+   Prismaera v1.4.0 — 演出スタイル (Season 1 第1章)
    ============================================================ */
 :root {
   --bg: #05060d;
@@ -184,7 +184,8 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 
 /* summon buttons */
 /* PC: 通常+ピックアップを横並び 2列 / モバイル: 縦並び 2段 */
-.cta { display: flex; flex-direction: row; gap: 14px; }
+.cta { display: flex; flex-direction: row; gap: 14px; flex-wrap: wrap; }
+.cta > .rate-detail-link { flex-basis: 100%; }
 @media (max-width: 700px) {
   .cta { flex-direction: column; }
 }
@@ -217,7 +218,7 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 }
 .cta-card-rate {
   /* hero-copy から CTA カード内に移動 (2026-05-01)、 既存 .rate スタイルを継承しつつ少し小さめに */
-  display: flex; gap: 6px; flex-wrap: wrap;
+  display: flex; gap: 6px; flex-wrap: wrap; align-items: center;
   font-size: 10px;
 }
 .cta-card-rate span {
@@ -231,6 +232,13 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   border-color: rgba(252,211,77,0.5);
   color: #ffd84d;
   font-weight: 700;
+}
+.cta-card-rate .lr {
+  background: linear-gradient(90deg, rgba(255,107,157,0.25), rgba(200,125,255,0.25), rgba(95,255,212,0.25));
+  border-color: rgba(255,107,157,0.6);
+  color: #fff;
+  font-weight: 700;
+  text-shadow: 0 0 4px rgba(255,107,157,0.6);
 }
 .cta-card-buttons { display: flex; gap: 12px; }
 .cta-card-buttons .summon { flex: 1; }
@@ -1459,13 +1467,15 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   font-size: 24px; font-weight: 900; letter-spacing: 0.3em;
   padding: 4px 16px; border-radius: 6px;
 }
-.rarity-rank.rank-c     { color: #aaa; background: rgba(255,255,255,0.05); }
-.rarity-rank.rank-b     { color: #6fa8ff; background: rgba(111,168,255,0.1); }
-.rarity-rank.rank-bplus { color: #6fa8ff; background: rgba(111,168,255,0.18); text-shadow: 0 0 10px rgba(111,168,255,0.6); }
-.rarity-rank.rank-a     { color: #c87dff; background: rgba(200,125,255,0.1); text-shadow: 0 0 10px rgba(200,125,255,0.5); }
-.rarity-rank.rank-aplus { color: #c87dff; background: rgba(200,125,255,0.2); text-shadow: 0 0 14px rgba(200,125,255,0.8); }
-.rarity-rank.rank-s     { color: #ffd96a; background: rgba(255,217,106,0.1); text-shadow: 0 0 14px rgba(255,217,106,0.7); }
-.rarity-rank.rank-splus { color: #ffd96a; background: rgba(255,217,106,0.2); text-shadow: 0 0 18px rgba(255,217,106,0.9); }
+/* パワプロ風 ランク色 (G/F/E/D/C/B/A/S/SS/SSS + LEGEND)、 偏差値ベース連動 (2026-05-02) */
+.rarity-rank.rank-g     { color: #888; background: rgba(255,255,255,0.04); }
+.rarity-rank.rank-f     { color: #b08866; background: rgba(176,136,102,0.08); }
+.rarity-rank.rank-e     { color: #c08855; background: rgba(192,136,85,0.10); }
+.rarity-rank.rank-d     { color: #88aa44; background: rgba(136,170,68,0.10); }
+.rarity-rank.rank-c     { color: #44cc44; background: rgba(68,204,68,0.12); }
+.rarity-rank.rank-b     { color: #44aaee; background: rgba(68,170,238,0.12); text-shadow: 0 0 8px rgba(68,170,238,0.4); }
+.rarity-rank.rank-a     { color: #2266dd; background: rgba(34,102,221,0.15); text-shadow: 0 0 12px rgba(100,150,255,0.5); }
+.rarity-rank.rank-s     { color: #ffd96a; background: rgba(255,217,106,0.18); text-shadow: 0 0 16px rgba(255,217,106,0.8); }
 .rarity-rank.rank-ss,
 .rarity-rank.rank-sss {
   background: linear-gradient(90deg, #ff5faa, #ffd84d, #5fffd4, #7ea8ff, #c87dff);
@@ -1488,6 +1498,275 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 }
 .rarity-line b { color: #fff; font-weight: 800; }
 .rarity-line .dot { color: rgba(255,255,255,0.3); }
+.rank-help-btn {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: rgba(255,217,122,0.85);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.rank-help-btn:hover {
+  background: rgba(255,217,122,0.18);
+  border-color: rgba(255,217,122,0.5);
+  color: #ffd97a;
+}
+
+/* 排出率詳細 トリガー (cta-card-rate 内 inline) */
+.rate-detail-inline {
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  width: 26px; height: 26px;
+  margin-left: auto;
+  padding: 0;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 50%;
+  color: rgba(255,255,255,0.92);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+.rate-detail-inline:hover {
+  background: linear-gradient(135deg, rgba(125,211,252,0.32), rgba(200,125,255,0.32));
+  border-color: rgba(125,211,252,0.55);
+  transform: scale(1.1);
+}
+
+/* 排出率詳細モーダル (rank-table-modal と同等の最前面) */
+.rate-detail-modal {
+  position: fixed; inset: 0; z-index: 280;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  align-items: center; justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.rate-detail-modal.active { display: flex; }
+.rate-detail-card {
+  background: linear-gradient(180deg, #1a1f3a 0%, #0a0d20 100%);
+  border: 1px solid rgba(200,180,255,0.25);
+  border-radius: 14px;
+  max-width: 540px; width: 100%;
+  max-height: 85vh; overflow-y: auto;
+  padding: 18px 22px;
+  color: #e8ecff;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+}
+.rate-detail-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 14px;
+  border-bottom: 1px solid rgba(200,180,255,0.15);
+  padding-bottom: 10px;
+  position: sticky; top: 0; z-index: 1;
+  background: linear-gradient(180deg, #1a1f3a 80%, transparent 100%);
+}
+.rate-detail-title {
+  font-size: 16px; font-weight: 700;
+  background: linear-gradient(90deg, #ffd84d, #5fffd4, #c87dff);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.rate-detail-close {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #fff;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  font-size: 20px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.rate-detail-close:hover { background: rgba(255,255,255,0.15); }
+.rate-detail-body { display: flex; flex-direction: column; gap: 18px; }
+.rate-detail-section h3 {
+  font-size: 13px; font-weight: 700;
+  letter-spacing: 0.04em;
+  margin: 0 0 8px;
+  color: rgba(255,217,122,0.95);
+}
+.rate-detail-desc {
+  font-size: 11.5px; line-height: 1.6;
+  color: rgba(255,255,255,0.65);
+  margin: 0 0 10px;
+}
+.rate-detail-table {
+  display: flex; flex-direction: column; gap: 4px;
+  background: rgba(0,0,0,0.18);
+  border-radius: 8px;
+  padding: 8px;
+}
+.rate-detail-row {
+  display: grid;
+  grid-template-columns: 56px 80px 1fr 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 6px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+.rate-detail-row.pickup-empty { opacity: 0.55; }
+.rate-detail-row.pickup-empty .rate-detail-each { grid-column: 3 / -1; }
+.rate-detail-ratio {
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  color: rgba(255,217,122,0.95);
+  letter-spacing: 0.02em;
+}
+.rate-detail-ratio b { color: #ffd84d; font-weight: 700; }
+.rate-detail-each b { color: #5fffd4; font-weight: 700; }
+.rate-detail-row .rate-detail-tier {
+  font-weight: 700; letter-spacing: 0.08em;
+  text-align: center; padding: 2px 4px;
+  border-radius: 4px;
+}
+.rate-detail-tier.tier-lr  { background: linear-gradient(135deg,#ff6b9d,#c87dff,#5fffd4); color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+.rate-detail-tier.tier-ur  { background: linear-gradient(135deg,#ff8a4c,#ffd84d,#c87dff); color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+.rate-detail-tier.tier-ssr { background: linear-gradient(135deg,#ffd84d,#ff8a4c); color: #2a1a00; }
+.rate-detail-tier.tier-sr  { background: rgba(125,211,252,0.45); color: #fff; }
+.rate-detail-tier.tier-r   { background: rgba(180,180,200,0.35); color: #fff; }
+.rate-detail-pct {
+  font-variant-numeric: tabular-nums;
+  font-size: 13px; font-weight: 700;
+  color: #5fffd4;
+}
+.rate-detail-cnt, .rate-detail-each {
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  color: rgba(255,255,255,0.65);
+}
+.rate-detail-pickup-tier-block { margin-bottom: 10px; }
+.rate-detail-pickup-tier-head {
+  font-size: 11.5px;
+  margin-bottom: 4px;
+  color: rgba(255,255,255,0.75);
+}
+.rate-detail-pickup-tier-head .rate-detail-tier {
+  display: inline-block; font-size: 11px; padding: 1px 5px;
+}
+.rate-detail-pickup-chars {
+  display: flex; flex-wrap: wrap; gap: 4px;
+}
+.rate-detail-pickup-char {
+  font-size: 11px;
+  padding: 3px 7px;
+  border-radius: 5px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.10);
+}
+.rate-detail-pickup-char.tier-lr  { border-color: rgba(255,107,157,0.5); }
+.rate-detail-pickup-char.tier-ur  { border-color: rgba(200,125,255,0.5); }
+.rate-detail-pickup-char.tier-ssr { border-color: rgba(255,216,77,0.5); }
+.rate-detail-pickup-char.tier-sr  { border-color: rgba(125,211,252,0.5); }
+.rate-detail-pickup-char.tier-r   { border-color: rgba(180,180,200,0.4); }
+.rate-detail-note {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(200,180,255,0.15);
+  font-size: 11px;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.6;
+}
+@media (max-width: 480px) {
+  .rate-detail-row {
+    grid-template-columns: 46px 1fr 1fr;
+    font-size: 11px;
+    gap: 6px;
+  }
+  .rate-detail-pct { display: none; }  /* 通常ガチャは tier別 % を非表示で each だけ残す */
+  .rate-detail-row.pickup-empty .rate-detail-each { grid-column: 2 / -1; }
+}
+
+/* ランク表モーダル */
+.rank-table-modal {
+  position: fixed; inset: 0; z-index: 280;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  align-items: center; justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.rank-table-modal.active { display: flex; }
+.rank-table-card {
+  background: linear-gradient(180deg, #1a1f3a 0%, #0a0d20 100%);
+  border: 1px solid rgba(200,180,255,0.25);
+  border-radius: 14px;
+  max-width: 480px; width: 100%;
+  max-height: 85vh; overflow-y: auto;
+  padding: 18px 22px;
+  color: #e8ecff;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+}
+.rank-table-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 14px;
+  border-bottom: 1px solid rgba(200,180,255,0.15);
+  padding-bottom: 10px;
+}
+.rank-table-title {
+  font-size: 16px; font-weight: 700;
+  background: linear-gradient(90deg, #ffd84d, #5fffd4, #c87dff);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.rank-table-close {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #fff;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  font-size: 20px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.rank-table-close:hover { background: rgba(255,255,255,0.15); }
+.rank-table-body {
+  display: flex; flex-direction: column; gap: 6px;
+}
+.rank-table-row {
+  display: grid;
+  grid-template-columns: 100px 90px 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+.rank-table-row:hover { background: rgba(255,255,255,0.04); }
+.rank-table-row .rarity-rank {
+  font-size: 16px; padding: 2px 6px;
+  letter-spacing: 0.12em;
+  text-align: center;
+  white-space: nowrap;
+  overflow: visible;
+}
+/* LEGEND は文字長く letter-spacing でも見切れる、 font-size と letter-spacing のみ縮小 (列幅は通常行と統一) */
+.rank-table-row-legend .rarity-rank {
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  padding: 3px 4px;
+}
+.rank-table-range {
+  font-size: 12px;
+  color: rgba(255,217,122,0.85);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.rank-table-desc {
+  font-size: 12px;
+  color: rgba(255,255,255,0.75);
+}
+.rank-table-note {
+  margin-top: 14px;
+  padding: 10px;
+  background: rgba(120,100,200,0.10);
+  border: 1px solid rgba(200,180,255,0.20);
+  border-radius: 6px;
+  font-size: 11px;
+  color: rgba(200,180,255,0.85);
+  line-height: 1.5;
+}
 
 @media (max-width: 640px) {
   .rarity-rank { font-size: 18px; letter-spacing: 0.2em; }
@@ -1702,13 +1981,23 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   color: #111;
 }
 .gallery-card .card-new {
-  position: absolute; top: 6px; right: 6px;
+  position: absolute; top: 6px; left: 6px;
   font-size: 9px; font-weight: 900; letter-spacing: 0.08em;
   padding: 2px 6px; border-radius: 3px;
   background: linear-gradient(90deg, #ff5faa, #ffd84d);
   color: #111; z-index: 2;
   box-shadow: 0 0 10px rgba(255,216,77,0.7);
   animation: new-pulse 1.2s ease-in-out infinite alternate;
+}
+.gallery-card .card-dup {
+  position: absolute; top: 6px; right: 6px;
+  font-size: 10px; font-weight: 900; letter-spacing: 0.04em;
+  padding: 2px 6px; border-radius: 3px;
+  background: linear-gradient(135deg, rgba(125,211,252,0.92), rgba(200,125,255,0.92));
+  color: #fff; z-index: 2;
+  box-shadow: 0 0 10px rgba(125,211,252,0.5);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
 .gallery-card .card-name {
   position: absolute; bottom: 0; left: 0; right: 0;
@@ -2918,6 +3207,123 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 .settings-offline-status {
   font-size: 11px; color: rgba(255,255,255,0.65); line-height: 1.5;
   min-height: 16px;
+}
+
+/* M4: カテゴリ別 breakdown (BGM / キャラ / 場所) */
+.settings-offline-breakdown {
+  display: flex; flex-direction: column; gap: 6px;
+  margin-top: 4px;
+  padding: 8px;
+  background: rgba(0,0,0,0.18);
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.settings-offline-cat {
+  display: grid;
+  grid-template-columns: 20px 1fr auto auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 4px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.85);
+}
+.settings-offline-cat-icon {
+  font-size: 15px; text-align: center; line-height: 1;
+}
+.settings-offline-cat-label {
+  font-weight: 600; letter-spacing: 0.02em;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.settings-offline-cat-count {
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  color: rgba(255,255,255,0.7);
+  min-width: 50px;
+  text-align: right;
+}
+.settings-offline-cat-count b { color: var(--text); font-weight: 700; }
+.settings-offline-cat-size {
+  font-variant-numeric: tabular-nums;
+  font-size: 10.5px;
+  color: rgba(255,255,255,0.5);
+  min-width: 50px;
+  text-align: right;
+  letter-spacing: 0.02em;
+}
+.settings-offline-cat-btn {
+  padding: 4px 8px;
+  background: linear-gradient(135deg, rgba(125,211,252,0.18), rgba(200,125,255,0.18));
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 7px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 10.5px; font-weight: 700;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  min-height: 28px;
+  min-width: 56px;
+}
+.settings-offline-cat-btn[hidden] { display: none; }
+.settings-offline-cat-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(125,211,252,0.32), rgba(200,125,255,0.32));
+  border-color: rgba(125,211,252,0.55);
+}
+.settings-offline-cat-btn:disabled { opacity: 0.5; cursor: progress; }
+/* モバイル: 場所が狭い時はラベルを縮める */
+@media (max-width: 480px) {
+  .settings-offline-cat {
+    grid-template-columns: 18px 1fr auto auto auto;
+    gap: 6px;
+    font-size: 11px;
+  }
+  .settings-offline-cat-count { min-width: 44px; font-size: 10.5px; }
+  .settings-offline-cat-size  { min-width: 46px; font-size: 10px; }
+  .settings-offline-cat-btn   { min-width: 44px; padding: 4px 6px; font-size: 10px; }
+}
+
+/* 相関図 focus banner (派閥クリックで表示) */
+.relations-focus-banner[hidden] { display: none; }
+.relations-focus-banner {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px;
+  padding: 8px 14px;
+  margin: 4px 8px 0;
+  background: linear-gradient(135deg, rgba(125,211,252,0.18), rgba(200,125,255,0.18));
+  border: 1px solid rgba(125,211,252,0.4);
+  border-radius: 10px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.92);
+  font-weight: 600;
+  z-index: 5;
+}
+.relations-focus-banner button {
+  padding: 5px 12px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 6px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 12px; font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.relations-focus-banner button:hover {
+  background: rgba(255,255,255,0.22);
+}
+.rel-faction-label, .rel-faction-bg {
+  transition: opacity 0.25s ease;
+}
+.rel-faction-label:hover {
+  text-decoration: underline;
+}
+/* focus 中の派閥のラベルは Zoom 表示で文字が大きくなりすぎるので相対 font-size 調整 */
+.relations-svg.focused .rel-faction-label {
+  font-size: 18px !important;
 }
 
 /* M5: オフライン indicator バナー */
@@ -4536,12 +4942,22 @@ body.has-offline-banner .topbar { margin-top: 30px; }
   pointer-events: none;
 }
 .hgcard-new {
-  position: absolute; top: 4px; right: 4px;
+  position: absolute; top: 4px; left: 4px;
   font-size: 9px; font-weight: 900; letter-spacing: 0.05em;
   padding: 2px 5px; border-radius: 3px;
   background: linear-gradient(90deg, #ff5faa, #ffd84d);
   color: #111; z-index: 2;
   box-shadow: 0 0 10px rgba(255,216,77,0.6);
+}
+.hgcard-dup {
+  position: absolute; top: 4px; right: 4px;
+  font-size: 9px; font-weight: 900; letter-spacing: 0.04em;
+  padding: 2px 5px; border-radius: 3px;
+  background: linear-gradient(135deg, rgba(125,211,252,0.92), rgba(200,125,255,0.92));
+  color: #fff; z-index: 2;
+  box-shadow: 0 0 10px rgba(125,211,252,0.5);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
 
 /* ───── 履歴モーダル ───── */
@@ -4941,12 +5357,26 @@ body.gasshuku-modal-open {
   display: inline-block;
   padding: 1px 5px;
   border-radius: 999px;
-  background: rgba(255, 217, 122, 0.25);
-  border: 1px solid rgba(255, 217, 122, 0.5);
-  color: #fcd34d;
   font-size: 9px;
   margin-right: 4px;
   vertical-align: middle;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.chapter-gallery-loc-kind.kind-bg {
+  background: rgba(125,211,252,0.25);
+  border: 1px solid rgba(125,211,252,0.55);
+  color: #7dd3fc;
+}
+.chapter-gallery-loc-kind.kind-ill {
+  background: rgba(252,165,89,0.25);
+  border: 1px solid rgba(252,165,89,0.55);
+  color: #fca559;
+}
+.chapter-gallery-loc-kind.kind-other {
+  background: rgba(255, 217, 122, 0.25);
+  border: 1px solid rgba(255, 217, 122, 0.5);
+  color: #fcd34d;
 }
 .chapter-gallery-loc.locked img {
   filter: blur(8px) grayscale(0.6) brightness(0.5);

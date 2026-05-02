@@ -272,23 +272,38 @@ Aspect ratio 16:9, high detail.
 
 ```
 A vast cinematic vertical illustration looking out over the deck of a fantasy
-pirate galleon called "Crimson Pearl" sailing on a moonless midnight sea —
-the night sky above shows absolutely no moon, only scattered cold pale stars
-hinting at an ominous absence, a subtle premonition of darker shadows to come.
-The deck stretches forward in the foreground with polished dark wooden planks,
-coiled ropes, and barrels. Tall masts rise into the upper portion of the frame
-with crimson sails barely visible against the starless midnight sky, edges
-just catching the faint warm glow of multiple hanging brass lanterns swaying
-gently from the masts and railings, casting amber pools of light onto the
-wooden boards. The sea stretches into pure black darkness on either side of
-the ship, only faint blue-green phosphorescence from passing waves visible
-along the hull. The composition emphasizes the vast empty sky above and the
-quiet wooden deck below, with the absent moon a held silence in the heart of
-the frame. No people visible, only the empty deck and quiet ship at peace
-before unseen danger. Anime fantasy game background painting, deep indigo
-and midnight black with warm amber lantern accents and faint phosphorescent
-sea glow, vertical composition with tall night sky dominating the upper two
-thirds and deck details in the lower third.
+pirate galleon called "Crimson Pearl" sailing on a moonless deep-evening sea —
+the night sky above shows absolutely no moon (a held silence at the heart of
+the frame, hinting at an ominous absence and a subtle premonition of darker
+shadows to come), but it is otherwise vibrant and alive: a richly visible band
+of the Milky Way stretches diagonally across the upper sky, dense fields of
+bright blue-white stars, soft auroral curtains of teal and rose at the high
+horizon catching the last memory of dusk, painting the heavens with a quiet
+luminous beauty that compensates for the missing moon.
+The deck stretches forward in the foreground with polished dark wooden planks
+warmly lit, coiled ropes, brass-bound barrels, and a varnished steering wheel
+catching highlights. Tall masts rise into the upper portion of the frame with
+fully visible crimson sails — billowing, edges catching strong warm light
+from many hanging brass lanterns (eight or more) glowing brightly along the
+masts, railings, and rigging, casting overlapping amber and golden pools of
+light across every plank, rope, and surface so the deck reads as warm and
+inviting rather than dim. A central brazier on the deck adds an additional
+warm orange glow.
+The sea on either side of the hull is alive with strong blue-green
+bioluminescent phosphorescence — bright glowing wave crests, drifting
+luminescent sea creatures, jellyfish-like motes of cyan light visible just
+below the surface, the bow's wake painting trails of vivid teal-emerald
+brilliance across the dark water.
+The composition emphasizes the layered light: warm amber deck below, vibrant
+star-filled sky above, glowing teal sea on both sides — a brightly readable
+night scene rather than a dark one.
+No people visible, only the empty deck and quiet ship at peace before
+unseen danger. Anime fantasy game background painting, dark navy and deep
+indigo base palette but well-illuminated with warm amber lantern light,
+vivid blue-green sea phosphorescence, and a luminous starlit sky, exposure
+balanced so all detail is clearly readable on a phone screen.
+Vertical composition with tall night sky dominating the upper half and
+deck details in the lower half.
 Aspect ratio 3:4, vertical orientation 1024x1536, high detail.
 
 元画像から表情や姿勢は変わってOKです
@@ -381,40 +396,61 @@ Aspect ratio 16:9, high detail.
 
 ---
 
-## 【11】serapia_dawn.png — 2-13 夜明けの港 (帰還)
+## 【11】serapia_dawn.png — 4-2 朝焼けの港 (ミカと別れ、 章末)
 
-- **対応シーン**: 2-13 夜明けの港 (帰還、 物語の締め)
+- **対応シーン**: 4-2 朝焼けの港 (ミカとの別れ、 物語の締め、 章末背景)
 - **本文行**: `STORY/s1c2.md` l.576〜「セラピアの港に戻ったのは、 夜明けだった」 / l.578〜「ミカが私の手を握って、 笑った」 / l.605〜「朝陽が、 海から昇り、 虹霊界の南方を七色に染めていた」
-- **役割**: 本文インライン挿絵 (物語の余韻、 章の締め)
-- **被写体**: 朝焼けのセラピア港、 七色に染まる空、 紅玉号、 覚醒イザベル UR + ミカ
+- **役割**: 背景画像 (LOCATION_CONFIG['s1c2']['4-2'])、 **3:4 縦長** — 章末シーン全体の背景。 s1c1 (`rooftop_dawn`) / s1c3 (`desert_dawn`) と章末統一フォーマット
+- **被写体**: 朝焼けのセラピア港、 七色に染まる空、 紅玉号、 覚醒イザベル UR + ミカ — **縦パン構図** (上=昇る朝陽 + 七色グラデ空 / 中=紅玉号と二人 / 下=波打ち際の桟橋)
 - **ストーリー全体との整合**: 朝陽の七色 = 原虹七色の世界が今も保たれている象徴 / 2-3 (夕暮れ) と対をなす朝焼けで 「失われていない」 ことを示す / 物語の最後の七色 → 次の章への希望 + S1C7 までずっと続く「七色を守る祈り」 のテーマ
 - **ストーリー使用**: ✅
-- **コード参照**: `LOCATION_CONFIG['s1c2']['2-13']` (実装後)
+- **コード参照**: `LOCATION_CONFIG['s1c2']['4-2']` (実装済)
+- **比率**: **3:4 縦長 (1086×1448 推奨)** — 章末背景共通フォーマット、 縦構図でドラマ性を縦に積み上げる
 
 > **添付画像** (生成時):
 > - `images/characters/season1/ur/ripple_saint.png` (覚醒後イザベル UR、 紅玉号甲板)
 > - `images/characters/season1/r/pirate_cabin_girl.png` (ミカ R、 イザベルの隣で見上げる)
 
 ```
-The southern harbor town of Serapia at sunrise.
-The sun rises directly from the eastern sea, casting a long golden path across the water.
-The sky transitions from deep indigo at the top to soft rose, gold, and full prismatic
-seven-color rainbow hues at the horizon — a vivid sign that the prismatic world's
-harmony has been preserved.
-A pirate galleon with crimson sails (the Crimson Pearl) is moored at the pier,
-its silhouette warm against the dawn light.
-On the deck of the galleon: a holy paladin in her awakened form matching the first
-reference image — rainbow-iridescent armor, seven-colored light wings folded gently
-behind her, silver-rainbow gradient hair, serene expression — kneels lightly to face
-a young pirate apprentice girl matching the second reference image — short brown hair,
-a small dagger at her belt, looking up with bright admiring eyes.
-The paladin's hand rests softly on the girl's head in a gesture of farewell blessing.
-Mist drifts low over the water, seabirds beginning their morning calls.
-The harbor is quiet and reverent, holding the stillness of a new day after great trial.
-Anime fantasy illustration style, hopeful and ascendant atmosphere,
-soft full-rainbow gradient sky, golden hour color palette with prismatic highlights.
-Wide cinematic shot from the pier, looking eastward toward the rising sun and the ship.
-Aspect ratio 16:9, high detail.
+The southern harbor town of Serapia at sunrise — chapter-ending farewell scene.
+Vertical composition layered top-to-bottom:
+
+Upper third (sky): The sun rises directly from the eastern sea on the upper horizon,
+the sky transitions from deep indigo at the very top to soft rose, gold, and a full
+prismatic seven-color rainbow gradient near the horizon — a vivid sign that the
+prismatic world's harmony has been preserved. Wisps of golden cloud catch the dawn light.
+
+Middle third (ship + characters): A pirate galleon with crimson sails (the Crimson
+Pearl) is moored at the pier in mid-frame, its tall masts and crimson sails warmly
+backlit by the rising sun, casting long silhouettes across the water. On the deck
+of the galleon, slightly off-center: a holy paladin in her awakened form matching
+the first reference image — rainbow-iridescent armor with seven-colored light wings
+folded gently behind her, silver-rainbow gradient hair flowing in the dawn breeze,
+serene expression — kneels lightly to face a young pirate apprentice girl matching
+the second reference image — short brown hair, a small dagger at her belt, looking
+up with bright admiring eyes. The paladin's hand rests softly on the girl's head
+in a gesture of farewell blessing.
+
+Lower third (pier + water): The wooden pier extends from foreground into the water,
+warm dawn reflections painting golden ripples on the calm sea, mist drifting low
+across the surface, a few seabirds wheeling through the lower-mid frame.
+
+The harbor is quiet and reverent, holding the stillness of a new day after great
+trial. Anime fantasy illustration style, hopeful and ascendant atmosphere,
+soft full-rainbow gradient sky, golden hour color palette with prismatic highlights,
+warm dawn lighting from the upper horizon.
+Tall cinematic vertical composition (3:4 portrait) emphasizing the layered depth
+from sky → ship+characters → pier+water.
+Aspect ratio 3:4, high detail.
+
+CRITICAL ANATOMY REQUIREMENTS:
+- Each visible hand must have exactly 5 fingers in natural anatomical position
+- Paladin's hand resting on the girl's head: 5 fingers visible, gentle splay,
+  no extra or missing digits, no fused finger merging with hair
+- Girl's hand (if visible): 5 fingers, natural relaxed position, dagger sheathed at belt
+- Joints (elbows, knees, wrists) bend in anatomically correct directions
+- No floating limbs, no broken bones, no asymmetrical proportions
+- Both characters fully clothed as in reference images, no missing armor pieces
 
 元画像から表情や姿勢は変わってOKです
 ```
@@ -476,10 +512,10 @@ Aspect ratio 9:16, high detail.
 |---|---|---|---|---|
 | **2-1 教会の朝** | `church_morning.png` | l.33 | インライン挿絵 | 七色ステンドグラスでイザベル覚醒 (七色波紋) の伏線 |
 | **2-3 港町セラピア (夕暮れ)** | `serapia_sunset.png` | l.114 | インライン挿絵 | 陸の白×海の紅の対比、 後の橋渡し象徴 |
-| **2-4 紅玉号の夜** | `crimson_pearl_night.png` | l.166 | インライン挿絵 | 月のない夜 = 黒月の前兆を視覚的に暗示 |
+| **1-4 海賊船の夜** | `crimson_pearl_night.png` | l.166 | **背景画像 (3:4縦長)** | 月のない夜 = 黒月の前兆、 ただし船灯/星空/海の燐光で全体は明るく可読 |
 | **2-5 影喰いの群れ** | `shadeova_swarm.png` | l.213 | インライン挿絵 | 影喰い vs 七色 = 終盤決戦 (S1C7) の縮図 |
 | **2-11 波紋の聖女覚醒** | `ripple_saint_awakening.png` | l.479 | インライン挿絵 | UR覚醒、 七座級戦力の視覚化 (S1C7 黒月決戦の伏線) |
-| **2-13 夜明けの港 (帰還)** | `serapia_dawn.png` | l.576 | インライン挿絵 | 朝陽の七色 = 原虹七色が守られた象徴、 次章への希望 |
+| **4-2 朝焼けの港 (ミカと別れ、 章末)** | `serapia_dawn.png` | l.576 | **背景画像 (3:4縦長)** | 朝陽の七色 = 原虹七色が守られた象徴、 次章への希望、 s1c1/s1c3 と章末統一 |
 
 ## 場所画像なしシーン (CSSグラデ背景のみ)
 
