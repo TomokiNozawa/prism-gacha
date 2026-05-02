@@ -180,6 +180,10 @@ def check_chapter_completeness():
     5. LORE_BY_KEY に s1c? キャラの凸秘話 entry (なし=凸秘話空)
     6. index.html story-next-teaser が STORY_FILES の最新章の次を指しているか (古い章を teaser しているのは不整合)
 
+    BLOCKER 追加 (2026-05-02 / 2026-05-03):
+    7-7. STORY_OUTLINE 次章エントリの releaseDate 必須
+    7-8. index.html #story-list-modal に releaseDate 設定済の次章カード必須 (Prismaera Stories 一覧の予告)
+
     POV1人目固定ルール: 章末ページで次章主人公1人だけ表示は STORY_OUTLINE.povCharName (ルール3 で完全一致確認済)、
     本編シーンで POV1人目は renderSceneChars のランタイム挙動 (静的チェック不可、 CLAUDE.md ルール参照)
     """
@@ -293,6 +297,7 @@ def check_chapter_completeness():
             outline_text = m_outline.group(1)
             # 各エントリ行を抽出 (1行1エントリ前提)
             entry_pattern = re.compile(r"\{\s*id:\s*'(s1c\d+)'[^}]*\}")
+            next_has_release = False
             for em in entry_pattern.finditer(outline_text):
                 if em.group(1) == next_id:
                     entry = em.group(0)
@@ -301,7 +306,29 @@ def check_chapter_completeness():
                             f"[ルール7-7 次章公開予定日 BLOCKER] STORY_OUTLINE['{next_id}'] に releaseDate が未設定\n"
                             f"      → 章末 Coming Soon カード + ホーム画面ティザーで「📅 公開予定 — お楽しみに」 fallback になる、 releaseDate: 'YYYY-MM-DD' を必ず追加 (野沢さん指示 2026-05-02 「ホーム画面と同様に公開予定日入れといて」)"
                         )
+                    else:
+                        next_has_release = True
                     break
+
+            # 7-8. ストーリー一覧モーダル (#story-list-modal) にも 次章 (releaseDate あり) のカードが存在するか
+            # (BLOCKER 2026-05-03 野沢さん指示「ストーリー一覧にも予告出して、 章公開時の自動チェックの1つにこれも入れて」)
+            # ホーム経由で開く Prismaera Stories モーダルにも 公開予定章カードを並べておくことで、
+            # ユーザーが次に何が来るか一覧で把握できる。 _refreshChapterReleaseLocks が自動で chapter-locked + Coming Soon バッジ付与
+            if next_has_release:
+                # index.html の story-list-modal セクションを抽出
+                slm_match = re.search(r'<div id="story-list-modal"[\s\S]*?</div>\s*</div>\s*</div>', html)
+                if slm_match:
+                    slm_text = slm_match.group(0)
+                    if f'data-story="{next_id}"' not in slm_text:
+                        violations.append(
+                            f"[ルール7-8 ストーリー一覧 次章カード未追加 BLOCKER] index.html #story-list-modal に data-story=\"{next_id}\" のカードが無い\n"
+                            f"      → ストーリー一覧モーダルに次章 ({next_id}) の予告カードを追加要 (s1c4 と同形式 + 字数欄は「主人公: 名前」 のみ)\n"
+                            f"      → JSの _refreshChapterReleaseLocks が自動で chapter-locked + Coming Soon バッジを付与する (HTML はカード本体だけ追加すればOK)"
+                        )
+                else:
+                    violations.append(
+                        f"[ルール7-8 検出失敗] index.html #story-list-modal セクションが見つからず、 次章カードチェックをスキップ"
+                    )
     return checked
 
 

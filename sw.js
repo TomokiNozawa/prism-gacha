@@ -7,7 +7,7 @@
 //
 // HTML/JSON/Firebase API はキャッシュせず常にネットワーク優先 (更新即反映+認証/DBの鮮度維持)。
 
-const SW_VERSION = '20260502h';  // 章 releaseDate 時刻判定 + ガチャ排出フィルタ + Coming Soon カード
+const SW_VERSION = '20260502i';  // ストーリー一覧 s1c5 予告 + s1c5 release 12:00 + ルール7-8
 const STATIC_CACHE = `prismaera-static-${SW_VERSION}`;
 const BGM_CACHE    = `prismaera-bgm-${SW_VERSION}`;
 const LOC_CACHE    = `prismaera-loc-${SW_VERSION}`;
