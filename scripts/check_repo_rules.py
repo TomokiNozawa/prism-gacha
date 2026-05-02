@@ -140,6 +140,21 @@ def check_chapter_structure():
                 f"[ルール4 章末ヘッダ] {path.name} に「## 第N章 終」 行が無い\n"
                 f"      → 章末ヘッダ統一必要"
             )
+        else:
+            # 章末予告本文チェック (BLOCKER): 「## 第N章 終」 のあとに次章予告本文 80文字以上が必要
+            # 本文ゼロだと parseStoryToScenes で isAct=true 判定 → cover演出 (タップで次へ ❖❖) になり 他章とレイアウト不整合
+            # 野沢さん指摘 2026-05-02 「章末ページで次の章の告知がちゃんとなされているかも必ずチェックするように」
+            after = text[m.end():]
+            # 別 h1/h2 (編集メモ等) があればそこまでで打ち切り
+            sep = re.search(r'\n##? ', after)
+            if sep:
+                after = after[:sep.start()]
+            after_clean = re.sub(r'\s+', '', after)
+            if len(after_clean) < 80:
+                violations.append(
+                    f"[ルール4 章末予告 BLOCKER] {path.name} 「## 第N章 終」 のあとに次章予告本文 80文字以上が必要 (現状 {len(after_clean)}文字)\n"
+                    f"      → 本文ゼロだと章末ページが cover 演出 (タップで次へ ❖❖) に落ちて他章とレイアウト不整合になる、 [次章予告] テキストを必ず入れる (野沢さん指示 2026-05-02)"
+                )
         # シーン番号 (N-K) 形式チェック (旧 1-13 みたいな章単位連番でなく N=幕単位)
         scene_labels = re.findall(r'^### (\d+)-(\d+):', text, flags=re.M)
         bad = [(n, k) for n, k in scene_labels if int(n) > 8]  # 8幕以上は現実的に無い

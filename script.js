@@ -5097,11 +5097,12 @@ function renderScene() {
   bodyHtml = linkifyCharNames(bodyHtml, scene.label, scene.title);
   bodyHtml = applyFurigana(bodyHtml);
   bodyHtml = injectStoryCutins(bodyHtml, storyIdx);
-  // 章末 scene 判定 (`第N章 終`): cover/act 演出をスキップして次章ナビ + 次章主人公を出す
-  const _isFinalSceneForCover = /^第[\d一二三四五六七八九十]+章\s*終$/.test(scene.title || '');
+  // 最終シーン: 次章/一覧ナビゲーションを末尾に追加
+  if (storyIdx === storyScenes.length - 1) {
+    bodyHtml += buildEndNavHtml(currentStoryId);
+  }
   // #6 表紙シーン (isCover) と中表紙 (isAct) は引き文 (B) + 七色演出 (A) で深化
-  // ただし章末 scene は cover/act 演出を出さず、 通常 scene 扱いで Coming Soon カード + 次章主人公サムネを出す
-  if ((scene.isCover || scene.isAct) && !_isFinalSceneForCover) {
+  if (scene.isCover || scene.isAct) {
     const intros = STORY_ACT_INTROS[currentStoryId] || {};
     const intro = intros[scene.title] || '';
     const isCover = scene.isCover;
@@ -5122,11 +5123,6 @@ function renderScene() {
     titleEl.classList.add('story-scene-title-cover');
   } else {
     titleEl.classList.remove('story-scene-title-cover');
-  }
-  // 最終シーン: 次章/一覧ナビゲーションを末尾に追加
-  // (cover/act 演出の後ろに追加して bodyHtml = 置換で消えないようにする。 章末 scene は cover/act スキップなので素直に append される)
-  if (storyIdx === storyScenes.length - 1) {
-    bodyHtml += buildEndNavHtml(currentStoryId);
   }
   $("#story-scene-content").innerHTML = bodyHtml;
   // キャラ名リンクのクリックハンドラ (本文 + タイトル共通)
@@ -5220,10 +5216,8 @@ function _findPovChar(povName) {
 function renderSceneChars(scene) {
   const container = $("#story-scene-chars");
   if (!container) return;
-  // 章末 scene (`第N章 終`) は本文空でも 次章主人公1人を出すため通す
-  const _isFinalScene = /^第[\d一二三四五六七八九十]+章\s*終$/.test(scene.title || '');
-  // 表紙シーン (isCover=true) や本文がほぼ空の場合は表示しない (章末は除外)
-  if (!_isFinalScene && (scene.isCover || !scene.contentMd || scene.contentMd.trim().length < 80)) {
+  // 表紙シーン (isCover=true) や本文がほぼ空の場合は表示しない
+  if (scene.isCover || !scene.contentMd || scene.contentMd.trim().length < 80) {
     container.innerHTML = '';
     container.style.display = 'none';
     return;
@@ -5735,7 +5729,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260502za';
+const IMG_CACHE_VERSION = '20260502zb';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる

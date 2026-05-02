@@ -7,7 +7,7 @@
 //
 // HTML/JSON/Firebase API はキャッシュせず常にネットワーク優先 (更新即反映+認証/DBの鮮度維持)。
 
-const SW_VERSION = '20260502za';  // v1.3.2+ 章末ページに次章Coming Soonカード復活 + 次章POV (シオン等) 表示
+const SW_VERSION = '20260502zb';  // v1.3.2+ s1c4.md に [次章予告] 追加 (他章と整合) + 章末予告 BLOCKER 自動チェック追加
 const STATIC_CACHE = `prismaera-static-${SW_VERSION}`;
 const BGM_CACHE    = `prismaera-bgm-${SW_VERSION}`;
 const LOC_CACHE    = `prismaera-loc-${SW_VERSION}`;
