@@ -5618,47 +5618,47 @@ const STORY_CUTIN_CONFIG = {
 const LOCATION_CONFIG = {
   's1c1': {
     // 各シーンの「印象深い1場面」 を 9:16 縦長背景画像として配置
-    '1-1': { img: '/images/locations/s1c1/academy_morning_thumb.webp' },     // 星霊学院の朝 (学院全景、 七色の光)
-    '1-3': { img: '/images/locations/s1c1/training_ground_thumb.webp' },     // 剣術科 朝練 (ちさと無力感)
-    '1-4': { img: '/images/locations/s1c1/rooftop_omen_thumb.webp' },        // 屋上 (五人の絆 + 影喰い予兆)
-    '2-3': { img: '/images/locations/s1c1/izabel_descent_thumb.webp' },      // 白い光 (イザベル降臨)
-    '2-6': { img: '/images/locations/s1c1/rift_emergence_thumb.webp' },      // 裂け目 (影喰い大量湧出)
-    '3-2': { img: '/images/locations/s1c1/chisato_awakening_thumb.webp' },   // 山場: ちさと虹脈覚醒
-    '3-3': { img: '/images/locations/s1c1/prisma_descent_thumb.webp' },      // プリズマ降臨
-    '4-2': { img: '/images/locations/s1c1/rooftop_dawn_thumb.webp' },        // 屋上の朝 (新しい日常)
+    '1-1': { img: '/images/locations/s1c1/thumb/academy_morning_thumb.webp' },     // 星霊学院の朝 (学院全景、 七色の光)
+    '1-3': { img: '/images/locations/s1c1/thumb/training_ground_thumb.webp' },     // 剣術科 朝練 (ちさと無力感)
+    '1-4': { img: '/images/locations/s1c1/thumb/rooftop_omen_thumb.webp' },        // 屋上 (五人の絆 + 影喰い予兆)
+    '2-3': { img: '/images/locations/s1c1/thumb/izabel_descent_thumb.webp' },      // 白い光 (イザベル降臨)
+    '2-6': { img: '/images/locations/s1c1/thumb/rift_emergence_thumb.webp' },      // 裂け目 (影喰い大量湧出)
+    '3-2': { img: '/images/locations/s1c1/thumb/chisato_awakening_thumb.webp' },   // 山場: ちさと虹脈覚醒
+    '3-3': { img: '/images/locations/s1c1/thumb/prisma_descent_thumb.webp' },      // プリズマ降臨
+    '4-2': { img: '/images/locations/s1c1/thumb/rooftop_dawn_thumb.webp' },        // 屋上の朝 (新しい日常)
   },
   's1c2': {
     // 2026-05-01 4幕統合: 出航/海淵/覚醒の波紋/帰路、 全章幕単位連番 (N=幕番号)
-    '1-1': { img: '/images/locations/s1c2/church_morning_thumb.webp' },          // 第一幕 1-1 教会の朝 (七色ステンドグラスで祈るイザベル)
-    '1-3': { img: '/images/locations/s1c2/serapia_evening_thumb.webp' },         // 第一幕 1-3 港町セラピア純風景
-    '1-4': { img: '/images/locations/s1c2/crimson_pearl_night_thumb.webp' },     // 第一幕 1-4 月のない夜の紅玉号甲板
+    '1-1': { img: '/images/locations/s1c2/thumb/church_morning_thumb.webp' },          // 第一幕 1-1 教会の朝 (七色ステンドグラスで祈るイザベル)
+    '1-3': { img: '/images/locations/s1c2/thumb/serapia_evening_thumb.webp' },         // 第一幕 1-3 港町セラピア純風景
+    '1-4': { img: '/images/locations/s1c2/thumb/crimson_pearl_night_thumb.webp' },     // 第一幕 1-4 月のない夜の紅玉号甲板
     // 第二幕 2-1 影喰いの群れ: shadeova_swarm を挿絵化、 背景はグラデ (戦闘シーン動的)
-    '2-3': { img: '/images/locations/s1c2/aquasis_city_thumb.webp' },            // 第二幕 2-3 海中の珊瑚都市 (アクアシス宮殿)
-    '3-1': { img: '/images/locations/s1c2/aquasis_rift_thumb.webp' },            // 第三幕 3-1 海溝の底・黒い亀裂
+    '2-3': { img: '/images/locations/s1c2/thumb/aquasis_city_thumb.webp' },            // 第二幕 2-3 海中の珊瑚都市 (アクアシス宮殿)
+    '3-1': { img: '/images/locations/s1c2/thumb/aquasis_rift_thumb.webp' },            // 第三幕 3-1 海溝の底・黒い亀裂
     // 第三幕 3-3 波紋の聖女: ripple_saint_awakening を挿絵化、 キャラカットイン削除
-    '4-2': { img: '/images/locations/s1c2/serapia_dawn_thumb.webp' },            // 第四幕 4-2 朝焼けの港 (ミカと別れ)
+    '4-2': { img: '/images/locations/s1c2/thumb/serapia_dawn_thumb.webp' },            // 第四幕 4-2 朝焼けの港 (ミカと別れ)
   },
   's1c4': {
     // 第4章「凍土と空」 背景 (3:4縦長 + 1枚 16:9横長 = snow_field_silence は 3:4縦)
-    '1-1': { img: '/images/locations/s1c4/imperial_jade_palace_thumb.webp' },         // プロローグ/1-1 龍国玉座
-    '1-3': { img: '/images/locations/s1c4/frozen_tundra_journey_thumb.webp' },        // 1-3 雪原を行く
-    '2-1': { img: '/images/locations/s1c4/niiruru_ice_palace_thumb.webp' },           // 2-1 氷宮殿の謁見
-    '3-1': { img: '/images/locations/s1c4/zenonia_floating_fortress_thumb.webp' },    // 3-1 空挺城ゼノニア
-    '3-3': { img: '/images/locations/s1c4/snow_field_silence_thumb.webp' },           // 3-3 山場 雪原で空を見上げる (アルテミス+グレイル)
-    '銀霜の月に呼ばれる者': { img: '/images/locations/s1c4/observer_prophecy_realm_thumb.webp' },  // エピローグ subscene
+    '1-1': { img: '/images/locations/s1c4/thumb/imperial_jade_palace_thumb.webp' },         // プロローグ/1-1 龍国玉座
+    '1-3': { img: '/images/locations/s1c4/thumb/frozen_tundra_journey_thumb.webp' },        // 1-3 雪原を行く
+    '2-1': { img: '/images/locations/s1c4/thumb/niiruru_ice_palace_thumb.webp' },           // 2-1 氷宮殿の謁見
+    '3-1': { img: '/images/locations/s1c4/thumb/zenonia_floating_fortress_thumb.webp' },    // 3-1 空挺城ゼノニア
+    '3-3': { img: '/images/locations/s1c4/thumb/snow_field_silence_thumb.webp' },           // 3-3 山場 雪原で空を見上げる (アルテミス+グレイル)
+    '銀霜の月に呼ばれる者': { img: '/images/locations/s1c4/thumb/observer_prophecy_realm_thumb.webp' },  // エピローグ subscene
   },
   's1c3': {
     // 各シーンの「印象深い1場面」 を 3:4 縦長背景画像として配置
-    '1-1': { img: '/images/locations/s1c3/purple_dragon_palace_thumb.webp' },     // 玉座の間 (父王とヴィルの対話)
+    '1-1': { img: '/images/locations/s1c3/thumb/purple_dragon_palace_thumb.webp' },     // 玉座の間 (父王とヴィルの対話)
     // 1-2 城門前: 玉座の間と画的に乖離するため背景なし (旅立ち専用画像未生成)
-    '2-1': { img: '/images/locations/s1c3/desert_caravan_thumb.webp' },           // 隊商に紛れて (アーシャの商隊)
+    '2-1': { img: '/images/locations/s1c3/thumb/desert_caravan_thumb.webp' },           // 隊商に紛れて (アーシャの商隊)
     // 2-2 砂塵の襲撃: sand_shadeova_battle を挿絵化、 背景はグラデ (戦闘シーン動的)
-    '2-3': { img: '/images/locations/s1c3/oasis_night_thumb.webp' },              // オアシスの夜 (サハナと焚き火)
-    '3-1': { img: '/images/locations/s1c3/ancient_ruins_thumb.webp' },            // 古代遺跡 (ファラー登場)
+    '2-3': { img: '/images/locations/s1c3/thumb/oasis_night_thumb.webp' },              // オアシスの夜 (サハナと焚き火)
+    '3-1': { img: '/images/locations/s1c3/thumb/ancient_ruins_thumb.webp' },            // 古代遺跡 (ファラー登場)
     // 3-2 影喰いの大波: tribe_battle を挿絵化、 背景はグラデ
-    '3-3': { img: '/images/locations/s1c3/starlight_oath_thumb.webp' },           // 山場: 星空の告白 (ヴィル+サハナ)
+    '3-3': { img: '/images/locations/s1c3/thumb/starlight_oath_thumb.webp' },           // 山場: 星空の告白 (ヴィル+サハナ)
     // 4-1 古龍王の予兆: lost_dragon_king_omen を挿絵化、 背景なし
-    '4-2': { img: '/images/locations/s1c3/desert_dawn_thumb.webp' },              // 砂漠の朝、 別れ
+    '4-2': { img: '/images/locations/s1c3/thumb/desert_dawn_thumb.webp' },              // 砂漠の朝、 別れ
   },
 };
 
@@ -5668,72 +5668,72 @@ const LOCATION_CONFIG = {
 const STORY_LOCATION_INLINE_CONFIG = {
   's1c1': [
     // 1-2 食堂: 五人の朝食 (カイの卵焼きシーン)
-    { scene: '1-2',  marker: '卵焼き多めにとっておいたから',     position: 'after',  img: '/images/locations/s1c1/breakfast_table_thumb.webp' },
+    { scene: '1-2',  marker: '卵焼き多めにとっておいたから',     position: 'after',  img: '/images/locations/s1c1/thumb/breakfast_table_thumb.webp' },
     // 2-2 戦闘の山場: 大型影喰いがちさとをロックオン (敵カタログ的意義もある)
-    { scene: '2-2',  marker: '影喰いがちさとを見た',             position: 'after',  img: '/images/enemies/shadeova_large_thumb.webp' },
+    { scene: '2-2',  marker: '影喰いがちさとを見た',             position: 'after',  img: '/images/enemies/thumb/shadeova_large_thumb.webp' },
     // 2-4 朱音とひなた: 派手な合流 (紅蓮+桜花)
-    { scene: '2-4',  marker: '紅蓮の炎が舞い上がった',           position: 'after',  img: '/images/locations/s1c1/akane_hinata_arrival_thumb.webp' },
+    { scene: '2-4',  marker: '紅蓮の炎が舞い上がった',           position: 'after',  img: '/images/locations/s1c1/thumb/akane_hinata_arrival_thumb.webp' },
     // 2-5 ガルドとヴィル: 重厚な合流 (狼+紫槍)
-    { scene: '2-5',  marker: '紫色の槍を構えた女性',             position: 'after',  img: '/images/locations/s1c1/garudo_vill_arrival_thumb.webp' },
+    { scene: '2-5',  marker: '紫色の槍を構えた女性',             position: 'after',  img: '/images/locations/s1c1/thumb/garudo_vill_arrival_thumb.webp' },
     // 2-6 裂け目から小型群体湧出: 既存背景 (rift_emergence) と併存、 群体クローズアップ
-    { scene: '2-6',  marker: '次々と這い出してきた',             position: 'after',  img: '/images/enemies/shadeova_swarm_land_thumb.webp' },
+    { scene: '2-6',  marker: '次々と這い出してきた',             position: 'after',  img: '/images/enemies/thumb/shadeova_swarm_land_thumb.webp' },
     // 3-4 戦いの終わり: 大人6人連携で裂け目縫合 (戦闘クライマックス締め)
-    { scene: '3-4',  marker: '裂け目が閉じる音だった',           position: 'after',  img: '/images/locations/s1c1/rift_seal_thumb.webp' },
+    { scene: '3-4',  marker: '裂け目が閉じる音だった',           position: 'after',  img: '/images/locations/s1c1/thumb/rift_seal_thumb.webp' },
     // エピローグ プリズマの黄昏: 章の最終 (label 無いので title 比較で hit)
-    { scene: 'プリズマの黄昏', marker: '結晶のように、 虹色の塵となって舞い上がる', position: 'after', img: '/images/locations/s1c1/prisma_twilight_thumb.webp' },
+    { scene: 'プリズマの黄昏', marker: '結晶のように、 虹色の塵となって舞い上がる', position: 'after', img: '/images/locations/s1c1/thumb/prisma_twilight_thumb.webp' },
   ],
   's1c2': [
     // 2026-05-01 4幕統合: 出航/海淵/覚醒の波紋/帰路 に再mapping
     // 第一幕 1-3 港町セラピア (旧 2-3 → 1-3): シャンティ登場時に挿絵
-    { scene: '1-3',  marker: '頭には大きな三角帽子に紅い羽飾り', position: 'after',  img: '/images/locations/s1c2/serapia_sunset_thumb.webp' },
+    { scene: '1-3',  marker: '頭には大きな三角帽子に紅い羽飾り', position: 'after',  img: '/images/locations/s1c2/thumb/serapia_sunset_thumb.webp' },
     // 第二幕 2-1 海中影喰い登場 (旧 3-1 → 2-1): 群れ突入挿絵より前に「水中型」 紹介
-    { scene: '2-1',  marker: '影喰い——水中型',                  position: 'after',  img: '/images/enemies/shadeova_swarm_marine_thumb.webp' },
+    { scene: '2-1',  marker: '影喰い——水中型',                  position: 'after',  img: '/images/enemies/thumb/shadeova_swarm_marine_thumb.webp' },
     // 第二幕 2-1 (旧 3-1): 戦闘シーンの動的瞬間を挿絵で
-    { scene: '2-1',  marker: '群れに突っ込んだ',                  position: 'after',  img: '/images/locations/s1c2/shadeova_swarm_thumb.webp' },
+    { scene: '2-1',  marker: '群れに突っ込んだ',                  position: 'after',  img: '/images/locations/s1c2/thumb/shadeova_swarm_thumb.webp' },
     // 第二幕 2-3 アクアシス宮殿 (旧 4-1 → 2-3): 海上 (entrance) → 海中 (city背景) → 宮殿 (throne) の進行
-    { scene: '2-3',  marker: '巨大な珊瑚の都市が広がっていた',    position: 'after',  img: '/images/locations/s1c2/aquasis_entrance_thumb.webp' },
-    { scene: '2-3',  marker: '宮殿の謁見の間',                    position: 'before', img: '/images/locations/s1c2/aquasis_throne_thumb.webp' },
+    { scene: '2-3',  marker: '巨大な珊瑚の都市が広がっていた',    position: 'after',  img: '/images/locations/s1c2/thumb/aquasis_entrance_thumb.webp' },
+    { scene: '2-3',  marker: '宮殿の謁見の間',                    position: 'before', img: '/images/locations/s1c2/thumb/aquasis_throne_thumb.webp' },
     // 第三幕 3-3 波紋の聖女 (旧 5-3 → 3-3): 覚醒の絶頂を挿絵で (キャラカットイン削除)
-    { scene: '3-3',  marker: '光の中で、私の鎧が、変容した',      position: 'after',  img: '/images/locations/s1c2/ripple_saint_awakening_thumb.webp' },
+    { scene: '3-3',  marker: '光の中で、私の鎧が、変容した',      position: 'after',  img: '/images/locations/s1c2/thumb/ripple_saint_awakening_thumb.webp' },
   ],
   's1c4': [
     // 第4章 挿絵 (16:9横、 全 8枚)
     // 第一幕 1-1: 翡翠の玉座 — 章開幕、 アルテミス + 双大剣『陰陽』
-    { scene: '1-1',  marker: '玉座の脇に、 双大剣『陰陽』 が静かに立てかけられていた', position: 'after',  img: '/images/locations/s1c4/jade_throne_thumb.webp' },
+    { scene: '1-1',  marker: '玉座の脇に、 双大剣『陰陽』 が静かに立てかけられていた', position: 'after',  img: '/images/locations/s1c4/thumb/jade_throne_thumb.webp' },
     // 第一幕 1-3: 雪原村でアルク&ミウ (R2人 デビュー) が龍帝隊列に駆け寄る
-    { scene: '1-3',  marker: '銀髪の少年が二人、 雪玉を投げ合って遊んでいた',    position: 'after',  img: '/images/locations/s1c4/snowfield_villagers_thumb.webp' },
+    { scene: '1-3',  marker: '銀髪の少年が二人、 雪玉を投げ合って遊んでいた',    position: 'after',  img: '/images/locations/s1c4/thumb/snowfield_villagers_thumb.webp' },
     // 第二幕 2-1: 氷宮殿の謁見、 北方剣聖ハグル + 氷帝グレイル の剣師教え構図
-    { scene: '2-1',  marker: '右側に立つのは、 銀髪の若き剣士。 北方剣聖ハグル', position: 'after',  img: '/images/locations/s1c4/frost_swordmaster_sparring_thumb.webp' },
+    { scene: '2-1',  marker: '右側に立つのは、 銀髪の若き剣士。 北方剣聖ハグル', position: 'after',  img: '/images/locations/s1c4/thumb/frost_swordmaster_sparring_thumb.webp' },
     // 第二幕 2-2: 氷帝グレイル vs 龍帝アルテミス 一騎打ち
-    { scene: '2-2',  marker: '五合目で、 私は双剣を交差させた',                   position: 'before', img: '/images/locations/s1c4/duel_ice_vs_dragon_thumb.webp' },
+    { scene: '2-2',  marker: '五合目で、 私は双剣を交差させた',                   position: 'before', img: '/images/locations/s1c4/thumb/duel_ice_vs_dragon_thumb.webp' },
     // 第二幕 2-3: アルテミス&ヒノオウ 千年前の回想 (戦友が並ぶ夜)
-    { scene: '2-3',  marker: 'ふと、 古い戦場の記憶が、 不意に蘇った',           position: 'after',  img: '/images/locations/s1c4/flashback_artemis_hinoo_thumb.webp' },
+    { scene: '2-3',  marker: 'ふと、 古い戦場の記憶が、 不意に蘇った',           position: 'after',  img: '/images/locations/s1c4/thumb/flashback_artemis_hinoo_thumb.webp' },
     // 第三幕 3-1: 空挺城ゼノニア 三国会談シーン (ヴァーレ女皇)
-    { scene: '3-1',  marker: 'ヴァーレが、 静かに口を開いた',                     position: 'before', img: '/images/locations/s1c4/vaire_diplomacy_thumb.webp' },
+    { scene: '3-1',  marker: 'ヴァーレが、 静かに口を開いた',                     position: 'before', img: '/images/locations/s1c4/thumb/vaire_diplomacy_thumb.webp' },
     // 第三幕 3-1: ゼノニア整備工房の生活感 (ハーニア親方+ベル整備士+ピット見習い)
-    { scene: '3-1',  marker: '整備工房から元気な声が響いた',                       position: 'after',  img: '/images/locations/s1c4/zenonia_workshop_thumb.webp' },
+    { scene: '3-1',  marker: '整備工房から元気な声が響いた',                       position: 'after',  img: '/images/locations/s1c4/thumb/zenonia_workshop_thumb.webp' },
     // 第四幕 4-1: 観測者三柱 ユーリス予言シーン (氷の小神殿)
-    { scene: '4-1',  marker: '氷の小さな神殿の中央に、 ユーリスは立っていた',     position: 'after',  img: '/images/locations/s1c4/frost_oracle_prophecy_thumb.webp' },
+    { scene: '4-1',  marker: '氷の小さな神殿の中央に、 ユーリスは立っていた',     position: 'after',  img: '/images/locations/s1c4/thumb/frost_oracle_prophecy_thumb.webp' },
   ],
   's1c3': [
     // 1-2 リアム誓い、 三月の約束 (主従の絆 + 旅の制約成立)
-    { scene: '1-2',  marker: '不器用だけれど、 真っ直ぐな、 リアムらしい言葉だった', position: 'after',  img: '/images/locations/s1c3/liam_oath_thumb.webp' },
+    { scene: '1-2',  marker: '不器用だけれど、 真っ直ぐな、 リアムらしい言葉だった', position: 'after',  img: '/images/locations/s1c3/thumb/liam_oath_thumb.webp' },
     // 2-1 ヴィル+アーシャ宿場町出会い (cutin から挿絵に格上げ)
-    { scene: '2-1',  marker: 'アーシャと名乗ったその女',                  position: 'after',  img: '/images/locations/s1c3/asha_meeting_thumb.webp' },
+    { scene: '2-1',  marker: 'アーシャと名乗ったその女',                  position: 'after',  img: '/images/locations/s1c3/thumb/asha_meeting_thumb.webp' },
     // 2-2 砂塵の襲撃: サハナ初登場、 双風刀シャマールで影喰いを斬る山場 (本文 bold削除に伴い marker 修正)
-    { scene: '2-2',  marker: '少女は、 風を纏って跳んだ',                position: 'after',  img: '/images/locations/s1c3/sand_shadeova_battle_thumb.webp' },
+    { scene: '2-2',  marker: '少女は、 風を纏って跳んだ',                position: 'after',  img: '/images/locations/s1c3/thumb/sand_shadeova_battle_thumb.webp' },
     // 3-2 影喰いの大波: ヴィル+サハナ+グラン+部族戦士たちの共闘
-    { scene: '3-2',  marker: '部族の戦士たちが、 一斉に駆けた',         position: 'after',  img: '/images/locations/s1c3/tribe_battle_thumb.webp' },
+    { scene: '3-2',  marker: '部族の戦士たちが、 一斉に駆けた',         position: 'after',  img: '/images/locations/s1c3/thumb/tribe_battle_thumb.webp' },
     // 4-1 古龍王の予兆: ファラーが砂を風に放ち、 巨大な古龍王のシルエットが揺らぐ (S2 伏線)
-    { scene: '4-1',  marker: 'ファラーは砂を一握り掬い、 風に放った',   position: 'after',  img: '/images/locations/s1c3/lost_dragon_king_omen_thumb.webp' },
+    { scene: '4-1',  marker: 'ファラーは砂を一握り掬い、 風に放った',   position: 'after',  img: '/images/locations/s1c3/thumb/lost_dragon_king_omen_thumb.webp' },
     // 4-2 別れの朝: ヴィル+サハナが紫水晶を分け合う最強エモシーン (七色光、 七色絹紐、 「これで二人で一つ」)
-    { scene: '4-2',  marker: '朝日の中で、 紫水晶が、 七色に輝いた',     position: 'after',  img: '/images/locations/s1c3/farewell_thumb.webp' },
+    { scene: '4-2',  marker: '朝日の中で、 紫水晶が、 七色に輝いた',     position: 'after',  img: '/images/locations/s1c3/thumb/farewell_thumb.webp' },
   ],
 };
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260502b';
+const IMG_CACHE_VERSION = '20260502c';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -5840,7 +5840,7 @@ function _collectAssetUrlsByCategory() {
         if (conf[k] && conf[k].img) {
           loc_thumb.add(conf[k].img);
           // 原寸PNG (拡大表示用) — 失敗しても _downloadAllAssets が無視
-          loc_full.add(conf[k].img.replace(/_thumb\.webp(\?.*)?$/i, '.png$1'));
+          loc_full.add(toFullUrl(conf[k].img));
         }
       }
     }
@@ -5850,7 +5850,7 @@ function _collectAssetUrlsByCategory() {
       (STORY_LOCATION_INLINE_CONFIG[sid] || []).forEach(e2 => {
         if (e2 && e2.img) {
           loc_thumb.add(e2.img);
-          loc_full.add(e2.img.replace(/_thumb\.webp(\?.*)?$/i, '.png$1'));
+          loc_full.add(toFullUrl(e2.img));
         }
       });
     }
@@ -6270,7 +6270,7 @@ function injectStoryLocationInlines(bodyHtml, sceneIdx) {
   for (const e of entries) {
     if (!e.img) continue;
     // タップで拡大: data-fullsrc に原寸PNG (thumb→.png 置換) を持たせ、 click で zoom モーダル
-    const fullSrc = e.img.replace(/_thumb\.webp(\?.*)?$/i, '.png$1');
+    const fullSrc = toFullUrl(e.img);
     const cardHtml = `<div class="story-location-inline" onclick="openLocImageZoom('${fullSrc}')" role="button" tabindex="0" aria-label="拡大表示" title="タップで拡大"><img class="story-location-inline-img" src="${e.img}" alt="" loading="lazy" decoding="async"></div>`;
     let injected = false;
     if (e.marker) {
