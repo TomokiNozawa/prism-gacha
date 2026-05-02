@@ -162,8 +162,8 @@ anime-style full-body portrait of a dignified moon-shrine priest in his mid-twen
 CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand, anatomically correct joints, staff grip realistic.
 ```
 
-**Tier 整合性**: 「祭司」 で SR 級アンカー含む。 既存 SR_メイリ「銀霜の巫女」 と並列の立ち位置。
-**対応シーン**: s1c5 4-1 黒月の祭壇の儀式 (シオン分離) — メイリと共に儀式を進行
+**Tier 整合性**: 「祭司」 で SR 級アンカー含む。 既存 SR_ルミナ「銀霜の巫女、 雪月神殿の灯番」 と並列の立ち位置。
+**対応シーン**: s1c5 4-1 黒月の祭壇の儀式 (シオン分離) — ルミナ (灯番) と共に儀式を進行
 **ストーリー使用**: ✅
 
 ---
@@ -205,7 +205,7 @@ anime-style full-body portrait of an innocent young moon-shrine acolyte boy arou
 CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand, anatomically correct joints, lantern grip realistic.
 ```
 
-**対応シーン**: s1c5 4-1 祭壇の儀式 (灯火担当)
+**対応シーン**: s1c5 4-1 祭壇の儀式 (灯火担当、 ルミナ姉の後輩としての見習い)
 **ストーリー使用**: ✅
 
 ---
@@ -262,10 +262,10 @@ CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand, anatomica
 | 6 | SSR | オリエル | `silver_swordmaster` | 1-2 / 4-1 | シオン師匠、 ハグル並列 |
 | 7 | SSR | ノヴァ (銀霜王) | `silver_king` | 1-1 王宮謁見 | S2 龍譲位類比 |
 | 8 | SR | 黒月の刺客 | `black_assassin` | 2-2 暗殺現場 | |
-| 9 | SR | アスター | `moon_priest` | 4-1 祭壇儀式 | メイリと並列 |
+| 9 | SR | アスター | `moon_priest` | 4-1 祭壇儀式 | ルミナと並列 (雪月神殿) |
 | 10 | SR | オルフェ | `underworld_bard` | 3-1/3-3 地底市 | |
 | 11 | R | セレン | `silver_squire` | 1-1 / 1-3 | 王族近衛若手 |
-| 12 | R | ラピス | `moon_acolyte` | 4-1 灯火 | メイリ後輩 |
+| 12 | R | ラピス | `moon_acolyte` | 4-1 灯火 | ルミナ後輩 (雪月神殿) |
 | 13 | R | シエル | `underworld_girl` | 3-1 / 3-3 | S2C5 影共生伏線 |
 | 14 | R | 工房娘 | `silver_villager_a` | 1-3 祭夜 | |
 | 15 | R | 歌姫 | `silver_villager_b` | 1-3 祭夜 | |

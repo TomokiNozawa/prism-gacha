@@ -701,6 +701,216 @@ def check_prompt_metadata(sf_ids):
     return checked
 
 
+def check_all_chars_have_faction(pool_chars_by_chap, script_text):
+    """ルール7-21 (BLOCKER 2026-05-03 野沢さん指示「整合性ちゃんとしろよ」): POOL 全キャラが
+    CHAR_FACTION に登録されているかチェック。 未登録は WM 上で派閥所属が表示されない事故源
+    (実例 2026-05-03: アルク/ミウ/ピピ/ピット 誤所属 + s1c4 主要 16 キャラ未登録の構造的整合性違反)。
+
+    詳細: feedback_world_map_consistency.md / feedback_total_integrity_check.md
+    """
+    if not pool_chars_by_chap or not script_text:
+        return 0
+    m = re.search(r'const CHAR_FACTION\s*=\s*\{([\s\S]*?)\n\};', script_text)
+    if not m:
+        return 0
+    char_faction_text = m.group(1)
+    registered = set(re.findall(r"'([^']+)':\s*\{", char_faction_text))
+    missing = []
+    for sid in sorted(pool_chars_by_chap.keys()):
+        for tier, name in pool_chars_by_chap[sid]:
+            if name not in registered:
+                missing.append((sid, tier, name))
+    if missing:
+        sample = ', '.join(f'{sid}/{t}「{n}」' for sid, t, n in missing[:6])
+        more = f' 他 {len(missing) - 6}件' if len(missing) > 6 else ''
+        violations.append(
+            f"[ルール7-21 CHAR_FACTION 未登録 BLOCKER] POOL の {len(missing)}キャラが CHAR_FACTION に未登録: {sample}{more}\n"
+            f"      → 各キャラの派閥所属を script.js CHAR_FACTION に追加 (WM/相関図で表示するため)"
+        )
+    return len(missing)
+
+
+def check_chapter_factions_registered(sf_ids, script_text):
+    """ルール7-22 (BLOCKER 2026-05-03 野沢さん指示): outline.md の各章 (公開済 + 公開予定) の「新派閥」 が
+    FACTIONS 配列 + FACTION_WORLD_COORDS の両方に登録されているかチェック。
+
+    実例 2026-05-03: ニーヴル/ゼノニア が outline.md s1c4 で「新派閥」 として記載されているのに
+    FACTIONS / FACTION_WORLD_COORDS どちらにも未登録の構造バグ。 章追加時の登録漏れ防止。
+    """
+    outline_path = ROOT / 'STORY' / 'outline.md'
+    if not outline_path.exists() or not script_text:
+        return 0
+    outline = outline_path.read_text(encoding='utf-8')
+    factions_text = ''
+    m1 = re.search(r'const FACTIONS\s*=\s*\[([\s\S]*?)\n\];', script_text)
+    if m1:
+        factions_text = m1.group(1)
+    coords_text = ''
+    m2 = re.search(r'const FACTION_WORLD_COORDS\s*=\s*\{([\s\S]*?)\n\};', script_text)
+    if m2:
+        coords_text = m2.group(1)
+    # outline から各章セクションの「新派閥」 を抽出 (S1C1〜S3C7)
+    chapter_sections = re.findall(r'## (S[123]C\d+):.*?(?=\n## |\Z)', outline, re.S)
+    # 章テキスト 個別抽出
+    section_blocks = re.split(r'(?=^## S[123]C\d+:)', outline, flags=re.M)
+    n = 0
+    for block in section_blocks:
+        m_head = re.match(r'## (S[123]C\d+):', block)
+        if not m_head:
+            continue
+        cid = m_head.group(1)
+        # 公開予定章まで含む (releaseDate 設定済 = まだ未公開でも登録必要)
+        # ただし S2/S3 は将来のため現時点では検査スキップ
+        if not cid.startswith('S1C'):
+            continue
+        m_fac = re.search(r'\*\*新派閥\*\*[:：]\s*(.+)', block)
+        if not m_fac:
+            continue
+        factions_str = m_fac.group(1).strip()
+        factions = [f.strip() for f in re.split(r'[\/／+、,]', factions_str) if f.strip()]
+        for fac in factions:
+            n += 1
+            if fac not in factions_text:
+                violations.append(
+                    f"[ルール7-22 FACTIONS 未登録 BLOCKER] outline.md {cid} 新派閥「{fac}」 が script.js FACTIONS 配列に未登録\n"
+                    f"      → 章追加時に FACTIONS + FACTION_WORLD_COORDS + CHAR_FACTION への追加忘れ防止"
+                )
+    return n
+
+
+def check_dup_name_unmarked(sf_ids, pool_chars_by_chap, script_text):
+    """ルール7-18 (BLOCKER 2026-05-03 野沢さん指示): POOL の lastToken (空白で分割した最後のトークン) が
+    複数キャラで重複している場合、 STORY 本文中でその単独表記が ID-based マークアップ
+    `{{char:slug}}...{{/char}}` で囲まれていなければ BLOCKER。
+
+    重複名の自動 linkify は最初にヒットしたキャラに紐付くため、 別キャラへの誤紐付け事故が起きる
+    (実例 2026-05-03 野沢さん指摘: s1c4 本文の「ベル」 単独表記が s1c1「詠聖ベル」 にリンクされる)。
+    ID-based マークアップで確定リンクを義務化することで、 同名重複問題を構造的に解決。
+
+    例外: STORY_CHAR_REMAP に登録されている fromName は、 文脈依存で意図的に切り替えるロジック
+    (覚醒前後の linkify ターゲット変更等) が動いているため、 マークアップ化を強制しない。
+
+    詳細: feedback_id_based_char_link.md (新規)
+    """
+    if not pool_chars_by_chap:
+        return 0
+    # STORY_CHAR_REMAP の fromName 集合を抽出 (例外リスト)
+    remap_keys = set()
+    m_remap = re.search(r'const STORY_CHAR_REMAP\s*=\s*\{([\s\S]*?)\n\};', script_text or '')
+    if m_remap:
+        for k in re.findall(r"'([^']+)':\s*'", m_remap.group(1)):
+            remap_keys.add(k)
+    last_tokens = {}
+    for sid in pool_chars_by_chap:
+        for tier, name in pool_chars_by_chap[sid]:
+            tokens = name.split()
+            last_token = tokens[-1] if tokens else name
+            last_tokens.setdefault(last_token, []).append((name, sid))
+    duplicates = {tok: lst for tok, lst in last_tokens.items() if len(lst) >= 2}
+    if not duplicates:
+        return 0
+    for sid in sf_ids:
+        path = ROOT / 'STORY' / f'{sid}.md'
+        if not path.exists():
+            continue
+        text = path.read_text(encoding='utf-8')
+        # 「## 編集メモ」 以降は公開対象外コメント領域、 検査対象外
+        em_idx = text.find('## 編集メモ')
+        if em_idx == -1:
+            em_idx = text.find('# 編集メモ')
+        if em_idx >= 0:
+            text = text[:em_idx]
+        cleaned = re.sub(r'\{\{char:[\w_-]+\}\}.*?\{\{\/char\}\}', '', text, flags=re.S)
+        # POOL 全キャラの fullName で tok を文字列内に含むものを集める (例: tok='ベル' なら 'イザベル' '詠聖 ベル' '波紋の聖女 イザベル' 等)
+        # 長い順にソートして除去 (短いの除去で長いの壊さないため)
+        all_names = []
+        for sid_x in pool_chars_by_chap:
+            for tier_x, name_x in pool_chars_by_chap[sid_x]:
+                all_names.append(name_x)
+        all_names = sorted(set(all_names), key=len, reverse=True)
+        for tok, lst in duplicates.items():
+            if tok in remap_keys:
+                continue  # STORY_CHAR_REMAP で文脈解決済の重複は除外
+            cleaned_for_tok = cleaned
+            # tok を文字列内に含む POOL キャラ名 (tok自身は除く) を全部除去
+            # これで tok 単独表記だけが残り、 「イザベル」 内の「ベル」 等の部分一致誤検知を防ぐ
+            for full_name in all_names:
+                if tok in full_name and full_name != tok:
+                    cleaned_for_tok = cleaned_for_tok.replace(full_name, '')
+            if re.search(re.escape(tok), cleaned_for_tok):
+                names_str = ' / '.join(name for name, _ in lst)
+                violations.append(
+                    f"[ルール7-18 同名キャラ単独表記 BLOCKER] STORY/{path.name} に同名キャラ「{tok}」 (POOL 重複: {names_str}) の単独表記。 "
+                    f"`{{{{char:slug}}}}{tok}{{{{/char}}}}` で確定リンクすべき"
+                )
+    return len(duplicates)
+
+
+def check_next_chapter_wm(sf_ids, script_text):
+    """ルール7-19 (BLOCKER 2026-05-03 野沢さん指示): 公開予定の次章 (releaseDate 設定済) の新派閥が、
+    既に WM (FACTION_WORLD_COORDS / STORY_FACTION_TEASER) に登録されているかチェック。
+
+    s1c5 公開時に s1c6 の派閥がマップに表示されていないと、 章遷移後にユーザーが「次章どこ?」 と迷う。
+    公開直前ではなく、 章執筆中から WM 反映を機械的に強制する。
+    """
+    if not sf_ids:
+        return 0
+    nums = sorted(int(re.match(r's1c(\d+)', s).group(1)) for s in sf_ids if re.match(r's1c\d+', s))
+    if not nums:
+        return 0
+    last_num = nums[-1]
+    next_num = last_num + 1
+    outline_path = ROOT / 'STORY' / 'outline.md'
+    if not outline_path.exists():
+        return 0
+    outline = outline_path.read_text(encoding='utf-8')
+    sect_match = re.search(rf'## S1C{next_num}:.*?\n([\s\S]*?)(?=\n## |\n---|\Z)', outline)
+    if not sect_match:
+        return 0
+    section = sect_match.group(1)
+    fac_match = re.search(r'\*\*新派閥\*\*[:：]\s*(.+)', section)
+    if not fac_match:
+        return next_num
+    factions_str = fac_match.group(1).strip()
+    factions = [f.strip() for f in re.split(r'[\/／+、,]', factions_str) if f.strip()]
+    for fac in factions:
+        if fac not in script_text:
+            violations.append(
+                f"[ルール7-19 次章 WM 派閥ポイント未登録 BLOCKER] outline.md S1C{next_num} 新派閥「{fac}」 が script.js (FACTION_WORLD_COORDS / STORY_FACTION_TEASER) に未登録。 "
+                f"次章公開時に WM で位置確認できないため、 公開前に必ず登録"
+            )
+    return next_num
+
+
+def check_age_excess(sf_ids):
+    """ルール7-20 (WARNING 2026-05-03 野沢さん指示): 1シーン内の年齢明示が 3件以上 → 過剰アピール警告
+
+    野沢さん指摘: 「年齢のアピールがすごい」「キャラ自体は若めにしてもらいましたが、
+    それをアピールしろという意味ではない」。 アルテミス千年との対比効果を狙いすぎず、
+    脇役の年齢は質的表現 (「若き」「青年」「見習い」 等) で代替可能。
+    """
+    age_pattern = re.compile(r'[一二三四五六七八九十百千]+(?:歳|代後半|代前半|代)')
+    n = 0
+    for sid in sf_ids:
+        path = ROOT / 'STORY' / f'{sid}.md'
+        if not path.exists():
+            continue
+        text = path.read_text(encoding='utf-8')
+        scenes = re.split(r'^(### [\d\-]+:.*)$', text, flags=re.M)
+        i = 1
+        while i < len(scenes):
+            scene_title = scenes[i].strip()
+            scene_body = scenes[i+1] if i+1 < len(scenes) else ''
+            ages = age_pattern.findall(scene_body)
+            if len(ages) >= 3:
+                warnings_only.append(
+                    f"[ルール7-20 年齢明示過剰 WARNING] STORY/{path.name} {scene_title} に年齢明示 {len(ages)}件 (脇役の年齢を「若き」「青年」 等の質的表現に置換できないか検討)"
+                )
+                n += 1
+            i += 2
+    return n
+
+
 def check_char_age_keywords(sf_ids):
     """ルール7-17 (WARNING): prompt/s1cN_chars.md の各キャラセクションで「老/中年/30代以上」 等の年齢ワード警告
     feedback_char_age_youth_first.md (2026-05-01) ガチャキャラ画像は若め (10-20代) を既定、 老人キャラ最小化"""
@@ -923,6 +1133,14 @@ n7_14 = check_faction_bgm(pool_x)
 print(f"  ルール7-14 (派閥 BGM ≥5キャラ): {n7_14}派閥 検査 [WARNING / 既存負債解消後 BLOCKER 化予定]")
 n7_16 = check_prompt_metadata(sf_ids_x)
 print(f"  ルール7-16 (アセット メタ記載): {n7_16}セクション 検査 [BLOCKER]")
+n7_18 = check_dup_name_unmarked(sf_ids_x, pool_x, script_text_x)
+print(f"  ルール7-18 (同名キャラ ID-based マークアップ): {n7_18}重複名 検査 [BLOCKER]")
+n7_19 = check_next_chapter_wm(sf_ids_x, script_text_x)
+print(f"  ルール7-19 (次章 WM 派閥ポイント): s1c{n7_19} 検査 [BLOCKER]")
+n7_21 = check_all_chars_have_faction(pool_x, script_text_x)
+print(f"  ルール7-21 (CHAR_FACTION 全キャラ登録): {n7_21}未登録 検査 [BLOCKER]")
+n7_22 = check_chapter_factions_registered(sf_ids_x, script_text_x)
+print(f"  ルール7-22 (章 新派閥 FACTIONS 登録): {n7_22}派閥 検査 [BLOCKER]")
 
 # === Warning ルール (commit はブロックせず、 開発者手動 review) ===
 violations_blocker = list(violations)  # ここまでが blocker 違反
@@ -936,6 +1154,7 @@ n6 = check_modal_requirements()
 n6_post = len(violations)
 n7_15 = check_tier_consistency(pool_x)
 n7_17 = check_char_age_keywords(sf_ids_x)
+n7_20 = check_age_excess(sf_ids_x)
 n8_pre = len(warnings_only)
 n8 = check_short_kana_collisions()
 n8_post = len(warnings_only)
@@ -948,6 +1167,7 @@ print(f"  ルール6 (モーダル網羅): {n6}件 検査 [WARNING / Esc・Space
 print(f"  ルール7-4/5 (章WARNING): {len(warnings) - n6 - (n8_post - n8_pre)}件 検査 [WARNING / 章公開段階]")
 print(f"  ルール7-15 (Tier 整合性 title格): {n7_15}キャラ 検査 [WARNING]")
 print(f"  ルール7-17 (ガチャキャラ年齢ワード): {n7_17}セクション 検査 [WARNING]")
+print(f"  ルール7-20 (本文年齢明示過剰): {n7_20}シーン 検査 [WARNING]")
 print(f"  ルール8 (短カナ部分一致): {n8}キャラ 検査 [WARNING / 部分一致リスク]")
 
 print()

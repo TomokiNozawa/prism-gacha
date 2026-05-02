@@ -7,7 +7,7 @@
 //
 // HTML/JSON/Firebase API はキャッシュせず常にネットワーク優先 (更新即反映+認証/DBの鮮度維持)。
 
-const SW_VERSION = '20260502i';  // ストーリー一覧 s1c5 予告 + s1c5 release 12:00 + ルール7-8
+const SW_VERSION = '20260503a';  // s1c5 公開準備 + ID-based キャラリンク + WM 整合性大修正 + s1c5 全アセット登録
 const STATIC_CACHE = `prismaera-static-${SW_VERSION}`;
 const BGM_CACHE    = `prismaera-bgm-${SW_VERSION}`;
 const LOC_CACHE    = `prismaera-loc-${SW_VERSION}`;
@@ -29,6 +29,7 @@ const PRECACHE_BGM = [
   '/assets/bgm/prism-frost.mp3',
   '/assets/bgm/prism-niflheim.mp3',
   '/assets/bgm/prism-aether.mp3',
+  '/assets/bgm/prism-blackmoon.mp3',  // S1C5 章テーマ (野沢さん側 Suno 生成中)
 ];
 
 // LRU上限 (entry数ベース、 サイズベースではない理由: Cache APIは個別sizeを取れないため)

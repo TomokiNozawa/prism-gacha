@@ -63,7 +63,7 @@ S1C5「黒月の予兆」 (POV: シオン、 銀霜王国 仮面騎士) の場�
 | 9 | royal_assassination_flashback.png | 16:9 | 挿絵 | 2-2 王族暗殺未遂現場 (回想 + 現在) | シオン+刺客 (添付2枚) |
 | 10 | church_tower_reunion.png | 16:9 | 挿絵 | 2-3 教会の塔 (シオン+ラナス再会) | シオン+ラナス (添付2枚) |
 | 11 | shadow_loom_workshop.png | 16:9 | 挿絵 | 3-2 影織りの工房 (リオラエル + ルナリア + シオン) | 3人 (添付3枚) |
-| 12 | mask_separation_ritual.png | 16:9 | 挿絵 | **4-1 山場** 分離の儀式 (シオン+シ・ロエン+ラナス+メイリ+アスター) | シオン+シ・ロエン+ラナス+メイリ+アスター (添付5枚) |
+| 12 | mask_separation_ritual.png | 16:9 | 挿絵 | **4-1 山場** 分離の儀式 (シオン+シ・ロエン+ラナス+ルミナ+アスター) | シオン+シ・ロエン+ラナス+ルミナ+アスター (添付5枚) |
 | 13 | shi_loen_departure.png | 16:9 | 挿絵 | 4-2 別れの朝 (シ・ロエン黒月衆へ去る、 シオン見送る) | シオン+シ・ロエン (添付2枚) |
 
 合計 13枚 (背景8 + 挿絵5)。 章規模 +15キャラ + 山場の重みから s1c4 (10枚) より 30% 増。
@@ -298,35 +298,37 @@ CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand for all th
 
 ---
 
-# 【12】mask_separation_ritual.png — 分離の儀式 (挿絵、 16:9、 山場、 シオン+シ・ロエン+ラナス+メイリ+アスター 添付5枚)
+# 【12】mask_separation_ritual.png — 分離の儀式 (挿絵、 16:9、 山場、 シオン+シ・ロエン+ラナス+ルミナ+アスター 添付5枚)
 
 **⚠️ 生成前に必ず添付してください** (5枚):
 - `images/characters/season1/ssr/masked_knight.png` (既存 SSR シオン)
 - `images/characters/season1/ur/shadow_apostle.png` (新規 UR シ・ロエン)
 - `images/characters/season1/sr/holy_guardian.png` (既存 SR ラナス)
-- `images/characters/season1/sr/frost_priestess.png` (既存 SR 銀霜の巫女 メイリ)
+- `images/characters/season1/sr/silver_girl.png` (既存 SR 銀霜の巫女 ルミナ — 雪月神殿の灯番、 イザベルと文通)
 - `images/characters/season1/sr/moon_priest.png` (新規 SR 雪月神殿祭司 アスター)
 
 - **対応シーン**: 4-1 黒月の祭壇・分離の儀式 (**章の山場**)
-- **本文行**: `STORY/s1c5.md` (執筆後に追記)
+- **本文行**: `STORY/s1c5.md` 4-1 (執筆完了)
 - **役割**: **本章のクライマックス**、 二重月夜の祭壇、 シオンが仮面を外し、 シ・ロエンと向き合う瞬間
-- **被写体**: 雪月神殿の祭壇、 中央の月鏡から立ち上がる影の人型 (シ・ロエン誕生)、 シオンが仮面を脇に置く、 ラナス + メイリ + アスターが証人として周囲に立つ
+- **被写体**: 雪月神殿の祭壇、 中央の月鏡から立ち上がる影の人型 (シ・ロエン誕生)、 シオンが仮面を脇に置く、 ラナス + ルミナ + アスターが証人として周囲に立つ
 - **ストーリー使用**: ✅ s1c5 4-1 挿絵 (山場、 大判)
 - **コード参照**: `STORY_LOCATION_INLINE_CONFIG['s1c5']` (scene='4-1', position='before' - 山場の本文直前)
 
 ```
-[Attached: reference image 1 = "Sion" (SSR), reference image 2 = "Shi-Loen" (UR), reference image 3 = "Lanas" (SR), reference image 4 = "Meili" (SR銀霜の巫女), reference image 5 = "Aster" (SR雪月神殿祭司)]
+[Attached: reference image 1 = "Sion" (SSR), reference image 2 = "Shi-Loen" (UR), reference image 3 = "Lanas" (SR), reference image 4 = "Lumina" (SR銀霜の巫女、 雪月神殿の灯番), reference image 5 = "Aster" (SR雪月神殿祭司)]
 
 Please create the climactic illustration of these five characters from the attached references at the moment of the mask separation ritual. Keep the facial features and identities EXACTLY as in the references. Optimize for a sacred ceremony composition with the dual-moon mirror altar as the visual focus.
 
-anime-style climactic ceremony illustration of five characters from the references gathered at a great circular silver mirror altar in a sacred shrine at midnight under a dual moon, in the CENTER the silver-frost knight Sion (SAME face as reference 1 unchanged) standing upright having JUST removed his silver mask now held in his right hand at his side, his face exposed for the first time with a serene resolved expression, his eyes catching the moonlight, RISING from the mirror altar in front of him is the shadow apostle Shi-Loen (SAME face as reference 2 unchanged) emerging from the silver mirror's surface like a living mirror image stepping out, the figure half-formed of black smoke and violet void light gradually solidifying into Shi-Loen's full form, the broken half-mask of Shi-Loen taking shape on the left side of his face, on the LEFT and RIGHT the witnesses standing in respectful silent vigil — Lanas the holy knight (SAME face as reference 3 unchanged) on the far left with both hands clasped in front, the priestess Meili (SAME face as reference 4 unchanged) holding a small silver lantern, and the moon-priest Aster (SAME face as reference 5 unchanged) holding his ceremonial staff vertically as the ritual conductor, the mirror altar on the floor reflects both moons simultaneously — pure silver crescent visible on its right half and void-black crescent visible on its left half — pale-blue moonlight and violet void light streaming down from the open skylight above where the dual moons hang side by side in the night sky, the seven prismatic streams of the genso swirling around the entire scene, twelve tall silver shrine lanterns surrounding the altar in a circle each emanating soft pale-blue flames, sacred and weighty atmosphere with epic emotional resonance, dramatic rim lighting with twin-tone silver-and-violet glow centered on Sion and Shi-Loen, detailed linework, high-quality illustration, Aspect ratio 16:9, horizontal orientation 1672x941, original character, no logos, no text, no watermark.
+anime-style climactic ceremony illustration of five characters from the references gathered at a great circular silver mirror altar in a sacred shrine at midnight under a dual moon, in the CENTER the silver-frost knight Sion (SAME face as reference 1 unchanged) standing upright having JUST removed his silver mask now held in his right hand at his side, his face exposed for the first time with a serene resolved expression, his eyes catching the moonlight, RISING from the mirror altar in front of him is the shadow apostle Shi-Loen (SAME face as reference 2 unchanged) emerging from the silver mirror's surface like a living mirror image stepping out, the figure half-formed of black smoke and violet void light gradually solidifying into Shi-Loen's full form, the broken half-mask of Shi-Loen taking shape on the left side of his face, on the LEFT and RIGHT the witnesses standing in respectful silent vigil — Lanas the holy knight (SAME face as reference 3 unchanged) on the far left with both hands clasped in front, the silver-frost shrine maiden Lumina (SAME face as reference 4 unchanged) holding a small silver lantern as the snow-moon shrine lamp-keeper, and the moon-priest Aster (SAME face as reference 5 unchanged) holding his ceremonial staff vertically as the ritual conductor, the mirror altar on the floor reflects both moons simultaneously — pure silver crescent visible on its right half and void-black crescent visible on its left half — pale-blue moonlight and violet void light streaming down from the open skylight above where the dual moons hang side by side in the night sky, the seven prismatic streams of the genso swirling around the entire scene, twelve tall silver shrine lanterns surrounding the altar in a circle each emanating soft pale-blue flames, sacred and weighty atmosphere with epic emotional resonance, dramatic rim lighting with twin-tone silver-and-violet glow centered on Sion and Shi-Loen, detailed linework, high-quality illustration, Aspect ratio 16:9, horizontal orientation 1672x941, original character, no logos, no text, no watermark.
 
 CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand for all five characters, anatomically correct joints, realistic grips on mask, lantern, and staff.
 
 元画像から表情や姿勢は変わってOKです
 ```
 
-**ポイント**: 本章のすべての伏線が収束する場面。 「二重月の同時表示」「鏡から立ち上がる影」「証人三人の沈黙」 = 山場のフォーカル。 シオンの「素顔」 を公式画で初めて描く (本編で「素顔を知るのは王族・イザベル・セラフィエルの3人」 とあるが、 章末でラナス・メイリ・アスターも知る側に追加される — シオンの新しい誓いとして)。
+**ポイント**: 本章のすべての伏線が収束する場面。 「二重月の同時表示」「鏡から立ち上がる影」「証人三人の沈黙」 = 山場のフォーカル。 シオンの「素顔」 を公式画で初めて描く (本編で「素顔を知るのは王族・イザベル・セラフィエルの3人」 とあるが、 章末でラナス・ルミナ・アスターも知る側に追加される — シオンの新しい誓いとして)。
+
+**⚠️ 立会人の正確な所属確認 (2026-05-03 修正)**: 雪月神殿の儀式立会人は **メイリ (白焔教会所属) ではなく ルミナ (銀霜の巫女、 雪月神殿の灯番)** が正しい。 メイリは白焔教会の見習い巫女でイザベル付き、 ルミナは雪月神殿の灯番でイザベルと「治療の情報交換」 口実で文通する銀霜国の巫女 (SR_ルミナ凸秘話「雪月神殿の灯籠」 + SR_メイリ凸秘話「イザベルへの憧れ」 で確認)。 frost_priestess.png は s1c4 凍土の祭司イル (ユーリス妹)、 ルミナの画像 slug は silver_girl.png。
 
 ---
 
@@ -374,7 +376,7 @@ CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand for both c
 | 9 | royal_assassination_flashback.png | 16:9 | 2-2 暗殺現場 | シオン + 黒月の刺客 |
 | 10 | church_tower_reunion.png | 16:9 | 2-3 教会の塔 | シオン + ラナス |
 | 11 | shadow_loom_workshop.png | 16:9 | 3-2 影織り | リオラエル + ルナリア + シオン |
-| 12 | mask_separation_ritual.png | 16:9 | **4-1 山場** | シオン + シ・ロエン + ラナス + メイリ + アスター |
+| 12 | mask_separation_ritual.png | 16:9 | **4-1 山場** | シオン + シ・ロエン + ラナス + ルミナ + アスター |
 | 13 | shi_loen_departure.png | 16:9 | 4-2 別れ | シオン + シ・ロエン |
 
 生成結果は `images/locations/s1c5/<filename>` にそのまま保存。

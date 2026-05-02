@@ -97,6 +97,28 @@ const POOL = {
       desc: "見た目は8-10歳の幼女、 中身は千年級。 古龍の血を最も濃く引く一族の長老。 古龍杖ジナを携え、 失われた古龍王の伝承を守る。 幼子の姿のまま、 千年の知恵と杖を振るう。 観測者三柱と千年前を共有する縁を持つ。 ヴィルを『次の千年の鍵』 と密かに見定めている。",
       img: `${S1}/ur/dragon_sage.png`,
     },
+    // ===== S1C5 追加 (UR3、 黒月衆+地底市) =====
+    {
+      name: "シ・ロエン", season: 1, chapter: 's1c5',
+      title: "銀霜黒月衆の使徒、 シオン分離後の影",
+      caption: "やあ、 兄上。 また会おう、 黒月の決戦の夜に。",
+      desc: "仮面騎士シオンが分離した「影の側」 として黒月衆へ去った存在。 同じ顔・体格、 髪は漆黒、 仮面は半割れ。 「俺が代わりに堕ちる」 と微笑み、 影の側として世界を観る。 S2C1「眠れる主の世界」 主人公として再登場予定。",
+      img: `${S1}/ur/shadow_apostle.png`,
+    },
+    {
+      name: "黒月の盟主 ノクトリア", season: 1, chapter: 's1c5',
+      title: "黒月衆を統べる影の女王、 ヴォイドラの代弁者",
+      caption: "影の側を、 私たちが引き取ろう。",
+      desc: "黒月衆ノクトスを率いる威厳の女王。 長い濃紫の髪、 黒の三日月の刺青、 黒い三日月を頂く長い杖。 ヴォイドラ陣営の代弁者として、 シオンに「取引」 を持ちかける。 S1C7 黒月決戦の主敵 + S2C5「影との和解」 交渉役として再登場予定。",
+      img: `${S1}/ur/black_moon_lord.png`,
+    },
+    {
+      name: "地底市の母 リオラエル", season: 1, chapter: 's1c5',
+      title: "地底市リオラの古女王、 影と共生する文化の守護者",
+      caption: "あなたの中の影を、 抱きしめてから手放しなさい。",
+      desc: "地底市リオラの民を千年率いる古き存在。 「観測者の前から在る」 古龍の血と影の血を引く長命種。 銀紫の長髪、 紫水晶のような瞳、 光と影が織り合わさる衣。 シオンに「影と共に生きる選択」 を教える。 S2C4「記憶の海」 千年記憶解放のキー。",
+      img: `${S1}/ur/underworld_matriarch.png`,
+    },
     // ===== S1C4 追加 (UR2、 凍土の覇者+空挺の女皇) =====
     {
       name: "氷帝 グレイル", season: 1, chapter: 's1c4',
@@ -212,6 +234,35 @@ const POOL = {
       caption: "ヴィル殿下、 必ずお迎えに参ります。",
       desc: "紫竜王国の若き侍従。 ヴィルが城を抜けた朝に砂時計で三月を計り、 期限内に戻らなければ単騎で迎えに行くと決めていた。 父も侍従だった世襲で、 細身の儀礼槍『紫翼』 を継ぐ。 ヴィル殿下を『家族』 と思っている、 不器用なだけ真っ直ぐな青年。",
       img: `${S1}/ssr/purple_dragon_servant.png`,
+    },
+    // ===== S1C5 追加 (SSR4、 黒月衆+地底市+銀霜王国補強) =====
+    {
+      name: "堕者剣聖 ガルヴィン", season: 1, chapter: 's1c5',
+      title: "元教会破門の堕者剣聖、 黒月衆の旧教会勢",
+      caption: "お前の道の先に、 何があるか——俺は、 知っている。",
+      desc: "元・白焔教会の盾の系譜の剣聖。 表向き「破門」、 実は教会の腐敗を看過できず自ら出ていった。 顳から顎までの古傷、 半腐敗の聖剣。 シオンの兄弟弟子の知り合い。 S1C7 旧教会勢 (イザベル/ラナス) との対峙シーンで再登場予定。",
+      img: `${S1}/ssr/fallen_paladin.png`,
+    },
+    {
+      name: "影織りの導師 ルナリア", season: 1, chapter: 's1c5',
+      title: "地底市の上級織り手、 影と光の織物職人",
+      caption: "光と影は、 等価に織られた時、 七色になります。",
+      desc: "地底市リオラの若き影織り導師。 銀紫の長髪、 紫水晶の織機の前で、 銀の糸と黒の糸を等価に織り合わせる。 章テーマ「影を抱きしめる」 を視覚化する重要キャラ。 山場 4-1 分離儀式の触媒となる織物の制作者。",
+      img: `${S1}/ssr/shadow_weaver.png`,
+    },
+    {
+      name: "銀霜剣聖 オリエル", season: 1, chapter: 's1c5',
+      title: "銀霜剣術の上席師範、 シオンの師匠",
+      caption: "(仮面の縁に指を一度添えて、 行け、 弟子よ)",
+      desc: "銀霜国剣術の上席師範。 五年前、 仮面の意味を言葉ではなく沈黙で教えた人物。 銀青の長髪、 平面的な剣士の落ち着き。 シオンの仮面騎士の作法の源流。 北方剣聖ハグル (s1c4) と並列の立ち位置。",
+      img: `${S1}/ssr/silver_swordmaster.png`,
+    },
+    {
+      name: "銀霜王 ノヴァ", season: 1, chapter: 's1c5',
+      title: "銀霜王国の若き王、 シオンが守る対象",
+      caption: "シオン。 ……あなたが居て、 よかった。",
+      desc: "銀霜王国の若き戴冠者、 即位半年。 銀の髪、 蒼い瞳、 細い肩。 玉座の重みに耐え始めたばかりで、 仮面騎士シオンに精神的依存しつつある。 黒月衆の暗殺未遂を経験。 S2 龍譲位編との類比 (覇者と後継の関係) への伏線。",
+      img: `${S1}/ssr/silver_king.png`,
     },
     // ===== S1C4 追加 (SSR7、 ニーヴル+ゼノニア の主要キャラ) =====
     {
@@ -392,6 +443,28 @@ const POOL = {
       desc: "十六-十七歳の若き戦士。 十一歳の時にサハナに助けられて以来、 双短剣で姉の双剣シャマールを真似てきた。 ティナを実の妹のように見守る。 一族の未来を担う次世代の戦士。",
       img: `${S1}/sr/young_desert_warrior.png`,
     },
+    // ===== S1C5 追加 (SR3、 黒月衆+雪月神殿+地底市) =====
+    {
+      name: "黒月の刺客", season: 1, chapter: 's1c5',
+      title: "月夜の暗殺者、 匿名仮面",
+      caption: "(全身覆面の沈黙、 短剣を逆手に構える)",
+      desc: "黒月衆ノクトスの刺客。 全身を黒の布で覆い、 全面の黒仮面、 双の短剣を逆手に持つ。 王族暗殺の手駒として銀霜王ノヴァを狙うも、 シオンに阻止される。 名は明かされない。",
+      img: `${S1}/sr/black_assassin.png`,
+    },
+    {
+      name: "月夜祭司 アスター", season: 1, chapter: 's1c5',
+      title: "雪月神殿の月夜祭司、 儀式の進行役",
+      caption: "シオン様。 あとは、 あなたの覚悟だけです。",
+      desc: "雪月神殿の若き祭司。 銀青の長髪、 銀と青の祭司衣、 銀青の儀式杖。 二重月夜の分離儀式を進行する役。 ルミナ (灯番) と並列で雪月神殿を支える。",
+      img: `${S1}/sr/moon_priest.png`,
+    },
+    {
+      name: "地底市の語り部 オルフェ", season: 1, chapter: 's1c5',
+      title: "地底市リオラの歴史を歌で伝える詩人",
+      caption: "千年前、 私たちは影と共に生きる選択をした。",
+      desc: "地底市リオラの若き語り部。 銀紫の中髪、 影と光の柄の竪琴杖。 地底市の歴史を歌でシオンに伝える。 千年の口伝の継承者。",
+      img: `${S1}/sr/underworld_bard.png`,
+    },
     // ===== S1C4 追加 (SR7、 ニーヴル+ゼノニア の戦士+整備士+祭司+狩人) =====
     {
       name: "氷牙の戦士 イズン", season: 1, chapter: 's1c4',
@@ -535,6 +608,42 @@ const POOL = {
       caption: "祖父の物語を、 次の子供たちへ。",
       desc: "二十二-二十三歳の若き語り部。 昨年、 祖父が遺した物語の杖 (古龍の歯入り) と語り部の役を受け継いだ。 砂漠夜営の焚き火の前で子供たちに祖父の話を語り継ぐ。 ファラー婆さんとは別系統の遊牧民側伝承の継承者。",
       img: `${S1}/r/young_storyteller.png`,
+    },
+    // ===== S1C5 追加 (R5、 銀霜近衛+雪月神殿見習い+地底市の少女+祭夜の街娘たち) =====
+    {
+      name: "銀霜近衛 セレン", season: 1, chapter: 's1c5',
+      title: "銀霜王国近衛騎士、 シオンを慕う若き後輩",
+      caption: "シオン様、 今夜の街は、 静かですね。",
+      desc: "銀霜国の若き近衛騎士。 銀の髪を短く整えた真面目な青年。 シオンの沈黙を数拍の遅れで察してくれる、 数少ない部下。 王族近衛として祭夜の市街警備を担う。",
+      img: `${S1}/r/silver_squire.png`,
+    },
+    {
+      name: "雪月神殿見習い ラピス", season: 1, chapter: 's1c5',
+      title: "雪月神殿の見習い少年、 灯火を運ぶ",
+      caption: "(灯篭を両手で慎重に持ち、 静かに礼)",
+      desc: "雪月神殿の若き見習い少年、 十四歳ほど。 銀青の短髪、 銀の三日月の髪飾り。 銀青の見習い衣、 銀の腕輪。 ルミナ姉の後輩として灯火を運ぶ。 山場 4-1 分離儀式で月鏡周辺の灯篭を担当。",
+      img: `${S1}/r/moon_acolyte.png`,
+    },
+    {
+      name: "地底市の少女 シエル", season: 1, chapter: 's1c5',
+      title: "地底市リオラの少女、 影喰いを「友達」 と呼ぶ純粋な視点",
+      caption: "これ、 私のお友達です!",
+      desc: "地底市リオラの少女、 八-九歳。 銀の髪、 紫の瞳。 影喰いの幼体を「お友達」 として手のひらに乗せる。 「影と共生する文化」 を子供視点で象徴する存在。 S2C5 への伏線。",
+      img: `${S1}/r/underworld_girl.png`,
+    },
+    {
+      name: "銀霜の工房娘", season: 1, chapter: 's1c5',
+      title: "銀霜国の若き工房娘、 祭夜の街で働く",
+      caption: "シオン様!  今夜の月、 細いですねっ",
+      desc: "銀霜国の祭夜街で工房を営む若い娘。 銀の髪を一房垂らし、 朗らかな笑顔。 銀の灯篭を高く掲げて月夜祭を彩る。 シオンの五つ目の誓い「弱者を守る」 の対象。",
+      img: `${S1}/r/silver_villager_a.png`,
+    },
+    {
+      name: "銀霜の歌姫", season: 1, chapter: 's1c5',
+      title: "銀霜国の若き祭夜の歌姫",
+      caption: "(月夜の静寂を傷つけないよう慎ましく歌う)",
+      desc: "銀霜国の祭夜街で歌う若い歌姫。 銀の髪、 銀青の歌い手衣。 古い子守歌のような曲調で月夜祭を彩る。 シオンが「ベルの歌に似ている」 と感じる声質。 「青の音」 の薄れを告げる役。",
+      img: `${S1}/r/silver_villager_b.png`,
     },
     // ===== S1C4 追加 (R4、 凍土+空挺の子供たち) =====
     {
@@ -962,7 +1071,7 @@ function saveState() {
 
 // ────────────── Rolling ──────────────
 // ピックアップ章: 該当章のキャラだけ重み×2、 他は×1。 章全体のtier比率(R65/SR25/SSR7/UR3)は維持。
-const PICKUP_CHAPTER = 's1c4';  // 最新章固定 (S1C5公開時に 's1c5' へ手動更新)
+const PICKUP_CHAPTER = 's1c5';  // 最新章固定 (S1C6公開時に 's1c6' へ手動更新)
 const PICKUP_WEIGHT = 2;
 
 function rollOne(opts = {}) {
@@ -3164,6 +3273,18 @@ const FACTIONS = [
   // S1C2 追加 (海域)
   { id: 'aquasis', label: '海淵都市アクアシス', yomi: 'かいえんとし・あくあしす', x:  800, y: 1450, color: '#7dd3fc' },
   { id: 'crimson', label: '紅玉海賊団',         yomi: 'こうぎょくかいぞくだん',   x: 1300, y: 1450, color: '#ff8888' },
+  // S1C3 追加 (砂漠)
+  { id: 'sahar',   label: '古龍砂漠サハール',   yomi: 'こりゅうさばく・さはーる', x: 1900, y: 1000, color: '#e8c578' },
+  // S1C4 追加 (凍土+空挺、 ※ FACTIONS/FACTION_WORLD_COORDS/CHAR_FACTION の登録漏れを 2026-05-03 に修正)
+  { id: 'niiruru', label: '氷霊王国ニーヴル',   yomi: 'ひょうれいおうこく・にーう゛る', x: 1700, y:  200, color: '#a8d4ff' },
+  { id: 'zenonia', label: '空挺城ゼノニア',     yomi: 'くうていじょう・ぜのにあ',     x: 1480, y:  380, color: '#d4b078' },
+  // S1C5 追加 (黒月+地底)
+  { id: 'darkmoon', label: '黒月衆ノクトス',    yomi: 'こくげつしゅう・のくとす',     x:  350, y: 1380, color: '#7a3ca5' },
+  { id: 'liora',    label: '地底市リオラ',      yomi: 'ちていし・りおら',             x:  200, y: 1100, color: '#9090d0' },
+  // S1C6 追加 (公開予定)
+  { id: 'shrines',  label: '巫女連邦リーリエ',  yomi: 'みこれんぽう・りーりえ',       x: 1100, y:  950, color: '#ffe4a0' },
+  // S1C7 追加 (公開予定、 ヴォイドラ覚醒の最終章)
+  { id: 'voidtower', label: '異界の塔ザナド',   yomi: 'いかいのとう・ざなど',         x: 1000, y: 1580, color: '#3a1858' },
 ];
 
 // キャラの所属派閥マップ (name → factionId, dx, dy: 派閥中心からの相対オフセット)
@@ -3228,11 +3349,60 @@ const CHAR_FACTION = {
   '白焔教会見習い巫女 ルーナ':   { f: 'church',  dx:  -60, dy:  130 },
   '白焔教会騎士 ラナス':         { f: 'church',  dx:  120, dy:  100 },
   '白焔教会従士 リッカ':         { f: 'church',  dx:  140, dy:  -10 },
-  // S1C4 R 追加 (silver=ニーヴル雪原、 gen=ゼノニア空挺は派閥未制定なので便宜上 redwing 圏に隣接)
-  '凍土の少年 アルク':           { f: 'silver',  dx:  -90, dy:  130 },
-  '雪原の少女 ミウ':             { f: 'silver',  dx:   90, dy:  130 },
-  '空の少女 ピピ':               { f: 'redwing', dx:  -80, dy:  130 },
-  '空の少年 ピット':             { f: 'redwing', dx:   80, dy:  130 },
+  // S1C3 古龍砂漠サハール (s1c3、 2026-05-03 登録漏れ修正)
+  '砂海王女 サハナ':             { f: 'sahar',   dx:    0, dy:  -60 },
+  '古龍の語り部 ファラー':       { f: 'sahar',   dx: -120, dy:    0 },
+  '隊商長 アーシャ':             { f: 'sahar',   dx:  120, dy:    0 },
+  '砂牙の剣聖 グラン':           { f: 'sahar',   dx:  -80, dy:   80 },
+  '祭舞のサフィラ':              { f: 'sahar',   dx:   80, dy:   80 },
+  '古龍鍛冶 オウル':             { f: 'sahar',   dx: -120, dy:  100 },
+  '砂風の戦士 ライ':             { f: 'sahar',   dx:  120, dy:  100 },
+  '砂塵の子 ティナ':             { f: 'sahar',   dx:    0, dy:  130 },
+  '砂風の語り部 ナドラ':         { f: 'sahar',   dx:  -50, dy: -100 },
+  // S1C3 紫竜王国 (リアムは紫竜の侍従)
+  '紫竜の侍従 リアム':           { f: 'dragon',  dx:    0, dy:  120 },
+  // S1C4 氷霊王国ニーヴル (s1c4、 2026-05-03 登録漏れ修正)
+  '氷帝 グレイル':               { f: 'niiruru', dx:    0, dy:  -60 },
+  '氷塔の聖騎士 リオネ':         { f: 'niiruru', dx: -100, dy:   30 },
+  '摂政 ヴァルキ':               { f: 'niiruru', dx:  100, dy:   30 },
+  '北方剣聖 ハグル':             { f: 'niiruru', dx:  -80, dy:   80 },
+  '氷霜の巫女 ユーリス':         { f: 'niiruru', dx:   80, dy:   80 },
+  '凍土の祭司 イル':             { f: 'niiruru', dx:    0, dy:  130 },
+  '氷牙の戦士 イズン':           { f: 'niiruru', dx: -120, dy:  -10 },
+  '凍土の狩人 シエラ':           { f: 'niiruru', dx:  120, dy:  -10 },
+  '氷塔の見習い騎士 アスラ':     { f: 'niiruru', dx: -100, dy:  130 },
+  // S1C4 R アルク・ミウ (旧 silver 誤所属を niiruru へ修正、 2026-05-03)
+  '凍土の少年 アルク':           { f: 'niiruru', dx: -120, dy:  150 },
+  '雪原の少女 ミウ':             { f: 'niiruru', dx:  120, dy:  150 },
+  // S1C4 空挺城ゼノニア (s1c4、 2026-05-03 登録漏れ修正)
+  '空挺女皇 ヴァーレ':           { f: 'zenonia', dx:    0, dy:  -60 },
+  '空挺城総監 ガリオン':         { f: 'zenonia', dx: -100, dy:   30 },
+  '空挺城首席学者 ゼピル':       { f: 'zenonia', dx:  100, dy:   30 },
+  '真鍮の女将 ハーニア':         { f: 'zenonia', dx:    0, dy:  100 },
+  '空挺整備士 ベル':             { f: 'zenonia', dx: -100, dy:  130 },
+  '蒸気砲手 ヴィン':             { f: 'zenonia', dx:    0, dy:  150 },
+  '空挺機関士 ジン':             { f: 'zenonia', dx:  100, dy:  130 },
+  // S1C4 R ピピ・ピット (旧 redwing 誤所属を zenonia へ修正、 2026-05-03)
+  '空の少女 ピピ':               { f: 'zenonia', dx: -120, dy:  170 },
+  '空の少年 ピット':             { f: 'zenonia', dx:  120, dy:  170 },
+  // S1C5 黒月衆ノクトス (s1c5)
+  'シ・ロエン':                  { f: 'darkmoon', dx:    0, dy:  -60 },
+  '黒月の盟主 ノクトリア':       { f: 'darkmoon', dx: -120, dy:   30 },
+  '堕者剣聖 ガルヴィン':         { f: 'darkmoon', dx:  120, dy:   30 },
+  '黒月の刺客':                  { f: 'darkmoon', dx:    0, dy:  120 },
+  // S1C5 地底市リオラ (s1c5)
+  '地底市の母 リオラエル':       { f: 'liora',    dx:    0, dy:  -60 },
+  '影織りの導師 ルナリア':       { f: 'liora',    dx: -100, dy:   30 },
+  '地底市の語り部 オルフェ':     { f: 'liora',    dx:  100, dy:   30 },
+  '地底市の少女 シエル':         { f: 'liora',    dx:    0, dy:  120 },
+  // S1C5 銀霜王国 (s1c5、 既存 silver に追加 — シオン/ルミナと並列)
+  '銀霜王 ノヴァ':               { f: 'silver',  dx:    0, dy: -100 },
+  '銀霜剣聖 オリエル':           { f: 'silver',  dx: -130, dy:  -30 },
+  '月夜祭司 アスター':           { f: 'silver',  dx:  130, dy:  -30 },
+  '銀霜近衛 セレン':             { f: 'silver',  dx: -130, dy:  130 },
+  '雪月神殿見習い ラピス':       { f: 'silver',  dx:  130, dy:  130 },
+  '銀霜の工房娘':                { f: 'silver',  dx: -100, dy:  170 },
+  '銀霜の歌姫':                  { f: 'silver',  dx:  100, dy:  170 },
 };
 // 注: こはね は 夜焔郷 配置 (1か所のみ)。星霊学院との関連は線で表現
 
@@ -3981,6 +4151,7 @@ const STORY_CHAPTER_MARKERS = [
   { storyId: 's1c2', label: '第2章', icon: '🌊', x:  900, y: 1380 }, // アクアシス aquasis 南西、 内側に少し移動
   { storyId: 's1c3', label: '第3章', icon: '🐉', x: 1670, y: 1380 }, // 砂漠サハール (派閥未登録、 専用座標)、 ???ティザーから離す
   { storyId: 's1c4', label: '第4章', icon: '❄️', x: 1700, y:  220 }, // 凍土+空 (北方東部、 Coming Soon)、 内側に下げてコンパスローズと干渉回避
+  { storyId: 's1c5', label: '第5章', icon: '🌑', x:  300, y: 1380 }, // 銀霜+黒月衆+地底市 (西方氷土の裏側)、 silver(500,1250) の少し南西
 ];
 // S2/S3 派閥ティザー (霧表現): まだ実装されていない領域を「???」 で示す
 // 画像範囲外は viewBox bg で見えにくいため内側に配置
@@ -4073,7 +4244,7 @@ const FACTION_WORLD_COORDS = {
   wolf:    { x:  330, y: 1010, region: '西方荒野' },
   silver:  { x:  500, y: 1250, region: '西方氷土' },
   // 東部山岳 (北→南)
-  dragon:  { x: 1550, y:  380, region: '東方山脈' },
+  dragon:  { x:  900, y:  220, region: '中央上紫塔' },  // 2026-05-03 修正: 旧 1550,380 は world_map 上で氷霊王国/空挺城の絵柄、 紫塔は中央上にあり s1c3「紫水晶の城」 と整合
   redwing: { x: 1720, y:  720, region: '東方紅地' },
   yakai:   { x: 1670, y: 1010, region: '東方夜域' },
   seventh: { x: 1500, y: 1250, region: '東方光土' },
@@ -4082,6 +4253,20 @@ const FACTION_WORLD_COORDS = {
   // 海域 (一番南)
   aquasis: { x:  800, y: 1450, region: '南方海域' },
   crimson: { x: 1300, y: 1450, region: '南方海域' },
+  // S1C3 追加 (古龍砂漠サハール、 右端の赤茶砂漠)
+  sahar:   { x: 1900, y: 1000, region: '東方砂漠' },
+  // S1C4 追加 (凍土+空挺、 2026-05-03 登録漏れ修正)
+  // niiruru: world_map 右上の氷城群 = 画像絵柄通り
+  // zenonia: niiruru の南西近距離 (s1c4 本文「ニーヴル → 南西へ少し迂回 → ゼノニア」 整合 + 旧 dragon 位置の浮遊城絵柄)
+  niiruru: { x: 1700, y:  200, region: '北方氷土' },
+  zenonia: { x: 1480, y:  380, region: '北方雲海' },
+  // S1C5 追加 (黒月衆+地底市リオラ)
+  darkmoon: { x:  350, y: 1380, region: '西方氷土の裏側' },  // silver(500,1250) の南西、 月喰いの森・黒月の祭壇地
+  liora:    { x:  200, y: 1100, region: '西方山岳地下' },    // silver の北西、 山岳の岩壁裂け目から下る地下都市
+  // S1C6 追加 (公開予定)
+  shrines:   { x: 1100, y:  950, region: '中央南東' },        // academy(1000,1180) の上、 観測者七座祭祀の中心
+  // S1C7 追加 (公開予定、 ヴォイドラ覚醒の異界塔)
+  voidtower: { x: 1000, y: 1580, region: '異界 (深淵)' },     // 観測者七座 (天空界) と対の存在、 viewBox 最下層
 };
 
 function renderWorldMap() {
@@ -4719,6 +4904,7 @@ const STORY_FILES = {
   s1c2: { title: '南方海域の異変', meta: 'Season 1 — 第2章', file: 'STORY/s1c2.md' },
   s1c3: { title: '砂塵の隊商', meta: 'Season 1 — 第3章', file: 'STORY/s1c3.md' },
   s1c4: { title: '凍土と空',     meta: 'Season 1 — 第4章', file: 'STORY/s1c4.md' },
+  s1c5: { title: '黒月の予兆',   meta: 'Season 1 — 第5章', file: 'STORY/s1c5.md' },
 };
 
 function escapeHtml(s) {
@@ -4834,7 +5020,75 @@ const FURIGANA = {
   '巫女': 'みこ',
   '神事': 'しんじ',
   '聖域': 'せいいき',
+  // S1C5 追加 (黒月衆+地底市+雪月神殿+祭夜+ID-based キャラ表示名)
+  '黒月衆ノクトス': 'こくげつしゅうのくとす',
+  '地底市リオラ': 'ちていしりおら',
+  '巫女連邦リーリエ': 'みこれんぽうりーりえ',
+  '異界の塔ザナド': 'いかいのとうざなど',
+  '黒月衆': 'こくげつしゅう',
+  '黒月': 'こくげつ',
+  '月喰いの森': 'つきはみのもり',
+  '月喰い': 'つきはみ',
+  '雪月神殿': 'せつげつしんでん',
+  '影織り': 'かげおり',
+  '沈黙の盾': 'ちんもくのたて',
+  '兄弟弟子': 'きょうだいでし',
+  '誓盾': 'せいたて',
+  '裁罰': 'さいばつ',
+  '月鏡': 'つきかがみ',
+  '灯篭': 'とうろう',
+  '灯番': 'ひばん',
+  '盟主': 'めいしゅ',
+  '使徒': 'しと',
+  '堕者': 'だしゃ',
+  '導師': 'どうし',
+  '師範': 'しはん',
+  '祭司': 'さいし',
+  '月夜': 'つきよ',
+  '月夜祭': 'つきよさい',
+  '祭夜': 'さいや',
+  '謁見': 'えっけん',
+  '私室': 'ししつ',
+  '街道': 'かいどう',
+  '工房娘': 'こうぼうむすめ',
+  '歌姫': 'うたひめ',
+  '影喰いを「友達」': 'かげくいを「ともだち」',
+  '黒月の盟主 ノクトリア': 'こくげつのめいしゅ のくとりあ',
+  '堕者剣聖 ガルヴィン': 'だしゃけんせい がるう゛ぃん',
+  '影織りの導師 ルナリア': 'かげおりのどうし るなりあ',
+  '銀霜剣聖 オリエル': 'ぎんそうけんせい おりえる',
+  '銀霜王 ノヴァ': 'ぎんそうおう のう゛ぁ',
+  '月夜祭司 アスター': 'つきよさいし あすたー',
+  '銀霜近衛 セレン': 'ぎんそうこのえ せれん',
+  '黒月の刺客': 'こくげつのしかく',
+  '雪月神殿見習い ラピス': 'せつげつしんでんみならい らぴす',
+  '地底市の母 リオラエル': 'ちていしのはは りおらえる',
+  '地底市の少女 シエル': 'ちていしのしょうじょ しえる',
+  '地底市の語り部 オルフェ': 'ちていしのかたりべ おるふぇ',
+  '銀霜の工房娘': 'ぎんそうのこうぼうむすめ',
+  '銀霜の歌姫': 'ぎんそうのうたひめ',
+  '虚': 'こ',
+  '虚境': 'きょきょう',
 };
+
+// ============ ID-based キャラリンク (2026-05-03 導入) ============
+// 同名キャラ重複時の安全装置: 本文中で {{char:slug}}表示名{{/char}} で一意指定可能。
+// 例: 「{{char:sky_engineer}}ベル{{/char}}」 → 空挺整備士ベル に確定リンク (詠聖ベルとの誤紐付け回避)
+// slug は POOL の img URL の filename (拡張子前) をそのまま使用 (例: songstress, sky_engineer, masked_knight)
+// 後方互換: マークアップなしの本文は従来通り name 完全一致 linkify が動く。
+const _poolBySlugCache = new Map();
+function _getCharBySlug(slug) {
+  if (!slug) return null;
+  if (_poolBySlugCache.size === 0 && typeof POOL !== 'undefined') {
+    for (const tier of ['LR','UR','SSR','SR','R']) {
+      for (const c of POOL[tier] || []) {
+        const m = (c.img || '').match(/\/([\w_-]+)\.(png|webp|jpg|jpeg)/i);
+        if (m) _poolBySlugCache.set(m[1], { ...c, tier });
+      }
+    }
+  }
+  return _poolBySlugCache.get(slug) || null;
+}
 
 // HTMLテキストノード内のキャラ名を <a class="char-link"> でラップ
 // 詳細画面オープン用。長い候補から処理して短い名前の誤マッチ回避。
@@ -4842,6 +5096,20 @@ const FURIGANA = {
 // sceneTitle: 現シーンの title (例: 'エピローグ — 天の境で')。 fromTitle ベースの remap 用。
 function linkifyCharNames(html, sceneLabel, sceneTitle) {
   if (typeof POOL === 'undefined') return html;
+  // Step 0: ID-based マークアップを先処理。 同名キャラ重複時の確定リンク手段。
+  // {{char:slug}}表示名{{/char}} → <a class="char-link" data-id="slug" data-name="...">表示名</a>
+  // この時点で <a> タグ化されているので、 後続の name 一致処理 (Step 1) では <a> 内をスキップする walk が
+  // 既存ロジック (tag === 'A' で return) で防御済 → 二重ラップ事故なし。
+  if (typeof html === 'string' && html.indexOf('{{char:') !== -1) {
+    html = html.replace(/\{\{char:([\w_-]+)\}\}([\s\S]*?)\{\{\/char\}\}/g, (m, slug, label) => {
+      const c = _getCharBySlug(slug);
+      if (!c) {
+        if (typeof console !== 'undefined' && console.warn) console.warn('[linkify] unknown char slug:', slug);
+        return label; // 未知 slug は label だけ残す (後続 name match に委ねる)
+      }
+      return `<a class="char-link" data-id="${slug}" data-name="${escapeHtml(c.name)}">${escapeHtml(label)}</a>`;
+    });
+  }
   const tmp = document.createElement('div');
   tmp.innerHTML = html;
   // 候補構築 (story-scene-charsと同じロジック、長い順)
@@ -5162,11 +5430,14 @@ function renderScene() {
   function _storyCharLinkClick(e, a) {
     e.stopPropagation();
     e.preventDefault();
+    // ID-based 優先: data-id (slug) があれば slug → POOL を直接引き、 同名重複でも一意特定。
+    // data-id がなければ従来通り data-name → getCharByName。
+    const slug = a.dataset.id;
     const name = a.dataset.name;
-    const c = getCharByName(name);
+    const c = slug ? _getCharBySlug(slug) : getCharByName(name);
     if (!c) return;
     if (!isUnlocked(c)) {
-      showToast('🔒 ' + name + ' はまだ未解放です。ガチャで引いてからご覧ください');
+      showToast('🔒 ' + (c.name || name) + ' はまだ未解放です。ガチャで引いてからご覧ください');
       return;
     }
     if (detailUnlockedList.length === 0) {
@@ -5479,6 +5750,13 @@ const STORY_ACT_INTROS = {
     '第三幕 — 凍土の対話':              '孤独を分かち合える相手と、 雪原で空を見上げる夜。\n— アルテミス',
     '第四幕 — 帰路':                    '次に龍を譲る相手を、 私はもう、 知っているのかもしれない。\n— アルテミス',
   },
+  's1c5': {
+    'Season 1 第5章 — 黒月の予兆':      '仮面の下に、 もう一人の俺がいる。 抱きしめてから、 手放すための夜の話だ。\n— 仮面騎士 シオン',
+    '第一幕 — 月夜の儀':                '銀霜の月が、 細く欠け始めた。 王から託された月夜の儀の刻が、 来た。\n— シオン',
+    '第二幕 — 影の使徒たち':            '黒月衆ノクトス。 仮面の下の俺の片割れを、 引き取りたいという声。\n— シオン',
+    '第三幕 — 地底市の教え':            '影と共に生きる選択を、 千年前にした民がいた。 私は、 その織機の前に立つ。\n— シオン',
+    '第四幕 — 分離の儀式':              '二重月夜の祭壇で、 仮面を外す。 もう一人の俺と、 向き合う夜。\n— シオン',
+  },
 };
 
 // 全章の outline (公開順、 公開済 + 将来予定)。 STORY_FILES (公開済) との差分で「Coming Soon teaser」 を出す
@@ -5491,7 +5769,7 @@ const STORY_OUTLINE = [
   { id: 's1c3', meta: 'Season 1 — 第3章', title: '砂塵の隊商',         icon: '🐉', tagline: '血ではなく、 共に過ごした時間が家族を作る',                          povCharName: '竜爵 ヴィル' },
   { id: 's1c4', meta: 'Season 1 — 第4章', title: '凍土と空',           icon: '❄️', tagline: '強者の頂は、 孤独を共に分かち合うことで初めて温かい', releaseDate: '2026-05-02', povCharName: '龍帝 アルテミス' },
   { id: 's1c5', meta: 'Season 1 — 第5章', title: '黒月の予兆',         icon: '🌑', tagline: '銀霜の月が黒く欠ける夜、 仮面の下のもう一人の自分が、 静かに立ち上がる ─ 光と影、 二つの私の境界で', releaseDate: '2026-05-06T12:00:00+09:00', povCharName: '仮面騎士 シオン' },
-  { id: 's1c6', meta: 'Season 1 — 第6章', title: '七座満つる',         icon: '🌈', tagline: '違っていても、 同じ目的を持つ仲間でいられる',                       povCharName: 'セラフィエル' },
+  { id: 's1c6', meta: 'Season 1 — 第6章', title: '七座満つる',         icon: '🌈', tagline: '違っていても、 同じ目的を持つ仲間でいられる', releaseDate: '2026-05-13', povCharName: 'セラフィエル' },
   { id: 's1c7', meta: 'Season 1 — 第7章', title: '黒月決戦',           icon: '☄️', tagline: '影を消すのではなく、 共に在ると認める',                              povCharName: '虹意 プリズマ' },
 ];
 
@@ -5682,6 +5960,17 @@ const LOCATION_CONFIG = {
     '3-3': { img: '/images/locations/s1c4/thumb/snow_field_silence_thumb.webp' },           // 3-3 山場 雪原で空を見上げる (アルテミス+グレイル)
     '銀霜の月に呼ばれる者': { img: '/images/locations/s1c4/thumb/observer_prophecy_realm_thumb.webp' },  // エピローグ subscene
   },
+  's1c5': {
+    // 第5章「黒月の予兆」 背景 (3:4縦長 全 8枚)
+    'プロローグ': { img: '/images/locations/s1c5/thumb/observer_west_realm_thumb.webp' },        // プロローグ 観測者三柱・西の月の異変観測
+    '1-1':         { img: '/images/locations/s1c5/thumb/silver_throne_hall_thumb.webp' },        // 1-1 銀霜王宮の月光謁見の間
+    '1-2':         { img: '/images/locations/s1c5/thumb/sion_chamber_thumb.webp' },              // 1-2 シオンの私室 (仮面の置かれた机)
+    '1-3':         { img: '/images/locations/s1c5/thumb/silver_festival_street_thumb.webp' },    // 1-3 銀霜の市街・祭夜
+    '2-1':         { img: '/images/locations/s1c5/thumb/black_moon_grove_thumb.webp' },          // 2-1 月喰いの森 (黒月衆の祭壇)
+    '3-1':         { img: '/images/locations/s1c5/thumb/underworld_liora_full_thumb.webp' },     // 3-1 地底市リオラ全景
+    '3-3':         { img: '/images/locations/s1c5/thumb/moon_shrine_altar_thumb.webp' },         // 3-3 雪月神殿の祭壇
+    'エピローグ': { img: '/images/locations/s1c5/thumb/observer_west_close_thumb.webp' },        // エピローグ 観測者三柱・東への引き
+  },
   's1c3': {
     // 各シーンの「印象深い1場面」 を 3:4 縦長背景画像として配置
     '1-1': { img: '/images/locations/s1c3/thumb/purple_dragon_palace_thumb.webp' },     // 玉座の間 (父王とヴィルの対話)
@@ -5737,12 +6026,29 @@ const STORY_LOCATION_INLINE_CONFIG = {
     { scene: '1-1',  marker: '玉座の脇に、 双大剣『陰陽』 が静かに立てかけられていた', position: 'after',  img: '/images/locations/s1c4/thumb/jade_throne_thumb.webp' },
     // 第一幕 1-3: 雪原村でアルク&ミウ (R2人 デビュー) が龍帝隊列に駆け寄る
     { scene: '1-3',  marker: '銀髪の少年が二人、 雪玉を投げ合って遊んでいた',    position: 'after',  img: '/images/locations/s1c4/thumb/snowfield_villagers_thumb.webp' },
-    // 第二幕 2-1: 氷宮殿の謁見、 北方剣聖ハグル + 氷帝グレイル の剣師教え構図
-    { scene: '2-1',  marker: '右側に立つのは、 銀髪の若き剣士。 北方剣聖ハグル', position: 'after',  img: '/images/locations/s1c4/thumb/frost_swordmaster_sparring_thumb.webp' },
+    // 第二幕 2-1 出会い: アルテミスとグレイルが胸前で手を組み合わせる「覇者同士の挨拶」 (章テーマの入口)
+    { scene: '2-1',  marker: '互いの胸前で手を組み合わせた',                       position: 'after',  img: '/images/locations/s1c4/thumb/artemis_greyle_first_meeting_thumb.webp' },
+    // 第二幕 2-2 一騎打ち冒頭: 北方剣聖ハグルがグレイルの構えを腕組みで見守る (二十年の剣師教えの結実)
+    { scene: '2-2',  marker: 'ハグル剣師が腕を組んで立っていた',                   position: 'before', img: '/images/locations/s1c4/thumb/frost_swordmaster_sparring_thumb.webp' },
     // 第二幕 2-2: 氷帝グレイル vs 龍帝アルテミス 一騎打ち
     { scene: '2-2',  marker: '五合目で、 私は双剣を交差させた',                   position: 'before', img: '/images/locations/s1c4/thumb/duel_ice_vs_dragon_thumb.webp' },
     // 第二幕 2-3: アルテミス&ヒノオウ 千年前の回想 (戦友が並ぶ夜)
     { scene: '2-3',  marker: 'ふと、 古い戦場の記憶が、 不意に蘇った',           position: 'after',  img: '/images/locations/s1c4/thumb/flashback_artemis_hinoo_thumb.webp' },
+    // 第三幕 3-2: 凍り影喰い襲撃 大規模戦闘 (戦友の証明、 希少種ビジュアル定着)
+    { scene: '3-2',  marker: '私たちは、 何も言わずに背を合わせた',                position: 'after',  img: '/images/locations/s1c4/thumb/ice_shadeova_battle_thumb.webp' },
+  ],
+  's1c5': [
+    // 第5章「黒月の予兆」 挿絵 (16:9横長、 全 5枚)
+    // 第二幕 2-2: 王族暗殺未遂 (シオン+刺客、 五つ目の誓いの動機)
+    { scene: '2-2',  marker: '俺のメイスが、 刺客の胴を、 横から薙ぎ払った',         position: 'after',  img: '/images/locations/s1c5/thumb/royal_assassination_flashback_thumb.webp' },
+    // 第二幕 2-3: 教会の塔・シオンとラナス兄弟弟子の沈黙の対話
+    { scene: '2-3',  marker: '銀霜の街の灯火を、 見下ろしていた',                    position: 'after',  img: '/images/locations/s1c5/thumb/church_tower_reunion_thumb.webp' },
+    // 第三幕 3-2: 影織りの工房 (リオラエル+ルナリア+シオン、 章テーマ視覚化)
+    { scene: '3-2',  marker: '銀の糸と、 黒の糸が、 完全に等価に、 交差していた',     position: 'after',  img: '/images/locations/s1c5/thumb/shadow_loom_workshop_thumb.webp' },
+    // 第四幕 4-1: 山場 分離の儀式 (シオン+シ・ロエン+ラナス+ルミナ+アスター、 二重月夜)
+    { scene: '4-1',  marker: '月鏡の表面が、 静かに、 揺らいだ',                       position: 'before', img: '/images/locations/s1c5/thumb/mask_separation_ritual_thumb.webp' },
+    // 第四幕 4-2: 別れの朝 (シオン+シ・ロエン、 雪原の二筋の足跡)
+    { scene: '4-2',  marker: '雪原の遠く、 朝霧の向こうに、 シ・ロエンと',             position: 'after',  img: '/images/locations/s1c5/thumb/shi_loen_departure_thumb.webp' },
     // 第三幕 3-1: 空挺城ゼノニア 三国会談シーン (ヴァーレ女皇)
     { scene: '3-1',  marker: 'ヴァーレが、 静かに口を開いた',                     position: 'before', img: '/images/locations/s1c4/thumb/vaire_diplomacy_thumb.webp' },
     // 第三幕 3-1: ゼノニア整備工房の生活感 (ハーニア親方+ベル整備士+ピット見習い)
@@ -5768,7 +6074,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260502i';
+const IMG_CACHE_VERSION = '20260503a';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -6692,6 +6998,8 @@ const BGM_LIST = [
   { id: 'frost',    label: '第4章テーマ',      desc: 'Prism Frost (凍空の鼓動)',           duration: '2:53', file: '/assets/bgm/prism-frost.mp3' },
   { id: 'niflheim', label: 'ニーヴルテーマ',   desc: 'Prism Niflheim (氷霊の歌)',          duration: '3:09', file: '/assets/bgm/prism-niflheim.mp3' },
   { id: 'aether',   label: 'ゼノニアテーマ',   desc: 'Prism Aether (蒸気の鼓動)',          duration: '3:08', file: '/assets/bgm/prism-aether.mp3' },
+  // ===== S1C5 追加 (1曲: 章テーマ、 派閥 BGM は 5キャラ閾値到達後に追加予定) =====
+  { id: 'blackmoon', label: '第5章テーマ',     desc: 'Prism Blackmoon (黒月の予兆)',       duration: '0:00', file: '/assets/bgm/prism-blackmoon.mp3' },
 ];
 const bgmAudio = document.getElementById("bgm-home");
 

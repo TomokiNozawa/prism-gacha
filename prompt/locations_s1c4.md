@@ -56,8 +56,14 @@ S1C4「凍土と空」 (POV: アルテミス、 龍国 龍帝) の場所画像 (
 | 8 | flashback_artemis_hinoo.png | 16:9 | 挿絵 | 2-3 ヒノオウ回想 | アルテミス20歳+ヒノオウ20歳 (添付2枚) |
 | 9 | vaire_diplomacy.png | 16:9 | 挿絵 | 3-1 ヴァーレ初登場、 外交 | アルテミス+ヴァーレ (添付2枚) |
 | 10 | frost_oracle_prophecy.png | 16:9 | 挿絵 | 4-1 ユーリス予言 | アルテミス+ユーリス (添付2枚) |
+| 11 | frost_swordmaster_sparring.png | 16:9 | 挿絵 | 2-2 一騎打ち冒頭、 ハグル剣師がグレイルの構えを腕組みで見守る | ハグル+グレイル (添付2枚) |
+| 12 | zenonia_workshop.png | 16:9 | 挿絵 | 3-1 ゼノニア整備工房の生活感 | ハーニア+ベル+ピット (添付3枚) |
+| 13 | jade_throne.png | 16:9 | 挿絵 | 1-1 翡翠の玉座 (章開幕) | アルテミス (添付1枚) |
+| 14 | snowfield_villagers.png | 16:9 | 挿絵 | 1-3 雪原村のアルク&ミウ | アルテミス+アルク+ミウ (添付3枚) |
+| 15 | artemis_greyle_first_meeting.png | 16:9 | 挿絵 | 2-1 氷宮殿の謁見、 二人が胸前で手を組み合わせた瞬間 | アルテミス+グレイル (添付2枚) |
+| 16 | ice_shadeova_battle.png | 16:9 | 挿絵 | 3-2 凍り影喰い襲撃 (希少種・百年に一度) との大規模戦闘 | アルテミス+グレイル+イズン+シエラ+アスラ+リオネ+ガリオン+ヴィン (添付8枚) |
 
-合計 10枚 (背景6 + 挿絵4)。 s1c2 (12枚) / s1c3 (12枚) と同規模、 章規模圧縮。
+合計 16枚 (背景6 + 挿絵10)。 章テーマ「強者の頂は孤独を共に分かち合う」 を 2-1 出会いの手の組み合わせ + 2-2 一騎打ち + 3-2 凍り影喰い大戦闘 (戦友の証明) + 3-3 雪原並びの 4点で象徴化。
 
 ---
 
@@ -257,12 +263,12 @@ anime fantasy game illustration of a prophetic oracle scene in a small ice shrin
 > - `images/characters/season1/ssr/north_swordmaster.png` (ハグル — 生成後)
 > - `images/characters/season1/ur/ice_emperor.png` (グレイル — 生成後)
 
-- **対応シーン**: 2-1 氷宮殿の謁見の途中、 ハグル剣師が紹介されるシーン (or 一騎打ち前夜の修行回想)
-- **本文行**: `STORY/s1c4.md` (リライト後に追記、 marker 候補: 「剣師に教わった構えだ」 等)
-- **役割**: 本文インライン挿絵、 ハグル (グレイル剣師) の存在を絵で示す
-- **被写体**: ハグル (年齢曖昧の若き剣聖、 双剣ヘルファング) が氷柱の前に立ち、 グレイル (氷帝) が片膝をついて剣を捧げる伝授風構図
-- **ストーリー使用**: ✅ s1c4 2-1 挿絵
-- **コード参照**: `STORY_LOCATION_INLINE_CONFIG['s1c4']` (2-1 marker)
+- **対応シーン**: 2-2 一騎打ち冒頭、 ハグル剣師が腕を組んでグレイルの構えを静かに見守るシーン (二十年の剣師教えの結実、 SSR_ハグル凸秘話「グレイルの剣師として」 に該当)
+- **本文行**: `STORY/s1c4.md` 2-2 marker = 「ハグル剣師が腕を組んで立っていた」 (l.266)
+- **役割**: 本文インライン挿絵、 弟子グレイルの最初の一手の前に師匠ハグルの「もう教えることはない」 沈黙の承認を絵で示す
+- **被写体**: ハグル (年齢曖昧の若き剣聖、 双剣ヘルファング) が雪原の左奥に腕を組んで立つ、 グレイル (氷帝、 双剣ニフル+ヘイル) が右前方で構えを取る、 二人の間に二十年の沈黙が流れる
+- **ストーリー使用**: ✅ s1c4 2-2 挿絵 (一騎打ち前)
+- **コード参照**: `STORY_LOCATION_INLINE_CONFIG['s1c4']` (2-2 marker, position 'before')
 
 ```
 anime fantasy game illustration of a sword master and his student in a snow training ground at twilight, on the left North Sword Saint Hagul standing tall in his north sword master attire holding twin ice swords Hellfang in a guard pose with quiet authority, on the right young Ice Emperor Glayl kneeling on one knee with his head bowed in respect his twin ice swords Nifl and Heil placed crossed before him on the snow as a gesture of receiving instruction, the master and student facing each other in three-quarter view connected by mutual unspoken trust, frozen tundra training ground at twilight with crystalline ice pillars rising around them and Niiruru ice palace silhouetted in the distance, the seven prismatic streams of the genso visible faintly through the violet twilight sky, soft pale-blue moonlight beginning to emerge mixed with last orange of sunset, atmosphere of solemn transmission between an ancient-blooded master and his coronated student, dramatic rim light with cool silver-blue glow and warm twilight amber accents, crystalline frost vapor drifting around them, cinematic composition, anime fantasy game illustration painting style, high detail, Aspect ratio 16:9, horizontal orientation 1672x941, CRITICAL ANATOMY REQUIREMENTS: anatomically correct human hands with exactly five distinct well-formed fingers per hand, Hagul both hands gripping the twin sword hilts firmly with all five fingers visible, Glayl both hands resting on his thigh with all five fingers visible, both arms of both characters in natural ceremonial poses with proper joint angles, original character setting, no logos, no text, no watermark.
@@ -348,9 +354,61 @@ CRITICAL ANATOMY REQUIREMENTS: anatomically correct human hands with exactly fiv
 - [x] エピローグ「次は、 西だ」 → S1C5 銀霜引き (#6 観測者の場で展開)
 - [x] 派閥背景キーワード `_common.md` 準拠 (frozen tundra / steampunk floating fortress / imperial jade)
 - [x] **追加 (2026-05-01 +20体構成対応)**: ハグル (グレイル剣師、 #11) + ハーニア+ベル+ピット (工房3人、 #12) を挿絵で正式登場、 凍土の血脈 + 機械文明の温度感を強化
+- [x] **追加 (2026-05-03 野沢さん指摘対応)**: 2-1 アルテミス+グレイル 出会いの手の組み合わせ挿絵 #15 を新規追加。 章テーマ「強者の頂は孤独を共に分かち合う」 の入口を視覚化。 また #11 frost_swordmaster_sparring の対応シーンを 2-1 (謁見の右側に立つハグル) → 2-2 (一騎打ち冒頭、 腕組みで弟子を見守るハグル) に修正、 sparring=稽古構図と本文整合を確保。
+
+---
+
+# 【15】artemis_greyle_first_meeting.png — 2-1 アルテミス+グレイル 出会いの手の組み合わせ (挿絵、 16:9、 キャラ含む)
+
+> **添付リファ画像 (2枚必須)**:
+> - `images/characters/season1/lr/dragon_emperor.png` (アルテミス)
+> - `images/characters/season1/ur/ice_emperor.png` (グレイル — 生成後)
+
+- **対応シーン**: 2-1 氷宮殿の謁見、 アルテミスとグレイルの初対面、 「胸前で手を組み合わせた」 覇者同士の挨拶シーン
+- **本文行**: `STORY/s1c4.md` 2-1 marker = 「互いの胸前で手を組み合わせた」 (l.222 付近)
+- **役割**: 本文インライン挿絵、 章テーマ「強者の頂は孤独を共に分かち合う」 を冒頭で視覚化、 二人の出会いを物語の核として印象付け
+- **被写体**: アルテミス (右、 黒翡翠の旅装、 双大剣『陰陽』 を腰に) と グレイル (左、 銀青の即位衣、 双氷剣ニフル+ヘイルを腰に) が、 氷宮殿の謁見の間中央で互いの右手を胸前で組み合わせる瞬間。 二人の手が画面中央焦点。 リオネが背後シルエットで控えめに見守る。
+- **ストーリー使用**: ✅ s1c4 2-1 挿絵 (出会い)
+- **コード参照**: `STORY_LOCATION_INLINE_CONFIG['s1c4']` (2-1 marker '互いの胸前で手を組み合わせた', position 'after')
+
+```
+anime fantasy game illustration of a historic first encounter between two emperors in the great audience hall of Niiruru Ice Palace under pale-blue moonlight from tall arched windows, on the right Emperor Artemis (dragon-emperor, matching the reference image — black-and-jade imperial robes with violet dragon embroidery, twin great-sword Yin-Yang sheathed at his side, ancient yet youthful dignity) standing tall facing left, on the left Emperor Glayl (ice-emperor, matching the reference image — silver-blue royal robes with intricate frost embroidery, twin ice-swords Nifl and Heil sheathed at his sides, calm authority of a newly-crowned ice emperor) standing facing right, BOTH EMPERORS pressing their right hands together palm-to-palm in front of their chests in the ancient ceremonial gesture of equals greeting equals — neither bowing, neither dominating, the two hands meeting at the exact center of the composition as the visual focus, both rulers locking eyes with mutual measured respect, slight pale-blue mist of breath rising in the cold ice palace air visible between them, the great translucent ice columns of Niiruru audience hall lining both sides like a forest of frozen pillars, blue ice-spirit lanterns floating slowly in the background casting cool shifting light, the floor of polished ice reflecting the seven prismatic streams of the genso flowing through the high vaulted ceiling, behind Glayl on his far left side a female knight Lione watches in respectful silence (small in middle distance, only a soft outline silhouette of a silver-haired knight), behind Artemis on his far right side his guard captain stands at attention (small in middle distance, only a soft silhouette), atmosphere of two solitary peaks meeting for the first time and recognizing each other through a single touch of hands, dramatic rim lighting with twin-tone golden-violet (Artemis side) and silver-blue (Glayl side) glow meeting at the center where their hands touch creating a soft prismatic halo, cinematic composition emphasizing the connecting hands at the focal point, anime fantasy game illustration painting style, high detail, Aspect ratio 16:9, horizontal orientation 1672x941,
+CRITICAL ANATOMY REQUIREMENTS: anatomically correct human hands with exactly five distinct well-formed fingers per hand, both emperors' right hands pressed palm-to-palm at chest height with all ten fingers visible properly aligned (Artemis's right palm meeting Glayl's right palm), both emperors' left hands resting at their sides on their sword hilts with all five fingers visible per hand, both arms of both characters in natural ceremonial poses with proper joint angles, no extra digits, no fused fingers, original character setting, no logos, no text, no watermark.
+
+元画像から表情や姿勢は変わってOKです (二人の右手が触れ合う中央焦点の対峙構図に最適化)
+```
 
 ## 生成順序 (推奨)
 
 1. キャラ画像 (`prompt/s1c4_chars.md` 全20体) を全部生成 → リファ画像が揃う
 2. 純風景 5枚を先行生成 (#1, #2, #3, #4, #6) — リファ不要、 即生成可
 3. キャラ含む 7枚 を後で生成 (#5, #7, #8, #9, #10, #11, #12) — 該当キャラ画像が揃ってから
+
+---
+
+# 【16】ice_shadeova_battle.png — 凍り影喰い襲撃 大規模戦闘 (挿絵、 16:9、 キャラ含む 8体)
+
+> **添付リファ画像 (8枚必須)**:
+> - `images/characters/season1/lr/dragon_emperor.png` (アルテミス)
+> - `images/characters/season1/ur/ice_emperor.png` (グレイル)
+> - `images/characters/season1/sr/ice_warrior.png` (イズン)
+> - `images/characters/season1/sr/snow_hunter.png` (シエラ — 生成後)
+> - `images/characters/season1/sr/ice_apprentice.png` (アスラ — 生成後)
+> - `images/characters/season1/ssr/snow_paladin.png` (リオネ — 生成後)
+> - `images/characters/season1/ssr/sky_general.png` (ガリオン — 生成後)
+> - `images/characters/season1/sr/steam_gunner.png` (ヴィン — 生成後)
+
+- **対応シーン**: 3-2 凍り影喰い襲撃 (希少種、 百年に一度の発生種、 章テーマの戦友証明シーン)
+- **本文行**: `STORY/s1c4.md` 3-2 marker = 「私たちは、 何も言わずに背を合わせた」 (l.465 付近)
+- **役割**: 本文インライン挿絵、 凍り影喰い (希少種) のビジュアル定着 + アルテミス+グレイルの「背を預け合う戦友」 関係を視覚化
+- **被写体**: 中央前面でアルテミス+グレイルが背中合わせ、 周囲に凍土戦士 (イズン+シエラ+アスラ+リオネ)、 空からゼノニア空挺艦援軍 (ガリオン+ヴィン)、 凍り影喰いの群れ (結晶人型・氷の破片で構成・胸に紫の void コア)
+- **ストーリー使用**: ✅ s1c4 3-2 挿絵 (戦友証明)
+- **コード参照**: `STORY_LOCATION_INLINE_CONFIG['s1c4']` (3-2 marker, position 'after')
+
+```
+anime-style dynamic battle illustration of a fierce defense against a horde of ice-shadow-eaters at night on the frozen tundra north of Niiruru ice palace, in the foreground center back-to-back stand Emperor Artemis (dragon-emperor, twin great-swords Yin-Yang radiating golden-violet dragon aura) and Emperor Glayl (ice-emperor, twin ice-swords Nifl and Heil radiating prismatic frost aura) covering each other in mutual back-cover stance, on the right young ice warrior Izun swinging his twin ice-axes Frimuri at an attacking ice-shadow-eater, on the left young huntress Schiela drawing her ice longbow piercing a shadow-eater's crystal core in a single shot, in the middle distance squire Asura desperately defending Lione's back with a short dagger while Lione the silver paladin parries multiple shadow-eaters at once with her holy silver sword, above in the night sky a Zenonia airship descends with general Galion firing the steam cannon downward, his subordinate Vin firing the long steam-rifle from the ship's edge, the rare ice-shadow-eaters appearing as crystalline humanoid shadows made of jagged ice fragments with violet void cores in their chests, broken ice fragments re-crystallizing on the snowy ground as they advance, the seven prismatic streams of the genso visible in the deep navy night sky above, dramatic motion-blur of multiple weapon strikes, frost vapor and ice shards exploding around the combatants, dramatic rim lighting with twin-tone golden-violet (Artemis) and silver-blue (Glayl) auras meeting at the center back-to-back contact point, urgent climactic battlefield atmosphere of comrades-in-arms protecting each other, anime fantasy game illustration painting style, high detail, Aspect ratio 16:9, horizontal orientation 1672x941, CRITICAL ANATOMY REQUIREMENTS: anatomically correct human hands with exactly five distinct well-formed fingers per hand for all visible characters, all weapon grips realistic, both arms of all characters in natural combat-ready poses with proper joint angles, no extra digits, no fused fingers, original character setting, no logos, no text, no watermark.
+
+元画像から表情や姿勢は変わってOKです (二人の覇王が背中合わせの中心、 凍土の戦士たち+空挺援軍が周囲で戦う多人数戦闘構図に最適化、 凍り影喰いは結晶人型として描く)
+```
+
+**ポイント**: 章テーマ「強者の頂は、 孤独を共に分かち合うことで初めて温かい」 を**実戦**で証明するシーン。 2-1 出会いの「手の組み合わせ」 → 2-2 一騎打ち「対峙」 → 3-2「背中合わせの共闘」 = 関係性の段階的深化。 凍り影喰いは希少種 (百年に一度) として、 結晶人型 + 紫の void コアという固有ビジュアルを定着させる。
