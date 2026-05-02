@@ -7,7 +7,7 @@
 //
 // HTML/JSON/Firebase API はキャッシュせず常にネットワーク優先 (更新即反映+認証/DBの鮮度維持)。
 
-const SW_VERSION = '20260502z';  // v1.3.2+ s1c4 挿絵 4枚追加 (jade_throne / snowfield_villagers / frost_swordmaster_sparring / zenonia_workshop)
+const SW_VERSION = '20260502za';  // v1.3.2+ 章末ページに次章Coming Soonカード復活 + 次章POV (シオン等) 表示
 const STATIC_CACHE = `prismaera-static-${SW_VERSION}`;
 const BGM_CACHE    = `prismaera-bgm-${SW_VERSION}`;
 const LOC_CACHE    = `prismaera-loc-${SW_VERSION}`;
