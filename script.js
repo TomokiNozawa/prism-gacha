@@ -977,8 +977,15 @@ function rollOne(opts = {}) {
   return pickTier("R", opts);
 }
 function pickTier(tier, opts = {}) {
-  const pool = POOL[tier];
-  if (!pool || pool.length === 0) return { tier };
+  const fullPool = POOL[tier];
+  if (!fullPool || fullPool.length === 0) return { tier };
+  // 公開済章のキャラだけ排出 (releaseDate <= now)。 chapter プロパティ無しのキャラは互換のため通す
+  const pool = fullPool.filter(c => !c.chapter || _isChapterReleased(c.chapter));
+  if (pool.length === 0) {
+    // 同 tier に公開済キャラ皆無の極端なケース → 全 pool から fallback (空 result 回避)
+    const ch = fullPool[Math.floor(Math.random() * fullPool.length)];
+    return { tier, ...ch };
+  }
   // 通常ガチャ: 等確率
   if (!opts.pickup) {
     const ch = pool[Math.floor(Math.random() * pool.length)];
@@ -4977,6 +4984,11 @@ let currentStoryPov = null;  // 章のPOVキャラ名 (**POV**: 名前 から抽
 async function openStory(storyId) {
   const info = STORY_FILES[storyId];
   if (!info) return;
+  // 公開予定日チェック (releaseDate <= now のみ閲覧可能、 防御線として WMマーカー側のチェックと併存)
+  if (!_isChapterReleased(storyId)) {
+    _showInfoToast(`📅 ${_formatReleaseDate(storyId)} 公開予定`);
+    return;
+  }
   currentStoryId = storyId;
   _prefetchChapterAssets(storyId);  // M2: 章の場所画像を background DL → SWで LOC_CACHE 充填
   $("#story-meta").textContent = info.meta;
@@ -5478,7 +5490,7 @@ const STORY_OUTLINE = [
   { id: 's1c2', meta: 'Season 1 — 第2章', title: '南方海域の異変',     icon: '🌊', tagline: '信じる対象は、 外にあるとは限らない',                                povCharName: 'イザベル' },
   { id: 's1c3', meta: 'Season 1 — 第3章', title: '砂塵の隊商',         icon: '🐉', tagline: '血ではなく、 共に過ごした時間が家族を作る',                          povCharName: '竜爵 ヴィル' },
   { id: 's1c4', meta: 'Season 1 — 第4章', title: '凍土と空',           icon: '❄️', tagline: '強者の頂は、 孤独を共に分かち合うことで初めて温かい', releaseDate: '2026-05-02', povCharName: '龍帝 アルテミス' },
-  { id: 's1c5', meta: 'Season 1 — 第5章', title: '黒月の予兆',         icon: '🌑', tagline: '銀霜の月が黒く欠ける夜、 仮面の下のもう一人の自分が、 静かに立ち上がる ─ 光と影、 二つの私の境界で', releaseDate: '2026-05-06', povCharName: '仮面騎士 シオン' },
+  { id: 's1c5', meta: 'Season 1 — 第5章', title: '黒月の予兆',         icon: '🌑', tagline: '銀霜の月が黒く欠ける夜、 仮面の下のもう一人の自分が、 静かに立ち上がる ─ 光と影、 二つの私の境界で', releaseDate: '2026-05-06T20:00:00+09:00', povCharName: '仮面騎士 シオン' },
   { id: 's1c6', meta: 'Season 1 — 第6章', title: '七座満つる',         icon: '🌈', tagline: '違っていても、 同じ目的を持つ仲間でいられる',                       povCharName: 'セラフィエル' },
   { id: 's1c7', meta: 'Season 1 — 第7章', title: '黒月決戦',           icon: '☄️', tagline: '影を消すのではなく、 共に在ると認める',                              povCharName: '虹意 プリズマ' },
 ];
@@ -5754,7 +5766,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260502g';
+const IMG_CACHE_VERSION = '20260502h';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -6521,9 +6533,32 @@ function restoreStoryProgress(storyId, total) {
 }
 
 // ストーリーカードクリック (モーダル内も含む)
+// クリック時に releaseDate 判定 + Coming Soon カードに locked 視覚適用 (起動時+定期)
 document.querySelectorAll('.story-card[data-story]').forEach(card => {
   card.addEventListener('click', () => openStory(card.dataset.story));
 });
+function _refreshChapterReleaseLocks() {
+  document.querySelectorAll('.story-card[data-story]').forEach(card => {
+    const sid = card.dataset.story;
+    const released = _isChapterReleased(sid);
+    card.classList.toggle('chapter-locked', !released);
+    // 既存 badge があれば消去 → 新規追加
+    let badge = card.querySelector('.chapter-locked-badge');
+    if (released) {
+      if (badge) badge.remove();
+    } else if (!badge) {
+      badge = document.createElement('div');
+      badge.className = 'chapter-locked-badge';
+      badge.innerHTML = `📅 <b>${_formatReleaseDate(sid)}</b> 公開予定`;
+      card.appendChild(badge);
+    } else {
+      badge.innerHTML = `📅 <b>${_formatReleaseDate(sid)}</b> 公開予定`;
+    }
+  });
+}
+document.addEventListener('DOMContentLoaded', _refreshChapterReleaseLocks);
+// 1分毎に再判定 (リリース時刻を跨いだ瞬間に自動 unlock)
+setInterval(_refreshChapterReleaseLocks, 60000);
 // ストーリー一覧モーダル
 // #10 ストーリー既読マーク (読了済み章カードに ✅ バッジ + ホームメタタグに 完読数/解放数 動的反映)
 function refreshStoryReadBadges() {
@@ -8244,6 +8279,35 @@ function _isChapterReleased(chapterId) {
     if (!isNaN(ts) && ts > Date.now()) return false;
   }
   return true;
+}
+// 公開予定日の表示用フォーマット (M/D HH:MM、 ゼロ埋め2桁)
+function _formatReleaseDate(chapterId) {
+  if (typeof STORY_OUTLINE === 'undefined') return '近日';
+  const o = STORY_OUTLINE.find(x => x && x.id === chapterId);
+  if (!o || !o.releaseDate) return '近日';
+  const d = new Date(o.releaseDate);
+  if (isNaN(d.getTime())) return '近日';
+  const pad = n => String(n).padStart(2, '0');
+  // 時刻部分が 00:00 の場合は日付のみ、 そうでなければ日付+時刻
+  const hh = d.getHours(), mm = d.getMinutes();
+  const datePart = `${pad(d.getMonth() + 1)}/${pad(d.getDate())}`;
+  if (hh === 0 && mm === 0) return datePart;
+  return `${datePart} ${pad(hh)}:${pad(mm)}`;
+}
+// グローバル info toast (公開予定告知 等、 WM外でも表示可能)
+let _infoToastTimer = null;
+function _showInfoToast(text, durationMs) {
+  let toast = document.getElementById('info-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'info-toast';
+    toast.className = 'info-toast';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = text;
+  toast.classList.add('show');
+  if (_infoToastTimer) clearTimeout(_infoToastTimer);
+  _infoToastTimer = setTimeout(() => { toast.classList.remove('show'); }, durationMs || 2200);
 }
 async function _autoPrecacheGachaImages() {
   if (_autoPrecacheRunning) return;

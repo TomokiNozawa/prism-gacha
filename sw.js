@@ -7,7 +7,7 @@
 //
 // HTML/JSON/Firebase API はキャッシュせず常にネットワーク優先 (更新即反映+認証/DBの鮮度維持)。
 
-const SW_VERSION = '20260502g';  // 既存ゲスト state.total を Firebase 同期 (admin 反映)
+const SW_VERSION = '20260502h';  // 章 releaseDate 時刻判定 + ガチャ排出フィルタ + Coming Soon カード
 const STATIC_CACHE = `prismaera-static-${SW_VERSION}`;
 const BGM_CACHE    = `prismaera-bgm-${SW_VERSION}`;
 const LOC_CACHE    = `prismaera-loc-${SW_VERSION}`;

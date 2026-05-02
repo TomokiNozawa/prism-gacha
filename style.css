@@ -5568,6 +5568,55 @@ body.gasshuku-modal-open {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
+/* グローバル info toast (公開予定告知 等、 viewport 中央下に表示) */
+.info-toast {
+  position: fixed;
+  left: 50%; bottom: 32px;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(20, 25, 45, 0.97);
+  color: #ffd97a;
+  padding: 12px 26px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 217, 122, 0.4);
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 320;
+  max-width: calc(100vw - 32px);
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+.info-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+/* 公開予定章カード (releaseDate > now) — 半透明 + Coming Soon オーバーレイ */
+.story-card.chapter-locked {
+  position: relative;
+  opacity: 0.65;
+  cursor: not-allowed;
+  filter: saturate(0.55);
+}
+.story-card.chapter-locked:hover { transform: none; }
+.chapter-locked-badge {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(20, 25, 45, 0.92);
+  color: #ffd97a;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 217, 122, 0.5);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+  z-index: 2;
+}
+.chapter-locked-badge b { color: #fff; font-weight: 700; }
 /* 全モーダル共通の背景 scroll lock。 JS 側 (body.classList.add('modal-open')) と セットで機能する */
 /* iOS PWA scroll lock: 単純な overflow:hidden では効かないため、 JS で position:fixed + top:-scrollY をセット */
 body.modal-open {
