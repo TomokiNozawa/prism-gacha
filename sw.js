@@ -7,7 +7,7 @@
 //
 // HTML/JSON/Firebase API はキャッシュせず常にネットワーク優先 (更新即反映+認証/DBの鮮度維持)。
 
-const SW_VERSION = '20260502y';  // v1.3.2+ LR 0.5%表示 + WM 紅翼皇家 Esc 修正 + 相関図 viewBox zoom + s1c4 全 20キャラ凸秘話完成
+const SW_VERSION = '20260502z';  // v1.3.2+ s1c4 挿絵 4枚追加 (jade_throne / snowfield_villagers / frost_swordmaster_sparring / zenonia_workshop)
 const STATIC_CACHE = `prismaera-static-${SW_VERSION}`;
 const BGM_CACHE    = `prismaera-bgm-${SW_VERSION}`;
 const LOC_CACHE    = `prismaera-loc-${SW_VERSION}`;

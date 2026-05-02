@@ -5693,10 +5693,22 @@ const STORY_LOCATION_INLINE_CONFIG = {
     { scene: '3-3',  marker: '光の中で、私の鎧が、変容した',      position: 'after',  img: '/images/locations/s1c2/ripple_saint_awakening_thumb.webp' },
   ],
   's1c4': [
-    // 第4章 挿絵 (16:9横、 全 4枚)
+    // 第4章 挿絵 (16:9横、 全 8枚)
+    // 第一幕 1-1: 翡翠の玉座 — 章開幕、 アルテミス + 双大剣『陰陽』
+    { scene: '1-1',  marker: '玉座の脇に、 双大剣『陰陽』 が静かに立てかけられていた', position: 'after',  img: '/images/locations/s1c4/jade_throne_thumb.webp' },
+    // 第一幕 1-3: 雪原村でアルク&ミウ (R2人 デビュー) が龍帝隊列に駆け寄る
+    { scene: '1-3',  marker: '銀髪の少年が二人、 雪玉を投げ合って遊んでいた',    position: 'after',  img: '/images/locations/s1c4/snowfield_villagers_thumb.webp' },
+    // 第二幕 2-1: 氷宮殿の謁見、 北方剣聖ハグル + 氷帝グレイル の剣師教え構図
+    { scene: '2-1',  marker: '右側に立つのは、 銀髪の若き剣士。 北方剣聖ハグル', position: 'after',  img: '/images/locations/s1c4/frost_swordmaster_sparring_thumb.webp' },
+    // 第二幕 2-2: 氷帝グレイル vs 龍帝アルテミス 一騎打ち
     { scene: '2-2',  marker: '五合目で、 私は双剣を交差させた',                   position: 'before', img: '/images/locations/s1c4/duel_ice_vs_dragon_thumb.webp' },
+    // 第二幕 2-3: アルテミス&ヒノオウ 千年前の回想 (戦友が並ぶ夜)
     { scene: '2-3',  marker: 'ふと、 古い戦場の記憶が、 不意に蘇った',           position: 'after',  img: '/images/locations/s1c4/flashback_artemis_hinoo_thumb.webp' },
+    // 第三幕 3-1: 空挺城ゼノニア 三国会談シーン (ヴァーレ女皇)
     { scene: '3-1',  marker: 'ヴァーレが、 静かに口を開いた',                     position: 'before', img: '/images/locations/s1c4/vaire_diplomacy_thumb.webp' },
+    // 第三幕 3-1: ゼノニア整備工房の生活感 (ハーニア親方+ベル整備士+ピット見習い)
+    { scene: '3-1',  marker: '整備工房から元気な声が響いた',                       position: 'after',  img: '/images/locations/s1c4/zenonia_workshop_thumb.webp' },
+    // 第四幕 4-1: 観測者三柱 ユーリス予言シーン (氷の小神殿)
     { scene: '4-1',  marker: '氷の小さな神殿の中央に、 ユーリスは立っていた',     position: 'after',  img: '/images/locations/s1c4/frost_oracle_prophecy_thumb.webp' },
   ],
   's1c3': [
@@ -5717,7 +5729,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260502y';
+const IMG_CACHE_VERSION = '20260502z';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
