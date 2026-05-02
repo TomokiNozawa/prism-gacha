@@ -2906,7 +2906,7 @@ function renderGalleryByTab() {
       // cache buster 付きで サムネ更新時にブラウザキャッシュ刷新
       const img = document.createElement("img");
       img.className = "gallery-card-img";
-      img.src = (c.img || '').replace(/\.png(\?.*)?$/i, '_thumb.webp$1') + '?v=20260430aa';
+      img.src = toThumbUrl(c.img || '') + '?v=20260430aa';
       img.alt = c.name;
       img.loading = "lazy";
       img.decoding = "async";
@@ -3797,7 +3797,7 @@ function openLocImageZoom(src) {
   const z = document.getElementById('char-img-zoom');
   const img = document.getElementById('char-img-zoom-img');
   if (!z || !img || !src) return;
-  const fullSrc = src.replace(/_thumb\.webp(\?.*)?$/i, '.png$1');
+  const fullSrc = toFullUrl(src);
   img.src = fullSrc;
   // 原寸PNGが404 の場合は thumb webp にフォールバック
   img.onerror = function () {
@@ -4390,7 +4390,7 @@ function _showChapterGallery(storyId) {
       const visIdx = visibleLocs.findIndex(l => l.scene === sceneKey && l.img === el.dataset.img);
       if (visIdx < 0) return;
       const thumbUrl = el.dataset.img;
-      const fullUrl = thumbUrl.replace(/_thumb\.webp(\?.*)?$/i, '.png$1');
+      const fullUrl = toFullUrl(thumbUrl);
       _openLocImageZoom(fullUrl, { list: visibleLocs, index: visIdx });
     });
   });
@@ -4449,7 +4449,7 @@ function _locZoomNavGo(dir) {
   _locZoomNav.index = newIdx;
   const next = list[newIdx];
   if (!next || !next.img) return;
-  const fullSrc = next.img.replace(/_thumb\.webp(\?.*)?$/i, '.png$1');
+  const fullSrc = toFullUrl(next.img);
   const img = document.getElementById('char-img-zoom-img');
   if (img) {
     img.src = fullSrc;
@@ -5733,7 +5733,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260502a';
+const IMG_CACHE_VERSION = '20260502b';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -5741,6 +5741,23 @@ function _appendImgCacheBuster(url) {
   const cleaned = url.replace(/\?v=[^&?]*/, '');
   const sep = cleaned.includes('?') ? '&' : '?';
   return cleaned + sep + 'v=' + IMG_CACHE_VERSION;
+}
+
+// Phase 1 (Box フォルダ整備): thumb 画像は {dir}/thumb/{name}_thumb.webp に分離
+// 例: /images/characters/season1/r/student.png → /images/characters/season1/r/thumb/student_thumb.webp
+// toFullUrl は新旧両形式 (移行期間中の location/enemies は旧形式のまま) を受け付ける
+function toThumbUrl(fullUrl) {
+  if (!fullUrl || typeof fullUrl !== 'string') return fullUrl;
+  return fullUrl.replace(/^(.+)\/([^/]+)\.png(\?.*)?$/i, '$1/thumb/$2_thumb.webp$3');
+}
+function toFullUrl(thumbUrl) {
+  if (!thumbUrl || typeof thumbUrl !== 'string') return thumbUrl;
+  // 新形式: /a/b/c/thumb/foo_thumb.webp → /a/b/c/foo.png
+  if (/\/thumb\/[^/]+_thumb\.webp/i.test(thumbUrl)) {
+    return thumbUrl.replace(/^(.+)\/thumb\/([^/]+)_thumb\.webp(\?.*)?$/i, '$1/$2.png$3');
+  }
+  // 旧形式 (Phase 1-B 完了まで location/enemies で使用): /a/b/c/foo_thumb.webp → /a/b/c/foo.png
+  return thumbUrl.replace(/_thumb\.webp(\?.*)?$/i, '.png$1');
 }
 (function _initImgCacheBusters() {
   if (typeof LOCATION_CONFIG !== 'undefined') {
@@ -5811,7 +5828,7 @@ function _collectAssetUrlsByCategory() {
         (POOL[tier] || []).forEach(c => {
           if (!c || !c.img) return;
           char_full.add(c.img);
-          char_thumb.add(c.img.replace(/\.png(\?.*)?$/i, '_thumb.webp$1'));
+          char_thumb.add(toThumbUrl(c.img));
         });
       }
     }
@@ -8165,7 +8182,7 @@ function _prefetchLowTierThumbs() {
     (POOL[tier] || []).forEach(c => {
       if (!c || !c.img) return;
       urls.add(c.img);
-      urls.add(c.img.replace(/\.png(\?.*)?$/i, '_thumb.webp$1'));
+      urls.add(toThumbUrl(c.img));
     });
   }
   console.log(`[prefetch] R/SR thumbs: ${urls.size} URLs`);
@@ -8185,7 +8202,7 @@ function _preloadCharImagesWithTimeout(result, timeoutMs) {
     items.forEach(c => {
       if (c && c.img) {
         urls.add(c.img);
-        urls.add(c.img.replace(/\.png(\?.*)?$/i, '_thumb.webp$1'));
+        urls.add(toThumbUrl(c.img));
       }
     });
     if (urls.size === 0) return resolve();

@@ -7,7 +7,7 @@
 //
 // HTML/JSON/Firebase API はキャッシュせず常にネットワーク優先 (更新即反映+認証/DBの鮮度維持)。
 
-const SW_VERSION = '20260502a';  // v1.4.0 第4章「凍土と空」 公開 (Season 1 — 第4章 release)
+const SW_VERSION = '20260502b';  // Phase 1-A: キャラ thumb を thumb/ サブフォルダに分離
 const STATIC_CACHE = `prismaera-static-${SW_VERSION}`;
 const BGM_CACHE    = `prismaera-bgm-${SW_VERSION}`;
 const LOC_CACHE    = `prismaera-loc-${SW_VERSION}`;
