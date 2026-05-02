@@ -1015,6 +1015,17 @@ function applyPull(result, opts) {
   result.dupCount = state.dupCounts[key] || 0;
   result.dupMax = MAX_DUPS[result.tier] || 0;
   state.total += 1;
+  // ゲスト含む全ユーザーのガチャ回数をデバイス単位で Firebase に記録 (admin 画面で確認用)
+  try {
+    if (typeof fbDb !== 'undefined' && fbDb) {
+      const dev = getSharedDeviceId();
+      if (dev) {
+        const devRef = fbDb.ref('prism-gacha/devices/' + dev);
+        devRef.child('totalRolls').transaction(c => (c || 0) + 1);
+        devRef.child('lastRollAt').set(Date.now());
+      }
+    }
+  } catch (e) {}
   if (result.tier === "UR") { state.ur += 1; state.pity = 0; }
   else state.pity += 1;
   state.history.unshift({ ...result, at: Date.now() });
@@ -5733,7 +5744,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260502c';
+const IMG_CACHE_VERSION = '20260502d';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
