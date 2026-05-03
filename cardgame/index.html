@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="theme-color" content="#0a0a1a">
+<title>Prismaera Cards [Phase 0 PoC]</title>
+<link rel="icon" href="/images/icons/icon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="/images/icons/icon-180.png">
+<link rel="stylesheet" href="./style.css?v=20260504a">
+</head>
+<body>
+
+<header class="cg-topbar">
+  <a class="cg-back" href="/" aria-label="ホームへ戻る">←</a>
+  <div class="cg-title">
+    ✦ Prismaera <span class="cg-title-sub">Cards</span>
+    <span class="cg-phase">Phase 0 PoC</span>
+  </div>
+  <button class="cg-help" id="btn-help" aria-label="ルール">?</button>
+</header>
+
+<!-- ホーム画面 (タイトル → モード選択) -->
+<section id="home-screen" class="cg-screen active">
+  <div class="cg-hero">
+    <div class="cg-aurora"></div>
+    <div class="cg-hero-icon">🎴</div>
+    <h1 class="cg-hero-title">Prismaera Cards</h1>
+    <p class="cg-hero-tagline">虹霊界のキャラと共に、3レーンの読み合い。</p>
+  </div>
+  <div class="cg-modes">
+    <button class="cg-mode-btn primary" id="btn-start-easy">
+      <div class="cg-mode-icon">🌱</div>
+      <div class="cg-mode-text">
+        <div class="cg-mode-title">AIと対戦 (Easy)</div>
+        <div class="cg-mode-sub">ルール体験 / 初心者向け</div>
+      </div>
+    </button>
+    <button class="cg-mode-btn" id="btn-start-normal">
+      <div class="cg-mode-icon">⚔️</div>
+      <div class="cg-mode-text">
+        <div class="cg-mode-title">AIと対戦 (Normal)</div>
+        <div class="cg-mode-sub">コスト最大化を狙うAI</div>
+      </div>
+    </button>
+    <button class="cg-mode-btn disabled" disabled>
+      <div class="cg-mode-icon">🔥</div>
+      <div class="cg-mode-text">
+        <div class="cg-mode-title">AIと対戦 (Hard)</div>
+        <div class="cg-mode-sub">準備中 (Phase 1で実装)</div>
+      </div>
+    </button>
+    <button class="cg-mode-btn disabled" disabled>
+      <div class="cg-mode-icon">🌐</div>
+      <div class="cg-mode-text">
+        <div class="cg-mode-title">オンラインPvP</div>
+        <div class="cg-mode-sub">準備中 (Phase 3)</div>
+      </div>
+    </button>
+    <button class="cg-mode-btn secondary" id="btn-tutorial">
+      <div class="cg-mode-icon">📘</div>
+      <div class="cg-mode-text">
+        <div class="cg-mode-title">チュートリアル</div>
+        <div class="cg-mode-sub">3分で覚えるルール</div>
+      </div>
+    </button>
+  </div>
+  <div class="cg-foot-note">v0.1 — このPoCは設計検証用。本番デザイン/演出/オンライン対戦はPhase 1以降で実装。</div>
+</section>
+
+<!-- 試合画面 -->
+<section id="match-screen" class="cg-screen">
+
+  <!-- 試合HUD -->
+  <div class="cg-hud">
+    <div class="cg-hud-block">
+      <div class="cg-hud-label">ターン</div>
+      <div class="cg-hud-value"><span id="hud-turn">1</span> / 6</div>
+    </div>
+    <div class="cg-hud-block">
+      <div class="cg-hud-label">コスト</div>
+      <div class="cg-hud-value"><span id="hud-cost">1</span></div>
+    </div>
+    <div class="cg-hud-block">
+      <div class="cg-hud-label">勝敗</div>
+      <div class="cg-hud-value cg-score">
+        <span class="cg-score-me">0</span>
+        :
+        <span class="cg-score-ai">0</span>
+      </div>
+    </div>
+    <button class="cg-end-turn" id="btn-end-turn">ターン終了 →</button>
+  </div>
+
+  <!-- 相手の場 -->
+  <div class="cg-board cg-board-opp">
+    <div class="cg-side-label">AI</div>
+    <div class="cg-lanes" id="lanes-opp">
+      <div class="cg-lane" data-lane="0">
+        <div class="cg-lane-header"><span class="cg-lane-name">L1</span><span class="cg-lane-power" id="opp-power-0">0</span></div>
+        <div class="cg-lane-slots" id="opp-slots-0"></div>
+      </div>
+      <div class="cg-lane" data-lane="1">
+        <div class="cg-lane-header"><span class="cg-lane-name">L2</span><span class="cg-lane-power" id="opp-power-1">0</span></div>
+        <div class="cg-lane-slots" id="opp-slots-1"></div>
+      </div>
+      <div class="cg-lane" data-lane="2">
+        <div class="cg-lane-header"><span class="cg-lane-name">L3</span><span class="cg-lane-power" id="opp-power-2">0</span></div>
+        <div class="cg-lane-slots" id="opp-slots-2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 中央: メッセージログ -->
+  <div class="cg-message" id="match-message">手札からカードをタップ → 配置先レーンをタップ</div>
+
+  <!-- 自分の場 -->
+  <div class="cg-board cg-board-me">
+    <div class="cg-side-label">You</div>
+    <div class="cg-lanes" id="lanes-me">
+      <div class="cg-lane" data-lane="0">
+        <div class="cg-lane-header"><span class="cg-lane-name">L1</span><span class="cg-lane-power" id="me-power-0">0</span></div>
+        <div class="cg-lane-slots" id="me-slots-0"></div>
+      </div>
+      <div class="cg-lane" data-lane="1">
+        <div class="cg-lane-header"><span class="cg-lane-name">L2</span><span class="cg-lane-power" id="me-power-1">0</span></div>
+        <div class="cg-lane-slots" id="me-slots-1"></div>
+      </div>
+      <div class="cg-lane" data-lane="2">
+        <div class="cg-lane-header"><span class="cg-lane-name">L3</span><span class="cg-lane-power" id="me-power-2">0</span></div>
+        <div class="cg-lane-slots" id="me-slots-2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 手札 -->
+  <div class="cg-hand-area">
+    <div class="cg-hand-label">手札 <span class="cg-hand-count"><span id="hand-count">0</span> 枚</span></div>
+    <div class="cg-hand" id="hand"></div>
+  </div>
+
+</section>
+
+<!-- 結果モーダル -->
+<div id="result-modal" class="cg-modal" hidden>
+  <div class="cg-modal-backdrop" onclick="closeResult()"></div>
+  <div class="cg-modal-card">
+    <div class="cg-modal-icon" id="result-icon">🏆</div>
+    <h2 class="cg-modal-title" id="result-title">勝利</h2>
+    <div class="cg-modal-detail" id="result-detail"></div>
+    <div class="cg-modal-actions">
+      <button class="cg-btn secondary" onclick="backToHome()">ホームへ</button>
+      <button class="cg-btn primary" onclick="rematch()">もう一回</button>
+    </div>
+  </div>
+</div>
+
+<!-- ルールモーダル -->
+<div id="help-modal" class="cg-modal" hidden>
+  <div class="cg-modal-backdrop" onclick="closeHelp()"></div>
+  <div class="cg-modal-card cg-help-card">
+    <button class="cg-modal-close" onclick="closeHelp()" aria-label="閉じる">×</button>
+    <h2 class="cg-modal-title">ルール (3分で覚える)</h2>
+    <div class="cg-help-body">
+      <p><b>🎯 勝利条件</b>: 6ターン後、3レーンのうち <b>2レーン以上</b> パワーが高ければ勝ち。</p>
+      <p><b>📊 コスト</b>: ターン数 = そのターン使えるコスト (T1=1, T2=2 ... T6=6)。</p>
+      <p><b>🃏 配置</b>: 手札のカードをタップ → 自分側のレーン (L1/L2/L3) をタップで配置。</p>
+      <p><b>✨ 効果</b>: 配置時(onPlay)に効果発動。「自レーン +N」「相手レーン -N」「両隣レーン +N」 等。</p>
+      <p><b>🏁 ターン終了</b>: もう置かないなら「ターン終了」 をタップ。 AI が動き、 次ターンへ。</p>
+      <p style="opacity:.7;font-size:13px;margin-top:14px;">PoC v0.1 — Phase 1 で派閥シナジー / 凸数効果 / レーン効果 / 演出 / カード画像が追加されます。</p>
+    </div>
+  </div>
+</div>
+
+<!-- チュートリアルモーダル -->
+<div id="tutorial-modal" class="cg-modal" hidden>
+  <div class="cg-modal-backdrop" onclick="closeTutorial()"></div>
+  <div class="cg-modal-card">
+    <button class="cg-modal-close" onclick="closeTutorial()" aria-label="閉じる">×</button>
+    <h2 class="cg-modal-title">📘 チュートリアル</h2>
+    <div class="cg-help-body">
+      <div class="cg-tut-step">
+        <span class="cg-tut-no">1</span>
+        <div>
+          <b>3レーンに別々の戦いがある</b><br>
+          <span class="cg-tut-sub">L1/L2/L3 それぞれパワーを競う。 2レーン取れば勝ち。</span>
+        </div>
+      </div>
+      <div class="cg-tut-step">
+        <span class="cg-tut-no">2</span>
+        <div>
+          <b>コストはターンごとに増える</b><br>
+          <span class="cg-tut-sub">T1=1, T6=6。 序盤は弱いカード、 終盤に強いカード。</span>
+        </div>
+      </div>
+      <div class="cg-tut-step">
+        <span class="cg-tut-no">3</span>
+        <div>
+          <b>配置時に効果発動</b><br>
+          <span class="cg-tut-sub">「自レーン+3」「相手-2」 等。 効果はカードに書いてある。</span>
+        </div>
+      </div>
+      <div class="cg-tut-step">
+        <span class="cg-tut-no">4</span>
+        <div>
+          <b>同じレーンに集めるか、 散らすか</b><br>
+          <span class="cg-tut-sub">読み合いの核心。 AIの陣形を見てから自分の手を決める。</span>
+        </div>
+      </div>
+    </div>
+    <div class="cg-modal-actions">
+      <button class="cg-btn primary" onclick="closeTutorial();startMatch('easy')">いざ実戦</button>
+    </div>
+  </div>
+</div>
+
+<script src="./script.js?v=20260504a"></script>
+</body>
+</html>
