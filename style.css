@@ -2984,6 +2984,13 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   gap: 0;
   padding: 0;  /* col 側で個別 padding */
 }
+/* 2分割時は片側幅が狭くなるので tagline の 1行 clamp を解除して全文表示 (野沢さん指摘 2026-05-03 第5章概要見切れ対策) */
+.story-next-teaser.teaser-split .story-next-tagline {
+  -webkit-line-clamp: unset;
+  display: block;
+  overflow: visible;
+  white-space: normal;
+}
 .story-next-teaser.teaser-split > .story-next-col {
   position: relative;
   display: flex; align-items: center; gap: 14px;
