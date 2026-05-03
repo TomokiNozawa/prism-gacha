@@ -1071,7 +1071,21 @@ function saveState() {
 
 // ────────────── Rolling ──────────────
 // ピックアップ章: 該当章のキャラだけ重み×2、 他は×1。 章全体のtier比率(R65/SR25/SSR7/UR3)は維持。
-const PICKUP_CHAPTER = 's1c5';  // 最新章固定 (S1C6公開時に 's1c6' へ手動更新)
+// 最新章ターゲット (開発者が手動設定)。 公開前なら 1つ前の公開済章へ降格 (_refreshPickupChapter で動的判定)
+const PICKUP_CHAPTER_TARGET = 's1c5';
+let PICKUP_CHAPTER = PICKUP_CHAPTER_TARGET;
+function _refreshPickupChapter() {
+  let t = PICKUP_CHAPTER_TARGET;
+  // 設定章が公開前なら 1つずつ降格
+  while (t && typeof STORY_FILES !== 'undefined' && !_isChapterReleased(t)) {
+    const m = t.match(/s(\d+)c(\d+)/);
+    if (!m) { t = null; break; }
+    const num = parseInt(m[2]);
+    if (num <= 1) { t = 's1c1'; break; }
+    t = `s${m[1]}c${num - 1}`;
+  }
+  PICKUP_CHAPTER = t || 's1c1';
+}
 const PICKUP_WEIGHT = 2;
 
 function rollOne(opts = {}) {
@@ -1483,7 +1497,9 @@ function renderHomeGallery() {
   const grid = $("#home-gallery-grid");
   if (!grid) return;
   grid.innerHTML = "";
-  const all = (typeof getAllCharactersWithTier === 'function') ? getAllCharactersWithTier() : [];
+  // 公開済章のキャラのみ (野沢さん指示 2026-05-03 公開前章を分母から除外)
+  const allRaw = (typeof getAllCharactersWithTier === 'function') ? getAllCharactersWithTier() : [];
+  const all = allRaw.filter(c => !c.chapter || _isChapterReleased(c.chapter));
   let unlockedCount = 0;
   for (const c of all) {
     const unlocked = (typeof isUnlocked === 'function') ? isUnlocked(c) : false;
@@ -3005,10 +3021,12 @@ function renderGalleryByTab() {
   }
 
   // 通常タブ (all / s1c1 / s1c2) — 章 + レアリティ の2軸フィルター
-  const all = getAllCharactersWithTier();
+  // 公開済章のキャラのみ (野沢さん指示 2026-05-03)。 章タブ自体は表示するが、 「all」 では公開前章を除外
+  const allRaw = getAllCharactersWithTier();
+  const all = allRaw.filter(c => !c.chapter || _isChapterReleased(c.chapter));
   const byChapter = currentGalleryTab === 'all'
     ? all
-    : all.filter(c => c.chapter === currentGalleryTab);
+    : allRaw.filter(c => c.chapter === currentGalleryTab);
   const filtered = currentGalleryTier === 'all'
     ? byChapter
     : byChapter.filter(c => c.tier === currentGalleryTier);
@@ -4244,7 +4262,7 @@ const FACTION_WORLD_COORDS = {
   wolf:    { x:  330, y: 1010, region: '西方荒野' },
   silver:  { x:  500, y: 1250, region: '西方氷土' },
   // 東部山岳 (北→南)
-  dragon:  { x:  900, y:  220, region: '中央上紫塔' },  // 2026-05-03 修正: 旧 1550,380 は world_map 上で氷霊王国/空挺城の絵柄、 紫塔は中央上にあり s1c3「紫水晶の城」 と整合
+  dragon:  { x: 1240, y:  550, region: '中央東部紫塔' },  // 2026-05-03 修正 (野沢さん指摘): 黒曜塔 (1000,720) と 空挺城 (1480,380) の間、 紫塔の絵柄に一致
   redwing: { x: 1720, y:  720, region: '東方紅地' },
   yakai:   { x: 1670, y: 1010, region: '東方夜域' },
   seventh: { x: 1500, y: 1250, region: '東方光土' },
@@ -4752,11 +4770,12 @@ function _setupWorldMapZoomPan(svg, layer) {
   // svg.__worldMapDragDist として公開、 派閥/章マーカー/ティザー click 側が参照
   svg.__worldMapDragDist = 0;
   const update = () => {
-    // 範囲ガード: scale=1 の時は強制中央 (tx=ty=0)、 scale>1 は viewBox外に飛ばないようclamp
+    // 範囲ガード: scale=1 の時は強制中央 (tx=ty=0)、 scale>1 は端まで pan 可能 (layer 全幅、 野沢さん指摘 2026-05-03 「右側にスクロールできない」)
     if (scale <= MIN) { scale = MIN; tx = 0; ty = 0; }
     else {
-      const maxOff = (scale - 1) * W * 0.5;  // 横方向の最大はみ出し量 (中央基準)
-      const maxOffY = (scale - 1) * H * 0.5;
+      // 全幅 = (scale-1) * W、 layer の右端が viewport 右端と一致するまで pan 可能
+      const maxOff = (scale - 1) * W;
+      const maxOffY = (scale - 1) * H;
       tx = Math.max(-maxOff, Math.min(maxOff, tx));
       ty = Math.max(-maxOffY, Math.min(maxOffY, ty));
     }
@@ -5769,7 +5788,7 @@ const STORY_OUTLINE = [
   { id: 's1c3', meta: 'Season 1 — 第3章', title: '砂塵の隊商',         icon: '🐉', tagline: '血ではなく、 共に過ごした時間が家族を作る',                          povCharName: '竜爵 ヴィル' },
   { id: 's1c4', meta: 'Season 1 — 第4章', title: '凍土と空',           icon: '❄️', tagline: '強者の頂は、 孤独を共に分かち合うことで初めて温かい', releaseDate: '2026-05-02', povCharName: '龍帝 アルテミス' },
   { id: 's1c5', meta: 'Season 1 — 第5章', title: '黒月の予兆',         icon: '🌑', tagline: '銀霜の月が黒く欠ける夜、 仮面の下のもう一人の自分が、 静かに立ち上がる ─ 光と影、 二つの私の境界で', releaseDate: '2026-05-06T12:00:00+09:00', povCharName: '仮面騎士 シオン' },
-  { id: 's1c6', meta: 'Season 1 — 第6章', title: '七座満つる',         icon: '🌈', tagline: '違っていても、 同じ目的を持つ仲間でいられる', releaseDate: '2026-05-13', povCharName: 'セラフィエル' },
+  { id: 's1c6', meta: 'Season 1 — 第6章', title: '七座満つる',         icon: '🌈', tagline: '違っていても、 同じ目的を持つ仲間でいられる',                       povCharName: 'セラフィエル' },
   { id: 's1c7', meta: 'Season 1 — 第7章', title: '黒月決戦',           icon: '☄️', tagline: '影を消すのではなく、 共に在ると認める',                              povCharName: '虹意 プリズマ' },
 ];
 
@@ -6028,9 +6047,8 @@ const STORY_LOCATION_INLINE_CONFIG = {
     { scene: '1-3',  marker: '銀髪の少年が二人、 雪玉を投げ合って遊んでいた',    position: 'after',  img: '/images/locations/s1c4/thumb/snowfield_villagers_thumb.webp' },
     // 第二幕 2-1 出会い: アルテミスとグレイルが胸前で手を組み合わせる「覇者同士の挨拶」 (章テーマの入口)
     { scene: '2-1',  marker: '互いの胸前で手を組み合わせた',                       position: 'after',  img: '/images/locations/s1c4/thumb/artemis_greyle_first_meeting_thumb.webp' },
-    // 第二幕 2-2 一騎打ち冒頭: 北方剣聖ハグルがグレイルの構えを腕組みで見守る (二十年の剣師教えの結実)
-    { scene: '2-2',  marker: 'ハグル剣師が腕を組んで立っていた',                   position: 'before', img: '/images/locations/s1c4/thumb/frost_swordmaster_sparring_thumb.webp' },
     // 第二幕 2-2: 氷帝グレイル vs 龍帝アルテミス 一騎打ち
+    // (frost_swordmaster_sparring 挿絵は意味不明として削除 — 野沢さん指摘 2026-05-03、 ファイル自体は将来再利用に備えて保持)
     { scene: '2-2',  marker: '五合目で、 私は双剣を交差させた',                   position: 'before', img: '/images/locations/s1c4/thumb/duel_ice_vs_dragon_thumb.webp' },
     // 第二幕 2-3: アルテミス&ヒノオウ 千年前の回想 (戦友が並ぶ夜)
     { scene: '2-3',  marker: 'ふと、 古い戦場の記憶が、 不意に蘇った',           position: 'after',  img: '/images/locations/s1c4/thumb/flashback_artemis_hinoo_thumb.webp' },
@@ -6074,7 +6092,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260503b';
+const IMG_CACHE_VERSION = '20260503c';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -6846,27 +6864,76 @@ document.querySelectorAll('.story-card[data-story]').forEach(card => {
   card.addEventListener('click', () => openStory(card.dataset.story));
 });
 function _refreshChapterReleaseLocks() {
+  // 「次章 = 最新公開章+1」 を特定。 これだけ公開予定日を表示、 「2つ次以降」 は「現在制作中」 (野沢さん指示 2026-05-03)
+  let nextChapterId = null;
+  if (typeof STORY_OUTLINE !== 'undefined') {
+    const releasedIds = STORY_OUTLINE.filter(o => _isChapterReleased(o.id)).map(o => o.id);
+    const lastReleased = releasedIds.length > 0 ? releasedIds[releasedIds.length - 1] : null;
+    if (lastReleased) {
+      const idx = STORY_OUTLINE.findIndex(o => o.id === lastReleased);
+      if (idx >= 0 && idx + 1 < STORY_OUTLINE.length) nextChapterId = STORY_OUTLINE[idx + 1].id;
+    } else if (STORY_OUTLINE.length > 0) {
+      nextChapterId = STORY_OUTLINE[0].id;  // 何も公開済でなければ先頭が「次章」
+    }
+  }
   document.querySelectorAll('.story-card[data-story]').forEach(card => {
     const sid = card.dataset.story;
     const released = _isChapterReleased(sid);
     card.classList.toggle('chapter-locked', !released);
-    // 既存 badge があれば消去 → 新規追加
     let badge = card.querySelector('.chapter-locked-badge');
     if (released) {
       if (badge) badge.remove();
-    } else if (!badge) {
+      return;
+    }
+    // 未公開: 次章 → 公開予定日、 2つ次以降 → 現在制作中
+    const html = (sid === nextChapterId)
+      ? `📅 <b>${_formatReleaseDate(sid)}</b> 公開予定`
+      : `🔮 現在制作中`;
+    if (!badge) {
       badge = document.createElement('div');
       badge.className = 'chapter-locked-badge';
-      badge.innerHTML = `📅 <b>${_formatReleaseDate(sid)}</b> 公開予定`;
       card.appendChild(badge);
-    } else {
-      badge.innerHTML = `📅 <b>${_formatReleaseDate(sid)}</b> 公開予定`;
     }
+    badge.innerHTML = html;
   });
 }
-document.addEventListener('DOMContentLoaded', _refreshChapterReleaseLocks);
-// 1分毎に再判定 (リリース時刻を跨いだ瞬間に自動 unlock)
-setInterval(_refreshChapterReleaseLocks, 60000);
+// ホーム画面の次章ティザーを動的レンダリング (野沢さん指示 2026-05-03: 公開時刻に応じて「次章」 のみ表示、 「2つ次以降」 は出さない)
+function _renderHomeNextTeaser() {
+  const el = document.querySelector('.story-next-teaser');
+  if (!el || typeof STORY_OUTLINE === 'undefined') return;
+  // 「次章 = 最新公開章+1」 を特定
+  const releasedIds = STORY_OUTLINE.filter(o => _isChapterReleased(o.id)).map(o => o.id);
+  const lastReleased = releasedIds.length > 0 ? releasedIds[releasedIds.length - 1] : null;
+  let next = null;
+  if (lastReleased) {
+    const idx = STORY_OUTLINE.findIndex(o => o.id === lastReleased);
+    if (idx >= 0 && idx + 1 < STORY_OUTLINE.length) next = STORY_OUTLINE[idx + 1];
+  } else if (STORY_OUTLINE.length > 0) {
+    next = STORY_OUTLINE[0];
+  }
+  if (!next) { el.style.display = 'none'; return; }
+  el.style.display = '';
+  const releaseStr = next.releaseDate
+    ? `📅 <b>${_formatReleaseDate(next.id)}</b> 公開予定`
+    : `📅 公開予定 — お楽しみに`;
+  const povLine = next.povCharName ? `<div class="story-next-pov">主人公: ${escapeHtml(next.povCharName)}</div>` : '';
+  el.innerHTML = `
+    <div class="story-next-badge">Coming Soon</div>
+    <div class="story-next-icon">${next.icon || '📖'}</div>
+    <div class="story-next-text">
+      <div class="story-next-meta">${escapeHtml(next.meta || '')}</div>
+      <div class="story-next-title">${escapeHtml(next.title || '')}</div>
+      ${povLine}
+      <div class="story-next-tagline">${escapeHtml(next.tagline || '')}</div>
+      <div class="story-next-stats">
+        <span>${releaseStr}</span>
+      </div>
+    </div>
+  `;
+}
+document.addEventListener('DOMContentLoaded', () => { _refreshPickupChapter(); _refreshChapterReleaseLocks(); _renderHomeNextTeaser(); });
+// 1分毎に再判定 (リリース時刻を跨いだ瞬間に自動 unlock + ピックアップ章 自動切替 + ティザー切替)
+setInterval(() => { _refreshPickupChapter(); _refreshChapterReleaseLocks(); _renderHomeNextTeaser(); }, 60000);
 // ストーリー一覧モーダル
 // #10 ストーリー既読マーク (読了済み章カードに ✅ バッジ + ホームメタタグに 完読数/解放数 動的反映)
 function refreshStoryReadBadges() {
@@ -6889,7 +6956,9 @@ function refreshStoryReadBadges() {
   // ホーム Stories カードのメタタグを動的更新 (B3 ストーリー読了視覚化)
   const progEl = document.getElementById('story-entry-progress');
   if (progEl) {
-    const releasedIds = Object.keys(STORY_FILES || {});
+    // 「公開済」 = STORY_FILES 登録 + releaseDate 経過済 (野沢さん指示 2026-05-03 公開前章を分母から除外)
+    const allIds = Object.keys(STORY_FILES || {});
+    const releasedIds = allIds.filter(id => _isChapterReleased(id));
     const released = releasedIds.length;
     const completedCount = releasedIds.filter(id => sp[id] && sp[id].completed).length;
     // 進行中の章があれば「読了 N / 公開M (進行中: X 章 Y/Z シーン)」 形式
