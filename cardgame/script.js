@@ -33,9 +33,9 @@ const state = {
 // ===== Master データロード =====
 async function loadMasters() {
   const [c, k, l] = await Promise.all([
-    fetch('./cards.json?v=20260504b').then(r => r.json()),
-    fetch('./combos.json?v=20260504b').then(r => r.json()),
-    fetch('./lane_effects.json?v=20260504b').then(r => r.json()),
+    fetch('./cards.json?v=20260504c').then(r => r.json()),
+    fetch('./combos.json?v=20260504c').then(r => r.json()),
+    fetch('./lane_effects.json?v=20260504c').then(r => r.json()),
   ]);
   state.cards = c;
   state.combos = k;
