@@ -3487,6 +3487,11 @@ const RELATIONS = [
   { a: 'ルミナ',          b: 'イザベル',          type: 'fellow', label: '情報交換' },
   { a: '詠聖 ベル',       b: 'メイリ',            type: 'fellow', label: '親友' },
   { a: '影刃 シン',       b: '朱音',              type: 'fellow', label: '別組織協力' },
+  // 2026-05-03 全章 desc + LORE 通読で発見した S1C1 漏れ
+  { a: '千夜姫 カグヤ',   b: '虹意 プリズマ',     type: 'fellow', label: '夜を共にする友' },  // LR_プリズマ凸3 + UR_カグヤ凸3「プリズマの涙」
+  { a: '竜爵 ヴィル',     b: '朱音',              type: 'fellow', label: '酒の飲み仲間' },    // POOL desc + SSR_ヴィル凸3「朱音の酒」
+  { a: '薫音',            b: '朱音',              type: 'fellow', label: '酒の姉妹' },        // SR_薫音凸1「酒の弱さ」
+  { a: 'リリム',          b: '龍帝 アルテミス',   type: 'admire', aRole: '慕う', bRole: 'おじうえ' },  // POOL desc + SR_リリム凸2
   // ===== S1C2 関係 =====
   // アクアシス内部
   { a: '深海女王 ネプテア',           b: '深海の少女 パール',         type: 'master', aRole: '養母', bRole: '養女' },
@@ -3513,6 +3518,10 @@ const RELATIONS = [
   { a: '深海巫女 ティアラ',           b: '詠聖 ベル',                 type: 'fellow', label: '巫女の遠縁' },
   // 覚醒前後
   { a: 'イザベル',                    b: '波紋の聖女 イザベル',       type: 'admire', aRole: '前形', bRole: '覚醒形' },
+  // 2026-05-03 全章 desc + LORE 通読で発見した S1C2 漏れ
+  { a: '珊瑚鎧の海騎士 コラリア',     b: 'アクアシス筆頭魔術師 グラシエル', type: 'fellow', label: '近衛と参謀の戦友' },  // POOL + SR_コラリア凸2
+  { a: '白焔教会従士 リッカ',         b: 'メイリ',                    type: 'fellow', label: '教会次世代' },          // POOL + R_リッカ凸1
+  { a: '白焔教会従士 リッカ',         b: '白焔教会見習い巫女 ルーナ', type: 'fellow', label: '教会次世代' },          // POOL + R_リッカ凸1
 
   // ===== S1C3 古龍砂漠サハール (2026-05-03 反映漏れ修正) =====
   { a: '竜爵 ヴィル',                 b: '砂海王女 サハナ',           type: 'fellow', label: '紫水晶の絆' },
@@ -3526,6 +3535,11 @@ const RELATIONS = [
   { a: '古龍鍛冶 オウル',             b: '古龍の語り部 ファラー',     type: 'master', aRole: '弟子', bRole: '婆さま' },
   { a: '砂風の語り部 ナドラ',         b: '古龍の語り部 ファラー',     type: 'fellow', label: '物語の継承者' },
   { a: '古龍の語り部 ファラー',       b: '千夜姫 カグヤ',             type: 'fellow', label: '千年の友' },
+  // 2026-05-03 全章 desc + LORE 通読で発見した S1C3 漏れ
+  { a: '古龍の語り部 ファラー',       b: '竜爵 ヴィル',               type: 'admire', aRole: '見守る', bRole: '次の千年の鍵' },  // UR_ファラー凸4
+  { a: '隊商長 アーシャ',             b: '竜爵 ヴィル',               type: 'fellow', label: '客の事情聞かず' },                  // SSR_アーシャ凸3「紫の襟を見抜いた夜」
+  { a: '古龍鍛冶 オウル',             b: '祭舞のサフィラ',            type: 'fellow', label: '鱗の粉の染料' },                    // SR_サフィラ凸1「七色絹の染料」
+  { a: '古龍鍛冶 オウル',             b: '竜爵 ヴィル',               type: 'fellow', label: '血の意味を諭す' },                  // SR_オウル凸2「ヴィルへの諭し」
 
   // ===== S1C4 凍土と空 (2026-05-03 反映漏れ修正) =====
   { a: '龍帝 アルテミス',             b: '氷帝 グレイル',             type: 'fellow', label: '三人目の戦友' },
@@ -3547,6 +3561,10 @@ const RELATIONS = [
   { a: '空挺整備士 ベル',             b: '空の少年 ピット',           type: 'sister', aRole: '姉分', bRole: '弟分' },
   { a: '空の少年 ピット',             b: '空の少女 ピピ',             type: 'blood', label: '兄妹' },
   { a: '空挺城総監 ガリオン',         b: '蒸気砲手 ヴィン',           type: 'master', aRole: '総監', bRole: '副官' },
+  // 2026-05-03 全章 desc + LORE 通読で発見した S1C4 漏れ
+  { a: '凍土の少年 アルク',           b: '雪原の少女 ミウ',           type: 'childhood', label: '幼馴染' },                    // POOL desc 両方明記 (野沢さん指摘)
+  { a: '空挺城総監 ガリオン',         b: '摂政 ヴァルキ',             type: 'fellow', label: '空挺と凍土の橋渡し' },        // SSR_ガリオン凸3「ニーヴル↔ゼノニアの橋渡し」
+  { a: '氷塔の聖騎士 リオネ',         b: '氷牙の戦士 イズン',         type: 'fellow', label: '凍土影喰い襲撃の戦友' },     // SR_イズン凸2「凍土の影喰い襲撃で初めて死を見た夜」
 
   // ===== S1C5 黒月の予兆 (2026-05-03 反映) =====
   { a: '仮面騎士 シオン',             b: 'シ・ロエン',                 type: 'blood', label: '分離した自分' },
@@ -3561,6 +3579,8 @@ const RELATIONS = [
   { a: '月夜祭司 アスター',           b: 'ルミナ',                     type: 'fellow', label: '雪月神殿の祭司と灯番' },
   { a: '雪月神殿見習い ラピス',       b: 'ルミナ',                     type: 'admire', aRole: '見習い', bRole: '姉さま' },
   { a: 'ルミナ',                       b: 'イザベル',                   type: 'fellow', label: '治療の情報交換 (文通)' },
+  // 2026-05-03 全章 desc + LORE 通読で発見した S1C5 漏れ
+  { a: '地底市の母 リオラエル',       b: '仮面騎士 シオン',           type: 'master', aRole: '導く', bRole: '影と共に生きる選択' },  // UR_リオラエル POOL desc
 ];
 
 const REL_STYLE = {
@@ -6143,7 +6163,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260503g';
+const IMG_CACHE_VERSION = '20260503h';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
