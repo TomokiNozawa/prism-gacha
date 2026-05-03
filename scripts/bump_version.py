@@ -151,7 +151,34 @@ def main() -> int:
     parser.add_argument("--note", action="append", required=True, help="changelog項目(複数可)")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--auto-commit", action="store_true")
+    parser.add_argument("--force", action="store_true",
+                        help="dev branch で実行する時の安全 abort を無視 (緊急時のみ、 通常使わない)")
     args = parser.parse_args()
+
+    # 安全装置: dev branch で patch/chapter/season bump はルール違反 (X.Y.Z bump は main release 時のみ)
+    # dev では手動で suffix a/b/c を進めること。 詳細: CLAUDE.md feedback_prismaera_version_suffix.md
+    branch_res = subprocess.run(
+        ["git", "-C", str(ROOT), "rev-parse", "--abbrev-ref", "HEAD"],
+        capture_output=True, text=True, encoding="utf-8", errors="replace"
+    )
+    branch = (branch_res.stdout or "").strip() if branch_res.returncode == 0 else ""
+    if branch == "dev" and not args.force:
+        print("❌ ERROR: bump_version.py は main branch でのみ実行可能です。", file=sys.stderr)
+        print(f"   現在の branch: {branch}", file=sys.stderr)
+        print("", file=sys.stderr)
+        print("   【ルール】 dev branch では version.json の \"version\" を", file=sys.stderr)
+        print("   1.4.2 → 1.4.2a → 1.4.2b → 1.4.2c ... と suffix で手動進行すること。", file=sys.stderr)
+        print("   主バージョン (X.Y.Z) bump は main マージ時のみ。", file=sys.stderr)
+        print("", file=sys.stderr)
+        print("   【正しいフロー】", file=sys.stderr)
+        print("   1. dev で機能完成 → 手動で suffix 進行 (例: 1.4.2a → 1.4.2b)", file=sys.stderr)
+        print("   2. main release 準備時: git checkout main && git merge dev --no-ff", file=sys.stderr)
+        print("   3. main で: py scripts/bump_version.py patch --note \"...\" → main push", file=sys.stderr)
+        print("   4. dev に back-merge fast-forward", file=sys.stderr)
+        print("", file=sys.stderr)
+        print("   詳細: CLAUDE.md feedback_prismaera_version_suffix.md", file=sys.stderr)
+        print("   緊急時のみ --force で override 可能 (基本使わない)。", file=sys.stderr)
+        return 1
 
     data = load_version()
     current = data["version"]

@@ -21,6 +21,8 @@ pre-commit フック (.githooks/pre-commit) から自動呼出。
 """
 import re
 import sys
+import json
+import subprocess
 from pathlib import Path
 
 try:
@@ -1169,6 +1171,87 @@ n7_21 = check_all_chars_have_faction(pool_x, script_text_x)
 print(f"  ルール7-21 (CHAR_FACTION 全キャラ登録): {n7_21}未登録 検査 [BLOCKER]")
 n7_22 = check_chapter_factions_registered(sf_ids_x, script_text_x)
 print(f"  ルール7-22 (章 新派閥 FACTIONS 登録): {n7_22}派閥 検査 [BLOCKER]")
+
+# === バージョン管理 ルール (BLOCKER 2026-05-04 野沢さん指示「同様のミスが起きないように」) ===
+def _current_branch():
+    r = subprocess.run(["git", "-C", str(ROOT), "rev-parse", "--abbrev-ref", "HEAD"],
+                       capture_output=True, text=True, encoding="utf-8", errors="replace")
+    return (r.stdout or "").strip() if r.returncode == 0 else ""
+
+def _read_version_at(ref):
+    """指定 ref の version.json から version を読む。 取れなければ None"""
+    r = subprocess.run(["git", "-C", str(ROOT), "show", f"{ref}:version.json"],
+                       capture_output=True, text=True, encoding="utf-8", errors="replace")
+    if r.returncode != 0 or not r.stdout:
+        return None
+    try:
+        return json.loads(r.stdout).get("version")
+    except Exception:
+        return None
+
+def check_dev_version_suffix():
+    """ルール7-23 (BLOCKER 2026-05-04): dev branch では version は X.Y.Z または {X.Y.Z}{suffix(a-z)} 形式必須。
+    主バージョン (X.Y.Z) bump は main マージ時のみ、 dev では suffix a/b/c で進行。
+    詳細: CLAUDE.md feedback_prismaera_version_suffix.md
+    """
+    if _current_branch() != "dev":
+        return 0
+    ver_path = ROOT / "version.json"
+    if not ver_path.exists():
+        return 0
+    try:
+        cur_ver = json.load(ver_path.open(encoding="utf-8"))["version"]
+    except Exception:
+        return 0
+    main_ver = _read_version_at("origin/main")
+    if main_ver is None:
+        return 0
+    ok = False
+    if cur_ver == main_ver:
+        ok = True
+    elif cur_ver.startswith(main_ver):
+        suffix = cur_ver[len(main_ver):]
+        if re.fullmatch(r"[a-z]{1,3}", suffix):
+            ok = True
+    if not ok:
+        violations.append(
+            f"[ルール7-23 dev version 不正 BLOCKER] dev branch の version='{cur_ver}' は不正。\n"
+            f"      origin/main='{main_ver}' と同じ、 または '{main_ver}a' / '{main_ver}b' ... の suffix 形式 必須。\n"
+            f"      → 主バージョン (X.Y.Z) bump は main マージ時のみ、 dev では手動で suffix 進行。\n"
+            f"      → 詳細: CLAUDE.md feedback_prismaera_version_suffix.md"
+        )
+    return 1
+
+def check_main_version_bumped():
+    """ルール7-24 (BLOCKER 2026-05-04): main branch で commit する時、 version は HEAD (= 親 commit) より bump 必須。
+    2026-05-03 朝のセッションで v1.4.1 を 7 回 main merge した事故の再発防止。
+    詳細: CLAUDE.md feedback_prismaera_version_suffix.md
+    """
+    if _current_branch() != "main":
+        return 0
+    ver_path = ROOT / "version.json"
+    if not ver_path.exists():
+        return 0
+    try:
+        cur_ver = json.load(ver_path.open(encoding="utf-8"))["version"]
+    except Exception:
+        return 0
+    parent_ver = _read_version_at("HEAD")
+    if parent_ver is None:
+        return 0
+    if cur_ver == parent_ver:
+        violations.append(
+            f"[ルール7-24 main version 未 bump BLOCKER] main で commit する version='{cur_ver}' が前 commit と同一。\n"
+            f"      → main release 時は必ず X.Y.Z を 1 段以上 bump (例: 1.4.2 → 1.4.3)\n"
+            f"      → 同じ X.Y.Z で main merge 連発はルール違反 (2026-05-03 v1.4.1 7回事故 再発防止)\n"
+            f"      → 詳細: CLAUDE.md feedback_prismaera_version_suffix.md"
+        )
+    return 1
+
+n7_23 = check_dev_version_suffix()
+print(f"  ルール7-23 (dev version suffix bump): {n7_23}件 検査 [BLOCKER]")
+n7_24 = check_main_version_bumped()
+print(f"  ルール7-24 (main version bump 必須): {n7_24}件 検査 [BLOCKER]")
 
 # === Warning ルール (commit はブロックせず、 開発者手動 review) ===
 violations_blocker = list(violations)  # ここまでが blocker 違反
