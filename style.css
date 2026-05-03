@@ -3613,7 +3613,7 @@ body.has-offline-banner .topbar { margin-top: 30px; }
 .relations-modal.active { display: flex; }
 .relations-header {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 60px 14px 22px; gap: 16px;  /* 右の close ボタン分余白 */
+  padding: 14px 140px 14px 22px; gap: 16px;  /* 右の close ボタン (✕閉じる(Esc) ≈110px) 分余白を確保、 zoom コントロールと被らないように */
   background: rgba(0,0,0,0.5);
   border-bottom: 1px solid rgba(255,255,255,0.1);
   backdrop-filter: blur(8px);
@@ -3688,7 +3688,7 @@ body.has-offline-banner .topbar { margin-top: 30px; }
 }
 
 @media (max-width: 720px) {
-  .relations-header { padding: 10px 56px 10px 12px; gap: 6px; flex-direction: column; align-items: stretch; }
+  .relations-header { padding: 10px 12px 10px 12px; padding-top: 48px; gap: 6px; flex-direction: column; align-items: stretch; }  /* close は absolute 右上配置のため、 上に padding-top 48px で zoom 等を下にずらして被り回避 */
   .relations-header h2 { font-size: 16px; margin: 0; text-align: center; }
   .relations-legend { justify-content: center; gap: 6px; font-size: 10px; }
   .relations-legend .leg-line { width: 18px; height: 2px; margin-right: 2px; }
