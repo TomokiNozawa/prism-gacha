@@ -186,6 +186,14 @@ body {
   color: var(--gold);
   font-weight: 600;
 }
+.cg-diff-tag {
+  background: rgba(124, 93, 255, 0.5);
+  color: #fff;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+}
 .cg-mover-tag {
   background: rgba(124, 93, 255, 0.4);
   color: #fff;
@@ -193,6 +201,27 @@ body {
   border-radius: 4px;
   font-size: 10px;
   margin-left: 8px;
+}
+
+/* ===== スマホ電池対策 (野沢さん指示 2026-05-04 「電池すごい食いそう」) ===== */
+@media (max-width: 480px) {
+  /* aurora animation 停止 (GPU 連続描画でバッテリー食う) */
+  .cg-aurora { animation: none; }
+  .cg-result-peek-btn { animation: none; }
+  /* backdrop-filter blur は GPU 重い → 削除/軽量化 */
+  .cg-combos-panel { backdrop-filter: none; background: rgba(20, 22, 51, 0.95); }
+  .cg-modal-backdrop { backdrop-filter: blur(2px); }
+  .cg-topbar { backdrop-filter: blur(4px); }
+  .cg-hand-area { backdrop-filter: blur(4px); }
+  /* 大きい box-shadow も軽量化 */
+  .cg-mode-btn.primary { box-shadow: 0 0 8px rgba(74, 214, 255, .15); }
+  .cg-end-turn { box-shadow: 0 0 6px rgba(95, 223, 255, .25); }
+}
+/* prefers-reduced-motion: ユーザー OS 設定で animation 縮減 */
+@media (prefers-reduced-motion: reduce) {
+  .cg-aurora { animation: none; }
+  .cg-result-peek-btn { animation: none; }
+  .cg-card.placed-anim { animation: none; }
 }
 .cg-score-vs { color: var(--text-dim); margin: 0 4px; }
 

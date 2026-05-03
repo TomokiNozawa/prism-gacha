@@ -4,18 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <meta name="theme-color" content="#0a0a1a">
-<title>Prismaera Cards [Phase 0 PoC]</title>
+<title>PCB | Prismaera Cards Battle</title>
 <link rel="icon" href="/images/icons/icon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
-<link rel="stylesheet" href="./style.css?v=20260504g">
+<link rel="stylesheet" href="./style.css?v=20260504h">
 </head>
 <body>
 
 <header class="cg-topbar">
   <a class="cg-back" href="/" aria-label="戻る">←</a>
   <div class="cg-title">
-    ✦ Prismaera <span class="cg-title-sub">Cards</span>
-    <span class="cg-phase">Phase 1</span>
+    ✦ <span class="cg-title-sub">PCB</span>
+    <span class="cg-phase">β</span>
   </div>
   <div class="cg-topbar-right">
     <button class="cg-iconbtn" id="btn-cg-mute" aria-label="BGMミュート切替" title="BGM 切替">🔊</button>
@@ -28,8 +28,8 @@
   <div class="cg-hero">
     <div class="cg-aurora"></div>
     <div class="cg-hero-icon">🎴</div>
-    <h1 class="cg-hero-title">Prismaera Cards</h1>
-    <p class="cg-hero-tagline">虹霊界のキャラと共に、3レーンの読み合い。</p>
+    <h1 class="cg-hero-title">PCB</h1>
+    <p class="cg-hero-tagline">Prismaera Cards Battle — 虹霊界のキャラと共に、 3レーンの読み合い</p>
   </div>
   <div class="cg-bo3-toggle">
     <label class="cg-bo3-label">
@@ -72,7 +72,7 @@
       <div class="cg-mode-icon">🌐</div>
       <div class="cg-mode-text">
         <div class="cg-mode-title">オンラインPvP</div>
-        <div class="cg-mode-sub">準備中 (Phase 3)</div>
+        <div class="cg-mode-sub">準備中</div>
       </div>
     </button>
     <button class="cg-mode-btn secondary" id="btn-tutorial">
@@ -83,7 +83,7 @@
       </div>
     </button>
   </div>
-  <div class="cg-foot-note">v0.1 — このPoCは設計検証用。本番デザイン/演出/オンライン対戦はPhase 1以降で実装。</div>
+  <div class="cg-foot-note">PCB β — Phase 1 機能 (派閥シナジー / 凸数 / レーン効果 / ストーリーコンボ / マリガン / BO3) 実装済</div>
 </section>
 
 <!-- 試合画面 -->
@@ -260,11 +260,11 @@
       </div>
     </div>
     <div class="cg-modal-actions">
-      <button class="cg-btn primary" onclick="closeTutorial();startMatch('easy')">いざ実戦</button>
+      <button class="cg-btn primary" onclick="closeTutorial()">閉じる</button>
     </div>
   </div>
 </div>
 
-<script src="./script.js?v=20260504g"></script>
+<script src="./script.js?v=20260504h"></script>
 </body>
 </html>

@@ -35,6 +35,19 @@ const state = {
   series: { isBO3: false, wins: { me: 0, opp: 0 }, matchNo: 1, results: [] },
 };
 
+// ===== 公開済章 判定 (本体 STORY_OUTLINE と同期、 リリース時刻自動切替) =====
+const CHAPTER_RELEASE = {
+  's1c1': 0,  // 既公開
+  's1c2': 0,
+  's1c3': 0,
+  's1c4': 0,
+  's1c5': new Date('2026-05-06T12:00:00+09:00').getTime(),
+};
+function isChapterReleased(ch) {
+  if (!ch || !CHAPTER_RELEASE.hasOwnProperty(ch)) return true;
+  return Date.now() >= CHAPTER_RELEASE[ch];
+}
+
 // ===== 派閥カラー マッピング =====
 // 派閥カラー (CHAR_FACTION 公式 19派閥に揃え)
 const FACTION_COLORS = {
@@ -65,6 +78,17 @@ function factionColor(f) { return FACTION_COLORS[f] || '#aaa'; }
 const BGM_URL = '/assets/bgm/prism-cards.mp3';
 const BGM_MUTE_KEY = 'cg_bgm_muted';
 let cgBgm = null;
+
+// スマホ電池対策: タブ非アクティブ時に BGM 停止 (visibilitychange)
+function _initVisibilityHandler() {
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      if (cgBgm && !cgBgm.paused) cgBgm.pause();
+    } else {
+      if (cgBgm && cgBgm.paused && !cgBgm.muted) cgBgm.play().catch(() => {});
+    }
+  });
+}
 
 function initBgm() {
   cgBgm = new Audio(BGM_URL);
@@ -111,16 +135,19 @@ function updateMuteUI() {
   }
 }
 
-// ===== Master データロード =====
+// ===== Master データロード (公開済章のみ filter) =====
 async function loadMasters() {
   const [c, k, l] = await Promise.all([
-    fetch('./cards.json?v=20260504g').then(r => r.json()),
-    fetch('./combos.json?v=20260504g').then(r => r.json()),
-    fetch('./lane_effects.json?v=20260504g').then(r => r.json()),
+    fetch('./cards.json?v=20260504h').then(r => r.json()),
+    fetch('./combos.json?v=20260504h').then(r => r.json()),
+    fetch('./lane_effects.json?v=20260504h').then(r => r.json()),
   ]);
-  state.cards = c;
-  state.combos = k;
-  state.laneEffectsAll = l;
+  // 公開済章のキャラ/レーン効果のみ採用 (5/6 12:00 で s1c5 自動解禁)
+  state.cards = c.filter(card => isChapterReleased(card.chapter));
+  state.laneEffectsAll = l.filter(e => isChapterReleased(e.chapter));
+  // コンボは「全 chars が公開済章のキャラ集合に存在する」 ものだけ採用
+  const cardNames = new Set(state.cards.map(card => card.name));
+  state.combos = k.filter(combo => combo.chars.every(name => cardNames.has(name)));
 }
 
 // ===== Utility =====
@@ -843,11 +870,14 @@ function rematch() {
 function updateSeriesHud() {
   const el = document.getElementById('series-info');
   if (!el) return;
+  const diffMap = { easy: '🌱 Easy', normal: '⚔️ Normal', hard: '🔥 Hard', master: '👑 Master' };
+  const diffLabel = diffMap[state.difficulty] || '?';
   if (state.series.isBO3) {
     el.style.display = '';
-    el.innerHTML = `BO3 第<b>${state.series.matchNo}</b>/3 — ${state.series.wins.me}<span class="cg-score-vs">:</span>${state.series.wins.opp} <span class="cg-mover-tag">${state.firstMover === 'me' ? '先攻' : '後攻'}</span>`;
+    el.innerHTML = `<span class="cg-diff-tag">${diffLabel}</span> | BO3 第<b>${state.series.matchNo}</b>/3 — ${state.series.wins.me}<span class="cg-score-vs">:</span>${state.series.wins.opp} <span class="cg-mover-tag">${state.firstMover === 'me' ? '先攻' : '後攻'}</span>`;
   } else {
-    el.style.display = 'none';
+    el.style.display = '';
+    el.innerHTML = `<span class="cg-diff-tag">${diffLabel}</span> | 単発`;
   }
 }
 
@@ -956,6 +986,7 @@ function onBackClick(e) {
 // ===== Init =====
 document.addEventListener('DOMContentLoaded', async () => {
   initBgm();
+  _initVisibilityHandler();
   await loadMasters();
   // BO3 toggle (localStorage 永続化)
   const bo3Toggle = document.getElementById('bo3-toggle');
