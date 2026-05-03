@@ -138,9 +138,9 @@ function updateMuteUI() {
 // ===== Master データロード (公開済章のみ filter) =====
 async function loadMasters() {
   const [c, k, l] = await Promise.all([
-    fetch('./cards.json?v=20260504h').then(r => r.json()),
-    fetch('./combos.json?v=20260504h').then(r => r.json()),
-    fetch('./lane_effects.json?v=20260504h').then(r => r.json()),
+    fetch('./cards.json?v=20260504i').then(r => r.json()),
+    fetch('./combos.json?v=20260504i').then(r => r.json()),
+    fetch('./lane_effects.json?v=20260504i').then(r => r.json()),
   ]);
   // 公開済章のキャラ/レーン効果のみ採用 (5/6 12:00 で s1c5 自動解禁)
   state.cards = c.filter(card => isChapterReleased(card.chapter));
@@ -411,6 +411,11 @@ function renderBoard() {
           el.classList.add('undoable');
           el.title = 'タップで手札に戻す';
           el.addEventListener('click', () => undoMyCard(lane, boardIdx));
+        } else {
+          // 場のカード = タップで詳細表示 (P-1)
+          el.style.cursor = 'pointer';
+          el.title = 'タップで詳細';
+          el.addEventListener('click', () => showCardDetail(card, 'board-' + side, null));
         }
         // 動的 power を表示用に上書き
         const dynPower = getCardPower(card, side, lane);
@@ -472,27 +477,96 @@ function updateLanePowers() {
   });
 }
 
-// ===== 手札カード選択 =====
+// ===== 手札カード選択 (タップ = 詳細モーダル + 配置ボタン) =====
 function onHandCardClick(idx) {
+  if (state.ended) return;
+  const card = state.hand[idx];
+  showCardDetail(card, 'hand', idx);
+}
+
+// 詳細モーダルから「配置先を選ぶ」 押下 (旧の selectedCardIdx 流れに合流)
+function _enterPlaceMode(idx) {
   if (state.busy || state.ended) return;
   const card = state.hand[idx];
+  if (!card) return;
   if (card.cost > state.cost - state.costUsed) {
     setMessage(`コスト不足: ${card.name} (⚡${card.cost} 必要、 残${state.cost - state.costUsed})`, 'alert');
     return;
   }
-  if (state.selectedCardIdx === idx) {
-    state.selectedCardIdx = -1;
-    $$('.lane-target').forEach(el => el.classList.remove('lane-target'));
-    setMessage('選択解除');
-  } else {
-    state.selectedCardIdx = idx;
-    $$('#lanes-me .cg-lane').forEach(el => {
-      if (state.board.me[Number(el.dataset.lane)].length < 4) el.classList.add('lane-target');
-    });
-    setMessage(`配置先レーンを選択: ${card.name}`);
-  }
+  state.selectedCardIdx = idx;
+  $$('#lanes-me .cg-lane').forEach(el => {
+    if (state.board.me[Number(el.dataset.lane)].length < 4) el.classList.add('lane-target');
+  });
+  setMessage(`配置先レーン (L1/L2/L3) をタップ: ${card.name}`);
   renderHand();
 }
+
+// ===== P-1: キャラ詳細モーダル =====
+function showCardDetail(card, context, handIdx) {
+  if (!card) return;
+  $('#char-detail-img').style.backgroundImage = card.img ? `url('..${card.img}')` : '';
+  const tierEl = $('#char-detail-tier');
+  tierEl.textContent = card.tier;
+  tierEl.className = 'cg-char-detail-tier ' + card.tier;
+  const facEl = $('#char-detail-faction');
+  facEl.textContent = card.faction || '無所属';
+  facEl.style.background = factionColor(card.faction);
+  $('#char-detail-dupes').textContent = card.dupes > 0 ? `+${card.dupes} 凸` : '凸 0';
+  $('#char-detail-name').textContent = card.name;
+  $('#char-detail-cost').textContent = card.cost;
+  $('#char-detail-base').textContent = card.basePower;
+  const dupeBonus = (card.dupes || 0) * (card.dupeBonus || 0);
+  $('#char-detail-bonus').textContent = '+' + dupeBonus;
+  $('#char-detail-total').textContent = card.basePower + dupeBonus;
+  $('#char-detail-effect').textContent = card.effectText || '効果なし';
+  // 関連コンボ
+  const related = state.combos.filter(c => c.chars.includes(card.name));
+  const listEl = $('#char-detail-combo-list');
+  if (related.length === 0) {
+    listEl.innerHTML = '<p class="cg-char-combo-empty">このキャラを含むコンボなし</p>';
+  } else {
+    listEl.innerHTML = related.map(c => {
+      const otherChars = c.chars.filter(n => n !== card.name);
+      const condLabel = c.condition === 'same_lane' ? '同レーンに揃える' : 'いずれかの場に揃える';
+      const targetLabel = c.effect.target === 'all_lanes' ? '全レーン' : '自レーン';
+      return `<div class="cg-char-combo-item">
+        <div class="cg-char-combo-name">✨ ${c.name}</div>
+        <div class="cg-char-combo-cond">${condLabel}: ${otherChars.join(' + ') || '(単独)'}</div>
+        <div class="cg-char-combo-effect">→ ${targetLabel} +${c.effect.power} power</div>
+        <div class="cg-char-combo-flavor">${c.flavor}</div>
+      </div>`;
+    }).join('');
+  }
+  // 配置ボタン (手札 + cost OK + 試合中 のみ)
+  const placeBtn = $('#char-detail-place-btn');
+  const canPlace = context === 'hand'
+    && handIdx != null
+    && card.cost <= (state.cost - state.costUsed)
+    && !state.busy
+    && !state.ended;
+  if (canPlace) {
+    placeBtn.style.display = '';
+    placeBtn.onclick = () => {
+      closeCharDetail();
+      _enterPlaceMode(handIdx);
+    };
+  } else if (context === 'hand' && handIdx != null) {
+    // cost 不足時は disabled で表示
+    placeBtn.style.display = '';
+    placeBtn.textContent = '⚡ コスト不足';
+    placeBtn.disabled = true;
+    placeBtn.onclick = null;
+  } else {
+    placeBtn.style.display = 'none';
+  }
+  // disabled state リセット
+  if (canPlace) {
+    placeBtn.disabled = false;
+    placeBtn.textContent = '📍 配置先を選ぶ';
+  }
+  $('#char-detail-modal').hidden = false;
+}
+function closeCharDetail() { $('#char-detail-modal').hidden = true; }
 
 // ===== レーン選択 (配置) =====
 $$('#lanes-me .cg-lane').forEach(el => {
@@ -1011,7 +1085,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-      closeResult(); closeHelp(); closeTutorial(); closeCombosModal();
+      closeResult(); closeHelp(); closeTutorial(); closeCombosModal(); closeCharDetail();
     }
   });
 });
@@ -1027,5 +1101,6 @@ window.closeResult = closeResult;
 window.closeHelp = closeHelp;
 window.closeTutorial = closeTutorial;
 window.closeCombosModal = closeCombosModal;
+window.closeCharDetail = closeCharDetail;
 window.peekBoard = peekBoard;
 window.reopenResult = reopenResult;

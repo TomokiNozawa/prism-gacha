@@ -7,7 +7,7 @@
 <title>PCB | Prismaera Cards Battle</title>
 <link rel="icon" href="/images/icons/icon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
-<link rel="stylesheet" href="./style.css?v=20260504h">
+<link rel="stylesheet" href="./style.css?v=20260504i">
 </head>
 <body>
 
@@ -192,6 +192,38 @@
 <!-- 結果に戻る floating ボタン (場を見る時に右下) -->
 <button id="result-peek-btn" class="cg-result-peek-btn" onclick="reopenResult()" hidden>📋 結果に戻る</button>
 
+<!-- キャラ詳細モーダル (P-1、 カードタップで開く) -->
+<div id="char-detail-modal" class="cg-modal" hidden>
+  <div class="cg-modal-backdrop" onclick="closeCharDetail()"></div>
+  <div class="cg-modal-card cg-char-detail-card">
+    <button class="cg-modal-close" onclick="closeCharDetail()" aria-label="閉じる">×</button>
+    <div class="cg-char-detail-img" id="char-detail-img"></div>
+    <div class="cg-char-detail-info">
+      <div class="cg-char-detail-tier-row">
+        <span id="char-detail-tier" class="cg-char-detail-tier">UR</span>
+        <span id="char-detail-faction" class="cg-char-detail-faction">原虹</span>
+        <span id="char-detail-dupes" class="cg-char-detail-dupes">+2 凸</span>
+      </div>
+      <h2 id="char-detail-name" class="cg-char-detail-name">キャラ名</h2>
+      <div class="cg-char-detail-stats">
+        <span>⚡ <b id="char-detail-cost">5</b></span>
+        <span>⚔ 基礎 <b id="char-detail-base">7</b></span>
+        <span>凸 <b id="char-detail-bonus">+0</b></span>
+        <span>計 <b id="char-detail-total">7</b></span>
+      </div>
+      <div class="cg-char-detail-effect" id="char-detail-effect">効果なし</div>
+      <div class="cg-char-detail-combos">
+        <h3>関連コンボ</h3>
+        <div id="char-detail-combo-list"></div>
+      </div>
+    </div>
+    <div class="cg-modal-actions">
+      <button class="cg-btn secondary" onclick="closeCharDetail()">閉じる</button>
+      <button class="cg-btn primary" id="char-detail-place-btn" style="display:none">📍 配置先を選ぶ</button>
+    </div>
+  </div>
+</div>
+
 <!-- コンボ確認モーダル -->
 <div id="combos-modal" class="cg-modal" hidden>
   <div class="cg-modal-backdrop" onclick="closeCombosModal()"></div>
@@ -265,6 +297,6 @@
   </div>
 </div>
 
-<script src="./script.js?v=20260504h"></script>
+<script src="./script.js?v=20260504i"></script>
 </body>
 </html>

@@ -788,6 +788,130 @@ body {
   #match-screen { padding-right: 264px; }
 }
 
+/* ===== P-1: キャラ詳細モーダル ===== */
+.cg-char-detail-card {
+  max-width: 420px;
+  width: calc(100vw - 32px);
+  padding: 0;
+  overflow: hidden;
+  text-align: left;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.cg-char-detail-img {
+  height: 220px;
+  background-size: cover;
+  background-position: center top;
+  background-color: var(--bg-card-hi);
+  background-repeat: no-repeat;
+  border-bottom: 2px solid var(--border-hi);
+}
+.cg-char-detail-info { padding: 14px 18px 4px; }
+.cg-char-detail-tier-row {
+  display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.cg-char-detail-tier {
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  letter-spacing: 0.05em;
+}
+.cg-char-detail-tier.LR  { background: var(--tier-lr); }
+.cg-char-detail-tier.UR  { background: var(--tier-ur); }
+.cg-char-detail-tier.SSR { background: var(--tier-ssr); }
+.cg-char-detail-tier.SR  { background: var(--tier-sr); }
+.cg-char-detail-tier.R   { background: var(--tier-r); }
+.cg-char-detail-faction {
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #1a1d3a;
+  text-shadow: 0 1px 1px rgba(255,255,255,0.4);
+}
+.cg-char-detail-dupes {
+  padding: 3px 8px;
+  background: rgba(255,213,107,0.25);
+  color: var(--gold);
+  border: 1px solid rgba(255,213,107,0.4);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-left: auto;
+}
+.cg-char-detail-name {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 4px 0 12px;
+  color: var(--text);
+}
+.cg-char-detail-stats {
+  display: flex; gap: 12px; flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--text-dim);
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 12px;
+}
+.cg-char-detail-stats b { color: var(--text); font-size: 14px; }
+.cg-char-detail-effect {
+  font-size: 13px;
+  color: var(--text);
+  background: rgba(124, 93, 255, 0.18);
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(124, 93, 255, 0.4);
+  line-height: 1.5;
+}
+.cg-char-detail-combos h3 {
+  font-size: 12px;
+  margin: 0 0 8px;
+  color: var(--gold);
+  letter-spacing: 0.05em;
+}
+.cg-char-combo-empty {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-align: center;
+  padding: 6px 0;
+  margin: 0;
+}
+.cg-char-combo-item {
+  background: rgba(35, 40, 82, 0.55);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 10px;
+  margin-bottom: 6px;
+}
+.cg-char-combo-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gold);
+}
+.cg-char-combo-cond {
+  font-size: 10px;
+  color: var(--text-dim);
+  margin: 3px 0;
+}
+.cg-char-combo-effect {
+  font-size: 11px;
+  color: var(--aurora-2);
+  font-weight: 600;
+}
+.cg-char-combo-flavor {
+  font-size: 10px;
+  color: var(--text-dim);
+  font-style: italic;
+  margin-top: 3px;
+  line-height: 1.4;
+}
+
 /* ===== コンボ確認モーダル ===== */
 .cg-combos-card { max-width: 480px; text-align: left; max-height: 84vh; overflow-y: auto; }
 .cg-combos-body {

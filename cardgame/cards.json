@@ -69,7 +69,7 @@
     "role": "captain",
     "chapter": "s1c2",
     "img": "/images/characters/season1/ssr/pirate_captain.png",
-    "dupes": 3,
+    "dupes": 1,
     "dupeBonus": 1,
     "effectText": "自レーン +3",
     "effect": { "trigger": "onPlay", "target": "self_lane", "power": 3 }
@@ -99,7 +99,7 @@
     "role": "priestess",
     "chapter": "s1c1",
     "img": "/images/characters/season1/sr/silver_girl.png",
-    "dupes": 3,
+    "dupes": 2,
     "dupeBonus": 1,
     "effectText": "自レーン +2",
     "effect": { "trigger": "onPlay", "target": "self_lane", "power": 2 }
@@ -114,7 +114,7 @@
     "role": "swordsman",
     "chapter": "s1c1",
     "img": "/images/characters/season1/sr/red_twintail.png",
-    "dupes": 4,
+    "dupes": 2,
     "dupeBonus": 1,
     "effectText": "基礎パワー高め (バニラ)",
     "effect": { "trigger": "none", "target": "none", "power": 0 }
@@ -144,7 +144,7 @@
     "role": "student",
     "chapter": "s1c1",
     "img": "/images/characters/season1/r/student.png",
-    "dupes": 5,
+    "dupes": 2,
     "dupeBonus": 1,
     "effectText": "自レーン +1",
     "effect": { "trigger": "onPlay", "target": "self_lane", "power": 1 }
@@ -159,7 +159,7 @@
     "role": "apprentice",
     "chapter": "s1c1",
     "img": "/images/characters/season1/r/boy_scout.png",
-    "dupes": 4,
+    "dupes": 2,
     "dupeBonus": 1,
     "effectText": "自レーン +1",
     "effect": { "trigger": "onPlay", "target": "self_lane", "power": 1 }
@@ -174,7 +174,7 @@
     "role": "archer",
     "chapter": "s1c1",
     "img": "/images/characters/season1/r/archer.png",
-    "dupes": 3,
+    "dupes": 2,
     "dupeBonus": 1,
     "effectText": "自レーン +2",
     "effect": { "trigger": "onPlay", "target": "self_lane", "power": 2 }
