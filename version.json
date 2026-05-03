@@ -1,8 +1,16 @@
 {
-  "version": "1.4.2",
-  "releasedAt": "2026-05-03",
+  "version": "1.4.3",
+  "releasedAt": "2026-05-04",
   "pendingChangelog": [],
   "changelog": [
+    {
+      "version": "1.4.3",
+      "date": "2026-05-04",
+      "type": "patch",
+      "notes": [
+        "🎴 カードゲーム β を公開しました (アカウント登録者限定、 Phase 0 PoC)"
+      ]
+    },
     {
       "version": "1.4.2",
       "date": "2026-05-03",

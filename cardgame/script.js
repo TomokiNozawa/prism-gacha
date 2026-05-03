@@ -119,7 +119,8 @@ function renderBoard() {
       const slotsEl = $(`#${side === 'opp' ? 'opp' : 'me'}-slots-${lane}`);
       slotsEl.innerHTML = '';
       state.board[side][lane].forEach(card => {
-        const el = makeCardElement(card, /*showEffect*/ false);
+        // 場のカードも能力 + 絵を表示 (ユーザー要望 2026-05-04)
+        const el = makeCardElement(card, /*showEffect*/ true);
         if (side === 'opp') el.classList.add('opp');
         slotsEl.appendChild(el);
       });
@@ -130,8 +131,13 @@ function renderBoard() {
 function makeCardElement(card, showEffect) {
   const el = document.createElement('div');
   el.className = 'cg-card';
+  // 画像 path: cardgame/ から見ると `..` で本体に戻る
+  const imgUrl = card.img ? '..' + card.img : '';
+  const imgStyle = imgUrl ? `background-image: url('${imgUrl}')` : '';
+  const imgClass = imgUrl ? '' : 'no-img';
   el.innerHTML = `
     <div class="cg-card-tier ${card.tier}">${card.tier}</div>
+    <div class="cg-card-img ${imgClass}" style="${imgStyle}"></div>
     <div class="cg-card-name">${card.name}</div>
     <div class="cg-card-stats">
       <span class="cg-card-cost">⚡${card.cost}</span>
@@ -139,6 +145,18 @@ function makeCardElement(card, showEffect) {
     </div>
     ${showEffect && card.effectText ? `<div class="cg-card-effect">${card.effectText}</div>` : ''}
   `;
+  // 画像 load 失敗時 fallback
+  if (imgUrl) {
+    const probe = new Image();
+    probe.src = imgUrl;
+    probe.onerror = () => {
+      const imgEl = el.querySelector('.cg-card-img');
+      if (imgEl) {
+        imgEl.style.backgroundImage = '';
+        imgEl.classList.add('no-img');
+      }
+    };
+  }
   return el;
 }
 

@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.2 — 演出スタイル (Season 1 第1章)
+   Prismaera v1.4.3 — 演出スタイル (Season 1 第1章)
    ============================================================ */
 :root {
   --bg: #05060d;
@@ -2875,7 +2875,8 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   grid-column: 1 / -1; /* hero(1fr auto)の全列スパン → 右端が10連と揃う */
 }
 .home-actions-row > .story-stack,
-.home-actions-row > .home-feedback {
+.home-actions-row > .home-feedback,
+.home-actions-row > .home-right-col {
   display: flex; flex-direction: column;
   margin: 0;
   padding: 0;
@@ -3061,6 +3062,89 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   .home-feedback-icon { font-size: 22px; }
   .home-feedback-title { font-size: 14px; }
   .home-feedback-sub { font-size: 11px; }
+}
+
+/* ───── ホーム右カラム (カードゲーム + ご意見要望 を縦に並べる) ───── */
+.home-right-col { gap: 14px; }
+.home-actions-row > .home-right-col > .home-feedback {
+  margin: 0; max-width: none; padding: 0;
+}
+
+/* ───── ホーム カードゲーム入口 (アカウント作成者限定) ───── */
+.home-cardgame-card {
+  position: relative;
+  width: 100%;
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(124,93,255,0.20), rgba(95,223,255,0.18));
+  border: 1px solid rgba(124,93,255,0.42);
+  color: var(--text);
+  text-decoration: none;
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  overflow: hidden;
+}
+.home-cardgame-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(124,93,255,0.75);
+  box-shadow: 0 4px 28px rgba(124,93,255,0.32), 0 2px 12px rgba(95,223,255,0.25);
+}
+.home-cardgame-aurora {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 30% 50%, rgba(124,93,255,0.55), transparent 60%),
+    radial-gradient(ellipse at 80% 50%, rgba(95,223,255,0.4), transparent 55%);
+  filter: blur(22px);
+  z-index: 0;
+  pointer-events: none;
+  animation: cardgameAuroraFlow 7s ease-in-out infinite alternate;
+}
+@keyframes cardgameAuroraFlow {
+  0%   { transform: translate(0,0) scale(1); }
+  100% { transform: translate(18px,-8px) scale(1.15); }
+}
+.home-cardgame-icon {
+  font-size: 28px; line-height: 1;
+  filter: drop-shadow(0 0 8px rgba(255, 213, 107, 0.5));
+  position: relative; z-index: 1;
+}
+.home-cardgame-text { flex: 1; min-width: 0; position: relative; z-index: 1; }
+.home-cardgame-title {
+  font-size: 15px; font-weight: 700; letter-spacing: 0.05em;
+  background: linear-gradient(120deg, #ff9a4a, #ffd56b, #ff8ddc, #5fdfff, #7c5dff);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.home-cardgame-badge {
+  font-size: 10px;
+  background: rgba(255,213,107,0.22);
+  color: #ffd56b;
+  padding: 2px 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,213,107,0.4);
+  -webkit-text-fill-color: #ffd56b;
+  font-weight: 700;
+}
+.home-cardgame-sub {
+  font-size: 12px; color: rgba(255,255,255,0.72);
+  margin-top: 3px; line-height: 1.5;
+}
+.home-cardgame-arrow {
+  font-size: 20px; color: rgba(255,255,255,0.55);
+  transition: transform 0.15s ease;
+  position: relative; z-index: 1;
+}
+.home-cardgame-card:hover .home-cardgame-arrow {
+  transform: translateX(3px); color: #fff;
+}
+@media (max-width: 600px) {
+  .home-cardgame-card { padding: 13px 14px; gap: 11px; }
+  .home-cardgame-icon { font-size: 24px; }
+  .home-cardgame-title { font-size: 14px; }
+  .home-cardgame-sub { font-size: 11px; }
+  .home-cardgame-badge { font-size: 9px; padding: 1px 5px; }
 }
 
 /* ───── 要望フォームモーダル ───── */

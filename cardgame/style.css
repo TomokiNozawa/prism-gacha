@@ -2,24 +2,25 @@
    Prismaera Cards — PoC Phase 0 スタイル (Aurora 紫×シアン)
    ============================================================ */
 :root {
-  --bg: #05060d;
-  --bg-elev: #0c0e1c;
-  --bg-card: #141633;
-  --border: rgba(180, 160, 255, 0.18);
-  --border-hi: rgba(180, 160, 255, 0.42);
-  --text: #e6e8ff;
-  --text-dim: #9ea3c8;
-  --aurora-1: #6b4aff;
-  --aurora-2: #4ad6ff;
-  --aurora-3: #ff7ad6;
+  --bg: #1a1d3a;
+  --bg-elev: #232852;
+  --bg-card: #2c3160;
+  --bg-card-hi: #3a4080;
+  --border: rgba(190, 180, 255, 0.28);
+  --border-hi: rgba(190, 180, 255, 0.55);
+  --text: #f4f5ff;
+  --text-dim: #c5c9eb;
+  --aurora-1: #7c5dff;
+  --aurora-2: #5fdfff;
+  --aurora-3: #ff8ddc;
   --gold: #ffd56b;
-  --me: #4ad6ff;
-  --opp: #ff7ad6;
-  --tier-lr: linear-gradient(120deg, #ff8a3a, #ffd56b, #ff7ad6, #4ad6ff, #6b4aff);
-  --tier-ur: linear-gradient(135deg, #ffb84a, #ff7ad6);
-  --tier-ssr: linear-gradient(135deg, #ffd56b, #ff8a3a);
-  --tier-sr: linear-gradient(135deg, #b8a4ff, #6b4aff);
-  --tier-r: linear-gradient(135deg, #4ad6ff, #6b4aff);
+  --me: #5fdfff;
+  --opp: #ff8ddc;
+  --tier-lr: linear-gradient(120deg, #ff9a4a, #ffd56b, #ff8ddc, #5fdfff, #7c5dff);
+  --tier-ur: linear-gradient(135deg, #ffc25c, #ff8ddc);
+  --tier-ssr: linear-gradient(135deg, #ffd56b, #ff9a4a);
+  --tier-sr: linear-gradient(135deg, #c8b8ff, #7c5dff);
+  --tier-r: linear-gradient(135deg, #5fdfff, #7c5dff);
 }
 
 * { box-sizing: border-box; }
@@ -34,7 +35,12 @@ html, body {
 }
 body {
   min-height: 100dvh;
-  background: radial-gradient(ellipse at top, #1a1846 0%, #05060d 60%);
+  background:
+    radial-gradient(ellipse at 20% 0%, #3d2f7a 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 30%, #1f4a7a 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 100%, #4a2a6a 0%, transparent 60%),
+    linear-gradient(180deg, #1a1d3a 0%, #14163a 100%);
+  background-attachment: fixed;
 }
 
 /* ===== ヘッダ ===== */
@@ -200,13 +206,14 @@ body {
   gap: 6px;
 }
 .cg-lane {
-  background: rgba(20, 22, 51, 0.5);
+  background: rgba(35, 40, 82, 0.65);
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 6px 4px;
-  min-height: 88px;
+  min-height: 130px;
   cursor: default;
   transition: background .15s, border-color .15s;
+  backdrop-filter: blur(4px);
 }
 .cg-lane.lane-target {
   background: rgba(74, 214, 255, 0.18);
@@ -225,22 +232,24 @@ body {
 .cg-lane-power { font-size: 14px; font-weight: 700; }
 
 .cg-lane-slots {
-  display: flex; flex-wrap: wrap; gap: 3px;
-  min-height: 52px;
+  display: flex; flex-wrap: wrap; gap: 4px;
+  min-height: 100px;
+  align-content: flex-start;
 }
 
 /* ===== カード ===== */
 .cg-card {
-  width: 48px; height: 64px;
+  width: 72px; height: 100px;
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 6px;
-  font-size: 9px;
+  border-radius: 8px;
+  font-size: 10px;
   display: flex; flex-direction: column;
   position: relative;
   cursor: default;
   overflow: hidden;
   flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 .cg-card.placed-anim { animation: placeCard .35s ease-out; }
 @keyframes placeCard {
@@ -252,7 +261,9 @@ body {
   display: flex; align-items: center; justify-content: center;
   font-size: 9px; font-weight: 700;
   color: #fff;
-  text-shadow: 0 1px 2px rgba(0,0,0,.5);
+  text-shadow: 0 1px 2px rgba(0,0,0,.6);
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
 }
 .cg-card-tier.LR  { background: var(--tier-lr); }
 .cg-card-tier.UR  { background: var(--tier-ur); }
@@ -260,25 +271,64 @@ body {
 .cg-card-tier.SR  { background: var(--tier-sr); }
 .cg-card-tier.R   { background: var(--tier-r); }
 
-.cg-card-name {
-  font-size: 8px; line-height: 1.1;
-  padding: 2px;
-  text-align: center;
+.cg-card-img {
   flex: 1;
+  background-color: var(--bg-card-hi);
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  position: relative;
+}
+.cg-card-img.no-img::after {
+  content: '🎴';
+  position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  opacity: 0.4;
+}
+
+.cg-card-name {
+  font-size: 9px; line-height: 1.1;
+  padding: 2px 3px;
+  text-align: center;
+  background: linear-gradient(180deg, transparent, rgba(0,0,0,0.85));
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,.8);
+  position: absolute;
+  left: 0; right: 0; bottom: 24px;
   word-break: keep-all;
+  font-weight: 600;
+  pointer-events: none;
 }
 .cg-card-stats {
-  display: flex; justify-content: space-between;
-  padding: 2px 3px;
-  font-size: 9px; font-weight: 700;
-  background: rgba(0,0,0,.4);
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 2px 4px;
+  font-size: 11px; font-weight: 700;
+  background: rgba(0,0,0,.7);
+  height: 24px;
+  flex-shrink: 0;
 }
-.cg-card-cost { color: var(--gold); }
-.cg-card-power { color: var(--aurora-2); }
+.cg-card-cost { color: var(--gold); text-shadow: 0 1px 2px rgba(0,0,0,.8); }
+.cg-card-power { color: var(--aurora-2); text-shadow: 0 1px 2px rgba(0,0,0,.8); }
 
-/* AI のカードは裏面演出 */
-.cg-card.opp .cg-card-name { color: var(--text-dim); }
+/* AI のカード = 裏向きデザイン (覆面) */
+.cg-card.opp.face-down .cg-card-img,
+.cg-card.opp.face-down .cg-card-name { display: none; }
+.cg-card.opp.face-down {
+  background: linear-gradient(135deg, #2a1f5a 0%, #1a1846 100%);
+  position: relative;
+}
+.cg-card.opp.face-down::before {
+  content: '✦';
+  position: absolute;
+  inset: 14px 0 24px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+  background: var(--tier-lr);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  opacity: 0.7;
+}
 
 /* ===== 中央メッセージ ===== */
 .cg-message {
@@ -315,25 +365,41 @@ body {
   padding: 4px;
 }
 .cg-hand .cg-card {
-  width: 64px; height: 88px;
+  width: 92px; height: 134px;
   cursor: pointer;
   transition: transform .15s, box-shadow .15s;
   flex-shrink: 0;
+  position: relative;
 }
-.cg-hand .cg-card .cg-card-name { font-size: 9px; }
+.cg-hand .cg-card .cg-card-name { font-size: 10px; bottom: 38px; }
 .cg-hand .cg-card.selected {
-  transform: translateY(-8px);
-  box-shadow: 0 0 16px rgba(74, 214, 255, .6);
+  transform: translateY(-10px);
+  box-shadow: 0 0 20px rgba(95, 223, 255, .8);
   border-color: var(--aurora-2);
 }
-.cg-hand .cg-card.unaffordable { opacity: .35; cursor: not-allowed; }
+.cg-hand .cg-card.unaffordable { opacity: .4; cursor: not-allowed; filter: grayscale(0.5); }
 .cg-hand .cg-card.unaffordable.selected { transform: none; box-shadow: none; }
 .cg-hand .cg-card-effect {
-  font-size: 7px; color: var(--text-dim);
-  padding: 1px 2px;
+  font-size: 8px;
+  color: #fff;
+  padding: 2px 4px;
   text-align: center;
-  border-top: 1px solid var(--border);
+  background: rgba(124, 93, 255, 0.85);
+  line-height: 1.2;
+  height: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+/* 場のカードに置かれたものにも effect 表示 (場合 = small だが見せる) */
+.cg-card .cg-card-effect {
+  font-size: 7px;
+  color: #fff;
+  padding: 1px 2px;
+  background: rgba(124, 93, 255, 0.85);
+  text-align: center;
   line-height: 1.1;
+  flex-shrink: 0;
 }
 
 /* ===== モーダル ===== */
@@ -420,23 +486,29 @@ body {
 
 /* ===== モバイル最適化 (480px以下) ===== */
 @media (max-width: 480px) {
-  .cg-card { width: 42px; height: 58px; }
-  .cg-card-name { font-size: 7px; }
-  .cg-card-stats { font-size: 8px; }
-  .cg-hand .cg-card { width: 58px; height: 80px; }
-  .cg-hand .cg-card .cg-card-name { font-size: 8px; }
-  .cg-hand .cg-card-effect { font-size: 6px; }
-  .cg-lane { min-height: 76px; }
-  .cg-hero-title { font-size: 22px; }
+  .cg-card { width: 64px; height: 92px; }
+  .cg-card-name { font-size: 8px; bottom: 22px; }
+  .cg-card-stats { font-size: 10px; height: 22px; }
+  .cg-card .cg-card-effect { font-size: 6px; }
+  .cg-hand .cg-card { width: 80px; height: 120px; }
+  .cg-hand .cg-card .cg-card-name { font-size: 9px; bottom: 36px; }
+  .cg-hand .cg-card-effect { font-size: 7px; }
+  .cg-lane { min-height: 116px; }
+  .cg-lane-slots { min-height: 92px; }
+  .cg-hero-title { font-size: 24px; }
 }
 
 /* ===== PC最適化 (768px以上) ===== */
 @media (min-width: 768px) {
-  .cg-card { width: 60px; height: 80px; }
-  .cg-card-name { font-size: 10px; }
-  .cg-hand .cg-card { width: 80px; height: 110px; }
-  .cg-hand .cg-card .cg-card-name { font-size: 11px; }
-  .cg-lane { min-height: 110px; }
+  .cg-card { width: 88px; height: 124px; }
+  .cg-card-name { font-size: 11px; bottom: 26px; }
+  .cg-card-stats { font-size: 13px; height: 26px; }
+  .cg-card .cg-card-effect { font-size: 9px; padding: 2px 4px; }
+  .cg-hand .cg-card { width: 110px; height: 156px; }
+  .cg-hand .cg-card .cg-card-name { font-size: 12px; bottom: 44px; }
+  .cg-hand .cg-card-effect { font-size: 10px; height: 18px; }
+  .cg-lane { min-height: 156px; }
+  .cg-lane-slots { min-height: 124px; }
   .cg-hero-title { font-size: 36px; }
   .cg-hero-tagline { font-size: 15px; }
 }

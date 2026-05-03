@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.2 — 演出&ゲームロジック (Season 1 第1〜2章)
+   Prismaera v1.4.3 — 演出&ゲームロジック (Season 1 第1〜2章)
    ============================================================ */
 "use strict";
 
@@ -6253,7 +6253,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260503q';
+const IMG_CACHE_VERSION = '20260504a';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -8728,6 +8728,11 @@ function updateAccountButton() {
   const envDevBtn = document.getElementById('btn-env-dev');
   if (envProdBtn) envProdBtn.style.display = isDevEnv ? '' : 'none';
   if (envDevBtn) envDevBtn.style.display = (isProdEnv && authUser && isPrismAdmin) ? '' : 'none';
+  // Home カードゲーム入口 (Phase 0 PoC) はアカウント登録者限定
+  const cardgameEntry = document.getElementById('home-cardgame-card');
+  if (cardgameEntry) {
+    cardgameEntry.style.display = authUser ? 'flex' : 'none';
+  }
 }
 
 let isPrismAdmin = false;
