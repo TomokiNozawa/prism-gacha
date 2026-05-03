@@ -1,35 +1,45 @@
 /* ============================================================
-   Prismaera Cards — PoC Phase 0 ロジック (v0.1)
-   - 6ターン固定、 3レーン × 4枠、 vs AI (Easy/Normal)
-   - 効果は onPlay 単純パターン (self_lane / adjacent_lanes / all_lanes / opp_self_lane / all_opp_lanes / self_lane_attack)
-   - 派閥シナジー / 凸数効果 / コンボは Phase 1 で実装
+   Prismaera Cards — Phase 1 ロジック (v0.2)
+   - 6ターン × 3レーン × 4枠、 vs AI (Easy / Normal)
+   - onPlay 効果 6種 + 派閥シナジー + ストーリーコンボ + レーン効果 + 凸数強化
+   - 配置取消 (個別カードクリック) + コンボ確認ボタン + リザルト後 場確認
    ============================================================ */
 "use strict";
 
 // ===== State =====
 const state = {
-  cards: [],          // マスタ (cards.json)
-  difficulty: 'easy', // easy / normal
+  cards: [],
+  combos: [],
+  laneEffectsAll: [],
+  difficulty: 'easy',
   turn: 1,
   maxTurn: 6,
   cost: 1,
   costUsed: 0,
-  hand: [],           // [{...card}]
-  deck: [],           // 残りデッキ
+  hand: [],
+  deck: [],
   oppHand: [],
   oppDeck: [],
   board: { me: [[], [], []], opp: [[], [], []] },
+  laneEffects: [null, null, null], // 試合開始時 ランダム 3 つ
   selectedCardIdx: -1,
   busy: false,
   scoreMe: 0,
   scoreOpp: 0,
   ended: false,
+  thisTurnPlacements: [], // [{ cardId, lane }] 自軍のみ、 ターン中の配置履歴
 };
 
-// ===== カードロード =====
-async function loadCards() {
-  const res = await fetch('./cards.json?v=20260504a');
-  state.cards = await res.json();
+// ===== Master データロード =====
+async function loadMasters() {
+  const [c, k, l] = await Promise.all([
+    fetch('./cards.json?v=20260504b').then(r => r.json()),
+    fetch('./combos.json?v=20260504b').then(r => r.json()),
+    fetch('./lane_effects.json?v=20260504b').then(r => r.json()),
+  ]);
+  state.cards = c;
+  state.combos = k;
+  state.laneEffectsAll = l;
 }
 
 // ===== Utility =====
@@ -43,6 +53,7 @@ function shuffle(arr) {
 }
 function $(sel) { return document.querySelector(sel); }
 function $$(sel) { return Array.from(document.querySelectorAll(sel)); }
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 function setMessage(text, kind = '') {
   const el = $('#match-message');
@@ -60,32 +71,98 @@ function startMatch(difficulty) {
   state.scoreOpp = 0;
   state.ended = false;
   state.selectedCardIdx = -1;
+  state.thisTurnPlacements = [];
 
-  // デッキ = 全 12 枚 (PoC ではデッキ構築なし、 全カード使用)
-  const baseDeck = [...state.cards];
+  const baseDeck = state.cards.map(c => ({ ...c }));
   state.deck = shuffle(baseDeck);
-  state.oppDeck = shuffle(baseDeck);
+  state.oppDeck = shuffle(state.cards.map(c => ({ ...c })));
   state.hand = state.deck.splice(0, 4);
   state.oppHand = state.oppDeck.splice(0, 4);
 
   state.board = { me: [[], [], []], opp: [[], [], []] };
 
-  // 画面切替
+  // レーン効果: ランダム 3 つ重複なし
+  const shuffled = shuffle(state.laneEffectsAll);
+  state.laneEffects = [shuffled[0], shuffled[1], shuffled[2]];
+
   $('#home-screen').classList.remove('active');
   $('#match-screen').classList.add('active');
+  $('#result-modal').hidden = true;
+  $('#result-peek-btn').hidden = true;
 
-  // 初期描画
   drawTurnStart();
-  setMessage(`ターン 1 開始 — コスト ${state.cost}`);
+  setMessage(`ターン 1 — レーン効果が決まりました。 ⚡コスト ${state.cost}`);
 }
 
 function drawTurnStart() {
-  // ターン開始時 1 枚 draw (ターン1 は既に 4 枚配ったので追加 1 枚で 5 枚スタート)
-  if (state.deck.length > 0) state.hand.push(state.deck.shift());
-  if (state.oppDeck.length > 0) state.oppHand.push(state.oppDeck.shift());
+  if (state.deck.length > 0 && state.hand.length < 7) state.hand.push(state.deck.shift());
+  if (state.oppDeck.length > 0 && state.oppHand.length < 7) state.oppHand.push(state.oppDeck.shift());
   state.cost = state.turn;
   state.costUsed = 0;
+  state.thisTurnPlacements = [];
+  // 配置済カードの onPlay 一時 buff (_appliedTo) はターンを跨いでも保持する設計 (恒久 buff)
   renderAll();
+}
+
+// ===== Power 計算 (派閥シナジー / レーン効果 / コンボ / 凸数 を毎回動的) =====
+function dupeBonusOf(card) {
+  return (card.dupes || 0) * (card.dupeBonus || 0);
+}
+function laneEffectFor(card, lane) {
+  const e = state.laneEffects[lane];
+  if (!e) return 0;
+  switch (e.rule) {
+    case 'cost_ge': return card.cost >= e.threshold ? e.value : 0;
+    case 'cost_le': return card.cost <= e.threshold ? e.value : 0;
+    case 'all_self': return e.value;       // 自分側のみ (呼び元で判定する)
+    case 'all_opp':  return e.value;       // 相手側のみ (呼び元で判定する)
+    case 'faction':  return card.faction === e.faction ? e.value : 0;
+  }
+  return 0;
+}
+function factionSynergyFor(card, side, lane) {
+  const same = state.board[side][lane].filter(c => c.faction === card.faction).length;
+  // 同レーンに同派閥 ≥ 2 → そのレーンの同派閥カード全員に +1 (1枚ごとに +1 追加)
+  return same >= 2 ? same : 0;
+}
+function comboBonusFor(card, side, lane) {
+  let bonus = 0;
+  for (const combo of state.combos) {
+    if (!combo.chars.includes(card.name)) continue;
+    const allCardsAnyLane = [].concat(...state.board[side]);
+    const sameLaneCards = state.board[side][lane];
+    const has = (charName, cards) => cards.some(c => c.name === charName);
+    let triggered = false;
+    if (combo.condition === 'same_lane') {
+      triggered = combo.chars.every(c => has(c, sameLaneCards));
+    } else if (combo.condition === 'any_lane') {
+      triggered = combo.chars.every(c => has(c, allCardsAnyLane));
+    }
+    if (triggered) bonus += combo.effect.power;
+  }
+  return bonus;
+}
+function getCardPower(card, side, lane) {
+  let p = card.basePower + dupeBonusOf(card);
+  // onPlay の固定 delta (相手カードからの -2 等) は _currentPower 経由 (累積)
+  if (card._currentPower != null) p = card._currentPower + dupeBonusOf(card);
+  // レーン効果
+  const le = state.laneEffects[lane];
+  if (le) {
+    if (le.rule === 'all_self' && side === 'me') p += le.value;
+    else if (le.rule === 'all_opp' && side === 'opp') p += le.value;
+    else if (le.rule === 'faction' || le.rule === 'cost_ge' || le.rule === 'cost_le') {
+      p += laneEffectFor(card, lane);
+    }
+  }
+  // 派閥シナジー
+  p += factionSynergyFor(card, side, lane);
+  // ストーリーコンボ
+  p += comboBonusFor(card, side, lane);
+  return p;
+}
+function getLanePower(side, lane) {
+  return state.board[side][lane].reduce((s, c) => s + getCardPower(c, side, lane), 0);
 }
 
 // ===== 描画 =====
@@ -95,17 +172,35 @@ function renderAll() {
   $('#hand-count').textContent = state.hand.length;
   $('.cg-score-me').textContent = state.scoreMe;
   $('.cg-score-ai').textContent = state.scoreOpp;
+  $('#btn-end-turn').disabled = state.busy || state.ended;
+  $('#btn-undo').disabled = state.busy || state.ended || state.thisTurnPlacements.length === 0;
 
+  renderLaneEffects();
   renderHand();
   renderBoard();
   updateLanePowers();
+}
+
+function renderLaneEffects() {
+  [0, 1, 2].forEach(lane => {
+    const e = state.laneEffects[lane];
+    const labelMe = $(`#lanes-me .cg-lane[data-lane="${lane}"] .cg-lane-name`);
+    const labelOpp = $(`#lanes-opp .cg-lane[data-lane="${lane}"] .cg-lane-name`);
+    if (!e) return;
+    const txt = `L${lane + 1} ${e.icon} ${e.name}`;
+    if (labelMe) labelMe.textContent = txt;
+    if (labelOpp) labelOpp.textContent = txt;
+    [`#lanes-me .cg-lane[data-lane="${lane}"]`, `#lanes-opp .cg-lane[data-lane="${lane}"]`].forEach(s => {
+      const el = $(s); if (el) el.title = e.description;
+    });
+  });
 }
 
 function renderHand() {
   const handEl = $('#hand');
   handEl.innerHTML = '';
   state.hand.forEach((card, idx) => {
-    const cardEl = makeCardElement(card, /*showEffect*/ true);
+    const cardEl = makeCardElement(card, true);
     if (state.selectedCardIdx === idx) cardEl.classList.add('selected');
     if (card.cost > state.cost - state.costUsed) cardEl.classList.add('unaffordable');
     cardEl.addEventListener('click', () => onHandCardClick(idx));
@@ -116,12 +211,21 @@ function renderHand() {
 function renderBoard() {
   ['me', 'opp'].forEach(side => {
     [0, 1, 2].forEach(lane => {
-      const slotsEl = $(`#${side === 'opp' ? 'opp' : 'me'}-slots-${lane}`);
+      const slotsEl = $(`#${side}-slots-${lane}`);
       slotsEl.innerHTML = '';
-      state.board[side][lane].forEach(card => {
-        // 場のカードも能力 + 絵を表示 (ユーザー要望 2026-05-04)
-        const el = makeCardElement(card, /*showEffect*/ true);
+      state.board[side][lane].forEach((card, boardIdx) => {
+        const el = makeCardElement(card, true);
         if (side === 'opp') el.classList.add('opp');
+        // 自分のカードかつ ターン内 配置済 → undo 可能 (クリックで取消)
+        if (side === 'me' && state.thisTurnPlacements.some(p => p.cardId === card.id && p.lane === lane)) {
+          el.classList.add('undoable');
+          el.title = 'タップで手札に戻す';
+          el.addEventListener('click', () => undoMyCard(lane, boardIdx));
+        }
+        // 動的 power を表示用に上書き
+        const dynPower = getCardPower(card, side, lane);
+        const pEl = el.querySelector('.cg-card-power');
+        if (pEl) pEl.textContent = '⚔' + dynPower;
         slotsEl.appendChild(el);
       });
     });
@@ -131,21 +235,21 @@ function renderBoard() {
 function makeCardElement(card, showEffect) {
   const el = document.createElement('div');
   el.className = 'cg-card';
-  // 画像 path: cardgame/ から見ると `..` で本体に戻る
   const imgUrl = card.img ? '..' + card.img : '';
   const imgStyle = imgUrl ? `background-image: url('${imgUrl}')` : '';
   const imgClass = imgUrl ? '' : 'no-img';
+  const dupesBadge = card.dupes > 0 ? `<span class="cg-card-dupes" title="凸 ${card.dupes}">+${card.dupes}</span>` : '';
+  const displayPower = card._currentPower != null ? card._currentPower : (card.basePower + dupeBonusOf(card));
   el.innerHTML = `
-    <div class="cg-card-tier ${card.tier}">${card.tier}</div>
+    <div class="cg-card-tier ${card.tier}">${card.tier}${dupesBadge}</div>
     <div class="cg-card-img ${imgClass}" style="${imgStyle}"></div>
     <div class="cg-card-name">${card.name}</div>
     <div class="cg-card-stats">
       <span class="cg-card-cost">⚡${card.cost}</span>
-      <span class="cg-card-power">⚔${card._currentPower != null ? card._currentPower : card.basePower}</span>
+      <span class="cg-card-power">⚔${displayPower}</span>
     </div>
     ${showEffect && card.effectText ? `<div class="cg-card-effect">${card.effectText}</div>` : ''}
   `;
-  // 画像 load 失敗時 fallback
   if (imgUrl) {
     const probe = new Image();
     probe.src = imgUrl;
@@ -162,8 +266,8 @@ function makeCardElement(card, showEffect) {
 
 function updateLanePowers() {
   [0, 1, 2].forEach(lane => {
-    const mePow = state.board.me[lane].reduce((s, c) => s + (c._currentPower != null ? c._currentPower : c.basePower), 0);
-    const oppPow = state.board.opp[lane].reduce((s, c) => s + (c._currentPower != null ? c._currentPower : c.basePower), 0);
+    const mePow = getLanePower('me', lane);
+    const oppPow = getLanePower('opp', lane);
     $(`#me-power-${lane}`).textContent = mePow;
     $(`#opp-power-${lane}`).textContent = oppPow;
 
@@ -184,19 +288,26 @@ function onHandCardClick(idx) {
     setMessage(`コスト不足: ${card.name} (⚡${card.cost} 必要、 残${state.cost - state.costUsed})`, 'alert');
     return;
   }
-  state.selectedCardIdx = idx;
-  // レーンをハイライト
-  $$('#lanes-me .cg-lane').forEach(el => {
-    if (state.board.me[Number(el.dataset.lane)].length < 4) el.classList.add('lane-target');
-  });
-  setMessage(`配置先レーンを選択: ${card.name}`);
+  if (state.selectedCardIdx === idx) {
+    state.selectedCardIdx = -1;
+    $$('.lane-target').forEach(el => el.classList.remove('lane-target'));
+    setMessage('選択解除');
+  } else {
+    state.selectedCardIdx = idx;
+    $$('#lanes-me .cg-lane').forEach(el => {
+      if (state.board.me[Number(el.dataset.lane)].length < 4) el.classList.add('lane-target');
+    });
+    setMessage(`配置先レーンを選択: ${card.name}`);
+  }
   renderHand();
 }
 
 // ===== レーン選択 (配置) =====
 $$('#lanes-me .cg-lane').forEach(el => {
-  el.addEventListener('click', () => {
+  el.addEventListener('click', (e) => {
     if (state.selectedCardIdx === -1 || state.busy || state.ended) return;
+    // 子要素 (配置済カードの undo クリック) と競合しないように
+    if (e.target.closest('.cg-card.undoable')) return;
     const lane = Number(el.dataset.lane);
     if (state.board.me[lane].length >= 4) {
       setMessage('そのレーンは満員 (4枚まで)', 'alert');
@@ -208,19 +319,18 @@ $$('#lanes-me .cg-lane').forEach(el => {
 
 function placeMyCard(handIdx, lane) {
   const card = { ...state.hand[handIdx] };
-  card._currentPower = card.basePower;
+  card._currentPower = card.basePower + dupeBonusOf(card);
+  card._appliedTo = [];
   state.hand.splice(handIdx, 1);
   state.board.me[lane].push(card);
   state.costUsed += card.cost;
+  state.thisTurnPlacements.push({ cardId: card.id, lane });
   state.selectedCardIdx = -1;
-  // 効果発動
   applyEffect(card, lane, 'me');
-  // ハイライト解除
   $$('.lane-target').forEach(el => el.classList.remove('lane-target'));
   setMessage(`${card.name} を L${lane + 1} に配置 (${card.effectText || '効果なし'})`, 'success');
+  state.busy = false; // 配置中に何かで残らないよう明示
   renderAll();
-
-  // アニメ
   setTimeout(() => {
     const slotsEl = $(`#me-slots-${lane}`);
     const last = slotsEl.lastElementChild;
@@ -228,7 +338,7 @@ function placeMyCard(handIdx, lane) {
   }, 10);
 }
 
-// ===== 効果発動 (PoC: onPlay のみ、 簡素) =====
+// ===== 効果発動 (onPlay) =====
 function applyEffect(card, lane, side) {
   const eff = card.effect;
   if (!eff || eff.trigger !== 'onPlay') return;
@@ -236,36 +346,88 @@ function applyEffect(card, lane, side) {
   const oppSide = side === 'me' ? 'opp' : 'me';
   const oppBoard = state.board[oppSide];
 
+  const add = (target, delta) => {
+    if (target === card) return; // 自身への onPlay 加算は selfBonus 別経路
+    target._currentPower = (target._currentPower != null ? target._currentPower : (target.basePower + dupeBonusOf(target))) + delta;
+    if (!card._appliedTo) card._appliedTo = [];
+    card._appliedTo.push({ target, delta });
+  };
+
   switch (eff.target) {
     case 'self_lane':
-      myBoard[lane].forEach(c => { c._currentPower = (c._currentPower || c.basePower) + eff.power; });
+      myBoard[lane].forEach(c => add(c, eff.power));
       break;
     case 'adjacent_lanes':
       [lane - 1, lane + 1].filter(L => L >= 0 && L <= 2).forEach(L => {
-        myBoard[L].forEach(c => { c._currentPower = (c._currentPower || c.basePower) + eff.power; });
+        myBoard[L].forEach(c => add(c, eff.power));
       });
       break;
     case 'all_lanes':
-      [0, 1, 2].forEach(L => {
-        myBoard[L].forEach(c => { c._currentPower = (c._currentPower || c.basePower) + eff.power; });
-      });
+      [0, 1, 2].forEach(L => myBoard[L].forEach(c => add(c, eff.power)));
       break;
     case 'opp_self_lane':
-      oppBoard[lane].forEach(c => { c._currentPower = (c._currentPower || c.basePower) + eff.power; });
+      oppBoard[lane].forEach(c => add(c, eff.power));
       break;
     case 'all_opp_lanes':
-      [0, 1, 2].forEach(L => {
-        oppBoard[L].forEach(c => { c._currentPower = (c._currentPower || c.basePower) + eff.power; });
-      });
+      [0, 1, 2].forEach(L => oppBoard[L].forEach(c => add(c, eff.power)));
       break;
     case 'self_lane_attack':
-      myBoard[lane].forEach(c => { c._currentPower = (c._currentPower || c.basePower) + eff.power; });
-      oppBoard[lane].forEach(c => { c._currentPower = (c._currentPower || c.basePower) + (eff.oppPower || 0); });
+      myBoard[lane].forEach(c => add(c, eff.power));
+      oppBoard[lane].forEach(c => add(c, eff.oppPower || 0));
       break;
   }
   if (eff.selfBonus) {
-    card._currentPower = (card._currentPower || card.basePower) + eff.selfBonus;
+    card._currentPower = (card._currentPower != null ? card._currentPower : (card.basePower + dupeBonusOf(card))) + eff.selfBonus;
   }
+}
+
+// ===== 配置取消 (個別カード undo) =====
+function undoMyCard(lane, boardIdx) {
+  if (state.busy || state.ended) return;
+  const card = state.board.me[lane][boardIdx];
+  if (!card) return;
+  // ターン内に配置したカードかチェック
+  const placementIdx = state.thisTurnPlacements.findIndex(p => p.cardId === card.id && p.lane === lane);
+  if (placementIdx === -1) {
+    setMessage('前のターンに配置したカードは手札に戻せません', 'alert');
+    return;
+  }
+  // 効果を逆適用
+  if (card._appliedTo) {
+    card._appliedTo.forEach(({ target, delta }) => {
+      target._currentPower = (target._currentPower != null ? target._currentPower : (target.basePower + dupeBonusOf(target))) - delta;
+    });
+  }
+  state.board.me[lane].splice(boardIdx, 1);
+  state.costUsed -= card.cost;
+  state.thisTurnPlacements.splice(placementIdx, 1);
+  // hand に戻す (state を綺麗に)
+  delete card._appliedTo;
+  delete card._currentPower;
+  state.hand.push(card);
+  setMessage(`${card.name} を手札に戻した (⚡${card.cost} 返却)`, 'success');
+  renderAll();
+}
+
+// ===== 配置リセット (ターン中の全 undo) =====
+function resetThisTurn() {
+  if (state.busy || state.ended) return;
+  if (state.thisTurnPlacements.length === 0) return;
+  // 後ろから順に undo
+  while (state.thisTurnPlacements.length > 0) {
+    const p = state.thisTurnPlacements[state.thisTurnPlacements.length - 1];
+    let found = -1, foundLane = -1;
+    for (let L = 0; L < 3; L++) {
+      const idx = state.board.me[L].findIndex(c => c.id === p.cardId);
+      if (idx !== -1) { found = idx; foundLane = L; break; }
+    }
+    if (found === -1) {
+      state.thisTurnPlacements.pop();
+      continue;
+    }
+    undoMyCard(foundLane, found);
+  }
+  setMessage('ターン中の配置を全てリセット', 'success');
 }
 
 // ===== ターン終了 =====
@@ -275,12 +437,13 @@ async function endTurn() {
   if (state.busy || state.ended) return;
   state.busy = true;
   $('#btn-end-turn').disabled = true;
+  $('#btn-undo').disabled = true;
+  $$('.lane-target').forEach(el => el.classList.remove('lane-target'));
 
   setMessage('AIの手番...');
-  await sleep(500);
+  await sleep(400);
   await aiTurn();
 
-  // ターン進行
   if (state.turn >= state.maxTurn) {
     state.busy = false;
     finishMatch();
@@ -288,17 +451,15 @@ async function endTurn() {
   }
   state.turn += 1;
   drawTurnStart();
-  setMessage(`ターン ${state.turn} 開始 — コスト ${state.cost}`);
+  setMessage(`ターン ${state.turn} — ⚡コスト ${state.cost}`);
   state.busy = false;
-  $('#btn-end-turn').disabled = false;
+  renderAll();
 }
 
 // ===== AI 手番 =====
 async function aiTurn() {
   let aiCost = state.turn;
   let aiCostUsed = 0;
-  // Easy: ランダムにカード選択 → 1〜複数枚配置
-  // Normal: コスト最大化 (使えるコストを目一杯使う)
   let attempts = 0;
   while (aiCostUsed < aiCost && attempts < 8) {
     attempts++;
@@ -311,15 +472,12 @@ async function aiTurn() {
     let pick;
     if (state.difficulty === 'easy') {
       pick = playable[Math.floor(Math.random() * playable.length)];
-      // Easy は 50% で配置スキップ
       if (Math.random() < 0.4) break;
     } else {
-      // Normal: 最大コストカード優先
       playable.sort((a, b) => b.c.cost - a.c.cost);
       pick = playable[0];
     }
 
-    // レーン選択: 空いているレーンの中で「自軍が劣勢のレーン」 を補強 (Normal) / ランダム (Easy)
     let lane;
     if (state.difficulty === 'easy') {
       const openLanes = [0, 1, 2].filter(L => state.board.opp[L].length < 4);
@@ -328,7 +486,7 @@ async function aiTurn() {
     } else {
       const lanes = [0, 1, 2].map(L => ({
         L,
-        diff: laneDiff(L, 'opp'),
+        diff: getLanePower('opp', L) - getLanePower('me', L),
         full: state.board.opp[L].length >= 4,
       })).filter(x => !x.full);
       if (lanes.length === 0) break;
@@ -338,20 +496,15 @@ async function aiTurn() {
 
     placeAICard(pick.i, lane);
     aiCostUsed += pick.c.cost;
-    await sleep(350);
+    await sleep(320);
   }
   setMessage(`AIが ${aiCostUsed} コスト分配置`, 'success');
 }
 
-function laneDiff(lane, side) {
-  const my = state.board[side][lane].reduce((s, c) => s + (c._currentPower || c.basePower), 0);
-  const opp = state.board[side === 'me' ? 'opp' : 'me'][lane].reduce((s, c) => s + (c._currentPower || c.basePower), 0);
-  return my - opp;
-}
-
 function placeAICard(handIdx, lane) {
   const card = { ...state.oppHand[handIdx] };
-  card._currentPower = card.basePower;
+  card._currentPower = card.basePower + dupeBonusOf(card);
+  card._appliedTo = [];
   state.oppHand.splice(handIdx, 1);
   state.board.opp[lane].push(card);
   applyEffect(card, lane, 'opp');
@@ -363,15 +516,13 @@ function placeAICard(handIdx, lane) {
   }, 10);
 }
 
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-
 // ===== 試合終了 =====
 function finishMatch() {
   state.ended = true;
   let me = 0, opp = 0;
   for (let L = 0; L < 3; L++) {
-    const meP = state.board.me[L].reduce((s, c) => s + (c._currentPower || c.basePower), 0);
-    const oppP = state.board.opp[L].reduce((s, c) => s + (c._currentPower || c.basePower), 0);
+    const meP = getLanePower('me', L);
+    const oppP = getLanePower('opp', L);
     if (meP > oppP) me++;
     else if (oppP > meP) opp++;
   }
@@ -382,13 +533,13 @@ function finishMatch() {
   let title, icon, detail;
   if (me > opp) {
     title = '勝利'; icon = '🏆';
-    detail = `3レーンのうち ${me} レーンで勝利。 おめでとう、 虹意の祝福を。`;
+    detail = `3レーン中 ${me} レーン勝利。 おめでとう、 虹意の祝福を。`;
   } else if (opp > me) {
     title = '敗北'; icon = '💧';
-    detail = `AIに ${opp} レーン取られた。 別のデッキ構築や配置を試そう。`;
+    detail = `AIに ${opp} レーン取られた。 派閥シナジーやコンボを狙って リトライ。`;
   } else {
     title = '引き分け'; icon = '⚖️';
-    detail = `${me} : ${opp} の互角。 もう一度挑戦してみよう。`;
+    detail = `${me} : ${opp} の互角。 もう一度挑戦しよう。`;
   }
   $('#result-icon').textContent = icon;
   $('#result-title').textContent = title;
@@ -398,13 +549,30 @@ function finishMatch() {
 
 function rematch() {
   $('#result-modal').hidden = true;
+  $('#result-peek-btn').hidden = true;
   startMatch(state.difficulty);
 }
 
-function backToHome() {
+function backToCardgameHome() {
+  // cardgame ホーム (難易度選択)
   $('#result-modal').hidden = true;
+  $('#result-peek-btn').hidden = true;
   $('#match-screen').classList.remove('active');
   $('#home-screen').classList.add('active');
+}
+
+function backToPrismaeraHome() {
+  location.href = '/';
+}
+
+// 結果モーダルから「場を見る」 押下 → モーダル一時クローズ + floating「結果に戻る」
+function peekBoard() {
+  $('#result-modal').hidden = true;
+  $('#result-peek-btn').hidden = false;
+}
+function reopenResult() {
+  $('#result-modal').hidden = false;
+  $('#result-peek-btn').hidden = true;
 }
 
 // ===== モーダル =====
@@ -414,26 +582,105 @@ function closeHelp() { $('#help-modal').hidden = true; }
 function openTutorial() { $('#tutorial-modal').hidden = false; }
 function closeTutorial() { $('#tutorial-modal').hidden = true; }
 
+// ===== コンボ確認モーダル =====
+function openCombosModal() {
+  if (state.busy) return;
+  const list = collectAvailableCombos();
+  const body = $('#combos-body');
+  if (list.length === 0) {
+    body.innerHTML = '<p style="color:var(--text-dim);text-align:center;padding:20px">現在の手札+場で発動可能なコンボなし。<br>手札にコンボパーツが揃っていない、 または条件未達。</p>';
+  } else {
+    body.innerHTML = list.map(c => `
+      <div class="cg-combo-item ${c.triggered ? 'triggered' : 'pending'}">
+        <div class="cg-combo-head">
+          <span class="cg-combo-icon">${c.triggered ? '✨' : '🔍'}</span>
+          <span class="cg-combo-name">${c.name}</span>
+          <span class="cg-combo-status">${c.triggered ? '発動中' : 'あと' + c.missing.length + '枚'}</span>
+        </div>
+        <div class="cg-combo-cond">${c.conditionLabel}</div>
+        <div class="cg-combo-chars">
+          ${c.chars.map(name => {
+            const has = c.collected.includes(name);
+            return `<span class="cg-combo-chip ${has ? 'has' : 'miss'}">${has ? '✓' : '○'} ${name}</span>`;
+          }).join('')}
+        </div>
+        <div class="cg-combo-flavor">${c.flavor}</div>
+        <div class="cg-combo-effect">効果: 自レーン +${c.power} power</div>
+      </div>
+    `).join('');
+  }
+  $('#combos-modal').hidden = false;
+}
+function closeCombosModal() { $('#combos-modal').hidden = true; }
+
+function collectAvailableCombos() {
+  const myBoardAll = [].concat(...state.board.me);
+  const myAll = myBoardAll.concat(state.hand);
+  const myAllNames = myAll.map(c => c.name);
+  return state.combos.map(combo => {
+    const collected = combo.chars.filter(c => myAllNames.includes(c));
+    const missing = combo.chars.filter(c => !myAllNames.includes(c));
+    // 発動チェック (場に揃っている場合)
+    let triggered = false;
+    if (combo.condition === 'same_lane') {
+      for (let L = 0; L < 3; L++) {
+        const laneNames = state.board.me[L].map(c => c.name);
+        if (combo.chars.every(c => laneNames.includes(c))) { triggered = true; break; }
+      }
+    } else if (combo.condition === 'any_lane') {
+      const boardNames = myBoardAll.map(c => c.name);
+      triggered = combo.chars.every(c => boardNames.includes(c));
+    }
+    return {
+      name: combo.name,
+      chars: combo.chars,
+      flavor: combo.flavor,
+      power: combo.effect.power,
+      conditionLabel: combo.condition === 'same_lane' ? '同じレーンに揃える' : 'どの場でも揃える',
+      collected, missing, triggered,
+    };
+  }).filter(x => x.collected.length > 0); // 1 枚も持っていないコンボは非表示
+}
+
+// ===== ヘッダ戻る =====
+function onBackClick(e) {
+  e.preventDefault();
+  if ($('#match-screen').classList.contains('active')) {
+    if (!state.ended && state.thisTurnPlacements.length > 0) {
+      if (!confirm('試合を放棄して カードゲームのホームへ戻りますか?')) return;
+    }
+    backToCardgameHome();
+  } else {
+    backToPrismaeraHome();
+  }
+}
+
 // ===== Init =====
 document.addEventListener('DOMContentLoaded', async () => {
-  await loadCards();
+  await loadMasters();
   $('#btn-start-easy').addEventListener('click', () => startMatch('easy'));
   $('#btn-start-normal').addEventListener('click', () => startMatch('normal'));
   $('#btn-tutorial').addEventListener('click', openTutorial);
   $('#btn-help').addEventListener('click', openHelp);
+  $('#btn-undo').addEventListener('click', resetThisTurn);
+  $('#btn-combos').addEventListener('click', openCombosModal);
+  $('.cg-back').addEventListener('click', onBackClick);
 
-  // Esc で閉じる
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-      closeResult(); closeHelp(); closeTutorial();
+      closeResult(); closeHelp(); closeTutorial(); closeCombosModal();
     }
   });
 });
 
-// ===== Globals (HTML から呼ばれる) =====
+// ===== Globals =====
 window.startMatch = startMatch;
 window.rematch = rematch;
-window.backToHome = backToHome;
+window.backToCardgameHome = backToCardgameHome;
+window.backToPrismaeraHome = backToPrismaeraHome;
 window.closeResult = closeResult;
 window.closeHelp = closeHelp;
 window.closeTutorial = closeTutorial;
+window.closeCombosModal = closeCombosModal;
+window.peekBoard = peekBoard;
+window.reopenResult = reopenResult;

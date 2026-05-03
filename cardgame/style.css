@@ -172,20 +172,57 @@ body {
 .cg-hud-value { font-size: 16px; font-weight: 700; }
 .cg-score-me { color: var(--me); }
 .cg-score-ai { color: var(--opp); }
-.cg-end-turn {
+.cg-hud-actions {
   margin-left: auto;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+.cg-hud-btn {
+  background: rgba(124, 93, 255, 0.18);
+  color: var(--text);
+  border: 1px solid rgba(124, 93, 255, 0.4);
+  padding: 7px 10px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 11px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s, border-color .15s;
+}
+.cg-hud-btn:hover:not(:disabled) {
+  background: rgba(124, 93, 255, 0.32);
+  border-color: var(--border-hi);
+}
+.cg-hud-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+.cg-end-turn {
   background: linear-gradient(135deg, var(--aurora-1), var(--aurora-2));
   color: #fff;
   border: none;
-  padding: 8px 16px;
+  padding: 8px 14px;
   border-radius: 10px;
-  font-weight: 600;
-  font-size: 13px;
+  font-weight: 700;
+  font-size: 12px;
   cursor: pointer;
-  box-shadow: 0 0 16px rgba(74, 214, 255, .35);
+  box-shadow: 0 0 16px rgba(95, 223, 255, .4);
+  white-space: nowrap;
 }
 .cg-end-turn:active { transform: scale(.96); }
-.cg-end-turn:disabled { opacity: .5; cursor: not-allowed; box-shadow: none; }
+.cg-end-turn:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+  box-shadow: none;
+  background: rgba(124, 93, 255, 0.2);
+}
+
+@media (max-width: 480px) {
+  .cg-hud { flex-wrap: wrap; }
+  .cg-hud-actions { width: 100%; justify-content: flex-end; margin-top: 6px; margin-left: 0; }
+  .cg-hud-btn { padding: 6px 8px; font-size: 10px; }
+  .cg-end-turn { padding: 7px 11px; font-size: 11px; }
+}
 
 /* ===== Board ===== */
 .cg-board {
@@ -311,6 +348,43 @@ body {
 .cg-card-cost { color: var(--gold); text-shadow: 0 1px 2px rgba(0,0,0,.8); }
 .cg-card-power { color: var(--aurora-2); text-shadow: 0 1px 2px rgba(0,0,0,.8); }
 
+/* 凸数バッジ */
+.cg-card-dupes {
+  display: inline-block;
+  background: rgba(255, 213, 107, 0.85);
+  color: #2a1f00;
+  padding: 0 4px;
+  margin-left: 4px;
+  border-radius: 4px;
+  font-size: 8px;
+  font-weight: 700;
+  vertical-align: middle;
+  text-shadow: none;
+}
+
+/* 配置済 自軍カード = ターン中なら手札に戻せる affordance */
+.cg-card.undoable {
+  cursor: pointer;
+  position: relative;
+  outline: 2px solid rgba(95, 223, 255, 0.45);
+  outline-offset: -2px;
+}
+.cg-card.undoable::after {
+  content: '↩';
+  position: absolute;
+  top: 16px; right: 2px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  font-size: 10px;
+  width: 14px; height: 14px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  border: 1px solid rgba(95, 223, 255, 0.7);
+  opacity: 0;
+  transition: opacity .15s;
+}
+.cg-card.undoable:hover::after { opacity: 1; }
+
 /* AI のカード = 裏向きデザイン (覆面) */
 .cg-card.opp.face-down .cg-card-img,
 .cg-card.opp.face-down .cg-card-name { display: none; }
@@ -415,6 +489,33 @@ body {
   background: rgba(0,0,0,.7);
   backdrop-filter: blur(6px);
 }
+/* 結果モーダルは backdrop 半透明、 場の状態が透けて見える */
+.cg-modal-result .cg-modal-backdrop {
+  background: rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(2px);
+}
+
+/* 結果に戻る floating ボタン (場を見ている時) */
+.cg-result-peek-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 16px;
+  z-index: 80;
+  background: linear-gradient(135deg, var(--aurora-1), var(--aurora-2));
+  color: #fff;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(95, 223, 255, .55);
+  animation: peekFloat 2.4s ease-in-out infinite;
+}
+@keyframes peekFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
 .cg-modal-card {
   position: relative;
   background: var(--bg-elev);
@@ -483,6 +584,73 @@ body {
   color: #fff;
 }
 .cg-tut-sub { font-size: 11px; color: var(--text-dim); }
+
+/* ===== コンボ確認モーダル ===== */
+.cg-combos-card { max-width: 480px; text-align: left; max-height: 84vh; overflow-y: auto; }
+.cg-combos-body {
+  display: flex; flex-direction: column; gap: 10px;
+  margin: 12px 0;
+}
+.cg-combo-item {
+  background: rgba(35, 40, 82, 0.55);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.cg-combo-item.triggered {
+  border-color: var(--gold);
+  box-shadow: 0 0 14px rgba(255, 213, 107, 0.25);
+  background: rgba(255, 213, 107, 0.08);
+}
+.cg-combo-head {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 14px; font-weight: 700;
+  margin-bottom: 6px;
+}
+.cg-combo-icon { font-size: 18px; }
+.cg-combo-name { flex: 1; }
+.cg-combo-status {
+  font-size: 10px;
+  background: rgba(124, 93, 255, 0.3);
+  color: var(--text);
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+.cg-combo-item.triggered .cg-combo-status {
+  background: rgba(255, 213, 107, 0.4);
+  color: #2a1f00;
+  font-weight: 700;
+}
+.cg-combo-cond { font-size: 10px; color: var(--text-dim); margin-bottom: 6px; }
+.cg-combo-chars {
+  display: flex; flex-wrap: wrap; gap: 4px;
+  margin-bottom: 6px;
+}
+.cg-combo-chip {
+  font-size: 10px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+}
+.cg-combo-chip.has {
+  background: rgba(95, 223, 255, 0.2);
+  border-color: var(--aurora-2);
+  color: var(--text);
+}
+.cg-combo-chip.miss {
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--text-dim);
+}
+.cg-combo-flavor {
+  font-size: 10px; color: var(--text-dim);
+  font-style: italic;
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+.cg-combo-effect {
+  font-size: 11px; color: var(--gold);
+  font-weight: 600;
+}
 
 /* ===== モバイル最適化 (480px以下) ===== */
 @media (max-width: 480px) {

@@ -1,0 +1,50 @@
+[
+  {
+    "id": "duo_aqua",
+    "name": "アクアシスの灯",
+    "chars": ["アクアシス筆頭魔術師 グラシエル", "珊瑚鎧の海騎士 コラリア"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 3 },
+    "flavor": "海淵の魔と海騎士、 同じ波紋を纏う。"
+  },
+  {
+    "id": "duo_forest",
+    "name": "深緑の絆",
+    "chars": ["森の射手 リナエ", "ヴィオラ"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 3 },
+    "flavor": "弓の達人と弟子。 同じ祖木の弓が二度鳴る。"
+  },
+  {
+    "id": "trio_observer",
+    "name": "観測者の三柱",
+    "chars": ["セラフィエル", "千夜姫 カグヤ", "星海のノクス"],
+    "condition": "any_lane",
+    "effect": { "target": "all_lanes", "power": 4 },
+    "flavor": "至天・最古・虚空、 三柱の祈りで世界が震える。"
+  },
+  {
+    "id": "duo_prisma_seraph",
+    "name": "原虹の双翼",
+    "chars": ["虹意 プリズマ", "セラフィエル"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 5 },
+    "flavor": "プリズマと、 その羽。 原虹そのものの顕現。"
+  },
+  {
+    "id": "duo_chanty_coralia",
+    "name": "紅玉と珊瑚",
+    "chars": ["紅玉海賊団船長 シャンティ", "珊瑚鎧の海騎士 コラリア"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 2 },
+    "flavor": "海の二派、 同じ航路を往く時のみ。"
+  },
+  {
+    "id": "duo_apprentices",
+    "name": "学び舎の灯",
+    "chars": ["ちさと", "カイ"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 2, "drawCard": false },
+    "flavor": "見習いと学院の少女。 始まりの友。"
+  }
+]

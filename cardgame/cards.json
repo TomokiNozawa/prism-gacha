@@ -9,7 +9,9 @@
     "role": "原虹",
     "chapter": "s1c1",
     "img": "/images/characters/season1/lr/prisma.png",
-    "effectText": "全レーンの自軍パワー +3",
+    "dupes": 0,
+    "dupeBonus": 0,
+    "effectText": "全レーンの自軍 +3",
     "effect": { "trigger": "onPlay", "target": "all_lanes", "power": 3 }
   },
   {
@@ -22,7 +24,9 @@
     "role": "paladin",
     "chapter": "s1c1",
     "img": "/images/characters/season1/ur/seraph_paladin.png",
-    "effectText": "自レーン +3、相手の同レーン -2",
+    "dupes": 1,
+    "dupeBonus": 1,
+    "effectText": "自レーン +3、 相手の同レーン -2",
     "effect": { "trigger": "onPlay", "target": "self_lane_attack", "power": 3, "oppPower": -2 }
   },
   {
@@ -35,6 +39,8 @@
     "role": "sage",
     "chapter": "s1c1",
     "img": "/images/characters/season1/ur/ancient_sage.png",
+    "dupes": 2,
+    "dupeBonus": 1,
     "effectText": "両隣レーンの自軍 +2",
     "effect": { "trigger": "onPlay", "target": "adjacent_lanes", "power": 2 }
   },
@@ -48,6 +54,8 @@
     "role": "archer",
     "chapter": "s1c1",
     "img": "/images/characters/season1/ssr/elf_archer.png",
+    "dupes": 2,
+    "dupeBonus": 1,
     "effectText": "相手の同レーン -2",
     "effect": { "trigger": "onPlay", "target": "opp_self_lane", "power": -2 }
   },
@@ -61,6 +69,8 @@
     "role": "captain",
     "chapter": "s1c2",
     "img": "/images/characters/season1/ssr/pirate_captain.png",
+    "dupes": 3,
+    "dupeBonus": 1,
     "effectText": "自レーン +3",
     "effect": { "trigger": "onPlay", "target": "self_lane", "power": 3 }
   },
@@ -74,6 +84,8 @@
     "role": "mage",
     "chapter": "s1c2",
     "img": "/images/characters/season1/ssr/aqua_mage.png",
+    "dupes": 1,
+    "dupeBonus": 1,
     "effectText": "全レーンの相手 -1",
     "effect": { "trigger": "onPlay", "target": "all_opp_lanes", "power": -1 }
   },
@@ -87,6 +99,8 @@
     "role": "priestess",
     "chapter": "s1c1",
     "img": "/images/characters/season1/sr/lumina.png",
+    "dupes": 3,
+    "dupeBonus": 1,
     "effectText": "自レーン +2",
     "effect": { "trigger": "onPlay", "target": "self_lane", "power": 2 }
   },
@@ -95,12 +109,14 @@
     "name": "紅翼 ツキ",
     "tier": "SR",
     "cost": 2,
-    "basePower": 3,
+    "basePower": 4,
     "faction": "紅翼",
     "role": "swordsman",
     "chapter": "s1c1",
     "img": "/images/characters/season1/sr/tsuki.png",
-    "effectText": "基礎パワーが高め",
+    "dupes": 4,
+    "dupeBonus": 1,
+    "effectText": "基礎パワー高め (バニラ)",
     "effect": { "trigger": "none", "target": "none", "power": 0 }
   },
   {
@@ -113,7 +129,9 @@
     "role": "knight",
     "chapter": "s1c2",
     "img": "/images/characters/season1/sr/coral_knight.png",
-    "effectText": "自レーン +1、自分自身も+1",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +1、 自身も+1",
     "effect": { "trigger": "onPlay", "target": "self_lane", "power": 1, "selfBonus": 1 }
   },
   {
@@ -126,6 +144,8 @@
     "role": "student",
     "chapter": "s1c1",
     "img": "/images/characters/season1/r/chisato.png",
+    "dupes": 5,
+    "dupeBonus": 1,
     "effectText": "自レーン +1",
     "effect": { "trigger": "onPlay", "target": "self_lane", "power": 1 }
   },
@@ -139,6 +159,8 @@
     "role": "apprentice",
     "chapter": "s1c1",
     "img": "/images/characters/season1/r/kai.png",
+    "dupes": 4,
+    "dupeBonus": 1,
     "effectText": "自レーン +1",
     "effect": { "trigger": "onPlay", "target": "self_lane", "power": 1 }
   },
@@ -152,6 +174,8 @@
     "role": "archer",
     "chapter": "s1c1",
     "img": "/images/characters/season1/r/viola.png",
+    "dupes": 3,
+    "dupeBonus": 1,
     "effectText": "自レーン +2",
     "effect": { "trigger": "onPlay", "target": "self_lane", "power": 2 }
   }

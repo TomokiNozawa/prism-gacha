@@ -7,15 +7,15 @@
 <title>Prismaera Cards [Phase 0 PoC]</title>
 <link rel="icon" href="/images/icons/icon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
-<link rel="stylesheet" href="./style.css?v=20260504a">
+<link rel="stylesheet" href="./style.css?v=20260504b">
 </head>
 <body>
 
 <header class="cg-topbar">
-  <a class="cg-back" href="/" aria-label="ホームへ戻る">←</a>
+  <a class="cg-back" href="/" aria-label="戻る">←</a>
   <div class="cg-title">
     ✦ Prismaera <span class="cg-title-sub">Cards</span>
-    <span class="cg-phase">Phase 0 PoC</span>
+    <span class="cg-phase">Phase 1</span>
   </div>
   <button class="cg-help" id="btn-help" aria-label="ルール">?</button>
 </header>
@@ -84,12 +84,14 @@
     <div class="cg-hud-block">
       <div class="cg-hud-label">勝敗</div>
       <div class="cg-hud-value cg-score">
-        <span class="cg-score-me">0</span>
-        :
-        <span class="cg-score-ai">0</span>
+        <span class="cg-score-me">0</span>:<span class="cg-score-ai">0</span>
       </div>
     </div>
-    <button class="cg-end-turn" id="btn-end-turn">ターン終了 →</button>
+    <div class="cg-hud-actions">
+      <button class="cg-hud-btn" id="btn-combos" title="現在の手札+場で発動可能なコンボを確認">💡 コンボ</button>
+      <button class="cg-hud-btn" id="btn-undo" title="このターンの配置を全てリセット">↩ リセット</button>
+      <button class="cg-end-turn" id="btn-end-turn">ターン終了 →</button>
+    </div>
   </div>
 
   <!-- 相手の場 -->
@@ -141,16 +143,37 @@
 
 </section>
 
-<!-- 結果モーダル -->
-<div id="result-modal" class="cg-modal" hidden>
-  <div class="cg-modal-backdrop" onclick="closeResult()"></div>
+<!-- 結果モーダル (backdrop 半透明 + 場が見える) -->
+<div id="result-modal" class="cg-modal cg-modal-result" hidden>
+  <div class="cg-modal-backdrop" onclick="peekBoard()"></div>
   <div class="cg-modal-card">
     <div class="cg-modal-icon" id="result-icon">🏆</div>
     <h2 class="cg-modal-title" id="result-title">勝利</h2>
     <div class="cg-modal-detail" id="result-detail"></div>
     <div class="cg-modal-actions">
-      <button class="cg-btn secondary" onclick="backToHome()">ホームへ</button>
+      <button class="cg-btn secondary" onclick="peekBoard()">場を見る</button>
       <button class="cg-btn primary" onclick="rematch()">もう一回</button>
+    </div>
+    <div class="cg-modal-actions" style="margin-top:8px">
+      <button class="cg-btn secondary" onclick="backToCardgameHome()">カードゲームHome</button>
+      <button class="cg-btn secondary" onclick="backToPrismaeraHome()">Prismaera Home</button>
+    </div>
+  </div>
+</div>
+
+<!-- 結果に戻る floating ボタン (場を見る時に右下) -->
+<button id="result-peek-btn" class="cg-result-peek-btn" onclick="reopenResult()" hidden>📋 結果に戻る</button>
+
+<!-- コンボ確認モーダル -->
+<div id="combos-modal" class="cg-modal" hidden>
+  <div class="cg-modal-backdrop" onclick="closeCombosModal()"></div>
+  <div class="cg-modal-card cg-combos-card">
+    <button class="cg-modal-close" onclick="closeCombosModal()" aria-label="閉じる">×</button>
+    <h2 class="cg-modal-title">💡 発動可能コンボ</h2>
+    <div class="cg-modal-detail">手札+場 のキャラから発動条件を表示。 ✓ = 揃っている</div>
+    <div class="cg-combos-body" id="combos-body"></div>
+    <div class="cg-modal-actions">
+      <button class="cg-btn primary" onclick="closeCombosModal()">閉じる</button>
     </div>
   </div>
 </div>
@@ -214,6 +237,6 @@
   </div>
 </div>
 
-<script src="./script.js?v=20260504a"></script>
+<script src="./script.js?v=20260504b"></script>
 </body>
 </html>
