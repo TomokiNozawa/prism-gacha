@@ -3286,7 +3286,7 @@ const FACTIONS = [
   { id: 'forest',  label: '深緑樹海',          yomi: 'しんりょくじゅかい',   x:  280, y:  720, color: '#b8e0b0' },
   { id: 'wolf',    label: '月牙狼族',          yomi: 'げつがろうぞく',       x:  330, y: 1010, color: '#cccccc' },
   { id: 'silver',  label: '銀霜王国',          yomi: 'ぎんそうおうこく',     x:  500, y: 1250, color: '#cce0ff' },
-  { id: 'dragon',  label: '紫竜王国',          yomi: 'しりゅうおうこく',     x: 1550, y:  380, color: '#d6c5ff' },
+  { id: 'dragon',  label: '紫竜王国',          yomi: 'しりゅうおうこく',     x: 1240, y:  550, color: '#d6c5ff' },  // 2026-05-03 WM 整合 (FACTION_WORLD_COORDS と一致、 黒曜塔と空挺城の間)
   { id: 'redwing', label: '紅翼皇家',          yomi: 'こうよくこうか',       x: 1720, y:  720, color: '#ffc0c0' },
   { id: 'yakai',   label: '夜焔郷・影衆',      yomi: 'やえんごう・かげしゅう', x: 1670, y: 1010, color: '#ffaaaa' },
   { id: 'seventh', label: '第七天',            yomi: 'だいしちてん',         x: 1500, y: 1250, color: '#ffb070' },
@@ -3340,9 +3340,9 @@ const CHAR_FACTION = {
   // 深緑樹海
   '森の射手 リナエ': { f: 'forest',  dx:  -70, dy:    0 },
   'ヴィオラ':        { f: 'forest',  dx:   70, dy:   70 },
-  // 銀霜王国
-  '仮面騎士 シオン': { f: 'silver',  dx:  -70, dy:    0 },
-  'ルミナ':          { f: 'silver',  dx:   70, dy:   70 },
+  // 銀霜王国 (s1c5 で +7人、 計9人を密集なく再配置)
+  '仮面騎士 シオン': { f: 'silver',  dx:  -65, dy:   30 },
+  'ルミナ':          { f: 'silver',  dx:   65, dy:   30 },
   // 黒曜塔
   '黒猫 ノア':       { f: 'tower',   dx:    0, dy:    0 },
   // 第七天
@@ -3370,42 +3370,42 @@ const CHAR_FACTION = {
   '白焔教会見習い巫女 ルーナ':   { f: 'church',  dx:  -60, dy:  130 },
   '白焔教会騎士 ラナス':         { f: 'church',  dx:  120, dy:  100 },
   '白焔教会従士 リッカ':         { f: 'church',  dx:  140, dy:  -10 },
-  // S1C3 古龍砂漠サハール (s1c3、 2026-05-03 登録漏れ修正)
-  '砂海王女 サハナ':             { f: 'sahar',   dx:    0, dy:  -60 },
-  '古龍の語り部 ファラー':       { f: 'sahar',   dx: -120, dy:    0 },
-  '隊商長 アーシャ':             { f: 'sahar',   dx:  120, dy:    0 },
-  '砂牙の剣聖 グラン':           { f: 'sahar',   dx:  -80, dy:   80 },
-  '祭舞のサフィラ':              { f: 'sahar',   dx:   80, dy:   80 },
-  '古龍鍛冶 オウル':             { f: 'sahar',   dx: -120, dy:  100 },
-  '砂風の戦士 ライ':             { f: 'sahar',   dx:  120, dy:  100 },
-  '砂塵の子 ティナ':             { f: 'sahar',   dx:    0, dy:  130 },
-  '砂風の語り部 ナドラ':         { f: 'sahar',   dx:  -50, dy: -100 },
+  // S1C3 古龍砂漠サハール (s1c3、 2026-05-03 9人を密集なく再配置)
+  '砂風の語り部 ナドラ':         { f: 'sahar',   dx:    0, dy: -150 },  // 最上
+  '砂海王女 サハナ':             { f: 'sahar',   dx:    0, dy:  -60 },  // 上中央
+  '古龍の語り部 ファラー':       { f: 'sahar',   dx: -130, dy:   20 },  // 中段左
+  '隊商長 アーシャ':             { f: 'sahar',   dx:  130, dy:   20 },  // 中段右
+  '砂牙の剣聖 グラン':           { f: 'sahar',   dx: -130, dy:  100 },  // 中下左
+  '砂塵の子 ティナ':             { f: 'sahar',   dx:    0, dy:  100 },  // 中下中央
+  '祭舞のサフィラ':              { f: 'sahar',   dx:  130, dy:  100 },  // 中下右
+  '古龍鍛冶 オウル':             { f: 'sahar',   dx:  -60, dy:  170 },  // 最下左
+  '砂風の戦士 ライ':             { f: 'sahar',   dx:   60, dy:  170 },  // 最下右
   // S1C3 紫竜王国 (リアムは紫竜の侍従)
   '紫竜の侍従 リアム':           { f: 'dragon',  dx:    0, dy:  120 },
-  // S1C4 氷霊王国ニーヴル (s1c4、 2026-05-03 登録漏れ修正)
-  '氷帝 グレイル':               { f: 'niiruru', dx:    0, dy:  -60 },
-  '氷塔の聖騎士 リオネ':         { f: 'niiruru', dx: -100, dy:   30 },
-  '摂政 ヴァルキ':               { f: 'niiruru', dx:  100, dy:   30 },
-  '北方剣聖 ハグル':             { f: 'niiruru', dx:  -80, dy:   80 },
-  '氷霜の巫女 ユーリス':         { f: 'niiruru', dx:   80, dy:   80 },
-  '凍土の祭司 イル':             { f: 'niiruru', dx:    0, dy:  130 },
-  '氷牙の戦士 イズン':           { f: 'niiruru', dx: -120, dy:  -10 },
-  '凍土の狩人 シエラ':           { f: 'niiruru', dx:  120, dy:  -10 },
-  '氷塔の見習い騎士 アスラ':     { f: 'niiruru', dx: -100, dy:  130 },
+  // S1C4 氷霊王国ニーヴル (s1c4、 11人を密集なく再配置 2026-05-03)
+  '氷帝 グレイル':               { f: 'niiruru', dx:    0, dy: -150 },  // 最上 (王)
+  '氷塔の聖騎士 リオネ':         { f: 'niiruru', dx: -110, dy:  -70 },  // 上中左
+  '摂政 ヴァルキ':               { f: 'niiruru', dx:  110, dy:  -70 },  // 上中右
+  '氷牙の戦士 イズン':           { f: 'niiruru', dx: -160, dy:   10 },  // 中左
+  '北方剣聖 ハグル':             { f: 'niiruru', dx:  -55, dy:   10 },  // 中央左
+  '氷霜の巫女 ユーリス':         { f: 'niiruru', dx:   55, dy:   10 },  // 中央右
+  '凍土の狩人 シエラ':           { f: 'niiruru', dx:  160, dy:   10 },  // 中右
+  '氷塔の見習い騎士 アスラ':     { f: 'niiruru', dx: -110, dy:   90 },  // 中下左
+  '凍土の祭司 イル':             { f: 'niiruru', dx:  110, dy:   90 },  // 中下右
   // S1C4 R アルク・ミウ (旧 silver 誤所属を niiruru へ修正、 2026-05-03)
-  '凍土の少年 アルク':           { f: 'niiruru', dx: -120, dy:  150 },
-  '雪原の少女 ミウ':             { f: 'niiruru', dx:  120, dy:  150 },
-  // S1C4 空挺城ゼノニア (s1c4、 2026-05-03 登録漏れ修正)
-  '空挺女皇 ヴァーレ':           { f: 'zenonia', dx:    0, dy:  -60 },
-  '空挺城総監 ガリオン':         { f: 'zenonia', dx: -100, dy:   30 },
-  '空挺城首席学者 ゼピル':       { f: 'zenonia', dx:  100, dy:   30 },
-  '真鍮の女将 ハーニア':         { f: 'zenonia', dx:    0, dy:  100 },
-  '空挺整備士 ベル':             { f: 'zenonia', dx: -100, dy:  130 },
-  '蒸気砲手 ヴィン':             { f: 'zenonia', dx:    0, dy:  150 },
-  '空挺機関士 ジン':             { f: 'zenonia', dx:  100, dy:  130 },
+  '凍土の少年 アルク':           { f: 'niiruru', dx:  -55, dy:  170 },  // 最下左
+  '雪原の少女 ミウ':             { f: 'niiruru', dx:   55, dy:  170 },  // 最下右
+  // S1C4 空挺城ゼノニア (s1c4、 9人を密集なく再配置 2026-05-03)
+  '空挺女皇 ヴァーレ':           { f: 'zenonia', dx:    0, dy: -150 },  // 最上 (女皇)
+  '空挺城総監 ガリオン':         { f: 'zenonia', dx: -110, dy:  -70 },  // 上中左
+  '空挺城首席学者 ゼピル':       { f: 'zenonia', dx:  110, dy:  -70 },  // 上中右
+  '真鍮の女将 ハーニア':         { f: 'zenonia', dx:    0, dy:    0 },  // 中央
+  '空挺整備士 ベル':             { f: 'zenonia', dx: -130, dy:   80 },  // 中下左
+  '蒸気砲手 ヴィン':             { f: 'zenonia', dx:    0, dy:   80 },  // 中下中央
+  '空挺機関士 ジン':             { f: 'zenonia', dx:  130, dy:   80 },  // 中下右
   // S1C4 R ピピ・ピット (旧 redwing 誤所属を zenonia へ修正、 2026-05-03)
-  '空の少女 ピピ':               { f: 'zenonia', dx: -120, dy:  170 },
-  '空の少年 ピット':             { f: 'zenonia', dx:  120, dy:  170 },
+  '空の少女 ピピ':               { f: 'zenonia', dx:  -55, dy:  170 },  // 最下左
+  '空の少年 ピット':             { f: 'zenonia', dx:   55, dy:  170 },  // 最下右
   // S1C5 黒月衆ノクトス (s1c5)
   'シ・ロエン':                  { f: 'darkmoon', dx:    0, dy:  -60 },
   '黒月の盟主 ノクトリア':       { f: 'darkmoon', dx: -120, dy:   30 },
@@ -3416,14 +3416,15 @@ const CHAR_FACTION = {
   '影織りの導師 ルナリア':       { f: 'liora',    dx: -100, dy:   30 },
   '地底市の語り部 オルフェ':     { f: 'liora',    dx:  100, dy:   30 },
   '地底市の少女 シエル':         { f: 'liora',    dx:    0, dy:  120 },
-  // S1C5 銀霜王国 (s1c5、 既存 silver に追加 — シオン/ルミナと並列)
-  '銀霜王 ノヴァ':               { f: 'silver',  dx:    0, dy: -100 },
-  '銀霜剣聖 オリエル':           { f: 'silver',  dx: -130, dy:  -30 },
-  '月夜祭司 アスター':           { f: 'silver',  dx:  130, dy:  -30 },
-  '銀霜近衛 セレン':             { f: 'silver',  dx: -130, dy:  130 },
-  '雪月神殿見習い ラピス':       { f: 'silver',  dx:  130, dy:  130 },
-  '銀霜の工房娘':                { f: 'silver',  dx: -100, dy:  170 },
-  '銀霜の歌姫':                  { f: 'silver',  dx:  100, dy:  170 },
+  // S1C5 銀霜王国 (s1c5、 9人を密集なく整列)
+  '銀霜王 ノヴァ':               { f: 'silver',  dx:    0, dy: -150 },  // 最上 (王)
+  '銀霜剣聖 オリエル':           { f: 'silver',  dx: -130, dy:  -70 },  // 上中左
+  '月夜祭司 アスター':           { f: 'silver',  dx:  130, dy:  -70 },  // 上中右
+  // シオン/ルミナ は上で再配置済 (silver_acad の上ブロック)
+  '銀霜近衛 セレン':             { f: 'silver',  dx: -130, dy:  100 },  // 中下左
+  '雪月神殿見習い ラピス':       { f: 'silver',  dx:  130, dy:  100 },  // 中下右
+  '銀霜の工房娘':                { f: 'silver',  dx:  -55, dy:  170 },  // 最下左
+  '銀霜の歌姫':                  { f: 'silver',  dx:   55, dy:  170 },  // 最下右
 };
 // 注: こはね は 夜焔郷 配置 (1か所のみ)。星霊学院との関連は線で表現
 
@@ -3487,6 +3488,11 @@ const RELATIONS = [
   { a: 'ルミナ',          b: 'イザベル',          type: 'fellow', label: '情報交換' },
   { a: '詠聖 ベル',       b: 'メイリ',            type: 'fellow', label: '親友' },
   { a: '影刃 シン',       b: '朱音',              type: 'fellow', label: '別組織協力' },
+  // 2026-05-03 全章 desc + LORE 通読で発見した S1C1 漏れ
+  { a: '千夜姫 カグヤ',   b: '虹意 プリズマ',     type: 'fellow', label: '夜を共にする友' },  // LR_プリズマ凸3 + UR_カグヤ凸3「プリズマの涙」
+  { a: '竜爵 ヴィル',     b: '朱音',              type: 'fellow', label: '酒の飲み仲間' },    // POOL desc + SSR_ヴィル凸3「朱音の酒」
+  { a: '薫音',            b: '朱音',              type: 'fellow', label: '酒の姉妹' },        // SR_薫音凸1「酒の弱さ」
+  { a: 'リリム',          b: '龍帝 アルテミス',   type: 'admire', aRole: '慕う', bRole: 'おじうえ' },  // POOL desc + SR_リリム凸2
   // ===== S1C2 関係 =====
   // アクアシス内部
   { a: '深海女王 ネプテア',           b: '深海の少女 パール',         type: 'master', aRole: '養母', bRole: '養女' },
@@ -3513,6 +3519,10 @@ const RELATIONS = [
   { a: '深海巫女 ティアラ',           b: '詠聖 ベル',                 type: 'fellow', label: '巫女の遠縁' },
   // 覚醒前後
   { a: 'イザベル',                    b: '波紋の聖女 イザベル',       type: 'admire', aRole: '前形', bRole: '覚醒形' },
+  // 2026-05-03 全章 desc + LORE 通読で発見した S1C2 漏れ
+  { a: '珊瑚鎧の海騎士 コラリア',     b: 'アクアシス筆頭魔術師 グラシエル', type: 'fellow', label: '近衛と参謀の戦友' },  // POOL + SR_コラリア凸2
+  { a: '白焔教会従士 リッカ',         b: 'メイリ',                    type: 'fellow', label: '教会次世代' },          // POOL + R_リッカ凸1
+  { a: '白焔教会従士 リッカ',         b: '白焔教会見習い巫女 ルーナ', type: 'fellow', label: '教会次世代' },          // POOL + R_リッカ凸1
 
   // ===== S1C3 古龍砂漠サハール (2026-05-03 反映漏れ修正) =====
   { a: '竜爵 ヴィル',                 b: '砂海王女 サハナ',           type: 'fellow', label: '紫水晶の絆' },
@@ -3526,6 +3536,11 @@ const RELATIONS = [
   { a: '古龍鍛冶 オウル',             b: '古龍の語り部 ファラー',     type: 'master', aRole: '弟子', bRole: '婆さま' },
   { a: '砂風の語り部 ナドラ',         b: '古龍の語り部 ファラー',     type: 'fellow', label: '物語の継承者' },
   { a: '古龍の語り部 ファラー',       b: '千夜姫 カグヤ',             type: 'fellow', label: '千年の友' },
+  // 2026-05-03 全章 desc + LORE 通読で発見した S1C3 漏れ
+  { a: '古龍の語り部 ファラー',       b: '竜爵 ヴィル',               type: 'admire', aRole: '見守る', bRole: '次の千年の鍵' },  // UR_ファラー凸4
+  { a: '隊商長 アーシャ',             b: '竜爵 ヴィル',               type: 'fellow', label: '客の事情聞かず' },                  // SSR_アーシャ凸3「紫の襟を見抜いた夜」
+  { a: '古龍鍛冶 オウル',             b: '祭舞のサフィラ',            type: 'fellow', label: '鱗の粉の染料' },                    // SR_サフィラ凸1「七色絹の染料」
+  { a: '古龍鍛冶 オウル',             b: '竜爵 ヴィル',               type: 'fellow', label: '血の意味を諭す' },                  // SR_オウル凸2「ヴィルへの諭し」
 
   // ===== S1C4 凍土と空 (2026-05-03 反映漏れ修正) =====
   { a: '龍帝 アルテミス',             b: '氷帝 グレイル',             type: 'fellow', label: '三人目の戦友' },
@@ -3547,6 +3562,10 @@ const RELATIONS = [
   { a: '空挺整備士 ベル',             b: '空の少年 ピット',           type: 'sister', aRole: '姉分', bRole: '弟分' },
   { a: '空の少年 ピット',             b: '空の少女 ピピ',             type: 'blood', label: '兄妹' },
   { a: '空挺城総監 ガリオン',         b: '蒸気砲手 ヴィン',           type: 'master', aRole: '総監', bRole: '副官' },
+  // 2026-05-03 全章 desc + LORE 通読で発見した S1C4 漏れ
+  { a: '凍土の少年 アルク',           b: '雪原の少女 ミウ',           type: 'childhood', label: '幼馴染' },                    // POOL desc 両方明記 (野沢さん指摘)
+  { a: '空挺城総監 ガリオン',         b: '摂政 ヴァルキ',             type: 'fellow', label: '空挺と凍土の橋渡し' },        // SSR_ガリオン凸3「ニーヴル↔ゼノニアの橋渡し」
+  { a: '氷塔の聖騎士 リオネ',         b: '氷牙の戦士 イズン',         type: 'fellow', label: '凍土影喰い襲撃の戦友' },     // SR_イズン凸2「凍土の影喰い襲撃で初めて死を見た夜」
 
   // ===== S1C5 黒月の予兆 (2026-05-03 反映) =====
   { a: '仮面騎士 シオン',             b: 'シ・ロエン',                 type: 'blood', label: '分離した自分' },
@@ -3561,6 +3580,8 @@ const RELATIONS = [
   { a: '月夜祭司 アスター',           b: 'ルミナ',                     type: 'fellow', label: '雪月神殿の祭司と灯番' },
   { a: '雪月神殿見習い ラピス',       b: 'ルミナ',                     type: 'admire', aRole: '見習い', bRole: '姉さま' },
   { a: 'ルミナ',                       b: 'イザベル',                   type: 'fellow', label: '治療の情報交換 (文通)' },
+  // 2026-05-03 全章 desc + LORE 通読で発見した S1C5 漏れ
+  { a: '地底市の母 リオラエル',       b: '仮面騎士 シオン',           type: 'master', aRole: '導く', bRole: '影と共に生きる選択' },  // UR_リオラエル POOL desc
 ];
 
 const REL_STYLE = {
@@ -3594,17 +3615,19 @@ function clearRelationsFocus() {
 function _redrawRelationsCanvas() {
   const canvas = document.getElementById('relations-canvas');
   if (!canvas) return;
-  const W = 2000, H = 1600;
+  // viewBox は scale 適用後の総空間 + 周囲バッファ (sahar 等 端の派閥が見切れない)
+  const W = 2000 * REL_FACTION_SCALE, H = 1600 * REL_FACTION_SCALE;
+  const PAD = 200;  // 派閥背景円半径 (175*1.25=219) + ラベル領域分のバッファ
   // focus 中: SVG viewBox 自体を派閥中心の縮小範囲に切替 → 自然に画面中央拡大表示
-  // (transform 戦略は g 内が viewBox cliped で見切れる問題があったため viewBox 切替に変更)
-  let viewBoxAttr = `0 0 ${W} ${H}`;
+  let viewBoxAttr = `${-PAD} ${-PAD} ${W + PAD * 2} ${H + PAD * 2}`;
   if (_relationsFocusFaction) {
     const f = FACTIONS.find(ff => ff.id === _relationsFocusFaction);
     if (f) {
+      const fp = _scaledFactionPos(f);
       const scale = 2.4;
       const focusW = W / scale, focusH = H / scale;
-      const fx = Math.max(0, Math.min(W - focusW, f.x - focusW / 2));
-      const fy = Math.max(0, Math.min(H - focusH, f.y - focusH / 2));
+      const fx = Math.max(-PAD, Math.min(W + PAD - focusW, fp.x - focusW / 2));
+      const fy = Math.max(-PAD, Math.min(H + PAD - focusH, fp.y - focusH / 2));
       viewBoxAttr = `${fx} ${fy} ${focusW} ${focusH}`;
     }
   }
@@ -3684,10 +3707,47 @@ function openRelations() {
   }, 0);
 
   bindRelationsPan(canvas);
+  bindRelationsZoomWheel(canvas);
   // タブ初期化 (スマホはリストをデフォルト)
   setupRelationsTabs();
   const isMobile = window.matchMedia('(max-width: 720px)').matches;
   setRelationsMode(isMobile ? 'list' : 'graph');
+  // 開く度に zoom はリセット (前回開いた zoom が残ると違和感)
+  setRelationsZoom(1.0);
+}
+
+// 相関図 拡大縮小 (野沢さん指示 2026-05-03)
+// CSS で svg width/height = 2200x1820 px。 _relationsZoom 倍率で動的に上書き
+let _relationsZoom = 1.0;
+const REL_ZOOM_MIN = 0.5, REL_ZOOM_MAX = 2.5, REL_ZOOM_STEP = 0.2;
+const REL_SVG_BASE_W = 2200, REL_SVG_BASE_H = 1820;
+function setRelationsZoom(z) {
+  _relationsZoom = Math.max(REL_ZOOM_MIN, Math.min(REL_ZOOM_MAX, z));
+  const svg = document.querySelector('.relations-canvas svg');
+  if (svg) {
+    svg.style.width  = (REL_SVG_BASE_W * _relationsZoom) + 'px';
+    svg.style.height = (REL_SVG_BASE_H * _relationsZoom) + 'px';
+  }
+  const lvl = document.getElementById('rel-zoom-level');
+  if (lvl) lvl.textContent = Math.round(_relationsZoom * 100) + '%';
+}
+function zoomRelationsIn()    { setRelationsZoom(_relationsZoom + REL_ZOOM_STEP); }
+function zoomRelationsOut()   { setRelationsZoom(_relationsZoom - REL_ZOOM_STEP); }
+function zoomRelationsReset() { setRelationsZoom(1.0); }
+window.zoomRelationsIn = zoomRelationsIn;
+window.zoomRelationsOut = zoomRelationsOut;
+window.zoomRelationsReset = zoomRelationsReset;
+let _relationsZoomWheelBound = false;
+function bindRelationsZoomWheel(canvas) {
+  if (_relationsZoomWheelBound) return;
+  _relationsZoomWheelBound = true;
+  // Ctrl/Cmd + ホイールで拡縮 (普通のスクロールと区別)、 タッチパッドのピンチも Ctrl 扱いされる
+  canvas.addEventListener('wheel', e => {
+    if (!e.ctrlKey && !e.metaKey) return;
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.1 : 0.1;
+    setRelationsZoom(_relationsZoom + delta);
+  }, { passive: false });
 }
 
 // #5 派閥別リスト表示
@@ -3729,13 +3789,17 @@ function renderRelationsList(container) {
     if (!byFaction[f]) byFaction[f] = [];
     byFaction[f].push({ name, char: c });
   }
-  // 各キャラの relations を集約
+  // 各キャラの relations を集約 (未公開章のキャラは相手側にも出さない)
   function relsOf(charName) {
     const out = [];
     RELATIONS.forEach(r => {
       if (r.a === charName) {
+        const oc = getCharByName(r.b);
+        if (!_isCharReleased(oc)) return;
         out.push({ other: r.b, type: r.type, role: r.aRole || r.label || '', isMyEnd: 'a' });
       } else if (r.b === charName) {
+        const oc = getCharByName(r.a);
+        if (!_isCharReleased(oc)) return;
         out.push({ other: r.a, type: r.type, role: r.bRole || r.label || '', isMyEnd: 'b' });
       }
     });
@@ -3747,7 +3811,7 @@ function renderRelationsList(container) {
   };
   let html = '';
   FACTIONS.forEach(f => {
-    const list = byFaction[f.id] || [];
+    const list = (byFaction[f.id] || []).filter(({ char }) => _isCharReleased(char));  // 未公開章キャラ非表示
     if (list.length === 0) return;
     html += `<section class="rel-faction" style="--fac-color:${f.color}">`;
     html += `<h3 class="rel-faction-head">${f.label} <span class="rel-faction-yomi">${f.yomi}</span> <span class="rel-faction-count">${list.length}名</span></h3>`;
@@ -3851,12 +3915,22 @@ function closeRelations() {
   document.getElementById('relations').classList.remove('active');
 }
 
+// 相関図の座標スケール (野沢さん指示 2026-05-03 「画面拡大じゃなく、 各派閥のキャラ間距離を実際に広げて」)
+// FACTION_SCALE: 派閥配置 (派閥間距離) を倍率
+// CHAR_SCALE:    派閥内キャラ間距離 (派閥中心からの相対座標 dx/dy) を倍率
+// 既存の FACTIONS / CHAR_FACTION の数値はそのまま、 描画レイヤだけ拡大
+const REL_FACTION_SCALE = 1.5;
+const REL_CHAR_SCALE = 1.25;
+function _scaledFactionPos(f) {
+  return { x: f.x * REL_FACTION_SCALE, y: f.y * REL_FACTION_SCALE };
+}
 function getCharPos(name) {
   const meta = CHAR_FACTION[name];
   if (!meta) return null;
   const f = FACTIONS.find(x => x.id === meta.f);
   if (!f) return null;
-  return { x: f.x + meta.dx, y: f.y + meta.dy };
+  const fp = _scaledFactionPos(f);
+  return { x: fp.x + meta.dx * REL_CHAR_SCALE, y: fp.y + meta.dy * REL_CHAR_SCALE };
 }
 
 function _factionDimOpacity(facId) {
@@ -3865,22 +3939,54 @@ function _factionDimOpacity(facId) {
   return _relationsFocusFaction === facId ? 1.0 : 0.18;
 }
 
+// 未公開章のキャラ/派閥は相関図に出さない (野沢さん指示 2026-05-03 「公開日時に合わせて表示」)
+// RELATIONS の登録自体は維持、 描画レイヤだけ抑制
+function _isCharReleased(c) {
+  return !!c && (!c.chapter || _isChapterReleased(c.chapter));
+}
+function _factionHasReleasedMember(facId) {
+  for (const [name, meta] of Object.entries(CHAR_FACTION)) {
+    if (meta.f !== facId) continue;
+    const c = getCharByName(name);
+    if (c && _isCharReleased(c)) return true;
+  }
+  return false;
+}
+
+// 派閥背景円の半径を派閥のキャラ占有領域から自動算出 (キャラ数差を吸収)
+function _factionRadius(facId) {
+  let maxDist = 0;
+  for (const [name, meta] of Object.entries(CHAR_FACTION)) {
+    if (meta.f !== facId) continue;
+    const c = getCharByName(name);
+    if (!c || !_isCharReleased(c)) continue;
+    const d = Math.hypot(meta.dx, meta.dy + 40);  // 円中心は f.y+40 オフセット
+    if (d > maxDist) maxDist = d;
+  }
+  // 最大相対距離 + ノード半径 + 余白、 ×CHAR_SCALE、 最低 175*scale
+  return Math.max(175, maxDist + 55) * REL_CHAR_SCALE;
+}
 function renderFactionBg() {
-  return FACTIONS.map(f => {
-    // 派閥領域を半透明の背景円で示す (新スケールに合わせ半径175)
-    const r = 175;
+  return FACTIONS.filter(f => _factionHasReleasedMember(f.id)).map(f => {
+    const fp = _scaledFactionPos(f);
+    const r = _factionRadius(f.id);
     const op = _factionDimOpacity(f.id);
-    return `<circle data-faction-id="${f.id}" class="rel-faction-bg" cx="${f.x}" cy="${f.y + 40}" r="${r}" fill="${f.color}" fill-opacity="${0.06 * op}" stroke="${f.color}" stroke-opacity="${0.25 * op}" stroke-width="1.5" stroke-dasharray="4,4" style="cursor:pointer"/>`;
+    return `<circle data-faction-id="${f.id}" class="rel-faction-bg" cx="${fp.x}" cy="${fp.y + 40 * REL_CHAR_SCALE}" r="${r}" fill="${f.color}" fill-opacity="${0.06 * op}" stroke="${f.color}" stroke-opacity="${0.25 * op}" stroke-width="1.5" stroke-dasharray="4,4" style="cursor:pointer"/>`;
   }).join('');
 }
 
 function renderFactionLabels() {
-  return FACTIONS.map(f => {
+  return FACTIONS.filter(f => _factionHasReleasedMember(f.id)).map(f => {
+    const fp = _scaledFactionPos(f);
+    const r = _factionRadius(f.id);
     const op = _factionDimOpacity(f.id);
+    // ラベルは派閥背景円の上端より少し上に配置 (円半径連動)
+    const labelY = fp.y + 40 * REL_CHAR_SCALE - r - 15;
+    const yomiY = labelY - 22;
     const yomiTxt = f.yomi
-      ? `<text x="${f.x}" y="${f.y - 137}" text-anchor="middle" fill="${f.color}" font-size="11" letter-spacing="2" opacity="${0.7 * op}" style="text-shadow: 0 0 6px rgba(0,0,0,0.8)">${f.yomi}</text>`
+      ? `<text x="${fp.x}" y="${yomiY}" text-anchor="middle" fill="${f.color}" font-size="11" letter-spacing="2" opacity="${0.7 * op}" style="text-shadow: 0 0 6px rgba(0,0,0,0.8)">${f.yomi}</text>`
       : '';
-    return `${yomiTxt}<text data-faction-id="${f.id}" class="rel-faction-label" x="${f.x}" y="${f.y - 115}" text-anchor="middle" fill="${f.color}" font-size="22" font-weight="700" letter-spacing="2" opacity="${op}" style="cursor:pointer; text-shadow: 0 0 8px rgba(0,0,0,0.8)">${f.label}</text>`;
+    return `${yomiTxt}<text data-faction-id="${f.id}" class="rel-faction-label" x="${fp.x}" y="${labelY}" text-anchor="middle" fill="${f.color}" font-size="22" font-weight="700" letter-spacing="2" opacity="${op}" style="cursor:pointer; text-shadow: 0 0 8px rgba(0,0,0,0.8)">${f.label}</text>`;
   }).join('');
 }
 
@@ -3910,6 +4016,9 @@ function renderRelationLines() {
       const pa = getCharPos(r.a);
       const pb = getCharPos(r.b);
       if (!pa || !pb) return;
+      // 未公開章キャラを含む線は描かない (野沢さん指示 2026-05-03)
+      const ca = getCharByName(r.a), cb = getCharByName(r.b);
+      if (!_isCharReleased(ca) || !_isCharReleased(cb)) return;
       const style = REL_STYLE[r.type] || REL_STYLE.fellow;
       const dash = style.dash !== 'none' ? `stroke-dasharray="${style.dash}"` : '';
 
@@ -3992,6 +4101,7 @@ function renderCharNodes() {
     if (name.endsWith('_acad')) continue; // ダミーキー除外
     const c = getCharByName(name);
     if (!c) continue;
+    if (!_isCharReleased(c)) continue;  // 未公開章キャラは表示しない (野沢さん指示 2026-05-03)
     const pos = getCharPos(name);
     if (!pos) continue;
     const unlocked = isUnlocked(c);
@@ -6143,7 +6253,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260503f';
+const IMG_CACHE_VERSION = '20260503p';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -6972,40 +7082,76 @@ document.addEventListener('DOMContentLoaded', _initLightmode);
 // body 未生成段階でも script.js 読込時に即適用 (FOUC 抑制)
 if (document.body) _initLightmode();
 
-// ホーム画面の次章ティザーを動的レンダリング (野沢さん指示 2026-05-03: 公開時刻に応じて「次章」 のみ表示、 「2つ次以降」 は出さない)
+// ホーム画面の次章ティザーを動的レンダリング (野沢さん指示 2026-05-03)
+// 左 = 次章、 右 = 次の次の章 (両方 Coming Soon)、 公開時刻に応じて自動繰上げ
 function _renderHomeNextTeaser() {
   const el = document.querySelector('.story-next-teaser');
   if (!el || typeof STORY_OUTLINE === 'undefined') return;
-  // 「次章 = 最新公開章+1」 を特定
   const releasedIds = STORY_OUTLINE.filter(o => _isChapterReleased(o.id)).map(o => o.id);
   const lastReleased = releasedIds.length > 0 ? releasedIds[releasedIds.length - 1] : null;
-  let next = null;
+  let next1 = null, next2 = null;
   if (lastReleased) {
     const idx = STORY_OUTLINE.findIndex(o => o.id === lastReleased);
-    if (idx >= 0 && idx + 1 < STORY_OUTLINE.length) next = STORY_OUTLINE[idx + 1];
+    if (idx >= 0 && idx + 1 < STORY_OUTLINE.length) next1 = STORY_OUTLINE[idx + 1];
+    if (idx >= 0 && idx + 2 < STORY_OUTLINE.length) next2 = STORY_OUTLINE[idx + 2];
   } else if (STORY_OUTLINE.length > 0) {
-    next = STORY_OUTLINE[0];
+    next1 = STORY_OUTLINE[0];
+    if (STORY_OUTLINE.length >= 2) next2 = STORY_OUTLINE[1];
   }
-  if (!next) { el.style.display = 'none'; return; }
+  if (!next1) { el.style.display = 'none'; return; }
   el.style.display = '';
-  const releaseStr = next.releaseDate
-    ? `📅 <b>${_formatReleaseDate(next.id)}</b> 公開予定`
-    : `📅 公開予定 — お楽しみに`;
-  const povLine = next.povCharName ? `<div class="story-next-pov">主人公: ${escapeHtml(next.povCharName)}</div>` : '';
-  el.innerHTML = `
-    <div class="story-next-badge">Coming Soon</div>
-    <div class="story-next-icon">${next.icon || '📖'}</div>
-    <div class="story-next-text">
-      <div class="story-next-meta">${escapeHtml(next.meta || '')}</div>
-      <div class="story-next-title">${escapeHtml(next.title || '')}</div>
-      ${povLine}
-      <div class="story-next-tagline">${escapeHtml(next.tagline || '')}</div>
-      <div class="story-next-stats">
-        <span>${releaseStr}</span>
+  function colHTML(ch) {
+    const releaseStr = ch.releaseDate
+      ? `📅 <b>${_formatReleaseDate(ch.id)}</b> 公開予定`
+      : `📅 公開予定 — お楽しみに`;
+    const povLine = ch.povCharName ? `<div class="story-next-pov">主人公: ${escapeHtml(ch.povCharName)}</div>` : '';
+    return `<div class="story-next-col">
+      <div class="story-next-badge">Coming Soon</div>
+      <div class="story-next-icon">${ch.icon || '📖'}</div>
+      <div class="story-next-text">
+        <div class="story-next-meta">${escapeHtml(ch.meta || '')}</div>
+        <div class="story-next-title">${escapeHtml(ch.title || '')}</div>
+        ${povLine}
+        <div class="story-next-tagline">${escapeHtml(ch.tagline || '')}</div>
+        <div class="story-next-stats"><span>${releaseStr}</span></div>
       </div>
-    </div>
-  `;
+    </div>`;
+  }
+  el.innerHTML = next2 ? (colHTML(next1) + colHTML(next2)) : colHTML(next1);
+  el.classList.toggle('teaser-split', !!next2);
+  // ティザー側の高さに Stories ボタンを揃える (野沢さん指示 2026-05-03)
+  // レイアウト確定後に同期 (innerHTML 直後は box 計測値が安定しないので RAF)
+  requestAnimationFrame(_syncStoriesHeightToTeaser);
 }
+
+// Stories エントリーボタンの高さをティザーに合わせる (章更新時に自動同期)
+function _syncStoriesHeightToTeaser() {
+  const teaser = document.querySelector('.story-next-teaser');
+  const btn = document.querySelector('.story-entry-block .story-entry-btn');
+  if (!teaser || !btn) return;
+  if (teaser.style.display === 'none' || teaser.offsetParent === null) {
+    btn.style.minHeight = '';  // 非表示時はリセット
+    return;
+  }
+  const h = teaser.getBoundingClientRect().height;
+  if (h > 0) btn.style.minHeight = h + 'px';
+}
+// ティザーのサイズ変更 (章更新 / 画面回転 / フォントロード後 等) を ResizeObserver で追跡
+let _teaserResizeObserver = null;
+function _initTeaserHeightSync() {
+  const teaser = document.querySelector('.story-next-teaser');
+  if (!teaser || _teaserResizeObserver) return;
+  if (typeof ResizeObserver === 'undefined') {
+    // フォールバック: window resize でだけ追従
+    window.addEventListener('resize', _syncStoriesHeightToTeaser);
+    return;
+  }
+  _teaserResizeObserver = new ResizeObserver(() => _syncStoriesHeightToTeaser());
+  _teaserResizeObserver.observe(teaser);
+  // 画面回転・ウィンドウサイズ変更でも再同期
+  window.addEventListener('resize', _syncStoriesHeightToTeaser);
+}
+document.addEventListener('DOMContentLoaded', _initTeaserHeightSync);
 document.addEventListener('DOMContentLoaded', () => { _refreshPickupChapter(); _refreshChapterReleaseLocks(); _renderHomeNextTeaser(); });
 // 2分毎に再判定 (リリース時刻を跨いだ瞬間に自動 unlock + ピックアップ章 自動切替 + ティザー切替)
 // 野沢さん指摘 2026-05-03 「スマホ電池の減りが凄い」: 60秒→120秒に緩和 + Page Visibility API で hidden 時はスキップ

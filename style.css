@@ -2976,6 +2976,39 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   .story-next-badge { font-size: 8px; padding: 2px 7px; top: 10px; right: 12px; }
 }
 
+/* 2分割ティザー (野沢さん指示 2026-05-03 「左=次章、 右=次の次の章」) */
+.story-next-teaser.teaser-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: stretch;
+  gap: 0;
+  padding: 0;  /* col 側で個別 padding */
+}
+/* 2分割時は片側幅が狭くなるので tagline の 1行 clamp を解除して全文表示 (野沢さん指摘 2026-05-03 第5章概要見切れ対策) */
+.story-next-teaser.teaser-split .story-next-tagline {
+  -webkit-line-clamp: unset;
+  display: block;
+  overflow: visible;
+  white-space: normal;
+}
+.story-next-teaser.teaser-split > .story-next-col {
+  position: relative;
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px 20px;
+  min-width: 0;  /* grid item shrink 許可 */
+  z-index: 1;
+}
+.story-next-teaser.teaser-split > .story-next-col + .story-next-col {
+  border-left: 1px dashed rgba(255, 217, 122, 0.25);
+}
+@media (max-width: 720px) {
+  .story-next-teaser.teaser-split { grid-template-columns: 1fr; }
+  .story-next-teaser.teaser-split > .story-next-col + .story-next-col {
+    border-left: none;
+    border-top: 1px dashed rgba(255, 217, 122, 0.25);
+  }
+}
+
 /* ───── ホーム画面の要望カード ───── */
 .home-feedback {
   margin: 24px auto 32px;
@@ -3613,7 +3646,7 @@ body.has-offline-banner .topbar { margin-top: 30px; }
 .relations-modal.active { display: flex; }
 .relations-header {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 60px 14px 22px; gap: 16px;  /* 右の close ボタン分余白 */
+  padding: 14px 140px 14px 22px; gap: 16px;  /* 右の close ボタン (✕閉じる(Esc) ≈110px) 分余白を確保、 zoom コントロールと被らないように */
   background: rgba(0,0,0,0.5);
   border-bottom: 1px solid rgba(255,255,255,0.1);
   backdrop-filter: blur(8px);
@@ -3661,20 +3694,24 @@ body.has-offline-banner .topbar { margin-top: 30px; }
   flex: 1;
   overflow: auto;
   display: flex; align-items: flex-start; justify-content: flex-start;
-  padding: 20px;
+  /* 2026-05-03 野沢さん指示「スクロールしても見切れる」 対策: 余白を 60px に拡大 */
+  padding: 60px;
   cursor: grab;
   user-select: none;
   -webkit-overflow-scrolling: touch;
 }
 .relations-canvas:active { cursor: grabbing; }
 .relations-canvas svg {
-  width: 2000px; height: 1600px;
+  /* 2026-05-03 野沢さん指示「最初拡大されすぎ」 対策:
+   * 内部viewBox = 座標 scale 後の総空間 (3000x2400) + 周囲200pxバッファ = 3400x2800 (比率 1.214)
+   * 表示サイズ 2200x1820 で比率一致、 縮小率 0.647 → 画面に収まりやすく + スクロール量抑制 */
+  width: 2200px; height: 1820px;
   flex-shrink: 0;
   pointer-events: auto;
 }
 /* スマホ: スクロール領域に下余白を確保 (ホームバー/safe-area対応) */
 .relations-canvas {
-  padding-bottom: max(20px, env(safe-area-inset-bottom, 20px));
+  padding-bottom: max(60px, env(safe-area-inset-bottom, 60px));
 }
 /* キャラノードはクリック可、それ以外はパン優先 */
 .relations-canvas svg [data-char-name] { pointer-events: auto; }
@@ -3684,7 +3721,7 @@ body.has-offline-banner .topbar { margin-top: 30px; }
 }
 
 @media (max-width: 720px) {
-  .relations-header { padding: 10px 56px 10px 12px; gap: 6px; flex-direction: column; align-items: stretch; }
+  .relations-header { padding: 10px 12px 10px 12px; padding-top: 48px; gap: 6px; flex-direction: column; align-items: stretch; }  /* close は absolute 右上配置のため、 上に padding-top 48px で zoom 等を下にずらして被り回避 */
   .relations-header h2 { font-size: 16px; margin: 0; text-align: center; }
   .relations-legend { justify-content: center; gap: 6px; font-size: 10px; }
   .relations-legend .leg-line { width: 18px; height: 2px; margin-right: 2px; }
@@ -7450,6 +7487,39 @@ body.gasshuku-mode-fantasy .fx-win {
   font-weight: 700;
 }
 .rel-tab:hover:not(.active) { background: rgba(255, 255, 255, 0.12); }
+/* 相関図 拡大縮小コントロール (野沢さん指示 2026-05-03) */
+.relations-zoom {
+  display: inline-flex; align-items: center; gap: 4px;
+  margin: 0 8px;
+  padding: 2px 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+}
+.rel-zoom-btn {
+  background: rgba(255, 255, 255, 0.08);
+  color: #e0e3ee;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  width: 30px; height: 28px;
+  font-size: 16px; line-height: 1;
+  cursor: pointer;
+  font-family: inherit;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.rel-zoom-btn:hover { background: rgba(255, 255, 255, 0.16); }
+.rel-zoom-btn:active { transform: scale(0.95); }
+.rel-zoom-level {
+  min-width: 42px; text-align: center;
+  color: #fbbf24; font-size: 12px; font-weight: 700;
+  padding: 0 4px;
+}
+.rel-zoom-reset { font-size: 14px; }
+@media (max-width: 720px) {
+  .relations-zoom { margin: 4px auto; }
+  .rel-zoom-btn { width: 36px; height: 36px; font-size: 18px; }  /* タップ領域 ≥36px */
+  .rel-zoom-level { min-width: 50px; font-size: 13px; }
+}
 .relations-list {
   position: absolute;
   inset: 80px 0 0 0;

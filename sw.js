@@ -7,7 +7,7 @@
 //
 // HTML/JSON/Firebase API はキャッシュせず常にネットワーク優先 (更新即反映+認証/DBの鮮度維持)。
 
-const SW_VERSION = '20260503f';  // 画像永続cache 分離 (Ver bump 時の全DL し直し問題を解消、 野沢さん指摘 2026-05-03)
+const SW_VERSION = '20260503p';  // 画像永続cache 分離 (Ver bump 時の全DL し直し問題を解消、 野沢さん指摘 2026-05-03)
 const STATIC_CACHE = `prismaera-static-${SW_VERSION}`;
 const BGM_CACHE    = `prismaera-bgm-${SW_VERSION}`;
 const LOC_CACHE    = `prismaera-loc-${SW_VERSION}`;
@@ -107,9 +107,10 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(staleWhileRevalidate(req, IMG_PERSIST));
     return;
   }
-  // 場所画像 — 専用cache (LOC_CACHE) で stale-while-revalidate (OFFLINE_SAVED 最優先)
+  // 場所画像 (WM 含む) — IMG_PERSIST cache (SW_VERSION 非依存、 cache buster 変更で再DL しない)
+  // 野沢さん指摘 2026-05-03 「WM が毎回リロードで読込し直し」 → LOC_CACHE は SW_VERSION 連動で消えるため永続cache 統合
   if (LOC_PATH.test(path)) {
-    event.respondWith(staleWhileRevalidate(req, LOC_CACHE));
+    event.respondWith(staleWhileRevalidate(req, IMG_PERSIST));
     return;
   }
   // その他静的アセット (CSS/JS/フォント等) — 既存挙動 (OFFLINE_SAVED 最優先)
@@ -212,18 +213,30 @@ async function staleWhileRevalidate(req, cacheName) {
   // ignoreSearch:true で cache buster 差異許容 (野沢さん指摘 2026-05-03 「Ver変わるたび全DL害悪」 の根本対策)
   // 同 path で cache hit すれば再DL不要、 query (?v=xxx) は無視
   const cached = await cache.match(req, { ignoreSearch: true });
-  // cached あり: 即返し、 background で revalidate
-  // ただし IMG_PERSIST はファイル名で永続管理 (cache buster でなくファイル名変更で更新する運用)
-  // → revalidate しない (background fetch を抑制 → 電池消費削減 + 通信量削減)
+  // cached あり: 即返し、 background で **条件付き** revalidate (ETag/Last-Modified 利用)
+  // 2026-05-03: 「同名ファイル名で更新があった場合だけ更新」 対応 (野沢さん指摘)
+  // → If-None-Match / If-Modified-Since を付けて conditional GET、 304 Not Modified なら body 転送 0 byte
+  //   サーバー側が変更を検知した時のみ 200 OK + 新 body が返り cache.put で差分更新される
+  //   IMG_PERSIST も対象 (同名で内容更新があれば取り込まれる、 cache buster 不要)
   if (cached) {
-    if (cacheName !== IMG_PERSIST) {
-      // STATIC/LOC は revalidate して背景で最新化
-      fetch(req).then(res => {
-        if (res && res.ok && res.type !== 'opaque') {
-          cache.put(req, res.clone()).then(() => trimCache(cacheName)).catch(() => {});
-        }
-      }).catch(() => {});
+    const etag = cached.headers.get('ETag');
+    const lastMod = cached.headers.get('Last-Modified');
+    const condInit = {};
+    if (etag || lastMod) {
+      const headers = new Headers();
+      if (etag) headers.set('If-None-Match', etag);
+      else if (lastMod) headers.set('If-Modified-Since', lastMod);
+      condInit.headers = headers;
     }
+    const condReq = (etag || lastMod) ? new Request(req, condInit) : req;
+    fetch(condReq).then(res => {
+      // 304 Not Modified: 内容変更なし → 何もしない (転送 0 byte で済む = 通信量/電池節約)
+      if (res && res.status === 304) return;
+      // 200 OK: 内容更新あり → cache に上書き put
+      if (res && res.ok && res.type !== 'opaque') {
+        cache.put(req, res.clone()).then(() => trimCache(cacheName)).catch(() => {});
+      }
+    }).catch(() => {});
     return cached;
   }
   // cache miss: network で取って put を await してから返す (race condition 回避)
