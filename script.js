@@ -1085,6 +1085,9 @@ function _refreshPickupChapter() {
     t = `s${m[1]}c${num - 1}`;
   }
   PICKUP_CHAPTER = t || 's1c1';
+  // UI ラベル (「第N章ピックアップ」「第N章キャラ ×2倍」「+ 第N章 ×2」) も追従更新
+  // 野沢さん指摘 2026-05-03 「嘘つかないでください」 → ラベルが PICKUP_CHAPTER と乖離していた問題の解消
+  if (typeof updatePickupChapterLabels === 'function') updatePickupChapterLabels();
 }
 const PICKUP_WEIGHT = 2;
 
@@ -3510,6 +3513,54 @@ const RELATIONS = [
   { a: '深海巫女 ティアラ',           b: '詠聖 ベル',                 type: 'fellow', label: '巫女の遠縁' },
   // 覚醒前後
   { a: 'イザベル',                    b: '波紋の聖女 イザベル',       type: 'admire', aRole: '前形', bRole: '覚醒形' },
+
+  // ===== S1C3 古龍砂漠サハール (2026-05-03 反映漏れ修正) =====
+  { a: '竜爵 ヴィル',                 b: '砂海王女 サハナ',           type: 'fellow', label: '紫水晶の絆' },
+  { a: '砂牙の剣聖 グラン',           b: '砂海王女 サハナ',           type: 'master', aRole: '兄貴・剣師', bRole: '妹分' },
+  { a: '古龍の語り部 ファラー',       b: '砂海王女 サハナ',           type: 'admire', aRole: '見守る', bRole: '次代' },
+  { a: '隊商長 アーシャ',             b: '砂海王女 サハナ',           type: 'sister', aRole: '姉貴分', bRole: '妹分' },
+  { a: '砂風の戦士 ライ',             b: '砂海王女 サハナ',           type: 'admire', aRole: '憧れる', bRole: '姉さま' },
+  { a: '砂塵の子 ティナ',             b: '砂海王女 サハナ',           type: 'admire', aRole: '憧れる', bRole: '姉さま' },
+  { a: '砂風の戦士 ライ',             b: '砂塵の子 ティナ',           type: 'sister', aRole: '兄分', bRole: '妹分' },
+  { a: '紫竜の侍従 リアム',           b: '竜爵 ヴィル',               type: 'admire', aRole: '忠誠', bRole: '主' },
+  { a: '古龍鍛冶 オウル',             b: '古龍の語り部 ファラー',     type: 'master', aRole: '弟子', bRole: '婆さま' },
+  { a: '砂風の語り部 ナドラ',         b: '古龍の語り部 ファラー',     type: 'fellow', label: '物語の継承者' },
+  { a: '古龍の語り部 ファラー',       b: '千夜姫 カグヤ',             type: 'fellow', label: '千年の友' },
+
+  // ===== S1C4 凍土と空 (2026-05-03 反映漏れ修正) =====
+  { a: '龍帝 アルテミス',             b: '氷帝 グレイル',             type: 'fellow', label: '三人目の戦友' },
+  { a: '焔帝 ヒノオウ',               b: '氷帝 グレイル',             type: 'fellow', label: '三人目の戦友' },
+  { a: '北方剣聖 ハグル',             b: '氷帝 グレイル',             type: 'master', aRole: '剣師', bRole: '弟子' },
+  { a: '氷塔の聖騎士 リオネ',         b: '氷帝 グレイル',             type: 'admire', aRole: '直属', bRole: '主君' },
+  { a: '摂政 ヴァルキ',               b: '氷帝 グレイル',             type: 'admire', aRole: '摂政', bRole: '若き帝' },
+  { a: '氷塔の聖騎士 リオネ',         b: '氷塔の見習い騎士 アスラ',   type: 'sister', aRole: '姉分', bRole: '見習い' },
+  { a: '氷牙の戦士 イズン',           b: '氷帝 グレイル',             type: 'admire', aRole: '憧れる', bRole: '陛下' },
+  { a: '凍土の少年 アルク',           b: '氷牙の戦士 イズン',         type: 'admire', aRole: '憧れる', bRole: 'イズン兄' },
+  { a: '雪原の少女 ミウ',             b: '凍土の狩人 シエラ',         type: 'admire', aRole: '憧れる', bRole: '姉さま' },
+  { a: '氷霜の巫女 ユーリス',         b: '凍土の祭司 イル',           type: 'blood', label: '実姉妹' },
+  { a: '空挺女皇 ヴァーレ',           b: '空挺城首席学者 ゼピル',     type: 'fellow', label: '師にして同志' },
+  { a: '空挺女皇 ヴァーレ',           b: '真鍮の女将 ハーニア',       type: 'admire', aRole: '主君', bRole: '母代わり' },
+  { a: '空挺女皇 ヴァーレ',           b: '空挺城総監 ガリオン',       type: 'admire', aRole: '主君', bRole: '右腕' },
+  { a: '真鍮の女将 ハーニア',         b: '空挺整備士 ベル',           type: 'master', aRole: '親方', bRole: '弟子' },
+  { a: '空挺整備士 ベル',             b: '空挺機関士 ジン',           type: 'childhood', label: '幼馴染' },
+  { a: '空挺整備士 ベル',             b: '空の少女 ピピ',             type: 'sister', aRole: '姉分', bRole: '妹分' },
+  { a: '空挺整備士 ベル',             b: '空の少年 ピット',           type: 'sister', aRole: '姉分', bRole: '弟分' },
+  { a: '空の少年 ピット',             b: '空の少女 ピピ',             type: 'blood', label: '兄妹' },
+  { a: '空挺城総監 ガリオン',         b: '蒸気砲手 ヴィン',           type: 'master', aRole: '総監', bRole: '副官' },
+
+  // ===== S1C5 黒月の予兆 (2026-05-03 反映) =====
+  { a: '仮面騎士 シオン',             b: 'シ・ロエン',                 type: 'blood', label: '分離した自分' },
+  { a: '仮面騎士 シオン',             b: 'イザベル',                   type: 'childhood', label: '幼馴染' },
+  { a: '仮面騎士 シオン',             b: '銀霜剣聖 オリエル',         type: 'master', aRole: '弟子', bRole: '師' },
+  { a: '仮面騎士 シオン',             b: '銀霜王 ノヴァ',             type: 'admire', aRole: '盾', bRole: '主君' },
+  { a: '銀霜近衛 セレン',             b: '仮面騎士 シオン',           type: 'admire', aRole: '後輩', bRole: '先輩' },
+  { a: 'シ・ロエン',                   b: '黒月の盟主 ノクトリア',     type: 'fellow', label: '黒月衆の使徒' },
+  { a: '堕者剣聖 ガルヴィン',         b: '黒月の盟主 ノクトリア',     type: 'admire', aRole: '配下', bRole: '盟主' },
+  { a: '地底市の母 リオラエル',       b: '影織りの導師 ルナリア',     type: 'master', aRole: '導師', bRole: '弟子' },
+  { a: '地底市の母 リオラエル',       b: '地底市の少女 シエル',       type: 'blood', label: '母娘' },
+  { a: '月夜祭司 アスター',           b: 'ルミナ',                     type: 'fellow', label: '雪月神殿の祭司と灯番' },
+  { a: '雪月神殿見習い ラピス',       b: 'ルミナ',                     type: 'admire', aRole: '見習い', bRole: '姉さま' },
+  { a: 'ルミナ',                       b: 'イザベル',                   type: 'fellow', label: '治療の情報交換 (文通)' },
 ];
 
 const REL_STYLE = {
@@ -6092,7 +6143,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260503e';
+const IMG_CACHE_VERSION = '20260503f';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -6898,6 +6949,29 @@ function _refreshChapterReleaseLocks() {
     badge.innerHTML = html;
   });
 }
+// 軽量モード (野沢さん指示 2026-05-03 「モバイル版は基本軽量状態がいい」、 電池消費改善):
+// localStorage 'prism-lightmode' で管理、 初期値はモバイル判定で auto-on (PC は off)。
+// ユーザーが設定モーダルで OFF にしたら永続保持。
+function _initLightmode() {
+  const isMobile = /iPhone|iPad|iPod|Android/.test(navigator.userAgent);
+  let mode = localStorage.getItem('prism-lightmode');
+  if (mode === null) {
+    mode = isMobile ? 'on' : 'off';
+    localStorage.setItem('prism-lightmode', mode);
+  }
+  document.body.classList.toggle('lightmode', mode === 'on');
+}
+function setLightmode(on) {
+  localStorage.setItem('prism-lightmode', on ? 'on' : 'off');
+  document.body.classList.toggle('lightmode', on);
+}
+function getLightmode() {
+  return localStorage.getItem('prism-lightmode') === 'on';
+}
+document.addEventListener('DOMContentLoaded', _initLightmode);
+// body 未生成段階でも script.js 読込時に即適用 (FOUC 抑制)
+if (document.body) _initLightmode();
+
 // ホーム画面の次章ティザーを動的レンダリング (野沢さん指示 2026-05-03: 公開時刻に応じて「次章」 のみ表示、 「2つ次以降」 は出さない)
 function _renderHomeNextTeaser() {
   const el = document.querySelector('.story-next-teaser');

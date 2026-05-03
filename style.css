@@ -8318,3 +8318,34 @@ body.power-saver .topbar {
   line-height: 1.5;
 }
 /* ===== END ===== */
+
+/* ===== 軽量モード (野沢さん指示 2026-05-03 「モバイル版は基本軽量状態がいい」、 電池消費改善) ===== */
+/* body.lightmode で持続 background animation を停止。 ガチャ演出/モーダル開閉等の重要 UI animation は残す */
+body.lightmode .auto-precache-fill,
+body.lightmode .twinkle,
+body.lightmode .float,
+body.lightmode .star-particle,
+body.lightmode .glow-pulse,
+body.lightmode .pulse,
+body.lightmode #bg-layer,
+body.lightmode .home-bg-anim,
+body.lightmode .home-twinkle {
+  animation: none !important;
+}
+/* infinite/長時間 animation を 0.3s 上限に */
+body.lightmode *,
+body.lightmode *::before,
+body.lightmode *::after {
+  animation-iteration-count: 1 !important;
+  animation-duration: min(var(--lightmode-anim-dur, 0.3s), 0.3s) !important;
+}
+/* ガチャ演出 (キーフレーム) は除外 — 演出体験は維持 */
+body.lightmode .stage,
+body.lightmode .stage *,
+body.lightmode .result,
+body.lightmode .result * {
+  animation-duration: revert !important;
+  animation-iteration-count: revert !important;
+}
+/* ===== END LIGHTMODE ===== */
+
