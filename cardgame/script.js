@@ -21,27 +21,43 @@ const state = {
   oppHand: [],
   oppDeck: [],
   board: { me: [[], [], []], opp: [[], [], []] },
-  laneEffects: [null, null, null], // 試合開始時 ランダム 3 つ
+  laneEffects: [null, null, null],
   selectedCardIdx: -1,
   busy: false,
   scoreMe: 0,
   scoreOpp: 0,
   ended: false,
-  thisTurnPlacements: [], // [{ cardId, lane }] 自軍のみ、 ターン中の配置履歴
+  thisTurnPlacements: [],
+  // Phase 1+ 拡張
+  mulliganAvailable: false,           // ターン1 で1回のみ使用可
+  firstMover: 'me',                   // 'me' | 'opp' (先行/後攻)
+  thisTurnAiDone: false,              // 後攻時、 ターン頭の AI 配置を済ませたか
+  series: { isBO3: false, wins: { me: 0, opp: 0 }, matchNo: 1, results: [] },
 };
 
 // ===== 派閥カラー マッピング =====
+// 派閥カラー (CHAR_FACTION 公式 19派閥に揃え)
 const FACTION_COLORS = {
-  '原虹':         '#ff8ddc',
-  '白焔教会':     '#ffd56b',
-  '月光':         '#c8b8ff',
-  '雪月神殿':     '#e8e8f8',
-  '紅翼':         '#ff8a3a',
-  '深緑樹海':     '#7aff8a',
-  '紅玉海賊団':   '#ff6b6b',
-  'アクアシス':   '#5fdfff',
-  '学院':         '#7a9bff',
-  '見習い':       '#7afff5',
+  '原虹':              '#ff8ddc',  // genso (観測者三柱)
+  '十国の覇者':        '#ffb84a',  // rulers
+  '白焔教会':          '#ffd56b',  // church
+  '紫竜王国':          '#a06eff',  // dragon
+  '紅翼皇家':          '#ff8a3a',  // redwing
+  '夜焔郷':            '#d83a4a',  // yakai
+  '月牙狼族':          '#a3a3a3',  // wolf
+  '深緑樹海':          '#7aff8a',  // forest
+  '銀霜王国':          '#c8d4ff',  // silver
+  '黒曜塔':            '#5a5a8a',  // tower
+  '第七天':            '#ff5050',  // seventh
+  '星霊学院':          '#7a9bff',  // academy
+  '海淵都市アクアシス': '#5fdfff',  // aquasis (PoC では「アクアシス」 短縮)
+  'アクアシス':        '#5fdfff',  // alias
+  '紅玉海賊団':        '#ff6b6b',  // crimson
+  '古龍砂漠サハール':   '#e8c980',  // sahar
+  '氷霊王国ニーヴル':   '#a8e8ff',  // niiruru
+  '空挺城ゼノニア':     '#c8a878',  // zenonia
+  '黒月衆ノクトス':     '#5a3070',  // darkmoon
+  '地底市リオラ':       '#9a78c8',  // liora
 };
 function factionColor(f) { return FACTION_COLORS[f] || '#aaa'; }
 
@@ -98,9 +114,9 @@ function updateMuteUI() {
 // ===== Master データロード =====
 async function loadMasters() {
   const [c, k, l] = await Promise.all([
-    fetch('./cards.json?v=20260504f').then(r => r.json()),
-    fetch('./combos.json?v=20260504f').then(r => r.json()),
-    fetch('./lane_effects.json?v=20260504f').then(r => r.json()),
+    fetch('./cards.json?v=20260504g').then(r => r.json()),
+    fetch('./combos.json?v=20260504g').then(r => r.json()),
+    fetch('./lane_effects.json?v=20260504g').then(r => r.json()),
   ]);
   state.cards = c;
   state.combos = k;
@@ -126,9 +142,41 @@ function setMessage(text, kind = '') {
   el.className = 'cg-message' + (kind ? ' ' + kind : '');
 }
 
-// ===== 試合開始 =====
-function startMatch(difficulty) {
+// ===== 試合開始 (BO3 series 開始 or 単発) =====
+function startMatch(difficulty, isBO3) {
   state.difficulty = difficulty;
+  // series 初期化 (BO3 開始時のみ、 既に series 進行中なら継続)
+  const startingNewSeries = !state.series.isBO3 || state.series.matchNo > 3 || (state.series.wins.me + state.series.wins.opp === 0 && !state._continueSeries);
+  if (startingNewSeries) {
+    state.series = { isBO3: !!isBO3, wins: { me: 0, opp: 0 }, matchNo: 1, results: [] };
+  }
+  // 先行/後攻決定 (BO3: 1試合目=ユーザー先行 / 2試合目=ユーザー後攻 / 3試合目=ランダム / 単発: ユーザー先行)
+  if (state.series.isBO3) {
+    if (state.series.matchNo === 1) state.firstMover = 'me';
+    else if (state.series.matchNo === 2) state.firstMover = 'opp';
+    else state.firstMover = Math.random() < 0.5 ? 'me' : 'opp';
+  } else {
+    state.firstMover = 'me';
+  }
+  state._continueSeries = false;
+
+  _initMatchState();
+
+  $('#home-screen').classList.remove('active');
+  $('#match-screen').classList.add('active');
+  $('#result-modal').hidden = true;
+  $('#result-peek-btn').hidden = true;
+
+  // BO3 表示更新
+  updateSeriesHud();
+
+  drawTurnStart();
+  const moverLabel = state.firstMover === 'me' ? '先行' : '後攻';
+  const seriesLabel = state.series.isBO3 ? `BO3 第${state.series.matchNo}試合 (${moverLabel}) ` : '';
+  setMessage(`${seriesLabel}ターン 1 — レーン効果決定。 マリガン (引き直し1回) 可。`);
+}
+
+function _initMatchState() {
   state.turn = 1;
   state.cost = 1;
   state.costUsed = 0;
@@ -137,35 +185,50 @@ function startMatch(difficulty) {
   state.ended = false;
   state.selectedCardIdx = -1;
   state.thisTurnPlacements = [];
+  state.mulliganAvailable = true;
+  state.thisTurnAiDone = false;
 
   const baseDeck = state.cards.map(c => ({ ...c }));
   state.deck = shuffle(baseDeck);
   state.oppDeck = shuffle(state.cards.map(c => ({ ...c })));
   state.hand = state.deck.splice(0, 4);
   state.oppHand = state.oppDeck.splice(0, 4);
-
   state.board = { me: [[], [], []], opp: [[], [], []] };
-
-  // レーン効果: ランダム 3 つ重複なし
   const shuffled = shuffle(state.laneEffectsAll);
   state.laneEffects = [shuffled[0], shuffled[1], shuffled[2]];
-
-  $('#home-screen').classList.remove('active');
-  $('#match-screen').classList.add('active');
-  $('#result-modal').hidden = true;
-  $('#result-peek-btn').hidden = true;
-
-  drawTurnStart();
-  setMessage(`ターン 1 — レーン効果が決まりました。 ⚡コスト ${state.cost}`);
 }
 
-function drawTurnStart() {
+// マリガン: 全手札 deck に戻して shuffle、 再 draw 5枚 (ターン1 で 1回のみ)
+function mulligan() {
+  if (!state.mulliganAvailable || state.turn !== 1 || state.thisTurnPlacements.length > 0) return;
+  const handSize = state.hand.length;
+  state.deck.push(...state.hand);
+  state.hand = [];
+  state.deck = shuffle(state.deck);
+  state.hand = state.deck.splice(0, handSize);
+  state.mulliganAvailable = false;
+  setMessage('🔄 マリガン: 手札を引き直しました', 'success');
+  renderAll();
+}
+
+async function drawTurnStart() {
   if (state.deck.length > 0 && state.hand.length < 7) state.hand.push(state.deck.shift());
   if (state.oppDeck.length > 0 && state.oppHand.length < 7) state.oppHand.push(state.oppDeck.shift());
   state.cost = state.turn;
   state.costUsed = 0;
   state.thisTurnPlacements = [];
-  // 配置済カードの onPlay 一時 buff (_appliedTo) はターンを跨いでも保持する設計 (恒久 buff)
+  state.thisTurnAiDone = false;
+  // 後攻時はターン頭で AI が先に配置 (ユーザーは AI の手を見てから配置可能)
+  if (state.firstMover === 'opp' && !state.ended) {
+    state.busy = true;
+    renderAll();
+    setMessage(`ターン ${state.turn} (後攻) — AI が先に配置中...`);
+    await sleep(400);
+    await aiTurn();
+    state.thisTurnAiDone = true;
+    state.busy = false;
+    setMessage(`ターン ${state.turn} (後攻) — あなたの番です`);
+  }
   renderAll();
 }
 
@@ -239,6 +302,14 @@ function renderAll() {
   $('.cg-score-ai').textContent = state.scoreOpp;
   $('#btn-end-turn').disabled = state.busy || state.ended;
   $('#btn-undo').disabled = state.busy || state.ended || state.thisTurnPlacements.length === 0;
+  // マリガンボタン: ターン1 で 配置前のみ有効
+  const mulBtn = document.getElementById('btn-mulligan');
+  if (mulBtn) {
+    const canMul = state.mulliganAvailable && state.turn === 1 && state.thisTurnPlacements.length === 0 && !state.busy && !state.ended;
+    mulBtn.style.display = (state.turn === 1 && state.mulliganAvailable) ? '' : 'none';
+    mulBtn.disabled = !canMul;
+  }
+  updateSeriesHud();
 
   renderLaneEffects();
   renderHand();
@@ -534,9 +605,12 @@ async function endTurn() {
   $('#btn-undo').disabled = true;
   $$('.lane-target').forEach(el => el.classList.remove('lane-target'));
 
-  setMessage('AIの手番...');
-  await sleep(400);
-  await aiTurn();
+  // 後攻時、 ターン頭で AI 既に配置済 → このターンで AI 動作スキップ
+  if (!state.thisTurnAiDone) {
+    setMessage('AIの手番...');
+    await sleep(400);
+    await aiTurn();
+  }
 
   if (state.turn >= state.maxTurn) {
     state.busy = false;
@@ -544,8 +618,10 @@ async function endTurn() {
     return;
   }
   state.turn += 1;
-  drawTurnStart();
-  setMessage(`ターン ${state.turn} — ⚡コスト ${state.cost}`);
+  await drawTurnStart();
+  if (state.firstMover === 'me') {
+    setMessage(`ターン ${state.turn} — ⚡コスト ${state.cost}`);
+  }
   state.busy = false;
   renderAll();
 }
@@ -669,7 +745,7 @@ function placeAICard(handIdx, lane) {
   }, 10);
 }
 
-// ===== 試合終了 =====
+// ===== 試合終了 (BO3 series 累積 / 単発リザルト) =====
 function finishMatch() {
   state.ended = true;
   let me = 0, opp = 0;
@@ -683,27 +759,96 @@ function finishMatch() {
   state.scoreOpp = opp;
   renderAll();
 
-  let title, icon, detail;
-  if (me > opp) {
-    title = '勝利'; icon = '🏆';
-    detail = `3レーン中 ${me} レーン勝利。 おめでとう、 虹意の祝福を。`;
-  } else if (opp > me) {
-    title = '敗北'; icon = '💧';
-    detail = `AIに ${opp} レーン取られた。 派閥シナジーやコンボを狙って リトライ。`;
-  } else {
-    title = '引き分け'; icon = '⚖️';
-    detail = `${me} : ${opp} の互角。 もう一度挑戦しよう。`;
+  // 試合結果の判定
+  const matchResult = me > opp ? 'win' : (opp > me ? 'loss' : 'draw');
+
+  // BO3 累積
+  if (state.series.isBO3) {
+    if (matchResult === 'win') state.series.wins.me += 1;
+    else if (matchResult === 'loss') state.series.wins.opp += 1;
+    state.series.results.push(matchResult);
   }
+
+  // BO3 シリーズ判定
+  const seriesEnded = !state.series.isBO3
+    || state.series.wins.me >= 2
+    || state.series.wins.opp >= 2
+    || state.series.matchNo >= 3;
+
+  let icon, title, detail;
+  if (state.series.isBO3 && !seriesEnded) {
+    // 次の試合へ
+    icon = matchResult === 'win' ? '🎯' : (matchResult === 'loss' ? '💧' : '⚖️');
+    const r = matchResult === 'win' ? '勝利' : (matchResult === 'loss' ? '敗北' : '引き分け');
+    title = `第${state.series.matchNo}試合 ${r}`;
+    detail = `BO3 累積 — あなた ${state.series.wins.me} 勝 / AI ${state.series.wins.opp} 勝<br>次は第${state.series.matchNo + 1}試合へ。`;
+    showMatchResultModal(icon, title, detail, true);
+    return;
+  }
+
+  // シリーズ終了 (単発 or BO3 完了)
+  if (state.series.isBO3) {
+    const winner = state.series.wins.me > state.series.wins.opp ? 'me' :
+                   state.series.wins.opp > state.series.wins.me ? 'opp' : 'draw';
+    if (winner === 'me') { title = 'BO3 勝利!'; icon = '🏆'; }
+    else if (winner === 'opp') { title = 'BO3 敗北'; icon = '💧'; }
+    else { title = 'BO3 引き分け'; icon = '⚖️'; }
+    const resultsLine = state.series.results.map((r, i) => {
+      const m = r === 'win' ? '○' : r === 'loss' ? '×' : '△';
+      return `第${i+1}: ${m}`;
+    }).join(' / ');
+    detail = `${resultsLine}<br>最終 — あなた ${state.series.wins.me} 勝 / AI ${state.series.wins.opp} 勝`;
+  } else {
+    if (matchResult === 'win') {
+      title = '勝利'; icon = '🏆';
+      detail = `3レーン中 ${me} レーン勝利。 おめでとう、 虹意の祝福を。`;
+    } else if (matchResult === 'loss') {
+      title = '敗北'; icon = '💧';
+      detail = `AIに ${opp} レーン取られた。 派閥シナジーやコンボを狙って リトライ。`;
+    } else {
+      title = '引き分け'; icon = '⚖️';
+      detail = `${me} : ${opp} の互角。 もう一度挑戦しよう。`;
+    }
+  }
+  showMatchResultModal(icon, title, detail, false);
+}
+
+function showMatchResultModal(icon, title, detailHtml, hasNext) {
   $('#result-icon').textContent = icon;
   $('#result-title').textContent = title;
-  $('#result-detail').textContent = detail;
+  $('#result-detail').innerHTML = detailHtml;
+  // 「次の試合へ」 ボタン表示制御
+  const nextBtn = $('#result-next-btn');
+  if (nextBtn) nextBtn.style.display = hasNext ? '' : 'none';
   $('#result-modal').hidden = false;
+}
+
+function nextMatch() {
+  if (!state.series.isBO3) return;
+  state.series.matchNo += 1;
+  state._continueSeries = true;
+  $('#result-modal').hidden = true;
+  $('#result-peek-btn').hidden = true;
+  startMatch(state.difficulty, true);
 }
 
 function rematch() {
   $('#result-modal').hidden = true;
   $('#result-peek-btn').hidden = true;
-  startMatch(state.difficulty);
+  // BO3 終了後 rematch なら新シリーズ
+  state.series = { isBO3: state.series.isBO3, wins: { me: 0, opp: 0 }, matchNo: 1, results: [] };
+  startMatch(state.difficulty, state.series.isBO3);
+}
+
+function updateSeriesHud() {
+  const el = document.getElementById('series-info');
+  if (!el) return;
+  if (state.series.isBO3) {
+    el.style.display = '';
+    el.innerHTML = `BO3 第<b>${state.series.matchNo}</b>/3 — ${state.series.wins.me}<span class="cg-score-vs">:</span>${state.series.wins.opp} <span class="cg-mover-tag">${state.firstMover === 'me' ? '先攻' : '後攻'}</span>`;
+  } else {
+    el.style.display = 'none';
+  }
 }
 
 function backToCardgameHome() {
@@ -812,14 +957,24 @@ function onBackClick(e) {
 document.addEventListener('DOMContentLoaded', async () => {
   initBgm();
   await loadMasters();
-  $('#btn-start-easy').addEventListener('click', () => startMatch('easy'));
-  $('#btn-start-normal').addEventListener('click', () => startMatch('normal'));
-  $('#btn-start-hard').addEventListener('click', () => startMatch('hard'));
-  $('#btn-start-master').addEventListener('click', () => startMatch('master'));
+  // BO3 toggle (localStorage 永続化)
+  const bo3Toggle = document.getElementById('bo3-toggle');
+  if (bo3Toggle) {
+    bo3Toggle.checked = localStorage.getItem('cg_bo3') === '1';
+    bo3Toggle.addEventListener('change', () => {
+      localStorage.setItem('cg_bo3', bo3Toggle.checked ? '1' : '0');
+    });
+  }
+  const getBo3 = () => bo3Toggle && bo3Toggle.checked;
+  $('#btn-start-easy').addEventListener('click', () => startMatch('easy', getBo3()));
+  $('#btn-start-normal').addEventListener('click', () => startMatch('normal', getBo3()));
+  $('#btn-start-hard').addEventListener('click', () => startMatch('hard', getBo3()));
+  $('#btn-start-master').addEventListener('click', () => startMatch('master', getBo3()));
   $('#btn-tutorial').addEventListener('click', openTutorial);
   $('#btn-help').addEventListener('click', openHelp);
   $('#btn-undo').addEventListener('click', resetThisTurn);
   $('#btn-combos').addEventListener('click', openCombosModal);
+  $('#btn-mulligan').addEventListener('click', mulligan);
   $('#btn-cg-mute').addEventListener('click', toggleBgmMute);
   $('.cg-back').addEventListener('click', onBackClick);
 
@@ -833,6 +988,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 // ===== Globals =====
 window.startMatch = startMatch;
 window.rematch = rematch;
+window.nextMatch = nextMatch;
+window.mulligan = mulligan;
 window.backToCardgameHome = backToCardgameHome;
 window.backToPrismaeraHome = backToPrismaeraHome;
 window.closeResult = closeResult;

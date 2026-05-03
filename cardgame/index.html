@@ -7,7 +7,7 @@
 <title>Prismaera Cards [Phase 0 PoC]</title>
 <link rel="icon" href="/images/icons/icon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
-<link rel="stylesheet" href="./style.css?v=20260504f">
+<link rel="stylesheet" href="./style.css?v=20260504g">
 </head>
 <body>
 
@@ -31,6 +31,14 @@
     <h1 class="cg-hero-title">Prismaera Cards</h1>
     <p class="cg-hero-tagline">虹霊界のキャラと共に、3レーンの読み合い。</p>
   </div>
+  <div class="cg-bo3-toggle">
+    <label class="cg-bo3-label">
+      <input type="checkbox" id="bo3-toggle">
+      <span class="cg-bo3-text">🏆 BO3 (3本勝負・2本先取)</span>
+      <span class="cg-bo3-sub">先攻 / 後攻 / ランダム の3試合</span>
+    </label>
+  </div>
+
   <div class="cg-modes">
     <button class="cg-mode-btn primary" id="btn-start-easy">
       <div class="cg-mode-icon">🌱</div>
@@ -98,11 +106,14 @@
       </div>
     </div>
     <div class="cg-hud-actions">
-      <button class="cg-hud-btn" id="btn-combos" title="現在の手札+場で発動可能なコンボを確認">💡 コンボ</button>
-      <button class="cg-hud-btn" id="btn-undo" title="このターンの配置を全てリセット">↩ リセット</button>
+      <button class="cg-hud-btn" id="btn-mulligan" style="display:none" title="手札を引き直す (1回のみ、 ターン1)">🔄 引直</button>
+      <button class="cg-hud-btn" id="btn-combos" title="現在の手札+場で発動可能なコンボを確認">💡</button>
+      <button class="cg-hud-btn" id="btn-undo" title="このターンの配置を全てリセット">↩</button>
       <button class="cg-end-turn" id="btn-end-turn">ターン終了 →</button>
     </div>
   </div>
+  <!-- BO3 series 表示 (BO3 時のみ) -->
+  <div id="series-info" class="cg-series-info" style="display:none"></div>
 
   <!-- 相手の場 -->
   <div class="cg-board cg-board-opp">
@@ -168,6 +179,7 @@
     <div class="cg-modal-detail" id="result-detail"></div>
     <div class="cg-modal-actions">
       <button class="cg-btn secondary" onclick="peekBoard()">場を見る</button>
+      <button class="cg-btn primary" id="result-next-btn" onclick="nextMatch()" style="display:none">次の試合へ →</button>
       <button class="cg-btn primary" onclick="rematch()">もう一回</button>
     </div>
     <div class="cg-modal-actions" style="margin-top:8px">
@@ -253,6 +265,6 @@
   </div>
 </div>
 
-<script src="./script.js?v=20260504f"></script>
+<script src="./script.js?v=20260504g"></script>
 </body>
 </html>

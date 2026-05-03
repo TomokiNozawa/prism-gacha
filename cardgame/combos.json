@@ -18,10 +18,10 @@
   {
     "id": "trio_observer",
     "name": "観測者の三柱",
-    "chars": ["セラフィエル", "千夜姫 カグヤ", "星海のノクス"],
+    "chars": ["セラフィエル", "千夜姫 カグヤ", "虹意 プリズマ"],
     "condition": "any_lane",
     "effect": { "target": "all_lanes", "power": 4 },
-    "flavor": "至天・最古・虚空、 三柱の祈りで世界が震える。"
+    "flavor": "至天・最古・原虹、 三柱の祈りで世界が震える。"
   },
   {
     "id": "duo_prisma_seraph",
@@ -44,7 +44,71 @@
     "name": "学び舎の灯",
     "chars": ["ちさと", "カイ"],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 2, "drawCard": false },
+    "effect": { "target": "self_lane", "power": 2 },
     "flavor": "見習いと学院の少女。 始まりの友。"
+  },
+  {
+    "id": "duo_kaguya_prisma",
+    "name": "千年の絆",
+    "chars": ["虹意 プリズマ", "千夜姫 カグヤ"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 4 },
+    "flavor": "原虹と最古の記憶の番人、 千年を共に歩んだ二柱。"
+  },
+  {
+    "id": "duo_seraph_kaguya",
+    "name": "至天と月夜",
+    "chars": ["セラフィエル", "千夜姫 カグヤ"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 3 },
+    "flavor": "至天の祈りと最古の月、 観測者三柱の二角。"
+  },
+  {
+    "id": "trio_ocean",
+    "name": "海洋連盟",
+    "chars": ["紅玉海賊団船長 シャンティ", "アクアシス筆頭魔術師 グラシエル", "珊瑚鎧の海騎士 コラリア"],
+    "condition": "any_lane",
+    "effect": { "target": "all_lanes", "power": 3 },
+    "flavor": "紅玉海賊団とアクアシス、 海の二派が同じ場に揃う時。"
+  },
+  {
+    "id": "duo_academy_archer",
+    "name": "学院と樹海",
+    "chars": ["カイ", "ヴィオラ"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 2 },
+    "flavor": "学院の見習いと樹海の弓姫、 弓を介した不器用な共闘。"
+  },
+  {
+    "id": "duo_silver_redwing",
+    "name": "白と紅",
+    "chars": ["ルミナ", "紅翼 ツキ"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 3 },
+    "flavor": "銀霜の月夜と紅翼の閃光、 対極の二色が交わる夜。"
+  },
+  {
+    "id": "duo_linae_chanty",
+    "name": "矢と帆",
+    "chars": ["森の射手 リナエ", "紅玉海賊団船長 シャンティ"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 2 },
+    "flavor": "樹海の達人射手と紅玉の海将軍、 異なる先導者の出会い。"
+  },
+  {
+    "id": "trio_genso_full",
+    "name": "原虹完全顕現",
+    "chars": ["虹意 プリズマ", "セラフィエル", "千夜姫 カグヤ"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 8 },
+    "flavor": "プリズマ・セラフィエル・カグヤ。 一つのレーンに観測者三柱が揃う、 神話級の奇跡。"
+  },
+  {
+    "id": "trio_academy",
+    "name": "星霊学院 三人組",
+    "chars": ["ちさと", "カイ", "ヴィオラ"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 4 },
+    "flavor": "学院の同期三人。 樹海の弟子も加えた、 始まりの絆。"
   }
 ]

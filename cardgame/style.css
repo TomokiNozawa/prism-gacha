@@ -156,6 +156,56 @@ body {
   padding: 10px 20px 30px;
 }
 
+/* ===== BO3 toggle (ホーム画面、 モード選択の上) ===== */
+.cg-bo3-toggle {
+  max-width: 480px; margin: 0 auto 14px; padding: 0 16px;
+}
+.cg-bo3-label {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px;
+  background: rgba(255, 213, 107, 0.08);
+  border: 1px solid rgba(255, 213, 107, 0.3);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background .15s;
+}
+.cg-bo3-label:hover { background: rgba(255, 213, 107, 0.16); }
+.cg-bo3-label input[type="checkbox"] {
+  width: 18px; height: 18px; cursor: pointer; accent-color: var(--gold);
+}
+.cg-bo3-text { font-weight: 700; color: var(--gold); flex: 1; font-size: 14px; }
+.cg-bo3-sub { font-size: 11px; color: var(--text-dim); }
+
+/* ===== BO3 series 表示 ===== */
+.cg-series-info {
+  text-align: center;
+  padding: 4px 8px;
+  font-size: 12px;
+  background: rgba(255, 213, 107, 0.12);
+  border-bottom: 1px solid rgba(255, 213, 107, 0.3);
+  color: var(--gold);
+  font-weight: 600;
+}
+.cg-mover-tag {
+  background: rgba(124, 93, 255, 0.4);
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  margin-left: 8px;
+}
+.cg-score-vs { color: var(--text-dim); margin: 0 4px; }
+
+/* マリガンボタン (HUD 内) */
+#btn-mulligan {
+  background: rgba(255, 213, 107, 0.18);
+  border-color: rgba(255, 213, 107, 0.5);
+  color: var(--gold);
+}
+#btn-mulligan:hover:not(:disabled) {
+  background: rgba(255, 213, 107, 0.32);
+}
+
 /* ===== 試合画面 HUD ===== */
 .cg-hud {
   display: flex; align-items: center; gap: 10px;
@@ -221,10 +271,17 @@ body {
 }
 
 @media (max-width: 480px) {
-  .cg-hud { flex-wrap: wrap; }
-  .cg-hud-actions { width: 100%; justify-content: flex-end; margin-top: 6px; margin-left: 0; }
-  .cg-hud-btn { padding: 6px 8px; font-size: 10px; }
-  .cg-end-turn { padding: 7px 11px; font-size: 11px; }
+  /* スマホ HUD コンパクト化 (野沢さん指示 2026-05-04 「もう少しコンパクトに」) */
+  .cg-hud { flex-wrap: nowrap; padding: 5px 8px; gap: 6px; }
+  .cg-hud-block { padding: 0 4px; min-width: 0; border-right: 1px solid var(--border); }
+  .cg-hud-label { display: none; }  /* ラベル省略、 値だけ表示 */
+  .cg-hud-value { font-size: 13px; }
+  .cg-hud-actions { margin-left: auto; gap: 3px; }
+  .cg-hud-btn { padding: 4px 7px; font-size: 10px; }
+  .cg-end-turn { padding: 6px 9px; font-size: 11px; }
+  .cg-topbar { padding: 6px 10px; }
+  .cg-title { font-size: 13px; }
+  .cg-back, .cg-help, .cg-iconbtn { width: 32px; height: 32px; font-size: 16px; }
 }
 
 /* ===== Board ===== */
@@ -771,28 +828,29 @@ body {
 
 /* ===== モバイル最適化 (480px以下) ===== */
 @media (max-width: 480px) {
-  .cg-card { width: 56px; height: 80px; }
-  .cg-card-name { font-size: 7px; bottom: 20px; }
-  .cg-card-stats { font-size: 9px; height: 20px; }
-  .cg-card .cg-card-effect { font-size: 6px; }
-  .cg-card-faction { font-size: 6px; padding: 1px 3px 1px 4px; max-width: 60%; }
-  .cg-hand .cg-card { width: 72px; height: 108px; }
-  .cg-hand .cg-card .cg-card-name { font-size: 8px; bottom: 32px; }
-  .cg-hand .cg-card-effect { font-size: 7px; }
+  /* HUD 詰めた分 card サイズ確保 (64px 幅、 80px 高さ) */
+  .cg-card { width: 64px; height: 92px; }
+  .cg-card-name { font-size: 8px; bottom: 22px; }
+  .cg-card-stats { font-size: 10px; height: 22px; }
+  .cg-card .cg-card-effect { font-size: 7px; height: 13px; }
+  .cg-card-faction { font-size: 7px; padding: 1px 4px 1px 5px; max-width: 65%; }
+  .cg-hand .cg-card { width: 80px; height: 120px; }
+  .cg-hand .cg-card .cg-card-name { font-size: 9px; bottom: 36px; }
+  .cg-hand .cg-card-effect { font-size: 8px; }
   /* レーン縦広がり防止: nowrap + 横スクロール (野沢さん指示 2026-05-04) */
   .cg-lane {
-    min-height: 100px;
-    height: 100px;
+    min-height: 116px;
+    height: 116px;
     overflow: hidden;
   }
   .cg-lane-slots {
     flex-wrap: nowrap;
     overflow-x: auto;
     overflow-y: hidden;
-    min-height: 80px;
+    min-height: 92px;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    gap: 3px;
+    gap: 4px;
   }
   .cg-lane-slots::-webkit-scrollbar { display: none; }
   .cg-hero-title { font-size: 24px; }
