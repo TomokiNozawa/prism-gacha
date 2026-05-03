@@ -140,10 +140,10 @@ function updateMuteUI() {
 // cards.json は手書き override (同名なら cards.json 優先)
 async function loadMasters() {
   const [c, k, l, p] = await Promise.all([
-    fetch('./cards.json?v=20260504n').then(r => r.json()),
-    fetch('./combos.json?v=20260504n').then(r => r.json()),
-    fetch('./lane_effects.json?v=20260504n').then(r => r.json()),
-    fetch('./data/pool.json?v=20260504n').then(r => r.json()).catch(() => []),
+    fetch('./cards.json?v=20260504o').then(r => r.json()),
+    fetch('./combos.json?v=20260504o').then(r => r.json()),
+    fetch('./lane_effects.json?v=20260504o').then(r => r.json()),
+    fetch('./data/pool.json?v=20260504o').then(r => r.json()).catch(() => []),
   ]);
   // pool 全カード ← cards.json で override
   const cardsByName = new Map();

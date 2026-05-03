@@ -6253,7 +6253,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260504n';
+const IMG_CACHE_VERSION = '20260504o';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -6339,6 +6339,11 @@ function _collectAssetUrlsByCategory() {
   const char_thumb = new Set();
   const loc_full = new Set();
   const loc_thumb = new Set();
+  // 公開済章のみ filter (野沢さん指摘 2026-05-04 「オフライン保存うまく動かない」 = s1c5 場所画像 未取込で 404 連発、 「未保存」 がリセットされない事故修正)
+  // s1c5 など未公開章のアセットは存在しない (5/6 12:00 で自動的に DL 対象に追加される)
+  const isReleased = (sid) => {
+    try { return typeof _isChapterReleased === 'function' ? _isChapterReleased(sid) : true; } catch (e) { return true; }
+  };
   try {
     if (typeof BGM_LIST !== 'undefined') BGM_LIST.forEach(b => { if (b && b.file) bgm.add(b.file); });
   } catch (e) {}
@@ -6347,6 +6352,7 @@ function _collectAssetUrlsByCategory() {
       for (const tier of ['LR','UR','SSR','SR','R']) {
         (POOL[tier] || []).forEach(c => {
           if (!c || !c.img) return;
+          if (c.chapter && !isReleased(c.chapter)) return;  // 未公開章キャラ skip
           char_full.add(c.img);
           char_thumb.add(toThumbUrl(c.img));
         });
@@ -6355,11 +6361,11 @@ function _collectAssetUrlsByCategory() {
   } catch (e) {}
   try {
     for (const sid in LOCATION_CONFIG) {
+      if (!isReleased(sid)) continue;  // 未公開章 location skip
       const conf = LOCATION_CONFIG[sid] || {};
       for (const k in conf) {
         if (conf[k] && conf[k].img) {
           loc_thumb.add(conf[k].img);
-          // 原寸PNG (拡大表示用) — 失敗しても _downloadAllAssets が無視
           loc_full.add(toFullUrl(conf[k].img));
         }
       }
@@ -6367,6 +6373,7 @@ function _collectAssetUrlsByCategory() {
   } catch (e) {}
   try {
     for (const sid in STORY_LOCATION_INLINE_CONFIG) {
+      if (!isReleased(sid)) continue;  // 未公開章 inline location skip
       (STORY_LOCATION_INLINE_CONFIG[sid] || []).forEach(e2 => {
         if (e2 && e2.img) {
           loc_thumb.add(e2.img);
