@@ -6253,7 +6253,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260503o';
+const IMG_CACHE_VERSION = '20260503p';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -7119,7 +7119,39 @@ function _renderHomeNextTeaser() {
   }
   el.innerHTML = next2 ? (colHTML(next1) + colHTML(next2)) : colHTML(next1);
   el.classList.toggle('teaser-split', !!next2);
+  // ティザー側の高さに Stories ボタンを揃える (野沢さん指示 2026-05-03)
+  // レイアウト確定後に同期 (innerHTML 直後は box 計測値が安定しないので RAF)
+  requestAnimationFrame(_syncStoriesHeightToTeaser);
 }
+
+// Stories エントリーボタンの高さをティザーに合わせる (章更新時に自動同期)
+function _syncStoriesHeightToTeaser() {
+  const teaser = document.querySelector('.story-next-teaser');
+  const btn = document.querySelector('.story-entry-block .story-entry-btn');
+  if (!teaser || !btn) return;
+  if (teaser.style.display === 'none' || teaser.offsetParent === null) {
+    btn.style.minHeight = '';  // 非表示時はリセット
+    return;
+  }
+  const h = teaser.getBoundingClientRect().height;
+  if (h > 0) btn.style.minHeight = h + 'px';
+}
+// ティザーのサイズ変更 (章更新 / 画面回転 / フォントロード後 等) を ResizeObserver で追跡
+let _teaserResizeObserver = null;
+function _initTeaserHeightSync() {
+  const teaser = document.querySelector('.story-next-teaser');
+  if (!teaser || _teaserResizeObserver) return;
+  if (typeof ResizeObserver === 'undefined') {
+    // フォールバック: window resize でだけ追従
+    window.addEventListener('resize', _syncStoriesHeightToTeaser);
+    return;
+  }
+  _teaserResizeObserver = new ResizeObserver(() => _syncStoriesHeightToTeaser());
+  _teaserResizeObserver.observe(teaser);
+  // 画面回転・ウィンドウサイズ変更でも再同期
+  window.addEventListener('resize', _syncStoriesHeightToTeaser);
+}
+document.addEventListener('DOMContentLoaded', _initTeaserHeightSync);
 document.addEventListener('DOMContentLoaded', () => { _refreshPickupChapter(); _refreshChapterReleaseLocks(); _renderHomeNextTeaser(); });
 // 2分毎に再判定 (リリース時刻を跨いだ瞬間に自動 unlock + ピックアップ章 自動切替 + ティザー切替)
 // 野沢さん指摘 2026-05-03 「スマホ電池の減りが凄い」: 60秒→120秒に緩和 + Page Visibility API で hidden 時はスキップ
