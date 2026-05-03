@@ -230,8 +230,11 @@ def check_chapter_completeness():
     m_lore = re.search(r'const LORE_BY_KEY\s*=\s*\{([\s\S]*?)\n\};', text)
     lore_keys = set(re.findall(r'"(\w+_[^"]+)"', m_lore.group(1))) if m_lore else set()
 
-    # ホームティザー: index.html story-next-teaser から次章 ID 抽出 (data-* で持たれてない場合は title 文字列でマッチ)
-    teaser_chap_match = re.search(r'<div class="story-next-teaser"[\s\S]*?第(\d+)章', html)
+    # ホームティザー: index.html story-next-teaser の内側だけ抽出 (空 div = 動的レンダリング、 check skip)
+    # 2026-05-03 修正: 動的レンダリング対応 (script.js _renderHomeNextTeaser で実行時に内容生成)
+    m_teaser_full = re.search(r'<div class="story-next-teaser"[^>]*>([\s\S]*?)</div>(?=\s*<(?:!--|/?(?:div|section|main)))', html)
+    teaser_inner = m_teaser_full.group(1).strip() if m_teaser_full else ''
+    teaser_chap_match = re.search(r'第(\d+)章', teaser_inner) if teaser_inner else None
     teaser_chap_num = int(teaser_chap_match.group(1)) if teaser_chap_match else None
 
     checked = len(sf_ids)
@@ -272,12 +275,37 @@ def check_chapter_completeness():
                 f"[ルール7-5 凸秘話未登録] {sid} の {len(missing_lore)}/{len(chars)}キャラ LORE_BY_KEY 未登録\n"
                 f"      → 例: {missing_lore[:3]}... (アセット完成段階なら追加推奨、 凸数=R1/SR2/SSR3/UR4/LR5話)"
             )
+    # 「公開済」 章 = STORY_FILES + (releaseDate なし or 経過済)
+    # 野沢さん指示 2026-05-03 「公開日時になったら変わる仕様」 + 「2 つ次の章は『現在制作中』」 への対応
+    from datetime import datetime, timezone
+    now_ts = datetime.now(timezone.utc).timestamp()
+    m_outline_full = re.search(r'const STORY_OUTLINE\s*=\s*\[([\s\S]*?)\n\];', text)
+    outline_text_full = m_outline_full.group(1) if m_outline_full else ''
+
+    def _has_passed_release(sid):
+        m_e = re.search(rf"\{{[^}}]*?id:\s*'{sid}'[^}}]*?\}}", outline_text_full)
+        if not m_e:
+            return True  # outline 未登録 → 公開扱い
+        e = m_e.group(0)
+        m_rd = re.search(r"releaseDate:\s*'([^']+)'", e)
+        if not m_rd:
+            return True  # releaseDate なし = 過去公開済
+        rd = m_rd.group(1)
+        try:
+            d = datetime.fromisoformat(rd.replace('Z', '+00:00'))
+            if d.tzinfo is None:
+                d = d.replace(tzinfo=timezone.utc)
+            return d.timestamp() <= now_ts
+        except ValueError:
+            return True  # parse 失敗 = 公開扱い
+
+    released_ids = [sid for sid in sf_ids if _has_passed_release(sid)]
+    last_chap = released_ids[-1] if released_ids else (sf_ids[0] if sf_ids else None)
+    last_num = int(re.match(r's1c(\d+)', last_chap).group(1)) if last_chap else 0
+
     # 6. ホームティザー 次章チェック (BLOCKER 化 2026-05-02、 野沢さん指示「自動チェックなのに s1c4 でボロボロ」)
+    # 2026-05-03 修正: ティザーが動的レンダリング (空 div) なら check skip。 静的内容ある場合のみ章番号一致を確認
     if teaser_chap_num is not None and sf_ids:
-        # 最新公開章 (sf_ids 末尾)
-        last_chap = sf_ids[-1]
-        last_num = int(re.match(r's1c(\d+)', last_chap).group(1))
-        # 次章番号
         next_num = last_num + 1
         if teaser_chap_num != next_num:
             violations.append(
@@ -288,8 +316,8 @@ def check_chapter_completeness():
     # 7. 次章 STORY_OUTLINE.releaseDate チェック (BLOCKER 2026-05-02 野沢さん指示「章末ページのチェックも自動確認入れて」)
     # 最新公開章 + 1 の STORY_OUTLINE エントリに releaseDate がないと、 章末 Coming Soon カード + ホーム画面ティザーの両方で
     # 「📅 公開予定 — お楽しみに」 fallback 表示になる。 公開予定が決まっている前提なので、 必須化。
+    # 2026-05-03 修正: 「最新公開章」 = STORY_FILES + releaseDate 経過済、 で動的判定 (公開予定章を除外)
     if sf_ids:
-        last_num = int(re.match(r's1c(\d+)', sf_ids[-1]).group(1))
         next_id = f"s1c{last_num + 1}"
         # STORY_OUTLINE 全体抽出して next_id エントリの releaseDate を検査
         m_outline = re.search(r'const STORY_OUTLINE\s*=\s*\[([\s\S]*?)\n\];', text)
