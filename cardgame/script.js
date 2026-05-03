@@ -138,9 +138,9 @@ function updateMuteUI() {
 // ===== Master データロード (公開済章のみ filter) =====
 async function loadMasters() {
   const [c, k, l] = await Promise.all([
-    fetch('./cards.json?v=20260504i').then(r => r.json()),
-    fetch('./combos.json?v=20260504i').then(r => r.json()),
-    fetch('./lane_effects.json?v=20260504i').then(r => r.json()),
+    fetch('./cards.json?v=20260504j').then(r => r.json()),
+    fetch('./combos.json?v=20260504j').then(r => r.json()),
+    fetch('./lane_effects.json?v=20260504j').then(r => r.json()),
   ]);
   // 公開済章のキャラ/レーン効果のみ採用 (5/6 12:00 で s1c5 自動解禁)
   state.cards = c.filter(card => isChapterReleased(card.chapter));
@@ -199,7 +199,7 @@ function startMatch(difficulty, isBO3) {
 
   drawTurnStart();
   const moverLabel = state.firstMover === 'me' ? '先行' : '後攻';
-  const seriesLabel = state.series.isBO3 ? `BO3 第${state.series.matchNo}試合 (${moverLabel}) ` : '';
+  const seriesLabel = state.series.isBO3 ? `BO3モード 第${state.series.matchNo}試合 (${moverLabel}) ` : '';
   setMessage(`${seriesLabel}ターン 1 — レーン効果決定。 マリガン (引き直し1回) 可。`);
 }
 
@@ -372,16 +372,19 @@ function renderCombosPanel() {
 }
 
 function renderLaneEffects() {
+  const isMobile = window.innerWidth <= 480;
   [0, 1, 2].forEach(lane => {
     const e = state.laneEffects[lane];
     const labelMe = $(`#lanes-me .cg-lane[data-lane="${lane}"] .cg-lane-name`);
     const labelOpp = $(`#lanes-opp .cg-lane[data-lane="${lane}"] .cg-lane-name`);
     if (!e) return;
-    const txt = `L${lane + 1} ${e.icon} ${e.name}`;
-    if (labelMe) labelMe.textContent = txt;
-    if (labelOpp) labelOpp.textContent = txt;
+    // スマホ: 「L1 🌊」 だけ (名前 + 効果は title で確認)、 PC: フル表示
+    const txt = isMobile ? `L${lane + 1} ${e.icon}` : `L${lane + 1} ${e.icon} ${e.name}`;
+    const titleTxt = `${e.name} — ${e.description}`;
+    if (labelMe) { labelMe.textContent = txt; labelMe.title = titleTxt; }
+    if (labelOpp) { labelOpp.textContent = txt; labelOpp.title = titleTxt; }
     [`#lanes-me .cg-lane[data-lane="${lane}"]`, `#lanes-opp .cg-lane[data-lane="${lane}"]`].forEach(s => {
-      const el = $(s); if (el) el.title = e.description;
+      const el = $(s); if (el) el.title = titleTxt;
     });
   });
 }
@@ -882,7 +885,7 @@ function finishMatch() {
     icon = matchResult === 'win' ? '🎯' : (matchResult === 'loss' ? '💧' : '⚖️');
     const r = matchResult === 'win' ? '勝利' : (matchResult === 'loss' ? '敗北' : '引き分け');
     title = `第${state.series.matchNo}試合 ${r}`;
-    detail = `BO3 累積 — あなた ${state.series.wins.me} 勝 / AI ${state.series.wins.opp} 勝<br>次は第${state.series.matchNo + 1}試合へ。`;
+    detail = `BO3モード 累積 — あなた ${state.series.wins.me} 勝 / AI ${state.series.wins.opp} 勝<br>次は第${state.series.matchNo + 1}試合へ。`;
     showMatchResultModal(icon, title, detail, true);
     return;
   }
@@ -891,9 +894,9 @@ function finishMatch() {
   if (state.series.isBO3) {
     const winner = state.series.wins.me > state.series.wins.opp ? 'me' :
                    state.series.wins.opp > state.series.wins.me ? 'opp' : 'draw';
-    if (winner === 'me') { title = 'BO3 勝利!'; icon = '🏆'; }
-    else if (winner === 'opp') { title = 'BO3 敗北'; icon = '💧'; }
-    else { title = 'BO3 引き分け'; icon = '⚖️'; }
+    if (winner === 'me') { title = 'BO3モード 勝利!'; icon = '🏆'; }
+    else if (winner === 'opp') { title = 'BO3モード 敗北'; icon = '💧'; }
+    else { title = 'BO3モード 引き分け'; icon = '⚖️'; }
     const resultsLine = state.series.results.map((r, i) => {
       const m = r === 'win' ? '○' : r === 'loss' ? '×' : '△';
       return `第${i+1}: ${m}`;
@@ -948,10 +951,10 @@ function updateSeriesHud() {
   const diffLabel = diffMap[state.difficulty] || '?';
   if (state.series.isBO3) {
     el.style.display = '';
-    el.innerHTML = `<span class="cg-diff-tag">${diffLabel}</span> | BO3 第<b>${state.series.matchNo}</b>/3 — ${state.series.wins.me}<span class="cg-score-vs">:</span>${state.series.wins.opp} <span class="cg-mover-tag">${state.firstMover === 'me' ? '先攻' : '後攻'}</span>`;
+    el.innerHTML = `<span class="cg-diff-tag">${diffLabel}</span><span class="cg-mode-tag bo3">🏆 BO3モード</span><span class="cg-series-progress">第<b>${state.series.matchNo}</b>/3 — ${state.series.wins.me}<span class="cg-score-vs">:</span>${state.series.wins.opp}</span><span class="cg-mover-tag">${state.firstMover === 'me' ? '先攻' : '後攻'}</span>`;
   } else {
     el.style.display = '';
-    el.innerHTML = `<span class="cg-diff-tag">${diffLabel}</span> | 単発`;
+    el.innerHTML = `<span class="cg-diff-tag">${diffLabel}</span><span class="cg-mode-tag">単発</span>`;
   }
 }
 

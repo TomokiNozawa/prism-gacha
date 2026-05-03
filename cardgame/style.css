@@ -133,6 +133,7 @@ body {
   max-width: 480px; margin: 0 auto;
 }
 .cg-mode-btn {
+  position: relative;
   display: flex; align-items: center; gap: 12px;
   padding: 14px 16px;
   background: var(--bg-card);
@@ -141,10 +142,29 @@ body {
   color: var(--text);
   text-align: left;
   cursor: pointer;
-  transition: transform .12s, border-color .12s;
+  transition: transform .12s, border-color .12s, box-shadow .12s;
+  overflow: hidden;
 }
-.cg-mode-btn:not(.disabled):hover { transform: translateY(-2px); border-color: var(--border-hi); }
-.cg-mode-btn.primary { border-color: var(--aurora-2); box-shadow: 0 0 22px rgba(74, 214, 255, .15); }
+.cg-mode-btn::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, var(--aurora-1), var(--aurora-2), var(--aurora-3));
+  opacity: 0.4;
+  transition: opacity .15s, width .15s;
+}
+.cg-mode-btn:not(.disabled):hover {
+  transform: translateY(-2px);
+  border-color: var(--border-hi);
+  box-shadow: 0 4px 16px rgba(124, 93, 255, 0.2);
+}
+.cg-mode-btn:not(.disabled):hover::before { opacity: 0.9; width: 6px; }
+.cg-mode-btn.primary {
+  border-color: var(--aurora-2);
+  box-shadow: 0 0 22px rgba(95, 223, 255, .18), 0 0 0 1px rgba(95, 223, 255, .25);
+}
+.cg-mode-btn.primary::before { opacity: 0.8; }
 .cg-mode-btn.secondary { background: rgba(20, 22, 51, 0.6); }
 .cg-mode-btn.disabled { opacity: .4; cursor: not-allowed; }
 .cg-mode-icon { font-size: 28px; }
@@ -156,36 +176,60 @@ body {
   padding: 10px 20px 30px;
 }
 
-/* ===== BO3 toggle (ホーム画面、 モード選択の上) ===== */
+/* ===== BO3モード toggle (ホーム画面、 モード選択の上) ===== */
 .cg-bo3-toggle {
   max-width: 480px; margin: 0 auto 14px; padding: 0 16px;
 }
 .cg-bo3-label {
-  display: flex; align-items: center; gap: 10px;
+  display: flex; align-items: center; gap: 12px;
   padding: 12px 16px;
-  background: rgba(255, 213, 107, 0.08);
-  border: 1px solid rgba(255, 213, 107, 0.3);
+  background: linear-gradient(135deg, rgba(255, 213, 107, 0.12), rgba(124, 93, 255, 0.10));
+  border: 1px solid rgba(255, 213, 107, 0.4);
   border-radius: 12px;
   cursor: pointer;
-  transition: background .15s;
+  transition: background .15s, border-color .15s, box-shadow .15s;
 }
-.cg-bo3-label:hover { background: rgba(255, 213, 107, 0.16); }
+.cg-bo3-label:hover {
+  background: linear-gradient(135deg, rgba(255, 213, 107, 0.20), rgba(124, 93, 255, 0.16));
+  border-color: rgba(255, 213, 107, 0.65);
+  box-shadow: 0 0 14px rgba(255, 213, 107, 0.18);
+}
 .cg-bo3-label input[type="checkbox"] {
-  width: 18px; height: 18px; cursor: pointer; accent-color: var(--gold);
+  width: 20px; height: 20px; cursor: pointer; accent-color: var(--gold); flex-shrink: 0;
 }
-.cg-bo3-text { font-weight: 700; color: var(--gold); flex: 1; font-size: 14px; }
-.cg-bo3-sub { font-size: 11px; color: var(--text-dim); }
+.cg-bo3-text-wrap { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.cg-bo3-text { font-weight: 700; color: var(--gold); font-size: 14px; letter-spacing: 0.03em; }
+.cg-bo3-sub { font-size: 11px; color: var(--text-dim); line-height: 1.4; }
 
-/* ===== BO3 series 表示 ===== */
+/* ===== BO3モード / 単発 series 表示 ===== */
 .cg-series-info {
-  text-align: center;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
   padding: 4px 8px;
   font-size: 12px;
-  background: rgba(255, 213, 107, 0.12);
+  background: linear-gradient(90deg, rgba(124, 93, 255, 0.12), rgba(255, 213, 107, 0.12), rgba(95, 223, 255, 0.12));
   border-bottom: 1px solid rgba(255, 213, 107, 0.3);
-  color: var(--gold);
+  color: var(--text);
   font-weight: 600;
 }
+.cg-mode-tag {
+  background: rgba(255, 213, 107, 0.25);
+  color: var(--gold);
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  border: 1px solid rgba(255, 213, 107, 0.45);
+}
+.cg-mode-tag.bo3 { background: rgba(255, 213, 107, 0.35); }
+.cg-series-progress {
+  font-size: 11px;
+  color: var(--text);
+}
+.cg-series-progress b { color: var(--gold); font-size: 13px; }
 .cg-diff-tag {
   background: rgba(124, 93, 255, 0.5);
   color: #fff;
@@ -301,16 +345,43 @@ body {
 
 @media (max-width: 480px) {
   /* スマホ HUD コンパクト化 (野沢さん指示 2026-05-04 「もう少しコンパクトに」) */
-  .cg-hud { flex-wrap: nowrap; padding: 5px 8px; gap: 6px; }
+  .cg-hud { flex-wrap: nowrap; padding: 5px 6px; gap: 5px; min-height: 40px; }
   .cg-hud-block { padding: 0 4px; min-width: 0; border-right: 1px solid var(--border); }
   .cg-hud-label { display: none; }  /* ラベル省略、 値だけ表示 */
-  .cg-hud-value { font-size: 13px; }
-  .cg-hud-actions { margin-left: auto; gap: 3px; }
-  .cg-hud-btn { padding: 4px 7px; font-size: 10px; }
+  .cg-hud-value { font-size: 12px; white-space: nowrap; }
+  .cg-hud-actions { margin-left: auto; gap: 3px; flex-shrink: 0; }
+  .cg-hud-btn {
+    padding: 5px 7px; font-size: 11px; min-width: 30px;
+    font-weight: 700;
+  }
   .cg-end-turn { padding: 6px 9px; font-size: 11px; }
   .cg-topbar { padding: 6px 10px; }
   .cg-title { font-size: 13px; }
   .cg-back, .cg-help, .cg-iconbtn { width: 32px; height: 32px; font-size: 16px; }
+  /* series-info をスマホで wrap 許可、 縦組可 */
+  .cg-series-info { font-size: 10px; padding: 3px 6px; gap: 4px; }
+  .cg-mode-tag { font-size: 9px; padding: 1px 5px; }
+  .cg-diff-tag { font-size: 10px; padding: 1px 6px; }
+  .cg-series-progress { font-size: 10px; }
+  .cg-series-progress b { font-size: 11px; }
+  .cg-mover-tag { font-size: 9px; padding: 1px 5px; margin-left: 0; }
+  /* レーン名をスマホで簡略 (effect 名は省略、 アイコンのみ) */
+  .cg-lane-name { font-size: 9px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cg-lane-power { font-size: 13px; }
+  /* キャラ詳細モーダル: 画像 高さ縮小 */
+  .cg-char-detail-img { height: 160px; }
+  .cg-char-detail-name { font-size: 16px; }
+  .cg-char-detail-stats { font-size: 11px; gap: 8px; }
+  .cg-char-detail-effect { font-size: 12px; padding: 6px 10px; }
+  .cg-char-detail-info { padding: 12px 14px 4px; }
+  /* mode-btn サブ表示 詰め */
+  .cg-mode-btn { padding: 11px 14px; gap: 10px; }
+  .cg-mode-icon { font-size: 24px; }
+  .cg-mode-title { font-size: 14px; }
+  .cg-mode-sub { font-size: 11px; }
+  /* ホーム hero タイトル */
+  .cg-hero { padding: 28px 16px 22px; }
+  .cg-hero-icon { font-size: 44px; }
 }
 
 /* ===== Board ===== */
@@ -347,8 +418,8 @@ body {
   cursor: pointer;
   box-shadow: 0 0 12px rgba(74, 214, 255, .4) inset;
 }
-.cg-lane.lane-win-me   { border-color: var(--me); box-shadow: 0 0 16px rgba(74, 214, 255, .35) inset; }
-.cg-lane.lane-win-opp  { border-color: var(--opp); box-shadow: 0 0 16px rgba(255, 122, 214, .35) inset; }
+.cg-lane.lane-win-me   { border-color: var(--me); box-shadow: 0 0 16px rgba(95, 223, 255, .4) inset, 0 0 12px rgba(95, 223, 255, .25); }
+.cg-lane.lane-win-opp  { border-color: var(--opp); box-shadow: 0 0 16px rgba(255, 141, 220, .4) inset, 0 0 12px rgba(255, 141, 220, .25); }
 
 .cg-lane-header {
   display: flex; justify-content: space-between; align-items: center;
@@ -377,10 +448,18 @@ body {
   flex-shrink: 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
-.cg-card.placed-anim { animation: placeCard .35s ease-out; }
+.cg-card { transition: transform .12s, box-shadow .12s; }
+.cg-card:not(.opp):not(.undoable):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(95, 223, 255, 0.35);
+}
+.cg-card.placed-anim {
+  animation: placeCard .4s cubic-bezier(.34,1.56,.64,1);
+}
 @keyframes placeCard {
-  from { transform: translateY(-20px) scale(.7); opacity: 0; }
-  to   { transform: translateY(0) scale(1); opacity: 1; }
+  0%   { transform: translateY(-24px) scale(.65); opacity: 0; box-shadow: 0 0 24px rgba(95, 223, 255, .8); }
+  60%  { transform: translateY(2px) scale(1.05); opacity: 1; box-shadow: 0 0 18px rgba(255, 213, 107, .6); }
+  100% { transform: translateY(0) scale(1); opacity: 1; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); }
 }
 .cg-card-tier {
   height: 14px;
@@ -629,13 +708,28 @@ body {
 .cg-modal-card {
   position: relative;
   background: var(--bg-elev);
-  border: 1px solid var(--border-hi);
   border-radius: 18px;
   padding: 28px 24px 20px;
   max-width: 380px;
   width: 100%;
-  box-shadow: 0 0 40px rgba(107, 74, 255, .25);
   text-align: center;
+  /* Aurora グラデ border (5色 conic) */
+  background-clip: padding-box;
+  border: 1px solid transparent;
+  box-shadow:
+    0 0 0 1px rgba(190, 180, 255, 0.4),
+    0 0 40px rgba(124, 93, 255, .35),
+    0 0 80px rgba(95, 223, 255, .12);
+}
+.cg-modal-card::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 19px;
+  background: conic-gradient(from 180deg, #7c5dff, #5fdfff, #ff8ddc, #ffd56b, #7c5dff);
+  z-index: -1;
+  opacity: 0.5;
+  filter: blur(2px);
 }
 .cg-modal-icon { font-size: 48px; }
 .cg-modal-title {
@@ -793,10 +887,18 @@ body {
   max-width: 420px;
   width: calc(100vw - 32px);
   padding: 0;
-  overflow: hidden;
   text-align: left;
   max-height: 90vh;
   overflow-y: auto;
+  overflow-x: hidden;
+}
+/* キャラ詳細は img を上に出すので overflow:hidden 必要、 ただ Aurora border も維持 */
+.cg-char-detail-card::before {
+  border-radius: 19px;
+}
+.cg-char-detail-card .cg-char-detail-img {
+  border-radius: 18px 18px 0 0;
+  margin: 0;
 }
 .cg-char-detail-img {
   height: 220px;
