@@ -6092,7 +6092,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260503d';
+const IMG_CACHE_VERSION = '20260503e';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -6240,7 +6240,8 @@ async function _downloadAllAssets(progressCb, urlList) {
   const allUrls = urlList || _collectAllAssetUrls();
   // 全URLを並列で cache 確認、 未cacheだけリスト化 (既DL分は再fetchしない)
   const checks = await Promise.all(allUrls.map(async (url) => {
-    try { return [url, !!(await caches.match(url))]; } catch (e) { return [url, false]; }
+    // ignoreSearch:true で cache buster 差異を無視 (野沢さん指摘 2026-05-03 「Ver変わるたび全DL害悪」)
+    try { return [url, !!(await caches.match(url, { ignoreSearch: true }))]; } catch (e) { return [url, false]; }
   }));
   const urls = checks.filter(([_, cached]) => !cached).map(([url, _]) => url);
   const skipped = allUrls.length - urls.length;  // 既DL済 (今回はskip)
@@ -6253,7 +6254,7 @@ async function _downloadAllAssets(progressCb, urlList) {
   // メインthread から明示的に書き込む defensive cache (SW activate で削除されない、 SW_VERSION非依存)
   let manualCache = null;
   try { manualCache = await caches.open('prismaera-offline-saved'); } catch (e) {}
-  const CONCURRENCY = 5;
+  const CONCURRENCY = 3;  // 5→3 に削減 (野沢さん指摘 2026-05-03 電池消費改善、 CPU負荷軽減)
   let idx = 0;
   async function worker() {
     while (idx < urls.length) {
@@ -8621,7 +8622,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // D 案: 起動直後に R/SR サムネを background prefetch (新規ユーザーの初回ガチャ画像読み込み対策、 即実行)
   _prefetchLowTierThumbs();
   // 起動から少し経った後に 公開済章の全ガチャキャラ画像を自動事前ダウンロード (24h cooldown)
-  setTimeout(() => { _autoPrecacheGachaImages().catch(() => {}); }, 2500);
+  // 起動から 5秒待ってから precache 開始 (UI 描画 + 初期 layout 完了後、 野沢さん指摘 2026-05-03 電池消費改善)
+  setTimeout(() => { _autoPrecacheGachaImages().catch(() => {}); }, 5000);
 });
 
 // ============================================================
@@ -8727,8 +8729,10 @@ async function _autoPrecacheGachaImages() {
   let missingThumbs = thumbUrls.length;
   let missingFulls = fullUrls.length;
   try {
-    const thumbCached = await Promise.all(thumbUrls.map(u => caches.match(u).then(r => !!r).catch(() => false)));
-    const fullCached = await Promise.all(fullUrls.map(u => caches.match(u).then(r => !!r).catch(() => false)));
+    // ignoreSearch:true で cache buster 差異を無視 (野沢さん指摘 2026-05-03 「Ver変わるたび全DL害悪」)
+    // 同 path のキャッシュがあれば skip = 再DL しない
+    const thumbCached = await Promise.all(thumbUrls.map(u => caches.match(u, { ignoreSearch: true }).then(r => !!r).catch(() => false)));
+    const fullCached = await Promise.all(fullUrls.map(u => caches.match(u, { ignoreSearch: true }).then(r => !!r).catch(() => false)));
     missingThumbs = thumbCached.filter(c => !c).length;
     missingFulls = fullCached.filter(c => !c).length;
   } catch (e) {
