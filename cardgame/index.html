@@ -7,7 +7,7 @@
 <title>PCB | Prismaera Cards Battle</title>
 <link rel="icon" href="/images/icons/icon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
-<link rel="stylesheet" href="./style.css?v=20260504j">
+<link rel="stylesheet" href="./style.css?v=20260504k">
 </head>
 <body>
 
@@ -39,6 +39,17 @@
         <span class="cg-bo3-sub">先攻 → 後攻 → ランダム の3本、 2本先取で勝利</span>
       </div>
     </label>
+  </div>
+
+  <div class="cg-deck-row">
+    <button type="button" class="cg-deck-btn" id="btn-open-deck-builder">
+      <span class="cg-deck-icon">⚙️</span>
+      <span class="cg-deck-text">
+        <span class="cg-deck-title">デッキ編集</span>
+        <span class="cg-deck-sub" id="deck-builder-sub">12 枚 — デフォルト使用中</span>
+      </span>
+      <span class="cg-deck-arrow">→</span>
+    </button>
   </div>
 
   <div class="cg-modes">
@@ -194,6 +205,38 @@
 <!-- 結果に戻る floating ボタン (場を見る時に右下) -->
 <button id="result-peek-btn" class="cg-result-peek-btn" onclick="reopenResult()" hidden>📋 結果に戻る</button>
 
+<!-- P-5: デッキ編集モーダル -->
+<div id="deck-builder-modal" class="cg-modal" hidden>
+  <div class="cg-modal-backdrop" onclick="closeDeckBuilder()"></div>
+  <div class="cg-modal-card cg-deck-builder-card">
+    <button class="cg-modal-close" onclick="closeDeckBuilder()" aria-label="閉じる">×</button>
+    <div class="cg-deck-builder-header">
+      <h2 class="cg-modal-title">⚙️ デッキ編集</h2>
+      <div class="cg-deck-builder-counter">
+        <span id="deck-builder-count">0</span> / 12 枚
+      </div>
+    </div>
+    <div class="cg-deck-builder-actions">
+      <button class="cg-btn secondary" id="btn-deck-clear">クリア</button>
+      <button class="cg-btn secondary" id="btn-deck-auto">🎲 おまかせ生成</button>
+      <button class="cg-btn secondary" id="btn-deck-default">🔁 デフォルトに戻す</button>
+    </div>
+    <div class="cg-deck-builder-tabs" id="deck-builder-tabs">
+      <button type="button" class="cg-deck-tab active" data-tier="all">全て</button>
+      <button type="button" class="cg-deck-tab" data-tier="LR">LR</button>
+      <button type="button" class="cg-deck-tab" data-tier="UR">UR</button>
+      <button type="button" class="cg-deck-tab" data-tier="SSR">SSR</button>
+      <button type="button" class="cg-deck-tab" data-tier="SR">SR</button>
+      <button type="button" class="cg-deck-tab" data-tier="R">R</button>
+    </div>
+    <div class="cg-deck-builder-grid" id="deck-builder-grid"></div>
+    <div class="cg-modal-actions">
+      <button class="cg-btn secondary" onclick="closeDeckBuilder()">キャンセル</button>
+      <button class="cg-btn primary" id="btn-deck-save">💾 保存して閉じる</button>
+    </div>
+  </div>
+</div>
+
 <!-- キャラ詳細モーダル (P-1、 カードタップで開く) -->
 <div id="char-detail-modal" class="cg-modal" hidden>
   <div class="cg-modal-backdrop" onclick="closeCharDetail()"></div>
@@ -299,6 +342,6 @@
   </div>
 </div>
 
-<script src="./script.js?v=20260504j"></script>
+<script src="./script.js?v=20260504k"></script>
 </body>
 </html>

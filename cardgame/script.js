@@ -135,19 +135,106 @@ function updateMuteUI() {
   }
 }
 
-// ===== Master データロード (公開済章のみ filter) =====
+// ===== Master データロード (公開済章のみ filter、 cards.json + pool.json 統合) =====
+// P-6: pool.json は本体 POOL から自動生成 (scripts/export_pool_for_cardgame.py)
+// cards.json は手書き override (同名なら cards.json 優先)
 async function loadMasters() {
-  const [c, k, l] = await Promise.all([
-    fetch('./cards.json?v=20260504j').then(r => r.json()),
-    fetch('./combos.json?v=20260504j').then(r => r.json()),
-    fetch('./lane_effects.json?v=20260504j').then(r => r.json()),
+  const [c, k, l, p] = await Promise.all([
+    fetch('./cards.json?v=20260504k').then(r => r.json()),
+    fetch('./combos.json?v=20260504k').then(r => r.json()),
+    fetch('./lane_effects.json?v=20260504k').then(r => r.json()),
+    fetch('./data/pool.json?v=20260504k').then(r => r.json()).catch(() => []),
   ]);
-  // 公開済章のキャラ/レーン効果のみ採用 (5/6 12:00 で s1c5 自動解禁)
-  state.cards = c.filter(card => isChapterReleased(card.chapter));
+  // pool 全カード ← cards.json で override
+  const cardsByName = new Map();
+  p.forEach(card => cardsByName.set(card.name, card));
+  c.forEach(card => cardsByName.set(card.name, card));  // override
+  state.allCards = Array.from(cardsByName.values()).filter(card => isChapterReleased(card.chapter));
+  // 後方互換: state.cards は state.allCards のフルセット (デフォルトデッキ用、 デッキ編集で絞られる時もある)
+  state.cards = state.allCards;
   state.laneEffectsAll = l.filter(e => isChapterReleased(e.chapter));
-  // コンボは「全 chars が公開済章のキャラ集合に存在する」 ものだけ採用
-  const cardNames = new Set(state.cards.map(card => card.name));
+  const cardNames = new Set(state.allCards.map(card => card.name));
   state.combos = k.filter(combo => combo.chars.every(name => cardNames.has(name)));
+}
+
+// ===== P-5: デッキ管理 (localStorage 永続化、 12枚) =====
+const DECK_LS_KEY = 'cg_deck_v1';
+const DECK_SIZE = 12;
+
+function loadDeck() {
+  try {
+    const raw = localStorage.getItem(DECK_LS_KEY);
+    if (!raw) return null;
+    const ids = JSON.parse(raw);
+    if (!Array.isArray(ids)) return null;
+    return ids;
+  } catch (e) { return null; }
+}
+
+function saveDeck(ids) {
+  localStorage.setItem(DECK_LS_KEY, JSON.stringify(ids));
+}
+
+// 現在使用するデッキ (12枚 card オブジェクト) を返す。 保存済みあればそれ、 なければデフォルト 12枚 (cards.json 手書き)
+function getCurrentDeck() {
+  const savedIds = loadDeck();
+  if (savedIds && savedIds.length === DECK_SIZE) {
+    const byId = new Map(state.allCards.map(c => [c.id, c]));
+    const cards = savedIds.map(id => byId.get(id)).filter(Boolean);
+    if (cards.length === DECK_SIZE) return cards;
+  }
+  // フォールバック: cards.json (手書き 12 枚) を使う
+  return state.allCards.filter(c => c.id && c.id.match(/^(lr_1_prisma|ur_1_seraph|ur_2_kaguya|ssr_1_linae|ssr_2_chanty|ssr_3_glaciel|sr_1_lumina|sr_2_tsuki|sr_3_coralia|r_1_chisato|r_2_kai|r_3_viola)$/)).slice(0, DECK_SIZE);
+}
+
+// AI 用デッキ: ランダムに 12 枚 (公開済章 + tier バランス考慮)
+function getAiDeck() {
+  const byTier = { LR: [], UR: [], SSR: [], SR: [], R: [] };
+  state.allCards.forEach(c => { if (byTier[c.tier]) byTier[c.tier].push(c); });
+  // tier バランス: LR 0-1 / UR 1-2 / SSR 2-3 / SR 3-4 / R 3-4
+  const pick = (arr, n) => shuffle([...arr]).slice(0, Math.min(n, arr.length));
+  const ai = [
+    ...pick(byTier.LR, 1),
+    ...pick(byTier.UR, 2),
+    ...pick(byTier.SSR, 3),
+    ...pick(byTier.SR, 3),
+    ...pick(byTier.R, 3),
+  ];
+  while (ai.length < DECK_SIZE) {
+    const fallback = pick(state.allCards.filter(c => !ai.some(a => a.id === c.id)), DECK_SIZE - ai.length);
+    ai.push(...fallback);
+  }
+  return ai.slice(0, DECK_SIZE);
+}
+
+// おまかせデッキ生成 (派閥シナジー優先 = 同派閥多めで自動構築)
+function generateAutoDeck() {
+  const byFaction = {};
+  state.allCards.forEach(c => {
+    if (!byFaction[c.faction]) byFaction[c.faction] = [];
+    byFaction[c.faction].push(c);
+  });
+  // 同派閥 ≥ 3 の派閥を優先選択
+  const factions = Object.entries(byFaction)
+    .filter(([f, arr]) => arr.length >= 3)
+    .sort((a, b) => b[1].length - a[1].length);
+  const picked = [];
+  for (const [, arr] of factions) {
+    const need = DECK_SIZE - picked.length;
+    if (need <= 0) break;
+    const sorted = [...arr].sort((a, b) => {
+      const order = { LR: 5, UR: 4, SSR: 3, SR: 2, R: 1 };
+      return order[b.tier] - order[a.tier];
+    });
+    picked.push(...sorted.slice(0, Math.min(4, need)));
+  }
+  // 足りない分はランダム fill
+  while (picked.length < DECK_SIZE) {
+    const remaining = state.allCards.filter(c => !picked.some(p => p.id === c.id));
+    if (remaining.length === 0) break;
+    picked.push(remaining[Math.floor(Math.random() * remaining.length)]);
+  }
+  return picked.slice(0, DECK_SIZE).map(c => c.id);
 }
 
 // ===== Utility =====
@@ -215,9 +302,11 @@ function _initMatchState() {
   state.mulliganAvailable = true;
   state.thisTurnAiDone = false;
 
-  const baseDeck = state.cards.map(c => ({ ...c }));
-  state.deck = shuffle(baseDeck);
-  state.oppDeck = shuffle(state.cards.map(c => ({ ...c })));
+  // P-5: ユーザーデッキ (localStorage) + AI デッキ (ランダム tier バランス)
+  const myDeckCards = getCurrentDeck().map(c => ({ ...c }));
+  const aiDeckCards = getAiDeck().map(c => ({ ...c }));
+  state.deck = shuffle(myDeckCards);
+  state.oppDeck = shuffle(aiDeckCards);
   state.hand = state.deck.splice(0, 4);
   state.oppHand = state.oppDeck.splice(0, 4);
   state.board = { me: [[], [], []], opp: [[], [], []] };
@@ -409,17 +498,13 @@ function renderBoard() {
       state.board[side][lane].forEach((card, boardIdx) => {
         const el = makeCardElement(card, true);
         if (side === 'opp') el.classList.add('opp');
-        // 自分のカードかつ ターン内 配置済 → undo 可能 (クリックで取消)
+        // 自分のカードかつ ターン内 配置済 → undo 可能 (クリックで取消、 ℹ ボタンは stopPropagation 済)
         if (side === 'me' && state.thisTurnPlacements.some(p => p.cardId === card.id && p.lane === lane)) {
           el.classList.add('undoable');
-          el.title = 'タップで手札に戻す';
+          el.title = 'タップで手札に戻す (ℹ で詳細)';
           el.addEventListener('click', () => undoMyCard(lane, boardIdx));
-        } else {
-          // 場のカード = タップで詳細表示 (P-1)
-          el.style.cursor = 'pointer';
-          el.title = 'タップで詳細';
-          el.addEventListener('click', () => showCardDetail(card, 'board-' + side, null));
         }
+        // 場の他カードはタップ動作なし (ℹ ボタンで詳細閲覧のみ)
         // 動的 power を表示用に上書き
         const dynPower = getCardPower(card, side, lane);
         const pEl = el.querySelector('.cg-card-power');
@@ -443,6 +528,7 @@ function makeCardElement(card, showEffect) {
     <div class="cg-card-tier ${card.tier}">${card.tier}${dupesBadge}</div>
     <div class="cg-card-faction" style="background:${factionColor(card.faction)}">${card.faction}</div>
     <div class="cg-card-img ${imgClass}" style="${imgStyle}"></div>
+    <button class="cg-card-info-btn" type="button" aria-label="詳細" title="詳細を見る">i</button>
     <div class="cg-card-name">${card.name}</div>
     ${showEffect && card.effectText ? `<div class="cg-card-effect">${card.effectText}</div>` : ''}
     <div class="cg-card-stats">
@@ -450,6 +536,14 @@ function makeCardElement(card, showEffect) {
       <span class="cg-card-power">⚔${displayPower}</span>
     </div>
   `;
+  // ℹ ボタン (stopPropagation で配置選択と分離)
+  const infoBtn = el.querySelector('.cg-card-info-btn');
+  if (infoBtn) {
+    infoBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showCardDetail(card, null, null);
+    });
+  }
   if (imgUrl) {
     const probe = new Image();
     probe.src = imgUrl;
@@ -480,27 +574,28 @@ function updateLanePowers() {
   });
 }
 
-// ===== 手札カード選択 (タップ = 詳細モーダル + 配置ボタン) =====
+// ===== 手札カード選択 (タップ = 配置モード、 ℹ ボタンで詳細) =====
+// 野沢さん指示 2026-05-04 「キャラ押した時はそのまま配置したい場合もある」 → 詳細はポップアップやめて配置直結。
+// PC は hover でも詳細表示、 スマホは ℹ アイコンタップで詳細モーダル。
 function onHandCardClick(idx) {
-  if (state.ended) return;
-  const card = state.hand[idx];
-  showCardDetail(card, 'hand', idx);
-}
-
-// 詳細モーダルから「配置先を選ぶ」 押下 (旧の selectedCardIdx 流れに合流)
-function _enterPlaceMode(idx) {
   if (state.busy || state.ended) return;
   const card = state.hand[idx];
-  if (!card) return;
   if (card.cost > state.cost - state.costUsed) {
     setMessage(`コスト不足: ${card.name} (⚡${card.cost} 必要、 残${state.cost - state.costUsed})`, 'alert');
     return;
   }
-  state.selectedCardIdx = idx;
-  $$('#lanes-me .cg-lane').forEach(el => {
-    if (state.board.me[Number(el.dataset.lane)].length < 4) el.classList.add('lane-target');
-  });
-  setMessage(`配置先レーン (L1/L2/L3) をタップ: ${card.name}`);
+  // 同カード再タップで選択解除
+  if (state.selectedCardIdx === idx) {
+    state.selectedCardIdx = -1;
+    $$('.lane-target').forEach(el => el.classList.remove('lane-target'));
+    setMessage('選択解除');
+  } else {
+    state.selectedCardIdx = idx;
+    $$('#lanes-me .cg-lane').forEach(el => {
+      if (state.board.me[Number(el.dataset.lane)].length < 4) el.classList.add('lane-target');
+    });
+    setMessage(`配置先レーン (L1/L2/L3) をタップ: ${card.name}`);
+  }
   renderHand();
 }
 
@@ -540,33 +635,9 @@ function showCardDetail(card, context, handIdx) {
       </div>`;
     }).join('');
   }
-  // 配置ボタン (手札 + cost OK + 試合中 のみ)
+  // 配置ボタンは廃止 (野沢さん指示 2026-05-04: 「キャラ押した時はそのまま配置したい場合もある」 → タップ = 配置に戻した、 詳細はℹボタンのみ)
   const placeBtn = $('#char-detail-place-btn');
-  const canPlace = context === 'hand'
-    && handIdx != null
-    && card.cost <= (state.cost - state.costUsed)
-    && !state.busy
-    && !state.ended;
-  if (canPlace) {
-    placeBtn.style.display = '';
-    placeBtn.onclick = () => {
-      closeCharDetail();
-      _enterPlaceMode(handIdx);
-    };
-  } else if (context === 'hand' && handIdx != null) {
-    // cost 不足時は disabled で表示
-    placeBtn.style.display = '';
-    placeBtn.textContent = '⚡ コスト不足';
-    placeBtn.disabled = true;
-    placeBtn.onclick = null;
-  } else {
-    placeBtn.style.display = 'none';
-  }
-  // disabled state リセット
-  if (canPlace) {
-    placeBtn.disabled = false;
-    placeBtn.textContent = '📍 配置先を選ぶ';
-  }
+  if (placeBtn) placeBtn.style.display = 'none';
   $('#char-detail-modal').hidden = false;
 }
 function closeCharDetail() { $('#char-detail-modal').hidden = true; }
@@ -980,6 +1051,122 @@ function reopenResult() {
   $('#result-peek-btn').hidden = true;
 }
 
+// ===== P-5: デッキ編集 UI =====
+let _deckBuilderState = { selected: [], filter: 'all' };
+
+function openDeckBuilder() {
+  // 現在のデッキを編集スタートに (なければデフォルトの 12 枚 id)
+  const current = loadDeck();
+  if (current && current.length > 0) {
+    _deckBuilderState.selected = [...current];
+  } else {
+    _deckBuilderState.selected = getCurrentDeck().map(c => c.id);
+  }
+  _deckBuilderState.filter = 'all';
+  $$('#deck-builder-tabs .cg-deck-tab').forEach(t => t.classList.toggle('active', t.dataset.tier === 'all'));
+  renderDeckBuilderGrid();
+  $('#deck-builder-modal').hidden = false;
+}
+
+function closeDeckBuilder() {
+  $('#deck-builder-modal').hidden = true;
+}
+
+function renderDeckBuilderGrid() {
+  const grid = $('#deck-builder-grid');
+  if (!grid) return;
+  const filter = _deckBuilderState.filter;
+  const cards = filter === 'all' ? state.allCards : state.allCards.filter(c => c.tier === filter);
+  // tier 順 sort (LR → R)
+  const order = { LR: 5, UR: 4, SSR: 3, SR: 2, R: 1 };
+  cards.sort((a, b) => order[b.tier] - order[a.tier]);
+  grid.innerHTML = cards.map(card => {
+    const isSelected = _deckBuilderState.selected.includes(card.id);
+    const imgUrl = card.img ? '..' + card.img : '';
+    const dupesBadge = card.dupes > 0 ? `<span class="cg-card-dupes">+${card.dupes}</span>` : '';
+    return `<div class="cg-deck-builder-item ${isSelected ? 'selected' : ''}" data-id="${card.id}">
+      <div class="cg-deck-item-tier ${card.tier}">${card.tier}${dupesBadge}</div>
+      <div class="cg-deck-item-img" style="background-image:url('${imgUrl}')"></div>
+      <div class="cg-deck-item-name">${card.name}</div>
+      <div class="cg-deck-item-stats">
+        <span class="cg-card-cost">⚡${card.cost}</span>
+        <span class="cg-card-power">⚔${card.basePower + (card.dupes||0)*(card.dupeBonus||0)}</span>
+      </div>
+      <div class="cg-deck-item-faction" style="background:${factionColor(card.faction)}">${card.faction}</div>
+      ${isSelected ? '<div class="cg-deck-item-check">✓</div>' : ''}
+    </div>`;
+  }).join('');
+  // クリックハンドラ
+  grid.querySelectorAll('.cg-deck-builder-item').forEach(el => {
+    el.addEventListener('click', () => toggleDeckCard(el.dataset.id));
+  });
+  $('#deck-builder-count').textContent = _deckBuilderState.selected.length;
+  $('#deck-builder-count').className = _deckBuilderState.selected.length === DECK_SIZE ? 'cg-deck-count-full' : '';
+}
+
+function toggleDeckCard(id) {
+  const idx = _deckBuilderState.selected.indexOf(id);
+  if (idx !== -1) {
+    _deckBuilderState.selected.splice(idx, 1);
+  } else {
+    if (_deckBuilderState.selected.length >= DECK_SIZE) {
+      // 上限超え: 警告表示
+      const counter = $('.cg-deck-builder-counter');
+      if (counter) {
+        counter.classList.add('flash-alert');
+        setTimeout(() => counter.classList.remove('flash-alert'), 600);
+      }
+      return;
+    }
+    _deckBuilderState.selected.push(id);
+  }
+  renderDeckBuilderGrid();
+}
+
+function clearBuilderDeck() {
+  _deckBuilderState.selected = [];
+  renderDeckBuilderGrid();
+}
+
+function setBuilderToAuto() {
+  _deckBuilderState.selected = generateAutoDeck();
+  renderDeckBuilderGrid();
+}
+
+function setBuilderToDefault() {
+  // cards.json の手書き 12 枚を id で取得
+  const defaultIds = ['lr_1_prisma','ur_1_seraph','ur_2_kaguya','ssr_1_linae','ssr_2_chanty','ssr_3_glaciel','sr_1_lumina','sr_2_tsuki','sr_3_coralia','r_1_chisato','r_2_kai','r_3_viola'];
+  _deckBuilderState.selected = defaultIds.filter(id => state.allCards.some(c => c.id === id));
+  renderDeckBuilderGrid();
+}
+
+function saveBuilderDeck() {
+  if (_deckBuilderState.selected.length !== DECK_SIZE) {
+    const counter = $('.cg-deck-builder-counter');
+    if (counter) {
+      counter.classList.add('flash-alert');
+      setTimeout(() => counter.classList.remove('flash-alert'), 600);
+    }
+    return;
+  }
+  saveDeck(_deckBuilderState.selected);
+  updateDeckBuilderSubText();
+  closeDeckBuilder();
+}
+
+function updateDeckBuilderSubText() {
+  const sub = $('#deck-builder-sub');
+  if (!sub) return;
+  const saved = loadDeck();
+  if (saved && saved.length === DECK_SIZE) {
+    sub.textContent = `12 枚 — カスタムデッキ使用中`;
+    sub.style.color = 'var(--gold)';
+  } else {
+    sub.textContent = `12 枚 — デフォルト使用中`;
+    sub.style.color = '';
+  }
+}
+
 // ===== モーダル =====
 function closeResult() { $('#result-modal').hidden = true; }
 function openHelp() { $('#help-modal').hidden = false; }
@@ -1085,10 +1272,32 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('#btn-mulligan').addEventListener('click', mulligan);
   $('#btn-cg-mute').addEventListener('click', toggleBgmMute);
   $('.cg-back').addEventListener('click', onBackClick);
+  // P-5: デッキ編集
+  const openDeckBtn = document.getElementById('btn-open-deck-builder');
+  if (openDeckBtn) openDeckBtn.addEventListener('click', openDeckBuilder);
+  const tabsEl = document.getElementById('deck-builder-tabs');
+  if (tabsEl) {
+    tabsEl.addEventListener('click', (e) => {
+      const t = e.target.closest('.cg-deck-tab');
+      if (!t) return;
+      _deckBuilderState.filter = t.dataset.tier;
+      $$('#deck-builder-tabs .cg-deck-tab').forEach(x => x.classList.toggle('active', x === t));
+      renderDeckBuilderGrid();
+    });
+  }
+  const clearBtn = document.getElementById('btn-deck-clear');
+  if (clearBtn) clearBtn.addEventListener('click', clearBuilderDeck);
+  const autoBtn = document.getElementById('btn-deck-auto');
+  if (autoBtn) autoBtn.addEventListener('click', setBuilderToAuto);
+  const defaultBtn = document.getElementById('btn-deck-default');
+  if (defaultBtn) defaultBtn.addEventListener('click', setBuilderToDefault);
+  const saveBtn = document.getElementById('btn-deck-save');
+  if (saveBtn) saveBtn.addEventListener('click', saveBuilderDeck);
+  updateDeckBuilderSubText();
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-      closeResult(); closeHelp(); closeTutorial(); closeCombosModal(); closeCharDetail();
+      closeResult(); closeHelp(); closeTutorial(); closeCombosModal(); closeCharDetail(); closeDeckBuilder();
     }
   });
 });
@@ -1105,5 +1314,6 @@ window.closeHelp = closeHelp;
 window.closeTutorial = closeTutorial;
 window.closeCombosModal = closeCombosModal;
 window.closeCharDetail = closeCharDetail;
+window.closeDeckBuilder = closeDeckBuilder;
 window.peekBoard = peekBoard;
 window.reopenResult = reopenResult;

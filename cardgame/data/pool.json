@@ -1,0 +1,1717 @@
+[
+  {
+    "id": "lr_001__",
+    "name": "虹意 プリズマ",
+    "tier": "LR",
+    "cost": 6,
+    "basePower": 12,
+    "faction": "原虹",
+    "role": "default",
+    "chapter": "s1c1",
+    "img": "/images/characters/season1/lr/prisma.png",
+    "dupes": 0,
+    "dupeBonus": 0,
+    "effectText": "自レーン +1",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 1
+    }
+  },
+  {
+    "id": "ur_002__",
+    "name": "セラフィエル",
+    "tier": "UR",
+    "cost": 5,
+    "basePower": 7,
+    "faction": "原虹",
+    "role": "attacker",
+    "chapter": "s1c1",
+    "img": "/images/characters/season1/ur/seraph_paladin.png",
+    "dupes": 1,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "ur_003__",
+    "name": "龍帝 アルテミス",
+    "tier": "UR",
+    "cost": 5,
+    "basePower": 7,
+    "faction": "十国の覇者",
+    "role": "attacker",
+    "chapter": "s1c1",
+    "img": "/images/characters/season1/ur/dragon_emperor.png",
+    "dupes": 1,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "ur_004__",
+    "name": "星海のノクス",
+    "tier": "UR",
+    "cost": 5,
+    "basePower": 7,
+    "faction": "原虹",
+    "role": "default",
+    "chapter": "s1c1",
+    "img": "/images/characters/season1/ur/cosmic_witch.png",
+    "dupes": 1,
+    "dupeBonus": 1,
+    "effectText": "自レーン +1",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 1
+    }
+  },
+  {
+    "id": "ur_005__",
+    "name": "千夜姫 カグヤ",
+    "tier": "UR",
+    "cost": 5,
+    "basePower": 7,
+    "faction": "原虹",
+    "role": "controller",
+    "chapter": "s1c1",
+    "img": "/images/characters/season1/ur/ancient_sage.png",
+    "dupes": 1,
+    "dupeBonus": 1,
+    "effectText": "相手の同レーン -2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "opp_self_lane",
+      "power": -2
+    }
+  },
+  {
+    "id": "ur_006__",
+    "name": "焔帝 ヒノオウ",
+    "tier": "UR",
+    "cost": 5,
+    "basePower": 7,
+    "faction": "十国の覇者",
+    "role": "attacker",
+    "chapter": "s1c1",
+    "img": "/images/characters/season1/ur/flame_empress.png",
+    "dupes": 1,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "ur_007__",
+    "name": "深海女王 ネプテア",
+    "tier": "UR",
+    "cost": 5,
+    "basePower": 7,
+    "faction": "アクアシス",
+    "role": "default",
+    "chapter": "s1c2",
+    "img": "/images/characters/season1/ur/sea_queen.png",
+    "dupes": 1,
+    "dupeBonus": 1,
+    "effectText": "自レーン +1",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 1
+    }
+  },
+  {
+    "id": "ur_008__",
+    "name": "波紋の聖女 イザベル",
+    "tier": "UR",
+    "cost": 5,
+    "basePower": 7,
+    "faction": "アクアシス",
+    "role": "default",
+    "chapter": "s1c2",
+    "img": "/images/characters/season1/ur/ripple_saint.png",
+    "dupes": 1,
+    "dupeBonus": 1,
+    "effectText": "自レーン +1",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 1
+    }
+  },
+  {
+    "id": "ur_009__",
+    "name": "砂海王女 サハナ",
+    "tier": "UR",
+    "cost": 5,
+    "basePower": 7,
+    "faction": "古龍砂漠サハール",
+    "role": "default",
+    "chapter": "s1c3",
+    "img": "/images/characters/season1/ur/desert_princess.png",
+    "dupes": 1,
+    "dupeBonus": 1,
+    "effectText": "自レーン +1",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 1
+    }
+  },
+  {
+    "id": "ur_010__",
+    "name": "古龍の語り部 ファラー",
+    "tier": "UR",
+    "cost": 5,
+    "basePower": 7,
+    "faction": "古龍砂漠サハール",
+    "role": "resource",
+    "chapter": "s1c3",
+    "img": "/images/characters/season1/ur/dragon_sage.png",
+    "dupes": 1,
+    "dupeBonus": 1,
+    "effectText": "バニラ (基礎パワー高め)",
+    "effect": {
+      "trigger": "none",
+      "target": "none",
+      "power": 0
+    }
+  },
+  {
+    "id": "ur_011__",
+    "name": "シ・ロエン",
+    "tier": "UR",
+    "cost": 5,
+    "basePower": 7,
+    "faction": "黒月衆ノクトス",
+    "role": "sabotage",
+    "chapter": "s1c5",
+    "img": "/images/characters/season1/ur/shadow_apostle.png",
+    "dupes": 1,
+    "dupeBonus": 1,
+    "effectText": "相手の同レーン -2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "opp_self_lane",
+      "power": -2
+    }
+  },
+  {
+    "id": "ur_012__",
+    "name": "黒月の盟主 ノクトリア",
+    "tier": "UR",
+    "cost": 5,
+    "basePower": 7,
+    "faction": "黒月衆ノクトス",
+    "role": "sabotage",
+    "chapter": "s1c5",
+    "img": "/images/characters/season1/ur/black_moon_lord.png",
+    "dupes": 1,
+    "dupeBonus": 1,
+    "effectText": "相手の同レーン -2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "opp_self_lane",
+      "power": -2
+    }
+  },
+  {
+    "id": "ur_013__",
+    "name": "地底市の母 リオラエル",
+    "tier": "UR",
+    "cost": 5,
+    "basePower": 7,
+    "faction": "地底市リオラ",
+    "role": "sabotage",
+    "chapter": "s1c5",
+    "img": "/images/characters/season1/ur/underworld_matriarch.png",
+    "dupes": 1,
+    "dupeBonus": 1,
+    "effectText": "相手の同レーン -2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "opp_self_lane",
+      "power": -2
+    }
+  },
+  {
+    "id": "ur_014__",
+    "name": "氷帝 グレイル",
+    "tier": "UR",
+    "cost": 5,
+    "basePower": 7,
+    "faction": "氷霊王国ニーヴル",
+    "role": "attacker",
+    "chapter": "s1c4",
+    "img": "/images/characters/season1/ur/ice_emperor.png",
+    "dupes": 1,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "ur_015__",
+    "name": "空挺女皇 ヴァーレ",
+    "tier": "UR",
+    "cost": 5,
+    "basePower": 7,
+    "faction": "空挺城ゼノニア",
+    "role": "attacker",
+    "chapter": "s1c4",
+    "img": "/images/characters/season1/ur/sky_empress.png",
+    "dupes": 1,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "ssr_016__",
+    "name": "森の射手 リナエ",
+    "tier": "SSR",
+    "cost": 4,
+    "basePower": 5,
+    "faction": "深緑樹海",
+    "role": "default",
+    "chapter": "s1c1",
+    "img": "/images/characters/season1/ssr/elf_archer.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +1",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 1
+    }
+  },
+  {
+    "id": "ssr_017__",
+    "name": "獣牙 ガルド",
+    "tier": "SSR",
+    "cost": 4,
+    "basePower": 5,
+    "faction": "月牙狼族",
+    "role": "attacker",
+    "chapter": "s1c1",
+    "img": "/images/characters/season1/ssr/wolf_warrior.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "ssr_018__",
+    "name": "竜爵 ヴィル",
+    "tier": "SSR",
+    "cost": 4,
+    "basePower": 5,
+    "faction": "紫竜王国",
+    "role": "attacker",
+    "chapter": "s1c1",
+    "img": "/images/characters/season1/ssr/draco_lancer.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "ssr_019__",
+    "name": "仮面騎士 シオン",
+    "tier": "SSR",
+    "cost": 4,
+    "basePower": 5,
+    "faction": "銀霜王国",
+    "role": "attacker",
+    "chapter": "s1c1",
+    "img": "/images/characters/season1/ssr/masked_knight.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "ssr_020__",
+    "name": "黒猫 ノア",
+    "tier": "SSR",
+    "cost": 4,
+    "basePower": 5,
+    "faction": "黒曜塔",
+    "role": "default",
+    "chapter": "s1c1",
+    "img": "/images/characters/season1/ssr/cat_librarian.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +1",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 1
+    }
+  },
+  {
+    "id": "ssr_021__",
+    "name": "朱音",
+    "tier": "SSR",
+    "cost": 4,
+    "basePower": 5,
+    "faction": "夜焔郷",
+    "role": "default",
+    "chapter": "s1c1",
+    "img": "/images/characters/season1/ssr/kitsune_lady.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +1",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 1
+    }
+  },
+  {
+    "id": "ssr_022__",
+    "name": "イザベル",
+    "tier": "SSR",
+    "cost": 4,
+    "basePower": 5,
+    "faction": "白焔教会",
+    "role": "attacker",
+    "chapter": "s1c1",
+    "img": "/images/characters/season1/ssr/paladin_lady.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "ssr_023__",
+    "name": "ひなた",
+    "tier": "SSR",
+    "cost": 4,
+    "basePower": 5,
+    "faction": "紅翼皇家",
+    "role": "attacker",
+    "chapter": "s1c1",
+    "img": "/images/characters/season1/ssr/little_sister.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "ssr_024__",
+    "name": "紅玉海賊団船長 シャンティ",
+    "tier": "SSR",
+    "cost": 4,
+    "basePower": 5,
+    "faction": "紅玉海賊団",
+    "role": "attacker",
+    "chapter": "s1c2",
+    "img": "/images/characters/season1/ssr/pirate_captain.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "ssr_025__",
+    "name": "白焔教会見習い巫女 ルーナ",
+    "tier": "SSR",
+    "cost": 4,
+    "basePower": 5,
+    "faction": "白焔教会",
+    "role": "controller",
+    "chapter": "s1c2",
+    "img": "/images/characters/season1/ssr/apprentice_priestess.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "相手の同レーン -2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "opp_self_lane",
+      "power": -2
+    }
+  },
+  {
+    "id": "ssr_026__",
+    "name": "アクアシス筆頭魔術師 グラシエル",
+    "tier": "SSR",
+    "cost": 4,
+    "basePower": 5,
+    "faction": "アクアシス",
+    "role": "controller",
+    "chapter": "s1c2",
+    "img": "/images/characters/season1/ssr/ice_mage.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "相手の同レーン -2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "opp_self_lane",
+      "power": -2
+    }
+  },
+  {
+    "id": "ssr_027__",
+    "name": "隊商長 アーシャ",
+    "tier": "SSR",
+    "cost": 4,
+    "basePower": 5,
+    "faction": "古龍砂漠サハール",
+    "role": "resource",
+    "chapter": "s1c3",
+    "img": "/images/characters/season1/ssr/caravan_leader.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "バニラ (基礎パワー高め)",
+    "effect": {
+      "trigger": "none",
+      "target": "none",
+      "power": 0
+    }
+  },
+  {
+    "id": "ssr_028__",
+    "name": "砂牙の剣聖 グラン",
+    "tier": "SSR",
+    "cost": 4,
+    "basePower": 5,
+    "faction": "古龍砂漠サハール",
+    "role": "attacker",
+    "chapter": "s1c3",
+    "img": "/images/characters/season1/ssr/desert_swordsaint.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "ssr_029__",
+    "name": "紫竜の侍従 リアム",
+    "tier": "SSR",
+    "cost": 4,
+    "basePower": 5,
+    "faction": "紫竜王国",
+    "role": "default",
+    "chapter": "s1c3",
+    "img": "/images/characters/season1/ssr/purple_dragon_servant.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +1",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 1
+    }
+  },
+  {
+    "id": "ssr_030__",
+    "name": "堕者剣聖 ガルヴィン",
+    "tier": "SSR",
+    "cost": 4,
+    "basePower": 5,
+    "faction": "黒月衆ノクトス",
+    "role": "attacker",
+    "chapter": "s1c5",
+    "img": "/images/characters/season1/ssr/fallen_paladin.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "ssr_031__",
+    "name": "影織りの導師 ルナリア",
+    "tier": "SSR",
+    "cost": 4,
+    "basePower": 5,
+    "faction": "地底市リオラ",
+    "role": "controller",
+    "chapter": "s1c5",
+    "img": "/images/characters/season1/ssr/shadow_weaver.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "相手の同レーン -2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "opp_self_lane",
+      "power": -2
+    }
+  },
+  {
+    "id": "ssr_032__",
+    "name": "銀霜剣聖 オリエル",
+    "tier": "SSR",
+    "cost": 4,
+    "basePower": 5,
+    "faction": "銀霜王国",
+    "role": "attacker",
+    "chapter": "s1c5",
+    "img": "/images/characters/season1/ssr/silver_swordmaster.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "ssr_033__",
+    "name": "銀霜王 ノヴァ",
+    "tier": "SSR",
+    "cost": 4,
+    "basePower": 5,
+    "faction": "銀霜王国",
+    "role": "default",
+    "chapter": "s1c5",
+    "img": "/images/characters/season1/ssr/silver_king.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +1",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 1
+    }
+  },
+  {
+    "id": "ssr_034__",
+    "name": "氷塔の聖騎士 リオネ",
+    "tier": "SSR",
+    "cost": 4,
+    "basePower": 5,
+    "faction": "氷霊王国ニーヴル",
+    "role": "attacker",
+    "chapter": "s1c4",
+    "img": "/images/characters/season1/ssr/ice_paladin.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "ssr_035__",
+    "name": "空挺城総監 ガリオン",
+    "tier": "SSR",
+    "cost": 4,
+    "basePower": 5,
+    "faction": "空挺城ゼノニア",
+    "role": "attacker",
+    "chapter": "s1c4",
+    "img": "/images/characters/season1/ssr/sky_general.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "ssr_036__",
+    "name": "氷霜の巫女 ユーリス",
+    "tier": "SSR",
+    "cost": 4,
+    "basePower": 5,
+    "faction": "氷霊王国ニーヴル",
+    "role": "controller",
+    "chapter": "s1c4",
+    "img": "/images/characters/season1/ssr/frost_oracle.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "相手の同レーン -2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "opp_self_lane",
+      "power": -2
+    }
+  },
+  {
+    "id": "ssr_037__",
+    "name": "摂政 ヴァルキ",
+    "tier": "SSR",
+    "cost": 4,
+    "basePower": 5,
+    "faction": "氷霊王国ニーヴル",
+    "role": "default",
+    "chapter": "s1c4",
+    "img": "/images/characters/season1/ssr/ice_regent.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +1",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 1
+    }
+  },
+  {
+    "id": "ssr_038__",
+    "name": "北方剣聖 ハグル",
+    "tier": "SSR",
+    "cost": 4,
+    "basePower": 5,
+    "faction": "氷霊王国ニーヴル",
+    "role": "attacker",
+    "chapter": "s1c4",
+    "img": "/images/characters/season1/ssr/north_swordmaster.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "ssr_039__",
+    "name": "空挺城首席学者 ゼピル",
+    "tier": "SSR",
+    "cost": 4,
+    "basePower": 5,
+    "faction": "空挺城ゼノニア",
+    "role": "attacker",
+    "chapter": "s1c4",
+    "img": "/images/characters/season1/ssr/sky_scholar.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "ssr_040__",
+    "name": "真鍮の女将 ハーニア",
+    "tier": "SSR",
+    "cost": 4,
+    "basePower": 5,
+    "faction": "空挺城ゼノニア",
+    "role": "attacker",
+    "chapter": "s1c4",
+    "img": "/images/characters/season1/ssr/brass_foreman.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "sr_041__",
+    "name": "ルミナ",
+    "tier": "SR",
+    "cost": 3,
+    "basePower": 4,
+    "faction": "銀霜王国",
+    "role": "controller",
+    "chapter": "s1c1",
+    "img": "/images/characters/season1/sr/silver_girl.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "相手の同レーン -2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "opp_self_lane",
+      "power": -2
+    }
+  },
+  {
+    "id": "sr_042__",
+    "name": "黒刃 玄",
+    "tier": "SR",
+    "cost": 3,
+    "basePower": 4,
+    "faction": "紅翼皇家",
+    "role": "attacker",
+    "chapter": "s1c1",
+    "img": "/images/characters/season1/sr/swordsman.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "sr_043__",
+    "name": "セラフィ",
+    "tier": "SR",
+    "cost": 3,
+    "basePower": 4,
+    "faction": "白焔教会",
+    "role": "controller",
+    "chapter": "s1c1",
+    "img": "/images/characters/season1/sr/mage.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "相手の同レーン -2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "opp_self_lane",
+      "power": -2
+    }
+  },
+  {
+    "id": "sr_044__",
+    "name": "紅翼 ツキ",
+    "tier": "SR",
+    "cost": 3,
+    "basePower": 4,
+    "faction": "紅翼皇家",
+    "role": "attacker",
+    "chapter": "s1c1",
+    "img": "/images/characters/season1/sr/red_twintail.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "sr_045__",
+    "name": "薫音",
+    "tier": "SR",
+    "cost": 3,
+    "basePower": 4,
+    "faction": "紅翼皇家",
+    "role": "attacker",
+    "chapter": "s1c1",
+    "img": "/images/characters/season1/sr/katana_miko.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "sr_046__",
+    "name": "リリム",
+    "tier": "SR",
+    "cost": 3,
+    "basePower": 4,
+    "faction": "紫竜王国",
+    "role": "attacker",
+    "chapter": "s1c1",
+    "img": "/images/characters/season1/sr/pink_dragon_girl.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "sr_047__",
+    "name": "メイリ",
+    "tier": "SR",
+    "cost": 3,
+    "basePower": 4,
+    "faction": "白焔教会",
+    "role": "controller",
+    "chapter": "s1c1",
+    "img": "/images/characters/season1/sr/white_priestess.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "相手の同レーン -2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "opp_self_lane",
+      "power": -2
+    }
+  },
+  {
+    "id": "sr_048__",
+    "name": "詠聖 ベル",
+    "tier": "SR",
+    "cost": 3,
+    "basePower": 4,
+    "faction": "白焔教会",
+    "role": "controller",
+    "chapter": "s1c1",
+    "img": "/images/characters/season1/sr/songstress.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "相手の同レーン -2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "opp_self_lane",
+      "power": -2
+    }
+  },
+  {
+    "id": "sr_049__",
+    "name": "影刃 シン",
+    "tier": "SR",
+    "cost": 3,
+    "basePower": 4,
+    "faction": "夜焔郷",
+    "role": "attacker",
+    "chapter": "s1c1",
+    "img": "/images/characters/season1/sr/shadow_ninja.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "sr_050__",
+    "name": "焔舞 ヒナカ",
+    "tier": "SR",
+    "cost": 3,
+    "basePower": 4,
+    "faction": "第七天",
+    "role": "controller",
+    "chapter": "s1c1",
+    "img": "/images/characters/season1/sr/flame_dancer.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "相手の同レーン -2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "opp_self_lane",
+      "power": -2
+    }
+  },
+  {
+    "id": "sr_051__",
+    "name": "海獣使い モルガ",
+    "tier": "SR",
+    "cost": 3,
+    "basePower": 4,
+    "faction": "紅玉海賊団",
+    "role": "attacker",
+    "chapter": "s1c2",
+    "img": "/images/characters/season1/sr/shark_tamer.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "sr_052__",
+    "name": "珊瑚鎧の海騎士 コラリア",
+    "tier": "SR",
+    "cost": 3,
+    "basePower": 4,
+    "faction": "アクアシス",
+    "role": "attacker",
+    "chapter": "s1c2",
+    "img": "/images/characters/season1/sr/coral_knight.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "sr_053__",
+    "name": "深海巫女 ティアラ",
+    "tier": "SR",
+    "cost": 3,
+    "basePower": 4,
+    "faction": "アクアシス",
+    "role": "controller",
+    "chapter": "s1c2",
+    "img": "/images/characters/season1/sr/abyss_oracle.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "相手の同レーン -2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "opp_self_lane",
+      "power": -2
+    }
+  },
+  {
+    "id": "sr_054__",
+    "name": "紅玉海賊団副長 ケイレブ",
+    "tier": "SR",
+    "cost": 3,
+    "basePower": 4,
+    "faction": "紅玉海賊団",
+    "role": "attacker",
+    "chapter": "s1c2",
+    "img": "/images/characters/season1/sr/pirate_firstmate.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "sr_055__",
+    "name": "白焔教会騎士 ラナス",
+    "tier": "SR",
+    "cost": 3,
+    "basePower": 4,
+    "faction": "白焔教会",
+    "role": "attacker",
+    "chapter": "s1c2",
+    "img": "/images/characters/season1/sr/holy_guardian.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "sr_056__",
+    "name": "祭舞のサフィラ",
+    "tier": "SR",
+    "cost": 3,
+    "basePower": 4,
+    "faction": "古龍砂漠サハール",
+    "role": "controller",
+    "chapter": "s1c3",
+    "img": "/images/characters/season1/sr/festival_dancer.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "相手の同レーン -2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "opp_self_lane",
+      "power": -2
+    }
+  },
+  {
+    "id": "sr_057__",
+    "name": "古龍鍛冶 オウル",
+    "tier": "SR",
+    "cost": 3,
+    "basePower": 4,
+    "faction": "古龍砂漠サハール",
+    "role": "attacker",
+    "chapter": "s1c3",
+    "img": "/images/characters/season1/sr/dragon_smith.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "sr_058__",
+    "name": "砂風の戦士 ライ",
+    "tier": "SR",
+    "cost": 3,
+    "basePower": 4,
+    "faction": "古龍砂漠サハール",
+    "role": "attacker",
+    "chapter": "s1c3",
+    "img": "/images/characters/season1/sr/young_desert_warrior.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "sr_059__",
+    "name": "黒月の刺客",
+    "tier": "SR",
+    "cost": 3,
+    "basePower": 4,
+    "faction": "黒月衆ノクトス",
+    "role": "attacker",
+    "chapter": "s1c5",
+    "img": "/images/characters/season1/sr/black_assassin.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "sr_060__",
+    "name": "月夜祭司 アスター",
+    "tier": "SR",
+    "cost": 3,
+    "basePower": 4,
+    "faction": "銀霜王国",
+    "role": "controller",
+    "chapter": "s1c5",
+    "img": "/images/characters/season1/sr/moon_priest.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "相手の同レーン -2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "opp_self_lane",
+      "power": -2
+    }
+  },
+  {
+    "id": "sr_061__",
+    "name": "地底市の語り部 オルフェ",
+    "tier": "SR",
+    "cost": 3,
+    "basePower": 4,
+    "faction": "地底市リオラ",
+    "role": "controller",
+    "chapter": "s1c5",
+    "img": "/images/characters/season1/sr/underworld_bard.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "相手の同レーン -2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "opp_self_lane",
+      "power": -2
+    }
+  },
+  {
+    "id": "sr_062__",
+    "name": "氷牙の戦士 イズン",
+    "tier": "SR",
+    "cost": 3,
+    "basePower": 4,
+    "faction": "氷霊王国ニーヴル",
+    "role": "attacker",
+    "chapter": "s1c4",
+    "img": "/images/characters/season1/sr/ice_warrior.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "sr_063__",
+    "name": "空挺整備士 ベル",
+    "tier": "SR",
+    "cost": 3,
+    "basePower": 4,
+    "faction": "空挺城ゼノニア",
+    "role": "support",
+    "chapter": "s1c4",
+    "img": "/images/characters/season1/sr/sky_engineer.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +1、 自身も+1",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 1,
+      "selfBonus": 1
+    }
+  },
+  {
+    "id": "sr_064__",
+    "name": "凍土の狩人 シエラ",
+    "tier": "SR",
+    "cost": 3,
+    "basePower": 4,
+    "faction": "氷霊王国ニーヴル",
+    "role": "attacker",
+    "chapter": "s1c4",
+    "img": "/images/characters/season1/sr/frost_hunter.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "sr_065__",
+    "name": "氷塔の見習い騎士 アスラ",
+    "tier": "SR",
+    "cost": 3,
+    "basePower": 4,
+    "faction": "氷霊王国ニーヴル",
+    "role": "attacker",
+    "chapter": "s1c4",
+    "img": "/images/characters/season1/sr/ice_apprentice.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "sr_066__",
+    "name": "凍土の祭司 イル",
+    "tier": "SR",
+    "cost": 3,
+    "basePower": 4,
+    "faction": "氷霊王国ニーヴル",
+    "role": "controller",
+    "chapter": "s1c4",
+    "img": "/images/characters/season1/sr/frost_priestess.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "相手の同レーン -2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "opp_self_lane",
+      "power": -2
+    }
+  },
+  {
+    "id": "sr_067__",
+    "name": "蒸気砲手 ヴィン",
+    "tier": "SR",
+    "cost": 3,
+    "basePower": 4,
+    "faction": "空挺城ゼノニア",
+    "role": "attacker",
+    "chapter": "s1c4",
+    "img": "/images/characters/season1/sr/steam_gunner.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "sr_068__",
+    "name": "空挺機関士 ジン",
+    "tier": "SR",
+    "cost": 3,
+    "basePower": 4,
+    "faction": "空挺城ゼノニア",
+    "role": "attacker",
+    "chapter": "s1c4",
+    "img": "/images/characters/season1/sr/sky_machinist.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "r_069__",
+    "name": "ちさと",
+    "tier": "R",
+    "cost": 1,
+    "basePower": 2,
+    "faction": "星霊学院",
+    "role": "default",
+    "chapter": "s1c1",
+    "img": "/images/characters/season1/r/student.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +1",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 1
+    }
+  },
+  {
+    "id": "r_070__",
+    "name": "カイ",
+    "tier": "R",
+    "cost": 1,
+    "basePower": 2,
+    "faction": "星霊学院",
+    "role": "default",
+    "chapter": "s1c1",
+    "img": "/images/characters/season1/r/boy_scout.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +1",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 1
+    }
+  },
+  {
+    "id": "r_071__",
+    "name": "こはね",
+    "tier": "R",
+    "cost": 1,
+    "basePower": 2,
+    "faction": "夜焔郷",
+    "role": "sabotage",
+    "chapter": "s1c1",
+    "img": "/images/characters/season1/r/fox_girl.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "相手の同レーン -2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "opp_self_lane",
+      "power": -2
+    }
+  },
+  {
+    "id": "r_072__",
+    "name": "ヴィオラ",
+    "tier": "R",
+    "cost": 1,
+    "basePower": 2,
+    "faction": "深緑樹海",
+    "role": "default",
+    "chapter": "s1c1",
+    "img": "/images/characters/season1/r/archer.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +1",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 1
+    }
+  },
+  {
+    "id": "r_073__",
+    "name": "アルス",
+    "tier": "R",
+    "cost": 1,
+    "basePower": 2,
+    "faction": "星霊学院",
+    "role": "controller",
+    "chapter": "s1c1",
+    "img": "/images/characters/season1/r/young_mage.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "相手の同レーン -2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "opp_self_lane",
+      "power": -2
+    }
+  },
+  {
+    "id": "r_074__",
+    "name": "ミレイア",
+    "tier": "R",
+    "cost": 1,
+    "basePower": 2,
+    "faction": "星霊学院",
+    "role": "default",
+    "chapter": "s1c1",
+    "img": "/images/characters/season1/r/warrior.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +1",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 1
+    }
+  },
+  {
+    "id": "r_075__",
+    "name": "深海の少女 パール",
+    "tier": "R",
+    "cost": 1,
+    "basePower": 2,
+    "faction": "アクアシス",
+    "role": "default",
+    "chapter": "s1c2",
+    "img": "/images/characters/season1/r/deepsea_girl.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +1",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 1
+    }
+  },
+  {
+    "id": "r_076__",
+    "name": "海賊見習い ミカ",
+    "tier": "R",
+    "cost": 1,
+    "basePower": 2,
+    "faction": "紅玉海賊団",
+    "role": "default",
+    "chapter": "s1c2",
+    "img": "/images/characters/season1/r/pirate_cabin_girl.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +1",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 1
+    }
+  },
+  {
+    "id": "r_077__",
+    "name": "珊瑚漁師 エラン",
+    "tier": "R",
+    "cost": 1,
+    "basePower": 2,
+    "faction": "紅玉海賊団",
+    "role": "default",
+    "chapter": "s1c2",
+    "img": "/images/characters/season1/r/coral_fisherman.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +1",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 1
+    }
+  },
+  {
+    "id": "r_078__",
+    "name": "海賊団船医 クレオ",
+    "tier": "R",
+    "cost": 1,
+    "basePower": 2,
+    "faction": "紅玉海賊団",
+    "role": "support",
+    "chapter": "s1c2",
+    "img": "/images/characters/season1/r/ship_doctor.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +1、 自身も+1",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 1,
+      "selfBonus": 1
+    }
+  },
+  {
+    "id": "r_079__",
+    "name": "白焔教会従士 リッカ",
+    "tier": "R",
+    "cost": 1,
+    "basePower": 2,
+    "faction": "白焔教会",
+    "role": "default",
+    "chapter": "s1c2",
+    "img": "/images/characters/season1/r/church_attendant.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +1",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 1
+    }
+  },
+  {
+    "id": "r_080__",
+    "name": "砂塵の子 ティナ",
+    "tier": "R",
+    "cost": 1,
+    "basePower": 2,
+    "faction": "古龍砂漠サハール",
+    "role": "default",
+    "chapter": "s1c3",
+    "img": "/images/characters/season1/r/desert_child.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +1",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 1
+    }
+  },
+  {
+    "id": "r_081__",
+    "name": "砂風の語り部 ナドラ",
+    "tier": "R",
+    "cost": 1,
+    "basePower": 2,
+    "faction": "古龍砂漠サハール",
+    "role": "resource",
+    "chapter": "s1c3",
+    "img": "/images/characters/season1/r/young_storyteller.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "バニラ (基礎パワー高め)",
+    "effect": {
+      "trigger": "none",
+      "target": "none",
+      "power": 0
+    }
+  },
+  {
+    "id": "r_082__",
+    "name": "銀霜近衛 セレン",
+    "tier": "R",
+    "cost": 1,
+    "basePower": 2,
+    "faction": "銀霜王国",
+    "role": "attacker",
+    "chapter": "s1c5",
+    "img": "/images/characters/season1/r/silver_squire.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 2
+    }
+  },
+  {
+    "id": "r_083__",
+    "name": "雪月神殿見習い ラピス",
+    "tier": "R",
+    "cost": 1,
+    "basePower": 2,
+    "faction": "銀霜王国",
+    "role": "default",
+    "chapter": "s1c5",
+    "img": "/images/characters/season1/r/moon_acolyte.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +1",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 1
+    }
+  },
+  {
+    "id": "r_084__",
+    "name": "地底市の少女 シエル",
+    "tier": "R",
+    "cost": 1,
+    "basePower": 2,
+    "faction": "地底市リオラ",
+    "role": "sabotage",
+    "chapter": "s1c5",
+    "img": "/images/characters/season1/r/underworld_girl.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "相手の同レーン -2",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "opp_self_lane",
+      "power": -2
+    }
+  },
+  {
+    "id": "r_085__",
+    "name": "銀霜の工房娘",
+    "tier": "R",
+    "cost": 1,
+    "basePower": 2,
+    "faction": "銀霜王国",
+    "role": "support",
+    "chapter": "s1c5",
+    "img": "/images/characters/season1/r/silver_villager_a.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +1、 自身も+1",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 1,
+      "selfBonus": 1
+    }
+  },
+  {
+    "id": "r_086__",
+    "name": "銀霜の歌姫",
+    "tier": "R",
+    "cost": 1,
+    "basePower": 2,
+    "faction": "銀霜王国",
+    "role": "default",
+    "chapter": "s1c5",
+    "img": "/images/characters/season1/r/silver_villager_b.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +1",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 1
+    }
+  },
+  {
+    "id": "r_087__",
+    "name": "凍土の少年 アルク",
+    "tier": "R",
+    "cost": 1,
+    "basePower": 2,
+    "faction": "氷霊王国ニーヴル",
+    "role": "default",
+    "chapter": "s1c4",
+    "img": "/images/characters/season1/r/snow_boy.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +1",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 1
+    }
+  },
+  {
+    "id": "r_088__",
+    "name": "雪原の少女 ミウ",
+    "tier": "R",
+    "cost": 1,
+    "basePower": 2,
+    "faction": "氷霊王国ニーヴル",
+    "role": "default",
+    "chapter": "s1c4",
+    "img": "/images/characters/season1/r/snow_girl.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +1",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 1
+    }
+  },
+  {
+    "id": "r_089__",
+    "name": "空の少女 ピピ",
+    "tier": "R",
+    "cost": 1,
+    "basePower": 2,
+    "faction": "空挺城ゼノニア",
+    "role": "support",
+    "chapter": "s1c4",
+    "img": "/images/characters/season1/r/sky_girl.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +1、 自身も+1",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 1,
+      "selfBonus": 1
+    }
+  },
+  {
+    "id": "r_090__",
+    "name": "空の少年 ピット",
+    "tier": "R",
+    "cost": 1,
+    "basePower": 2,
+    "faction": "空挺城ゼノニア",
+    "role": "support",
+    "chapter": "s1c4",
+    "img": "/images/characters/season1/r/sky_boy.png",
+    "dupes": 2,
+    "dupeBonus": 1,
+    "effectText": "自レーン +1、 自身も+1",
+    "effect": {
+      "trigger": "onPlay",
+      "target": "self_lane",
+      "power": 1,
+      "selfBonus": 1
+    }
+  }
+]

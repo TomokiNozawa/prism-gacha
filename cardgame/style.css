@@ -201,6 +201,182 @@ body {
 .cg-bo3-text { font-weight: 700; color: var(--gold); font-size: 14px; letter-spacing: 0.03em; }
 .cg-bo3-sub { font-size: 11px; color: var(--text-dim); line-height: 1.4; }
 
+/* ===== P-5: デッキ編集ボタン (ホーム) ===== */
+.cg-deck-row { max-width: 480px; margin: 0 auto 14px; padding: 0 16px; }
+.cg-deck-btn {
+  width: 100%;
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, rgba(95,223,255,0.10), rgba(124,93,255,0.10));
+  border: 1px solid rgba(95,223,255,0.35);
+  border-radius: 12px;
+  color: var(--text);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: background .15s, border-color .15s, box-shadow .15s;
+}
+.cg-deck-btn:hover {
+  background: linear-gradient(135deg, rgba(95,223,255,0.18), rgba(124,93,255,0.18));
+  border-color: var(--aurora-2);
+  box-shadow: 0 0 14px rgba(95,223,255,0.2);
+}
+.cg-deck-icon { font-size: 24px; }
+.cg-deck-text { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.cg-deck-title { font-weight: 700; color: var(--text); font-size: 14px; }
+.cg-deck-sub { font-size: 11px; color: var(--text-dim); }
+.cg-deck-arrow { font-size: 18px; color: var(--text-dim); }
+.cg-deck-btn:hover .cg-deck-arrow { color: var(--text); }
+
+/* ===== P-5: デッキ編集モーダル ===== */
+.cg-deck-builder-card {
+  max-width: 720px;
+  width: calc(100vw - 24px);
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  padding: 20px 16px 16px;
+}
+.cg-deck-builder-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 8px;
+}
+.cg-deck-builder-counter {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-dim);
+}
+.cg-deck-builder-counter #deck-builder-count.cg-deck-count-full {
+  color: var(--gold);
+}
+.cg-deck-builder-counter.flash-alert {
+  animation: deckFlashAlert 0.6s ease-in-out;
+}
+@keyframes deckFlashAlert {
+  0%, 100% { color: var(--text-dim); transform: scale(1); }
+  50% { color: #ff6b6b; transform: scale(1.15); }
+}
+.cg-deck-builder-actions {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.cg-deck-builder-actions .cg-btn { flex: 1; min-width: 90px; padding: 8px 10px; font-size: 11px; }
+.cg-deck-builder-tabs {
+  display: flex; gap: 4px; overflow-x: auto;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+}
+.cg-deck-tab {
+  padding: 5px 12px;
+  background: rgba(35, 40, 82, 0.6);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-dim);
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .12s;
+}
+.cg-deck-tab:hover { background: rgba(124, 93, 255, 0.25); }
+.cg-deck-tab.active {
+  background: rgba(124, 93, 255, 0.55);
+  color: #fff;
+  border-color: var(--aurora-1);
+  font-weight: 700;
+}
+.cg-deck-builder-grid {
+  flex: 1;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 6px;
+  padding: 4px 4px 8px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+.cg-deck-builder-item {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform .12s, border-color .12s, box-shadow .12s;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  font-size: 9px;
+}
+.cg-deck-builder-item:hover { transform: translateY(-2px); border-color: var(--border-hi); }
+.cg-deck-builder-item.selected {
+  border-color: var(--aurora-2);
+  box-shadow: 0 0 12px rgba(95,223,255,0.5), 0 0 0 2px var(--aurora-2);
+}
+.cg-deck-item-tier {
+  height: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.5);
+}
+.cg-deck-item-tier.LR  { background: var(--tier-lr); }
+.cg-deck-item-tier.UR  { background: var(--tier-ur); }
+.cg-deck-item-tier.SSR { background: var(--tier-ssr); }
+.cg-deck-item-tier.SR  { background: var(--tier-sr); }
+.cg-deck-item-tier.R   { background: var(--tier-r); }
+.cg-deck-item-img {
+  height: 100px;
+  background-size: cover;
+  background-position: center top;
+  background-color: var(--bg-card-hi);
+  background-repeat: no-repeat;
+}
+.cg-deck-item-name {
+  font-size: 9px;
+  font-weight: 600;
+  padding: 3px 4px 2px;
+  text-align: center;
+  line-height: 1.2;
+  color: var(--text);
+  word-break: keep-all;
+}
+.cg-deck-item-stats {
+  display: flex; justify-content: space-between;
+  padding: 2px 4px;
+  font-size: 10px;
+  background: rgba(0,0,0,0.4);
+  font-weight: 700;
+}
+.cg-deck-item-faction {
+  font-size: 8px;
+  font-weight: 700;
+  color: #1a1d3a;
+  padding: 2px 4px;
+  text-align: center;
+  text-shadow: 0 1px 1px rgba(255,255,255,0.4);
+}
+.cg-deck-item-check {
+  position: absolute;
+  top: 2px; right: 2px;
+  width: 18px; height: 18px;
+  background: var(--aurora-2);
+  color: #1a1d3a;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900;
+  font-size: 12px;
+  z-index: 2;
+  box-shadow: 0 0 6px rgba(95,223,255,0.8);
+}
+
+@media (max-width: 480px) {
+  .cg-deck-builder-grid { grid-template-columns: repeat(auto-fill, minmax(82px, 1fr)); gap: 4px; }
+  .cg-deck-item-img { height: 80px; }
+  .cg-deck-builder-card { padding: 14px 10px 10px; }
+  .cg-deck-builder-actions .cg-btn { font-size: 10px; padding: 6px 8px; min-width: 70px; }
+}
+
 /* ===== BO3モード / 単発 series 表示 ===== */
 .cg-series-info {
   display: flex;
@@ -529,6 +705,37 @@ body {
   vertical-align: middle;
   text-shadow: none;
 }
+
+/* ℹ 詳細ボタン (card 左上隅、 small 半透明、 hover で目立つ) */
+.cg-card-info-btn {
+  position: absolute;
+  top: 16px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  background: rgba(0, 0, 0, 0.62);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: 'Times New Roman', serif;
+  font-style: italic;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 4;
+  padding: 0;
+  line-height: 1;
+  transition: background .15s, transform .15s, border-color .15s;
+}
+.cg-card-info-btn:hover {
+  background: rgba(124, 93, 255, 0.95);
+  border-color: var(--aurora-2);
+  transform: scale(1.18);
+}
+.cg-card-info-btn:active { transform: scale(0.95); }
 
 /* 派閥チップ (右上 absolute、 派閥カラー背景) */
 .cg-card-faction {
