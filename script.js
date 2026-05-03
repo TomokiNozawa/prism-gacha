@@ -3749,13 +3749,17 @@ function renderRelationsList(container) {
     if (!byFaction[f]) byFaction[f] = [];
     byFaction[f].push({ name, char: c });
   }
-  // 各キャラの relations を集約
+  // 各キャラの relations を集約 (未公開章のキャラは相手側にも出さない)
   function relsOf(charName) {
     const out = [];
     RELATIONS.forEach(r => {
       if (r.a === charName) {
+        const oc = getCharByName(r.b);
+        if (!_isCharReleased(oc)) return;
         out.push({ other: r.b, type: r.type, role: r.aRole || r.label || '', isMyEnd: 'a' });
       } else if (r.b === charName) {
+        const oc = getCharByName(r.a);
+        if (!_isCharReleased(oc)) return;
         out.push({ other: r.a, type: r.type, role: r.bRole || r.label || '', isMyEnd: 'b' });
       }
     });
@@ -3767,7 +3771,7 @@ function renderRelationsList(container) {
   };
   let html = '';
   FACTIONS.forEach(f => {
-    const list = byFaction[f.id] || [];
+    const list = (byFaction[f.id] || []).filter(({ char }) => _isCharReleased(char));  // 未公開章キャラ非表示
     if (list.length === 0) return;
     html += `<section class="rel-faction" style="--fac-color:${f.color}">`;
     html += `<h3 class="rel-faction-head">${f.label} <span class="rel-faction-yomi">${f.yomi}</span> <span class="rel-faction-count">${list.length}名</span></h3>`;
@@ -3885,8 +3889,22 @@ function _factionDimOpacity(facId) {
   return _relationsFocusFaction === facId ? 1.0 : 0.18;
 }
 
+// 未公開章のキャラ/派閥は相関図に出さない (野沢さん指示 2026-05-03 「公開日時に合わせて表示」)
+// RELATIONS の登録自体は維持、 描画レイヤだけ抑制
+function _isCharReleased(c) {
+  return !!c && (!c.chapter || _isChapterReleased(c.chapter));
+}
+function _factionHasReleasedMember(facId) {
+  for (const [name, meta] of Object.entries(CHAR_FACTION)) {
+    if (meta.f !== facId) continue;
+    const c = getCharByName(name);
+    if (c && _isCharReleased(c)) return true;
+  }
+  return false;
+}
+
 function renderFactionBg() {
-  return FACTIONS.map(f => {
+  return FACTIONS.filter(f => _factionHasReleasedMember(f.id)).map(f => {
     // 派閥領域を半透明の背景円で示す (新スケールに合わせ半径175)
     const r = 175;
     const op = _factionDimOpacity(f.id);
@@ -3895,7 +3913,7 @@ function renderFactionBg() {
 }
 
 function renderFactionLabels() {
-  return FACTIONS.map(f => {
+  return FACTIONS.filter(f => _factionHasReleasedMember(f.id)).map(f => {
     const op = _factionDimOpacity(f.id);
     const yomiTxt = f.yomi
       ? `<text x="${f.x}" y="${f.y - 137}" text-anchor="middle" fill="${f.color}" font-size="11" letter-spacing="2" opacity="${0.7 * op}" style="text-shadow: 0 0 6px rgba(0,0,0,0.8)">${f.yomi}</text>`
@@ -3930,6 +3948,9 @@ function renderRelationLines() {
       const pa = getCharPos(r.a);
       const pb = getCharPos(r.b);
       if (!pa || !pb) return;
+      // 未公開章キャラを含む線は描かない (野沢さん指示 2026-05-03)
+      const ca = getCharByName(r.a), cb = getCharByName(r.b);
+      if (!_isCharReleased(ca) || !_isCharReleased(cb)) return;
       const style = REL_STYLE[r.type] || REL_STYLE.fellow;
       const dash = style.dash !== 'none' ? `stroke-dasharray="${style.dash}"` : '';
 
@@ -4012,6 +4033,7 @@ function renderCharNodes() {
     if (name.endsWith('_acad')) continue; // ダミーキー除外
     const c = getCharByName(name);
     if (!c) continue;
+    if (!_isCharReleased(c)) continue;  // 未公開章キャラは表示しない (野沢さん指示 2026-05-03)
     const pos = getCharPos(name);
     if (!pos) continue;
     const unlocked = isUnlocked(c);
@@ -6163,7 +6185,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260503h';
+const IMG_CACHE_VERSION = '20260503i';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる

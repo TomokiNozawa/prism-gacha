@@ -3668,7 +3668,8 @@ body.has-offline-banner .topbar { margin-top: 30px; }
 }
 .relations-canvas:active { cursor: grabbing; }
 .relations-canvas svg {
-  width: 2000px; height: 1600px;
+  /* 2026-05-03 野沢さん指示: 「相関図エリアが狭いと分かりづらい、 領域全体を広げて」 → 1.5倍表示 (viewBox は維持、 描画サイズだけ拡大 = 視認性UP) */
+  width: 3000px; height: 2400px;
   flex-shrink: 0;
   pointer-events: auto;
 }
