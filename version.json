@@ -1,8 +1,22 @@
 {
-  "version": "1.4.0",
-  "releasedAt": "2026-05-02",
+  "version": "1.4.1",
+  "releasedAt": "2026-05-03",
   "pendingChangelog": [],
   "changelog": [
+    {
+      "version": "1.4.1",
+      "date": "2026-05-03",
+      "type": "patch",
+      "notes": [
+        "WM 整合性大修正 (s1c3〜s1c7 派閥未登録 7件 全件追加 + dragon 座標修正 + s1c4 主要キャラ 16+ の CHAR_FACTION 全網羅)",
+        "ID-based キャラリンク導入 ({{char:slug}}名{{/char}} で同名重複事故対策、 ベル誤紐付け解消)",
+        "Tier 整合性 title 改訂 43件 (各キャラの格を明示、 機械チェック合格)",
+        "ice/snow/frost ファイル名統一 (アルク frost_boy→snow_boy、 frozen_tundra→frost_tundra、 prefix付き残骸 18件削除)",
+        "s1c4 文章修正 (3-1 ヴァーレ台詞矛盾 / 2-1 挿絵移動 + 出会い挿絵新規 / 3-2 時系列+凍り影喰い挿絵 / 3-3 二人の沈黙テンポ改善 / 4-2 別れの朝改善 / エピローグメタ発言修正)",
+        "年齢明示の過剰アピール削減 (脇役を質的表現に置換)",
+        "機械チェック新ルール 5つ (7-18 同名 ID-based / 7-19 次章WM / 7-20 年齢過剰 / 7-21 CHAR_FACTION全登録 / 7-22 outline派閥 FACTIONS登録)"
+      ]
+    },
     {
       "version": "1.4.0",
       "date": "2026-05-02",

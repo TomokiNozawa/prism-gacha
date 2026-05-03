@@ -1175,10 +1175,8 @@ print()
 # Warning 表示 (exit 0 維持)
 if warnings:
     print(f"⚠️  警告 {len(warnings)}件 (commit は通る、 内容を確認)\n")
-    for w in warnings[:20]:  # 最大20件まで表示
+    for w in warnings:
         print(f"  - {w}")
-    if len(warnings) > 20:
-        print(f"  ... 他 {len(warnings) - 20}件")
     print()
 
 # Blocker 違反 → commit abort

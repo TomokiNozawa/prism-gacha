@@ -47,7 +47,7 @@ S1C4「凍土と空」 (POV: アルテミス、 龍国 龍帝) の場所画像 (
 | # | filename | 比率 | 役割 | 対応シーン | キャラ |
 |---|---|---|---|---|---|
 | 1 | imperial_jade_palace.png | 3:4 | 背景 | プロローグ / 1-1 龍国玉座 | (純風景) |
-| 2 | frozen_tundra_journey.png | 3:4 | 背景 | 1-3 雪原を行く | (純風景、 遠景人影のみ) |
+| 2 | frost_tundra_journey.png | 3:4 | 背景 | 1-3 雪原を行く | (純風景、 遠景人影のみ) |
 | 3 | niiruru_ice_palace.png | 3:4 | 背景 | 2-1 氷宮殿謁見の間 | (純風景) |
 | 4 | zenonia_floating_fortress.png | 3:4 | 背景 | 3-1 空挺城外観 | (純風景) |
 | 5 | snow_field_silence.png | 3:4 | 背景 | 3-3 山場 (雪原で空を見上げる) | アルテミス+グレイル (添付2枚) |
@@ -84,7 +84,7 @@ original character setting, no logos, no text, no watermark
 
 ---
 
-# 【2】frozen_tundra_journey.png — 凍土への旅路 (背景、 3:4、 純風景・遠景人影のみ)
+# 【2】frost_tundra_journey.png — 凍土への旅路 (背景、 3:4、 純風景・遠景人影のみ)
 
 - **対応シーン**: 1-3 雪原を行く (アルテミス + 護衛団が龍国から凍土への遠征)
 - **本文行**: `STORY/s1c4.md` (執筆後に追記)
@@ -303,7 +303,7 @@ anime fantasy game illustration of a busy steampunk workshop interior in Zenonia
 # 【13】jade_throne.png — 1-1 翡翠の玉座 (挿絵、 16:9、 アルテミス + 双大剣)
 
 > **添付リファ画像 (1枚必須)**:
-> - `images/characters/season1/lr/dragon_emperor.png` (アルテミス — 既存 LR キャラ画像)
+> - `images/characters/season1/ur/dragon_emperor.png` (アルテミス — 既存 UR キャラ画像)
 
 - **対応シーン**: 1-1 龍国 翡翠の玉座 (朝の謁見、 ニーヴルからの新帝即位の親書を受け取るシーン)
 - **本文行**: `STORY/s1c4.md` l.39〜「翡翠の柱が立ち並ぶ玉座の間」 / l.18〜「玉座の脇に、 双大剣『陰陽』 が静かに立てかけられていた」
@@ -324,7 +324,7 @@ CRITICAL ANATOMY REQUIREMENTS: anatomically correct human hands with exactly fiv
 # 【14】snowfield_villagers.png — 1-3 雪原村のアルク&ミウ (挿絵、 16:9、 R2人 + アルテミス遠景)
 
 > **添付リファ画像 (3枚必須)**:
-> - `images/characters/season1/lr/dragon_emperor.png` (アルテミス LR — 馬上、 遠景)
+> - `images/characters/season1/ur/dragon_emperor.png` (アルテミス LR — 馬上、 遠景)
 > - `images/characters/season1/r/snow_boy.png` (アルク R — 雪原少年、 生成後)
 > - `images/characters/season1/r/snow_girl.png` (ミウ R — 雪原少女、 生成後)
 
@@ -361,21 +361,21 @@ CRITICAL ANATOMY REQUIREMENTS: anatomically correct human hands with exactly fiv
 # 【15】artemis_greyle_first_meeting.png — 2-1 アルテミス+グレイル 出会いの手の組み合わせ (挿絵、 16:9、 キャラ含む)
 
 > **添付リファ画像 (2枚必須)**:
-> - `images/characters/season1/lr/dragon_emperor.png` (アルテミス)
+> - `images/characters/season1/ur/dragon_emperor.png` (アルテミス)
 > - `images/characters/season1/ur/ice_emperor.png` (グレイル — 生成後)
 
 - **対応シーン**: 2-1 氷宮殿の謁見、 アルテミスとグレイルの初対面、 「胸前で手を組み合わせた」 覇者同士の挨拶シーン
 - **本文行**: `STORY/s1c4.md` 2-1 marker = 「互いの胸前で手を組み合わせた」 (l.222 付近)
 - **役割**: 本文インライン挿絵、 章テーマ「強者の頂は孤独を共に分かち合う」 を冒頭で視覚化、 二人の出会いを物語の核として印象付け
-- **被写体**: アルテミス (右、 黒翡翠の旅装、 双大剣『陰陽』 を腰に) と グレイル (左、 銀青の即位衣、 双氷剣ニフル+ヘイルを腰に) が、 氷宮殿の謁見の間中央で互いの右手を胸前で組み合わせる瞬間。 二人の手が画面中央焦点。 リオネが背後シルエットで控えめに見守る。
+- **被写体**: アルテミス (右、 黒翡翠の旅装、 双大剣『陰陽』 を腰に) と グレイル (左、 銀青の即位衣、 双氷剣ニフル+ヘイルを腰に) が、 氷宮殿の謁見の間中央で **互いの右手で相手の前腕 (肘下) を握り合う「ローマ式握手・戦士の挨拶」** の瞬間。 二人の前腕タッチ点が画面中央焦点。 リオネが背後シルエットで控えめに見守る。
 - **ストーリー使用**: ✅ s1c4 2-1 挿絵 (出会い)
 - **コード参照**: `STORY_LOCATION_INLINE_CONFIG['s1c4']` (2-1 marker '互いの胸前で手を組み合わせた', position 'after')
 
 ```
-anime fantasy game illustration of a historic first encounter between two emperors in the great audience hall of Niiruru Ice Palace under pale-blue moonlight from tall arched windows, on the right Emperor Artemis (dragon-emperor, matching the reference image — black-and-jade imperial robes with violet dragon embroidery, twin great-sword Yin-Yang sheathed at his side, ancient yet youthful dignity) standing tall facing left, on the left Emperor Glayl (ice-emperor, matching the reference image — silver-blue royal robes with intricate frost embroidery, twin ice-swords Nifl and Heil sheathed at his sides, calm authority of a newly-crowned ice emperor) standing facing right, BOTH EMPERORS pressing their right hands together palm-to-palm in front of their chests in the ancient ceremonial gesture of equals greeting equals — neither bowing, neither dominating, the two hands meeting at the exact center of the composition as the visual focus, both rulers locking eyes with mutual measured respect, slight pale-blue mist of breath rising in the cold ice palace air visible between them, the great translucent ice columns of Niiruru audience hall lining both sides like a forest of frozen pillars, blue ice-spirit lanterns floating slowly in the background casting cool shifting light, the floor of polished ice reflecting the seven prismatic streams of the genso flowing through the high vaulted ceiling, behind Glayl on his far left side a female knight Lione watches in respectful silence (small in middle distance, only a soft outline silhouette of a silver-haired knight), behind Artemis on his far right side his guard captain stands at attention (small in middle distance, only a soft silhouette), atmosphere of two solitary peaks meeting for the first time and recognizing each other through a single touch of hands, dramatic rim lighting with twin-tone golden-violet (Artemis side) and silver-blue (Glayl side) glow meeting at the center where their hands touch creating a soft prismatic halo, cinematic composition emphasizing the connecting hands at the focal point, anime fantasy game illustration painting style, high detail, Aspect ratio 16:9, horizontal orientation 1672x941,
-CRITICAL ANATOMY REQUIREMENTS: anatomically correct human hands with exactly five distinct well-formed fingers per hand, both emperors' right hands pressed palm-to-palm at chest height with all ten fingers visible properly aligned (Artemis's right palm meeting Glayl's right palm), both emperors' left hands resting at their sides on their sword hilts with all five fingers visible per hand, both arms of both characters in natural ceremonial poses with proper joint angles, no extra digits, no fused fingers, original character setting, no logos, no text, no watermark.
+anime fantasy game illustration of a historic first encounter between two emperors in the great audience hall of Niiruru Ice Palace under pale-blue moonlight from tall arched windows, on the right Emperor Artemis (dragon-emperor, matching the reference image — black-and-jade imperial robes with violet dragon embroidery, twin great-sword Yin-Yang sheathed at his side, ancient yet youthful dignity) standing tall facing left, on the left Emperor Glayl (ice-emperor, matching the reference image — silver-blue royal robes with intricate frost embroidery, twin ice-swords Nifl and Heil sheathed at his sides, calm authority of a newly-crowned ice emperor) standing facing right, BOTH EMPERORS performing the ancient warrior's clasp greeting at chest height — each emperor's right hand firmly gripping the other's right forearm just below the elbow (Roman-style forearm clasp / warrior's handshake, NOT a palm-to-palm prayer gesture), their forearms locked together in a powerful horizontal grip at the exact center of the composition as the visual focus, both rulers leaning slightly toward each other with their gripping arms meeting in mutual recognition, both emperors locking eyes with mutual measured respect, slight pale-blue mist of breath rising in the cold ice palace air visible between them, the great translucent ice columns of Niiruru audience hall lining both sides like a forest of frozen pillars, blue ice-spirit lanterns floating slowly in the background casting cool shifting light, the floor of polished ice reflecting the seven prismatic streams of the genso flowing through the high vaulted ceiling, behind Glayl on his far left side a female knight Lione watches in respectful silence (small in middle distance, only a soft outline silhouette of a silver-haired knight), behind Artemis on his far right side his guard captain stands at attention (small in middle distance, only a soft silhouette), atmosphere of two solitary peaks meeting for the first time as equals through the warrior's forearm clasp, dramatic rim lighting with twin-tone golden-violet (Artemis side) and silver-blue (Glayl side) glow meeting at the center where their forearms grip creating a soft prismatic halo, cinematic composition emphasizing the connecting forearms at the focal point, anime fantasy game illustration painting style, high detail, Aspect ratio 16:9, horizontal orientation 1672x941,
+CRITICAL ANATOMY REQUIREMENTS: anatomically correct human hands with exactly five distinct well-formed fingers per hand, both emperors gripping each other's right forearm just below the elbow with all five fingers wrapped around the other's forearm (warrior's clasp / Roman handshake — the forearms are gripped horizontally, NOT palms pressed together vertically), both emperors' left hands resting at their sides on their sword hilts with all five fingers visible per hand, both arms of both characters in natural ceremonial poses with proper joint angles, no extra digits, no fused fingers, original character setting, no logos, no text, no watermark.
 
-元画像から表情や姿勢は変わってOKです (二人の右手が触れ合う中央焦点の対峙構図に最適化)
+元画像から表情や姿勢は変わってOKです (二人の右手が互いの前腕を握り合う「ローマ式握手・戦士の挨拶」 構図に最適化、 合掌ではなく前腕タッチ)
 ```
 
 ## 生成順序 (推奨)
@@ -389,7 +389,7 @@ CRITICAL ANATOMY REQUIREMENTS: anatomically correct human hands with exactly fiv
 # 【16】ice_shadeova_battle.png — 凍り影喰い襲撃 大規模戦闘 (挿絵、 16:9、 キャラ含む 8体)
 
 > **添付リファ画像 (8枚必須)**:
-> - `images/characters/season1/lr/dragon_emperor.png` (アルテミス)
+> - `images/characters/season1/ur/dragon_emperor.png` (アルテミス)
 > - `images/characters/season1/ur/ice_emperor.png` (グレイル)
 > - `images/characters/season1/sr/ice_warrior.png` (イズン)
 > - `images/characters/season1/sr/snow_hunter.png` (シエラ — 生成後)
