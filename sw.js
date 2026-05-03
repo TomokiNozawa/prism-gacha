@@ -7,7 +7,7 @@
 //
 // HTML/JSON/Firebase API はキャッシュせず常にネットワーク優先 (更新即反映+認証/DBの鮮度維持)。
 
-const SW_VERSION = '20260504e';  // 画像永続cache 分離 (Ver bump 時の全DL し直し問題を解消、 野沢さん指摘 2026-05-03)
+const SW_VERSION = '20260504f';  // 画像永続cache 分離 (Ver bump 時の全DL し直し問題を解消、 野沢さん指摘 2026-05-03)
 const STATIC_CACHE = `prismaera-static-${SW_VERSION}`;
 const BGM_CACHE    = `prismaera-bgm-${SW_VERSION}`;
 const LOC_CACHE    = `prismaera-loc-${SW_VERSION}`;
@@ -34,6 +34,7 @@ const PRECACHE_BGM = [
   '/assets/bgm/prism-niflheim.mp3',
   '/assets/bgm/prism-aether.mp3',
   '/assets/bgm/prism-blackmoon.mp3',  // S1C5 章テーマ (野沢さん側 Suno 生成中)
+  '/assets/bgm/prism-cards.mp3',      // カードゲーム BGM (1曲ループ、 v1 神秘カードホール BPM 115)
 ];
 
 // LRU上限 (entry数ベース、 サイズベースではない理由: Cache APIは個別sizeを取れないため)

@@ -98,9 +98,9 @@ function updateMuteUI() {
 // ===== Master データロード =====
 async function loadMasters() {
   const [c, k, l] = await Promise.all([
-    fetch('./cards.json?v=20260504e').then(r => r.json()),
-    fetch('./combos.json?v=20260504e').then(r => r.json()),
-    fetch('./lane_effects.json?v=20260504e').then(r => r.json()),
+    fetch('./cards.json?v=20260504f').then(r => r.json()),
+    fetch('./combos.json?v=20260504f').then(r => r.json()),
+    fetch('./lane_effects.json?v=20260504f').then(r => r.json()),
   ]);
   state.cards = c;
   state.combos = k;
