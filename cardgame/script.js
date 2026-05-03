@@ -140,10 +140,10 @@ function updateMuteUI() {
 // cards.json は手書き override (同名なら cards.json 優先)
 async function loadMasters() {
   const [c, k, l, p] = await Promise.all([
-    fetch('./cards.json?v=20260504l').then(r => r.json()),
-    fetch('./combos.json?v=20260504l').then(r => r.json()),
-    fetch('./lane_effects.json?v=20260504l').then(r => r.json()),
-    fetch('./data/pool.json?v=20260504l').then(r => r.json()).catch(() => []),
+    fetch('./cards.json?v=20260504m').then(r => r.json()),
+    fetch('./combos.json?v=20260504m').then(r => r.json()),
+    fetch('./lane_effects.json?v=20260504m').then(r => r.json()),
+    fetch('./data/pool.json?v=20260504m').then(r => r.json()).catch(() => []),
   ]);
   // pool 全カード ← cards.json で override
   const cardsByName = new Map();
@@ -1257,36 +1257,92 @@ function renderDeckBuilderGrid() {
   // tier 順 sort (LR → R)、 同 tier は cost 降順
   const order = { LR: 5, UR: 4, SSR: 3, SR: 2, R: 1 };
   cards.sort((a, b) => (order[b.tier] - order[a.tier]) || (b.cost - a.cost));
+  // status 表示 (○件中 / フィルター適用中)
+  const statusEl = $('#deck-list-status');
+  if (statusEl) {
+    const filterCount = _activeFilterCount();
+    statusEl.innerHTML = `${cards.length} 件 / 全 ${state.allCards.length} 件 ${filterCount > 0 ? `<span class="cg-filter-badge">フィルター ${filterCount}件 適用中</span>` : ''}`;
+  }
   if (cards.length === 0) {
-    grid.innerHTML = '<p style="color:var(--text-dim);text-align:center;padding:30px;grid-column:1/-1">条件に一致するカードがありません</p>';
+    grid.innerHTML = '<p class="cg-deck-empty">条件に一致するカードがありません</p>';
   } else {
+    // list 形式 (横並び: 画像 + 情報 + 操作) で 絵 + 詳細 を確実に表示
     grid.innerHTML = cards.map(card => {
       const isSelected = s.selected.includes(card.id);
       const imgUrl = card.img ? '..' + card.img : '';
-      const dupesBadge = card.dupes > 0 ? `<span class="cg-card-dupes">+${card.dupes}</span>` : '';
-      const dupBonus = dupeBonusOf(card);
-      const totalPower = card.basePower + dupBonus;
+      const dupesText = card.dupes > 0 ? `+${card.dupes}` : '';
+      const max = MAX_DUPS[card.tier] || 0;
+      const dupesBadge = max > 0 ? `<span class="cg-list-dupes">凸 ${card.dupes||0}/${max}</span>` : '';
+      const totalPower = card.basePower + dupeBonusOf(card);
       const cost = effectiveCost(card);
+      const costMod = isMaxDup(card) ? '<span class="cg-list-cost-mod">▼</span>' : '';
       const ownedClass = card._owned ? '' : 'unowned';
-      return `<div class="cg-deck-builder-item ${isSelected ? 'selected' : ''} ${ownedClass}" data-id="${card.id}">
-        <div class="cg-deck-item-tier ${card.tier}">${card.tier}${dupesBadge}</div>
-        <div class="cg-deck-item-img" style="background-image:url('${imgUrl}')"></div>
-        <div class="cg-deck-item-name">${card.name}</div>
-        <div class="cg-deck-item-stats">
-          <span class="cg-card-cost">⚡${cost}</span>
-          <span class="cg-card-power">⚔${totalPower}</span>
+      return `<div class="cg-deck-list-item ${isSelected ? 'selected' : ''} ${ownedClass}" data-id="${card.id}">
+        <div class="cg-deck-list-img" style="background-image:url('${imgUrl}')">
+          <div class="cg-deck-list-tier ${card.tier}">${card.tier} ${dupesText}</div>
         </div>
-        <div class="cg-deck-item-faction" style="background:${factionColor(card.faction)}">${card.faction}</div>
-        ${isSelected ? '<div class="cg-deck-item-check">✓</div>' : ''}
-        ${!card._owned ? '<div class="cg-deck-item-unowned-tag">未所持</div>' : ''}
+        <div class="cg-deck-list-info">
+          <div class="cg-deck-list-name">${card.name}</div>
+          <div class="cg-deck-list-faction" style="background:${factionColor(card.faction)}">${card.faction}</div>
+          <div class="cg-deck-list-meta">${dupesBadge} ${card._owned ? '' : '<span class="cg-list-unowned-tag">未所持</span>'}</div>
+          <div class="cg-deck-list-effect">${card.effectText || '効果なし'}</div>
+        </div>
+        <div class="cg-deck-list-stats">
+          <div class="cg-deck-list-cost">⚡${cost}${costMod}</div>
+          <div class="cg-deck-list-power">⚔${totalPower}</div>
+          <div class="cg-deck-list-check ${isSelected ? 'on' : ''}">${isSelected ? '✓' : '＋'}</div>
+        </div>
       </div>`;
     }).join('');
-    grid.querySelectorAll('.cg-deck-builder-item').forEach(el => {
+    grid.querySelectorAll('.cg-deck-list-item').forEach(el => {
       el.addEventListener('click', () => toggleDeckCard(el.dataset.id));
     });
   }
   $('#deck-builder-count').textContent = s.selected.length;
   $('#deck-builder-count').className = s.selected.length === DECK_SIZE ? 'cg-deck-count-full' : '';
+  _updateFilterCountBadge();
+}
+
+function _activeFilterCount() {
+  const s = _deckBuilderState;
+  let n = 0;
+  if (s.tierFilter !== 'all') n++;
+  if (s.chapterFilter !== 'all') n++;
+  if (s.factionFilter !== 'all') n++;
+  if (s.search) n++;
+  if (s.ownedOnly) n++;
+  return n;
+}
+
+function _updateFilterCountBadge() {
+  const badge = $('#filter-count-badge');
+  if (!badge) return;
+  const n = _activeFilterCount();
+  badge.textContent = n > 0 ? `(${n})` : '';
+  badge.style.color = n > 0 ? 'var(--gold)' : '';
+}
+
+function openDeckFilter() {
+  $('#deck-filter-modal').hidden = false;
+  _setBodyModalOpen();
+}
+function closeDeckFilter() {
+  $('#deck-filter-modal').hidden = true;
+  _setBodyModalOpen();
+  renderDeckBuilderGrid();
+}
+function resetDeckFilter() {
+  _deckBuilderState.tierFilter = 'all';
+  _deckBuilderState.chapterFilter = 'all';
+  _deckBuilderState.factionFilter = 'all';
+  _deckBuilderState.search = '';
+  _deckBuilderState.ownedOnly = false;
+  $$('#deck-builder-tabs .cg-deck-tab').forEach(t => t.classList.toggle('active', t.dataset.tier === 'all'));
+  $$('#deck-builder-chapter-tabs .cg-deck-tab').forEach(t => t.classList.toggle('active', t.dataset.chapter === 'all'));
+  const search = $('#deck-search-input'); if (search) search.value = '';
+  const fac = $('#deck-faction-filter'); if (fac) fac.value = 'all';
+  const owned = $('#deck-owned-only'); if (owned) owned.checked = false;
+  renderDeckBuilderGrid();
 }
 
 function toggleDeckCard(id) {
@@ -1507,6 +1563,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   const setActiveBtn = document.getElementById('btn-deck-set-active');
   if (setActiveBtn) setActiveBtn.addEventListener('click', setEditingAsActive);
+  // フィルター ポップアップ
+  const filterBtn = document.getElementById('btn-deck-filter');
+  if (filterBtn) filterBtn.addEventListener('click', openDeckFilter);
+  const filterResetBtn = document.getElementById('btn-filter-reset');
+  if (filterResetBtn) filterResetBtn.addEventListener('click', resetDeckFilter);
   const clearBtn = document.getElementById('btn-deck-clear');
   if (clearBtn) clearBtn.addEventListener('click', clearBuilderDeck);
   const autoBtn = document.getElementById('btn-deck-auto');
@@ -1519,7 +1580,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-      closeResult(); closeHelp(); closeTutorial(); closeCombosModal(); closeCharDetail(); closeDeckBuilder();
+      closeResult(); closeHelp(); closeTutorial(); closeCombosModal(); closeCharDetail(); closeDeckFilter(); closeDeckBuilder();
     }
   });
 });
@@ -1537,5 +1598,6 @@ window.closeTutorial = closeTutorial;
 window.closeCombosModal = closeCombosModal;
 window.closeCharDetail = closeCharDetail;
 window.closeDeckBuilder = closeDeckBuilder;
+window.closeDeckFilter = closeDeckFilter;
 window.peekBoard = peekBoard;
 window.reopenResult = reopenResult;

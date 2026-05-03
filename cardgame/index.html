@@ -7,7 +7,7 @@
 <title>PCB | Prismaera Cards Battle</title>
 <link rel="icon" href="/images/icons/icon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
-<link rel="stylesheet" href="./style.css?v=20260504l">
+<link rel="stylesheet" href="./style.css?v=20260504m">
 </head>
 <body>
 
@@ -235,12 +235,28 @@
       </button>
     </div>
     <div class="cg-deck-builder-actions">
+      <button class="cg-btn secondary" id="btn-deck-filter">🔍 <span id="filter-count-badge"></span> フィルター</button>
       <button class="cg-btn secondary" id="btn-deck-clear">クリア</button>
       <button class="cg-btn secondary" id="btn-deck-auto">🎲 おまかせ</button>
-      <button class="cg-btn secondary" id="btn-deck-default">🔁 デフォルト</button>
+      <button class="cg-btn secondary" id="btn-deck-default">🔁 デフォ</button>
     </div>
-    <!-- フィルター -->
-    <div class="cg-deck-filters">
+    <div class="cg-deck-list-status" id="deck-list-status"></div>
+    <div class="cg-deck-builder-list" id="deck-builder-grid"></div>
+    <div class="cg-modal-actions">
+      <button class="cg-btn secondary" onclick="closeDeckBuilder()">キャンセル</button>
+      <button class="cg-btn primary" id="btn-deck-save">💾 このスロットに保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- フィルター ポップアップ (野沢さん指示 2026-05-04 「フィルター欄こそポップアップで」) -->
+<div id="deck-filter-modal" class="cg-modal" hidden>
+  <div class="cg-modal-backdrop" onclick="closeDeckFilter()"></div>
+  <div class="cg-modal-card cg-deck-filter-card">
+    <button class="cg-modal-close" onclick="closeDeckFilter()" aria-label="閉じる">×</button>
+    <h2 class="cg-modal-title">🔍 フィルター</h2>
+    <div class="cg-deck-filter-section">
+      <div class="cg-deck-filter-label">レア度</div>
       <div class="cg-deck-builder-tabs" id="deck-builder-tabs">
         <button type="button" class="cg-deck-tab active" data-tier="all">全Tier</button>
         <button type="button" class="cg-deck-tab" data-tier="LR">LR</button>
@@ -249,6 +265,9 @@
         <button type="button" class="cg-deck-tab" data-tier="SR">SR</button>
         <button type="button" class="cg-deck-tab" data-tier="R">R</button>
       </div>
+    </div>
+    <div class="cg-deck-filter-section">
+      <div class="cg-deck-filter-label">章</div>
       <div class="cg-deck-builder-tabs" id="deck-builder-chapter-tabs">
         <button type="button" class="cg-deck-tab active" data-chapter="all">全章</button>
         <button type="button" class="cg-deck-tab" data-chapter="s1c1">第1章</button>
@@ -256,21 +275,26 @@
         <button type="button" class="cg-deck-tab" data-chapter="s1c3">第3章</button>
         <button type="button" class="cg-deck-tab" data-chapter="s1c4">第4章</button>
       </div>
-      <div class="cg-deck-filter-row">
-        <input type="text" id="deck-search-input" class="cg-deck-search" placeholder="🔍 名前で検索">
-        <select id="deck-faction-filter" class="cg-deck-faction-select">
-          <option value="all">全派閥</option>
-        </select>
-        <label class="cg-deck-owned-toggle">
-          <input type="checkbox" id="deck-owned-only">
-          <span>所持のみ</span>
-        </label>
-      </div>
     </div>
-    <div class="cg-deck-builder-grid" id="deck-builder-grid"></div>
+    <div class="cg-deck-filter-section">
+      <div class="cg-deck-filter-label">名前検索</div>
+      <input type="text" id="deck-search-input" class="cg-deck-search" placeholder="例: プリズマ">
+    </div>
+    <div class="cg-deck-filter-section">
+      <div class="cg-deck-filter-label">派閥</div>
+      <select id="deck-faction-filter" class="cg-deck-faction-select">
+        <option value="all">全派閥</option>
+      </select>
+    </div>
+    <div class="cg-deck-filter-section">
+      <label class="cg-deck-owned-toggle">
+        <input type="checkbox" id="deck-owned-only">
+        <span>所持しているカードのみ表示</span>
+      </label>
+    </div>
     <div class="cg-modal-actions">
-      <button class="cg-btn secondary" onclick="closeDeckBuilder()">キャンセル</button>
-      <button class="cg-btn primary" id="btn-deck-save">💾 このスロットに保存</button>
+      <button class="cg-btn secondary" id="btn-filter-reset">🔁 リセット</button>
+      <button class="cg-btn primary" onclick="closeDeckFilter()">適用して閉じる</button>
     </div>
   </div>
 </div>
@@ -380,6 +404,6 @@
   </div>
 </div>
 
-<script src="./script.js?v=20260504l"></script>
+<script src="./script.js?v=20260504m"></script>
 </body>
 </html>
