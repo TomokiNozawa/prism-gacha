@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.2c — 演出&ゲームロジック (Season 1 第1〜2章)
+   Prismaera v1.4.2d — 演出&ゲームロジック (Season 1 第1〜2章)
    ============================================================ */
 "use strict";
 
@@ -6253,7 +6253,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260504d';
+const IMG_CACHE_VERSION = '20260504e';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -7130,10 +7130,20 @@ function _syncStoriesHeightToTeaser() {
   const btn = document.querySelector('.story-entry-block .story-entry-btn');
   if (!teaser || !btn) return;
   if (teaser.style.display === 'none' || teaser.offsetParent === null) {
-    btn.style.minHeight = '';  // 非表示時はリセット
+    btn.style.minHeight = '';
     return;
   }
-  const h = teaser.getBoundingClientRect().height;
+  // スマホ + 2分割ティザー時は「1章分の高さ」 に揃える (野沢さん指示 2026-05-04 「2倍は大きすぎ」)
+  // PC は teaser 全体高さ (= 既存仕様)、 単独章ティザーは どちらも teaser 全体高さ
+  const isMobile = window.innerWidth <= 600;
+  const isSplit = teaser.classList.contains('teaser-split');
+  let h;
+  if (isMobile && isSplit) {
+    const firstCol = teaser.querySelector('.story-next-col');
+    h = firstCol ? firstCol.getBoundingClientRect().height : teaser.getBoundingClientRect().height / 2;
+  } else {
+    h = teaser.getBoundingClientRect().height;
+  }
   if (h > 0) btn.style.minHeight = h + 'px';
 }
 // ティザーのサイズ変更 (章更新 / 画面回転 / フォントロード後 等) を ResizeObserver で追跡

@@ -30,6 +30,21 @@ const state = {
   thisTurnPlacements: [], // [{ cardId, lane }] 自軍のみ、 ターン中の配置履歴
 };
 
+// ===== 派閥カラー マッピング =====
+const FACTION_COLORS = {
+  '原虹':         '#ff8ddc',
+  '白焔教会':     '#ffd56b',
+  '月光':         '#c8b8ff',
+  '雪月神殿':     '#e8e8f8',
+  '紅翼':         '#ff8a3a',
+  '深緑樹海':     '#7aff8a',
+  '紅玉海賊団':   '#ff6b6b',
+  'アクアシス':   '#5fdfff',
+  '学院':         '#7a9bff',
+  '見習い':       '#7afff5',
+};
+function factionColor(f) { return FACTION_COLORS[f] || '#aaa'; }
+
 // ===== BGM (1曲ループ、 ミュート localStorage 保存) =====
 const BGM_URL = '/assets/bgm/prism-cards.mp3';
 const BGM_MUTE_KEY = 'cg_bgm_muted';
@@ -83,9 +98,9 @@ function updateMuteUI() {
 // ===== Master データロード =====
 async function loadMasters() {
   const [c, k, l] = await Promise.all([
-    fetch('./cards.json?v=20260504d').then(r => r.json()),
-    fetch('./combos.json?v=20260504d').then(r => r.json()),
-    fetch('./lane_effects.json?v=20260504d').then(r => r.json()),
+    fetch('./cards.json?v=20260504e').then(r => r.json()),
+    fetch('./combos.json?v=20260504e').then(r => r.json()),
+    fetch('./lane_effects.json?v=20260504e').then(r => r.json()),
   ]);
   state.cards = c;
   state.combos = k;
@@ -229,6 +244,33 @@ function renderAll() {
   renderHand();
   renderBoard();
   updateLanePowers();
+  renderCombosPanel();
+}
+
+// PC 用 コンボ常時パネル
+function renderCombosPanel() {
+  const body = document.getElementById('cg-combos-panel-body');
+  if (!body) return;
+  const list = collectAvailableCombos();
+  if (list.length === 0) {
+    body.innerHTML = '<p class="cg-combos-panel-empty">手札+場 にコンボパーツなし</p>';
+    return;
+  }
+  body.innerHTML = list.map(c => `
+    <div class="cg-combos-panel-item ${c.triggered ? 'triggered' : ''}">
+      <div class="cg-combos-panel-head">
+        <span class="cg-combos-panel-icon">${c.triggered ? '✨' : '🔍'}</span>
+        <span class="cg-combos-panel-name">${c.name}</span>
+        <span class="cg-combos-panel-status">${c.triggered ? `+${c.power}` : `${c.collected.length}/${c.chars.length}`}</span>
+      </div>
+      <div class="cg-combos-panel-chars">
+        ${c.chars.map(name => {
+          const has = c.collected.includes(name);
+          return `<span class="cg-combos-panel-chip ${has ? 'has' : 'miss'}">${has ? '✓' : '○'}${name}</span>`;
+        }).join('')}
+      </div>
+    </div>
+  `).join('');
 }
 
 function renderLaneEffects() {
@@ -285,6 +327,7 @@ function renderBoard() {
 function makeCardElement(card, showEffect) {
   const el = document.createElement('div');
   el.className = 'cg-card';
+  el.style.setProperty('--faction-color', factionColor(card.faction));
   const imgUrl = card.img ? '..' + card.img : '';
   const imgStyle = imgUrl ? `background-image: url('${imgUrl}')` : '';
   const imgClass = imgUrl ? '' : 'no-img';
@@ -292,13 +335,14 @@ function makeCardElement(card, showEffect) {
   const displayPower = card._currentPower != null ? card._currentPower : (card.basePower + dupeBonusOf(card));
   el.innerHTML = `
     <div class="cg-card-tier ${card.tier}">${card.tier}${dupesBadge}</div>
+    <div class="cg-card-faction" style="background:${factionColor(card.faction)}">${card.faction}</div>
     <div class="cg-card-img ${imgClass}" style="${imgStyle}"></div>
     <div class="cg-card-name">${card.name}</div>
+    ${showEffect && card.effectText ? `<div class="cg-card-effect">${card.effectText}</div>` : ''}
     <div class="cg-card-stats">
       <span class="cg-card-cost">⚡${card.cost}</span>
       <span class="cg-card-power">⚔${displayPower}</span>
     </div>
-    ${showEffect && card.effectText ? `<div class="cg-card-effect">${card.effectText}</div>` : ''}
   `;
   if (imgUrl) {
     const probe = new Image();
@@ -506,49 +550,108 @@ async function endTurn() {
   renderAll();
 }
 
-// ===== AI 手番 =====
+// ===== AI 手番 (4段階: easy / normal / hard / master) =====
 async function aiTurn() {
   let aiCost = state.turn;
   let aiCostUsed = 0;
   let attempts = 0;
+  const diff = state.difficulty;
   while (aiCostUsed < aiCost && attempts < 8) {
     attempts++;
     const remaining = aiCost - aiCostUsed;
-    const playable = state.oppHand
-      .map((c, i) => ({ c, i }))
-      .filter(x => x.c.cost <= remaining);
+    const playable = state.oppHand.map((c, i) => ({ c, i })).filter(x => x.c.cost <= remaining);
     if (playable.length === 0) break;
+    const openLanes = [0, 1, 2].filter(L => state.board.opp[L].length < 4);
+    if (openLanes.length === 0) break;
 
-    let pick;
-    if (state.difficulty === 'easy') {
-      pick = playable[Math.floor(Math.random() * playable.length)];
-      if (Math.random() < 0.4) break;
-    } else {
-      playable.sort((a, b) => b.c.cost - a.c.cost);
-      pick = playable[0];
-    }
+    let pickIdx, lane;
 
-    let lane;
-    if (state.difficulty === 'easy') {
-      const openLanes = [0, 1, 2].filter(L => state.board.opp[L].length < 4);
-      if (openLanes.length === 0) break;
+    if (diff === 'easy') {
+      // ランダム、 50% 早期終了 (温存気味)
+      const p = playable[Math.floor(Math.random() * playable.length)];
+      pickIdx = p.i;
       lane = openLanes[Math.floor(Math.random() * openLanes.length)];
-    } else {
-      const lanes = [0, 1, 2].map(L => ({
-        L,
-        diff: getLanePower('opp', L) - getLanePower('me', L),
-        full: state.board.opp[L].length >= 4,
-      })).filter(x => !x.full);
-      if (lanes.length === 0) break;
-      lanes.sort((a, b) => a.diff - b.diff);
+      if (Math.random() < 0.4) break;
+    } else if (diff === 'normal') {
+      // コスト最大 + 最劣勢レーン補強
+      playable.sort((a, b) => b.c.cost - a.c.cost);
+      pickIdx = playable[0].i;
+      const lanes = openLanes.map(L => ({L, d: getLanePower('opp', L) - getLanePower('me', L)}));
+      lanes.sort((a, b) => a.d - b.d);
       lane = lanes[0].L;
+    } else if (diff === 'hard') {
+      // (card, lane) 評価: コスト価値 + 同派閥シナジー + 劣勢補強 + 高コストカードは終盤温存
+      let best = null;
+      for (const p of playable) {
+        for (const L of openLanes) {
+          let score = p.c.cost * 1.5;
+          // 同派閥 シナジー (同派閥 既に N人 → +N*2)
+          const sameFac = state.board.opp[L].filter(c => c.faction === p.c.faction).length;
+          score += sameFac * 2;
+          // 劣勢補強
+          const myDiff = getLanePower('me', L) - getLanePower('opp', L);
+          if (myDiff > 0) score += myDiff * 0.6;
+          // レーン効果と一致するカードを優先
+          const e = state.laneEffects[L];
+          if (e) {
+            if (e.rule === 'cost_ge' && p.c.cost >= e.threshold) score += e.value * 1.5;
+            if (e.rule === 'cost_le' && p.c.cost <= e.threshold) score += e.value * 1.5;
+            if (e.rule === 'faction' && p.c.faction === e.faction) score += e.value * 2;
+          }
+          // 高コストは終盤温存 (残ターン数考慮)
+          const remainingTurns = state.maxTurn - state.turn + 1;
+          if (p.c.cost > remainingTurns * 1.5) score -= 1;
+          if (!best || score > best.score) best = { i: p.i, L, score };
+        }
+      }
+      if (!best) break;
+      pickIdx = best.i; lane = best.L;
+    } else if (diff === 'master') {
+      // 1-ply look-ahead: 配置 simulate → power gain (自) - power loss (相手) を最大化 + コンボ評価 + 派閥シナジー累積
+      let best = null;
+      for (const p of playable) {
+        for (const L of openLanes) {
+          // simulate
+          const card = { ...p.c, _currentPower: p.c.basePower + dupeBonusOf(p.c), _appliedTo: [] };
+          state.board.opp[L].push(card);
+          applyEffect(card, L, 'opp');
+          // 配置後の評価: 自軍3レーン total + 「自軍勝ちレーン数」 +5 each
+          let score = 0;
+          for (let LL = 0; LL < 3; LL++) {
+            const oppP = getLanePower('opp', LL);
+            const meP = getLanePower('me', LL);
+            score += oppP - meP;
+            if (oppP > meP) score += 5;
+          }
+          // コンボ判定 (簡易)
+          for (const combo of state.combos) {
+            const oppCardsAll = [].concat(...state.board.opp);
+            const inLane = state.board.opp[L];
+            let trig = false;
+            if (combo.condition === 'same_lane') trig = combo.chars.every(c => inLane.some(x => x.name === c));
+            else if (combo.condition === 'any_lane') trig = combo.chars.every(c => oppCardsAll.some(x => x.name === c));
+            if (trig) score += combo.effect.power * 1.5;
+          }
+          // revert
+          if (card._appliedTo) {
+            card._appliedTo.forEach(({target, delta}) => {
+              target._currentPower = (target._currentPower != null ? target._currentPower : (target.basePower + dupeBonusOf(target))) - delta;
+            });
+          }
+          state.board.opp[L].pop();
+          if (!best || score > best.score) best = { i: p.i, L, score };
+        }
+      }
+      if (!best) break;
+      pickIdx = best.i; lane = best.L;
     }
 
-    placeAICard(pick.i, lane);
-    aiCostUsed += pick.c.cost;
-    await sleep(320);
+    const cardCost = playable.find(x => x.i === pickIdx)?.c.cost || 0;
+    placeAICard(pickIdx, lane);
+    aiCostUsed += cardCost;
+    await sleep(diff === 'easy' ? 350 : 250);
   }
-  setMessage(`AIが ${aiCostUsed} コスト分配置`, 'success');
+  setMessage(`AI が ${aiCostUsed} コスト分配置`, 'success');
 }
 
 function placeAICard(handIdx, lane) {
@@ -711,6 +814,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadMasters();
   $('#btn-start-easy').addEventListener('click', () => startMatch('easy'));
   $('#btn-start-normal').addEventListener('click', () => startMatch('normal'));
+  $('#btn-start-hard').addEventListener('click', () => startMatch('hard'));
+  $('#btn-start-master').addEventListener('click', () => startMatch('master'));
   $('#btn-tutorial').addEventListener('click', openTutorial);
   $('#btn-help').addEventListener('click', openHelp);
   $('#btn-undo').addEventListener('click', resetThisTurn);

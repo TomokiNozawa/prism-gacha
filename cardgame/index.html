@@ -7,7 +7,7 @@
 <title>Prismaera Cards [Phase 0 PoC]</title>
 <link rel="icon" href="/images/icons/icon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
-<link rel="stylesheet" href="./style.css?v=20260504d">
+<link rel="stylesheet" href="./style.css?v=20260504e">
 </head>
 <body>
 
@@ -43,14 +43,21 @@
       <div class="cg-mode-icon">⚔️</div>
       <div class="cg-mode-text">
         <div class="cg-mode-title">AIと対戦 (Normal)</div>
-        <div class="cg-mode-sub">コスト最大化を狙うAI</div>
+        <div class="cg-mode-sub">コスト最大化 + 劣勢補強</div>
       </div>
     </button>
-    <button class="cg-mode-btn disabled" disabled>
+    <button class="cg-mode-btn" id="btn-start-hard">
       <div class="cg-mode-icon">🔥</div>
       <div class="cg-mode-text">
         <div class="cg-mode-title">AIと対戦 (Hard)</div>
-        <div class="cg-mode-sub">準備中 (Phase 1で実装)</div>
+        <div class="cg-mode-sub">派閥シナジー + レーン効果意識</div>
+      </div>
+    </button>
+    <button class="cg-mode-btn" id="btn-start-master">
+      <div class="cg-mode-icon">👑</div>
+      <div class="cg-mode-text">
+        <div class="cg-mode-title">AIと対戦 (Master)</div>
+        <div class="cg-mode-sub">1手先まで読む + コンボ評価</div>
       </div>
     </button>
     <button class="cg-mode-btn disabled" disabled>
@@ -137,6 +144,12 @@
       </div>
     </div>
   </div>
+
+  <!-- PC 用 コンボ常時パネル (right side floating、 スマホは display:none) -->
+  <aside id="cg-combos-panel" class="cg-combos-panel" aria-label="発動可能コンボ一覧">
+    <h3 class="cg-combos-panel-title">💡 コンボ <span class="cg-combos-panel-sub">手札+場で発動可能</span></h3>
+    <div class="cg-combos-panel-body" id="cg-combos-panel-body"></div>
+  </aside>
 
   <!-- 手札 -->
   <div class="cg-hand-area">
@@ -240,6 +253,6 @@
   </div>
 </div>
 
-<script src="./script.js?v=20260504d"></script>
+<script src="./script.js?v=20260504e"></script>
 </body>
 </html>
