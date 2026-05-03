@@ -52,7 +52,7 @@ body {
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
 }
-.cg-back, .cg-help {
+.cg-back, .cg-help, .cg-iconbtn {
   width: 36px; height: 36px;
   background: var(--bg-elev);
   border: 1px solid var(--border);
@@ -62,8 +62,11 @@ body {
   text-decoration: none;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
+  flex-shrink: 0;
 }
-.cg-back:hover, .cg-help:hover { border-color: var(--border-hi); }
+.cg-back:hover, .cg-help:hover, .cg-iconbtn:hover { border-color: var(--border-hi); }
+.cg-topbar-right { display: flex; gap: 6px; align-items: center; }
+.cg-iconbtn.muted { opacity: 0.6; background: rgba(0,0,0,0.4); }
 .cg-title {
   font-size: 16px; font-weight: 600;
   display: flex; align-items: center; gap: 6px;

@@ -30,12 +30,62 @@ const state = {
   thisTurnPlacements: [], // [{ cardId, lane }] 自軍のみ、 ターン中の配置履歴
 };
 
+// ===== BGM (1曲ループ、 ミュート localStorage 保存) =====
+const BGM_URL = '/assets/bgm/prism-cards.mp3';
+const BGM_MUTE_KEY = 'cg_bgm_muted';
+let cgBgm = null;
+
+function initBgm() {
+  cgBgm = new Audio(BGM_URL);
+  cgBgm.loop = true;
+  cgBgm.volume = 0.4;
+  cgBgm.preload = 'auto';
+  // 初回 load エラーは握り潰す (BGM ファイル未配備時のフォールバック)
+  cgBgm.addEventListener('error', () => { /* BGM ファイル無し時の silent fail */ });
+  const muted = localStorage.getItem(BGM_MUTE_KEY) === '1';
+  cgBgm.muted = muted;
+  updateMuteUI();
+  // ブラウザ自動再生規制対策: 最初のユーザー interact で play 試行
+  const tryPlay = () => {
+    if (cgBgm && cgBgm.paused) {
+      cgBgm.play().catch(() => { /* user gesture 必要 or ファイル無し */ });
+    }
+  };
+  document.addEventListener('click', tryPlay, { once: true });
+  document.addEventListener('keydown', tryPlay, { once: true });
+  document.addEventListener('touchstart', tryPlay, { once: true });
+}
+
+function toggleBgmMute() {
+  if (!cgBgm) return;
+  cgBgm.muted = !cgBgm.muted;
+  localStorage.setItem(BGM_MUTE_KEY, cgBgm.muted ? '1' : '0');
+  updateMuteUI();
+  if (!cgBgm.muted && cgBgm.paused) {
+    cgBgm.play().catch(() => {});
+  }
+}
+
+function updateMuteUI() {
+  const btn = document.getElementById('btn-cg-mute');
+  if (!btn || !cgBgm) return;
+  if (cgBgm.muted) {
+    btn.textContent = '🔇';
+    btn.title = 'BGM ミュート中 (タップで ON)';
+    btn.classList.add('muted');
+  } else {
+    btn.textContent = '🔊';
+    btn.title = 'BGM 再生中 (タップでミュート)';
+    btn.classList.remove('muted');
+  }
+}
+
 // ===== Master データロード =====
 async function loadMasters() {
   const [c, k, l] = await Promise.all([
-    fetch('./cards.json?v=20260504c').then(r => r.json()),
-    fetch('./combos.json?v=20260504c').then(r => r.json()),
-    fetch('./lane_effects.json?v=20260504c').then(r => r.json()),
+    fetch('./cards.json?v=20260504d').then(r => r.json()),
+    fetch('./combos.json?v=20260504d').then(r => r.json()),
+    fetch('./lane_effects.json?v=20260504d').then(r => r.json()),
   ]);
   state.cards = c;
   state.combos = k;
@@ -657,6 +707,7 @@ function onBackClick(e) {
 
 // ===== Init =====
 document.addEventListener('DOMContentLoaded', async () => {
+  initBgm();
   await loadMasters();
   $('#btn-start-easy').addEventListener('click', () => startMatch('easy'));
   $('#btn-start-normal').addEventListener('click', () => startMatch('normal'));
@@ -664,6 +715,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('#btn-help').addEventListener('click', openHelp);
   $('#btn-undo').addEventListener('click', resetThisTurn);
   $('#btn-combos').addEventListener('click', openCombosModal);
+  $('#btn-cg-mute').addEventListener('click', toggleBgmMute);
   $('.cg-back').addEventListener('click', onBackClick);
 
   document.addEventListener('keydown', (e) => {
