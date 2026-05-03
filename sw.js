@@ -7,7 +7,7 @@
 //
 // HTML/JSON/Firebase API はキャッシュせず常にネットワーク優先 (更新即反映+認証/DBの鮮度維持)。
 
-const SW_VERSION = '20260503m';  // 画像永続cache 分離 (Ver bump 時の全DL し直し問題を解消、 野沢さん指摘 2026-05-03)
+const SW_VERSION = '20260503n';  // 画像永続cache 分離 (Ver bump 時の全DL し直し問題を解消、 野沢さん指摘 2026-05-03)
 const STATIC_CACHE = `prismaera-static-${SW_VERSION}`;
 const BGM_CACHE    = `prismaera-bgm-${SW_VERSION}`;
 const LOC_CACHE    = `prismaera-loc-${SW_VERSION}`;
@@ -107,9 +107,10 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(staleWhileRevalidate(req, IMG_PERSIST));
     return;
   }
-  // 場所画像 — 専用cache (LOC_CACHE) で stale-while-revalidate (OFFLINE_SAVED 最優先)
+  // 場所画像 (WM 含む) — IMG_PERSIST cache (SW_VERSION 非依存、 cache buster 変更で再DL しない)
+  // 野沢さん指摘 2026-05-03 「WM が毎回リロードで読込し直し」 → LOC_CACHE は SW_VERSION 連動で消えるため永続cache 統合
   if (LOC_PATH.test(path)) {
-    event.respondWith(staleWhileRevalidate(req, LOC_CACHE));
+    event.respondWith(staleWhileRevalidate(req, IMG_PERSIST));
     return;
   }
   // その他静的アセット (CSS/JS/フォント等) — 既存挙動 (OFFLINE_SAVED 最優先)

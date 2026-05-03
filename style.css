@@ -2976,6 +2976,32 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   .story-next-badge { font-size: 8px; padding: 2px 7px; top: 10px; right: 12px; }
 }
 
+/* 2分割ティザー (野沢さん指示 2026-05-03 「左=次章、 右=次の次の章」) */
+.story-next-teaser.teaser-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: stretch;
+  gap: 0;
+  padding: 0;  /* col 側で個別 padding */
+}
+.story-next-teaser.teaser-split > .story-next-col {
+  position: relative;
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px 20px;
+  min-width: 0;  /* grid item shrink 許可 */
+  z-index: 1;
+}
+.story-next-teaser.teaser-split > .story-next-col + .story-next-col {
+  border-left: 1px dashed rgba(255, 217, 122, 0.25);
+}
+@media (max-width: 720px) {
+  .story-next-teaser.teaser-split { grid-template-columns: 1fr; }
+  .story-next-teaser.teaser-split > .story-next-col + .story-next-col {
+    border-left: none;
+    border-top: 1px dashed rgba(255, 217, 122, 0.25);
+  }
+}
+
 /* ───── ホーム画面の要望カード ───── */
 .home-feedback {
   margin: 24px auto 32px;

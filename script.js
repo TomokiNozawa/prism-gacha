@@ -6253,7 +6253,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260503m';
+const IMG_CACHE_VERSION = '20260503n';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -7082,39 +7082,43 @@ document.addEventListener('DOMContentLoaded', _initLightmode);
 // body 未生成段階でも script.js 読込時に即適用 (FOUC 抑制)
 if (document.body) _initLightmode();
 
-// ホーム画面の次章ティザーを動的レンダリング (野沢さん指示 2026-05-03: 公開時刻に応じて「次章」 のみ表示、 「2つ次以降」 は出さない)
+// ホーム画面の次章ティザーを動的レンダリング (野沢さん指示 2026-05-03)
+// 左 = 次章、 右 = 次の次の章 (両方 Coming Soon)、 公開時刻に応じて自動繰上げ
 function _renderHomeNextTeaser() {
   const el = document.querySelector('.story-next-teaser');
   if (!el || typeof STORY_OUTLINE === 'undefined') return;
-  // 「次章 = 最新公開章+1」 を特定
   const releasedIds = STORY_OUTLINE.filter(o => _isChapterReleased(o.id)).map(o => o.id);
   const lastReleased = releasedIds.length > 0 ? releasedIds[releasedIds.length - 1] : null;
-  let next = null;
+  let next1 = null, next2 = null;
   if (lastReleased) {
     const idx = STORY_OUTLINE.findIndex(o => o.id === lastReleased);
-    if (idx >= 0 && idx + 1 < STORY_OUTLINE.length) next = STORY_OUTLINE[idx + 1];
+    if (idx >= 0 && idx + 1 < STORY_OUTLINE.length) next1 = STORY_OUTLINE[idx + 1];
+    if (idx >= 0 && idx + 2 < STORY_OUTLINE.length) next2 = STORY_OUTLINE[idx + 2];
   } else if (STORY_OUTLINE.length > 0) {
-    next = STORY_OUTLINE[0];
+    next1 = STORY_OUTLINE[0];
+    if (STORY_OUTLINE.length >= 2) next2 = STORY_OUTLINE[1];
   }
-  if (!next) { el.style.display = 'none'; return; }
+  if (!next1) { el.style.display = 'none'; return; }
   el.style.display = '';
-  const releaseStr = next.releaseDate
-    ? `📅 <b>${_formatReleaseDate(next.id)}</b> 公開予定`
-    : `📅 公開予定 — お楽しみに`;
-  const povLine = next.povCharName ? `<div class="story-next-pov">主人公: ${escapeHtml(next.povCharName)}</div>` : '';
-  el.innerHTML = `
-    <div class="story-next-badge">Coming Soon</div>
-    <div class="story-next-icon">${next.icon || '📖'}</div>
-    <div class="story-next-text">
-      <div class="story-next-meta">${escapeHtml(next.meta || '')}</div>
-      <div class="story-next-title">${escapeHtml(next.title || '')}</div>
-      ${povLine}
-      <div class="story-next-tagline">${escapeHtml(next.tagline || '')}</div>
-      <div class="story-next-stats">
-        <span>${releaseStr}</span>
+  function colHTML(ch) {
+    const releaseStr = ch.releaseDate
+      ? `📅 <b>${_formatReleaseDate(ch.id)}</b> 公開予定`
+      : `📅 公開予定 — お楽しみに`;
+    const povLine = ch.povCharName ? `<div class="story-next-pov">主人公: ${escapeHtml(ch.povCharName)}</div>` : '';
+    return `<div class="story-next-col">
+      <div class="story-next-badge">Coming Soon</div>
+      <div class="story-next-icon">${ch.icon || '📖'}</div>
+      <div class="story-next-text">
+        <div class="story-next-meta">${escapeHtml(ch.meta || '')}</div>
+        <div class="story-next-title">${escapeHtml(ch.title || '')}</div>
+        ${povLine}
+        <div class="story-next-tagline">${escapeHtml(ch.tagline || '')}</div>
+        <div class="story-next-stats"><span>${releaseStr}</span></div>
       </div>
-    </div>
-  `;
+    </div>`;
+  }
+  el.innerHTML = next2 ? (colHTML(next1) + colHTML(next2)) : colHTML(next1);
+  el.classList.toggle('teaser-split', !!next2);
 }
 document.addEventListener('DOMContentLoaded', () => { _refreshPickupChapter(); _refreshChapterReleaseLocks(); _renderHomeNextTeaser(); });
 // 2分毎に再判定 (リリース時刻を跨いだ瞬間に自動 unlock + ピックアップ章 自動切替 + ティザー切替)
