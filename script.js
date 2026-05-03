@@ -6052,8 +6052,14 @@ const STORY_LOCATION_INLINE_CONFIG = {
     { scene: '2-2',  marker: '五合目で、 私は双剣を交差させた',                   position: 'before', img: '/images/locations/s1c4/thumb/duel_ice_vs_dragon_thumb.webp' },
     // 第二幕 2-3: アルテミス&ヒノオウ 千年前の回想 (戦友が並ぶ夜)
     { scene: '2-3',  marker: 'ふと、 古い戦場の記憶が、 不意に蘇った',           position: 'after',  img: '/images/locations/s1c4/thumb/flashback_artemis_hinoo_thumb.webp' },
+    // 第三幕 3-1: 空挺城ゼノニア 三国会談シーン (ヴァーレ女皇)
+    { scene: '3-1',  marker: 'ヴァーレが、 静かに口を開いた',                     position: 'before', img: '/images/locations/s1c4/thumb/vaire_diplomacy_thumb.webp' },
+    // 第三幕 3-1: ゼノニア整備工房の生活感 (ハーニア親方+ベル整備士+ピット見習い)
+    { scene: '3-1',  marker: '整備工房から元気な声が響いた',                       position: 'after',  img: '/images/locations/s1c4/thumb/zenonia_workshop_thumb.webp' },
     // 第三幕 3-2: 凍り影喰い襲撃 大規模戦闘 (戦友の証明、 希少種ビジュアル定着)
     { scene: '3-2',  marker: '私たちは、 何も言わずに背を合わせた',                position: 'after',  img: '/images/locations/s1c4/thumb/ice_shadeova_battle_thumb.webp' },
+    // 第四幕 4-1: 観測者三柱 ユーリス予言シーン (氷の小神殿)
+    { scene: '4-1',  marker: '氷の小さな神殿の中央に、 ユーリスは立っていた',     position: 'after',  img: '/images/locations/s1c4/thumb/frost_oracle_prophecy_thumb.webp' },
   ],
   's1c5': [
     // 第5章「黒月の予兆」 挿絵 (16:9横長、 全 5枚)
@@ -6067,12 +6073,6 @@ const STORY_LOCATION_INLINE_CONFIG = {
     { scene: '4-1',  marker: '月鏡の表面が、 静かに、 揺らいだ',                       position: 'before', img: '/images/locations/s1c5/thumb/mask_separation_ritual_thumb.webp' },
     // 第四幕 4-2: 別れの朝 (シオン+シ・ロエン、 雪原の二筋の足跡)
     { scene: '4-2',  marker: '雪原の遠く、 朝霧の向こうに、 シ・ロエンと',             position: 'after',  img: '/images/locations/s1c5/thumb/shi_loen_departure_thumb.webp' },
-    // 第三幕 3-1: 空挺城ゼノニア 三国会談シーン (ヴァーレ女皇)
-    { scene: '3-1',  marker: 'ヴァーレが、 静かに口を開いた',                     position: 'before', img: '/images/locations/s1c4/thumb/vaire_diplomacy_thumb.webp' },
-    // 第三幕 3-1: ゼノニア整備工房の生活感 (ハーニア親方+ベル整備士+ピット見習い)
-    { scene: '3-1',  marker: '整備工房から元気な声が響いた',                       position: 'after',  img: '/images/locations/s1c4/thumb/zenonia_workshop_thumb.webp' },
-    // 第四幕 4-1: 観測者三柱 ユーリス予言シーン (氷の小神殿)
-    { scene: '4-1',  marker: '氷の小さな神殿の中央に、 ユーリスは立っていた',     position: 'after',  img: '/images/locations/s1c4/thumb/frost_oracle_prophecy_thumb.webp' },
   ],
   's1c3': [
     // 1-2 リアム誓い、 三月の約束 (主従の絆 + 旅の制約成立)
@@ -6092,7 +6092,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260503c';
+const IMG_CACHE_VERSION = '20260503d';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -6932,8 +6932,16 @@ function _renderHomeNextTeaser() {
   `;
 }
 document.addEventListener('DOMContentLoaded', () => { _refreshPickupChapter(); _refreshChapterReleaseLocks(); _renderHomeNextTeaser(); });
-// 1分毎に再判定 (リリース時刻を跨いだ瞬間に自動 unlock + ピックアップ章 自動切替 + ティザー切替)
-setInterval(() => { _refreshPickupChapter(); _refreshChapterReleaseLocks(); _renderHomeNextTeaser(); }, 60000);
+// 2分毎に再判定 (リリース時刻を跨いだ瞬間に自動 unlock + ピックアップ章 自動切替 + ティザー切替)
+// 野沢さん指摘 2026-05-03 「スマホ電池の減りが凄い」: 60秒→120秒に緩和 + Page Visibility API で hidden 時はスキップ
+setInterval(() => {
+  if (document.hidden) return;  // バックグラウンド時は CPU 使わない
+  _refreshPickupChapter(); _refreshChapterReleaseLocks(); _renderHomeNextTeaser();
+}, 120000);
+// タブ復帰時に即時再評価 (公開時刻を跨いだケースの自動切替を体感ラグなく)
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) { _refreshPickupChapter(); _refreshChapterReleaseLocks(); _renderHomeNextTeaser(); }
+});
 // ストーリー一覧モーダル
 // #10 ストーリー既読マーク (読了済み章カードに ✅ バッジ + ホームメタタグに 完読数/解放数 動的反映)
 function refreshStoryReadBadges() {
@@ -7554,7 +7562,12 @@ function _updateBgmProgress() {
   }
   cur.textContent = _bgmFormatTime(t);
 }
-setInterval(_updateBgmProgress, 500);
+setInterval(() => {
+  // 野沢さん指摘 2026-05-03 電池消費改善: hidden 時 + BGM 一時停止時 はスキップ
+  if (document.hidden) return;
+  if (bgmAudio && bgmAudio.paused) return;  // 再生中のみ プログレス更新
+  _updateBgmProgress();
+}, 500);
 
 // 再生位置バー click → seek (panel 開いてる間のみ動作)
 document.addEventListener('click', (e) => {

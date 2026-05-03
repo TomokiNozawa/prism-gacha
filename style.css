@@ -2238,15 +2238,25 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   letter-spacing: 0.03em;
 }
 .close-detail {
-  position: absolute; top: 14px; right: 14px;
-  width: 40px; height: 40px;
-  background: rgba(0,0,0,0.5);
-  border: 1px solid rgba(255,255,255,0.2);
+  /* iOS Safari 対応 (野沢さん指摘 2026-05-03 「閉じる ボタンが押せない、 特にキャラ詳細から戻れない」):
+     position: fixed で画面に固定 / safe-area-inset で notch+URLバー回避 / 48px tap領域 / z-index高 */
+  position: fixed;
+  top: max(14px, calc(env(safe-area-inset-top, 0px) + 14px));
+  right: max(14px, calc(env(safe-area-inset-right, 0px) + 14px));
+  width: 48px; height: 48px;
+  background: rgba(0,0,0,0.7);
+  border: 1px solid rgba(255,255,255,0.3);
   color: #fff; cursor: pointer;
-  border-radius: 50%; font-size: 22px; font-family: inherit;
-  z-index: 2;
+  border-radius: 50%; font-size: 24px; font-family: inherit; line-height: 1;
+  z-index: 9999;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  -webkit-tap-highlight-color: rgba(255,255,255,0.2);
+  touch-action: manipulation;
 }
 .close-detail:hover { background: rgba(255,255,255,0.15); }
+.close-detail:active { transform: scale(0.92); }
+/* char-detail が非 active 時は close-detail も非表示 (fixed なので明示制御必要) */
+#char-detail:not(.active) .close-detail { display: none; }
 
 /* prev/next ナビ */
 .char-detail-nav {
