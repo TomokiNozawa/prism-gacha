@@ -3670,9 +3670,9 @@ body.has-offline-banner .topbar { margin-top: 30px; }
 .relations-canvas:active { cursor: grabbing; }
 .relations-canvas svg {
   /* 2026-05-03 野沢さん指示「最初拡大されすぎ」 対策:
-   * 内部viewBox は座標 scale 後の総空間 (3000x2400)、 表示サイズは控えめ (2200x1760) で
-   * デフォルトズーム比率 0.73 = 画面に収まりやすく、 スクロール量も抑制 */
-  width: 2200px; height: 1760px;
+   * 内部viewBox = 座標 scale 後の総空間 (3000x2400) + 周囲200pxバッファ = 3400x2800 (比率 1.214)
+   * 表示サイズ 2200x1820 で比率一致、 縮小率 0.647 → 画面に収まりやすく + スクロール量抑制 */
+  width: 2200px; height: 1820px;
   flex-shrink: 0;
   pointer-events: auto;
 }

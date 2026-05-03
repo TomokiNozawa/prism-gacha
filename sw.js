@@ -7,7 +7,7 @@
 //
 // HTML/JSON/Firebase API はキャッシュせず常にネットワーク優先 (更新即反映+認証/DBの鮮度維持)。
 
-const SW_VERSION = '20260503j';  // 画像永続cache 分離 (Ver bump 時の全DL し直し問題を解消、 野沢さん指摘 2026-05-03)
+const SW_VERSION = '20260503k';  // 画像永続cache 分離 (Ver bump 時の全DL し直し問題を解消、 野沢さん指摘 2026-05-03)
 const STATIC_CACHE = `prismaera-static-${SW_VERSION}`;
 const BGM_CACHE    = `prismaera-bgm-${SW_VERSION}`;
 const LOC_CACHE    = `prismaera-loc-${SW_VERSION}`;
