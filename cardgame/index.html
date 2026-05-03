@@ -7,7 +7,7 @@
 <title>PCB | Prismaera Cards Battle</title>
 <link rel="icon" href="/images/icons/icon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
-<link rel="stylesheet" href="./style.css?v=20260504m">
+<link rel="stylesheet" href="./style.css?v=20260504n">
 </head>
 <body>
 
@@ -205,31 +205,33 @@
 <!-- 結果に戻る floating ボタン (場を見る時に右下) -->
 <button id="result-peek-btn" class="cg-result-peek-btn" onclick="reopenResult()" hidden>📋 結果に戻る</button>
 
-<!-- P-5: デッキ編集モーダル (3スロット + フィルター強化) -->
+<!-- P-5: スロット選択モーダル (デッキ編集前段、 野沢さん指示 2026-05-04 「最初に選ばせて」) -->
+<div id="deck-slot-picker-modal" class="cg-modal" hidden>
+  <div class="cg-modal-backdrop" onclick="closeDeckSlotPicker()"></div>
+  <div class="cg-modal-card cg-deck-slot-picker-card">
+    <button class="cg-modal-close" onclick="closeDeckSlotPicker()" aria-label="閉じる">×</button>
+    <h2 class="cg-modal-title">⚙️ どのデッキを編集?</h2>
+    <p class="cg-modal-detail">3つのデッキスロットから選んで編集します。 「⭐使用中」 が現在対戦で使うデッキです。</p>
+    <div class="cg-deck-slot-picker-list" id="deck-slot-picker-list"></div>
+    <div class="cg-modal-actions">
+      <button class="cg-btn secondary" onclick="closeDeckSlotPicker()">キャンセル</button>
+    </div>
+  </div>
+</div>
+
+<!-- P-5: デッキ編集モーダル (1スロット編集に絞る、 切替は前段で済む) -->
 <div id="deck-builder-modal" class="cg-modal" hidden>
   <div class="cg-modal-backdrop" onclick="closeDeckBuilder()"></div>
   <div class="cg-modal-card cg-deck-builder-card">
     <button class="cg-modal-close" onclick="closeDeckBuilder()" aria-label="閉じる">×</button>
     <div class="cg-deck-builder-header">
-      <h2 class="cg-modal-title">⚙️ デッキ編集</h2>
+      <button type="button" class="cg-deck-builder-back" onclick="backToSlotPicker()" title="スロット選択へ戻る">← Slot</button>
+      <h2 class="cg-modal-title">⚙️ Slot <span id="deck-builder-slot-num">1</span></h2>
       <div class="cg-deck-builder-counter">
         <span id="deck-builder-count">0</span> / 12 枚
       </div>
     </div>
-    <!-- 3 スロット切替 -->
-    <div class="cg-deck-slots" id="deck-slots">
-      <button type="button" class="cg-deck-slot" data-slot="1">
-        <span class="cg-deck-slot-num">1</span>
-        <span class="cg-deck-slot-status" data-slot-status="1"></span>
-      </button>
-      <button type="button" class="cg-deck-slot" data-slot="2">
-        <span class="cg-deck-slot-num">2</span>
-        <span class="cg-deck-slot-status" data-slot-status="2"></span>
-      </button>
-      <button type="button" class="cg-deck-slot" data-slot="3">
-        <span class="cg-deck-slot-num">3</span>
-        <span class="cg-deck-slot-status" data-slot-status="3"></span>
-      </button>
+    <div class="cg-deck-active-toggle-row">
       <button type="button" class="cg-deck-active-toggle" id="btn-deck-set-active">
         ⭐ このスロットを使用中に
       </button>
@@ -325,8 +327,10 @@
       </div>
     </div>
     <div class="cg-modal-actions">
-      <button class="cg-btn secondary" onclick="closeCharDetail()">閉じる</button>
+      <button class="cg-btn secondary" onclick="closeCharDetail()">戻る</button>
       <button class="cg-btn primary" id="char-detail-place-btn" style="display:none">📍 配置先を選ぶ</button>
+      <button class="cg-btn primary" id="char-detail-deck-add-btn" style="display:none">📥 デッキに加える</button>
+      <button class="cg-btn secondary" id="char-detail-deck-remove-btn" style="display:none">✕ デッキから外す</button>
     </div>
   </div>
 </div>
@@ -404,6 +408,6 @@
   </div>
 </div>
 
-<script src="./script.js?v=20260504m"></script>
+<script src="./script.js?v=20260504n"></script>
 </body>
 </html>

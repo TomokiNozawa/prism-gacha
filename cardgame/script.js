@@ -140,10 +140,10 @@ function updateMuteUI() {
 // cards.json は手書き override (同名なら cards.json 優先)
 async function loadMasters() {
   const [c, k, l, p] = await Promise.all([
-    fetch('./cards.json?v=20260504m').then(r => r.json()),
-    fetch('./combos.json?v=20260504m').then(r => r.json()),
-    fetch('./lane_effects.json?v=20260504m').then(r => r.json()),
-    fetch('./data/pool.json?v=20260504m').then(r => r.json()).catch(() => []),
+    fetch('./cards.json?v=20260504n').then(r => r.json()),
+    fetch('./combos.json?v=20260504n').then(r => r.json()),
+    fetch('./lane_effects.json?v=20260504n').then(r => r.json()),
+    fetch('./data/pool.json?v=20260504n').then(r => r.json()).catch(() => []),
   ]);
   // pool 全カード ← cards.json で override
   const cardsByName = new Map();
@@ -720,9 +720,36 @@ function showCardDetail(card, context, handIdx) {
       </div>`;
     }).join('');
   }
-  // 配置ボタンは廃止 (野沢さん指示 2026-05-04: 「キャラ押した時はそのまま配置したい場合もある」 → タップ = 配置に戻した、 詳細はℹボタンのみ)
+  // ボタン制御: context によって 配置ボタン / デッキ追加・削除ボタンを切替
   const placeBtn = $('#char-detail-place-btn');
+  const deckAddBtn = $('#char-detail-deck-add-btn');
+  const deckRemoveBtn = $('#char-detail-deck-remove-btn');
   if (placeBtn) placeBtn.style.display = 'none';
+  if (deckAddBtn) deckAddBtn.style.display = 'none';
+  if (deckRemoveBtn) deckRemoveBtn.style.display = 'none';
+  if (context === 'deck-builder' && card.id) {
+    const isInDeck = _deckBuilderState.selected.includes(card.id);
+    if (isInDeck) {
+      if (deckRemoveBtn) {
+        deckRemoveBtn.style.display = '';
+        deckRemoveBtn.onclick = () => {
+          toggleDeckCard(card.id);
+          closeCharDetail();
+        };
+      }
+    } else {
+      if (deckAddBtn) {
+        const full = _deckBuilderState.selected.length >= DECK_SIZE;
+        deckAddBtn.style.display = '';
+        deckAddBtn.disabled = full;
+        deckAddBtn.textContent = full ? '⚠️ デッキは満員 (12/12)' : '📥 デッキに加える';
+        deckAddBtn.onclick = () => {
+          toggleDeckCard(card.id);
+          closeCharDetail();
+        };
+      }
+    }
+  }
   $('#char-detail-modal').hidden = false;
   _setBodyModalOpen();
 }
@@ -1148,8 +1175,47 @@ let _deckBuilderState = {
   ownedOnly: false,
 };
 
-function openDeckBuilder() {
-  _deckBuilderState.editSlot = getActiveSlot();
+// ホーム「デッキ編集」 → スロット選択 → 編集モード (野沢さん指示 2026-05-04)
+function openDeckSlotPicker() {
+  _renderDeckSlotPicker();
+  $('#deck-slot-picker-modal').hidden = false;
+  _setBodyModalOpen();
+}
+function closeDeckSlotPicker() {
+  $('#deck-slot-picker-modal').hidden = true;
+  _setBodyModalOpen();
+}
+function _renderDeckSlotPicker() {
+  const list = $('#deck-slot-picker-list');
+  if (!list) return;
+  const active = getActiveSlot();
+  list.innerHTML = '';
+  for (let n = 1; n <= DECK_SLOT_COUNT; n++) {
+    const ids = loadDeckSlot(n);
+    const cnt = ids ? ids.length : 0;
+    const isActive = n === active;
+    const status = cnt > 0 ? `${cnt} 枚` : '未設定';
+    const item = document.createElement('div');
+    item.className = 'cg-deck-slot-pick' + (isActive ? ' active' : '');
+    item.innerHTML = `
+      <div class="cg-deck-slot-pick-num">Slot ${n}</div>
+      <div class="cg-deck-slot-pick-status">${status}${isActive ? ' <span class="cg-active-mark">⭐使用中</span>' : ''}</div>
+      <button type="button" class="cg-btn primary cg-deck-slot-pick-btn" data-slot="${n}">編集 →</button>
+    `;
+    list.appendChild(item);
+  }
+  list.querySelectorAll('.cg-deck-slot-pick-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      const n = parseInt(b.dataset.slot, 10);
+      closeDeckSlotPicker();
+      openDeckBuilder(n);
+    });
+  });
+}
+
+// 編集モードへ (slot 引数で対象スロット指定)
+function openDeckBuilder(slot) {
+  _deckBuilderState.editSlot = slot || getActiveSlot();
   _loadEditingSlot();
   _deckBuilderState.tierFilter = 'all';
   _deckBuilderState.chapterFilter = 'all';
@@ -1162,10 +1228,17 @@ function openDeckBuilder() {
   const fac = $('#deck-faction-filter'); if (fac) fac.value = 'all';
   const owned = $('#deck-owned-only'); if (owned) owned.checked = false;
   _populateFactionFilter();
-  _updateSlotUI();
+  $('#deck-builder-slot-num').textContent = _deckBuilderState.editSlot;
+  _updateActiveToggleUI();
   renderDeckBuilderGrid();
   $('#deck-builder-modal').hidden = false;
-  _setBodyModalOpen(true);
+  _setBodyModalOpen();
+}
+
+function backToSlotPicker() {
+  $('#deck-builder-modal').hidden = true;
+  _setBodyModalOpen();
+  setTimeout(() => openDeckSlotPicker(), 50);
 }
 
 function _loadEditingSlot() {
@@ -1191,40 +1264,17 @@ function _populateFactionFilter() {
   });
 }
 
-function _updateSlotUI() {
-  $$('#deck-slots .cg-deck-slot').forEach(b => {
-    const n = parseInt(b.dataset.slot, 10);
-    b.classList.toggle('editing', n === _deckBuilderState.editSlot);
-    b.classList.toggle('active', n === getActiveSlot());
-  });
-  // 各 slot の status (枚数 / アクティブ表示) 更新
-  for (let n = 1; n <= DECK_SLOT_COUNT; n++) {
-    const status = document.querySelector(`[data-slot-status="${n}"]`);
-    if (!status) continue;
-    const ids = loadDeckSlot(n);
-    const cnt = ids ? ids.length : 0;
-    const isActive = n === getActiveSlot();
-    status.innerHTML = `${cnt}枚${isActive ? ' <span class="cg-active-mark">⭐使用中</span>' : ''}`;
-  }
+function _updateActiveToggleUI() {
   const setActiveBtn = $('#btn-deck-set-active');
-  if (setActiveBtn) {
-    const editingIsActive = _deckBuilderState.editSlot === getActiveSlot();
-    setActiveBtn.disabled = editingIsActive;
-    setActiveBtn.textContent = editingIsActive ? '✅ 使用中' : `⭐ Slot ${_deckBuilderState.editSlot} を使用中に`;
-  }
-}
-
-function switchEditSlot(n) {
-  if (n < 1 || n > DECK_SLOT_COUNT || n === _deckBuilderState.editSlot) return;
-  _deckBuilderState.editSlot = n;
-  _loadEditingSlot();
-  _updateSlotUI();
-  renderDeckBuilderGrid();
+  if (!setActiveBtn) return;
+  const editingIsActive = _deckBuilderState.editSlot === getActiveSlot();
+  setActiveBtn.disabled = editingIsActive;
+  setActiveBtn.textContent = editingIsActive ? '✅ Slot ' + _deckBuilderState.editSlot + ' を使用中' : `⭐ Slot ${_deckBuilderState.editSlot} を使用中に`;
 }
 
 function setEditingAsActive() {
   setActiveSlot(_deckBuilderState.editSlot);
-  _updateSlotUI();
+  _updateActiveToggleUI();
   updateDeckBuilderSubText();
 }
 
@@ -1233,11 +1283,12 @@ function closeDeckBuilder() {
   _setBodyModalOpen(false);
 }
 
-// body スクロールロック (モーダル open/close で呼ぶ)
+// body + html スクロールロック (モーダル open/close で呼ぶ、 PC でも有効)
 function _setBodyModalOpen() {
   setTimeout(() => {
     const anyOpen = !!document.querySelector('.cg-modal:not([hidden])');
     document.body.classList.toggle('cg-modal-open', anyOpen);
+    document.documentElement.classList.toggle('cg-modal-open', anyOpen);
   }, 10);
 }
 
@@ -1295,7 +1346,10 @@ function renderDeckBuilderGrid() {
       </div>`;
     }).join('');
     grid.querySelectorAll('.cg-deck-list-item').forEach(el => {
-      el.addEventListener('click', () => toggleDeckCard(el.dataset.id));
+      el.addEventListener('click', () => {
+        const card = state.allCards.find(c => c.id === el.dataset.id);
+        if (card) showCardDetail(card, 'deck-builder', null);
+      });
     });
   }
   $('#deck-builder-count').textContent = s.selected.length;
@@ -1391,7 +1445,7 @@ function saveBuilderDeck() {
     return;
   }
   saveDeckSlot(_deckBuilderState.editSlot, _deckBuilderState.selected);
-  _updateSlotUI();
+  _updateActiveToggleUI();
   updateDeckBuilderSubText();
   closeDeckBuilder();
 }
@@ -1516,9 +1570,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('#btn-mulligan').addEventListener('click', mulligan);
   $('#btn-cg-mute').addEventListener('click', toggleBgmMute);
   $('.cg-back').addEventListener('click', onBackClick);
-  // P-5: デッキ編集
+  // P-5: デッキ編集 (ホームの「デッキ編集」 ボタン → スロット選択)
   const openDeckBtn = document.getElementById('btn-open-deck-builder');
-  if (openDeckBtn) openDeckBtn.addEventListener('click', openDeckBuilder);
+  if (openDeckBtn) openDeckBtn.addEventListener('click', openDeckSlotPicker);
   const tabsEl = document.getElementById('deck-builder-tabs');
   if (tabsEl) {
     tabsEl.addEventListener('click', (e) => {
@@ -1553,13 +1607,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (ownedEl) ownedEl.addEventListener('change', (e) => {
     _deckBuilderState.ownedOnly = e.target.checked;
     renderDeckBuilderGrid();
-  });
-  // 3 スロット切替
-  const slotsEl = document.getElementById('deck-slots');
-  if (slotsEl) slotsEl.addEventListener('click', (e) => {
-    const sl = e.target.closest('.cg-deck-slot');
-    if (!sl) return;
-    switchEditSlot(parseInt(sl.dataset.slot, 10));
   });
   const setActiveBtn = document.getElementById('btn-deck-set-active');
   if (setActiveBtn) setActiveBtn.addEventListener('click', setEditingAsActive);
@@ -1599,5 +1646,7 @@ window.closeCombosModal = closeCombosModal;
 window.closeCharDetail = closeCharDetail;
 window.closeDeckBuilder = closeDeckBuilder;
 window.closeDeckFilter = closeDeckFilter;
+window.closeDeckSlotPicker = closeDeckSlotPicker;
+window.backToSlotPicker = backToSlotPicker;
 window.peekBoard = peekBoard;
 window.reopenResult = reopenResult;

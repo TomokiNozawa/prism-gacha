@@ -42,12 +42,16 @@ body {
     linear-gradient(180deg, #1a1d3a 0%, #14163a 100%);
   background-attachment: fixed;
 }
-/* モーダル open 中は背景スクロール禁止 (野沢さん指示「ロックしてスクロールで操作できるように」) */
+/* モーダル open 中は背景スクロール禁止 (html + body 両方必要、 PC でも効く) */
+html.cg-modal-open,
 body.cg-modal-open {
-  overflow: hidden;
+  overflow: hidden !important;
   touch-action: none;
+  /* iOS Safari の overscroll bounce も止める */
+  position: relative;
 }
 body.cg-modal-open .cg-modal-card,
+body.cg-modal-open .cg-deck-builder-list,
 body.cg-modal-open .cg-deck-builder-grid {
   touch-action: pan-y;  /* モーダル内は scroll 可能 */
 }
@@ -355,14 +359,17 @@ body.cg-modal-open .cg-deck-builder-grid {
 
 .cg-deck-list-img {
   width: 64px; height: 88px;
+  min-width: 64px; max-width: 64px;
   background-size: cover;
   background-position: center top;
   background-color: var(--bg-card-hi);
   background-repeat: no-repeat;
   border-radius: 6px;
   flex-shrink: 0;
+  flex-grow: 0;
   position: relative;
-  overflow: hidden;
+  overflow: hidden !important;
+  box-sizing: border-box;
 }
 .cg-deck-list-tier {
   position: absolute;
@@ -484,7 +491,7 @@ body.cg-modal-open .cg-deck-builder-grid {
 
 @media (max-width: 480px) {
   .cg-deck-list-item { padding: 6px 8px; gap: 8px; min-height: 78px; }
-  .cg-deck-list-img { width: 54px; height: 76px; }
+  .cg-deck-list-img { width: 54px; height: 76px; min-width: 54px; max-width: 54px; }
   .cg-deck-list-tier { font-size: 9px; height: 14px; }
   .cg-deck-list-name { font-size: 12px; }
   .cg-deck-list-faction { font-size: 9px; padding: 1px 6px; }
@@ -618,7 +625,71 @@ body.cg-modal-open .cg-deck-builder-grid {
   box-shadow: 0 0 6px rgba(95,223,255,0.8);
 }
 
-/* ===== 3 スロット切替 ===== */
+/* ===== スロット選択モーダル (デッキ編集前段) ===== */
+.cg-deck-slot-picker-card {
+  max-width: 420px;
+  width: calc(100vw - 32px);
+  text-align: left;
+  padding: 22px 18px 16px;
+}
+.cg-deck-slot-picker-list {
+  display: flex; flex-direction: column; gap: 10px;
+  margin: 14px 0;
+}
+.cg-deck-slot-pick {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.cg-deck-slot-pick.active {
+  border-color: var(--gold);
+  box-shadow: 0 0 12px rgba(255, 213, 107, 0.25);
+  background: rgba(255, 213, 107, 0.08);
+}
+.cg-deck-slot-pick-num {
+  font-size: 16px; font-weight: 700;
+  color: var(--text);
+  min-width: 60px;
+}
+.cg-deck-slot-pick-status {
+  flex: 1;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.cg-deck-slot-pick-btn {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  font-size: 13px;
+}
+
+/* ===== 編集モーダル ヘッダ + 戻るボタン ===== */
+.cg-deck-builder-back {
+  background: rgba(35, 40, 82, 0.6);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-dim);
+  padding: 4px 10px;
+  font-size: 11px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .12s, color .12s;
+}
+.cg-deck-builder-back:hover {
+  background: rgba(124, 93, 255, 0.3);
+  color: var(--text);
+}
+.cg-deck-active-toggle-row {
+  margin: 8px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.cg-deck-active-toggle-row .cg-deck-active-toggle {
+  width: 100%;
+}
+
+/* ===== 旧 3 スロット切替 (廃止、 残してコメント保持) ===== */
 .cg-deck-slots {
   display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
   padding: 8px 0;
