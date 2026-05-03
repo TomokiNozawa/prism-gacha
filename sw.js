@@ -7,12 +7,16 @@
 //
 // HTML/JSON/Firebase API はキャッシュせず常にネットワーク優先 (更新即反映+認証/DBの鮮度維持)。
 
-const SW_VERSION = '20260503d';  // s1c5 公開準備 + ID-based キャラリンク + WM 整合性大修正 + s1c5 全アセット登録
+const SW_VERSION = '20260503e';  // 画像永続cache 分離 (Ver bump 時の全DL し直し問題を解消、 野沢さん指摘 2026-05-03)
 const STATIC_CACHE = `prismaera-static-${SW_VERSION}`;
 const BGM_CACHE    = `prismaera-bgm-${SW_VERSION}`;
 const LOC_CACHE    = `prismaera-loc-${SW_VERSION}`;
 // 「全アセットDL」 ボタンが直接書き込む cache (SW activate で削除されない、 SW_VERSION非依存)
 const OFFLINE_SAVED = 'prismaera-offline-saved';
+// キャラ画像永続 cache (SW_VERSION 非依存、 cache buster 変更でも再DL 不要、 ignoreSearch:true で query 差異許容)
+// 野沢さん指摘 2026-05-03 「Ver.変わるたびに全部ダウンロードし直しなの害悪すぎ」 への対応:
+// 画像は cache buster で URL が変わっても中身は同一、 activate で削除しない永続 cache に置く
+const IMG_PERSIST  = 'prismaera-img-persist';
 
 // プリキャッシュ対象 BGM — script.js BGM_LIST と同期 (新曲追加時はここも更新)
 // 配列順は BGM_LIST と完全同期 (dawn/watch/tide/sands/rift/church/aquasis/crimson/sahar = 9曲)
@@ -70,8 +74,8 @@ self.addEventListener('install', (event) => {
 // ───── activate: 古いcache掃除 + claim ─────
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
-    // OFFLINE_SAVED は版を跨いで保持 (ユーザーが手動で DL したものを SW更新で消さない)
-    const validNames = new Set([STATIC_CACHE, BGM_CACHE, LOC_CACHE, OFFLINE_SAVED]);
+    // OFFLINE_SAVED + IMG_PERSIST は版を跨いで保持 (ユーザーが DL したもの + 画像永続cache を SW更新で消さない)
+    const validNames = new Set([STATIC_CACHE, BGM_CACHE, LOC_CACHE, OFFLINE_SAVED, IMG_PERSIST]);
     const keys = await caches.keys();
     await Promise.all(
       keys
@@ -97,12 +101,18 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // キャラ画像 — IMG_PERSIST cache (SW_VERSION 非依存、 cache buster 変更で再DL しない)
+  // 野沢さん指摘 2026-05-03 「Ver変わるたび全DL害悪」 → /images/characters/ は永続cache へ
+  if (path.startsWith('/images/characters/')) {
+    event.respondWith(staleWhileRevalidate(req, IMG_PERSIST));
+    return;
+  }
   // 場所画像 — 専用cache (LOC_CACHE) で stale-while-revalidate (OFFLINE_SAVED 最優先)
   if (LOC_PATH.test(path)) {
     event.respondWith(staleWhileRevalidate(req, LOC_CACHE));
     return;
   }
-  // その他静的アセット (キャラ画像/CSS/JS/フォント等) — 既存挙動 (OFFLINE_SAVED 最優先)
+  // その他静的アセット (CSS/JS/フォント等) — 既存挙動 (OFFLINE_SAVED 最優先)
   if (STATIC_EXT.test(path + url.search)) {
     event.respondWith(staleWhileRevalidate(req, STATIC_CACHE));
     return;
@@ -199,14 +209,21 @@ async function staleWhileRevalidate(req, cacheName) {
     if (savedCached) return savedCached;
   } catch (e) {}
   const cache = await caches.open(cacheName);
-  const cached = await cache.match(req);
-  // cached あり: 即返し、 background で revalidate (put は fire-and-forget でOK、 すでに hit するため)
+  // ignoreSearch:true で cache buster 差異許容 (野沢さん指摘 2026-05-03 「Ver変わるたび全DL害悪」 の根本対策)
+  // 同 path で cache hit すれば再DL不要、 query (?v=xxx) は無視
+  const cached = await cache.match(req, { ignoreSearch: true });
+  // cached あり: 即返し、 background で revalidate
+  // ただし IMG_PERSIST はファイル名で永続管理 (cache buster でなくファイル名変更で更新する運用)
+  // → revalidate しない (background fetch を抑制 → 電池消費削減 + 通信量削減)
   if (cached) {
-    fetch(req).then(res => {
-      if (res && res.ok && res.type !== 'opaque') {
-        cache.put(req, res.clone()).then(() => trimCache(cacheName)).catch(() => {});
-      }
-    }).catch(() => {});
+    if (cacheName !== IMG_PERSIST) {
+      // STATIC/LOC は revalidate して背景で最新化
+      fetch(req).then(res => {
+        if (res && res.ok && res.type !== 'opaque') {
+          cache.put(req, res.clone()).then(() => trimCache(cacheName)).catch(() => {});
+        }
+      }).catch(() => {});
+    }
     return cached;
   }
   // cache miss: network で取って put を await してから返す (race condition 回避)
