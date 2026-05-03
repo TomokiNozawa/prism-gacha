@@ -140,10 +140,10 @@ function updateMuteUI() {
 // cards.json は手書き override (同名なら cards.json 優先)
 async function loadMasters() {
   const [c, k, l, p] = await Promise.all([
-    fetch('./cards.json?v=20260504k').then(r => r.json()),
-    fetch('./combos.json?v=20260504k').then(r => r.json()),
-    fetch('./lane_effects.json?v=20260504k').then(r => r.json()),
-    fetch('./data/pool.json?v=20260504k').then(r => r.json()).catch(() => []),
+    fetch('./cards.json?v=20260504l').then(r => r.json()),
+    fetch('./combos.json?v=20260504l').then(r => r.json()),
+    fetch('./lane_effects.json?v=20260504l').then(r => r.json()),
+    fetch('./data/pool.json?v=20260504l').then(r => r.json()).catch(() => []),
   ]);
   // pool 全カード ← cards.json で override
   const cardsByName = new Map();
@@ -155,36 +155,115 @@ async function loadMasters() {
   state.laneEffectsAll = l.filter(e => isChapterReleased(e.chapter));
   const cardNames = new Set(state.allCards.map(card => card.name));
   state.combos = k.filter(combo => combo.chars.every(name => cardNames.has(name)));
+  // ユーザー所持・凸数を反映 (本体 prism-gacha localStorage)
+  applyUserDupes();
 }
 
-// ===== P-5: デッキ管理 (localStorage 永続化、 12枚) =====
-const DECK_LS_KEY = 'cg_deck_v1';
+// ===== P-5: デッキ管理 (3スロット、 localStorage 永続化、 12枚) =====
 const DECK_SIZE = 12;
+const DECK_SLOT_COUNT = 3;
+const DECK_SLOT_KEY = (n) => `cg_deck_v2_slot${n}`;
+const ACTIVE_SLOT_KEY = 'cg_deck_active_slot';
+// 本体 Prismaera の MAX_DUPS と同期 (script.js 692)
+const MAX_DUPS = { R: 1, SR: 2, SSR: 3, UR: 4, LR: 4 };
 
-function loadDeck() {
+function getActiveSlot() {
+  const v = parseInt(localStorage.getItem(ACTIVE_SLOT_KEY) || '1', 10);
+  return v >= 1 && v <= DECK_SLOT_COUNT ? v : 1;
+}
+function setActiveSlot(n) {
+  if (n >= 1 && n <= DECK_SLOT_COUNT) localStorage.setItem(ACTIVE_SLOT_KEY, String(n));
+}
+function loadDeckSlot(n) {
   try {
-    const raw = localStorage.getItem(DECK_LS_KEY);
+    const raw = localStorage.getItem(DECK_SLOT_KEY(n));
     if (!raw) return null;
     const ids = JSON.parse(raw);
-    if (!Array.isArray(ids)) return null;
-    return ids;
+    return Array.isArray(ids) ? ids : null;
   } catch (e) { return null; }
 }
-
-function saveDeck(ids) {
-  localStorage.setItem(DECK_LS_KEY, JSON.stringify(ids));
+function saveDeckSlot(n, ids) {
+  localStorage.setItem(DECK_SLOT_KEY(n), JSON.stringify(ids));
 }
 
-// 現在使用するデッキ (12枚 card オブジェクト) を返す。 保存済みあればそれ、 なければデフォルト 12枚 (cards.json 手書き)
+// 現在使用するデッキ (= active slot)
 function getCurrentDeck() {
-  const savedIds = loadDeck();
-  if (savedIds && savedIds.length === DECK_SIZE) {
+  const ids = loadDeckSlot(getActiveSlot());
+  if (ids && ids.length === DECK_SIZE) {
     const byId = new Map(state.allCards.map(c => [c.id, c]));
-    const cards = savedIds.map(id => byId.get(id)).filter(Boolean);
+    const cards = ids.map(id => byId.get(id)).filter(Boolean);
     if (cards.length === DECK_SIZE) return cards;
   }
-  // フォールバック: cards.json (手書き 12 枚) を使う
-  return state.allCards.filter(c => c.id && c.id.match(/^(lr_1_prisma|ur_1_seraph|ur_2_kaguya|ssr_1_linae|ssr_2_chanty|ssr_3_glaciel|sr_1_lumina|sr_2_tsuki|sr_3_coralia|r_1_chisato|r_2_kai|r_3_viola)$/)).slice(0, DECK_SIZE);
+  // フォールバック: cards.json (手書き 12 枚)
+  const defaultIds = ['lr_1_prisma','ur_1_seraph','ur_2_kaguya','ssr_1_linae','ssr_2_chanty','ssr_3_glaciel','sr_1_lumina','sr_2_tsuki','sr_3_coralia','r_1_chisato','r_2_kai','r_3_viola'];
+  return defaultIds.map(id => state.allCards.find(c => c.id === id)).filter(Boolean).slice(0, DECK_SIZE);
+}
+
+// ===== 凸数: 本体 Prismaera の dupCounts を反映 =====
+function getUserDupCounts() {
+  try {
+    const raw = JSON.parse(localStorage.getItem('prism-gacha') || '{}');
+    return raw.dupCounts || {};
+  } catch (e) { return {}; }
+}
+function getUserOwnedSet() {
+  try {
+    const raw = JSON.parse(localStorage.getItem('prism-gacha') || '{}');
+    return raw.unlockedSet || {};
+  } catch (e) { return {}; }
+}
+
+// 本体の dupCounts から allCards の dupes を上書き、 所持判定も付与
+function applyUserDupes() {
+  const dc = getUserDupCounts();
+  const owned = getUserOwnedSet();
+  state.allCards.forEach(c => {
+    const key = `${c.tier}_${c.name}`;
+    if (key in dc) {
+      c.dupes = dc[key];
+      c._owned = true;
+    } else if (owned[key]) {
+      c.dupes = 0;
+      c._owned = true;
+    } else {
+      c.dupes = 0;
+      c._owned = false;
+    }
+    c._maxDupes = MAX_DUPS[c.tier] || 0;
+  });
+}
+
+// ===== 凸数 効果影響 (DESIGN 4.3 簡易実装) =====
+// 凸 = 半分以上 → 数値 +1
+// 凸 = MAX → 効果範囲拡大 (self_lane → adjacent_lanes 等) + cost -1
+function effectiveCost(card) {
+  if (isMaxDup(card)) return Math.max(0, card.cost - 1);
+  return card.cost;
+}
+function isHalfDup(card) {
+  const max = MAX_DUPS[card.tier] || 0;
+  return max > 0 && (card.dupes || 0) >= Math.ceil(max / 2);
+}
+function isMaxDup(card) {
+  const max = MAX_DUPS[card.tier] || 0;
+  return max > 0 && (card.dupes || 0) >= max;
+}
+// onPlay 効果を凸数で動的拡張
+function effectiveEffect(card) {
+  const base = card.effect || {};
+  if (!base.trigger) return base;
+  const e = { ...base };
+  if (isHalfDup(card) && e.power != null) e.power += 1;  // 数値 +1
+  if (isMaxDup(card)) {
+    // 効果範囲を 1 段拡大
+    const expand = {
+      'self_lane': 'adjacent_lanes',
+      'adjacent_lanes': 'all_lanes',
+      'opp_self_lane': 'all_opp_lanes',
+    };
+    if (expand[e.target]) e.target = expand[e.target];
+  }
+  return e;
 }
 
 // AI 用デッキ: ランダムに 12 枚 (公開済章 + tier バランス考慮)
@@ -349,8 +428,13 @@ async function drawTurnStart() {
 }
 
 // ===== Power 計算 (派閥シナジー / レーン効果 / コンボ / 凸数 を毎回動的) =====
+// 凸 0 = +0、 凸 半分以上 = +1、 凸 MAX = +2 (DESIGN 4.3 段階パターン簡易版)
 function dupeBonusOf(card) {
-  return (card.dupes || 0) * (card.dupeBonus || 0);
+  const max = MAX_DUPS[card.tier] || 0;
+  if (max === 0 || (card.dupes || 0) === 0) return 0;
+  if (card.dupes >= max) return 2;
+  if (card.dupes >= Math.ceil(max / 2)) return 1;
+  return 0;
 }
 function laneEffectFor(card, lane) {
   const e = state.laneEffects[lane];
@@ -580,8 +664,9 @@ function updateLanePowers() {
 function onHandCardClick(idx) {
   if (state.busy || state.ended) return;
   const card = state.hand[idx];
-  if (card.cost > state.cost - state.costUsed) {
-    setMessage(`コスト不足: ${card.name} (⚡${card.cost} 必要、 残${state.cost - state.costUsed})`, 'alert');
+  const cost = effectiveCost(card);
+  if (cost > state.cost - state.costUsed) {
+    setMessage(`コスト不足: ${card.name} (⚡${cost} 必要、 残${state.cost - state.costUsed})`, 'alert');
     return;
   }
   // 同カード再タップで選択解除
@@ -639,8 +724,9 @@ function showCardDetail(card, context, handIdx) {
   const placeBtn = $('#char-detail-place-btn');
   if (placeBtn) placeBtn.style.display = 'none';
   $('#char-detail-modal').hidden = false;
+  _setBodyModalOpen();
 }
-function closeCharDetail() { $('#char-detail-modal').hidden = true; }
+function closeCharDetail() { $('#char-detail-modal').hidden = true; _setBodyModalOpen(); }
 
 // ===== レーン選択 (配置) =====
 $$('#lanes-me .cg-lane').forEach(el => {
@@ -663,7 +749,7 @@ function placeMyCard(handIdx, lane) {
   card._appliedTo = [];
   state.hand.splice(handIdx, 1);
   state.board.me[lane].push(card);
-  state.costUsed += card.cost;
+  state.costUsed += effectiveCost(card);
   state.thisTurnPlacements.push({ cardId: card.id, lane });
   state.selectedCardIdx = -1;
   applyEffect(card, lane, 'me');
@@ -678,9 +764,9 @@ function placeMyCard(handIdx, lane) {
   }, 10);
 }
 
-// ===== 効果発動 (onPlay) =====
+// ===== 効果発動 (onPlay、 凸数で範囲拡大 + power +1) =====
 function applyEffect(card, lane, side) {
-  const eff = card.effect;
+  const eff = effectiveEffect(card);
   if (!eff || eff.trigger !== 'onPlay') return;
   const myBoard = state.board[side];
   const oppSide = side === 'me' ? 'opp' : 'me';
@@ -739,7 +825,7 @@ function undoMyCard(lane, boardIdx) {
     });
   }
   state.board.me[lane].splice(boardIdx, 1);
-  state.costUsed -= card.cost;
+  state.costUsed -= effectiveCost(card);
   state.thisTurnPlacements.splice(placementIdx, 1);
   // hand に戻す (state を綺麗に)
   delete card._appliedTo;
@@ -992,10 +1078,10 @@ function showMatchResultModal(icon, title, detailHtml, hasNext) {
   $('#result-icon').textContent = icon;
   $('#result-title').textContent = title;
   $('#result-detail').innerHTML = detailHtml;
-  // 「次の試合へ」 ボタン表示制御
   const nextBtn = $('#result-next-btn');
   if (nextBtn) nextBtn.style.display = hasNext ? '' : 'none';
   $('#result-modal').hidden = false;
+  _setBodyModalOpen();
 }
 
 function nextMatch() {
@@ -1051,57 +1137,156 @@ function reopenResult() {
   $('#result-peek-btn').hidden = true;
 }
 
-// ===== P-5: デッキ編集 UI =====
-let _deckBuilderState = { selected: [], filter: 'all' };
+// ===== P-5: デッキ編集 UI (3 スロット + フィルター強化) =====
+let _deckBuilderState = {
+  selected: [],
+  editSlot: 1,
+  tierFilter: 'all',
+  chapterFilter: 'all',
+  factionFilter: 'all',
+  search: '',
+  ownedOnly: false,
+};
 
 function openDeckBuilder() {
-  // 現在のデッキを編集スタートに (なければデフォルトの 12 枚 id)
-  const current = loadDeck();
-  if (current && current.length > 0) {
-    _deckBuilderState.selected = [...current];
-  } else {
-    _deckBuilderState.selected = getCurrentDeck().map(c => c.id);
-  }
-  _deckBuilderState.filter = 'all';
+  _deckBuilderState.editSlot = getActiveSlot();
+  _loadEditingSlot();
+  _deckBuilderState.tierFilter = 'all';
+  _deckBuilderState.chapterFilter = 'all';
+  _deckBuilderState.factionFilter = 'all';
+  _deckBuilderState.search = '';
+  _deckBuilderState.ownedOnly = false;
   $$('#deck-builder-tabs .cg-deck-tab').forEach(t => t.classList.toggle('active', t.dataset.tier === 'all'));
+  $$('#deck-builder-chapter-tabs .cg-deck-tab').forEach(t => t.classList.toggle('active', t.dataset.chapter === 'all'));
+  const search = $('#deck-search-input'); if (search) search.value = '';
+  const fac = $('#deck-faction-filter'); if (fac) fac.value = 'all';
+  const owned = $('#deck-owned-only'); if (owned) owned.checked = false;
+  _populateFactionFilter();
+  _updateSlotUI();
   renderDeckBuilderGrid();
   $('#deck-builder-modal').hidden = false;
+  _setBodyModalOpen(true);
+}
+
+function _loadEditingSlot() {
+  const ids = loadDeckSlot(_deckBuilderState.editSlot);
+  if (ids && ids.length > 0) {
+    _deckBuilderState.selected = [...ids];
+  } else {
+    // 該当 slot 未設定 → デフォルトデッキで開始
+    _deckBuilderState.selected = getCurrentDeck().map(c => c.id);
+  }
+}
+
+function _populateFactionFilter() {
+  const sel = $('#deck-faction-filter');
+  if (!sel) return;
+  const factions = new Set(state.allCards.map(c => c.faction).filter(Boolean));
+  // 既存 option をリセット (最初の「全派閥」 だけ残す)
+  while (sel.options.length > 1) sel.remove(1);
+  Array.from(factions).sort().forEach(f => {
+    const opt = document.createElement('option');
+    opt.value = f; opt.textContent = f;
+    sel.appendChild(opt);
+  });
+}
+
+function _updateSlotUI() {
+  $$('#deck-slots .cg-deck-slot').forEach(b => {
+    const n = parseInt(b.dataset.slot, 10);
+    b.classList.toggle('editing', n === _deckBuilderState.editSlot);
+    b.classList.toggle('active', n === getActiveSlot());
+  });
+  // 各 slot の status (枚数 / アクティブ表示) 更新
+  for (let n = 1; n <= DECK_SLOT_COUNT; n++) {
+    const status = document.querySelector(`[data-slot-status="${n}"]`);
+    if (!status) continue;
+    const ids = loadDeckSlot(n);
+    const cnt = ids ? ids.length : 0;
+    const isActive = n === getActiveSlot();
+    status.innerHTML = `${cnt}枚${isActive ? ' <span class="cg-active-mark">⭐使用中</span>' : ''}`;
+  }
+  const setActiveBtn = $('#btn-deck-set-active');
+  if (setActiveBtn) {
+    const editingIsActive = _deckBuilderState.editSlot === getActiveSlot();
+    setActiveBtn.disabled = editingIsActive;
+    setActiveBtn.textContent = editingIsActive ? '✅ 使用中' : `⭐ Slot ${_deckBuilderState.editSlot} を使用中に`;
+  }
+}
+
+function switchEditSlot(n) {
+  if (n < 1 || n > DECK_SLOT_COUNT || n === _deckBuilderState.editSlot) return;
+  _deckBuilderState.editSlot = n;
+  _loadEditingSlot();
+  _updateSlotUI();
+  renderDeckBuilderGrid();
+}
+
+function setEditingAsActive() {
+  setActiveSlot(_deckBuilderState.editSlot);
+  _updateSlotUI();
+  updateDeckBuilderSubText();
 }
 
 function closeDeckBuilder() {
   $('#deck-builder-modal').hidden = true;
+  _setBodyModalOpen(false);
+}
+
+// body スクロールロック (モーダル open/close で呼ぶ)
+function _setBodyModalOpen() {
+  setTimeout(() => {
+    const anyOpen = !!document.querySelector('.cg-modal:not([hidden])');
+    document.body.classList.toggle('cg-modal-open', anyOpen);
+  }, 10);
 }
 
 function renderDeckBuilderGrid() {
   const grid = $('#deck-builder-grid');
   if (!grid) return;
-  const filter = _deckBuilderState.filter;
-  const cards = filter === 'all' ? state.allCards : state.allCards.filter(c => c.tier === filter);
-  // tier 順 sort (LR → R)
+  const s = _deckBuilderState;
+  let cards = state.allCards.slice();
+  if (s.tierFilter !== 'all') cards = cards.filter(c => c.tier === s.tierFilter);
+  if (s.chapterFilter !== 'all') cards = cards.filter(c => c.chapter === s.chapterFilter);
+  if (s.factionFilter !== 'all') cards = cards.filter(c => c.faction === s.factionFilter);
+  if (s.search) {
+    const q = s.search.toLowerCase();
+    cards = cards.filter(c => c.name.toLowerCase().includes(q));
+  }
+  if (s.ownedOnly) cards = cards.filter(c => c._owned);
+  // tier 順 sort (LR → R)、 同 tier は cost 降順
   const order = { LR: 5, UR: 4, SSR: 3, SR: 2, R: 1 };
-  cards.sort((a, b) => order[b.tier] - order[a.tier]);
-  grid.innerHTML = cards.map(card => {
-    const isSelected = _deckBuilderState.selected.includes(card.id);
-    const imgUrl = card.img ? '..' + card.img : '';
-    const dupesBadge = card.dupes > 0 ? `<span class="cg-card-dupes">+${card.dupes}</span>` : '';
-    return `<div class="cg-deck-builder-item ${isSelected ? 'selected' : ''}" data-id="${card.id}">
-      <div class="cg-deck-item-tier ${card.tier}">${card.tier}${dupesBadge}</div>
-      <div class="cg-deck-item-img" style="background-image:url('${imgUrl}')"></div>
-      <div class="cg-deck-item-name">${card.name}</div>
-      <div class="cg-deck-item-stats">
-        <span class="cg-card-cost">⚡${card.cost}</span>
-        <span class="cg-card-power">⚔${card.basePower + (card.dupes||0)*(card.dupeBonus||0)}</span>
-      </div>
-      <div class="cg-deck-item-faction" style="background:${factionColor(card.faction)}">${card.faction}</div>
-      ${isSelected ? '<div class="cg-deck-item-check">✓</div>' : ''}
-    </div>`;
-  }).join('');
-  // クリックハンドラ
-  grid.querySelectorAll('.cg-deck-builder-item').forEach(el => {
-    el.addEventListener('click', () => toggleDeckCard(el.dataset.id));
-  });
-  $('#deck-builder-count').textContent = _deckBuilderState.selected.length;
-  $('#deck-builder-count').className = _deckBuilderState.selected.length === DECK_SIZE ? 'cg-deck-count-full' : '';
+  cards.sort((a, b) => (order[b.tier] - order[a.tier]) || (b.cost - a.cost));
+  if (cards.length === 0) {
+    grid.innerHTML = '<p style="color:var(--text-dim);text-align:center;padding:30px;grid-column:1/-1">条件に一致するカードがありません</p>';
+  } else {
+    grid.innerHTML = cards.map(card => {
+      const isSelected = s.selected.includes(card.id);
+      const imgUrl = card.img ? '..' + card.img : '';
+      const dupesBadge = card.dupes > 0 ? `<span class="cg-card-dupes">+${card.dupes}</span>` : '';
+      const dupBonus = dupeBonusOf(card);
+      const totalPower = card.basePower + dupBonus;
+      const cost = effectiveCost(card);
+      const ownedClass = card._owned ? '' : 'unowned';
+      return `<div class="cg-deck-builder-item ${isSelected ? 'selected' : ''} ${ownedClass}" data-id="${card.id}">
+        <div class="cg-deck-item-tier ${card.tier}">${card.tier}${dupesBadge}</div>
+        <div class="cg-deck-item-img" style="background-image:url('${imgUrl}')"></div>
+        <div class="cg-deck-item-name">${card.name}</div>
+        <div class="cg-deck-item-stats">
+          <span class="cg-card-cost">⚡${cost}</span>
+          <span class="cg-card-power">⚔${totalPower}</span>
+        </div>
+        <div class="cg-deck-item-faction" style="background:${factionColor(card.faction)}">${card.faction}</div>
+        ${isSelected ? '<div class="cg-deck-item-check">✓</div>' : ''}
+        ${!card._owned ? '<div class="cg-deck-item-unowned-tag">未所持</div>' : ''}
+      </div>`;
+    }).join('');
+    grid.querySelectorAll('.cg-deck-builder-item').forEach(el => {
+      el.addEventListener('click', () => toggleDeckCard(el.dataset.id));
+    });
+  }
+  $('#deck-builder-count').textContent = s.selected.length;
+  $('#deck-builder-count').className = s.selected.length === DECK_SIZE ? 'cg-deck-count-full' : '';
 }
 
 function toggleDeckCard(id) {
@@ -1149,7 +1334,8 @@ function saveBuilderDeck() {
     }
     return;
   }
-  saveDeck(_deckBuilderState.selected);
+  saveDeckSlot(_deckBuilderState.editSlot, _deckBuilderState.selected);
+  _updateSlotUI();
   updateDeckBuilderSubText();
   closeDeckBuilder();
 }
@@ -1157,22 +1343,23 @@ function saveBuilderDeck() {
 function updateDeckBuilderSubText() {
   const sub = $('#deck-builder-sub');
   if (!sub) return;
-  const saved = loadDeck();
-  if (saved && saved.length === DECK_SIZE) {
-    sub.textContent = `12 枚 — カスタムデッキ使用中`;
+  const slot = getActiveSlot();
+  const ids = loadDeckSlot(slot);
+  if (ids && ids.length === DECK_SIZE) {
+    sub.textContent = `Slot ${slot} 使用中 — カスタム 12 枚`;
     sub.style.color = 'var(--gold)';
   } else {
-    sub.textContent = `12 枚 — デフォルト使用中`;
+    sub.textContent = `Slot ${slot} 使用中 — デフォルト 12 枚`;
     sub.style.color = '';
   }
 }
 
-// ===== モーダル =====
-function closeResult() { $('#result-modal').hidden = true; }
-function openHelp() { $('#help-modal').hidden = false; }
-function closeHelp() { $('#help-modal').hidden = true; }
-function openTutorial() { $('#tutorial-modal').hidden = false; }
-function closeTutorial() { $('#tutorial-modal').hidden = true; }
+// ===== モーダル (全 open/close で body スクロールロック) =====
+function closeResult() { $('#result-modal').hidden = true; _setBodyModalOpen(); }
+function openHelp() { $('#help-modal').hidden = false; _setBodyModalOpen(); }
+function closeHelp() { $('#help-modal').hidden = true; _setBodyModalOpen(); }
+function openTutorial() { $('#tutorial-modal').hidden = false; _setBodyModalOpen(); }
+function closeTutorial() { $('#tutorial-modal').hidden = true; _setBodyModalOpen(); }
 
 // ===== コンボ確認モーダル =====
 function openCombosModal() {
@@ -1202,8 +1389,9 @@ function openCombosModal() {
     `).join('');
   }
   $('#combos-modal').hidden = false;
+  _setBodyModalOpen();
 }
-function closeCombosModal() { $('#combos-modal').hidden = true; }
+function closeCombosModal() { $('#combos-modal').hidden = true; _setBodyModalOpen(); }
 
 function collectAvailableCombos() {
   const myBoardAll = [].concat(...state.board.me);
@@ -1280,11 +1468,45 @@ document.addEventListener('DOMContentLoaded', async () => {
     tabsEl.addEventListener('click', (e) => {
       const t = e.target.closest('.cg-deck-tab');
       if (!t) return;
-      _deckBuilderState.filter = t.dataset.tier;
+      _deckBuilderState.tierFilter = t.dataset.tier;
       $$('#deck-builder-tabs .cg-deck-tab').forEach(x => x.classList.toggle('active', x === t));
       renderDeckBuilderGrid();
     });
   }
+  const chTabsEl = document.getElementById('deck-builder-chapter-tabs');
+  if (chTabsEl) {
+    chTabsEl.addEventListener('click', (e) => {
+      const t = e.target.closest('.cg-deck-tab');
+      if (!t) return;
+      _deckBuilderState.chapterFilter = t.dataset.chapter;
+      $$('#deck-builder-chapter-tabs .cg-deck-tab').forEach(x => x.classList.toggle('active', x === t));
+      renderDeckBuilderGrid();
+    });
+  }
+  const searchEl = document.getElementById('deck-search-input');
+  if (searchEl) searchEl.addEventListener('input', (e) => {
+    _deckBuilderState.search = e.target.value;
+    renderDeckBuilderGrid();
+  });
+  const facEl = document.getElementById('deck-faction-filter');
+  if (facEl) facEl.addEventListener('change', (e) => {
+    _deckBuilderState.factionFilter = e.target.value;
+    renderDeckBuilderGrid();
+  });
+  const ownedEl = document.getElementById('deck-owned-only');
+  if (ownedEl) ownedEl.addEventListener('change', (e) => {
+    _deckBuilderState.ownedOnly = e.target.checked;
+    renderDeckBuilderGrid();
+  });
+  // 3 スロット切替
+  const slotsEl = document.getElementById('deck-slots');
+  if (slotsEl) slotsEl.addEventListener('click', (e) => {
+    const sl = e.target.closest('.cg-deck-slot');
+    if (!sl) return;
+    switchEditSlot(parseInt(sl.dataset.slot, 10));
+  });
+  const setActiveBtn = document.getElementById('btn-deck-set-active');
+  if (setActiveBtn) setActiveBtn.addEventListener('click', setEditingAsActive);
   const clearBtn = document.getElementById('btn-deck-clear');
   if (clearBtn) clearBtn.addEventListener('click', clearBuilderDeck);
   const autoBtn = document.getElementById('btn-deck-auto');

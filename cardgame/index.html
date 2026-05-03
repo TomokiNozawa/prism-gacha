@@ -7,7 +7,7 @@
 <title>PCB | Prismaera Cards Battle</title>
 <link rel="icon" href="/images/icons/icon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
-<link rel="stylesheet" href="./style.css?v=20260504k">
+<link rel="stylesheet" href="./style.css?v=20260504l">
 </head>
 <body>
 
@@ -205,7 +205,7 @@
 <!-- 結果に戻る floating ボタン (場を見る時に右下) -->
 <button id="result-peek-btn" class="cg-result-peek-btn" onclick="reopenResult()" hidden>📋 結果に戻る</button>
 
-<!-- P-5: デッキ編集モーダル -->
+<!-- P-5: デッキ編集モーダル (3スロット + フィルター強化) -->
 <div id="deck-builder-modal" class="cg-modal" hidden>
   <div class="cg-modal-backdrop" onclick="closeDeckBuilder()"></div>
   <div class="cg-modal-card cg-deck-builder-card">
@@ -216,23 +216,61 @@
         <span id="deck-builder-count">0</span> / 12 枚
       </div>
     </div>
+    <!-- 3 スロット切替 -->
+    <div class="cg-deck-slots" id="deck-slots">
+      <button type="button" class="cg-deck-slot" data-slot="1">
+        <span class="cg-deck-slot-num">1</span>
+        <span class="cg-deck-slot-status" data-slot-status="1"></span>
+      </button>
+      <button type="button" class="cg-deck-slot" data-slot="2">
+        <span class="cg-deck-slot-num">2</span>
+        <span class="cg-deck-slot-status" data-slot-status="2"></span>
+      </button>
+      <button type="button" class="cg-deck-slot" data-slot="3">
+        <span class="cg-deck-slot-num">3</span>
+        <span class="cg-deck-slot-status" data-slot-status="3"></span>
+      </button>
+      <button type="button" class="cg-deck-active-toggle" id="btn-deck-set-active">
+        ⭐ このスロットを使用中に
+      </button>
+    </div>
     <div class="cg-deck-builder-actions">
       <button class="cg-btn secondary" id="btn-deck-clear">クリア</button>
-      <button class="cg-btn secondary" id="btn-deck-auto">🎲 おまかせ生成</button>
-      <button class="cg-btn secondary" id="btn-deck-default">🔁 デフォルトに戻す</button>
+      <button class="cg-btn secondary" id="btn-deck-auto">🎲 おまかせ</button>
+      <button class="cg-btn secondary" id="btn-deck-default">🔁 デフォルト</button>
     </div>
-    <div class="cg-deck-builder-tabs" id="deck-builder-tabs">
-      <button type="button" class="cg-deck-tab active" data-tier="all">全て</button>
-      <button type="button" class="cg-deck-tab" data-tier="LR">LR</button>
-      <button type="button" class="cg-deck-tab" data-tier="UR">UR</button>
-      <button type="button" class="cg-deck-tab" data-tier="SSR">SSR</button>
-      <button type="button" class="cg-deck-tab" data-tier="SR">SR</button>
-      <button type="button" class="cg-deck-tab" data-tier="R">R</button>
+    <!-- フィルター -->
+    <div class="cg-deck-filters">
+      <div class="cg-deck-builder-tabs" id="deck-builder-tabs">
+        <button type="button" class="cg-deck-tab active" data-tier="all">全Tier</button>
+        <button type="button" class="cg-deck-tab" data-tier="LR">LR</button>
+        <button type="button" class="cg-deck-tab" data-tier="UR">UR</button>
+        <button type="button" class="cg-deck-tab" data-tier="SSR">SSR</button>
+        <button type="button" class="cg-deck-tab" data-tier="SR">SR</button>
+        <button type="button" class="cg-deck-tab" data-tier="R">R</button>
+      </div>
+      <div class="cg-deck-builder-tabs" id="deck-builder-chapter-tabs">
+        <button type="button" class="cg-deck-tab active" data-chapter="all">全章</button>
+        <button type="button" class="cg-deck-tab" data-chapter="s1c1">第1章</button>
+        <button type="button" class="cg-deck-tab" data-chapter="s1c2">第2章</button>
+        <button type="button" class="cg-deck-tab" data-chapter="s1c3">第3章</button>
+        <button type="button" class="cg-deck-tab" data-chapter="s1c4">第4章</button>
+      </div>
+      <div class="cg-deck-filter-row">
+        <input type="text" id="deck-search-input" class="cg-deck-search" placeholder="🔍 名前で検索">
+        <select id="deck-faction-filter" class="cg-deck-faction-select">
+          <option value="all">全派閥</option>
+        </select>
+        <label class="cg-deck-owned-toggle">
+          <input type="checkbox" id="deck-owned-only">
+          <span>所持のみ</span>
+        </label>
+      </div>
     </div>
     <div class="cg-deck-builder-grid" id="deck-builder-grid"></div>
     <div class="cg-modal-actions">
       <button class="cg-btn secondary" onclick="closeDeckBuilder()">キャンセル</button>
-      <button class="cg-btn primary" id="btn-deck-save">💾 保存して閉じる</button>
+      <button class="cg-btn primary" id="btn-deck-save">💾 このスロットに保存</button>
     </div>
   </div>
 </div>
@@ -342,6 +380,6 @@
   </div>
 </div>
 
-<script src="./script.js?v=20260504k"></script>
+<script src="./script.js?v=20260504l"></script>
 </body>
 </html>

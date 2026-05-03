@@ -42,6 +42,15 @@ body {
     linear-gradient(180deg, #1a1d3a 0%, #14163a 100%);
   background-attachment: fixed;
 }
+/* モーダル open 中は背景スクロール禁止 (野沢さん指示「ロックしてスクロールで操作できるように」) */
+body.cg-modal-open {
+  overflow: hidden;
+  touch-action: none;
+}
+body.cg-modal-open .cg-modal-card,
+body.cg-modal-open .cg-deck-builder-grid {
+  touch-action: pan-y;  /* モーダル内は scroll 可能 */
+}
 
 /* ===== ヘッダ ===== */
 .cg-topbar {
@@ -331,6 +340,25 @@ body {
   background-position: center top;
   background-color: var(--bg-card-hi);
   background-repeat: no-repeat;
+  flex-shrink: 0;  /* flex-direction:column 内で height 確保 (修正済 v1.4.2l) */
+}
+.cg-deck-item-tier { flex-shrink: 0; }
+.cg-deck-item-name { flex-shrink: 0; min-height: 24px; }
+.cg-deck-item-stats { flex-shrink: 0; }
+.cg-deck-item-faction { flex-shrink: 0; }
+/* 未所持カード = grayscale + 「未所持」 タグ */
+.cg-deck-builder-item.unowned { opacity: 0.45; filter: grayscale(0.7); }
+.cg-deck-builder-item.unowned:hover { opacity: 0.7; }
+.cg-deck-item-unowned-tag {
+  position: absolute;
+  top: 2px; left: 2px;
+  background: rgba(0,0,0,0.8);
+  color: #fff;
+  font-size: 8px;
+  padding: 1px 4px;
+  border-radius: 3px;
+  z-index: 3;
+  font-weight: 700;
 }
 .cg-deck-item-name {
   font-size: 9px;
@@ -370,11 +398,94 @@ body {
   box-shadow: 0 0 6px rgba(95,223,255,0.8);
 }
 
+/* ===== 3 スロット切替 ===== */
+.cg-deck-slots {
+  display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+.cg-deck-slot {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  flex: 1; min-width: 70px;
+  padding: 6px 8px;
+  background: rgba(35, 40, 82, 0.6);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  cursor: pointer;
+  transition: background .12s, border-color .12s;
+}
+.cg-deck-slot:hover { background: rgba(124, 93, 255, 0.25); }
+.cg-deck-slot.editing { border-color: var(--aurora-2); background: rgba(95, 223, 255, 0.18); box-shadow: 0 0 8px rgba(95, 223, 255, 0.3); }
+.cg-deck-slot.active { box-shadow: 0 0 0 2px var(--gold) inset; }
+.cg-deck-slot-num { font-size: 14px; font-weight: 700; }
+.cg-deck-slot-status { font-size: 10px; color: var(--text-dim); white-space: nowrap; }
+.cg-active-mark { color: var(--gold); font-weight: 700; }
+.cg-deck-active-toggle {
+  flex: 1; min-width: 110px;
+  padding: 7px 10px;
+  background: rgba(255, 213, 107, 0.18);
+  border: 1px solid rgba(255, 213, 107, 0.45);
+  border-radius: 8px;
+  color: var(--gold);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.cg-deck-active-toggle:disabled { opacity: 0.5; cursor: not-allowed; }
+.cg-deck-active-toggle:hover:not(:disabled) { background: rgba(255, 213, 107, 0.32); }
+
+/* ===== フィルター UI ===== */
+.cg-deck-filters { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+.cg-deck-filter-row {
+  display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
+}
+.cg-deck-search {
+  flex: 2; min-width: 130px;
+  padding: 6px 10px;
+  background: rgba(35, 40, 82, 0.7);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 12px;
+  font-family: inherit;
+}
+.cg-deck-search:focus { outline: none; border-color: var(--aurora-2); box-shadow: 0 0 6px rgba(95, 223, 255, 0.3); }
+.cg-deck-faction-select {
+  flex: 1; min-width: 110px;
+  padding: 6px 8px;
+  background: rgba(35, 40, 82, 0.7);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+}
+.cg-deck-owned-toggle {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 10px;
+  background: rgba(35, 40, 82, 0.7);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 11px;
+  cursor: pointer;
+}
+.cg-deck-owned-toggle input { accent-color: var(--aurora-2); cursor: pointer; }
+
 @media (max-width: 480px) {
   .cg-deck-builder-grid { grid-template-columns: repeat(auto-fill, minmax(82px, 1fr)); gap: 4px; }
   .cg-deck-item-img { height: 80px; }
   .cg-deck-builder-card { padding: 14px 10px 10px; }
   .cg-deck-builder-actions .cg-btn { font-size: 10px; padding: 6px 8px; min-width: 70px; }
+  .cg-deck-slots { gap: 4px; }
+  .cg-deck-slot { min-width: 50px; padding: 4px 6px; }
+  .cg-deck-slot-num { font-size: 12px; }
+  .cg-deck-slot-status { font-size: 9px; }
+  .cg-deck-active-toggle { font-size: 10px; padding: 5px 8px; min-width: 100%; margin-top: 4px; }
+  .cg-deck-search, .cg-deck-faction-select { font-size: 11px; padding: 5px 8px; }
+  .cg-deck-filter-row { gap: 4px; }
 }
 
 /* ===== BO3モード / 単発 series 表示 ===== */
