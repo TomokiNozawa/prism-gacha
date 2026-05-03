@@ -7454,6 +7454,39 @@ body.gasshuku-mode-fantasy .fx-win {
   font-weight: 700;
 }
 .rel-tab:hover:not(.active) { background: rgba(255, 255, 255, 0.12); }
+/* 相関図 拡大縮小コントロール (野沢さん指示 2026-05-03) */
+.relations-zoom {
+  display: inline-flex; align-items: center; gap: 4px;
+  margin: 0 8px;
+  padding: 2px 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+}
+.rel-zoom-btn {
+  background: rgba(255, 255, 255, 0.08);
+  color: #e0e3ee;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  width: 30px; height: 28px;
+  font-size: 16px; line-height: 1;
+  cursor: pointer;
+  font-family: inherit;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.rel-zoom-btn:hover { background: rgba(255, 255, 255, 0.16); }
+.rel-zoom-btn:active { transform: scale(0.95); }
+.rel-zoom-level {
+  min-width: 42px; text-align: center;
+  color: #fbbf24; font-size: 12px; font-weight: 700;
+  padding: 0 4px;
+}
+.rel-zoom-reset { font-size: 14px; }
+@media (max-width: 720px) {
+  .relations-zoom { margin: 4px auto; }
+  .rel-zoom-btn { width: 36px; height: 36px; font-size: 18px; }  /* タップ領域 ≥36px */
+  .rel-zoom-level { min-width: 50px; font-size: 13px; }
+}
 .relations-list {
   position: absolute;
   inset: 80px 0 0 0;

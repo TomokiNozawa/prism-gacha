@@ -3707,10 +3707,47 @@ function openRelations() {
   }, 0);
 
   bindRelationsPan(canvas);
+  bindRelationsZoomWheel(canvas);
   // タブ初期化 (スマホはリストをデフォルト)
   setupRelationsTabs();
   const isMobile = window.matchMedia('(max-width: 720px)').matches;
   setRelationsMode(isMobile ? 'list' : 'graph');
+  // 開く度に zoom はリセット (前回開いた zoom が残ると違和感)
+  setRelationsZoom(1.0);
+}
+
+// 相関図 拡大縮小 (野沢さん指示 2026-05-03)
+// CSS で svg width/height = 2200x1820 px。 _relationsZoom 倍率で動的に上書き
+let _relationsZoom = 1.0;
+const REL_ZOOM_MIN = 0.5, REL_ZOOM_MAX = 2.5, REL_ZOOM_STEP = 0.2;
+const REL_SVG_BASE_W = 2200, REL_SVG_BASE_H = 1820;
+function setRelationsZoom(z) {
+  _relationsZoom = Math.max(REL_ZOOM_MIN, Math.min(REL_ZOOM_MAX, z));
+  const svg = document.querySelector('.relations-canvas svg');
+  if (svg) {
+    svg.style.width  = (REL_SVG_BASE_W * _relationsZoom) + 'px';
+    svg.style.height = (REL_SVG_BASE_H * _relationsZoom) + 'px';
+  }
+  const lvl = document.getElementById('rel-zoom-level');
+  if (lvl) lvl.textContent = Math.round(_relationsZoom * 100) + '%';
+}
+function zoomRelationsIn()    { setRelationsZoom(_relationsZoom + REL_ZOOM_STEP); }
+function zoomRelationsOut()   { setRelationsZoom(_relationsZoom - REL_ZOOM_STEP); }
+function zoomRelationsReset() { setRelationsZoom(1.0); }
+window.zoomRelationsIn = zoomRelationsIn;
+window.zoomRelationsOut = zoomRelationsOut;
+window.zoomRelationsReset = zoomRelationsReset;
+let _relationsZoomWheelBound = false;
+function bindRelationsZoomWheel(canvas) {
+  if (_relationsZoomWheelBound) return;
+  _relationsZoomWheelBound = true;
+  // Ctrl/Cmd + ホイールで拡縮 (普通のスクロールと区別)、 タッチパッドのピンチも Ctrl 扱いされる
+  canvas.addEventListener('wheel', e => {
+    if (!e.ctrlKey && !e.metaKey) return;
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.1 : 0.1;
+    setRelationsZoom(_relationsZoom + delta);
+  }, { passive: false });
 }
 
 // #5 派閥別リスト表示
@@ -6216,7 +6253,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260503k';
+const IMG_CACHE_VERSION = '20260503l';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
