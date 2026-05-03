@@ -855,25 +855,31 @@ async function loadAll() {
     }
     window._gasshukuByUid = gasshukuByUid;
     // F1: 中央デバイス台帳から visit 情報を guest に merge (firstVisitAt は ms精度)
+    // 通常ガチャ回数 (totalRolls) も rollOne() から prism-gacha/devices/${dev}/totalRolls に記録される
     for (const [devId, devData] of Object.entries(centralDevices)) {
       if (!guestDevices[devId]) {
         // ガチャ未プレイで visit のみのゲスト
         guestDevices[devId] = {
           deviceId: devId,
-          totalRolls: 0,
+          totalRolls: devData.totalRolls || 0,
           totalSummons: 0,
           uid: devData.lastUid || null,
           firstAt: devData.firstVisitAt || Number.POSITIVE_INFINITY,
-          lastAt: devData.lastVisitAt || 0,
+          lastAt: devData.lastVisitAt || devData.lastRollAt || 0,
           days: new Set(),
           retroactive: false,
-          visitOnly: true,
+          visitOnly: !devData.totalRolls,
         };
       } else {
         // 既存 guestDevices に visit 情報を反映 (visit時刻をms精度で上書き)
         if (devData.firstVisitAt) guestDevices[devId].firstAt = Math.min(guestDevices[devId].firstAt, devData.firstVisitAt);
         if (devData.lastVisitAt) guestDevices[devId].lastAt = Math.max(guestDevices[devId].lastAt, devData.lastVisitAt);
+        if (devData.lastRollAt) guestDevices[devId].lastAt = Math.max(guestDevices[devId].lastAt, devData.lastRollAt);
         if (devData.lastUid && !guestDevices[devId].uid) guestDevices[devId].uid = devData.lastUid;
+        // 中央台帳の totalRolls (通常ガチャ累計) を採用 — gasshukuStats の集計より新しく正確
+        if (devData.totalRolls && devData.totalRolls > (guestDevices[devId].totalRolls || 0)) {
+          guestDevices[devId].totalRolls = devData.totalRolls;
+        }
       }
     }
     window._lastRenderArgs = [users, uidToNickname, guestDevices];
@@ -986,7 +992,7 @@ function renderUsers(users, uidToNickname, guestDevices) {
       userRowData.push({
         isGuest: true, deviceId: g.deviceId, idShort, retroactive: g.retroactive,
         nickname: `🎌 ゲスト #${idShort}`, nicknameDim: true,
-        total: 0, ur: 0, lr: 0, dup: 0,
+        total: g.totalRolls || 0, ur: 0, lr: 0, dup: 0,
         gasshukuCnt: g.totalSummons || 0,
         story: { text: '—', sortKey: -1, dim: true },
         lastAt, lastAtTs: g.lastAt || 0,
@@ -1028,11 +1034,11 @@ function renderUsers(users, uidToNickname, guestDevices) {
       const tag = d.retroactive ? ' <span style="font-size:10px;color:#fcd34d">過去</span>' : '';
       row.innerHTML = `
         <div class="u-nickname dim">${d.nickname}${tag}</div>
-        <div class="u-count dim">—</div>
+        <div class="u-count ${d.total === 0 ? 'dim' : ''}">${d.total > 0 ? d.total : '—'}</div>
         <div class="u-count col-ur dim">—</div>
         <div class="u-count col-lr dim">—</div>
         <div class="u-count col-dup dim">—</div>
-        <div class="u-count col-gasshuku ${d.gasshukuCnt === 0 ? 'dim' : ''}">${d.gasshukuCnt}</div>
+        <div class="u-count col-gasshuku ${d.gasshukuCnt === 0 ? 'dim' : ''}">${d.gasshukuCnt > 0 ? d.gasshukuCnt : '—'}</div>
         <div class="u-story dim">—</div>
         <div class="u-streak dim col-streak">—</div>
         <div class="u-lastlogin col-registered">${d.registeredAt}</div>
@@ -1049,6 +1055,7 @@ function renderUsers(users, uidToNickname, guestDevices) {
       detail.innerHTML = `
         <div style="padding:14px 18px;color:#c0c4d0;font-size:13px">
           <div><b>device_id</b>: <code style="font-size:11px">${d.deviceId}</code></div>
+          <div><b>通常ガチャ回数</b>: ${d.total}</div>
           <div><b>合宿ガチャ召喚数</b>: ${d.gasshukuCnt}</div>
           <div><b>プレイ日数</b>: ${d.days ? d.days.size : 0}日 (${d.days ? [...d.days].sort().join(', ') : ''})</div>
           <div><b>最終操作</b>: ${d.lastAt}</div>

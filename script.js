@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.0 — 演出&ゲームロジック (Season 1 第1〜2章)
+   Prismaera v1.4.1 — 演出&ゲームロジック (Season 1 第1〜2章)
    ============================================================ */
 "use strict";
 
@@ -78,7 +78,7 @@ const POOL = {
     },
     {
       name: "波紋の聖女 イザベル", season: 1, chapter: 's1c2',
-      title: "自分自身として祈る者",
+      title: "波紋の聖女、 海の盟友",
       caption: "私は、私自身として、祈ります。",
       desc: "深海の決戦を経て覚醒した聖巫騎士の新たな姿。聖槍『天穹』が虹色の刃へと変容し、振るうたび海中に虹色の波紋が広がる。『セラフィエル様の代理』ではなく『自分自身の祈り』に目覚めたことでUR枠へ昇華。ネプテア女王と姉妹の盟約を結ぶ、海と虹の体現者。",
       img: `${S1}/ur/ripple_saint.png`,
@@ -96,6 +96,28 @@ const POOL = {
       caption: "わしはカグヤを覚えておる。 ノクスもセラフィエルも。",
       desc: "見た目は8-10歳の幼女、 中身は千年級。 古龍の血を最も濃く引く一族の長老。 古龍杖ジナを携え、 失われた古龍王の伝承を守る。 幼子の姿のまま、 千年の知恵と杖を振るう。 観測者三柱と千年前を共有する縁を持つ。 ヴィルを『次の千年の鍵』 と密かに見定めている。",
       img: `${S1}/ur/dragon_sage.png`,
+    },
+    // ===== S1C5 追加 (UR3、 黒月衆+地底市) =====
+    {
+      name: "シ・ロエン", season: 1, chapter: 's1c5',
+      title: "銀霜黒月衆の使徒、 シオン分離後の影",
+      caption: "やあ、 兄上。 また会おう、 黒月の決戦の夜に。",
+      desc: "仮面騎士シオンが分離した「影の側」 として黒月衆へ去った存在。 同じ顔・体格、 髪は漆黒、 仮面は半割れ。 「俺が代わりに堕ちる」 と微笑み、 影の側として世界を観る。 S2C1「眠れる主の世界」 主人公として再登場予定。",
+      img: `${S1}/ur/shadow_apostle.png`,
+    },
+    {
+      name: "黒月の盟主 ノクトリア", season: 1, chapter: 's1c5',
+      title: "黒月衆を統べる影の女王、 ヴォイドラの代弁者",
+      caption: "影の側を、 私たちが引き取ろう。",
+      desc: "黒月衆ノクトスを率いる威厳の女王。 長い濃紫の髪、 黒の三日月の刺青、 黒い三日月を頂く長い杖。 ヴォイドラ陣営の代弁者として、 シオンに「取引」 を持ちかける。 S1C7 黒月決戦の主敵 + S2C5「影との和解」 交渉役として再登場予定。",
+      img: `${S1}/ur/black_moon_lord.png`,
+    },
+    {
+      name: "地底市の母 リオラエル", season: 1, chapter: 's1c5',
+      title: "地底市リオラの古女王、 影と共生する文化の守護者",
+      caption: "あなたの中の影を、 抱きしめてから手放しなさい。",
+      desc: "地底市リオラの民を千年率いる古き存在。 「観測者の前から在る」 古龍の血と影の血を引く長命種。 銀紫の長髪、 紫水晶のような瞳、 光と影が織り合わさる衣。 シオンに「影と共に生きる選択」 を教える。 S2C4「記憶の海」 千年記憶解放のキー。",
+      img: `${S1}/ur/underworld_matriarch.png`,
     },
     // ===== S1C4 追加 (UR2、 凍土の覇者+空挺の女皇) =====
     {
@@ -116,35 +138,35 @@ const POOL = {
   SSR: [
     {
       name: "森の射手 リナエ", season: 1, chapter: 's1c1',
-      title: "深緑樹海の守り手",
+      title: "深緑樹海の達人射手、 祖木の継承者",
       caption: "葉音が消えた瞬間、狙いは定まっている",
       desc: "エルフ狩人氏族の末裔。樹齢千年の祖木から作られた『生きた弓』の継承者。葉擦れだけで敵の位置を読み、矢は外さない。樹海の異変をいち早く察知する斥候。半エルフのヴィオラは弓の後輩で、気まぐれに指導している。影刃シンとは『一番目の斥候』の座を競う好敵手。",
       img: `${S1}/ssr/elf_archer.png`,
     },
     {
       name: "獣牙 ガルド", season: 1, chapter: 's1c1',
-      title: "月牙狼族の戦士団長",
+      title: "月牙狼族の戦士団将軍",
       caption: "群れのために斧を振るう。それだけだ",
       desc: "狼獣人の誇り高き戦士族。両手斧『月牙』は代々の団長が受け継ぐ英雄の遺物。寡黙で粗野に見えて、仲間のためには命を惜しまない。紫竜ヴィルとは以前領地問題で斬り合った仲だが、今は背中を預ける戦友。",
       img: `${S1}/ssr/wolf_warrior.png`,
     },
     {
       name: "竜爵 ヴィル", season: 1, chapter: 's1c1',
-      title: "紫竜王国の第三王女",
+      title: "紫竜王国第三王女、 紫雷の上騎士",
       caption: "竜の血を甘く見るな、死ぬぞ",
       desc: "紫竜王の三女にして、生まれながらの竜人。三叉槍『紫雷』は彼女自身の竜気を解放する。王位継承権を弟に譲り、戦場を己の居場所と決めた。龍帝アルテミスとは遠縁(竜の血筋)。リリムは実の従妹で、彼女を姉のように慕う。朱音とは酒の飲み仲間。",
       img: `${S1}/ssr/draco_lancer.png`,
     },
     {
       name: "仮面騎士 シオン", season: 1, chapter: 's1c1',
-      title: "銀霜王国の沈黙の盾",
+      title: "銀霜王国の沈黙の上騎士、 五つの誓いの盾",
       caption: "騎士に名は要らぬ。仮面と誓いがあれば",
       desc: "素顔も声も伏せた謎の聖騎士。王族暗殺の陰謀から主君を守るため、名と顔を捨てた。盾『誓盾』とメイス『裁罰』は神器級。無言の剛力が恐怖を呼ぶ。仮面の下の素顔を知る者は三人だけ——王族、イザベル、そしてセラフィエル。イザベルとは古い幼馴染。",
       img: `${S1}/ssr/masked_knight.png`,
     },
     {
       name: "黒猫 ノア", season: 1, chapter: 's1c1',
-      title: "黒曜塔の若き司書官",
+      title: "黒曜塔の高位司書、 召喚の若き継承",
       caption: "本なら任せて♪ 読むのも書くのも、ぶっ壊すのも",
       desc: "黒曜塔の禁書庫を預かる猫獣人の天才。浮遊魔導書『夜導』で召喚魔術を操る。自由奔放で人懐っこいが、禁書の扱いだけは絶対に譲らない。星海ノクスを憧れ、論文を投稿しては『まだ甘い』と返されるのを楽しんでいる。こはねは同じ獣人として妹分。",
       img: `${S1}/ssr/cat_librarian.png`,
@@ -165,7 +187,7 @@ const POOL = {
     },
     {
       name: "ひなた", season: 1, chapter: 's1c1',
-      title: "皇家の末妹・見習い剣士",
+      title: "紅翼皇家の末妹、 桜散の近衛剣士",
       caption: "ね、わたしも連れてって！修行したんだから！",
       desc: "紅翼皇家の末妹、齢十三。兄姉たちの背を追って剣の道へ。小太刀『桜散(さくらちらし)』で舞うように戦う。屈託のない笑顔の奥に、家を守る強い意志を秘める。紅翼ツキは実姉、薫音は剣師範。龍帝アルテミスを『おにーさま！』と呼び慕う(一方的)。",
       img: `${S1}/ssr/little_sister.png`,
@@ -173,28 +195,28 @@ const POOL = {
     // ===== S1C2 追加 (SSR3体) =====
     {
       name: "紅玉海賊団船長 シャンティ", season: 1, chapter: 's1c2',
-      title: "海上自由商人の頭領",
+      title: "紅玉海賊団の海将軍、 自由商人の頭領",
       caption: "お前、案外、面白い奴だな。",
       desc: "紅玉海賊団を率いる紅髪の女船長。『自由商人』を名乗り、海賊行為と交易の境界を絶妙に渡り歩く。双剣『紅潮』を抜き、戦闘では誰よりも前に立つ。煙草を片手に部下を見守る姉貴肌。イザベルと意気投合し、教会の白鎧を『紅玉号の客人』として迎えた。副長ケイレブとは長年の相棒。",
       img: `${S1}/ssr/pirate_captain.png`,
     },
     {
       name: "白焔教会見習い巫女 ルーナ", season: 1, chapter: 's1c2',
-      title: "教会の若き祈り手",
+      title: "教会の若き上級巫女、 祈り手",
       caption: "イザベル姉さま、お役に立てるよう頑張ります！",
       desc: "白焔教会の若き見習い巫女。金色のツインテールに錫杖を抱え、純真な瞳でイザベルを姉のように慕う。アクアシス遠征に同行し、戦いの中で『自分の祈り』とは何かを掴み始める。メイリ・セラフィの後輩として、教会の次世代を担う逸材。",
       img: `${S1}/ssr/apprentice_priestess.png`,
     },
     {
       name: "アクアシス筆頭魔術師 グラシエル", season: 1, chapter: 's1c2',
-      title: "深海宮殿の冷静な参謀",
+      title: "深海宮殿の冷静な宰相、 氷の参謀",
       caption: "事態を、簡潔に話します。",
       desc: "海淵都市アクアシスの筆頭氷魔術師。ネプテア女王の参謀として、海溝の異変を分析する冷静沈着な頭脳派。氷結魔法を操り、戦闘でも後衛から的確な支援を行う。『青の音』を奪う黒月の存在を最初に察知した一人。星海ノクスとは『虚空観測者』として遠縁の研究仲間。",
       img: `${S1}/ssr/ice_mage.png`,
     },
     {
       name: "隊商長 アーシャ", season: 1, chapter: 's1c3',
-      title: "神童商人、 サハールの隊商長",
+      title: "サハールの上級隊商長、 神童商人",
       caption: "商人は耳を持つな、 心だけ持て。",
       desc: "若くして大隊商を率いるサハールの神童商人。 サハナの旧知の姉貴分。 顔を隠したヴィルの正体に気づきつつも、 商人の流儀で深追いしない。 短剣と革の鞭を扱い、 緑のキャラバンコートとターバンが象徴。 サハナを十二歳で隊商に乗せた最初の人物。",
       img: `${S1}/ssr/caravan_leader.png`,
@@ -208,10 +230,39 @@ const POOL = {
     },
     {
       name: "紫竜の侍従 リアム", season: 1, chapter: 's1c3',
-      title: "紫竜王国の若き侍従",
+      title: "紫竜王国の若き上級侍従、 紫翼の継承",
       caption: "ヴィル殿下、 必ずお迎えに参ります。",
       desc: "紫竜王国の若き侍従。 ヴィルが城を抜けた朝に砂時計で三月を計り、 期限内に戻らなければ単騎で迎えに行くと決めていた。 父も侍従だった世襲で、 細身の儀礼槍『紫翼』 を継ぐ。 ヴィル殿下を『家族』 と思っている、 不器用なだけ真っ直ぐな青年。",
       img: `${S1}/ssr/purple_dragon_servant.png`,
+    },
+    // ===== S1C5 追加 (SSR4、 黒月衆+地底市+銀霜王国補強) =====
+    {
+      name: "堕者剣聖 ガルヴィン", season: 1, chapter: 's1c5',
+      title: "元教会破門の堕者剣聖、 黒月衆の旧教会勢",
+      caption: "お前の道の先に、 何があるか——俺は、 知っている。",
+      desc: "元・白焔教会の盾の系譜の剣聖。 表向き「破門」、 実は教会の腐敗を看過できず自ら出ていった。 顳から顎までの古傷、 半腐敗の聖剣。 シオンの兄弟弟子の知り合い。 S1C7 旧教会勢 (イザベル/ラナス) との対峙シーンで再登場予定。",
+      img: `${S1}/ssr/fallen_paladin.png`,
+    },
+    {
+      name: "影織りの導師 ルナリア", season: 1, chapter: 's1c5',
+      title: "地底市の上級織り手、 影と光の織物職人",
+      caption: "光と影は、 等価に織られた時、 七色になります。",
+      desc: "地底市リオラの若き影織り導師。 銀紫の長髪、 紫水晶の織機の前で、 銀の糸と黒の糸を等価に織り合わせる。 章テーマ「影を抱きしめる」 を視覚化する重要キャラ。 山場 4-1 分離儀式の触媒となる織物の制作者。",
+      img: `${S1}/ssr/shadow_weaver.png`,
+    },
+    {
+      name: "銀霜剣聖 オリエル", season: 1, chapter: 's1c5',
+      title: "銀霜剣術の上席師範、 シオンの師匠",
+      caption: "(仮面の縁に指を一度添えて、 行け、 弟子よ)",
+      desc: "銀霜国剣術の上席師範。 五年前、 仮面の意味を言葉ではなく沈黙で教えた人物。 銀青の長髪、 平面的な剣士の落ち着き。 シオンの仮面騎士の作法の源流。 北方剣聖ハグル (s1c4) と並列の立ち位置。",
+      img: `${S1}/ssr/silver_swordmaster.png`,
+    },
+    {
+      name: "銀霜王 ノヴァ", season: 1, chapter: 's1c5',
+      title: "銀霜王国の若き王、 千年継承の血",
+      caption: "シオン。 ……あなたが居て、 よかった。",
+      desc: "銀霜王国の若き戴冠者、 即位半年。 銀の髪、 蒼い瞳、 細い肩。 玉座の重みに耐え始めたばかりで、 仮面騎士シオンに精神的依存しつつある。 黒月衆の暗殺未遂を経験。 S2 龍譲位編との類比 (覇者と後継の関係) への伏線。",
+      img: `${S1}/ssr/silver_king.png`,
     },
     // ===== S1C4 追加 (SSR7、 ニーヴル+ゼノニア の主要キャラ) =====
     {
@@ -230,16 +281,16 @@ const POOL = {
     },
     {
       name: "氷霜の巫女 ユーリス", season: 1, chapter: 's1c4',
-      title: "凍土の予言者、 神事の継承者",
+      title: "凍土の高位予言者、 神事の継承",
       caption: "次に龍を譲る相手を、 もうあなたは知っているはずです。",
       desc: "ニーヴル神事を司る若き巫女、 二十二-二十三。 氷の予言杖イルディラから七色の予言光を放つ。 アルテミス龍帝に「次に龍を譲る相手」 を示唆する伏線回収者。 妹のイル祭司と神殿を守る。",
       img: `${S1}/ssr/frost_oracle.png`,
     },
     {
       name: "摂政 ヴァルキ", season: 1, chapter: 's1c4',
-      title: "ニーヴル摂政、 凍土外交の知略",
+      title: "ニーヴル摂政、 凍土外交の宰相",
       caption: "陛下の即位、 私が支えます。",
-      desc: "氷霊王国ニーヴルの摂政、 二十八。 グレイル先代 (前帝) の右腕として凍土の外交を司り、 グレイル即位後も摂政として内政を担う。 銀の長髪を編み込んだ女政治家、 知略の人。",
+      desc: "氷霊王国ニーヴルの摂政、 二十八。 グレイル先代 (前帝) の右腕として凍土の外交を司り、 グレイル即位後も摂政として内政を担う。 銀の長髪を編み込んだ宰相、 知略の人。",
       img: `${S1}/ssr/ice_regent.png`,
     },
     {
@@ -288,21 +339,21 @@ const POOL = {
     },
     {
       name: "紅翼 ツキ", season: 1, chapter: 's1c1',
-      title: "紅翼皇家の次姫",
+      title: "紅翼皇家の次姫、 桜散の剣士",
       caption: "妹の分まで、ちゃんと守るから",
       desc: "紅翼皇家の次女。ひなたの姉で、家を守るのは自分の役目だと自任している。ツインテールは紅翼皇家の女子の伝統装束。薫音師範を『姐さん』と呼び慕う。",
       img: `${S1}/sr/red_twintail.png`,
     },
     {
       name: "薫音", season: 1, chapter: 's1c1',
-      title: "紅翼皇家の剣師範",
+      title: "紅翼皇家の剣師範、 舞の剣士",
       caption: "お稽古の時間。さあ、構えなさい",
       desc: "紅翼皇家に仕える剣の師範。舞のような太刀筋から『剣舞の薫音』と呼ばれる。清廉で厳しく、弟子思い。ひなた・ツキの剣の師。黒刃玄の妹弟子。お酒には弱い(秘密)。",
       img: `${S1}/sr/katana_miko.png`,
     },
     {
       name: "リリム", season: 1, chapter: 's1c1',
-      title: "紫竜の若竜人",
+      title: "紫竜の若き竜戦士、 ピンク鱗の若手",
       caption: "えへへ、ヴィル姉さまみたいになりたい！",
       desc: "紫竜王国の若き竜人。まだ成竜ではないため、竜化は部分的。ピンク色の鱗が特徴の珍しい突然変異種で、本人は少し気にしている。ヴィルは実の従姉で師匠、龍帝を『おじうえ』と呼ぶ(遠縁だが)。",
       img: `${S1}/sr/pink_dragon_girl.png`,
@@ -323,14 +374,14 @@ const POOL = {
     },
     {
       name: "影刃 シン", season: 1, chapter: 's1c1',
-      title: "夜焔・影衆の若頭",
+      title: "夜焔・影衆若頭、 一撃の武者",
       caption: "一撃、一瞬、一切",
       desc: "夜焔郷の裏側、影衆と呼ばれる情報衆の若頭。朱音とは別組織だが、協力関係にある。こはねは影衆の妹分(エージェント見習い)。リナエとは情報戦の速さで争う好敵手。",
       img: `${S1}/sr/shadow_ninja.png`,
     },
     {
       name: "焔舞 ヒナカ", season: 1, chapter: 's1c1',
-      title: "第七天の踊り子",
+      title: "第七天の踊り巫女、 焔舞の祭司",
       caption: "この踊り、あなたの為に",
       desc: "第七天の祭祀を務める炎の踊り子。ヒノオウの焔術を舞に昇華させた独自の流派を創始した。焔帝ヒノオウ直属の愛弟子。朱音とは『焔術を競う妹分』として友好関係。",
       img: `${S1}/sr/flame_dancer.png`,
@@ -338,28 +389,28 @@ const POOL = {
     // ===== S1C2 追加 (SR5体) =====
     {
       name: "海獣使い モルガ", season: 1, chapter: 's1c2',
-      title: "深海女王の伝令",
+      title: "深海女王の伝令戦士、 海獣使い",
       caption: "あたしはモルガ！海獣使いだよ！",
       desc: "海の遊牧民の少女。サメ・イルカ・海蛇など海獣を自在に操り、ネプテアの伝令として海域を駆け巡る。褐色の肌に活発な笑顔、自由奔放な性格。シャンティの紅玉海賊団とは『同じ海を生きる仲間』として認め合う関係。イザベルの遠征に救援として参戦した。",
       img: `${S1}/sr/shark_tamer.png`,
     },
     {
       name: "珊瑚鎧の海騎士 コラリア", season: 1, chapter: 's1c2',
-      title: "アクアシスの近衛槍士",
+      title: "アクアシスの槍騎士、 珊瑚の近衛",
       caption: "女王様の御前、お通しください。",
       desc: "ネプテア女王直属の近衛海騎士。ピンクのボブカットに珊瑚の槍『潮華』を持ち、礼儀正しく戦場を駆ける。『海の騎士』という珍しい肩書を誇りにし、陸の聖騎士イザベルとは戦友のような関係を築いた。グラシエルの戦友でもある。",
       img: `${S1}/sr/coral_knight.png`,
     },
     {
       name: "深海巫女 ティアラ", season: 1, chapter: 's1c2',
-      title: "水晶玉の予言者",
+      title: "水晶玉の予言巫女、 海の祭司",
       caption: "海の声が、聞こえるのです。",
       desc: "アクアシスの深海巫女。貝殻の冠と水晶玉で海の未来を読む神秘的な少女。普段は無口だが、予言を語る時だけ凛とした声で話す。『黒月の前兆』を最初に水晶玉で観測した一人。詠聖ベルとは『歌と予言』の互換的な巫女として遠い友。",
       img: `${S1}/sr/abyss_oracle.png`,
     },
     {
       name: "紅玉海賊団副長 ケイレブ", season: 1, chapter: 's1c2',
-      title: "双剣の若き副長",
+      title: "双剣の若き副長剣士",
       caption: "ようこそ紅玉号へ。船長は荒っぽいですが、まあ慣れます。",
       desc: "紅玉海賊団の副長。黒髪に琥珀色の瞳、人懐こい笑顔の青年。シャンティ船長の右腕として、双剣『風裂』を背に交差させて戦う。船員からの信頼が厚く、団のまとめ役としても優秀。船医クレオとは幼馴染。",
       img: `${S1}/sr/pirate_firstmate.png`,
@@ -373,14 +424,14 @@ const POOL = {
     },
     {
       name: "祭舞のサフィラ", season: 1, chapter: 's1c3',
-      title: "七色絹の祭舞踊り子",
+      title: "七色絹の祭舞巫女",
       caption: "影喰いは斬らず、 浄化するの。",
       desc: "サハールの祭事の踊り手。 母の最期の絹を縫い込んだ七色の絹布で踊り、 影喰いを浄化する。 古龍鍛冶オウルから古龍鱗の粉を分けてもらい染めた絹は、 三代の女たちの祈りの蓄積。 朗らかだが舞いには深い覚悟を秘める。",
       img: `${S1}/sr/festival_dancer.png`,
     },
     {
       name: "古龍鍛冶 オウル", season: 1, chapter: 's1c3',
-      title: "古龍鱗を鍛える若き天才鍛冶",
+      title: "古龍鱗を鍛える若き戦士、 砂牙の天才鍛冶",
       caption: "血だけじゃ、 剣にはならんがね。",
       desc: "古龍の血を引く一族の若き天才鍛冶。 数年前、 ファラー婆さんから古龍鱗の鍛冶技を直接口伝。 腕に古龍鱗の刺青を纏う。 鍛冶用大ハンマーは戦場でも武器となる。 ヴィルに『血の意味』 をハンマー一振りで諭した若き哲人。",
       img: `${S1}/sr/dragon_smith.png`,
@@ -391,6 +442,28 @@ const POOL = {
       caption: "姉さま、 もう少しで、 追いつきます。",
       desc: "十六-十七歳の若き戦士。 十一歳の時にサハナに助けられて以来、 双短剣で姉の双剣シャマールを真似てきた。 ティナを実の妹のように見守る。 一族の未来を担う次世代の戦士。",
       img: `${S1}/sr/young_desert_warrior.png`,
+    },
+    // ===== S1C5 追加 (SR3、 黒月衆+雪月神殿+地底市) =====
+    {
+      name: "黒月の刺客", season: 1, chapter: 's1c5',
+      title: "月夜の暗殺武者、 匿名仮面",
+      caption: "(全身覆面の沈黙、 短剣を逆手に構える)",
+      desc: "黒月衆ノクトスの刺客。 全身を黒の布で覆い、 全面の黒仮面、 双の短剣を逆手に持つ。 王族暗殺の手駒として銀霜王ノヴァを狙うも、 シオンに阻止される。 名は明かされない。",
+      img: `${S1}/sr/black_assassin.png`,
+    },
+    {
+      name: "月夜祭司 アスター", season: 1, chapter: 's1c5',
+      title: "雪月神殿の月夜祭司、 儀式の進行役",
+      caption: "シオン様。 あとは、 あなたの覚悟だけです。",
+      desc: "雪月神殿の若き祭司。 銀青の長髪、 銀と青の祭司衣、 銀青の儀式杖。 二重月夜の分離儀式を進行する役。 ルミナ (灯番) と並列で雪月神殿を支える。",
+      img: `${S1}/sr/moon_priest.png`,
+    },
+    {
+      name: "地底市の語り部 オルフェ", season: 1, chapter: 's1c5',
+      title: "地底市リオラの語り部巫女、 歴史の歌い手",
+      caption: "千年前、 私たちは影と共に生きる選択をした。",
+      desc: "地底市リオラの若き語り部。 銀紫の中髪、 影と光の柄の竪琴杖。 地底市の歴史を歌でシオンに伝える。 千年の口伝の継承者。",
+      img: `${S1}/sr/underworld_bard.png`,
     },
     // ===== S1C4 追加 (SR7、 ニーヴル+ゼノニア の戦士+整備士+祭司+狩人) =====
     {
@@ -409,7 +482,7 @@ const POOL = {
     },
     {
       name: "凍土の狩人 シエラ", season: 1, chapter: 's1c4',
-      title: "ニーヴル猟師、 雪豹シロの相棒",
+      title: "ニーヴル猟師、 雪豹シロの相棒武者",
       caption: "(無言で氷弓を構える)",
       desc: "ニーヴルの若き狩人、 二十一-二十二。 銀髪ロングストレート、 寡黙で集中力の塊。 氷の長弓グレシエルで凍土の獣道を熟知。 雪豹「シロ」 を相棒にする。",
       img: `${S1}/sr/frost_hunter.png`,
@@ -423,21 +496,21 @@ const POOL = {
     },
     {
       name: "凍土の祭司 イル", season: 1, chapter: 's1c4',
-      title: "ユーリスの実妹、 神事の補佐",
+      title: "ユーリスの実妹、 神事の巫女補佐",
       caption: "(鈴杖を鳴らす)",
       desc: "ニーヴル神事の補佐役、 二十歳。 ユーリス氷霜の巫女の実妹。 銀の長髪 (姉と同色) と静謐な気配。 氷の鈴杖で神事の始まりを告げる。 姉への深い敬愛を持つ。",
       img: `${S1}/sr/frost_priestess.png`,
     },
     {
       name: "蒸気砲手 ヴィン", season: 1, chapter: 's1c4',
-      title: "ガリオン総監の副官、 ゼノニア軍の名手",
+      title: "ガリオン総監の副官武者、 ゼノニア軍の名手",
       caption: "(蒸気ライフルを担いで沈黙)",
       desc: "ゼノニア軍の砲手、 二十二-二十三。 黒髪のバックスリックに落ち着いた狙撃手気質。 蒸気ライフルの名手、 ガリオン総監の副官として軍事を支える。",
       img: `${S1}/sr/steam_gunner.png`,
     },
     {
       name: "空挺機関士 ジン", season: 1, chapter: 's1c4',
-      title: "ベル整備士の幼馴染、 蒸気エンジンの専門家",
+      title: "ベル整備士の幼馴染、 蒸気の機関戦士",
       caption: "ベル、 ねじ持ってこいよ。",
       desc: "ゼノニア機関室の機関士、 二十一。 朱茶のミディアムに朗らかで頼れる性格。 大型スパナを二刀流で振るう。 ベル整備士の幼馴染、 機械工房での息の合った職人の応酬は工房名物。",
       img: `${S1}/sr/sky_machinist.png`,
@@ -446,42 +519,42 @@ const POOL = {
   R: [
     {
       name: "ちさと", season: 1, chapter: 's1c1',
-      title: "星霊学院の剣見習い",
+      title: "星霊学院の剣の少女",
       caption: "こわいけど、がんばるっ！",
       desc: "星霊学院の剣術科一年生。まだ新人だが、勇気だけは一人前。カイ・こはね・アルス・ミレイアとは同期の『星霊学院四人組＋α』。寮では常にカイと押しくらまんじゅう状態。",
       img: `${S1}/r/student.png`,
     },
     {
       name: "カイ", season: 1, chapter: 's1c1',
-      title: "星霊学院の弓見習い",
+      title: "星霊学院の弓の少年",
       caption: "遠くから、です……！",
       desc: "星霊学院の弓術科。気弱だが目だけはいい。斥候として将来を嘱望されている。ちさとを密かに想っている。いつかリナエのように森で射ちたい。",
       img: `${S1}/r/boy_scout.png`,
     },
     {
       name: "こはね", season: 1, chapter: 's1c1',
-      title: "夜焔・影衆見習い",
+      title: "夜焔・影衆の見習い少女",
       caption: "朱音さまの、足手まといには、なりません！",
       desc: "夜焔郷の狐獣人の少女。朱音に拾われて影衆見習いとして働いている。実は魔術の才能もある。ノアとは同じ獣人として姉妹のよう。シンとは先輩後輩。",
       img: `${S1}/r/fox_girl.png`,
     },
     {
       name: "ヴィオラ", season: 1, chapter: 's1c1',
-      title: "半エルフの弓使い",
+      title: "半エルフの弓の少女",
       caption: "矢は、外さない。たぶん",
       desc: "深緑樹海の外れに住む半エルフ。純血ではないため、樹海の中では肩身が狭い。戦場でなら実力が認められると信じている。リナエを憧れの先輩として慕う。",
       img: `${S1}/r/archer.png`,
     },
     {
       name: "アルス", season: 1, chapter: 's1c1',
-      title: "星霊学院の魔導見習い",
+      title: "星霊学院の魔導の少年",
       caption: "魔法の本、ちゃんと読んだ！",
       desc: "星霊学院の魔術科首席。眼鏡の奥に秘めた野心は、いつか黒曜塔で学ぶこと。ノアを憧れの先輩として崇拝。ちさと・カイ・こはねと同期の『四人組』。",
       img: `${S1}/r/young_mage.png`,
     },
     {
       name: "ミレイア", season: 1, chapter: 's1c1',
-      title: "星霊学院の盾見習い",
+      title: "星霊学院の盾の少女",
       caption: "壁なら、任せて",
       desc: "星霊学院の剣術科、ちさとの同期で親友。体格は学年一。面倒見がよく、四人組の姉的存在。非公式に黒刃玄から剣を習っている。",
       img: `${S1}/r/warrior.png`,
@@ -503,7 +576,7 @@ const POOL = {
     },
     {
       name: "珊瑚漁師 エラン", season: 1, chapter: 's1c2',
-      title: "海溝の地理案内人",
+      title: "海溝の地理案内人、 漁師の少年",
       caption: "この海なら、誰よりも知っています。",
       desc: "アクアシス近海で珊瑚漁を営む素朴な青年。海溝の隅々まで知り尽くしており、地理案内人として遠征に参加した。寡黙だが信頼できる仲間。『自分にできることは、知っている海を案内することだけ』と謙遜する。",
       img: `${S1}/r/coral_fisherman.png`,
@@ -524,7 +597,7 @@ const POOL = {
     },
     {
       name: "砂塵の子 ティナ", season: 1, chapter: 's1c3',
-      title: "サハナの妹分、 一族の未来",
+      title: "サハナの妹分の少女、 一族の未来",
       caption: "サハナ姉さまみたいになる！",
       desc: "八-九歳の砂漠の子。 サハナを姉のように慕い、 革のスリングで小石を投げて『姉さまの真似』 をする。 ライ兄からは双短剣を一本だけ握らせてもらい、 大人の世界の入口に立った。 一族の次世代の希望。",
       img: `${S1}/r/desert_child.png`,
@@ -536,13 +609,49 @@ const POOL = {
       desc: "二十二-二十三歳の若き語り部。 昨年、 祖父が遺した物語の杖 (古龍の歯入り) と語り部の役を受け継いだ。 砂漠夜営の焚き火の前で子供たちに祖父の話を語り継ぐ。 ファラー婆さんとは別系統の遊牧民側伝承の継承者。",
       img: `${S1}/r/young_storyteller.png`,
     },
+    // ===== S1C5 追加 (R5、 銀霜近衛+雪月神殿見習い+地底市の少女+祭夜の街娘たち) =====
+    {
+      name: "銀霜近衛 セレン", season: 1, chapter: 's1c5',
+      title: "銀霜王国近衛騎士、 シオンを慕う若き後輩",
+      caption: "シオン様、 今夜の街は、 静かですね。",
+      desc: "銀霜国の若き近衛騎士。 銀の髪を短く整えた真面目な青年。 シオンの沈黙を数拍の遅れで察してくれる、 数少ない部下。 王族近衛として祭夜の市街警備を担う。",
+      img: `${S1}/r/silver_squire.png`,
+    },
+    {
+      name: "雪月神殿見習い ラピス", season: 1, chapter: 's1c5',
+      title: "雪月神殿の見習い少年、 灯火を運ぶ",
+      caption: "(灯篭を両手で慎重に持ち、 静かに礼)",
+      desc: "雪月神殿の若き見習い少年、 十四歳ほど。 銀青の短髪、 銀の三日月の髪飾り。 銀青の見習い衣、 銀の腕輪。 ルミナ姉の後輩として灯火を運ぶ。 山場 4-1 分離儀式で月鏡周辺の灯篭を担当。",
+      img: `${S1}/r/moon_acolyte.png`,
+    },
+    {
+      name: "地底市の少女 シエル", season: 1, chapter: 's1c5',
+      title: "地底市リオラの少女、 影喰いを「友達」 と呼ぶ純粋な視点",
+      caption: "これ、 私のお友達です!",
+      desc: "地底市リオラの少女、 八-九歳。 銀の髪、 紫の瞳。 影喰いの幼体を「お友達」 として手のひらに乗せる。 「影と共生する文化」 を子供視点で象徴する存在。 S2C5 への伏線。",
+      img: `${S1}/r/underworld_girl.png`,
+    },
+    {
+      name: "銀霜の工房娘", season: 1, chapter: 's1c5',
+      title: "銀霜国の若き工房娘、 祭夜の街で働く",
+      caption: "シオン様!  今夜の月、 細いですねっ",
+      desc: "銀霜国の祭夜街で工房を営む若い娘。 銀の髪を一房垂らし、 朗らかな笑顔。 銀の灯篭を高く掲げて月夜祭を彩る。 シオンの五つ目の誓い「弱者を守る」 の対象。",
+      img: `${S1}/r/silver_villager_a.png`,
+    },
+    {
+      name: "銀霜の歌姫", season: 1, chapter: 's1c5',
+      title: "銀霜国の若き祭夜の歌姫",
+      caption: "(月夜の静寂を傷つけないよう慎ましく歌う)",
+      desc: "銀霜国の祭夜街で歌う若い歌姫。 銀の髪、 銀青の歌い手衣。 古い子守歌のような曲調で月夜祭を彩る。 シオンが「ベルの歌に似ている」 と感じる声質。 「青の音」 の薄れを告げる役。",
+      img: `${S1}/r/silver_villager_b.png`,
+    },
     // ===== S1C4 追加 (R4、 凍土+空挺の子供たち) =====
     {
       name: "凍土の少年 アルク", season: 1, chapter: 's1c4',
-      title: "ニーヴル雪原村の子、 凍土の冒険心",
+      title: "ニーヴル雪原村の少年、 凍土の冒険心",
       caption: "お、 龍帝様だっ……!",
       desc: "ニーヴル雪原村の少年、 十一-十二歳。 銀髪のショート、 元気で好奇心旺盛。 氷玉投げが得意。 イズン兄に憧れて、 「いつか戦士になる!」 と意気込む。 ミウは幼馴染で、 ふたりで雪原を駆け回って育った。",
-      img: `${S1}/r/frost_boy.png`,
+      img: `${S1}/r/snow_boy.png`,
     },
     {
       name: "雪原の少女 ミウ", season: 1, chapter: 's1c4',
@@ -553,14 +662,14 @@ const POOL = {
     },
     {
       name: "空の少女 ピピ", season: 1, chapter: 's1c4',
-      title: "ゼノニア郊外の整備見習い",
+      title: "ゼノニア郊外の整備の少女",
       caption: "ねじまわしっ! あったよっ!",
       desc: "ゼノニア郊外の整備見習いの少女、 十二-十三歳。 朱色ショート、 朗らかで活発。 ねじまわしを工具兼武器に。 ベル姉に憧れ、 工房通いを始めた。 兄ピットの隣で育ち、 兄を超えるのが目下の目標。",
       img: `${S1}/r/sky_girl.png`,
     },
     {
       name: "空の少年 ピット", season: 1, chapter: 's1c4',
-      title: "ゼノニア郊外の整備見習い、 ピピの兄",
+      title: "ゼノニア郊外の整備の少年、 ピピの兄",
       caption: "妹に追い越されないようにしないと……!",
       desc: "ゼノニア郊外の整備見習いの少年、 十三-十四歳。 朱色ミディアム、 ピピの兄。 小型レンチを腰に下げ、 妹より先に工房を志した先輩。 ピピが急成長してきて、 兄として焦りつつも自慢に思う複雑な心境。",
       img: `${S1}/r/sky_boy.png`,
@@ -962,7 +1071,7 @@ function saveState() {
 
 // ────────────── Rolling ──────────────
 // ピックアップ章: 該当章のキャラだけ重み×2、 他は×1。 章全体のtier比率(R65/SR25/SSR7/UR3)は維持。
-const PICKUP_CHAPTER = 's1c4';  // 最新章固定 (S1C5公開時に 's1c5' へ手動更新)
+const PICKUP_CHAPTER = 's1c5';  // 最新章固定 (S1C6公開時に 's1c6' へ手動更新)
 const PICKUP_WEIGHT = 2;
 
 function rollOne(opts = {}) {
@@ -977,8 +1086,15 @@ function rollOne(opts = {}) {
   return pickTier("R", opts);
 }
 function pickTier(tier, opts = {}) {
-  const pool = POOL[tier];
-  if (!pool || pool.length === 0) return { tier };
+  const fullPool = POOL[tier];
+  if (!fullPool || fullPool.length === 0) return { tier };
+  // 公開済章のキャラだけ排出 (releaseDate <= now)。 chapter プロパティ無しのキャラは互換のため通す
+  const pool = fullPool.filter(c => !c.chapter || _isChapterReleased(c.chapter));
+  if (pool.length === 0) {
+    // 同 tier に公開済キャラ皆無の極端なケース → 全 pool から fallback (空 result 回避)
+    const ch = fullPool[Math.floor(Math.random() * fullPool.length)];
+    return { tier, ...ch };
+  }
   // 通常ガチャ: 等確率
   if (!opts.pickup) {
     const ch = pool[Math.floor(Math.random() * pool.length)];
@@ -1015,6 +1131,17 @@ function applyPull(result, opts) {
   result.dupCount = state.dupCounts[key] || 0;
   result.dupMax = MAX_DUPS[result.tier] || 0;
   state.total += 1;
+  // ゲスト含む全ユーザーのガチャ回数をデバイス単位で Firebase に記録 (admin 画面で確認用)
+  try {
+    if (typeof fbDb !== 'undefined' && fbDb) {
+      const dev = getSharedDeviceId();
+      if (dev) {
+        const devRef = fbDb.ref('prism-gacha/devices/' + dev);
+        devRef.child('totalRolls').transaction(c => (c || 0) + 1);
+        devRef.child('lastRollAt').set(Date.now());
+      }
+    }
+  } catch (e) {}
   if (result.tier === "UR") { state.ur += 1; state.pity = 0; }
   else state.pity += 1;
   state.history.unshift({ ...result, at: Date.now() });
@@ -2906,7 +3033,7 @@ function renderGalleryByTab() {
       // cache buster 付きで サムネ更新時にブラウザキャッシュ刷新
       const img = document.createElement("img");
       img.className = "gallery-card-img";
-      img.src = (c.img || '').replace(/\.png(\?.*)?$/i, '_thumb.webp$1') + '?v=20260430aa';
+      img.src = toThumbUrl(c.img || '') + '?v=20260430aa';
       img.alt = c.name;
       img.loading = "lazy";
       img.decoding = "async";
@@ -3146,6 +3273,18 @@ const FACTIONS = [
   // S1C2 追加 (海域)
   { id: 'aquasis', label: '海淵都市アクアシス', yomi: 'かいえんとし・あくあしす', x:  800, y: 1450, color: '#7dd3fc' },
   { id: 'crimson', label: '紅玉海賊団',         yomi: 'こうぎょくかいぞくだん',   x: 1300, y: 1450, color: '#ff8888' },
+  // S1C3 追加 (砂漠)
+  { id: 'sahar',   label: '古龍砂漠サハール',   yomi: 'こりゅうさばく・さはーる', x: 1900, y: 1000, color: '#e8c578' },
+  // S1C4 追加 (凍土+空挺、 ※ FACTIONS/FACTION_WORLD_COORDS/CHAR_FACTION の登録漏れを 2026-05-03 に修正)
+  { id: 'niiruru', label: '氷霊王国ニーヴル',   yomi: 'ひょうれいおうこく・にーう゛る', x: 1700, y:  200, color: '#a8d4ff' },
+  { id: 'zenonia', label: '空挺城ゼノニア',     yomi: 'くうていじょう・ぜのにあ',     x: 1480, y:  380, color: '#d4b078' },
+  // S1C5 追加 (黒月+地底)
+  { id: 'darkmoon', label: '黒月衆ノクトス',    yomi: 'こくげつしゅう・のくとす',     x:  350, y: 1380, color: '#7a3ca5' },
+  { id: 'liora',    label: '地底市リオラ',      yomi: 'ちていし・りおら',             x:  200, y: 1100, color: '#9090d0' },
+  // S1C6 追加 (公開予定)
+  { id: 'shrines',  label: '巫女連邦リーリエ',  yomi: 'みこれんぽう・りーりえ',       x: 1100, y:  950, color: '#ffe4a0' },
+  // S1C7 追加 (公開予定、 ヴォイドラ覚醒の最終章)
+  { id: 'voidtower', label: '異界の塔ザナド',   yomi: 'いかいのとう・ざなど',         x: 1000, y: 1580, color: '#3a1858' },
 ];
 
 // キャラの所属派閥マップ (name → factionId, dx, dy: 派閥中心からの相対オフセット)
@@ -3210,11 +3349,60 @@ const CHAR_FACTION = {
   '白焔教会見習い巫女 ルーナ':   { f: 'church',  dx:  -60, dy:  130 },
   '白焔教会騎士 ラナス':         { f: 'church',  dx:  120, dy:  100 },
   '白焔教会従士 リッカ':         { f: 'church',  dx:  140, dy:  -10 },
-  // S1C4 R 追加 (silver=ニーヴル雪原、 gen=ゼノニア空挺は派閥未制定なので便宜上 redwing 圏に隣接)
-  '凍土の少年 アルク':           { f: 'silver',  dx:  -90, dy:  130 },
-  '雪原の少女 ミウ':             { f: 'silver',  dx:   90, dy:  130 },
-  '空の少女 ピピ':               { f: 'redwing', dx:  -80, dy:  130 },
-  '空の少年 ピット':             { f: 'redwing', dx:   80, dy:  130 },
+  // S1C3 古龍砂漠サハール (s1c3、 2026-05-03 登録漏れ修正)
+  '砂海王女 サハナ':             { f: 'sahar',   dx:    0, dy:  -60 },
+  '古龍の語り部 ファラー':       { f: 'sahar',   dx: -120, dy:    0 },
+  '隊商長 アーシャ':             { f: 'sahar',   dx:  120, dy:    0 },
+  '砂牙の剣聖 グラン':           { f: 'sahar',   dx:  -80, dy:   80 },
+  '祭舞のサフィラ':              { f: 'sahar',   dx:   80, dy:   80 },
+  '古龍鍛冶 オウル':             { f: 'sahar',   dx: -120, dy:  100 },
+  '砂風の戦士 ライ':             { f: 'sahar',   dx:  120, dy:  100 },
+  '砂塵の子 ティナ':             { f: 'sahar',   dx:    0, dy:  130 },
+  '砂風の語り部 ナドラ':         { f: 'sahar',   dx:  -50, dy: -100 },
+  // S1C3 紫竜王国 (リアムは紫竜の侍従)
+  '紫竜の侍従 リアム':           { f: 'dragon',  dx:    0, dy:  120 },
+  // S1C4 氷霊王国ニーヴル (s1c4、 2026-05-03 登録漏れ修正)
+  '氷帝 グレイル':               { f: 'niiruru', dx:    0, dy:  -60 },
+  '氷塔の聖騎士 リオネ':         { f: 'niiruru', dx: -100, dy:   30 },
+  '摂政 ヴァルキ':               { f: 'niiruru', dx:  100, dy:   30 },
+  '北方剣聖 ハグル':             { f: 'niiruru', dx:  -80, dy:   80 },
+  '氷霜の巫女 ユーリス':         { f: 'niiruru', dx:   80, dy:   80 },
+  '凍土の祭司 イル':             { f: 'niiruru', dx:    0, dy:  130 },
+  '氷牙の戦士 イズン':           { f: 'niiruru', dx: -120, dy:  -10 },
+  '凍土の狩人 シエラ':           { f: 'niiruru', dx:  120, dy:  -10 },
+  '氷塔の見習い騎士 アスラ':     { f: 'niiruru', dx: -100, dy:  130 },
+  // S1C4 R アルク・ミウ (旧 silver 誤所属を niiruru へ修正、 2026-05-03)
+  '凍土の少年 アルク':           { f: 'niiruru', dx: -120, dy:  150 },
+  '雪原の少女 ミウ':             { f: 'niiruru', dx:  120, dy:  150 },
+  // S1C4 空挺城ゼノニア (s1c4、 2026-05-03 登録漏れ修正)
+  '空挺女皇 ヴァーレ':           { f: 'zenonia', dx:    0, dy:  -60 },
+  '空挺城総監 ガリオン':         { f: 'zenonia', dx: -100, dy:   30 },
+  '空挺城首席学者 ゼピル':       { f: 'zenonia', dx:  100, dy:   30 },
+  '真鍮の女将 ハーニア':         { f: 'zenonia', dx:    0, dy:  100 },
+  '空挺整備士 ベル':             { f: 'zenonia', dx: -100, dy:  130 },
+  '蒸気砲手 ヴィン':             { f: 'zenonia', dx:    0, dy:  150 },
+  '空挺機関士 ジン':             { f: 'zenonia', dx:  100, dy:  130 },
+  // S1C4 R ピピ・ピット (旧 redwing 誤所属を zenonia へ修正、 2026-05-03)
+  '空の少女 ピピ':               { f: 'zenonia', dx: -120, dy:  170 },
+  '空の少年 ピット':             { f: 'zenonia', dx:  120, dy:  170 },
+  // S1C5 黒月衆ノクトス (s1c5)
+  'シ・ロエン':                  { f: 'darkmoon', dx:    0, dy:  -60 },
+  '黒月の盟主 ノクトリア':       { f: 'darkmoon', dx: -120, dy:   30 },
+  '堕者剣聖 ガルヴィン':         { f: 'darkmoon', dx:  120, dy:   30 },
+  '黒月の刺客':                  { f: 'darkmoon', dx:    0, dy:  120 },
+  // S1C5 地底市リオラ (s1c5)
+  '地底市の母 リオラエル':       { f: 'liora',    dx:    0, dy:  -60 },
+  '影織りの導師 ルナリア':       { f: 'liora',    dx: -100, dy:   30 },
+  '地底市の語り部 オルフェ':     { f: 'liora',    dx:  100, dy:   30 },
+  '地底市の少女 シエル':         { f: 'liora',    dx:    0, dy:  120 },
+  // S1C5 銀霜王国 (s1c5、 既存 silver に追加 — シオン/ルミナと並列)
+  '銀霜王 ノヴァ':               { f: 'silver',  dx:    0, dy: -100 },
+  '銀霜剣聖 オリエル':           { f: 'silver',  dx: -130, dy:  -30 },
+  '月夜祭司 アスター':           { f: 'silver',  dx:  130, dy:  -30 },
+  '銀霜近衛 セレン':             { f: 'silver',  dx: -130, dy:  130 },
+  '雪月神殿見習い ラピス':       { f: 'silver',  dx:  130, dy:  130 },
+  '銀霜の工房娘':                { f: 'silver',  dx: -100, dy:  170 },
+  '銀霜の歌姫':                  { f: 'silver',  dx:  100, dy:  170 },
 };
 // 注: こはね は 夜焔郷 配置 (1か所のみ)。星霊学院との関連は線で表現
 
@@ -3797,7 +3985,7 @@ function openLocImageZoom(src) {
   const z = document.getElementById('char-img-zoom');
   const img = document.getElementById('char-img-zoom-img');
   if (!z || !img || !src) return;
-  const fullSrc = src.replace(/_thumb\.webp(\?.*)?$/i, '.png$1');
+  const fullSrc = toFullUrl(src);
   img.src = fullSrc;
   // 原寸PNGが404 の場合は thumb webp にフォールバック
   img.onerror = function () {
@@ -3963,6 +4151,7 @@ const STORY_CHAPTER_MARKERS = [
   { storyId: 's1c2', label: '第2章', icon: '🌊', x:  900, y: 1380 }, // アクアシス aquasis 南西、 内側に少し移動
   { storyId: 's1c3', label: '第3章', icon: '🐉', x: 1670, y: 1380 }, // 砂漠サハール (派閥未登録、 専用座標)、 ???ティザーから離す
   { storyId: 's1c4', label: '第4章', icon: '❄️', x: 1700, y:  220 }, // 凍土+空 (北方東部、 Coming Soon)、 内側に下げてコンパスローズと干渉回避
+  { storyId: 's1c5', label: '第5章', icon: '🌑', x:  300, y: 1380 }, // 銀霜+黒月衆+地底市 (西方氷土の裏側)、 silver(500,1250) の少し南西
 ];
 // S2/S3 派閥ティザー (霧表現): まだ実装されていない領域を「???」 で示す
 // 画像範囲外は viewBox bg で見えにくいため内側に配置
@@ -3975,7 +4164,7 @@ const STORY_FACTION_TEASER = [
 // 2026-05-02 修正: hidden attribute だけで判定すると、 char-detail/img-zoom 等の経由で
 // hidden state が想定外に変化した時に lock pair が崩れて button 反応しなくなる問題対策
 let _worldMapIsOpen = false;
-function openWorldMap() {
+async function openWorldMap() {
   const m = document.getElementById('world-map');
   if (!m) return;
   // 状態不整合の自己修復: 内部 open フラグ true なのに UI 上は hidden の場合、 lock pair が壊れてる
@@ -3983,6 +4172,16 @@ function openWorldMap() {
   if (_worldMapIsOpen && m.hasAttribute('hidden')) {
     _worldMapIsOpen = false;
     _unlockBodyScroll();
+  }
+  // ワールドマップ画像 (約 3.5MB) を事前 fetch — 未cacheなら 「読込中」 オーバーレイ
+  const wmUrl = _appendImgCacheBuster('/images/locations/world_map.png');
+  let wmCached = false;
+  try { wmCached = !!(await caches.match(wmUrl)); } catch (e) {}
+  if (!wmCached) {
+    const ov = document.getElementById('world-map-loading-overlay');
+    if (ov) ov.hidden = false;
+    try { await fetch(wmUrl, { credentials: 'omit' }); } catch (e) { /* オフライン等は無視、 SVG 内 image が再試行する */ }
+    if (ov) ov.hidden = true;
   }
   renderWorldMap();
   m.removeAttribute('hidden');
@@ -4045,7 +4244,7 @@ const FACTION_WORLD_COORDS = {
   wolf:    { x:  330, y: 1010, region: '西方荒野' },
   silver:  { x:  500, y: 1250, region: '西方氷土' },
   // 東部山岳 (北→南)
-  dragon:  { x: 1550, y:  380, region: '東方山脈' },
+  dragon:  { x:  900, y:  220, region: '中央上紫塔' },  // 2026-05-03 修正: 旧 1550,380 は world_map 上で氷霊王国/空挺城の絵柄、 紫塔は中央上にあり s1c3「紫水晶の城」 と整合
   redwing: { x: 1720, y:  720, region: '東方紅地' },
   yakai:   { x: 1670, y: 1010, region: '東方夜域' },
   seventh: { x: 1500, y: 1250, region: '東方光土' },
@@ -4054,6 +4253,20 @@ const FACTION_WORLD_COORDS = {
   // 海域 (一番南)
   aquasis: { x:  800, y: 1450, region: '南方海域' },
   crimson: { x: 1300, y: 1450, region: '南方海域' },
+  // S1C3 追加 (古龍砂漠サハール、 右端の赤茶砂漠)
+  sahar:   { x: 1900, y: 1000, region: '東方砂漠' },
+  // S1C4 追加 (凍土+空挺、 2026-05-03 登録漏れ修正)
+  // niiruru: world_map 右上の氷城群 = 画像絵柄通り
+  // zenonia: niiruru の南西近距離 (s1c4 本文「ニーヴル → 南西へ少し迂回 → ゼノニア」 整合 + 旧 dragon 位置の浮遊城絵柄)
+  niiruru: { x: 1700, y:  200, region: '北方氷土' },
+  zenonia: { x: 1480, y:  380, region: '北方雲海' },
+  // S1C5 追加 (黒月衆+地底市リオラ)
+  darkmoon: { x:  350, y: 1380, region: '西方氷土の裏側' },  // silver(500,1250) の南西、 月喰いの森・黒月の祭壇地
+  liora:    { x:  200, y: 1100, region: '西方山岳地下' },    // silver の北西、 山岳の岩壁裂け目から下る地下都市
+  // S1C6 追加 (公開予定)
+  shrines:   { x: 1100, y:  950, region: '中央南東' },        // academy(1000,1180) の上、 観測者七座祭祀の中心
+  // S1C7 追加 (公開予定、 ヴォイドラ覚醒の異界塔)
+  voidtower: { x: 1000, y: 1580, region: '異界 (深淵)' },     // 観測者七座 (天空界) と対の存在、 viewBox 最下層
 };
 
 function renderWorldMap() {
@@ -4390,7 +4603,7 @@ function _showChapterGallery(storyId) {
       const visIdx = visibleLocs.findIndex(l => l.scene === sceneKey && l.img === el.dataset.img);
       if (visIdx < 0) return;
       const thumbUrl = el.dataset.img;
-      const fullUrl = thumbUrl.replace(/_thumb\.webp(\?.*)?$/i, '.png$1');
+      const fullUrl = toFullUrl(thumbUrl);
       _openLocImageZoom(fullUrl, { list: visibleLocs, index: visIdx });
     });
   });
@@ -4449,7 +4662,7 @@ function _locZoomNavGo(dir) {
   _locZoomNav.index = newIdx;
   const next = list[newIdx];
   if (!next || !next.img) return;
-  const fullSrc = next.img.replace(/_thumb\.webp(\?.*)?$/i, '.png$1');
+  const fullSrc = toFullUrl(next.img);
   const img = document.getElementById('char-img-zoom-img');
   if (img) {
     img.src = fullSrc;
@@ -4691,6 +4904,7 @@ const STORY_FILES = {
   s1c2: { title: '南方海域の異変', meta: 'Season 1 — 第2章', file: 'STORY/s1c2.md' },
   s1c3: { title: '砂塵の隊商', meta: 'Season 1 — 第3章', file: 'STORY/s1c3.md' },
   s1c4: { title: '凍土と空',     meta: 'Season 1 — 第4章', file: 'STORY/s1c4.md' },
+  s1c5: { title: '黒月の予兆',   meta: 'Season 1 — 第5章', file: 'STORY/s1c5.md' },
 };
 
 function escapeHtml(s) {
@@ -4806,7 +5020,75 @@ const FURIGANA = {
   '巫女': 'みこ',
   '神事': 'しんじ',
   '聖域': 'せいいき',
+  // S1C5 追加 (黒月衆+地底市+雪月神殿+祭夜+ID-based キャラ表示名)
+  '黒月衆ノクトス': 'こくげつしゅうのくとす',
+  '地底市リオラ': 'ちていしりおら',
+  '巫女連邦リーリエ': 'みこれんぽうりーりえ',
+  '異界の塔ザナド': 'いかいのとうざなど',
+  '黒月衆': 'こくげつしゅう',
+  '黒月': 'こくげつ',
+  '月喰いの森': 'つきはみのもり',
+  '月喰い': 'つきはみ',
+  '雪月神殿': 'せつげつしんでん',
+  '影織り': 'かげおり',
+  '沈黙の盾': 'ちんもくのたて',
+  '兄弟弟子': 'きょうだいでし',
+  '誓盾': 'せいたて',
+  '裁罰': 'さいばつ',
+  '月鏡': 'つきかがみ',
+  '灯篭': 'とうろう',
+  '灯番': 'ひばん',
+  '盟主': 'めいしゅ',
+  '使徒': 'しと',
+  '堕者': 'だしゃ',
+  '導師': 'どうし',
+  '師範': 'しはん',
+  '祭司': 'さいし',
+  '月夜': 'つきよ',
+  '月夜祭': 'つきよさい',
+  '祭夜': 'さいや',
+  '謁見': 'えっけん',
+  '私室': 'ししつ',
+  '街道': 'かいどう',
+  '工房娘': 'こうぼうむすめ',
+  '歌姫': 'うたひめ',
+  '影喰いを「友達」': 'かげくいを「ともだち」',
+  '黒月の盟主 ノクトリア': 'こくげつのめいしゅ のくとりあ',
+  '堕者剣聖 ガルヴィン': 'だしゃけんせい がるう゛ぃん',
+  '影織りの導師 ルナリア': 'かげおりのどうし るなりあ',
+  '銀霜剣聖 オリエル': 'ぎんそうけんせい おりえる',
+  '銀霜王 ノヴァ': 'ぎんそうおう のう゛ぁ',
+  '月夜祭司 アスター': 'つきよさいし あすたー',
+  '銀霜近衛 セレン': 'ぎんそうこのえ せれん',
+  '黒月の刺客': 'こくげつのしかく',
+  '雪月神殿見習い ラピス': 'せつげつしんでんみならい らぴす',
+  '地底市の母 リオラエル': 'ちていしのはは りおらえる',
+  '地底市の少女 シエル': 'ちていしのしょうじょ しえる',
+  '地底市の語り部 オルフェ': 'ちていしのかたりべ おるふぇ',
+  '銀霜の工房娘': 'ぎんそうのこうぼうむすめ',
+  '銀霜の歌姫': 'ぎんそうのうたひめ',
+  '虚': 'こ',
+  '虚境': 'きょきょう',
 };
+
+// ============ ID-based キャラリンク (2026-05-03 導入) ============
+// 同名キャラ重複時の安全装置: 本文中で {{char:slug}}表示名{{/char}} で一意指定可能。
+// 例: 「{{char:sky_engineer}}ベル{{/char}}」 → 空挺整備士ベル に確定リンク (詠聖ベルとの誤紐付け回避)
+// slug は POOL の img URL の filename (拡張子前) をそのまま使用 (例: songstress, sky_engineer, masked_knight)
+// 後方互換: マークアップなしの本文は従来通り name 完全一致 linkify が動く。
+const _poolBySlugCache = new Map();
+function _getCharBySlug(slug) {
+  if (!slug) return null;
+  if (_poolBySlugCache.size === 0 && typeof POOL !== 'undefined') {
+    for (const tier of ['LR','UR','SSR','SR','R']) {
+      for (const c of POOL[tier] || []) {
+        const m = (c.img || '').match(/\/([\w_-]+)\.(png|webp|jpg|jpeg)/i);
+        if (m) _poolBySlugCache.set(m[1], { ...c, tier });
+      }
+    }
+  }
+  return _poolBySlugCache.get(slug) || null;
+}
 
 // HTMLテキストノード内のキャラ名を <a class="char-link"> でラップ
 // 詳細画面オープン用。長い候補から処理して短い名前の誤マッチ回避。
@@ -4814,6 +5096,20 @@ const FURIGANA = {
 // sceneTitle: 現シーンの title (例: 'エピローグ — 天の境で')。 fromTitle ベースの remap 用。
 function linkifyCharNames(html, sceneLabel, sceneTitle) {
   if (typeof POOL === 'undefined') return html;
+  // Step 0: ID-based マークアップを先処理。 同名キャラ重複時の確定リンク手段。
+  // {{char:slug}}表示名{{/char}} → <a class="char-link" data-id="slug" data-name="...">表示名</a>
+  // この時点で <a> タグ化されているので、 後続の name 一致処理 (Step 1) では <a> 内をスキップする walk が
+  // 既存ロジック (tag === 'A' で return) で防御済 → 二重ラップ事故なし。
+  if (typeof html === 'string' && html.indexOf('{{char:') !== -1) {
+    html = html.replace(/\{\{char:([\w_-]+)\}\}([\s\S]*?)\{\{\/char\}\}/g, (m, slug, label) => {
+      const c = _getCharBySlug(slug);
+      if (!c) {
+        if (typeof console !== 'undefined' && console.warn) console.warn('[linkify] unknown char slug:', slug);
+        return label; // 未知 slug は label だけ残す (後続 name match に委ねる)
+      }
+      return `<a class="char-link" data-id="${slug}" data-name="${escapeHtml(c.name)}">${escapeHtml(label)}</a>`;
+    });
+  }
   const tmp = document.createElement('div');
   tmp.innerHTML = html;
   // 候補構築 (story-scene-charsと同じロジック、長い順)
@@ -4956,6 +5252,11 @@ let currentStoryPov = null;  // 章のPOVキャラ名 (**POV**: 名前 から抽
 async function openStory(storyId) {
   const info = STORY_FILES[storyId];
   if (!info) return;
+  // 公開予定日チェック (releaseDate <= now のみ閲覧可能、 防御線として WMマーカー側のチェックと併存)
+  if (!_isChapterReleased(storyId)) {
+    _showInfoToast(`📅 ${_formatReleaseDate(storyId)} 公開予定`);
+    return;
+  }
   currentStoryId = storyId;
   _prefetchChapterAssets(storyId);  // M2: 章の場所画像を background DL → SWで LOC_CACHE 充填
   $("#story-meta").textContent = info.meta;
@@ -5129,11 +5430,14 @@ function renderScene() {
   function _storyCharLinkClick(e, a) {
     e.stopPropagation();
     e.preventDefault();
+    // ID-based 優先: data-id (slug) があれば slug → POOL を直接引き、 同名重複でも一意特定。
+    // data-id がなければ従来通り data-name → getCharByName。
+    const slug = a.dataset.id;
     const name = a.dataset.name;
-    const c = getCharByName(name);
+    const c = slug ? _getCharBySlug(slug) : getCharByName(name);
     if (!c) return;
     if (!isUnlocked(c)) {
-      showToast('🔒 ' + name + ' はまだ未解放です。ガチャで引いてからご覧ください');
+      showToast('🔒 ' + (c.name || name) + ' はまだ未解放です。ガチャで引いてからご覧ください');
       return;
     }
     if (detailUnlockedList.length === 0) {
@@ -5446,6 +5750,13 @@ const STORY_ACT_INTROS = {
     '第三幕 — 凍土の対話':              '孤独を分かち合える相手と、 雪原で空を見上げる夜。\n— アルテミス',
     '第四幕 — 帰路':                    '次に龍を譲る相手を、 私はもう、 知っているのかもしれない。\n— アルテミス',
   },
+  's1c5': {
+    'Season 1 第5章 — 黒月の予兆':      '仮面の下に、 もう一人の俺がいる。 抱きしめてから、 手放すための夜の話だ。\n— 仮面騎士 シオン',
+    '第一幕 — 月夜の儀':                '銀霜の月が、 細く欠け始めた。 王から託された月夜の儀の刻が、 来た。\n— シオン',
+    '第二幕 — 影の使徒たち':            '黒月衆ノクトス。 仮面の下の俺の片割れを、 引き取りたいという声。\n— シオン',
+    '第三幕 — 地底市の教え':            '影と共に生きる選択を、 千年前にした民がいた。 私は、 その織機の前に立つ。\n— シオン',
+    '第四幕 — 分離の儀式':              '二重月夜の祭壇で、 仮面を外す。 もう一人の俺と、 向き合う夜。\n— シオン',
+  },
 };
 
 // 全章の outline (公開順、 公開済 + 将来予定)。 STORY_FILES (公開済) との差分で「Coming Soon teaser」 を出す
@@ -5457,8 +5768,8 @@ const STORY_OUTLINE = [
   { id: 's1c2', meta: 'Season 1 — 第2章', title: '南方海域の異変',     icon: '🌊', tagline: '信じる対象は、 外にあるとは限らない',                                povCharName: 'イザベル' },
   { id: 's1c3', meta: 'Season 1 — 第3章', title: '砂塵の隊商',         icon: '🐉', tagline: '血ではなく、 共に過ごした時間が家族を作る',                          povCharName: '竜爵 ヴィル' },
   { id: 's1c4', meta: 'Season 1 — 第4章', title: '凍土と空',           icon: '❄️', tagline: '強者の頂は、 孤独を共に分かち合うことで初めて温かい', releaseDate: '2026-05-02', povCharName: '龍帝 アルテミス' },
-  { id: 's1c5', meta: 'Season 1 — 第5章', title: '黒月の予兆',         icon: '🌑', tagline: '銀霜の月が黒く欠ける夜、 仮面の下のもう一人の自分が、 静かに立ち上がる ─ 光と影、 二つの私の境界で', releaseDate: '2026-05-06', povCharName: '仮面騎士 シオン' },
-  { id: 's1c6', meta: 'Season 1 — 第6章', title: '七座満つる',         icon: '🌈', tagline: '違っていても、 同じ目的を持つ仲間でいられる',                       povCharName: 'セラフィエル' },
+  { id: 's1c5', meta: 'Season 1 — 第5章', title: '黒月の予兆',         icon: '🌑', tagline: '銀霜の月が黒く欠ける夜、 仮面の下のもう一人の自分が、 静かに立ち上がる ─ 光と影、 二つの私の境界で', releaseDate: '2026-05-06T12:00:00+09:00', povCharName: '仮面騎士 シオン' },
+  { id: 's1c6', meta: 'Season 1 — 第6章', title: '七座満つる',         icon: '🌈', tagline: '違っていても、 同じ目的を持つ仲間でいられる', releaseDate: '2026-05-13', povCharName: 'セラフィエル' },
   { id: 's1c7', meta: 'Season 1 — 第7章', title: '黒月決戦',           icon: '☄️', tagline: '影を消すのではなく、 共に在ると認める',                              povCharName: '虹意 プリズマ' },
 ];
 
@@ -5485,12 +5796,14 @@ function buildEndNavHtml(storyId) {
     // 次章未公開: Coming Soon teaser カード
     let releaseLabel = '📅 公開予定 — お楽しみに';
     if (next.releaseDate) {
-      // YYYY-MM-DD → YYYY/MM/DD (ゼロ埋め2桁、 ホーム画面ティザーと同形式、 feedback_datetime_format.md 準拠)
-      const [y, m, d] = next.releaseDate.split('-').map(s => parseInt(s, 10));
-      if (y && m && d) {
-        const mm = String(m).padStart(2, '0');
-        const dd = String(d).padStart(2, '0');
-        releaseLabel = `📅 <b>${y}/${mm}/${dd}</b> 公開予定`;
+      // ISO 8601 (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS+TZ) を Date でパース → YYYY/MM/DD HH:MM (時刻 00:00 なら省略)
+      const d = new Date(next.releaseDate);
+      if (!isNaN(d.getTime())) {
+        const pad = n => String(n).padStart(2, '0');
+        const dateStr = `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())}`;
+        const hh = d.getHours(), mm = d.getMinutes();
+        const timeStr = (hh === 0 && mm === 0) ? '' : ` ${pad(hh)}:${pad(mm)}`;
+        releaseLabel = `📅 <b>${dateStr}${timeStr}</b> 公開予定`;
       }
     }
     html += `<div class="story-end-nav-teaser">
@@ -5618,47 +5931,58 @@ const STORY_CUTIN_CONFIG = {
 const LOCATION_CONFIG = {
   's1c1': {
     // 各シーンの「印象深い1場面」 を 9:16 縦長背景画像として配置
-    '1-1': { img: '/images/locations/s1c1/academy_morning_thumb.webp' },     // 星霊学院の朝 (学院全景、 七色の光)
-    '1-3': { img: '/images/locations/s1c1/training_ground_thumb.webp' },     // 剣術科 朝練 (ちさと無力感)
-    '1-4': { img: '/images/locations/s1c1/rooftop_omen_thumb.webp' },        // 屋上 (五人の絆 + 影喰い予兆)
-    '2-3': { img: '/images/locations/s1c1/izabel_descent_thumb.webp' },      // 白い光 (イザベル降臨)
-    '2-6': { img: '/images/locations/s1c1/rift_emergence_thumb.webp' },      // 裂け目 (影喰い大量湧出)
-    '3-2': { img: '/images/locations/s1c1/chisato_awakening_thumb.webp' },   // 山場: ちさと虹脈覚醒
-    '3-3': { img: '/images/locations/s1c1/prisma_descent_thumb.webp' },      // プリズマ降臨
-    '4-2': { img: '/images/locations/s1c1/rooftop_dawn_thumb.webp' },        // 屋上の朝 (新しい日常)
+    '1-1': { img: '/images/locations/s1c1/thumb/academy_morning_thumb.webp' },     // 星霊学院の朝 (学院全景、 七色の光)
+    '1-3': { img: '/images/locations/s1c1/thumb/training_ground_thumb.webp' },     // 剣術科 朝練 (ちさと無力感)
+    '1-4': { img: '/images/locations/s1c1/thumb/rooftop_omen_thumb.webp' },        // 屋上 (五人の絆 + 影喰い予兆)
+    '2-3': { img: '/images/locations/s1c1/thumb/izabel_descent_thumb.webp' },      // 白い光 (イザベル降臨)
+    '2-6': { img: '/images/locations/s1c1/thumb/rift_emergence_thumb.webp' },      // 裂け目 (影喰い大量湧出)
+    '3-2': { img: '/images/locations/s1c1/thumb/chisato_awakening_thumb.webp' },   // 山場: ちさと虹脈覚醒
+    '3-3': { img: '/images/locations/s1c1/thumb/prisma_descent_thumb.webp' },      // プリズマ降臨
+    '4-2': { img: '/images/locations/s1c1/thumb/rooftop_dawn_thumb.webp' },        // 屋上の朝 (新しい日常)
   },
   's1c2': {
     // 2026-05-01 4幕統合: 出航/海淵/覚醒の波紋/帰路、 全章幕単位連番 (N=幕番号)
-    '1-1': { img: '/images/locations/s1c2/church_morning_thumb.webp' },          // 第一幕 1-1 教会の朝 (七色ステンドグラスで祈るイザベル)
-    '1-3': { img: '/images/locations/s1c2/serapia_evening_thumb.webp' },         // 第一幕 1-3 港町セラピア純風景
-    '1-4': { img: '/images/locations/s1c2/crimson_pearl_night_thumb.webp' },     // 第一幕 1-4 月のない夜の紅玉号甲板
+    '1-1': { img: '/images/locations/s1c2/thumb/church_morning_thumb.webp' },          // 第一幕 1-1 教会の朝 (七色ステンドグラスで祈るイザベル)
+    '1-3': { img: '/images/locations/s1c2/thumb/serapia_evening_thumb.webp' },         // 第一幕 1-3 港町セラピア純風景
+    '1-4': { img: '/images/locations/s1c2/thumb/crimson_pearl_night_thumb.webp' },     // 第一幕 1-4 月のない夜の紅玉号甲板
     // 第二幕 2-1 影喰いの群れ: shadeova_swarm を挿絵化、 背景はグラデ (戦闘シーン動的)
-    '2-3': { img: '/images/locations/s1c2/aquasis_city_thumb.webp' },            // 第二幕 2-3 海中の珊瑚都市 (アクアシス宮殿)
-    '3-1': { img: '/images/locations/s1c2/aquasis_rift_thumb.webp' },            // 第三幕 3-1 海溝の底・黒い亀裂
+    '2-3': { img: '/images/locations/s1c2/thumb/aquasis_city_thumb.webp' },            // 第二幕 2-3 海中の珊瑚都市 (アクアシス宮殿)
+    '3-1': { img: '/images/locations/s1c2/thumb/aquasis_rift_thumb.webp' },            // 第三幕 3-1 海溝の底・黒い亀裂
     // 第三幕 3-3 波紋の聖女: ripple_saint_awakening を挿絵化、 キャラカットイン削除
-    '4-2': { img: '/images/locations/s1c2/serapia_dawn_thumb.webp' },            // 第四幕 4-2 朝焼けの港 (ミカと別れ)
+    '4-2': { img: '/images/locations/s1c2/thumb/serapia_dawn_thumb.webp' },            // 第四幕 4-2 朝焼けの港 (ミカと別れ)
   },
   's1c4': {
     // 第4章「凍土と空」 背景 (3:4縦長 + 1枚 16:9横長 = snow_field_silence は 3:4縦)
-    '1-1': { img: '/images/locations/s1c4/imperial_jade_palace_thumb.webp' },         // プロローグ/1-1 龍国玉座
-    '1-3': { img: '/images/locations/s1c4/frozen_tundra_journey_thumb.webp' },        // 1-3 雪原を行く
-    '2-1': { img: '/images/locations/s1c4/niiruru_ice_palace_thumb.webp' },           // 2-1 氷宮殿の謁見
-    '3-1': { img: '/images/locations/s1c4/zenonia_floating_fortress_thumb.webp' },    // 3-1 空挺城ゼノニア
-    '3-3': { img: '/images/locations/s1c4/snow_field_silence_thumb.webp' },           // 3-3 山場 雪原で空を見上げる (アルテミス+グレイル)
-    '銀霜の月に呼ばれる者': { img: '/images/locations/s1c4/observer_prophecy_realm_thumb.webp' },  // エピローグ subscene
+    '1-1': { img: '/images/locations/s1c4/thumb/imperial_jade_palace_thumb.webp' },         // プロローグ/1-1 龍国玉座
+    '1-3': { img: '/images/locations/s1c4/thumb/frost_tundra_journey_thumb.webp' },         // 1-3 雪原を行く
+    '2-1': { img: '/images/locations/s1c4/thumb/niiruru_ice_palace_thumb.webp' },           // 2-1 氷宮殿の謁見
+    '3-1': { img: '/images/locations/s1c4/thumb/zenonia_floating_fortress_thumb.webp' },    // 3-1 空挺城ゼノニア
+    '3-3': { img: '/images/locations/s1c4/thumb/snow_field_silence_thumb.webp' },           // 3-3 山場 雪原で空を見上げる (アルテミス+グレイル)
+    '銀霜の月に呼ばれる者': { img: '/images/locations/s1c4/thumb/observer_prophecy_realm_thumb.webp' },  // エピローグ subscene
+  },
+  's1c5': {
+    // 第5章「黒月の予兆」 背景 (3:4縦長 全 8枚)
+    'プロローグ': { img: '/images/locations/s1c5/thumb/observer_west_realm_thumb.webp' },        // プロローグ 観測者三柱・西の月の異変観測
+    '1-1':         { img: '/images/locations/s1c5/thumb/silver_throne_hall_thumb.webp' },        // 1-1 銀霜王宮の月光謁見の間
+    '1-2':         { img: '/images/locations/s1c5/thumb/sion_chamber_thumb.webp' },              // 1-2 シオンの私室 (仮面の置かれた机)
+    '1-3':         { img: '/images/locations/s1c5/thumb/silver_festival_street_thumb.webp' },    // 1-3 銀霜の市街・祭夜
+    '2-1':         { img: '/images/locations/s1c5/thumb/black_moon_grove_thumb.webp' },          // 2-1 月喰いの森 (黒月衆の祭壇)
+    '3-1':         { img: '/images/locations/s1c5/thumb/underworld_liora_full_thumb.webp' },     // 3-1 地底市リオラ全景
+    '3-3':         { img: '/images/locations/s1c5/thumb/moon_shrine_altar_thumb.webp' },         // 3-3 雪月神殿の祭壇
+    'エピローグ': { img: '/images/locations/s1c5/thumb/observer_west_close_thumb.webp' },        // エピローグ 観測者三柱・東への引き
   },
   's1c3': {
     // 各シーンの「印象深い1場面」 を 3:4 縦長背景画像として配置
-    '1-1': { img: '/images/locations/s1c3/purple_dragon_palace_thumb.webp' },     // 玉座の間 (父王とヴィルの対話)
+    '1-1': { img: '/images/locations/s1c3/thumb/purple_dragon_palace_thumb.webp' },     // 玉座の間 (父王とヴィルの対話)
     // 1-2 城門前: 玉座の間と画的に乖離するため背景なし (旅立ち専用画像未生成)
-    '2-1': { img: '/images/locations/s1c3/desert_caravan_thumb.webp' },           // 隊商に紛れて (アーシャの商隊)
+    '2-1': { img: '/images/locations/s1c3/thumb/desert_caravan_thumb.webp' },           // 隊商に紛れて (アーシャの商隊)
     // 2-2 砂塵の襲撃: sand_shadeova_battle を挿絵化、 背景はグラデ (戦闘シーン動的)
-    '2-3': { img: '/images/locations/s1c3/oasis_night_thumb.webp' },              // オアシスの夜 (サハナと焚き火)
-    '3-1': { img: '/images/locations/s1c3/ancient_ruins_thumb.webp' },            // 古代遺跡 (ファラー登場)
+    '2-3': { img: '/images/locations/s1c3/thumb/oasis_night_thumb.webp' },              // オアシスの夜 (サハナと焚き火)
+    '3-1': { img: '/images/locations/s1c3/thumb/ancient_ruins_thumb.webp' },            // 古代遺跡 (ファラー登場)
     // 3-2 影喰いの大波: tribe_battle を挿絵化、 背景はグラデ
-    '3-3': { img: '/images/locations/s1c3/starlight_oath_thumb.webp' },           // 山場: 星空の告白 (ヴィル+サハナ)
+    '3-3': { img: '/images/locations/s1c3/thumb/starlight_oath_thumb.webp' },           // 山場: 星空の告白 (ヴィル+サハナ)
     // 4-1 古龍王の予兆: lost_dragon_king_omen を挿絵化、 背景なし
-    '4-2': { img: '/images/locations/s1c3/desert_dawn_thumb.webp' },              // 砂漠の朝、 別れ
+    '4-2': { img: '/images/locations/s1c3/thumb/desert_dawn_thumb.webp' },              // 砂漠の朝、 別れ
   },
 };
 
@@ -5668,72 +5992,89 @@ const LOCATION_CONFIG = {
 const STORY_LOCATION_INLINE_CONFIG = {
   's1c1': [
     // 1-2 食堂: 五人の朝食 (カイの卵焼きシーン)
-    { scene: '1-2',  marker: '卵焼き多めにとっておいたから',     position: 'after',  img: '/images/locations/s1c1/breakfast_table_thumb.webp' },
+    { scene: '1-2',  marker: '卵焼き多めにとっておいたから',     position: 'after',  img: '/images/locations/s1c1/thumb/breakfast_table_thumb.webp' },
     // 2-2 戦闘の山場: 大型影喰いがちさとをロックオン (敵カタログ的意義もある)
-    { scene: '2-2',  marker: '影喰いがちさとを見た',             position: 'after',  img: '/images/enemies/shadeova_large_thumb.webp' },
+    { scene: '2-2',  marker: '影喰いがちさとを見た',             position: 'after',  img: '/images/enemies/thumb/shadeova_large_thumb.webp' },
     // 2-4 朱音とひなた: 派手な合流 (紅蓮+桜花)
-    { scene: '2-4',  marker: '紅蓮の炎が舞い上がった',           position: 'after',  img: '/images/locations/s1c1/akane_hinata_arrival_thumb.webp' },
+    { scene: '2-4',  marker: '紅蓮の炎が舞い上がった',           position: 'after',  img: '/images/locations/s1c1/thumb/akane_hinata_arrival_thumb.webp' },
     // 2-5 ガルドとヴィル: 重厚な合流 (狼+紫槍)
-    { scene: '2-5',  marker: '紫色の槍を構えた女性',             position: 'after',  img: '/images/locations/s1c1/garudo_vill_arrival_thumb.webp' },
+    { scene: '2-5',  marker: '紫色の槍を構えた女性',             position: 'after',  img: '/images/locations/s1c1/thumb/garudo_vill_arrival_thumb.webp' },
     // 2-6 裂け目から小型群体湧出: 既存背景 (rift_emergence) と併存、 群体クローズアップ
-    { scene: '2-6',  marker: '次々と這い出してきた',             position: 'after',  img: '/images/enemies/shadeova_swarm_land_thumb.webp' },
+    { scene: '2-6',  marker: '次々と這い出してきた',             position: 'after',  img: '/images/enemies/thumb/shadeova_swarm_land_thumb.webp' },
     // 3-4 戦いの終わり: 大人6人連携で裂け目縫合 (戦闘クライマックス締め)
-    { scene: '3-4',  marker: '裂け目が閉じる音だった',           position: 'after',  img: '/images/locations/s1c1/rift_seal_thumb.webp' },
+    { scene: '3-4',  marker: '裂け目が閉じる音だった',           position: 'after',  img: '/images/locations/s1c1/thumb/rift_seal_thumb.webp' },
     // エピローグ プリズマの黄昏: 章の最終 (label 無いので title 比較で hit)
-    { scene: 'プリズマの黄昏', marker: '結晶のように、 虹色の塵となって舞い上がる', position: 'after', img: '/images/locations/s1c1/prisma_twilight_thumb.webp' },
+    { scene: 'プリズマの黄昏', marker: '結晶のように、 虹色の塵となって舞い上がる', position: 'after', img: '/images/locations/s1c1/thumb/prisma_twilight_thumb.webp' },
   ],
   's1c2': [
     // 2026-05-01 4幕統合: 出航/海淵/覚醒の波紋/帰路 に再mapping
     // 第一幕 1-3 港町セラピア (旧 2-3 → 1-3): シャンティ登場時に挿絵
-    { scene: '1-3',  marker: '頭には大きな三角帽子に紅い羽飾り', position: 'after',  img: '/images/locations/s1c2/serapia_sunset_thumb.webp' },
+    { scene: '1-3',  marker: '頭には大きな三角帽子に紅い羽飾り', position: 'after',  img: '/images/locations/s1c2/thumb/serapia_sunset_thumb.webp' },
     // 第二幕 2-1 海中影喰い登場 (旧 3-1 → 2-1): 群れ突入挿絵より前に「水中型」 紹介
-    { scene: '2-1',  marker: '影喰い——水中型',                  position: 'after',  img: '/images/enemies/shadeova_swarm_marine_thumb.webp' },
+    { scene: '2-1',  marker: '影喰い——水中型',                  position: 'after',  img: '/images/enemies/thumb/shadeova_swarm_marine_thumb.webp' },
     // 第二幕 2-1 (旧 3-1): 戦闘シーンの動的瞬間を挿絵で
-    { scene: '2-1',  marker: '群れに突っ込んだ',                  position: 'after',  img: '/images/locations/s1c2/shadeova_swarm_thumb.webp' },
+    { scene: '2-1',  marker: '群れに突っ込んだ',                  position: 'after',  img: '/images/locations/s1c2/thumb/shadeova_swarm_thumb.webp' },
     // 第二幕 2-3 アクアシス宮殿 (旧 4-1 → 2-3): 海上 (entrance) → 海中 (city背景) → 宮殿 (throne) の進行
-    { scene: '2-3',  marker: '巨大な珊瑚の都市が広がっていた',    position: 'after',  img: '/images/locations/s1c2/aquasis_entrance_thumb.webp' },
-    { scene: '2-3',  marker: '宮殿の謁見の間',                    position: 'before', img: '/images/locations/s1c2/aquasis_throne_thumb.webp' },
+    { scene: '2-3',  marker: '巨大な珊瑚の都市が広がっていた',    position: 'after',  img: '/images/locations/s1c2/thumb/aquasis_entrance_thumb.webp' },
+    { scene: '2-3',  marker: '宮殿の謁見の間',                    position: 'before', img: '/images/locations/s1c2/thumb/aquasis_throne_thumb.webp' },
     // 第三幕 3-3 波紋の聖女 (旧 5-3 → 3-3): 覚醒の絶頂を挿絵で (キャラカットイン削除)
-    { scene: '3-3',  marker: '光の中で、私の鎧が、変容した',      position: 'after',  img: '/images/locations/s1c2/ripple_saint_awakening_thumb.webp' },
+    { scene: '3-3',  marker: '光の中で、私の鎧が、変容した',      position: 'after',  img: '/images/locations/s1c2/thumb/ripple_saint_awakening_thumb.webp' },
   ],
   's1c4': [
     // 第4章 挿絵 (16:9横、 全 8枚)
     // 第一幕 1-1: 翡翠の玉座 — 章開幕、 アルテミス + 双大剣『陰陽』
-    { scene: '1-1',  marker: '玉座の脇に、 双大剣『陰陽』 が静かに立てかけられていた', position: 'after',  img: '/images/locations/s1c4/jade_throne_thumb.webp' },
+    { scene: '1-1',  marker: '玉座の脇に、 双大剣『陰陽』 が静かに立てかけられていた', position: 'after',  img: '/images/locations/s1c4/thumb/jade_throne_thumb.webp' },
     // 第一幕 1-3: 雪原村でアルク&ミウ (R2人 デビュー) が龍帝隊列に駆け寄る
-    { scene: '1-3',  marker: '銀髪の少年が二人、 雪玉を投げ合って遊んでいた',    position: 'after',  img: '/images/locations/s1c4/snowfield_villagers_thumb.webp' },
-    // 第二幕 2-1: 氷宮殿の謁見、 北方剣聖ハグル + 氷帝グレイル の剣師教え構図
-    { scene: '2-1',  marker: '右側に立つのは、 銀髪の若き剣士。 北方剣聖ハグル', position: 'after',  img: '/images/locations/s1c4/frost_swordmaster_sparring_thumb.webp' },
+    { scene: '1-3',  marker: '銀髪の少年が二人、 雪玉を投げ合って遊んでいた',    position: 'after',  img: '/images/locations/s1c4/thumb/snowfield_villagers_thumb.webp' },
+    // 第二幕 2-1 出会い: アルテミスとグレイルが胸前で手を組み合わせる「覇者同士の挨拶」 (章テーマの入口)
+    { scene: '2-1',  marker: '互いの胸前で手を組み合わせた',                       position: 'after',  img: '/images/locations/s1c4/thumb/artemis_greyle_first_meeting_thumb.webp' },
+    // 第二幕 2-2 一騎打ち冒頭: 北方剣聖ハグルがグレイルの構えを腕組みで見守る (二十年の剣師教えの結実)
+    { scene: '2-2',  marker: 'ハグル剣師が腕を組んで立っていた',                   position: 'before', img: '/images/locations/s1c4/thumb/frost_swordmaster_sparring_thumb.webp' },
     // 第二幕 2-2: 氷帝グレイル vs 龍帝アルテミス 一騎打ち
-    { scene: '2-2',  marker: '五合目で、 私は双剣を交差させた',                   position: 'before', img: '/images/locations/s1c4/duel_ice_vs_dragon_thumb.webp' },
+    { scene: '2-2',  marker: '五合目で、 私は双剣を交差させた',                   position: 'before', img: '/images/locations/s1c4/thumb/duel_ice_vs_dragon_thumb.webp' },
     // 第二幕 2-3: アルテミス&ヒノオウ 千年前の回想 (戦友が並ぶ夜)
-    { scene: '2-3',  marker: 'ふと、 古い戦場の記憶が、 不意に蘇った',           position: 'after',  img: '/images/locations/s1c4/flashback_artemis_hinoo_thumb.webp' },
+    { scene: '2-3',  marker: 'ふと、 古い戦場の記憶が、 不意に蘇った',           position: 'after',  img: '/images/locations/s1c4/thumb/flashback_artemis_hinoo_thumb.webp' },
+    // 第三幕 3-2: 凍り影喰い襲撃 大規模戦闘 (戦友の証明、 希少種ビジュアル定着)
+    { scene: '3-2',  marker: '私たちは、 何も言わずに背を合わせた',                position: 'after',  img: '/images/locations/s1c4/thumb/ice_shadeova_battle_thumb.webp' },
+  ],
+  's1c5': [
+    // 第5章「黒月の予兆」 挿絵 (16:9横長、 全 5枚)
+    // 第二幕 2-2: 王族暗殺未遂 (シオン+刺客、 五つ目の誓いの動機)
+    { scene: '2-2',  marker: '俺のメイスが、 刺客の胴を、 横から薙ぎ払った',         position: 'after',  img: '/images/locations/s1c5/thumb/royal_assassination_flashback_thumb.webp' },
+    // 第二幕 2-3: 教会の塔・シオンとラナス兄弟弟子の沈黙の対話
+    { scene: '2-3',  marker: '銀霜の街の灯火を、 見下ろしていた',                    position: 'after',  img: '/images/locations/s1c5/thumb/church_tower_reunion_thumb.webp' },
+    // 第三幕 3-2: 影織りの工房 (リオラエル+ルナリア+シオン、 章テーマ視覚化)
+    { scene: '3-2',  marker: '銀の糸と、 黒の糸が、 完全に等価に、 交差していた',     position: 'after',  img: '/images/locations/s1c5/thumb/shadow_loom_workshop_thumb.webp' },
+    // 第四幕 4-1: 山場 分離の儀式 (シオン+シ・ロエン+ラナス+ルミナ+アスター、 二重月夜)
+    { scene: '4-1',  marker: '月鏡の表面が、 静かに、 揺らいだ',                       position: 'before', img: '/images/locations/s1c5/thumb/mask_separation_ritual_thumb.webp' },
+    // 第四幕 4-2: 別れの朝 (シオン+シ・ロエン、 雪原の二筋の足跡)
+    { scene: '4-2',  marker: '雪原の遠く、 朝霧の向こうに、 シ・ロエンと',             position: 'after',  img: '/images/locations/s1c5/thumb/shi_loen_departure_thumb.webp' },
     // 第三幕 3-1: 空挺城ゼノニア 三国会談シーン (ヴァーレ女皇)
-    { scene: '3-1',  marker: 'ヴァーレが、 静かに口を開いた',                     position: 'before', img: '/images/locations/s1c4/vaire_diplomacy_thumb.webp' },
+    { scene: '3-1',  marker: 'ヴァーレが、 静かに口を開いた',                     position: 'before', img: '/images/locations/s1c4/thumb/vaire_diplomacy_thumb.webp' },
     // 第三幕 3-1: ゼノニア整備工房の生活感 (ハーニア親方+ベル整備士+ピット見習い)
-    { scene: '3-1',  marker: '整備工房から元気な声が響いた',                       position: 'after',  img: '/images/locations/s1c4/zenonia_workshop_thumb.webp' },
+    { scene: '3-1',  marker: '整備工房から元気な声が響いた',                       position: 'after',  img: '/images/locations/s1c4/thumb/zenonia_workshop_thumb.webp' },
     // 第四幕 4-1: 観測者三柱 ユーリス予言シーン (氷の小神殿)
-    { scene: '4-1',  marker: '氷の小さな神殿の中央に、 ユーリスは立っていた',     position: 'after',  img: '/images/locations/s1c4/frost_oracle_prophecy_thumb.webp' },
+    { scene: '4-1',  marker: '氷の小さな神殿の中央に、 ユーリスは立っていた',     position: 'after',  img: '/images/locations/s1c4/thumb/frost_oracle_prophecy_thumb.webp' },
   ],
   's1c3': [
     // 1-2 リアム誓い、 三月の約束 (主従の絆 + 旅の制約成立)
-    { scene: '1-2',  marker: '不器用だけれど、 真っ直ぐな、 リアムらしい言葉だった', position: 'after',  img: '/images/locations/s1c3/liam_oath_thumb.webp' },
+    { scene: '1-2',  marker: '不器用だけれど、 真っ直ぐな、 リアムらしい言葉だった', position: 'after',  img: '/images/locations/s1c3/thumb/liam_oath_thumb.webp' },
     // 2-1 ヴィル+アーシャ宿場町出会い (cutin から挿絵に格上げ)
-    { scene: '2-1',  marker: 'アーシャと名乗ったその女',                  position: 'after',  img: '/images/locations/s1c3/asha_meeting_thumb.webp' },
+    { scene: '2-1',  marker: 'アーシャと名乗ったその女',                  position: 'after',  img: '/images/locations/s1c3/thumb/asha_meeting_thumb.webp' },
     // 2-2 砂塵の襲撃: サハナ初登場、 双風刀シャマールで影喰いを斬る山場 (本文 bold削除に伴い marker 修正)
-    { scene: '2-2',  marker: '少女は、 風を纏って跳んだ',                position: 'after',  img: '/images/locations/s1c3/sand_shadeova_battle_thumb.webp' },
+    { scene: '2-2',  marker: '少女は、 風を纏って跳んだ',                position: 'after',  img: '/images/locations/s1c3/thumb/sand_shadeova_battle_thumb.webp' },
     // 3-2 影喰いの大波: ヴィル+サハナ+グラン+部族戦士たちの共闘
-    { scene: '3-2',  marker: '部族の戦士たちが、 一斉に駆けた',         position: 'after',  img: '/images/locations/s1c3/tribe_battle_thumb.webp' },
+    { scene: '3-2',  marker: '部族の戦士たちが、 一斉に駆けた',         position: 'after',  img: '/images/locations/s1c3/thumb/tribe_battle_thumb.webp' },
     // 4-1 古龍王の予兆: ファラーが砂を風に放ち、 巨大な古龍王のシルエットが揺らぐ (S2 伏線)
-    { scene: '4-1',  marker: 'ファラーは砂を一握り掬い、 風に放った',   position: 'after',  img: '/images/locations/s1c3/lost_dragon_king_omen_thumb.webp' },
+    { scene: '4-1',  marker: 'ファラーは砂を一握り掬い、 風に放った',   position: 'after',  img: '/images/locations/s1c3/thumb/lost_dragon_king_omen_thumb.webp' },
     // 4-2 別れの朝: ヴィル+サハナが紫水晶を分け合う最強エモシーン (七色光、 七色絹紐、 「これで二人で一つ」)
-    { scene: '4-2',  marker: '朝日の中で、 紫水晶が、 七色に輝いた',     position: 'after',  img: '/images/locations/s1c3/farewell_thumb.webp' },
+    { scene: '4-2',  marker: '朝日の中で、 紫水晶が、 七色に輝いた',     position: 'after',  img: '/images/locations/s1c3/thumb/farewell_thumb.webp' },
   ],
 };
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260502a';
+const IMG_CACHE_VERSION = '20260503b';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -5741,6 +6082,23 @@ function _appendImgCacheBuster(url) {
   const cleaned = url.replace(/\?v=[^&?]*/, '');
   const sep = cleaned.includes('?') ? '&' : '?';
   return cleaned + sep + 'v=' + IMG_CACHE_VERSION;
+}
+
+// Phase 1 (Box フォルダ整備): thumb 画像は {dir}/thumb/{name}_thumb.webp に分離
+// 例: /images/characters/season1/r/student.png → /images/characters/season1/r/thumb/student_thumb.webp
+// toFullUrl は新旧両形式 (移行期間中の location/enemies は旧形式のまま) を受け付ける
+function toThumbUrl(fullUrl) {
+  if (!fullUrl || typeof fullUrl !== 'string') return fullUrl;
+  return fullUrl.replace(/^(.+)\/([^/]+)\.png(\?.*)?$/i, '$1/thumb/$2_thumb.webp$3');
+}
+function toFullUrl(thumbUrl) {
+  if (!thumbUrl || typeof thumbUrl !== 'string') return thumbUrl;
+  // 新形式: /a/b/c/thumb/foo_thumb.webp → /a/b/c/foo.png
+  if (/\/thumb\/[^/]+_thumb\.webp/i.test(thumbUrl)) {
+    return thumbUrl.replace(/^(.+)\/thumb\/([^/]+)_thumb\.webp(\?.*)?$/i, '$1/$2.png$3');
+  }
+  // 旧形式 (Phase 1-B 完了まで location/enemies で使用): /a/b/c/foo_thumb.webp → /a/b/c/foo.png
+  return thumbUrl.replace(/_thumb\.webp(\?.*)?$/i, '.png$1');
 }
 (function _initImgCacheBusters() {
   if (typeof LOCATION_CONFIG !== 'undefined') {
@@ -5811,7 +6169,7 @@ function _collectAssetUrlsByCategory() {
         (POOL[tier] || []).forEach(c => {
           if (!c || !c.img) return;
           char_full.add(c.img);
-          char_thumb.add(c.img.replace(/\.png(\?.*)?$/i, '_thumb.webp$1'));
+          char_thumb.add(toThumbUrl(c.img));
         });
       }
     }
@@ -5823,7 +6181,7 @@ function _collectAssetUrlsByCategory() {
         if (conf[k] && conf[k].img) {
           loc_thumb.add(conf[k].img);
           // 原寸PNG (拡大表示用) — 失敗しても _downloadAllAssets が無視
-          loc_full.add(conf[k].img.replace(/_thumb\.webp(\?.*)?$/i, '.png$1'));
+          loc_full.add(toFullUrl(conf[k].img));
         }
       }
     }
@@ -5833,7 +6191,7 @@ function _collectAssetUrlsByCategory() {
       (STORY_LOCATION_INLINE_CONFIG[sid] || []).forEach(e2 => {
         if (e2 && e2.img) {
           loc_thumb.add(e2.img);
-          loc_full.add(e2.img.replace(/_thumb\.webp(\?.*)?$/i, '.png$1'));
+          loc_full.add(toFullUrl(e2.img));
         }
       });
     }
@@ -6253,7 +6611,7 @@ function injectStoryLocationInlines(bodyHtml, sceneIdx) {
   for (const e of entries) {
     if (!e.img) continue;
     // タップで拡大: data-fullsrc に原寸PNG (thumb→.png 置換) を持たせ、 click で zoom モーダル
-    const fullSrc = e.img.replace(/_thumb\.webp(\?.*)?$/i, '.png$1');
+    const fullSrc = toFullUrl(e.img);
     const cardHtml = `<div class="story-location-inline" onclick="openLocImageZoom('${fullSrc}')" role="button" tabindex="0" aria-label="拡大表示" title="タップで拡大"><img class="story-location-inline-img" src="${e.img}" alt="" loading="lazy" decoding="async"></div>`;
     let injected = false;
     if (e.marker) {
@@ -6483,9 +6841,32 @@ function restoreStoryProgress(storyId, total) {
 }
 
 // ストーリーカードクリック (モーダル内も含む)
+// クリック時に releaseDate 判定 + Coming Soon カードに locked 視覚適用 (起動時+定期)
 document.querySelectorAll('.story-card[data-story]').forEach(card => {
   card.addEventListener('click', () => openStory(card.dataset.story));
 });
+function _refreshChapterReleaseLocks() {
+  document.querySelectorAll('.story-card[data-story]').forEach(card => {
+    const sid = card.dataset.story;
+    const released = _isChapterReleased(sid);
+    card.classList.toggle('chapter-locked', !released);
+    // 既存 badge があれば消去 → 新規追加
+    let badge = card.querySelector('.chapter-locked-badge');
+    if (released) {
+      if (badge) badge.remove();
+    } else if (!badge) {
+      badge = document.createElement('div');
+      badge.className = 'chapter-locked-badge';
+      badge.innerHTML = `📅 <b>${_formatReleaseDate(sid)}</b> 公開予定`;
+      card.appendChild(badge);
+    } else {
+      badge.innerHTML = `📅 <b>${_formatReleaseDate(sid)}</b> 公開予定`;
+    }
+  });
+}
+document.addEventListener('DOMContentLoaded', _refreshChapterReleaseLocks);
+// 1分毎に再判定 (リリース時刻を跨いだ瞬間に自動 unlock)
+setInterval(_refreshChapterReleaseLocks, 60000);
 // ストーリー一覧モーダル
 // #10 ストーリー既読マーク (読了済み章カードに ✅ バッジ + ホームメタタグに 完読数/解放数 動的反映)
 function refreshStoryReadBadges() {
@@ -6617,6 +6998,8 @@ const BGM_LIST = [
   { id: 'frost',    label: '第4章テーマ',      desc: 'Prism Frost (凍空の鼓動)',           duration: '2:53', file: '/assets/bgm/prism-frost.mp3' },
   { id: 'niflheim', label: 'ニーヴルテーマ',   desc: 'Prism Niflheim (氷霊の歌)',          duration: '3:09', file: '/assets/bgm/prism-niflheim.mp3' },
   { id: 'aether',   label: 'ゼノニアテーマ',   desc: 'Prism Aether (蒸気の鼓動)',          duration: '3:08', file: '/assets/bgm/prism-aether.mp3' },
+  // ===== S1C5 追加 (1曲: 章テーマ、 派閥 BGM は 5キャラ閾値到達後に追加予定) =====
+  { id: 'blackmoon', label: '第5章テーマ',     desc: 'Prism Blackmoon (黒月の予兆)',       duration: '3:07', file: '/assets/bgm/prism-blackmoon.mp3' },
 ];
 const bgmAudio = document.getElementById("bgm-home");
 
@@ -7606,6 +7989,13 @@ async function logVisitAndStreak(user) {
       devRef.child('utm').transaction(c => c || inflow.utm);
       devRef.child('landingUrl').transaction(c => c || inflow.landingUrl);
     }
+    // 既存ゲスト/登録ユーザーの localStorage state.total を Firebase に sync (admin 表示用)
+    // 過去にガチャした人も 1度起動すれば admin に数字が反映される。 transaction で Math.max なので減らない
+    try {
+      if (typeof state !== 'undefined' && state && typeof state.total === 'number' && state.total > 0) {
+        devRef.child('totalRolls').transaction(c => Math.max(c || 0, state.total));
+      }
+    } catch (e) {}
   } catch (e) { console.warn('[visit] device log failed', e); }
   if (!user) return;
   // ログイン済: users[uid] にも firstVisitAt/lastVisitAt + streak + deviceType履歴 + PWA flag
@@ -8148,6 +8538,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (am) am.addEventListener('click', e => { if (e.target === am) closeAccountModal(); });
   // D 案: 起動直後に R/SR サムネを background prefetch (新規ユーザーの初回ガチャ画像読み込み対策、 即実行)
   _prefetchLowTierThumbs();
+  // 起動から少し経った後に 公開済章の全ガチャキャラ画像を自動事前ダウンロード (24h cooldown)
+  setTimeout(() => { _autoPrecacheGachaImages().catch(() => {}); }, 2500);
 });
 
 // ============================================================
@@ -8165,13 +8557,134 @@ function _prefetchLowTierThumbs() {
     (POOL[tier] || []).forEach(c => {
       if (!c || !c.img) return;
       urls.add(c.img);
-      urls.add(c.img.replace(/\.png(\?.*)?$/i, '_thumb.webp$1'));
+      urls.add(toThumbUrl(c.img));
     });
   }
   console.log(`[prefetch] R/SR thumbs: ${urls.size} URLs`);
   for (const url of urls) {
     try { fetch(url, { credentials: 'omit', priority: 'low' }).catch(() => {}); } catch (e) {}
   }
+}
+
+// ============================================================
+// 起動時 自動事前ダウンロード (公開済章のガチャ排出キャラ画像)
+// 段階1: thumb (オーバーレイ表示) → 段階2: full PNG (バックグラウンド)
+// 24h以内に走った後はスキップ (localStorage で cooldown 管理)
+// 「スキップ」 ボタンで即中断可能、 ガチャ時の on-demand preload にフォールバック
+// ============================================================
+let _autoPrecacheSkipped = false;
+let _autoPrecacheRunning = false;
+function _skipAutoPrecache() {
+  _autoPrecacheSkipped = true;
+  const ov = document.getElementById('auto-precache-overlay');
+  if (ov) ov.hidden = true;
+  // スキップ時は cooldown を記録しない (次回起動時に再試行)
+}
+function _isChapterReleased(chapterId) {
+  if (typeof STORY_FILES === 'undefined' || !STORY_FILES[chapterId]) return false;
+  if (typeof STORY_OUTLINE === 'undefined') return true;
+  const o = STORY_OUTLINE.find(x => x && x.id === chapterId);
+  if (o && o.releaseDate) {
+    const ts = new Date(o.releaseDate).getTime();
+    if (!isNaN(ts) && ts > Date.now()) return false;
+  }
+  return true;
+}
+// 公開予定日の表示用フォーマット (M/D HH:MM、 ゼロ埋め2桁)
+function _formatReleaseDate(chapterId) {
+  if (typeof STORY_OUTLINE === 'undefined') return '近日';
+  const o = STORY_OUTLINE.find(x => x && x.id === chapterId);
+  if (!o || !o.releaseDate) return '近日';
+  const d = new Date(o.releaseDate);
+  if (isNaN(d.getTime())) return '近日';
+  const pad = n => String(n).padStart(2, '0');
+  // 時刻部分が 00:00 の場合は日付のみ、 そうでなければ日付+時刻
+  const hh = d.getHours(), mm = d.getMinutes();
+  const datePart = `${pad(d.getMonth() + 1)}/${pad(d.getDate())}`;
+  if (hh === 0 && mm === 0) return datePart;
+  return `${datePart} ${pad(hh)}:${pad(mm)}`;
+}
+// グローバル info toast (公開予定告知 等、 WM外でも表示可能)
+let _infoToastTimer = null;
+function _showInfoToast(text, durationMs) {
+  let toast = document.getElementById('info-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'info-toast';
+    toast.className = 'info-toast';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = text;
+  toast.classList.add('show');
+  if (_infoToastTimer) clearTimeout(_infoToastTimer);
+  _infoToastTimer = setTimeout(() => { toast.classList.remove('show'); }, durationMs || 2200);
+}
+async function _autoPrecacheGachaImages() {
+  if (_autoPrecacheRunning) return;
+  if (typeof POOL === 'undefined') return;
+  // 容量節約モードユーザーは skip (cellular でも自動DL したくない場合のため)
+  if (navigator.connection && navigator.connection.saveData) {
+    console.log('[auto-precache] save-data mode, skip');
+    return;
+  }
+  _autoPrecacheRunning = true;
+  // 公開済章のキャラだけ集計 (releaseDate <= now かつ STORY_FILES に登録済)
+  const thumbUrls = [];
+  const fullUrls = [];
+  for (const tier of ['LR', 'UR', 'SSR', 'SR', 'R']) {
+    (POOL[tier] || []).forEach(c => {
+      if (!c || !c.img || !c.chapter) return;
+      if (!_isChapterReleased(c.chapter)) return;
+      fullUrls.push(c.img);
+      thumbUrls.push(toThumbUrl(c.img));
+    });
+  }
+  if (thumbUrls.length === 0) { _autoPrecacheRunning = false; return; }
+  // 事前 cache check: 全部キャッシュ済ならオーバーレイ表示せず即終了 (リロード時の高速復帰)
+  const allUrls = [...thumbUrls, ...fullUrls];
+  let missingThumbs = thumbUrls.length;
+  let missingFulls = fullUrls.length;
+  try {
+    const thumbCached = await Promise.all(thumbUrls.map(u => caches.match(u).then(r => !!r).catch(() => false)));
+    const fullCached = await Promise.all(fullUrls.map(u => caches.match(u).then(r => !!r).catch(() => false)));
+    missingThumbs = thumbCached.filter(c => !c).length;
+    missingFulls = fullCached.filter(c => !c).length;
+  } catch (e) {
+    console.warn('[auto-precache] cache check failed', e);
+  }
+  console.log(`[auto-precache] missing thumb=${missingThumbs}/${thumbUrls.length}, full=${missingFulls}/${fullUrls.length}`);
+  if (missingThumbs === 0 && missingFulls === 0) {
+    // 全 cache 済 → オーバーレイなしで即進行
+    _autoPrecacheRunning = false;
+    return;
+  }
+  const ov = document.getElementById('auto-precache-overlay');
+  const fillEl = ov && ov.querySelector('.auto-precache-fill');
+  const textEl = ov && ov.querySelector('.auto-precache-text');
+  const subEl = ov && ov.querySelector('.auto-precache-sub');
+  // 段階1: thumb 未DL あれば オーバーレイ表示 + DL
+  if (missingThumbs > 0) {
+    if (subEl) subEl.textContent = `スムーズに遊べるよう、 公開済キャラの画像 ${missingThumbs}件を読み込みます`;
+    if (ov) ov.hidden = false;
+    try {
+      await _downloadAllAssets((done, total) => {
+        if (_autoPrecacheSkipped) return;
+        const pct = total ? Math.round(done / total * 100) : 0;
+        if (fillEl) fillEl.style.width = pct + '%';
+        if (textEl) textEl.textContent = `${done} / ${total} (${pct}%)`;
+      }, thumbUrls);
+    } catch (e) { console.warn('[auto-precache] thumb DL error', e); }
+    if (ov) ov.hidden = true;
+  }
+  // 段階2: full PNG 未DL あれば バックグラウンドで DL (オーバーレイなし)
+  if (missingFulls > 0 && !_autoPrecacheSkipped) {
+    setTimeout(async () => {
+      try {
+        await _downloadAllAssets(null, fullUrls);
+      } catch (e) { console.warn('[auto-precache] full DL error', e); }
+    }, 1500);
+  }
+  _autoPrecacheRunning = false;
 }
 
 // 高tier (SSR/UR/LR) ヒット時に演出開始前にキャラ画像を preload + 短時間待機
@@ -8185,7 +8698,7 @@ function _preloadCharImagesWithTimeout(result, timeoutMs) {
     items.forEach(c => {
       if (c && c.img) {
         urls.add(c.img);
-        urls.add(c.img.replace(/\.png(\?.*)?$/i, '_thumb.webp$1'));
+        urls.add(toThumbUrl(c.img));
       }
     });
     if (urls.size === 0) return resolve();

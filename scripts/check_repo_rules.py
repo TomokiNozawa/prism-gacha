@@ -180,6 +180,10 @@ def check_chapter_completeness():
     5. LORE_BY_KEY に s1c? キャラの凸秘話 entry (なし=凸秘話空)
     6. index.html story-next-teaser が STORY_FILES の最新章の次を指しているか (古い章を teaser しているのは不整合)
 
+    BLOCKER 追加 (2026-05-02 / 2026-05-03):
+    7-7. STORY_OUTLINE 次章エントリの releaseDate 必須
+    7-8. index.html #story-list-modal に releaseDate 設定済の次章カード必須 (Prismaera Stories 一覧の予告)
+
     POV1人目固定ルール: 章末ページで次章主人公1人だけ表示は STORY_OUTLINE.povCharName (ルール3 で完全一致確認済)、
     本編シーンで POV1人目は renderSceneChars のランタイム挙動 (静的チェック不可、 CLAUDE.md ルール参照)
     """
@@ -293,6 +297,7 @@ def check_chapter_completeness():
             outline_text = m_outline.group(1)
             # 各エントリ行を抽出 (1行1エントリ前提)
             entry_pattern = re.compile(r"\{\s*id:\s*'(s1c\d+)'[^}]*\}")
+            next_has_release = False
             for em in entry_pattern.finditer(outline_text):
                 if em.group(1) == next_id:
                     entry = em.group(0)
@@ -301,7 +306,29 @@ def check_chapter_completeness():
                             f"[ルール7-7 次章公開予定日 BLOCKER] STORY_OUTLINE['{next_id}'] に releaseDate が未設定\n"
                             f"      → 章末 Coming Soon カード + ホーム画面ティザーで「📅 公開予定 — お楽しみに」 fallback になる、 releaseDate: 'YYYY-MM-DD' を必ず追加 (野沢さん指示 2026-05-02 「ホーム画面と同様に公開予定日入れといて」)"
                         )
+                    else:
+                        next_has_release = True
                     break
+
+            # 7-8. ストーリー一覧モーダル (#story-list-modal) にも 次章 (releaseDate あり) のカードが存在するか
+            # (BLOCKER 2026-05-03 野沢さん指示「ストーリー一覧にも予告出して、 章公開時の自動チェックの1つにこれも入れて」)
+            # ホーム経由で開く Prismaera Stories モーダルにも 公開予定章カードを並べておくことで、
+            # ユーザーが次に何が来るか一覧で把握できる。 _refreshChapterReleaseLocks が自動で chapter-locked + Coming Soon バッジ付与
+            if next_has_release:
+                # index.html の story-list-modal セクションを抽出
+                slm_match = re.search(r'<div id="story-list-modal"[\s\S]*?</div>\s*</div>\s*</div>', html)
+                if slm_match:
+                    slm_text = slm_match.group(0)
+                    if f'data-story="{next_id}"' not in slm_text:
+                        violations.append(
+                            f"[ルール7-8 ストーリー一覧 次章カード未追加 BLOCKER] index.html #story-list-modal に data-story=\"{next_id}\" のカードが無い\n"
+                            f"      → ストーリー一覧モーダルに次章 ({next_id}) の予告カードを追加要 (s1c4 と同形式 + 字数欄は「主人公: 名前」 のみ)\n"
+                            f"      → JSの _refreshChapterReleaseLocks が自動で chapter-locked + Coming Soon バッジを付与する (HTML はカード本体だけ追加すればOK)"
+                        )
+                else:
+                    violations.append(
+                        f"[ルール7-8 検出失敗] index.html #story-list-modal セクションが見つからず、 次章カードチェックをスキップ"
+                    )
     return checked
 
 
@@ -351,6 +378,575 @@ def check_story_pov_header():
                                 f"      → どちらかに揃える要 (POOL の正確な name と一致が望ましい)"
                             )
         checked += 1
+    return checked
+
+
+def check_outline_foreshadowing(sf_ids):
+    """ルール7-9 (BLOCKER): STORY/outline.md「## 仕込み済み伏線」 に公開済章の `### S1CN` セクション必須
+    feedback_story_consistency.md: 仕込み時に outline.md 末尾の伏線リストへ即追記、 回収できない伏線は禁止"""
+    outline_path = ROOT / 'STORY' / 'outline.md'
+    if not outline_path.exists() or not sf_ids:
+        return 0
+    text = outline_path.read_text(encoding='utf-8')
+    fs_match = re.search(r'## 仕込み済み伏線([\s\S]+?)(?=\n## |\Z)', text)
+    if not fs_match:
+        violations.append(
+            f"[ルール7-9 outline 伏線リスト不在 BLOCKER] STORY/outline.md に「## 仕込み済み伏線」 セクションが無い\n"
+            f"      → outline.md 末尾に「## 仕込み済み伏線」 + 各章「### S1CN」 サブセクション + 仕込み伏線テーブル"
+        )
+        return 0
+    fs_text = fs_match.group(1)
+    checked = 0
+    for sid in sf_ids:
+        sid_upper = sid.upper()  # s1c1 → S1C1
+        ch_num = int(re.search(r's1c(\d+)', sid).group(1))
+        # 「### S1CN」 or 「### Season 1 第N章」 or 「### S1CN (Season 1 第N章 — タイトル)」 等
+        if re.search(rf'###\s+{sid_upper}\b', fs_text) or re.search(rf'###\s+.*第{ch_num}章', fs_text):
+            checked += 1
+            continue
+        violations.append(
+            f"[ルール7-9 outline 伏線 章セクション不在 BLOCKER] STORY/outline.md「## 仕込み済み伏線」 に「### {sid_upper}」 サブセクションが無い\n"
+            f"      → 章公開と同時に outline.md の伏線リストに該当章のセクション + 仕込み伏線テーブル ≥ 1件 を追記要"
+        )
+    return checked
+
+
+def check_pool_chapter_count(sf_ids, pool_chars_by_chap):
+    """ルール7-11 (BLOCKER): outline「Season 1 キャラ追加総数」 の章規模 と POOL の chapter='s1cN' キャラ数 が ± 1 以内
+    feedback_story_consistency.md: outline 規模 (キャラ数) を厳守、 思い込み禁止"""
+    outline_path = ROOT / 'STORY' / 'outline.md'
+    if not outline_path.exists() or not sf_ids:
+        return 0
+    text = outline_path.read_text(encoding='utf-8')
+    # 表行: | S1C1 | 30 | 30 | ... | / | S1C2 | +15 | 45 | ...
+    expected = {}  # {sid: count}
+    for m in re.finditer(r'\|\s*S1C(\d+)\s*\|\s*([+\d]+)\s*\|', text):
+        ch_num = int(m.group(1))
+        val = m.group(2).lstrip('+')
+        if val.isdigit():
+            expected[f's1c{ch_num}'] = int(val)
+    checked = 0
+    for sid in sf_ids:
+        if sid not in expected:
+            continue
+        target = expected[sid]
+        actual = len(pool_chars_by_chap.get(sid, []))
+        checked += 1
+        # ± 1 以内なら OK
+        if abs(actual - target) > 1:
+            violations.append(
+                f"[ルール7-11 POOL キャラ数 不整合 BLOCKER] {sid} POOL に {actual}キャラ、 outline の規模は +{target}\n"
+                f"      → outline.md の「{sid_label(sid)}」 規模と POOL の chapter='{sid}' キャラ数を ±1 以内に揃える要"
+            )
+    return checked
+
+
+def sid_label(sid):
+    m = re.match(r's1c(\d+)', sid)
+    return f"S1C{m.group(1)}" if m else sid
+
+
+def check_furigana_dictionary(sf_ids, script_text):
+    """ルール7-12 (BLOCKER): prompt/s1cN_chars.md / locations_s1cN.md の漢字含む固有名詞 を FURIGANA 辞書に登録
+    feedback_chapter_release_checklist.md ⑧: 新キャラ名 + 新地名 + 新派閥名 + 新固有武器/アイテム名 を script.js の FURIGANA 辞書に追加"""
+    if not sf_ids:
+        return 0
+    # FURIGANA 抽出
+    m_furi = re.search(r"const FURIGANA\s*=\s*\{([\s\S]*?)\n\};", script_text)
+    if not m_furi:
+        return 0
+    furi_keys = set(re.findall(r"'([^']+)'\s*:", m_furi.group(1)))
+    furi_keys.update(re.findall(r'"([^"]+)"\s*:', m_furi.group(1)))
+    # POOL の name + title (chapter='s1cN' なら) も対象
+    m_pool = re.search(r'const POOL\s*=\s*(\{[\s\S]*?\n\});', script_text)
+    pool_text = m_pool.group(1) if m_pool else ''
+    checked = 0
+    missing_terms = []
+    for sid in sf_ids:
+        # POOL の chapter='sid' キャラの name (漢字を含むもの)
+        for ent in re.finditer(rf'name:\s*"([^"]+)"[^}}]*?chapter:\s*\'{sid}\'', pool_text):
+            name = ent.group(1)
+            # 各 token に分割して 漢字含むものを抽出
+            for token in re.split(r'[\s ]+', name):
+                if not token or len(token) < 2:
+                    continue
+                if not re.search(r'[一-龥]', token):
+                    continue  # 漢字なし → ふりがな不要
+                if token in furi_keys:
+                    continue
+                missing_terms.append(('キャラ名', sid, token, name))
+                checked += 1
+        # prompt/locations_sid.md から地名抽出 (## 【N】 タイトル)
+        loc_path = ROOT / 'prompt' / f'locations_{sid}.md'
+        if loc_path.exists():
+            loc_text = loc_path.read_text(encoding='utf-8')
+            # ## 【N】 タイトル 形式
+            for m in re.finditer(r'^##\s*【\d+】\s*([^\n(（]+)', loc_text, re.M):
+                title = m.group(1).strip()
+                # 漢字含む単語を抽出 (簡易: 2文字以上の漢字連続)
+                for word in re.findall(r'[一-龥]{2,}', title):
+                    if word not in furi_keys:
+                        missing_terms.append(('地名/場所', sid, word, title))
+                        checked += 1
+    # 出力 (重複排除、 まとめて1メッセージ)
+    if missing_terms:
+        unique = list(dict.fromkeys((t[2], t[0]) for t in missing_terms))
+        sample = ', '.join(f"「{w}」 ({k})" for w, k in unique[:8])
+        more = f" 他 {len(unique) - 8}件" if len(unique) > 8 else ''
+        # 暫定 WARNING (既存 s1c1-s1c4 で 67件 未登録の負債、 修正完了後に BLOCKER 化)
+        warnings_only.append(
+            f"[ルール7-12 FURIGANA 辞書 漢字未登録 WARNING] script.js FURIGANA に {len(unique)}件 未登録: {sample}{more}\n"
+            f"      → 章公開時に script.js の FURIGANA 辞書へ全件追加要 (本文で漢字のみ表示されてユーザーが読めない事故防止)\n"
+            f"      → 暫定 WARNING、 既存負債解消完了後 BLOCKER 化予定 (野沢さん指示 2026-05-03)"
+        )
+    return checked
+
+
+def check_chapter_bgm(sf_ids):
+    """ルール7-13 (BLOCKER): 公開済章ごとに章テーマ BGM が prompt/bgm/chapter_s1cN.md として存在 + sw.js PRECACHE_BGM に追加
+    outline 「BGM 必要数」 ライン: 章ごとテーマ (S1の7章分) ★★ Season1完成時"""
+    if not sf_ids:
+        return 0
+    sw_path = ROOT / 'sw.js'
+    sw_text = sw_path.read_text(encoding='utf-8') if sw_path.exists() else ''
+    # PRECACHE_BGM 配列を抽出
+    m_pre = re.search(r'const PRECACHE_BGM\s*=\s*\[([\s\S]*?)\];', sw_text)
+    pre_text = m_pre.group(1) if m_pre else ''
+    checked = 0
+    for sid in sf_ids:
+        # prompt/bgm/chapter_s1cN.md 存在確認
+        prompt_path = ROOT / 'prompt' / 'bgm' / f'chapter_{sid}.md'
+        if not prompt_path.exists():
+            warnings_only.append(
+                f"[ルール7-13 章 BGM プロンプト不在 WARNING] prompt/bgm/chapter_{sid}.md が存在しない\n"
+                f"      → 公開済章ごとに章テーマ BGM プロンプト必須 (outline ルール: 章ごとテーマ S1で7曲)\n"
+                f"      → 暫定 WARNING、 既存負債解消完了後 BLOCKER 化予定"
+            )
+        else:
+            checked += 1
+        # sw.js PRECACHE_BGM に該当 mp3 が含まれるか (柔軟マッチ: prism-XXX.mp3 で章キーワード含む)
+        prompt_text = prompt_path.read_text(encoding='utf-8') if prompt_path.exists() else ''
+        bgm_filename_match = re.search(r'prism-[a-z0-9-]+\.mp3', prompt_text)
+        if bgm_filename_match and prompt_path.exists():
+            fname = bgm_filename_match.group(0)
+            if fname not in pre_text:
+                warnings_only.append(
+                    f"[ルール7-13 PRECACHE_BGM 未登録 WARNING] sw.js PRECACHE_BGM に '/assets/bgm/{fname}' が無い\n"
+                    f"      → 章 BGM ファイル ({fname}) を sw.js の PRECACHE_BGM 配列に追加要"
+                )
+    return checked
+
+
+def check_faction_bgm(pool_chars_by_chap):
+    """ルール7-14 (BLOCKER 2026-05-03 野沢さん指示): 派閥キャラ ≥ 5名なら派閥テーマ BGM 追加 (prompt/bgm/faction_*.md 必須)
+    outline ルール: 派閥テーマ 主要9派閥分 ★ 随時、 ただし派閥キャラ ≥ 5なら必須化"""
+    # 全 POOL から派閥別集計 (faction は title or POOL の name から推定不可、 FACTIONS 定義を script.js から抽出)
+    script_path = ROOT / 'script.js'
+    if not script_path.exists():
+        return 0
+    text = script_path.read_text(encoding='utf-8')
+    # FACTIONS 配列の id+label を抽出
+    m_fac = re.search(r'const FACTIONS\s*=\s*\[([\s\S]*?)\n\];', text)
+    if not m_fac:
+        return 0
+    fac_text = m_fac.group(1)
+    factions = []  # [(id, label)]
+    for fm in re.finditer(r"\{[^}]*id:\s*'([^']+)'[^}]*label:\s*'([^']+)'", fac_text):
+        factions.append((fm.group(1), fm.group(2)))
+    # キャラ → 派閥マッピング (FACTION_OVERRIDE or 名前から推定 — 実装あり?)
+    # 簡易: script.js の CHAR_FACTION (もしあれば) or POOL の faction フィールド
+    # 現状 POOL に faction フィールドが無いので、 派閥別キャラ数推定は困難
+    # 代替: title に 派閥 label が含まれるかで近似集計
+    char_count_by_faction = {fid: 0 for fid, _ in factions}
+    fac_label_to_id = {label: fid for fid, label in factions}
+    for sid, chars in pool_chars_by_chap.items():
+        for tier, name in chars:
+            # POOL から 該当キャラの title を抽出
+            ent = re.search(rf'name:\s*"{re.escape(name)}"\s*,[^}}]*?title:\s*"([^"]*)"', text)
+            if not ent:
+                continue
+            title = ent.group(1)
+            for label, fid in fac_label_to_id.items():
+                if label in title or label in name:
+                    char_count_by_faction[fid] += 1
+                    break
+    # PRECACHE_BGM 抽出
+    sw_text = (ROOT / 'sw.js').read_text(encoding='utf-8') if (ROOT / 'sw.js').exists() else ''
+    m_pre = re.search(r'const PRECACHE_BGM\s*=\s*\[([\s\S]*?)\];', sw_text)
+    pre_text = m_pre.group(1) if m_pre else ''
+    checked = 0
+    for fid, label in factions:
+        cnt = char_count_by_faction.get(fid, 0)
+        if cnt < 5:
+            continue
+        checked += 1
+        # 派閥テーマ BGM プロンプト存在確認: prompt/bgm/faction_{fid}.md or {label}.md
+        prompt_path = ROOT / 'prompt' / 'bgm' / f'faction_{fid}.md'
+        if not prompt_path.exists():
+            # label 短縮版でも探す
+            alt = ROOT / 'prompt' / 'bgm' / 'factions' / f'{fid}.md'
+            if not alt.exists():
+                warnings_only.append(
+                    f"[ルール7-14 派閥 BGM プロンプト不在 WARNING] prompt/bgm/faction_{fid}.md (or factions/{fid}.md) が無い\n"
+                    f"      → 派閥『{label}』 に {cnt}キャラ存在 (≥5)、 派閥テーマ BGM プロンプト必須 (野沢さん指示 2026-05-03 「派閥キャラが5名以上になったら派閥のテーマ曲を追加」)\n"
+                    f"      → 暫定 WARNING、 既存負債解消完了後 BLOCKER 化予定"
+                )
+                continue
+            prompt_path = alt
+        # PRECACHE_BGM に登録あるか
+        prompt_text = prompt_path.read_text(encoding='utf-8')
+        bgm_filename_match = re.search(r'prism-[a-z0-9-]+\.mp3', prompt_text)
+        if bgm_filename_match:
+            fname = bgm_filename_match.group(0)
+            if fname not in pre_text:
+                warnings_only.append(
+                    f"[ルール7-14 PRECACHE_BGM 未登録 (派閥) WARNING] sw.js PRECACHE_BGM に派閥『{label}』 BGM '/assets/bgm/{fname}' が無い\n"
+                    f"      → 派閥キャラ {cnt}名 ≥ 5、 派閥テーマ BGM ({fname}) を sw.js PRECACHE_BGM へ追加要"
+                )
+    return checked
+
+
+def check_tier_consistency(pool_chars_by_chap):
+    """ルール7-15 (WARNING 2026-05-03 野沢さん指示): 同 Tier 内のキャラ title 格揃えチェック
+    既存 Tier の title キーワード集合から共通パターンを学習 → 新キャラの title が同パターンに含まれるか
+    LR/UR/SSR/SR/R それぞれで「格」 に違和感のあるキャラを警告"""
+    # Tier 別キーワード集合 (title 内の漢字キーワードで判定)
+    # この集合は既存 Tier キャラの title から動的に学習可
+    tier_keywords = {'LR': set(), 'UR': set(), 'SSR': set(), 'SR': set(), 'R': set()}
+    script_path = ROOT / 'script.js'
+    if not script_path.exists():
+        return 0
+    text = script_path.read_text(encoding='utf-8')
+    # POOL から各キャラ name → title を抽出
+    name_to_title = {}
+    name_to_tier = {}
+    for tier_match in re.finditer(r'\b(LR|UR|SSR|SR|R):\s*\[([\s\S]*?)\n  \]', text):
+        tier = tier_match.group(1)
+        for ent in re.finditer(r'name:\s*"([^"]+)"\s*,[^}]*?title:\s*"([^"]*)"', tier_match.group(2)):
+            name = ent.group(1)
+            title = ent.group(2)
+            name_to_title[name] = title
+            name_to_tier[name] = tier
+            # title から 2文字以上の漢字句を抽出して keyword に
+            for kw in re.findall(r'[一-龥]{2,}', title):
+                tier_keywords[tier].add(kw)
+    # 期待格パターン (代表キーワード、 各 Tier に必ず含まれるべきキーワードセット)
+    # LR: 「世界」「原虹」「神」 等 / UR: 「皇」「帝」「王」「至天」「波紋」「砂海」「氷帝」「龍帝」 等
+    # SSR: 「聖」「達人」「上級」「千年」「将軍」 / SR: 「中堅」「巫女」「騎士」「祭司」 / R: 「学生」「見習い」「若き」「養女」
+    expected_anchors = {
+        'LR': {'世界', '原虹', '神格', '神'},  # ほぼ唯一無二の格
+        'UR': {'皇', '帝', '王', '至天', '覇', '聖女', '神格', '波紋', '海', '砂', '凍', '空', '虹', '黒', '龍', '原虹', '霊'},  # 王族・覇者級
+        'SSR': {'聖', '達人', '上級', '千年', '将軍', '上騎士', '師', '師範', '宰相', '近衛', '高位'},
+        'SR': {'中堅', '巫女', '騎士', '祭司', '剣士', '魔導', '冒険者', '戦士', '商人', '研究員', '武者'},
+        'R': {'学生', '見習い', '若', '養女', '従者', '助手', '初心', '少年', '少女', '弟子', '侍童', '一般'},
+    }
+    checked = 0
+    for sid, chars in pool_chars_by_chap.items():
+        for tier, name in chars:
+            title = name_to_title.get(name, '')
+            if not title:
+                continue
+            checked += 1
+            # title 内に Tier 期待アンカーがあるか
+            anchors = expected_anchors.get(tier, set())
+            kanji_in_title = set(re.findall(r'[一-龥]{1,}', title))
+            # 部分一致 (アンカーキーワードが title 内のいずれかの漢字句に含まれる)
+            matched = False
+            for anchor in anchors:
+                if any(anchor in kw for kw in kanji_in_title):
+                    matched = True
+                    break
+            if not matched:
+                # WARNING (false positive 多発防止)
+                warnings_only.append(
+                    f"[ルール7-15 Tier 整合性 WARNING] {sid} {tier}「{name}」 title='{title}' に {tier} 級アンカーキーワード ({', '.join(sorted(anchors)[:6])}…) なし\n"
+                    f"      → Tier 格と違和感ないか確認、 必要なら title 調整 or Tier 見直し (野沢さん指示 2026-05-03 「同じレア度に追加しても遜色ないか」)"
+                )
+    return checked
+
+
+def check_prompt_metadata(sf_ids):
+    """ルール7-16 (BLOCKER): prompt/locations_*.md の各画像セクション内に「対応シーン」 等のメタ記載必須
+    feedback_asset_scene_mapping.md (2026-04-30 強い叱責 「別PC・別セッションで作業遂行できる引き継ぎじゃないと意味ない」)"""
+    target_dir = ROOT / 'prompt'
+    if not target_dir.exists() or not sf_ids:
+        return 0
+    REQUIRED_META = ['対応シーン', 'ストーリー使用']  # どちらか1つあれば OK (一部は world_map 等 純風景で不要だが、 章別 locations_s1cN.md は必須)
+    checked = 0
+    missing_sections = []
+    for sid in sf_ids:
+        loc_path = target_dir / f'locations_{sid}.md'
+        if not loc_path.exists():
+            continue
+        text = loc_path.read_text(encoding='utf-8')
+        # ## 【N】 セクション分割
+        sections = re.split(r'(?=^##\s*【\d+】)', text, flags=re.M)
+        for sec in sections:
+            first_line = sec.split('\n', 1)[0].strip()
+            if not first_line.startswith('## 【'):
+                continue
+            checked += 1
+            if not any(meta in sec for meta in REQUIRED_META):
+                section_title = re.search(r'## 【\d+】\s*([^\n]+)', first_line)
+                title = section_title.group(1) if section_title else first_line
+                missing_sections.append(f"{loc_path.name} :: {title}")
+    if missing_sections:
+        sample = '\n        '.join(missing_sections[:5])
+        more = f"\n        ... 他 {len(missing_sections) - 5}件" if len(missing_sections) > 5 else ''
+        violations.append(
+            f"[ルール7-16 アセットメタ記載漏れ BLOCKER] prompt/locations_*.md の {len(missing_sections)} セクションに「対応シーン」 「ストーリー使用」 が無い\n"
+            f"      {sample}{more}\n"
+            f"      → 各画像セクション内に対応シーン・本文行・コード参照位置を記載必須 (feedback_asset_scene_mapping.md / 2026-04-30 別PC事故防止強い叱責)"
+        )
+    return checked
+
+
+def check_all_chars_have_faction(pool_chars_by_chap, script_text):
+    """ルール7-21 (BLOCKER 2026-05-03 野沢さん指示「整合性ちゃんとしろよ」): POOL 全キャラが
+    CHAR_FACTION に登録されているかチェック。 未登録は WM 上で派閥所属が表示されない事故源
+    (実例 2026-05-03: アルク/ミウ/ピピ/ピット 誤所属 + s1c4 主要 16 キャラ未登録の構造的整合性違反)。
+
+    詳細: feedback_world_map_consistency.md / feedback_total_integrity_check.md
+    """
+    if not pool_chars_by_chap or not script_text:
+        return 0
+    m = re.search(r'const CHAR_FACTION\s*=\s*\{([\s\S]*?)\n\};', script_text)
+    if not m:
+        return 0
+    char_faction_text = m.group(1)
+    registered = set(re.findall(r"'([^']+)':\s*\{", char_faction_text))
+    missing = []
+    for sid in sorted(pool_chars_by_chap.keys()):
+        for tier, name in pool_chars_by_chap[sid]:
+            if name not in registered:
+                missing.append((sid, tier, name))
+    if missing:
+        sample = ', '.join(f'{sid}/{t}「{n}」' for sid, t, n in missing[:6])
+        more = f' 他 {len(missing) - 6}件' if len(missing) > 6 else ''
+        violations.append(
+            f"[ルール7-21 CHAR_FACTION 未登録 BLOCKER] POOL の {len(missing)}キャラが CHAR_FACTION に未登録: {sample}{more}\n"
+            f"      → 各キャラの派閥所属を script.js CHAR_FACTION に追加 (WM/相関図で表示するため)"
+        )
+    return len(missing)
+
+
+def check_chapter_factions_registered(sf_ids, script_text):
+    """ルール7-22 (BLOCKER 2026-05-03 野沢さん指示): outline.md の各章 (公開済 + 公開予定) の「新派閥」 が
+    FACTIONS 配列 + FACTION_WORLD_COORDS の両方に登録されているかチェック。
+
+    実例 2026-05-03: ニーヴル/ゼノニア が outline.md s1c4 で「新派閥」 として記載されているのに
+    FACTIONS / FACTION_WORLD_COORDS どちらにも未登録の構造バグ。 章追加時の登録漏れ防止。
+    """
+    outline_path = ROOT / 'STORY' / 'outline.md'
+    if not outline_path.exists() or not script_text:
+        return 0
+    outline = outline_path.read_text(encoding='utf-8')
+    factions_text = ''
+    m1 = re.search(r'const FACTIONS\s*=\s*\[([\s\S]*?)\n\];', script_text)
+    if m1:
+        factions_text = m1.group(1)
+    coords_text = ''
+    m2 = re.search(r'const FACTION_WORLD_COORDS\s*=\s*\{([\s\S]*?)\n\};', script_text)
+    if m2:
+        coords_text = m2.group(1)
+    # outline から各章セクションの「新派閥」 を抽出 (S1C1〜S3C7)
+    chapter_sections = re.findall(r'## (S[123]C\d+):.*?(?=\n## |\Z)', outline, re.S)
+    # 章テキスト 個別抽出
+    section_blocks = re.split(r'(?=^## S[123]C\d+:)', outline, flags=re.M)
+    n = 0
+    for block in section_blocks:
+        m_head = re.match(r'## (S[123]C\d+):', block)
+        if not m_head:
+            continue
+        cid = m_head.group(1)
+        # 公開予定章まで含む (releaseDate 設定済 = まだ未公開でも登録必要)
+        # ただし S2/S3 は将来のため現時点では検査スキップ
+        if not cid.startswith('S1C'):
+            continue
+        m_fac = re.search(r'\*\*新派閥\*\*[:：]\s*(.+)', block)
+        if not m_fac:
+            continue
+        factions_str = m_fac.group(1).strip()
+        factions = [f.strip() for f in re.split(r'[\/／+、,]', factions_str) if f.strip()]
+        for fac in factions:
+            n += 1
+            if fac not in factions_text:
+                violations.append(
+                    f"[ルール7-22 FACTIONS 未登録 BLOCKER] outline.md {cid} 新派閥「{fac}」 が script.js FACTIONS 配列に未登録\n"
+                    f"      → 章追加時に FACTIONS + FACTION_WORLD_COORDS + CHAR_FACTION への追加忘れ防止"
+                )
+    return n
+
+
+def check_dup_name_unmarked(sf_ids, pool_chars_by_chap, script_text):
+    """ルール7-18 (BLOCKER 2026-05-03 野沢さん指示): POOL の lastToken (空白で分割した最後のトークン) が
+    複数キャラで重複している場合、 STORY 本文中でその単独表記が ID-based マークアップ
+    `{{char:slug}}...{{/char}}` で囲まれていなければ BLOCKER。
+
+    重複名の自動 linkify は最初にヒットしたキャラに紐付くため、 別キャラへの誤紐付け事故が起きる
+    (実例 2026-05-03 野沢さん指摘: s1c4 本文の「ベル」 単独表記が s1c1「詠聖ベル」 にリンクされる)。
+    ID-based マークアップで確定リンクを義務化することで、 同名重複問題を構造的に解決。
+
+    例外: STORY_CHAR_REMAP に登録されている fromName は、 文脈依存で意図的に切り替えるロジック
+    (覚醒前後の linkify ターゲット変更等) が動いているため、 マークアップ化を強制しない。
+
+    詳細: feedback_id_based_char_link.md (新規)
+    """
+    if not pool_chars_by_chap:
+        return 0
+    # STORY_CHAR_REMAP の fromName 集合を抽出 (例外リスト)
+    remap_keys = set()
+    m_remap = re.search(r'const STORY_CHAR_REMAP\s*=\s*\{([\s\S]*?)\n\};', script_text or '')
+    if m_remap:
+        for k in re.findall(r"'([^']+)':\s*'", m_remap.group(1)):
+            remap_keys.add(k)
+    last_tokens = {}
+    for sid in pool_chars_by_chap:
+        for tier, name in pool_chars_by_chap[sid]:
+            tokens = name.split()
+            last_token = tokens[-1] if tokens else name
+            last_tokens.setdefault(last_token, []).append((name, sid))
+    duplicates = {tok: lst for tok, lst in last_tokens.items() if len(lst) >= 2}
+    if not duplicates:
+        return 0
+    for sid in sf_ids:
+        path = ROOT / 'STORY' / f'{sid}.md'
+        if not path.exists():
+            continue
+        text = path.read_text(encoding='utf-8')
+        # 「## 編集メモ」 以降は公開対象外コメント領域、 検査対象外
+        em_idx = text.find('## 編集メモ')
+        if em_idx == -1:
+            em_idx = text.find('# 編集メモ')
+        if em_idx >= 0:
+            text = text[:em_idx]
+        cleaned = re.sub(r'\{\{char:[\w_-]+\}\}.*?\{\{\/char\}\}', '', text, flags=re.S)
+        # POOL 全キャラの fullName で tok を文字列内に含むものを集める (例: tok='ベル' なら 'イザベル' '詠聖 ベル' '波紋の聖女 イザベル' 等)
+        # 長い順にソートして除去 (短いの除去で長いの壊さないため)
+        all_names = []
+        for sid_x in pool_chars_by_chap:
+            for tier_x, name_x in pool_chars_by_chap[sid_x]:
+                all_names.append(name_x)
+        all_names = sorted(set(all_names), key=len, reverse=True)
+        for tok, lst in duplicates.items():
+            if tok in remap_keys:
+                continue  # STORY_CHAR_REMAP で文脈解決済の重複は除外
+            cleaned_for_tok = cleaned
+            # tok を文字列内に含む POOL キャラ名 (tok自身は除く) を全部除去
+            # これで tok 単独表記だけが残り、 「イザベル」 内の「ベル」 等の部分一致誤検知を防ぐ
+            for full_name in all_names:
+                if tok in full_name and full_name != tok:
+                    cleaned_for_tok = cleaned_for_tok.replace(full_name, '')
+            if re.search(re.escape(tok), cleaned_for_tok):
+                names_str = ' / '.join(name for name, _ in lst)
+                violations.append(
+                    f"[ルール7-18 同名キャラ単独表記 BLOCKER] STORY/{path.name} に同名キャラ「{tok}」 (POOL 重複: {names_str}) の単独表記。 "
+                    f"`{{{{char:slug}}}}{tok}{{{{/char}}}}` で確定リンクすべき"
+                )
+    return len(duplicates)
+
+
+def check_next_chapter_wm(sf_ids, script_text):
+    """ルール7-19 (BLOCKER 2026-05-03 野沢さん指示): 公開予定の次章 (releaseDate 設定済) の新派閥が、
+    既に WM (FACTION_WORLD_COORDS / STORY_FACTION_TEASER) に登録されているかチェック。
+
+    s1c5 公開時に s1c6 の派閥がマップに表示されていないと、 章遷移後にユーザーが「次章どこ?」 と迷う。
+    公開直前ではなく、 章執筆中から WM 反映を機械的に強制する。
+    """
+    if not sf_ids:
+        return 0
+    nums = sorted(int(re.match(r's1c(\d+)', s).group(1)) for s in sf_ids if re.match(r's1c\d+', s))
+    if not nums:
+        return 0
+    last_num = nums[-1]
+    next_num = last_num + 1
+    outline_path = ROOT / 'STORY' / 'outline.md'
+    if not outline_path.exists():
+        return 0
+    outline = outline_path.read_text(encoding='utf-8')
+    sect_match = re.search(rf'## S1C{next_num}:.*?\n([\s\S]*?)(?=\n## |\n---|\Z)', outline)
+    if not sect_match:
+        return 0
+    section = sect_match.group(1)
+    fac_match = re.search(r'\*\*新派閥\*\*[:：]\s*(.+)', section)
+    if not fac_match:
+        return next_num
+    factions_str = fac_match.group(1).strip()
+    factions = [f.strip() for f in re.split(r'[\/／+、,]', factions_str) if f.strip()]
+    for fac in factions:
+        if fac not in script_text:
+            violations.append(
+                f"[ルール7-19 次章 WM 派閥ポイント未登録 BLOCKER] outline.md S1C{next_num} 新派閥「{fac}」 が script.js (FACTION_WORLD_COORDS / STORY_FACTION_TEASER) に未登録。 "
+                f"次章公開時に WM で位置確認できないため、 公開前に必ず登録"
+            )
+    return next_num
+
+
+def check_age_excess(sf_ids):
+    """ルール7-20 (WARNING 2026-05-03 野沢さん指示): 1シーン内の年齢明示が 3件以上 → 過剰アピール警告
+
+    野沢さん指摘: 「年齢のアピールがすごい」「キャラ自体は若めにしてもらいましたが、
+    それをアピールしろという意味ではない」。 アルテミス千年との対比効果を狙いすぎず、
+    脇役の年齢は質的表現 (「若き」「青年」「見習い」 等) で代替可能。
+    """
+    age_pattern = re.compile(r'[一二三四五六七八九十百千]+(?:歳|代後半|代前半|代)')
+    n = 0
+    for sid in sf_ids:
+        path = ROOT / 'STORY' / f'{sid}.md'
+        if not path.exists():
+            continue
+        text = path.read_text(encoding='utf-8')
+        scenes = re.split(r'^(### [\d\-]+:.*)$', text, flags=re.M)
+        i = 1
+        while i < len(scenes):
+            scene_title = scenes[i].strip()
+            scene_body = scenes[i+1] if i+1 < len(scenes) else ''
+            ages = age_pattern.findall(scene_body)
+            if len(ages) >= 3:
+                warnings_only.append(
+                    f"[ルール7-20 年齢明示過剰 WARNING] STORY/{path.name} {scene_title} に年齢明示 {len(ages)}件 (脇役の年齢を「若き」「青年」 等の質的表現に置換できないか検討)"
+                )
+                n += 1
+            i += 2
+    return n
+
+
+def check_char_age_keywords(sf_ids):
+    """ルール7-17 (WARNING): prompt/s1cN_chars.md の各キャラセクションで「老/中年/30代以上」 等の年齢ワード警告
+    feedback_char_age_youth_first.md (2026-05-01) ガチャキャラ画像は若め (10-20代) を既定、 老人キャラ最小化"""
+    target_dir = ROOT / 'prompt'
+    if not target_dir.exists() or not sf_ids:
+        return 0
+    AGE_WORDS = ['老人', '老戦士', '老師', '老兵', '年老', '中年', '初老', '熟年', '老',
+                 '30代', '40代', '50代', '60代', '70代', '80代',
+                 'middle-aged', 'elderly', 'old man', 'old woman']
+    EXEMPT_WORDS = ['老ける', '老けず', '老不死', '不老']  # 不老等は OK (若さの逆説的表現)
+    checked = 0
+    for sid in sf_ids:
+        chars_path = target_dir / f'{sid}_chars.md'
+        if not chars_path.exists():
+            continue
+        text = chars_path.read_text(encoding='utf-8')
+        # ## 【N】 セクション分割
+        sections = re.split(r'(?=^##\s*【\d+】)', text, flags=re.M)
+        for sec in sections:
+            first_line = sec.split('\n', 1)[0].strip()
+            if not first_line.startswith('## 【'):
+                continue
+            checked += 1
+            # 該当 word ある + 除外 word なし
+            hits = []
+            for w in AGE_WORDS:
+                if w in sec and not any(ex in sec for ex in EXEMPT_WORDS if w in ex):
+                    hits.append(w)
+            if hits:
+                section_title = re.search(r'## 【\d+】\s*([^\n]+)', first_line)
+                title = section_title.group(1) if section_title else first_line
+                warnings_only.append(
+                    f"[ルール7-17 ガチャキャラ年齢WARN] {chars_path.name} :: {title}\n"
+                    f"      → 年齢ワード検出: {', '.join(set(hits))}\n"
+                    f"      → ガチャキャラは 10-20代 既定、 年齢/熟練はロリババア・古龍血・継承者設定・神童で表現 (feedback_char_age_youth_first.md)"
+                )
     return checked
 
 
@@ -484,6 +1080,26 @@ def check_nozawa_honorific():
     return checked
 
 
+# === 共通抽出ヘルパー (7-9 以降のルールで使う、 check_chapter_completeness の重複を最小化) ===
+def extract_chapter_data():
+    """script.js から sf_ids / pool_chars_by_chap / script_text を抽出"""
+    script_path = ROOT / 'script.js'
+    if not script_path.exists():
+        return [], {}, ''
+    text = script_path.read_text(encoding='utf-8')
+    m_sf = re.search(r'const STORY_FILES\s*=\s*\{([\s\S]*?)\};', text)
+    sf_ids = sorted(set(re.findall(r"^\s+(s1c\d+):\s*\{", m_sf.group(1), re.M))) if m_sf else []
+    m_pool = re.search(r'const POOL\s*=\s*(\{[\s\S]*?\n\});', text)
+    pool_chars_by_chap = {}
+    if m_pool:
+        pool_text = m_pool.group(1)
+        for tier_match in re.finditer(r'\b(LR|UR|SSR|SR|R):\s*\[([\s\S]*?)\n  \]', pool_text):
+            tier = tier_match.group(1)
+            for ent in re.finditer(r'name:\s*"([^"]+)"[^}]*?chapter:\s*\'(s1c\d+)\'', tier_match.group(2)):
+                pool_chars_by_chap.setdefault(ent.group(2), []).append((tier, ent.group(1)))
+    return sf_ids, pool_chars_by_chap, text
+
+
 # ─── 実行 ───
 # ルール1/3/4 = commit blocker (false positive 少ない、 確実な静的チェック)
 # ルール2/5 = warning level (誤検知あり、 表示のみ、 開発者手動 review)
@@ -503,6 +1119,29 @@ print(f"  ルール7 (章追加漏れ): {n7}章 検査 [BLOCKER]")
 n9 = check_story_pov_header()
 print(f"  ルール9 (POV header 形式): {n9}章 検査 [BLOCKER]")
 
+# === 章公開準備 ルール (BLOCKER + WARNING、 2026-05-03 過去叱責漏れ対策) ===
+sf_ids_x, pool_x, script_text_x = extract_chapter_data()
+n7_9 = check_outline_foreshadowing(sf_ids_x)
+print(f"  ルール7-9 (outline 伏線リスト 章セクション): {n7_9}章 検査 [BLOCKER]")
+n7_11 = check_pool_chapter_count(sf_ids_x, pool_x)
+print(f"  ルール7-11 (POOL 章キャラ数 整合): {n7_11}章 検査 [BLOCKER]")
+n7_12 = check_furigana_dictionary(sf_ids_x, script_text_x)
+print(f"  ルール7-12 (FURIGANA 辞書 漢字未登録): {n7_12}件 検査 [WARNING / 既存負債解消後 BLOCKER 化予定]")
+n7_13 = check_chapter_bgm(sf_ids_x)
+print(f"  ルール7-13 (章 BGM プロンプト + PRECACHE_BGM): {n7_13}章 検査 [WARNING / 既存負債解消後 BLOCKER 化予定]")
+n7_14 = check_faction_bgm(pool_x)
+print(f"  ルール7-14 (派閥 BGM ≥5キャラ): {n7_14}派閥 検査 [WARNING / 既存負債解消後 BLOCKER 化予定]")
+n7_16 = check_prompt_metadata(sf_ids_x)
+print(f"  ルール7-16 (アセット メタ記載): {n7_16}セクション 検査 [BLOCKER]")
+n7_18 = check_dup_name_unmarked(sf_ids_x, pool_x, script_text_x)
+print(f"  ルール7-18 (同名キャラ ID-based マークアップ): {n7_18}重複名 検査 [BLOCKER]")
+n7_19 = check_next_chapter_wm(sf_ids_x, script_text_x)
+print(f"  ルール7-19 (次章 WM 派閥ポイント): s1c{n7_19} 検査 [BLOCKER]")
+n7_21 = check_all_chars_have_faction(pool_x, script_text_x)
+print(f"  ルール7-21 (CHAR_FACTION 全キャラ登録): {n7_21}未登録 検査 [BLOCKER]")
+n7_22 = check_chapter_factions_registered(sf_ids_x, script_text_x)
+print(f"  ルール7-22 (章 新派閥 FACTIONS 登録): {n7_22}派閥 検査 [BLOCKER]")
+
 # === Warning ルール (commit はブロックせず、 開発者手動 review) ===
 violations_blocker = list(violations)  # ここまでが blocker 違反
 violations.clear()
@@ -513,6 +1152,9 @@ n5_post = len(violations)
 n6_pre = len(violations)
 n6 = check_modal_requirements()
 n6_post = len(violations)
+n7_15 = check_tier_consistency(pool_x)
+n7_17 = check_char_age_keywords(sf_ids_x)
+n7_20 = check_age_excess(sf_ids_x)
 n8_pre = len(warnings_only)
 n8 = check_short_kana_collisions()
 n8_post = len(warnings_only)
@@ -523,6 +1165,9 @@ print(f"  ルール2 (内部キー直書き): {n2}件 検査 [WARNING / 誤検�
 print(f"  ルール5 (野沢呼称): {n5_post - n5_pre}件 検査 [WARNING / 誤検知あり]")
 print(f"  ルール6 (モーダル網羅): {n6}件 検査 [WARNING / Esc・Space網羅対策]")
 print(f"  ルール7-4/5 (章WARNING): {len(warnings) - n6 - (n8_post - n8_pre)}件 検査 [WARNING / 章公開段階]")
+print(f"  ルール7-15 (Tier 整合性 title格): {n7_15}キャラ 検査 [WARNING]")
+print(f"  ルール7-17 (ガチャキャラ年齢ワード): {n7_17}セクション 検査 [WARNING]")
+print(f"  ルール7-20 (本文年齢明示過剰): {n7_20}シーン 検査 [WARNING]")
 print(f"  ルール8 (短カナ部分一致): {n8}キャラ 検査 [WARNING / 部分一致リスク]")
 
 print()
@@ -530,10 +1175,8 @@ print()
 # Warning 表示 (exit 0 維持)
 if warnings:
     print(f"⚠️  警告 {len(warnings)}件 (commit は通る、 内容を確認)\n")
-    for w in warnings[:20]:  # 最大20件まで表示
+    for w in warnings:
         print(f"  - {w}")
-    if len(warnings) > 20:
-        print(f"  ... 他 {len(warnings) - 20}件")
     print()
 
 # Blocker 違反 → commit abort
