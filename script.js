@@ -3614,17 +3614,19 @@ function clearRelationsFocus() {
 function _redrawRelationsCanvas() {
   const canvas = document.getElementById('relations-canvas');
   if (!canvas) return;
-  const W = 2000, H = 1600;
+  // viewBox は scale 適用後の総空間 (野沢さん指示 2026-05-03 派閥/キャラ間広げ)
+  const W = 2000 * REL_FACTION_SCALE, H = 1600 * REL_FACTION_SCALE;
   // focus 中: SVG viewBox 自体を派閥中心の縮小範囲に切替 → 自然に画面中央拡大表示
   // (transform 戦略は g 内が viewBox cliped で見切れる問題があったため viewBox 切替に変更)
   let viewBoxAttr = `0 0 ${W} ${H}`;
   if (_relationsFocusFaction) {
     const f = FACTIONS.find(ff => ff.id === _relationsFocusFaction);
     if (f) {
+      const fp = _scaledFactionPos(f);
       const scale = 2.4;
       const focusW = W / scale, focusH = H / scale;
-      const fx = Math.max(0, Math.min(W - focusW, f.x - focusW / 2));
-      const fy = Math.max(0, Math.min(H - focusH, f.y - focusH / 2));
+      const fx = Math.max(0, Math.min(W - focusW, fp.x - focusW / 2));
+      const fy = Math.max(0, Math.min(H - focusH, fp.y - focusH / 2));
       viewBoxAttr = `${fx} ${fy} ${focusW} ${focusH}`;
     }
   }
@@ -3875,12 +3877,22 @@ function closeRelations() {
   document.getElementById('relations').classList.remove('active');
 }
 
+// 相関図の座標スケール (野沢さん指示 2026-05-03 「画面拡大じゃなく、 各派閥のキャラ間距離を実際に広げて」)
+// FACTION_SCALE: 派閥配置 (派閥間距離) を倍率
+// CHAR_SCALE:    派閥内キャラ間距離 (派閥中心からの相対座標 dx/dy) を倍率
+// 既存の FACTIONS / CHAR_FACTION の数値はそのまま、 描画レイヤだけ拡大
+const REL_FACTION_SCALE = 1.5;
+const REL_CHAR_SCALE = 1.25;
+function _scaledFactionPos(f) {
+  return { x: f.x * REL_FACTION_SCALE, y: f.y * REL_FACTION_SCALE };
+}
 function getCharPos(name) {
   const meta = CHAR_FACTION[name];
   if (!meta) return null;
   const f = FACTIONS.find(x => x.id === meta.f);
   if (!f) return null;
-  return { x: f.x + meta.dx, y: f.y + meta.dy };
+  const fp = _scaledFactionPos(f);
+  return { x: fp.x + meta.dx * REL_CHAR_SCALE, y: fp.y + meta.dy * REL_CHAR_SCALE };
 }
 
 function _factionDimOpacity(facId) {
@@ -3905,20 +3917,22 @@ function _factionHasReleasedMember(facId) {
 
 function renderFactionBg() {
   return FACTIONS.filter(f => _factionHasReleasedMember(f.id)).map(f => {
-    // 派閥領域を半透明の背景円で示す (新スケールに合わせ半径175)
-    const r = 175;
+    const fp = _scaledFactionPos(f);
+    // 派閥領域を半透明の背景円で示す (派閥内キャラ間距離が拡大したので円も少し大きく)
+    const r = 175 * REL_CHAR_SCALE;
     const op = _factionDimOpacity(f.id);
-    return `<circle data-faction-id="${f.id}" class="rel-faction-bg" cx="${f.x}" cy="${f.y + 40}" r="${r}" fill="${f.color}" fill-opacity="${0.06 * op}" stroke="${f.color}" stroke-opacity="${0.25 * op}" stroke-width="1.5" stroke-dasharray="4,4" style="cursor:pointer"/>`;
+    return `<circle data-faction-id="${f.id}" class="rel-faction-bg" cx="${fp.x}" cy="${fp.y + 40 * REL_CHAR_SCALE}" r="${r}" fill="${f.color}" fill-opacity="${0.06 * op}" stroke="${f.color}" stroke-opacity="${0.25 * op}" stroke-width="1.5" stroke-dasharray="4,4" style="cursor:pointer"/>`;
   }).join('');
 }
 
 function renderFactionLabels() {
   return FACTIONS.filter(f => _factionHasReleasedMember(f.id)).map(f => {
+    const fp = _scaledFactionPos(f);
     const op = _factionDimOpacity(f.id);
     const yomiTxt = f.yomi
-      ? `<text x="${f.x}" y="${f.y - 137}" text-anchor="middle" fill="${f.color}" font-size="11" letter-spacing="2" opacity="${0.7 * op}" style="text-shadow: 0 0 6px rgba(0,0,0,0.8)">${f.yomi}</text>`
+      ? `<text x="${fp.x}" y="${fp.y - 137 * REL_CHAR_SCALE}" text-anchor="middle" fill="${f.color}" font-size="11" letter-spacing="2" opacity="${0.7 * op}" style="text-shadow: 0 0 6px rgba(0,0,0,0.8)">${f.yomi}</text>`
       : '';
-    return `${yomiTxt}<text data-faction-id="${f.id}" class="rel-faction-label" x="${f.x}" y="${f.y - 115}" text-anchor="middle" fill="${f.color}" font-size="22" font-weight="700" letter-spacing="2" opacity="${op}" style="cursor:pointer; text-shadow: 0 0 8px rgba(0,0,0,0.8)">${f.label}</text>`;
+    return `${yomiTxt}<text data-faction-id="${f.id}" class="rel-faction-label" x="${fp.x}" y="${fp.y - 115 * REL_CHAR_SCALE}" text-anchor="middle" fill="${f.color}" font-size="22" font-weight="700" letter-spacing="2" opacity="${op}" style="cursor:pointer; text-shadow: 0 0 8px rgba(0,0,0,0.8)">${f.label}</text>`;
   }).join('');
 }
 
@@ -6185,7 +6199,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260503i';
+const IMG_CACHE_VERSION = '20260503j';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる

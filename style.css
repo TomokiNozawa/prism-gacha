@@ -3661,21 +3661,24 @@ body.has-offline-banner .topbar { margin-top: 30px; }
   flex: 1;
   overflow: auto;
   display: flex; align-items: flex-start; justify-content: flex-start;
-  padding: 20px;
+  /* 2026-05-03 野沢さん指示「スクロールしても見切れる」 対策: 余白を 60px に拡大 */
+  padding: 60px;
   cursor: grab;
   user-select: none;
   -webkit-overflow-scrolling: touch;
 }
 .relations-canvas:active { cursor: grabbing; }
 .relations-canvas svg {
-  /* 2026-05-03 野沢さん指示: 「相関図エリアが狭いと分かりづらい、 領域全体を広げて」 → 1.5倍表示 (viewBox は維持、 描画サイズだけ拡大 = 視認性UP) */
-  width: 3000px; height: 2400px;
+  /* 2026-05-03 野沢さん指示「最初拡大されすぎ」 対策:
+   * 内部viewBox は座標 scale 後の総空間 (3000x2400)、 表示サイズは控えめ (2200x1760) で
+   * デフォルトズーム比率 0.73 = 画面に収まりやすく、 スクロール量も抑制 */
+  width: 2200px; height: 1760px;
   flex-shrink: 0;
   pointer-events: auto;
 }
 /* スマホ: スクロール領域に下余白を確保 (ホームバー/safe-area対応) */
 .relations-canvas {
-  padding-bottom: max(20px, env(safe-area-inset-bottom, 20px));
+  padding-bottom: max(60px, env(safe-area-inset-bottom, 60px));
 }
 /* キャラノードはクリック可、それ以外はパン優先 */
 .relations-canvas svg [data-char-name] { pointer-events: auto; }
