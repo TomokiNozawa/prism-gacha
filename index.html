@@ -24,8 +24,8 @@
 <link rel="icon" href="/images/icons/icon-32.png" type="image/png" sizes="32x32">
 <link rel="icon" href="/images/icons/icon-16.png" type="image/png" sizes="16x16">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
-<link rel="manifest" href="/manifest.json?v=20260504q1">
-<link rel="stylesheet" href="/style.css?v=20260504q">
+<link rel="manifest" href="/manifest.json?v=20260504r1">
+<link rel="stylesheet" href="/style.css?v=20260504r">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -268,14 +268,9 @@ if ('serviceWorker' in navigator) {
   <div class="stage-skip">クリック / Space でスキップ</div>
 </div>
 
-<!-- Result modal after 10-roll -->
+<!-- Result modal after 10-roll (C-1: 上下重複ボタン廃止 → 下部 sticky 1セット + 中身スクロール) -->
 <div id="result" class="result">
   <div class="result-inner">
-    <!-- モバイル用 上部 アクション — 順序は下部と統一 (閉じる左 / もう一度10連右) -->
-    <div class="result-actions result-actions-top">
-      <button id="result-close-top" class="result-btn secondary" type="button">閉じる<span class="esc-hint"> (Esc)</span></button>
-      <button id="result-again-ten-top" class="result-btn primary" type="button">もう一度10連<span class="esc-hint"> (Enter)</span></button>
-    </div>
     <h2 id="result-title">結果</h2>
     <div id="result-rarity" class="result-rarity"></div>
     <div id="result-grid" class="result-grid"></div>
@@ -625,7 +620,7 @@ if ('serviceWorker' in navigator) {
 <audio id="bgm-home" preload="auto"></audio>
 
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
-<script src="/script.js?v=20260504q"></script>
-<script src="/gasshuku.js?v=20260504q"></script>
+<script src="/script.js?v=20260504r"></script>
+<script src="/gasshuku.js?v=20260504r"></script>
 </body>
 </html>

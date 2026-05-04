@@ -112,17 +112,8 @@ body::before {
   }
 }
 
-/* ガチャリザルト 上部アクション: モバイル時のみ表示 (画面上部からも操作できるように) */
-.result-actions-top { display: none; }
-@media (max-width: 700px) {
-  .result-actions-top {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 14px;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-}
+/* C-1: 旧上部アクション完全廃止 (下部 sticky に統一) */
+.result-actions-top { display: none !important; }
 .title {
   font-size: 20px; font-weight: 700; letter-spacing: 0.08em;
   background: linear-gradient(90deg, #ffd84d, #5fffd4, #c87dff, #ff5faa);
@@ -1373,20 +1364,34 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   padding: 20px;
 }
 .result.active { display: flex; }
+/* C-1: result-inner を flex column 化 — タイトル/レア度 (固定) + grid (スクロール) + actions (sticky下) */
 .result-inner {
   max-width: 720px; width: 100%;
   background: rgba(15,20,40,0.9);
   border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 16px; padding: 24px;
-  max-height: 90vh; overflow: auto;
+  border-radius: 16px;
+  max-height: 90vh;
+  display: flex; flex-direction: column;
+  overflow: hidden;
 }
 .result-inner h2 {
-  margin: 0 0 16px; font-size: 22px; text-align: center;
+  margin: 0; padding: 24px 24px 8px;
+  font-size: 22px; text-align: center;
   letter-spacing: 0.1em;
+  flex-shrink: 0;
+}
+.result-rarity {
+  flex-shrink: 0;
+  padding: 0 24px;
 }
 .result-grid {
   display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;
-  margin-bottom: 16px;
+  padding: 12px 24px;
+  margin: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 .rcard {
   aspect-ratio: 2/3; border-radius: 8px;
@@ -2346,11 +2351,17 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   font-size: 12px; color: #fff;
 }
 
-/* result 画面のアクションボタン */
+/* result 画面のアクションボタン (C-1: sticky bottom、 ✕上部重複廃止、 grid スクロールでも常時visible) */
 .result-actions {
   display: flex; gap: 14px; justify-content: center;
-  margin-top: 24px; flex-wrap: wrap;
+  padding: 14px 24px 18px;
+  margin: 0;
+  flex-wrap: wrap;
   align-items: center;
+  flex-shrink: 0;
+  background: linear-gradient(to bottom, rgba(15,20,40,0.55), rgba(15,20,40,0.95) 35%);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
 }
 .result-btn {
   font-family: inherit; font-size: 14px; font-weight: 700;
@@ -3824,12 +3835,19 @@ body.has-offline-banner .topbar { margin-top: 30px; }
   .char-detail-relations .rel-role { font-size: 9px; }
   .char-detail-relations .rel-name { font-size: 11px; }
 }
-/* 結果画面アクションボタンのモバイル */
+/* 結果画面アクションボタンのモバイル (C-1: 横並び維持で省スペース、 縦並びにすると 2行で sticky bar が高くなる) */
 @media (max-width: 600px) {
-  .result-actions { flex-direction: column-reverse; gap: 10px; margin-top: 16px; }
-  .result-btn { width: 100%; max-width: 280px; }
-  .result-btn.primary { padding: 14px 24px; }
-  .result-btn.secondary { padding: 10px 24px; font-size: 13px; }
+  .result-actions {
+    flex-direction: row;
+    gap: 8px;
+    padding: 10px 14px 14px;
+  }
+  .result-btn { flex: 1; max-width: none; }
+  .result-btn.primary { padding: 12px 16px; font-size: 14px; }
+  .result-btn.secondary { padding: 10px 16px; font-size: 13px; }
+  .result-inner h2 { padding: 16px 16px 6px; font-size: 18px; }
+  .result-rarity { padding: 0 16px; }
+  .result-grid { padding: 10px 14px; }
 }
 /* 画像ズームコントロールのモバイル */
 @media (max-width: 600px) {
