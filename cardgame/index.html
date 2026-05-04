@@ -7,7 +7,7 @@
 <title>PCB | Prismaera Cards Battle</title>
 <link rel="icon" href="/images/icons/icon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
-<link rel="stylesheet" href="./style.css?v=20260504o">
+<link rel="stylesheet" href="./style.css?v=20260504p">
 </head>
 <body>
 
@@ -102,21 +102,24 @@
 <!-- 試合画面 -->
 <section id="match-screen" class="cg-screen">
 
-  <!-- 試合HUD -->
+  <!-- 試合HUD (A-4: アイコンラベル + 勝敗は BO3 時のみ) -->
   <div class="cg-hud">
-    <div class="cg-hud-block">
-      <div class="cg-hud-label">ターン</div>
+    <div class="cg-hud-block" title="ターン進行 (現/全6)">
+      <div class="cg-hud-label">⏳ ターン</div>
       <div class="cg-hud-value"><span id="hud-turn">1</span> / 6</div>
     </div>
-    <div class="cg-hud-block">
-      <div class="cg-hud-label">コスト</div>
+    <div class="cg-hud-block" title="このターン使えるコスト (残/合計)">
+      <div class="cg-hud-label">⚡ コスト</div>
       <div class="cg-hud-value"><span id="hud-cost">1</span></div>
     </div>
-    <div class="cg-hud-block">
-      <div class="cg-hud-label">勝敗</div>
+    <div class="cg-hud-block" id="hud-score-block" style="display:none" title="BO3 シリーズ累積 (あなた:AI)">
+      <div class="cg-hud-label">🏆 試合</div>
       <div class="cg-hud-value cg-score">
         <span class="cg-score-me">0</span>:<span class="cg-score-ai">0</span>
       </div>
+    </div>
+    <div class="cg-hud-block" id="hud-pause-block" title="試合を中断">
+      <button class="cg-hud-pause" id="btn-pause" aria-label="中断" title="試合を中断">⏸</button>
     </div>
     <div class="cg-hud-actions">
       <button class="cg-hud-btn" id="btn-mulligan" style="display:none" title="手札を引き直す (1回のみ、 ターン1)">🔄 引直</button>
@@ -321,6 +324,8 @@
         <span>計 <b id="char-detail-total">7</b></span>
       </div>
       <div class="cg-char-detail-effect" id="char-detail-effect">効果なし</div>
+      <!-- A-3: 凸毎効果 段階表 -->
+      <div id="char-detail-dupe-stages" class="cg-dupe-stages"></div>
       <div class="cg-char-detail-combos">
         <h3>関連コンボ</h3>
         <div id="char-detail-combo-list"></div>
@@ -408,6 +413,6 @@
   </div>
 </div>
 
-<script src="./script.js?v=20260504o"></script>
+<script src="./script.js?v=20260504p"></script>
 </body>
 </html>

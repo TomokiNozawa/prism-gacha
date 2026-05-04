@@ -865,6 +865,19 @@ body.cg-modal-open .cg-deck-builder-grid {
   border-bottom: 1px solid var(--border);
   position: sticky; top: 56px; z-index: 40;
 }
+/* C-4: 中断ボタン (HUD 内、 ⏸ アイコン) */
+.cg-hud-pause {
+  background: rgba(255, 122, 122, 0.18);
+  color: #ff9d9d;
+  border: 1px solid rgba(255, 122, 122, 0.4);
+  border-radius: 8px;
+  width: 30px; height: 30px;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s, border-color .15s;
+}
+.cg-hud-pause:hover { background: rgba(255, 122, 122, 0.32); border-color: #ff9d9d; }
 .cg-hud-block {
   display: flex; flex-direction: column; align-items: center;
   padding: 0 8px;
@@ -925,8 +938,10 @@ body.cg-modal-open .cg-deck-builder-grid {
   /* スマホ HUD コンパクト化 (野沢さん指示 2026-05-04 「もう少しコンパクトに」) */
   .cg-hud { flex-wrap: nowrap; padding: 5px 6px; gap: 5px; min-height: 40px; }
   .cg-hud-block { padding: 0 4px; min-width: 0; border-right: 1px solid var(--border); }
-  .cg-hud-label { display: none; }  /* ラベル省略、 値だけ表示 */
+  /* A-4: スマホでもラベル維持 (アイコン化済み)、 ただし極小フォント */
+  .cg-hud-label { display: block; font-size: 9px; line-height: 1.05; opacity: 0.75; }
   .cg-hud-value { font-size: 12px; white-space: nowrap; }
+  .cg-hud-pause { width: 26px; height: 26px; font-size: 11px; }
   .cg-hud-actions { margin-left: auto; gap: 3px; flex-shrink: 0; }
   .cg-hud-btn {
     padding: 5px 7px; font-size: 11px; min-width: 30px;
@@ -1093,6 +1108,10 @@ body.cg-modal-open .cg-deck-builder-grid {
 }
 .cg-card-cost { color: var(--gold); text-shadow: 0 1px 2px rgba(0,0,0,.8); }
 .cg-card-power { color: var(--aurora-2); text-shadow: 0 1px 2px rgba(0,0,0,.8); }
+/* A-2: MAX 凸でコスト 軽減時の表示 (元cost 打消線 + 凸後cost 強調) */
+.cg-card-cost.cg-cost-reduced { color: #ffe78a; text-shadow: 0 0 6px rgba(255, 213, 107, 0.6); }
+.cg-cost-orig { opacity: 0.55; font-size: 0.85em; margin-right: 2px; color: #aaa; }
+.cg-char-detail-stats .cg-cost-reduced { color: #ffe78a; }
 
 /* 凸数バッジ */
 .cg-card-dupes {
@@ -1734,3 +1753,117 @@ body.cg-modal-open .cg-deck-builder-grid {
   .cg-hero-title { font-size: 36px; }
   .cg-hero-tagline { font-size: 15px; }
 }
+
+/* ===== A-3: 凸毎効果 段階表 ===== */
+.cg-dupe-stages {
+  margin: 12px 14px 0;
+  padding: 10px 12px;
+  background: rgba(124, 93, 255, 0.07);
+  border: 1px solid rgba(124, 93, 255, 0.25);
+  border-radius: 10px;
+}
+.cg-dupe-stage-title {
+  font-size: 12px;
+  margin: 0 0 8px;
+  color: var(--gold);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+.cg-dupe-stage-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+.cg-dupe-stage-table th {
+  text-align: left;
+  padding: 4px 6px;
+  font-weight: 600;
+  color: var(--text-dim);
+  border-bottom: 1px solid var(--border);
+  font-size: 10px;
+}
+.cg-dupe-stage-table td {
+  padding: 6px 6px;
+  border-bottom: 1px dashed rgba(255,255,255,0.06);
+  vertical-align: middle;
+}
+.cg-dupe-stage-table tr:last-child td { border-bottom: none; }
+.cg-dupe-stage-current {
+  background: rgba(255, 213, 107, 0.12);
+}
+.cg-dupe-stage-current td:first-child {
+  color: var(--gold);
+  font-weight: 700;
+}
+.cg-dupe-stage-cur-mark {
+  font-size: 9px;
+  color: var(--gold);
+  background: rgba(255, 213, 107, 0.2);
+  padding: 1px 5px;
+  border-radius: 4px;
+  margin-left: 4px;
+}
+.cg-dupe-bonus {
+  color: var(--gold);
+  font-weight: 700;
+}
+.cg-dupe-effect-cell { font-size: 10px; line-height: 1.35; }
+.cg-dupe-effect-none { opacity: 0.5; }
+
+/* ===== A-5: レーン効果 popover ===== */
+.cg-lane-popover {
+  position: absolute;
+  z-index: 200;
+  display: none;
+  width: 240px;
+  padding: 12px 14px;
+  background: rgba(15, 18, 42, 0.97);
+  border: 1px solid var(--border-hi);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 16px rgba(124, 93, 255, 0.3);
+  font-size: 12px;
+  color: var(--text);
+  pointer-events: auto;
+  cursor: pointer;
+}
+.cg-lane-popover.open { display: block; animation: lanePopoverFade .18s ease-out; }
+@keyframes lanePopoverFade {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.cg-lane-popover-head {
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: 6px;
+}
+.cg-lane-popover-icon { font-size: 18px; }
+.cg-lane-popover-name { flex: 1; font-weight: 700; color: var(--gold); }
+.cg-lane-popover-chapter {
+  font-size: 9px;
+  background: rgba(124, 93, 255, 0.25);
+  color: #c9b8ff;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+.cg-lane-popover-desc {
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+.cg-lane-popover-hint {
+  font-size: 10px;
+  color: var(--text-dim);
+  text-align: right;
+  font-style: italic;
+}
+.cg-lane-info-hint {
+  display: inline-block;
+  background: rgba(95, 223, 255, 0.25);
+  color: #c0eaff;
+  font-size: 8px;
+  font-weight: 700;
+  padding: 0 3px;
+  border-radius: 3px;
+  margin-left: 2px;
+  vertical-align: top;
+}
+.cg-lane-header { cursor: pointer; }
+.cg-lane-header:hover { color: var(--aurora-2); }

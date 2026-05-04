@@ -140,10 +140,10 @@ function updateMuteUI() {
 // cards.json は手書き override (同名なら cards.json 優先)
 async function loadMasters() {
   const [c, k, l, p] = await Promise.all([
-    fetch('./cards.json?v=20260504o').then(r => r.json()),
-    fetch('./combos.json?v=20260504o').then(r => r.json()),
-    fetch('./lane_effects.json?v=20260504o').then(r => r.json()),
-    fetch('./data/pool.json?v=20260504o').then(r => r.json()).catch(() => []),
+    fetch('./cards.json?v=20260504p').then(r => r.json()),
+    fetch('./combos.json?v=20260504p').then(r => r.json()),
+    fetch('./lane_effects.json?v=20260504p').then(r => r.json()),
+    fetch('./data/pool.json?v=20260504p').then(r => r.json()).catch(() => []),
   ]);
   // pool 全カード ← cards.json で override
   const cardsByName = new Map();
@@ -237,7 +237,7 @@ function applyUserDupes() {
 // 凸 = 半分以上 → 数値 +1
 // 凸 = MAX → 効果範囲拡大 (self_lane → adjacent_lanes 等) + cost -1
 function effectiveCost(card) {
-  if (isMaxDup(card)) return Math.max(0, card.cost - 1);
+  if (isMaxDup(card)) return Math.max(1, card.cost - 1);
   return card.cost;
 }
 function isHalfDup(card) {
@@ -498,8 +498,11 @@ function renderAll() {
   $('#hud-turn').textContent = state.turn;
   $('#hud-cost').textContent = (state.cost - state.costUsed) + ' / ' + state.cost;
   $('#hand-count').textContent = state.hand.length;
-  $('.cg-score-me').textContent = state.scoreMe;
-  $('.cg-score-ai').textContent = state.scoreOpp;
+  // A-4: BO3 時のみ「試合」 ブロック表示 (シングル時は finishMatch 直前まで 0:0 のまま動かないので非表示)
+  const scoreBlock = $('#hud-score-block');
+  if (scoreBlock) scoreBlock.style.display = state.series.isBO3 ? '' : 'none';
+  $('.cg-score-me').textContent = state.series.isBO3 ? state.series.wins.me : state.scoreMe;
+  $('.cg-score-ai').textContent = state.series.isBO3 ? state.series.wins.opp : state.scoreOpp;
   $('#btn-end-turn').disabled = state.busy || state.ended;
   $('#btn-undo').disabled = state.busy || state.ended || state.thisTurnPlacements.length === 0;
   // マリガンボタン: ターン1 で 配置前のみ有効
@@ -551,13 +554,68 @@ function renderLaneEffects() {
     const labelMe = $(`#lanes-me .cg-lane[data-lane="${lane}"] .cg-lane-name`);
     const labelOpp = $(`#lanes-opp .cg-lane[data-lane="${lane}"] .cg-lane-name`);
     if (!e) return;
-    // スマホ: 「L1 🌊」 だけ (名前 + 効果は title で確認)、 PC: フル表示
-    const txt = isMobile ? `L${lane + 1} ${e.icon}` : `L${lane + 1} ${e.icon} ${e.name}`;
+    // スマホ: 「L1 🌊 ⓘ」 (タップで popover)、 PC: フル表示 + title hover
+    const txt = isMobile
+      ? `L${lane + 1} ${e.icon} <span class="cg-lane-info-hint">ⓘ</span>`
+      : `L${lane + 1} ${e.icon} ${e.name}`;
     const titleTxt = `${e.name} — ${e.description}`;
-    if (labelMe) { labelMe.textContent = txt; labelMe.title = titleTxt; }
-    if (labelOpp) { labelOpp.textContent = txt; labelOpp.title = titleTxt; }
+    if (labelMe) { labelMe.innerHTML = txt; labelMe.title = titleTxt; }
+    if (labelOpp) { labelOpp.innerHTML = txt; labelOpp.title = titleTxt; }
     [`#lanes-me .cg-lane[data-lane="${lane}"]`, `#lanes-opp .cg-lane[data-lane="${lane}"]`].forEach(s => {
       const el = $(s); if (el) el.title = titleTxt;
+    });
+  });
+}
+
+// A-5: レーン効果 popover (スマホで詳細表示できない問題への対応、 タップで開閉)
+function _initLaneEffectPopover() {
+  const showPopover = (lane, anchor) => {
+    const e = state.laneEffects[lane];
+    if (!e) return;
+    let pop = document.getElementById('cg-lane-popover');
+    if (!pop) {
+      pop = document.createElement('div');
+      pop.id = 'cg-lane-popover';
+      pop.className = 'cg-lane-popover';
+      pop.addEventListener('click', () => pop.classList.remove('open'));
+      document.body.appendChild(pop);
+    }
+    pop.innerHTML = `
+      <div class="cg-lane-popover-head">
+        <span class="cg-lane-popover-icon">${e.icon}</span>
+        <span class="cg-lane-popover-name">${e.name}</span>
+        <span class="cg-lane-popover-chapter">${(e.chapter || '').toUpperCase()}</span>
+      </div>
+      <div class="cg-lane-popover-desc">${e.description}</div>
+      <div class="cg-lane-popover-hint">タップで閉じる</div>
+    `;
+    const rect = anchor.getBoundingClientRect();
+    pop.style.left = Math.max(8, Math.min(window.innerWidth - 240, rect.left + rect.width / 2 - 120)) + 'px';
+    pop.style.top = (rect.bottom + window.scrollY + 6) + 'px';
+    pop.classList.add('open');
+    // 外側クリックで閉じる (1度だけ捕捉)
+    setTimeout(() => {
+      const close = (ev) => {
+        if (!pop.contains(ev.target) && !ev.target.closest('.cg-lane-header')) {
+          pop.classList.remove('open');
+          document.removeEventListener('click', close, true);
+        }
+      };
+      document.addEventListener('click', close, true);
+    }, 50);
+  };
+  // me/opp 両方の lane header にイベント (delegation)
+  ['lanes-me', 'lanes-opp'].forEach(parentId => {
+    const parent = document.getElementById(parentId);
+    if (!parent) return;
+    parent.addEventListener('click', (ev) => {
+      const header = ev.target.closest('.cg-lane-header');
+      if (!header) return;
+      const laneEl = header.closest('.cg-lane');
+      if (!laneEl) return;
+      const lane = Number(laneEl.dataset.lane);
+      ev.stopPropagation();
+      showPopover(lane, header);
     });
   });
 }
@@ -608,6 +666,11 @@ function makeCardElement(card, showEffect) {
   const imgClass = imgUrl ? '' : 'no-img';
   const dupesBadge = card.dupes > 0 ? `<span class="cg-card-dupes" title="凸 ${card.dupes}">+${card.dupes}</span>` : '';
   const displayPower = card._currentPower != null ? card._currentPower : (card.basePower + dupeBonusOf(card));
+  // A-2: 凸後コスト反映 (MAX凸で cost-1 が適用されたら 元cost 打消線 + 凸後cost を gold で表示)
+  const effCost = effectiveCost(card);
+  const costHtml = (effCost !== card.cost)
+    ? `<span class="cg-card-cost cg-cost-reduced" title="MAX凸でコスト-1"><s class="cg-cost-orig">${card.cost}</s>⚡${effCost}</span>`
+    : `<span class="cg-card-cost">⚡${effCost}</span>`;
   el.innerHTML = `
     <div class="cg-card-tier ${card.tier}">${card.tier}${dupesBadge}</div>
     <div class="cg-card-faction" style="background:${factionColor(card.faction)}">${card.faction}</div>
@@ -616,7 +679,7 @@ function makeCardElement(card, showEffect) {
     <div class="cg-card-name">${card.name}</div>
     ${showEffect && card.effectText ? `<div class="cg-card-effect">${card.effectText}</div>` : ''}
     <div class="cg-card-stats">
-      <span class="cg-card-cost">⚡${card.cost}</span>
+      ${costHtml}
       <span class="cg-card-power">⚔${displayPower}</span>
     </div>
   `;
@@ -696,12 +759,24 @@ function showCardDetail(card, context, handIdx) {
   facEl.style.background = factionColor(card.faction);
   $('#char-detail-dupes').textContent = card.dupes > 0 ? `+${card.dupes} 凸` : '凸 0';
   $('#char-detail-name').textContent = card.name;
-  $('#char-detail-cost').textContent = card.cost;
+  // A-2: 凸後 cost 反映 (MAX 凸なら 元cost 打消線 + 凸後cost)
+  const detailEffCost = effectiveCost(card);
+  const costEl = $('#char-detail-cost');
+  if (detailEffCost !== card.cost) {
+    costEl.innerHTML = `<s class="cg-cost-orig">${card.cost}</s>${detailEffCost}`;
+    costEl.classList.add('cg-cost-reduced');
+  } else {
+    costEl.textContent = card.cost;
+    costEl.classList.remove('cg-cost-reduced');
+  }
   $('#char-detail-base').textContent = card.basePower;
-  const dupeBonus = (card.dupes || 0) * (card.dupeBonus || 0);
+  // dupe bonus は dupeBonusOf (段階式: 0 / +1 / +2)
+  const dupeBonus = dupeBonusOf(card);
   $('#char-detail-bonus').textContent = '+' + dupeBonus;
   $('#char-detail-total').textContent = card.basePower + dupeBonus;
   $('#char-detail-effect').textContent = card.effectText || '効果なし';
+  // A-3: 凸毎効果 段階表 (現在の凸数を強調)
+  _renderDupeStageTable(card);
   // 関連コンボ
   const related = state.combos.filter(c => c.chars.includes(card.name));
   const listEl = $('#char-detail-combo-list');
@@ -754,6 +829,68 @@ function showCardDetail(card, context, handIdx) {
   _setBodyModalOpen();
 }
 function closeCharDetail() { $('#char-detail-modal').hidden = true; _setBodyModalOpen(); }
+
+// A-3: 凸毎効果 段階表 (凸0 / +half / MAX、 各段で 基礎pow / cost / 効果文 を表示)
+function _renderDupeStageTable(card) {
+  const wrap = $('#char-detail-dupe-stages');
+  if (!wrap) return;
+  const max = MAX_DUPS[card.tier] || 0;
+  if (max === 0) {
+    wrap.style.display = 'none';
+    return;
+  }
+  wrap.style.display = '';
+  const half = Math.ceil(max / 2);
+  // 段階定義: 0 / half / max。 R は max=1 なので half=max=1 → 2段階に集約
+  const stages = max === 1
+    ? [{ label: '凸 0', dupes: 0 }, { label: 'MAX 凸 (+1)', dupes: 1 }]
+    : [{ label: '凸 0', dupes: 0 }, { label: `+${half} 凸 (半分)`, dupes: half }, { label: `MAX 凸 (+${max})`, dupes: max }];
+  const curDupes = card.dupes || 0;
+  const fakeCardAt = (d) => ({ ...card, dupes: d });
+  wrap.innerHTML = `<h3 class="cg-dupe-stage-title">📊 凸毎の効果</h3>
+    <table class="cg-dupe-stage-table">
+      <thead><tr><th>段階</th><th>パワー</th><th>コスト</th><th>効果</th></tr></thead>
+      <tbody>
+        ${stages.map(s => {
+          const fc = fakeCardAt(s.dupes);
+          const bonus = dupeBonusOf(fc);
+          const tp = card.basePower + bonus;
+          const ec = effectiveCost(fc);
+          const effDesc = _describeEffect(fc);
+          const isCur = curDupes === s.dupes || (s.dupes === max && curDupes >= max) || (s.dupes === half && curDupes >= half && curDupes < max);
+          return `<tr class="${isCur ? 'cg-dupe-stage-current' : ''}">
+            <td>${s.label}${isCur ? ' <span class="cg-dupe-stage-cur-mark">◀現在</span>' : ''}</td>
+            <td>${card.basePower}${bonus > 0 ? ` <span class="cg-dupe-bonus">+${bonus}</span>` : ''} = <b>${tp}</b></td>
+            <td>${ec !== card.cost ? `<s class="cg-cost-orig">${card.cost}</s> <b>${ec}</b>` : `<b>${ec}</b>`}</td>
+            <td class="cg-dupe-effect-cell">${effDesc}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
+}
+
+// 効果を凸数段階に応じて自然言語化 (effectiveEffect で動的に target/power が変わる)
+function _describeEffect(card) {
+  const e = effectiveEffect(card);
+  if (!e || !e.trigger || e.trigger === 'none') return '<span class="cg-dupe-effect-none">効果なし</span>';
+  const targetMap = {
+    'self_lane': '自レーン',
+    'adjacent_lanes': '両隣レーン',
+    'all_lanes': '全レーン',
+    'opp_self_lane': '相手の同レーン',
+    'all_opp_lanes': '全相手レーン',
+    'self_lane_attack': '自レーン+相手同レーン',
+  };
+  const tlabel = targetMap[e.target] || e.target;
+  const power = e.power != null ? e.power : 0;
+  if (e.target === 'self_lane_attack') {
+    return `${tlabel} (自軍 +${power}, 相手 ${e.oppPower || 0})`;
+  }
+  const sign = power >= 0 ? '+' : '';
+  let txt = `${tlabel} ${sign}${power}`;
+  if (e.selfBonus) txt += ` / 自身 +${e.selfBonus}`;
+  return txt;
+}
 
 // ===== レーン選択 (配置) =====
 $$('#lanes-me .cg-lane').forEach(el => {
@@ -1117,12 +1254,14 @@ function nextMatch() {
   state._continueSeries = true;
   $('#result-modal').hidden = true;
   $('#result-peek-btn').hidden = true;
+  _setBodyModalOpen();
   startMatch(state.difficulty, true);
 }
 
 function rematch() {
   $('#result-modal').hidden = true;
   $('#result-peek-btn').hidden = true;
+  _setBodyModalOpen();
   // BO3 終了後 rematch なら新シリーズ
   state.series = { isBO3: state.series.isBO3, wins: { me: 0, opp: 0 }, matchNo: 1, results: [] };
   startMatch(state.difficulty, state.series.isBO3);
@@ -1148,6 +1287,7 @@ function backToCardgameHome() {
   $('#result-peek-btn').hidden = true;
   $('#match-screen').classList.remove('active');
   $('#home-screen').classList.add('active');
+  _setBodyModalOpen();
 }
 
 function backToPrismaeraHome() {
@@ -1155,13 +1295,25 @@ function backToPrismaeraHome() {
 }
 
 // 結果モーダルから「場を見る」 押下 → モーダル一時クローズ + floating「結果に戻る」
+// A-6: peekBoard 時に body.cg-modal-open が残ってスクロール不能になるバグ → _setBodyModalOpen() 呼出
 function peekBoard() {
   $('#result-modal').hidden = true;
   $('#result-peek-btn').hidden = false;
+  _setBodyModalOpen();
 }
 function reopenResult() {
   $('#result-modal').hidden = false;
   $('#result-peek-btn').hidden = true;
+  _setBodyModalOpen();
+}
+
+// C-4: PvE 中断機能 (試合中「⏸」 ボタン → 確認 → home へ、 戦績無し)
+function pauseMatch() {
+  if (state.busy || state.ended) return;
+  if (!confirm('試合を中断してホームへ戻りますか? (戦績は残りません)')) return;
+  state.ended = true;
+  state.busy = false;
+  backToCardgameHome();
 }
 
 // ===== P-5: デッキ編集 UI (3 スロット + フィルター強化) =====
@@ -1549,6 +1701,7 @@ function onBackClick(e) {
 document.addEventListener('DOMContentLoaded', async () => {
   initBgm();
   _initVisibilityHandler();
+  _initLaneEffectPopover();
   await loadMasters();
   // BO3 toggle (localStorage 永続化)
   const bo3Toggle = document.getElementById('bo3-toggle');
@@ -1569,6 +1722,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('#btn-combos').addEventListener('click', openCombosModal);
   $('#btn-mulligan').addEventListener('click', mulligan);
   $('#btn-cg-mute').addEventListener('click', toggleBgmMute);
+  const pauseBtn = document.getElementById('btn-pause');
+  if (pauseBtn) pauseBtn.addEventListener('click', pauseMatch);
   $('.cg-back').addEventListener('click', onBackClick);
   // P-5: デッキ編集 (ホームの「デッキ編集」 ボタン → スロット選択)
   const openDeckBtn = document.getElementById('btn-open-deck-builder');
