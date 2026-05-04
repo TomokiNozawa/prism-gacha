@@ -8454,7 +8454,9 @@ body.app-paused *::after {
   .topbar { backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
 }
 
-/* 省電力モード (設定からユーザー切替) — アンビエントアニメ全停止 + blur OFF */
+/* 省電力モード (設定からユーザー切替) — C-3 強化版 (野沢さん指摘 2026-05-04 「全然省電力になっていません、 端末が熱くなる」)
+   主因: backdrop-filter (GPU 高負荷) / 全面 animation / 大画像の頻繁な再描画 / hover transition
+   対策: 全 backdrop-filter OFF、 transition 即時化、 hover transform 抑制、 アニメ全停止 */
 body.power-saver::before,
 body.power-saver::after {
   animation: none !important;
@@ -8466,10 +8468,42 @@ body.power-saver::after {
 body.power-saver.t-1000 #bg-layer {
   animation: none !important;
 }
-body.power-saver .topbar {
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  background: rgba(10, 14, 29, 0.92);
+/* C-3: 全 backdrop-filter (blur) を OFF — これがモバイル GPU 最大の負荷 */
+body.power-saver *,
+body.power-saver *::before,
+body.power-saver *::after {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+body.power-saver .topbar { background: rgba(10, 14, 29, 0.92); }
+body.power-saver .modal { background: rgba(0,0,0,0.85); }
+body.power-saver .gallery-modal { background: rgba(0,0,0,0.85); }
+body.power-saver .result { background: rgba(0,0,0,0.92); }
+body.power-saver .result-actions { background: rgba(15,20,40,0.95); }
+/* C-3: 全 transition を 0s に (hover 等の細かい transition も停止、 GPU 節約) */
+body.power-saver *:not(.stage *):not(.result *):not(.summon *) {
+  transition: none !important;
+}
+/* C-3: hover transform 抑制 (cards / mode buttons の transform: translateY 等を無効化) */
+body.power-saver .cg-card:hover,
+body.power-saver .card:hover,
+body.power-saver .mode-btn:hover,
+body.power-saver .gallery-card:hover,
+body.power-saver .lib-card:hover,
+body.power-saver .topbar-btn:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+/* C-3: 全 animation を一括停止 (ガチャ演出系は除外、 .stage/.summon/.result 配下) */
+body.power-saver *:not(.stage *):not(.summon *):not(.result *):not(.gacha-anim *) {
+  animation: none !important;
+}
+/* C-3: image-rendering 軽量化 (large image scaling 軽減) */
+body.power-saver img,
+body.power-saver .gallery-card-img,
+body.power-saver .rcard-img,
+body.power-saver .cg-card-img {
+  image-rendering: optimizeSpeed;
 }
 
 /* 設定モーダル: 省電力モードセクション (label+toggle 横並び + desc 下段、 モバイル対応) */

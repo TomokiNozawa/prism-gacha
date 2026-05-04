@@ -7800,12 +7800,25 @@ function _updateBgmProgress() {
   }
   cur.textContent = _bgmFormatTime(t);
 }
-setInterval(() => {
-  // 野沢さん指摘 2026-05-03 電池消費改善: hidden 時 + BGM 一時停止時 はスキップ
-  if (document.hidden) return;
-  if (bgmAudio && bgmAudio.paused) return;  // 再生中のみ プログレス更新
-  _updateBgmProgress();
-}, 500);
+// C-3 強化: powerSaver ON 時は 500ms → 1500ms に間引き (3倍 CPU 節約)、 BGM パネル開いている時のみ動く
+let _bgmProgressTimer = null;
+function _restartBgmProgressTimer() {
+  if (_bgmProgressTimer) clearInterval(_bgmProgressTimer);
+  const interval = _isPowerSaverActive() ? 1500 : 500;
+  _bgmProgressTimer = setInterval(() => {
+    if (document.hidden) return;
+    if (bgmAudio && bgmAudio.paused) return;
+    // C-3: BGM パネルが閉じている時はスキップ (見えない progress 計算は無駄)
+    const panel = document.getElementById('bgm-panel');
+    if (panel && !panel.classList.contains('open')) return;
+    _updateBgmProgress();
+  }, interval);
+}
+_restartBgmProgressTimer();
+// power-saver toggle 時に再起動
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) _restartBgmProgressTimer();
+});
 
 // 再生位置バー click → seek (panel 開いてる間のみ動作)
 document.addEventListener('click', (e) => {
@@ -9243,9 +9256,41 @@ function applySettings(s) {
   // 文字サイズ (大/中/小)
   const root = document.documentElement;
   root.dataset.fontsize = s.fontSize || 'medium';
-  // 省電力モード (発熱対策 2026-05-01) — アンビエントアニメ + blur 停止
-  document.body.classList.toggle('power-saver', !!s.powerSaver);
+  // 省電力モード (発熱対策 2026-05-01、 強化 C-3 2026-05-04) — アンビエントアニメ + blur + transition 全停止 + lightmode 自動有効
+  const ps = !!s.powerSaver;
+  document.body.classList.toggle('power-saver', ps);
+  // C-3: powerSaver ON で lightmode も自動有効化 (両方の対策が必要)
+  if (ps && !getLightmode()) setLightmode(true);
 }
+
+// C-3: Battery API でバッテリー残量低下時に省電力 自動 ON 提案 (2026-05-04 野沢さん指摘 「全然省電力になっていません」)
+async function _initBatterySaverHook() {
+  if (!navigator.getBattery) return;
+  try {
+    const battery = await navigator.getBattery();
+    const checkBatteryLevel = () => {
+      // バッテリー 20% 未満 + 充電してない時 → power-saver 自動 ON 提案 (1度だけ)
+      if (battery.level < 0.2 && !battery.charging) {
+        const s = loadSettings();
+        if (!s.powerSaver && !s._batterySaverPrompted) {
+          s._batterySaverPrompted = true;
+          saveSettings(s);
+          // ユーザー判断 — 強制 ON にはせず、 trayメッセージ的に通知
+          if (confirm(`🔋 バッテリー残量 ${Math.round(battery.level*100)}% です。 省電力モードを ON にして電池消費を抑えますか?`)) {
+            const news = loadSettings();
+            news.powerSaver = true;
+            saveSettings(news);
+            applySettings(news);
+          }
+        }
+      }
+    };
+    checkBatteryLevel();
+    battery.addEventListener('levelchange', checkBatteryLevel);
+    battery.addEventListener('chargingchange', checkBatteryLevel);
+  } catch (e) { /* Battery API 非対応端末 */ }
+}
+document.addEventListener('DOMContentLoaded', _initBatterySaverHook);
 // OS reduced-motion または ユーザー省電力モード ON 時 true
 function _isPowerSaverActive() {
   try {
@@ -9295,7 +9340,7 @@ function openSettingsModal() {
               <span class="settings-toggle-track"></span>
             </label>
           </div>
-          <div class="settings-power-saver-desc">背景アニメ・キャラ瞬きを停止して発熱を抑えます。 (OS の省電力モード ON 時は自動有効)</div>
+          <div class="settings-power-saver-desc">背景アニメ・キャラ瞬き・blur(GPU 重)・全 transition・hover アニメを停止 + 軽量モード自動有効。 GPU/CPU 負荷を大幅減し発熱・電池消費を抑えます。 ガチャ演出は維持されます。</div>
         </div>
         <div class="settings-section settings-offline-section">
           <div class="settings-label">📥 オフライン用にデータ保存</div>
@@ -9384,15 +9429,18 @@ function openSettingsModal() {
         m.querySelectorAll('.settings-fontsize-btn').forEach(bb => bb.classList.toggle('active', bb.dataset.size === sz));
       });
     });
-    // 省電力モード (発熱対策 2026-05-01)
+    // 省電力モード (発熱対策 2026-05-01、 強化 C-3 2026-05-04)
     const psEl = m.querySelector('#settings-power-saver');
     psEl.addEventListener('change', () => {
       const s = loadSettings(); s.powerSaver = psEl.checked; saveSettings(s);
+      applySettings(s);  // body.power-saver class + lightmode 自動連動
       // 即座にblink loop 停止/再起動 (現在表示中のシーンに反映)
       try { if (typeof clearBlinkTimers === 'function') clearBlinkTimers(); } catch {}
       if (!psEl.checked) {
         try { if (typeof setupCharBlinkAnimations === 'function') setupCharBlinkAnimations(); } catch {}
       }
+      // C-3: BGM progress timer も interval を切り替え (500ms <-> 1500ms)
+      try { if (typeof _restartBgmProgressTimer === 'function') _restartBgmProgressTimer(); } catch {}
     });
     // M4: 全アセットDL — 状態管理 (未DL数 > 0 の時だけボタン表示)
     const dlBtn = m.querySelector('#settings-offline-dl');
