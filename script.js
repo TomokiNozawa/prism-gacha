@@ -8360,6 +8360,26 @@ async function logVisitAndStreak(user) {
       streakMax: maxStreak,
     });
   } catch (e) { console.warn('[visit] user/streak log failed', e); }
+  // PCB プレイ履歴 を Firebase に sync (cardgame で localStorage に蓄積したものを uploads)
+  try { await syncPcbStatsToFirebase(user); } catch (e) { console.warn('[pcb] sync failed', e); }
+}
+
+// PCB プレイ履歴 同期 (cardgame は localStorage 蓄積、 本体ログイン時に Firebase へ送信、 admin で集計表示)
+async function syncPcbStatsToFirebase(user) {
+  if (!user || !fbDb) return;
+  let stats, history;
+  try {
+    stats = JSON.parse(localStorage.getItem('prism-pcb-stats') || 'null');
+    history = JSON.parse(localStorage.getItem('prism-pcb-history') || '[]');
+  } catch (e) { return; }
+  if (!stats || !stats.totalMatches) return;
+  const userRef = fbDb.ref('prism-gacha/users/' + user.uid);
+  // pcbStats: 集計値 (admin で per-user 表示)
+  await userRef.child('pcbStats').set(stats);
+  // pcbHistory: 直近 50 試合 (admin で履歴一覧)
+  if (Array.isArray(history) && history.length > 0) {
+    await userRef.child('pcbHistory').set(history);
+  }
 }
 
 try {

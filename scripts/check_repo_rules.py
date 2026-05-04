@@ -1253,6 +1253,88 @@ print(f"  ルール7-23 (dev version suffix bump): {n7_23}件 検査 [BLOCKER]")
 n7_24 = check_main_version_bumped()
 print(f"  ルール7-24 (main version bump 必須): {n7_24}件 検査 [BLOCKER]")
 
+
+def check_admin_tier_max():
+    """ルール9 (BLOCKER 2026-05-04 野沢さん指示「自動チェックにも入れたほうが良い」):
+    admin.html の TIER_MAX が cardgame/data/pool.json の tier 別 count と一致するか確認。
+    章追加時に TIER_MAX 更新漏れで「ガチャコンプ判定」 が永遠に届かなくなる事故防止。"""
+    admin_path = ROOT / "admin.html"
+    pool_path = ROOT / "cardgame" / "data" / "pool.json"
+    if not admin_path.exists() or not pool_path.exists():
+        return 0
+    try:
+        pool = json.loads(pool_path.read_text(encoding="utf-8"))
+    except Exception:
+        return 0
+    from collections import Counter
+    actual = Counter(c.get("tier", "?") for c in pool)
+    admin_text = admin_path.read_text(encoding="utf-8")
+    m = re.search(r"const\s+TIER_MAX\s*=\s*\{([^}]+)\}", admin_text)
+    if not m:
+        return 0
+    declared = {}
+    for kv in re.finditer(r"(\w+)\s*:\s*(\d+)", m.group(1)):
+        declared[kv.group(1)] = int(kv.group(2))
+    diffs = []
+    for tier in ["LR", "UR", "SSR", "SR", "R"]:
+        a = actual.get(tier, 0)
+        d = declared.get(tier, 0)
+        if a != d:
+            diffs.append(f"{tier}: admin={d} vs pool={a}")
+    if diffs:
+        violations.append(
+            f"[ルール9 admin TIER_MAX 不一致 BLOCKER] {' / '.join(diffs)}\n"
+            f"      → admin.html の TIER_MAX を pool.json の実数 (LR{actual.get('LR',0)}/UR{actual.get('UR',0)}/SSR{actual.get('SSR',0)}/SR{actual.get('SR',0)}/R{actual.get('R',0)}) に更新\n"
+            f"      → 章追加時に admin 画面のガチャコンプ統計が永遠に届かない事故を防ぐ自動チェック (野沢さん指示 2026-05-04)"
+        )
+    return len(diffs)
+
+
+def check_admin_bgm_labels():
+    """ルール10 (WARNING 2026-05-04): prompt/bgm/ 配下の全 BGM が admin.html の BGM_LABELS に登録済確認。
+    新章 BGM プロンプト追加時に admin の display label 更新漏れを警告 (再生回数統計の表示に必要)。"""
+    admin_path = ROOT / "admin.html"
+    bgm_dir = ROOT / "prompt" / "bgm"
+    if not admin_path.exists() or not bgm_dir.exists():
+        return 0
+    admin_text = admin_path.read_text(encoding="utf-8")
+    # BGM_LABELS 内の id を抽出 (1箇所目: const BGM_LABELS = { 'id': ... } )
+    m = re.search(r"const\s+BGM_LABELS\s*=\s*\{([^}]+\}\s*,?\s*)*\s*\}", admin_text, re.DOTALL)
+    if not m:
+        return 0
+    label_ids = set(re.findall(r"['\"]([\w_]+)['\"]\s*:\s*\{", m.group(0)))
+    # prompt/bgm/ 配下の md ファイル名から BGM id を逆引き (最低限のもの)
+    expected_ids = set()
+    for f in bgm_dir.glob("*.md"):
+        name = f.stem
+        # 章テーマ: chapter_s1cN.md → s1cN は admin label にないが BGM id はある程度推測
+        # 派閥テーマ: faction_<name>.md or factions/<name>.md → admin の id と一致しそうな文字列
+        m2 = re.match(r"chapter_s1c(\d+)", name)
+        if m2:
+            ch = int(m2.group(1))
+            # 第1章=watch, 第2章=tide, 第3章=sands, 第4章=frost, 第5章=blackmoon
+            chmap = {1: "watch", 2: "tide", 3: "sands", 4: "frost", 5: "blackmoon"}
+            if ch in chmap:
+                expected_ids.add(chmap[ch])
+            continue
+        # cardgame.md
+        if name == "cardgame":
+            expected_ids.add("cards")
+            continue
+    missing = expected_ids - label_ids
+    if missing:
+        warnings_only.append(
+            f"[ルール10 admin BGM_LABELS 未登録 WARNING] prompt/bgm/ にある BGM が admin.html BGM_LABELS に未登録: {', '.join(sorted(missing))}\n"
+            f"      → admin.html の BGM_LABELS / BGM_LABELS_DETAIL に追加すると BGM 再生統計が正しく表示される (野沢さん指示 2026-05-04 自動チェック)"
+        )
+    return len(missing)
+
+
+n9 = check_admin_tier_max()
+print(f"  ルール9 (admin TIER_MAX = pool count): {n9}件 検査 [BLOCKER]")
+n10 = check_admin_bgm_labels()
+print(f"  ルール10 (admin BGM_LABELS 全 BGM 登録): {n10}件 検査 [WARNING]")
+
 # === Warning ルール (commit はブロックせず、 開発者手動 review) ===
 violations_blocker = list(violations)  # ここまでが blocker 違反
 violations.clear()

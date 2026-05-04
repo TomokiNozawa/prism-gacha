@@ -141,11 +141,11 @@ function updateMuteUI() {
 // 優先順位: cards.json (手書き完全override) > effects_override.json (effect+effectText のみ) > pool.json (default)
 async function loadMasters() {
   const [c, k, l, p, eo] = await Promise.all([
-    fetch('./cards.json?v=20260504t').then(r => r.json()),
-    fetch('./combos.json?v=20260504t').then(r => r.json()),
-    fetch('./lane_effects.json?v=20260504t').then(r => r.json()),
-    fetch('./data/pool.json?v=20260504t').then(r => r.json()).catch(() => []),
-    fetch('./effects_override.json?v=20260504t').then(r => r.json()).catch(() => ({})),
+    fetch('./cards.json?v=20260505a').then(r => r.json()),
+    fetch('./combos.json?v=20260505a').then(r => r.json()),
+    fetch('./lane_effects.json?v=20260505a').then(r => r.json()),
+    fetch('./data/pool.json?v=20260505a').then(r => r.json()).catch(() => []),
+    fetch('./effects_override.json?v=20260505a').then(r => r.json()).catch(() => ({})),
   ]);
   // pool 全カード ← effects_override で effect/effectText を上書き ← cards.json で完全 override
   const cardsByName = new Map();
@@ -1585,6 +1585,38 @@ function placeAICard(handIdx, lane) {
   }, 10);
 }
 
+// ===== PCB プレイ履歴 (localStorage 蓄積、 本体側で Firebase 同期、 admin で表示) =====
+const PCB_STATS_KEY = 'prism-pcb-stats';
+const PCB_HISTORY_KEY = 'prism-pcb-history';
+const PCB_HISTORY_MAX = 50;
+function _logPcbMatch(result, difficulty, isBO3, scoreMe, scoreOpp) {
+  // result: 'win' | 'loss' | 'draw' | 'pause' (PvE 中断は記録しない)
+  if (result === 'pause') return;
+  try {
+    const stats = JSON.parse(localStorage.getItem(PCB_STATS_KEY) || '{}');
+    stats.totalMatches = (stats.totalMatches || 0) + 1;
+    stats.wins = (stats.wins || 0) + (result === 'win' ? 1 : 0);
+    stats.losses = (stats.losses || 0) + (result === 'loss' ? 1 : 0);
+    stats.draws = (stats.draws || 0) + (result === 'draw' ? 1 : 0);
+    stats.byDifficulty = stats.byDifficulty || {};
+    stats.byDifficulty[difficulty] = stats.byDifficulty[difficulty] || { matches: 0, wins: 0, losses: 0, draws: 0 };
+    stats.byDifficulty[difficulty].matches += 1;
+    stats.byDifficulty[difficulty][result === 'win' ? 'wins' : (result === 'loss' ? 'losses' : 'draws')] += 1;
+    if (isBO3) stats.bo3Matches = (stats.bo3Matches || 0) + 1;
+    stats.lastPlayedAt = Date.now();
+    localStorage.setItem(PCB_STATS_KEY, JSON.stringify(stats));
+    // 直近 50 試合の履歴
+    const history = JSON.parse(localStorage.getItem(PCB_HISTORY_KEY) || '[]');
+    history.unshift({
+      ts: Date.now(), result, difficulty, isBO3,
+      scoreMe, scoreOpp,
+      firstMover: state.firstMover,
+    });
+    if (history.length > PCB_HISTORY_MAX) history.length = PCB_HISTORY_MAX;
+    localStorage.setItem(PCB_HISTORY_KEY, JSON.stringify(history));
+  } catch (e) { /* localStorage 失敗時は silent */ }
+}
+
 // ===== 試合終了 (BO3 series 累積 / 単発リザルト) =====
 function finishMatch() {
   state.ended = true;
@@ -1601,6 +1633,9 @@ function finishMatch() {
 
   // 試合結果の判定
   const matchResult = me > opp ? 'win' : (opp > me ? 'loss' : 'draw');
+
+  // PCB プレイ履歴 logging (localStorage、 本体起動時に Firebase 同期)
+  _logPcbMatch(matchResult, state.difficulty, state.series.isBO3, me, opp);
 
   // BO3 累積
   if (state.series.isBO3) {
