@@ -141,11 +141,11 @@ function updateMuteUI() {
 // 優先順位: cards.json (手書き完全override) > effects_override.json (effect+effectText のみ) > pool.json (default)
 async function loadMasters() {
   const [c, k, l, p, eo] = await Promise.all([
-    fetch('./cards.json?v=20260505a').then(r => r.json()),
-    fetch('./combos.json?v=20260505a').then(r => r.json()),
-    fetch('./lane_effects.json?v=20260505a').then(r => r.json()),
-    fetch('./data/pool.json?v=20260505a').then(r => r.json()).catch(() => []),
-    fetch('./effects_override.json?v=20260505a').then(r => r.json()).catch(() => ({})),
+    fetch('./cards.json?v=1.4.2g').then(r => r.json()),
+    fetch('./combos.json?v=1.4.2g').then(r => r.json()),
+    fetch('./lane_effects.json?v=1.4.2g').then(r => r.json()),
+    fetch('./data/pool.json?v=1.4.2g').then(r => r.json()).catch(() => []),
+    fetch('./effects_override.json?v=1.4.2g').then(r => r.json()).catch(() => ({})),
   ]);
   // pool 全カード ← effects_override で effect/effectText を上書き ← cards.json で完全 override
   const cardsByName = new Map();
@@ -1758,13 +1758,224 @@ function reopenResult() {
   _setBodyModalOpen();
 }
 
-// C-4: PvE 中断機能 (試合中「⏸」 ボタン → 確認 → home へ、 戦績無し)
+// C-4: PvE 中断 → 復帰 機能 (野沢さん指示 2026-05-05 「中断した後の復帰は?」)
+const PCB_PAUSED_KEY = 'prism-pcb-paused-match';
+
+// _appliedTo は循環参照 (target が card refs) なので id-based に変換して serialize 可能化
+function _serializeBoardState() {
+  const idMap = new Map();  // card id → card 全フィールド
+  const collect = (c) => idMap.set(c.id, { ...c, _appliedTo: undefined });
+  ['me', 'opp'].forEach(s => state.board[s].flat().forEach(collect));
+  state.hand.forEach(collect);
+  state.oppHand.forEach(collect);
+  state.deck.forEach(collect);
+  state.oppDeck.forEach(collect);
+  // _appliedTo 関係のみ id ペアで保存
+  const appliedRels = [];
+  ['me', 'opp'].forEach(s => state.board[s].flat().forEach(c => {
+    if (c._appliedTo) c._appliedTo.forEach(({ target, delta }) => {
+      if (target && target.id) appliedRels.push({ from: c.id, to: target.id, delta });
+    });
+  }));
+  // _sideEffects も target を id 化
+  const sideEffectsByCard = {};
+  ['me', 'opp'].forEach(s => state.board[s].flat().forEach(c => {
+    if (c._sideEffects && c._sideEffects.length > 0) {
+      sideEffectsByCard[c.id] = c._sideEffects.map(se => {
+        const out = { type: se.type, delta: se.delta };
+        if (se.target && se.target.id) out.targetId = se.target.id;
+        if (se.handCard && se.handCard.id) out.handCardId = se.handCard.id;
+        if (se.tokenId) out.tokenId = se.tokenId;
+        if ('prevSilenced' in se) out.prevSilenced = se.prevSilenced;
+        if ('lane' in se) out.lane = se.lane;
+        return out;
+      });
+    }
+  }));
+  return {
+    cards: Array.from(idMap.entries()),
+    boardLayout: {
+      me: state.board.me.map(lane => lane.map(c => c.id)),
+      opp: state.board.opp.map(lane => lane.map(c => c.id)),
+    },
+    handIds: { me: state.hand.map(c => c.id), opp: state.oppHand.map(c => c.id) },
+    deckIds: { me: state.deck.map(c => c.id), opp: state.oppDeck.map(c => c.id) },
+    appliedRels,
+    sideEffectsByCard,
+    turn: state.turn,
+    cost: state.cost,
+    costUsed: state.costUsed,
+    scoreMe: state.scoreMe,
+    scoreOpp: state.scoreOpp,
+    selectedCardIdx: state.selectedCardIdx,
+    thisTurnPlacements: state.thisTurnPlacements,
+    mulliganAvailable: state.mulliganAvailable,
+    thisTurnAiDone: state.thisTurnAiDone,
+    laneEffects: state.laneEffects,
+    difficulty: state.difficulty,
+    firstMover: state.firstMover,
+    series: state.series,
+  };
+}
+
+function _deserializeBoardState(snap) {
+  if (!snap || !snap.cards) return false;
+  const idMap = new Map(snap.cards);
+  const lookup = (id) => idMap.get(id);
+  state.board = {
+    me: snap.boardLayout.me.map(lane => lane.map(lookup).filter(Boolean)),
+    opp: snap.boardLayout.opp.map(lane => lane.map(lookup).filter(Boolean)),
+  };
+  state.hand = snap.handIds.me.map(lookup).filter(Boolean);
+  state.oppHand = snap.handIds.opp.map(lookup).filter(Boolean);
+  state.deck = snap.deckIds.me.map(lookup).filter(Boolean);
+  state.oppDeck = snap.deckIds.opp.map(lookup).filter(Boolean);
+  ['me', 'opp'].forEach(s => state.board[s].flat().forEach(c => { c._appliedTo = []; }));
+  for (const rel of snap.appliedRels) {
+    const fromCard = lookup(rel.from);
+    const toCard = lookup(rel.to);
+    if (fromCard && toCard) {
+      fromCard._appliedTo = fromCard._appliedTo || [];
+      fromCard._appliedTo.push({ target: toCard, delta: rel.delta });
+    }
+  }
+  for (const cardId in snap.sideEffectsByCard) {
+    const card = lookup(cardId);
+    if (!card) continue;
+    card._sideEffects = snap.sideEffectsByCard[cardId].map(se => {
+      const out = { type: se.type, delta: se.delta };
+      if (se.targetId) out.target = lookup(se.targetId);
+      if (se.handCardId) out.handCard = lookup(se.handCardId);
+      if ('tokenId' in se) out.tokenId = se.tokenId;
+      if ('prevSilenced' in se) out.prevSilenced = se.prevSilenced;
+      if ('lane' in se) out.lane = se.lane;
+      return out;
+    });
+  }
+  state.turn = snap.turn;
+  state.cost = snap.cost;
+  state.costUsed = snap.costUsed;
+  state.scoreMe = snap.scoreMe;
+  state.scoreOpp = snap.scoreOpp;
+  state.selectedCardIdx = snap.selectedCardIdx;
+  state.thisTurnPlacements = snap.thisTurnPlacements || [];
+  state.mulliganAvailable = snap.mulliganAvailable;
+  state.thisTurnAiDone = snap.thisTurnAiDone;
+  state.laneEffects = snap.laneEffects;
+  state.difficulty = snap.difficulty;
+  state.firstMover = snap.firstMover;
+  state.series = snap.series;
+  state.ended = false;
+  state.busy = false;
+  return true;
+}
+
 function pauseMatch() {
   if (state.busy || state.ended) return;
-  if (!confirm('試合を中断してホームへ戻りますか? (戦績は残りません)')) return;
+  if (!confirm('試合を中断してホームへ戻りますか? (後で続きから再開できます)')) return;
+  try {
+    const snap = _serializeBoardState();
+    snap.savedAt = Date.now();
+    localStorage.setItem(PCB_PAUSED_KEY, JSON.stringify(snap));
+  } catch (e) {
+    console.warn('[pcb] pause save failed', e);
+    if (!confirm('保存に失敗しました。 中断データなしで戻りますか?')) return;
+  }
   state.ended = true;
   state.busy = false;
   backToCardgameHome();
+  _refreshHomeResumeButton();
+}
+
+function _hasPausedMatch() {
+  try {
+    const raw = localStorage.getItem(PCB_PAUSED_KEY);
+    if (!raw) return false;
+    const snap = JSON.parse(raw);
+    if (Date.now() - (snap.savedAt || 0) > 24 * 60 * 60 * 1000) {
+      localStorage.removeItem(PCB_PAUSED_KEY);
+      return false;
+    }
+    return true;
+  } catch (e) { return false; }
+}
+
+function _getPausedMatchInfo() {
+  try {
+    const snap = JSON.parse(localStorage.getItem(PCB_PAUSED_KEY) || 'null');
+    if (!snap) return null;
+    return {
+      turn: snap.turn, maxTurn: 6,
+      difficulty: snap.difficulty,
+      isBO3: snap.series && snap.series.isBO3,
+      matchNo: snap.series && snap.series.matchNo,
+      savedAt: snap.savedAt,
+    };
+  } catch (e) { return null; }
+}
+
+async function resumePausedMatch() {
+  let snap;
+  try {
+    snap = JSON.parse(localStorage.getItem(PCB_PAUSED_KEY) || 'null');
+  } catch (e) { return; }
+  if (!snap) return;
+  if (!state.allCards || state.allCards.length === 0) await loadMasters();
+  if (!_deserializeBoardState(snap)) {
+    setMessage('中断データの復元に失敗しました', 'alert');
+    return;
+  }
+  localStorage.removeItem(PCB_PAUSED_KEY);
+  $('#home-screen').classList.remove('active');
+  $('#match-screen').classList.add('active');
+  $('#result-modal').hidden = true;
+  $('#result-peek-btn').hidden = true;
+  state.maxTurn = 6;
+  updateSeriesHud();
+  renderAll();
+  setMessage(`T${state.turn} — 中断から復帰`);
+  _refreshHomeResumeButton();
+}
+
+function _refreshHomeResumeButton() {
+  const homeScreen = $('#home-screen');
+  if (!homeScreen) return;
+  let resumeRow = document.getElementById('cg-resume-row');
+  if (!_hasPausedMatch()) {
+    if (resumeRow) resumeRow.remove();
+    return;
+  }
+  const info = _getPausedMatchInfo();
+  if (!info) return;
+  const diffMap = { easy: '🌱 Easy', normal: '⚔️ Normal', hard: '🔥 Hard', master: '👑 Master' };
+  const sub = `${diffMap[info.difficulty] || '?'} / T${info.turn}/${info.maxTurn}${info.isBO3 ? ` / BO3 第${info.matchNo}` : ''}`;
+  if (!resumeRow) {
+    resumeRow = document.createElement('div');
+    resumeRow.id = 'cg-resume-row';
+    resumeRow.className = 'cg-resume-row';
+    const modesEl = homeScreen.querySelector('.cg-modes');
+    if (modesEl) homeScreen.insertBefore(resumeRow, modesEl);
+    else homeScreen.appendChild(resumeRow);
+  }
+  const dt = new Date(info.savedAt);
+  const tstr = `${dt.getMonth()+1}/${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
+  resumeRow.innerHTML = `
+    <button type="button" class="cg-resume-btn" id="btn-resume-paused">
+      <span class="cg-resume-icon">▶</span>
+      <span class="cg-resume-text">
+        <span class="cg-resume-title">中断中の試合 を再開</span>
+        <span class="cg-resume-sub">${sub}  <small>(${tstr} 保存)</small></span>
+      </span>
+      <span class="cg-resume-arrow">→</span>
+    </button>
+    <button type="button" class="cg-resume-discard" id="btn-resume-discard" title="中断データを破棄">✕</button>
+  `;
+  document.getElementById('btn-resume-paused').addEventListener('click', resumePausedMatch);
+  document.getElementById('btn-resume-discard').addEventListener('click', () => {
+    if (!confirm('中断データを破棄しますか? (再開できなくなります)')) return;
+    localStorage.removeItem(PCB_PAUSED_KEY);
+    _refreshHomeResumeButton();
+  });
 }
 
 // ===== P-5: デッキ編集 UI (3 スロット + フィルター強化) =====
@@ -2154,6 +2365,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   _initVisibilityHandler();
   _initLaneEffectPopover();
   await loadMasters();
+  _refreshHomeResumeButton();  // 中断中の試合があれば「再開」 ボタンを home に表示
   // BO3 toggle (localStorage 永続化)
   const bo3Toggle = document.getElementById('bo3-toggle');
   if (bo3Toggle) {

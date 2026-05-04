@@ -1190,8 +1190,8 @@ def _read_version_at(ref):
         return None
 
 def check_dev_version_suffix():
-    """ルール7-23 (BLOCKER 2026-05-04): dev branch では version は X.Y.Z または {X.Y.Z}{suffix(a-z)} 形式必須。
-    主バージョン (X.Y.Z) bump は main マージ時のみ、 dev では suffix a/b/c で進行。
+    """ルール7-23 (BLOCKER 2026-05-04): dev branch では version は X.Y.Z または {X.Y.Z}{suffix(a-z+)} 形式必須。
+    主バージョン (X.Y.Z) bump は main マージ時のみ、 dev では suffix a/b/c... で進行 (a→z→aa→ab→...)。
     詳細: CLAUDE.md feedback_prismaera_version_suffix.md
     """
     if _current_branch() != "dev":
@@ -1211,16 +1211,118 @@ def check_dev_version_suffix():
         ok = True
     elif cur_ver.startswith(main_ver):
         suffix = cur_ver[len(main_ver):]
-        if re.fullmatch(r"[a-z]{1,3}", suffix):
+        if re.fullmatch(r"[a-z]+", suffix):
             ok = True
     if not ok:
         violations.append(
             f"[ルール7-23 dev version 不正 BLOCKER] dev branch の version='{cur_ver}' は不正。\n"
-            f"      origin/main='{main_ver}' と同じ、 または '{main_ver}a' / '{main_ver}b' ... の suffix 形式 必須。\n"
+            f"      origin/main='{main_ver}' と同じ、 または '{main_ver}a' / '{main_ver}b' ... '{main_ver}z' / '{main_ver}aa' / '{main_ver}ab' ... の suffix 形式 必須。\n"
             f"      → 主バージョン (X.Y.Z) bump は main マージ時のみ、 dev では手動で suffix 進行。\n"
             f"      → 詳細: CLAUDE.md feedback_prismaera_version_suffix.md"
         )
     return 1
+
+
+def _increment_suffix(s):
+    """Excel column 風 文字列 increment: '' → 'a', 'a' → 'b', ..., 'z' → 'aa', 'aa' → 'ab', ..., 'zz' → 'aaa'"""
+    if not s:
+        return "a"
+    chars = list(s)
+    i = len(chars) - 1
+    while i >= 0:
+        if chars[i] < "z":
+            chars[i] = chr(ord(chars[i]) + 1)
+            return "".join(chars)
+        chars[i] = "a"
+        i -= 1
+    return "a" + "".join(chars)
+
+
+def check_dev_suffix_progression():
+    """ルール7-25 (BLOCKER 2026-05-05 野沢さん指示「同様のミスが二度と起こらないように」):
+    dev branch で commit する時、 suffix は前 commit から 1段階増分 必須 (a→b、 z→aa、 zz→aaa)。
+    X.Y.Z 跨ぎ (main merge 直後) は suffix 'a' で開始 必須。
+    suffix skip (a→c)、 後退 (b→a)、 同一 (a→a) は全て BLOCKER。
+    """
+    if _current_branch() != "dev":
+        return 0
+    ver_path = ROOT / "version.json"
+    if not ver_path.exists():
+        return 0
+    try:
+        cur_ver = json.load(ver_path.open(encoding="utf-8"))["version"]
+    except Exception:
+        return 0
+    parent_ver = _read_version_at("HEAD")  # 親 commit (今 commit が積まれる前)
+    if parent_ver is None or parent_ver == cur_ver:
+        # 初回 commit or 同じ (= bump し忘れ)、 同じなら別ルール (7-23) で検出
+        return 0
+    m_cur = re.match(r"^(\d+\.\d+\.\d+)([a-z]*)$", cur_ver)
+    m_par = re.match(r"^(\d+\.\d+\.\d+)([a-z]*)$", parent_ver)
+    if not m_cur or not m_par:
+        return 0
+    cur_base, cur_suffix = m_cur.groups()
+    par_base, par_suffix = m_par.groups()
+    if cur_base != par_base:
+        # X.Y.Z 跨ぎ → main merge 直後、 suffix='a' で開始
+        if cur_suffix != "a":
+            violations.append(
+                f"[ルール7-25 dev suffix リセット 不正 BLOCKER] X.Y.Z bump 後 ({parent_ver} → {cur_ver}) の dev suffix は 'a' で開始必須。\n"
+                f"      → 期待: {cur_base}a / 実際: {cur_ver}\n"
+                f"      → main merge 直後の dev は a から再開する仕様 (野沢さん指示 2026-05-05)"
+            )
+            return 1
+        return 0
+    expected = _increment_suffix(par_suffix or "")
+    if cur_suffix != expected:
+        violations.append(
+            f"[ルール7-25 dev suffix 不正増分 BLOCKER] {parent_ver} → {cur_ver} は不正。\n"
+            f"      → 期待: {par_base}{expected} (前 suffix '{par_suffix}' を 1段階 increment)\n"
+            f"      → 仕様: a→b→...→z→aa→ab→...→az→ba→...→zz→aaa (skip / 後退 / 同一 全て NG)\n"
+            f"      → bump_version.py dev-suffix で自動進行可能 (野沢さん指示 2026-05-05)"
+        )
+        return 1
+    return 0
+
+
+def check_cache_buster_format():
+    """ルール7-26 (BLOCKER 2026-05-05 野沢さん指示): cache buster (?v=) は version.json の version と完全同期 必須。
+    日付ベース (?v=20260505a 等) や 不一致 cache buster は 旧仕様残存・同期漏れ で BLOCKER。
+    """
+    ver_path = ROOT / "version.json"
+    if not ver_path.exists():
+        return 0
+    try:
+        ver = json.load(ver_path.open(encoding="utf-8"))["version"]
+    except Exception:
+        return 0
+    targets = [
+        ROOT / "index.html",
+        ROOT / "cardgame" / "index.html",
+        ROOT / "cardgame" / "script.js",
+        ROOT / "sw.js",
+    ]
+    found_violations = 0
+    for path in targets:
+        if not path.exists():
+            continue
+        text = path.read_text(encoding="utf-8")
+        # ?v= で始まる cache buster
+        for m in re.finditer(r"\?v=([\w.]+)", text):
+            cb = m.group(1)
+            if cb != ver:
+                # 例外: manifest.json の cache buster は version + suffix (例: 1.4.2g1) も許容
+                if path.name == "index.html" and re.match(r"^" + re.escape(ver) + r"\d+$", cb):
+                    continue
+                violations.append(
+                    f"[ルール7-26 cache buster 不一致 BLOCKER] {path.relative_to(ROOT)} に '?v={cb}' (version='{ver}' と不一致)\n"
+                    f"      → 全 cache buster は version.json の version と完全同期 必須\n"
+                    f"      → 旧仕様 (?v=YYYYMMDDx) 残存検出 or bump_version.py 同期漏れ\n"
+                    f"      → bump_version.py dev-suffix で全ファイル一括統一 可能"
+                )
+                found_violations += 1
+                break  # 同ファイル内の他箇所も同じ問題なので 1 件だけ記録
+    return found_violations
 
 def check_main_version_bumped():
     """ルール7-24 (BLOCKER 2026-05-04): main branch で commit する時、 version は HEAD (= 親 commit) より bump 必須。
@@ -1252,6 +1354,10 @@ n7_23 = check_dev_version_suffix()
 print(f"  ルール7-23 (dev version suffix bump): {n7_23}件 検査 [BLOCKER]")
 n7_24 = check_main_version_bumped()
 print(f"  ルール7-24 (main version bump 必須): {n7_24}件 検査 [BLOCKER]")
+n7_25 = check_dev_suffix_progression()
+print(f"  ルール7-25 (dev suffix 1段階 increment): {n7_25}件 検査 [BLOCKER]")
+n7_26 = check_cache_buster_format()
+print(f"  ルール7-26 (cache buster = version 完全同期): {n7_26}件 検査 [BLOCKER]")
 
 
 def check_admin_tier_max():

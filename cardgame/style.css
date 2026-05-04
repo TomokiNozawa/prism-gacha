@@ -865,6 +865,51 @@ body.cg-modal-open .cg-deck-builder-grid {
   border-bottom: 1px solid var(--border);
   position: sticky; top: 56px; z-index: 40;
 }
+/* C-4 復帰: ホーム画面の「中断中の試合 を再開」 行 (野沢さん指示 2026-05-05) */
+.cg-resume-row {
+  display: flex;
+  gap: 8px;
+  margin: 0 14px 14px;
+  align-items: stretch;
+}
+.cg-resume-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, rgba(122, 219, 122, 0.18), rgba(95, 223, 255, 0.12));
+  border: 1px solid rgba(122, 219, 122, 0.55);
+  border-radius: 12px;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: background 0.15s, border-color 0.15s;
+}
+.cg-resume-btn:hover {
+  background: linear-gradient(135deg, rgba(122, 219, 122, 0.28), rgba(95, 223, 255, 0.2));
+  border-color: var(--aurora-2);
+}
+.cg-resume-icon { font-size: 22px; color: #7adb7a; flex-shrink: 0; }
+.cg-resume-text { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.cg-resume-title { font-weight: 700; font-size: 14px; }
+.cg-resume-sub { font-size: 11px; color: var(--text-dim); }
+.cg-resume-sub small { opacity: 0.7; margin-left: 4px; }
+.cg-resume-arrow { color: var(--text-dim); font-size: 14px; flex-shrink: 0; }
+.cg-resume-discard {
+  background: rgba(255, 122, 122, 0.15);
+  border: 1px solid rgba(255, 122, 122, 0.4);
+  color: #ff9d9d;
+  border-radius: 10px;
+  padding: 0 14px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.cg-resume-discard:hover { background: rgba(255, 122, 122, 0.28); }
+
 /* C-4: 中断ボタン (HUD 内、 ⏸ アイコン) */
 .cg-hud-pause {
   background: rgba(255, 122, 122, 0.18);

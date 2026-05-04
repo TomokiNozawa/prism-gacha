@@ -5,7 +5,7 @@
 
 ## バージョニング
 
-現在のバージョン: **v1.4.2 (本番)** / dev は cache buster suffix (例: v1.4.2f) で進行
+現在のバージョン: **v1.4.2h**
 
 `v{Season}.{公開済み章数}.{patch}` — 詳細ルールは [`VERSIONING.md`](VERSIONING.md) を参照。
 

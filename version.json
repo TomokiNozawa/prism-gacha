@@ -1,5 +1,5 @@
 {
-  "version": "1.4.2f",
+  "version": "1.4.2g",
   "releasedAt": "2026-05-03",
   "pendingChangelog": [
     "🎴 カードゲーム β を公開しました (アカウント登録者限定、 ホーム右カラムに入口)",
@@ -12,7 +12,8 @@
     "🎰 v1.4.2c: ガチャリザルト UI改善 (スマホで上下重複していた「もう一度10連/閉じる」 を下部 sticky 1セットに統一、 中身スクロール対応)",
     "🔋 v1.4.2d: 省電力モード強化 (野沢さん指摘 「全然省電力になっていません」)。 全 backdrop-filter (blur) OFF / 全 transition 0s化 / hover transform 抑制 / lightmode 自動連動 / BGM progress 500→1500ms 間引き / Battery API 残量低下時に自動 ON 提案",
     "🛠 v1.4.2e: 緊急バグ修正 + PCB UI改善 (野沢さん指摘 2026-05-04)。 ヘッダ ver 表示 「v1.4.2ds」 → 「v1.4.2e」 修正 (cache buster 二重連結廃止)。 PCB コスト計算バグ修正 (凸軽減カード配置時の グレー化判定誤り)。 PCB HUD 簡略化 (絵文字削除 / 試合スコア廃止 / 中央メッセージ短縮 / 先攻後攻は You-AI ラベル横アイコン)。 PCB カード効果文 見切れ修正 (手札カード縦伸長 + 4行表示)。 全体数字計算点検: dupe 二重カウント・コンボ過剰加算バグ修正、 undo で 新メカニクス side effect 完全 revert",
-    "📊 v1.4.2f: admin 画面 章更新対応 (TIER_MAX 14/25/28/22 + BGM_LABELS 第3-5章/カードゲーム/サハール/ニーヴル/ゼノニア/黒月/リオラ/銀霜 を追加)。 自動チェック ルール9 (admin TIER_MAX = pool count、 BLOCKER) + ルール10 (BGM_LABELS 全 BGM 登録、 WARNING) を check_repo_rules.py に追加。 admin に 🎴 PCB タブ追加 (アカウント作成者の試合数/勝率/BO3/最終プレイ集計、 cardgame の localStorage を本体ログイン時に Firebase 同期)"
+    "📊 v1.4.2f: admin 画面 章更新対応 (TIER_MAX 14/25/28/22 + BGM_LABELS 第3-5章/カードゲーム/サハール/ニーヴル/ゼノニア/黒月/リオラ/銀霜 を追加)。 自動チェック ルール9 (admin TIER_MAX = pool count、 BLOCKER) + ルール10 (BGM_LABELS 全 BGM 登録、 WARNING) を check_repo_rules.py に追加。 admin に 🎴 PCB タブ追加 (アカウント作成者の試合数/勝率/BO3/最終プレイ集計、 cardgame の localStorage を本体ログイン時に Firebase 同期)",
+    "🛠 v1.4.2g: cache buster 仕様 大改修 (野沢さん指示 2026-05-05 「同様のミスが二度と起こらないように」)。 cache buster を 日付ベース (?v=20260505a) → version.json と完全同期 (?v=1.4.2g) に統一。 dev suffix は a→z→aa→ab→...→zz→aaa の 無制限 increment (Excel column 風)、 main merge 時に a リセット。 bump_version.py に dev-suffix モード追加 (1コマンドで version + cache buster + SW_VERSION 一括更新)。 check_repo_rules.py ルール7-25 (suffix 1段階 increment 強制、 BLOCKER) + ルール7-26 (cache buster = version 完全同期、 BLOCKER) で機械的に強制。 PCB 中断 → 復帰機能 (state snapshot id-based serialize で localStorage 保存、 ホーム画面に「中断中の試合 を再開」 行 表示、 24時間で自動破棄)"
   ],
   "changelog": [
     {
