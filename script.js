@@ -9075,20 +9075,10 @@ async function checkPrismaeraVersion() {
     _prismaeraChangelogCache = changelog;
 
     // ヘッダーのバージョン表記を version.json で上書き
-    // dev 環境では cache buster 末尾の文字 (a/b/c...) を suffix として表示 (確認用)
+    // 【単一 source 統一 2026-05-04】 旧仕様 (cache buster suffix を末尾連結) は version.json の dev suffix と
+    // 二重化して 「v1.4.2ds」 のようなバグ表示の原因になるため廃止。 version.json の version をそのまま表示する。
     const verEl = document.getElementById('app-version');
-    if (verEl) {
-      let suffix = '';
-      const isDevHost = location.hostname.startsWith('dev.') || location.hostname.includes('localhost');
-      if (isDevHost) {
-        try {
-          // [a-z]+ で複数文字 suffix (z 到達後の aa, bb, cc... も対応)
-          const cb = (document.querySelector('link[rel=stylesheet]')?.href || '').match(/\?v=\d{8}([a-z]+)/);
-          if (cb) suffix = cb[1];
-        } catch (e) {}
-      }
-      verEl.textContent = `v${currentVer}${suffix}`;
-    }
+    if (verEl) verEl.textContent = `v${currentVer}`;
 
     let lastSeen = null;
     try { lastSeen = localStorage.getItem(PRISMAERA_VERSION_LS_KEY); } catch (e) {}

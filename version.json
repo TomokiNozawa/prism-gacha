@@ -1,5 +1,5 @@
 {
-  "version": "1.4.2d",
+  "version": "1.4.2e",
   "releasedAt": "2026-05-03",
   "pendingChangelog": [
     "🎴 カードゲーム β を公開しました (アカウント登録者限定、 ホーム右カラムに入口)",
@@ -10,7 +10,8 @@
     "🎴 PCB v1.4.2a: 凸後コスト UI反映 / 凸毎効果 段階表 / HUDラベル修正 / レーン効果 popover (スマホ) / リザルト後スクロールバグ修正 / PvE 中断機能 / Rコスト最低 1 保証",
     "🎴 PCB v1.4.2b: 90キャラ効果再設計 (派閥+lore+tier別)、 9 新メカニクス (凍結/沈黙/ステルス/即時/成長/コスト軽減/トークン召喚/連結/黄金化)、 状態 badge UI、 79 ストーリーコンボ拡充",
     "🎰 v1.4.2c: ガチャリザルト UI改善 (スマホで上下重複していた「もう一度10連/閉じる」 を下部 sticky 1セットに統一、 中身スクロール対応)",
-    "🔋 v1.4.2d: 省電力モード強化 (野沢さん指摘 「全然省電力になっていません」)。 全 backdrop-filter (blur) OFF / 全 transition 0s化 / hover transform 抑制 / lightmode 自動連動 / BGM progress 500→1500ms 間引き / Battery API 残量低下時に自動 ON 提案"
+    "🔋 v1.4.2d: 省電力モード強化 (野沢さん指摘 「全然省電力になっていません」)。 全 backdrop-filter (blur) OFF / 全 transition 0s化 / hover transform 抑制 / lightmode 自動連動 / BGM progress 500→1500ms 間引き / Battery API 残量低下時に自動 ON 提案",
+    "🛠 v1.4.2e: 緊急バグ修正 + PCB UI改善 (野沢さん指摘 2026-05-04)。 ヘッダ ver 表示 「v1.4.2ds」 → 「v1.4.2e」 修正 (cache buster 二重連結廃止)。 PCB コスト計算バグ修正 (凸軽減カード配置時の グレー化判定誤り)。 PCB HUD 簡略化 (絵文字削除 / 試合スコア廃止 / 中央メッセージ短縮 / 先攻後攻は You-AI ラベル横アイコン)。 PCB カード効果文 見切れ修正 (手札カード縦伸長 + 4行表示)。 全体数字計算点検: dupe 二重カウント・コンボ過剰加算バグ修正、 undo で 新メカニクス side effect 完全 revert"
   ],
   "changelog": [
     {

@@ -7,7 +7,7 @@
 <title>PCB | Prismaera Cards Battle</title>
 <link rel="icon" href="/images/icons/icon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
-<link rel="stylesheet" href="./style.css?v=20260504s">
+<link rel="stylesheet" href="./style.css?v=20260504t">
 </head>
 <body>
 
@@ -102,21 +102,15 @@
 <!-- 試合画面 -->
 <section id="match-screen" class="cg-screen">
 
-  <!-- 試合HUD (A-4: アイコンラベル + 勝敗は BO3 時のみ) -->
+  <!-- 試合HUD (野沢さん指示 2026-05-04: 絵文字削除 + 試合スコア削除 + ラベルは半角カナ) -->
   <div class="cg-hud">
     <div class="cg-hud-block" title="ターン進行 (現/全6)">
-      <div class="cg-hud-label">⏳ ターン</div>
+      <div class="cg-hud-label">ﾀｰﾝ</div>
       <div class="cg-hud-value"><span id="hud-turn">1</span> / 6</div>
     </div>
     <div class="cg-hud-block" title="このターン使えるコスト (残/合計)">
-      <div class="cg-hud-label">⚡ コスト</div>
+      <div class="cg-hud-label">ｺｽﾄ</div>
       <div class="cg-hud-value"><span id="hud-cost">1</span></div>
-    </div>
-    <div class="cg-hud-block" id="hud-score-block" style="display:none" title="BO3 シリーズ累積 (あなた:AI)">
-      <div class="cg-hud-label">🏆 試合</div>
-      <div class="cg-hud-value cg-score">
-        <span class="cg-score-me">0</span>:<span class="cg-score-ai">0</span>
-      </div>
     </div>
     <div class="cg-hud-block" id="hud-pause-block" title="試合を中断">
       <button class="cg-hud-pause" id="btn-pause" aria-label="中断" title="試合を中断">⏸</button>
@@ -128,12 +122,12 @@
       <button class="cg-end-turn" id="btn-end-turn">ターン終了 →</button>
     </div>
   </div>
-  <!-- BO3 series 表示 (BO3 時のみ) -->
-  <div id="series-info" class="cg-series-info" style="display:none"></div>
+  <!-- BO3 series 表示 (簡略化済) -->
+  <div id="series-info" class="cg-series-info"></div>
 
-  <!-- 相手の場 -->
+  <!-- 相手の場 (側ラベルに 先攻/後攻 アイコン、 野沢さん指示 2026-05-04) -->
   <div class="cg-board cg-board-opp">
-    <div class="cg-side-label">AI</div>
+    <div class="cg-side-label"><span class="cg-mover-icon" id="mover-icon-opp"></span>AI</div>
     <div class="cg-lanes" id="lanes-opp">
       <div class="cg-lane" data-lane="0">
         <div class="cg-lane-header"><span class="cg-lane-name">L1</span><span class="cg-lane-power" id="opp-power-0">0</span></div>
@@ -155,7 +149,7 @@
 
   <!-- 自分の場 -->
   <div class="cg-board cg-board-me">
-    <div class="cg-side-label">You</div>
+    <div class="cg-side-label"><span class="cg-mover-icon" id="mover-icon-me"></span>You</div>
     <div class="cg-lanes" id="lanes-me">
       <div class="cg-lane" data-lane="0">
         <div class="cg-lane-header"><span class="cg-lane-name">L1</span><span class="cg-lane-power" id="me-power-0">0</span></div>
@@ -413,6 +407,6 @@
   </div>
 </div>
 
-<script src="./script.js?v=20260504s"></script>
+<script src="./script.js?v=20260504t"></script>
 </body>
 </html>

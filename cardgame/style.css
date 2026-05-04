@@ -885,10 +885,17 @@ body.cg-modal-open .cg-deck-builder-grid {
   min-width: 56px;
 }
 .cg-hud-block:last-of-type { border-right: none; }
-.cg-hud-label { font-size: 10px; color: var(--text-dim); }
+.cg-hud-label { font-size: 10px; color: var(--text-dim); letter-spacing: 0.05em; }
 .cg-hud-value { font-size: 16px; font-weight: 700; }
-.cg-score-me { color: var(--me); }
-.cg-score-ai { color: var(--opp); }
+/* 野沢さん指示 2026-05-04: 試合スコア (0:0) 削除済 — series-info 行に統合 */
+/* You/AI 側の 先攻/後攻 アイコン */
+.cg-mover-icon {
+  display: inline-block;
+  font-size: 12px;
+  margin-right: 4px;
+  vertical-align: middle;
+  opacity: 0.85;
+}
 .cg-hud-actions {
   margin-left: auto;
   display: flex;
@@ -1312,17 +1319,20 @@ body.cg-modal-open .cg-deck-builder-grid {
   opacity: 0.7;
 }
 
-/* ===== 中央メッセージ ===== */
+/* ===== 中央メッセージ (野沢さん指示 2026-05-04 短文化、 折返さない) ===== */
 .cg-message {
   text-align: center;
-  padding: 6px 12px;
+  padding: 4px 12px;
   font-size: 12px;
   color: var(--text-dim);
   background: rgba(20, 22, 51, 0.4);
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
-  margin: 6px 0;
+  margin: 4px 0;
   min-height: 18px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .cg-message.alert { color: var(--gold); font-weight: 600; }
 .cg-message.success { color: var(--aurora-2); font-weight: 600; }
@@ -1361,17 +1371,23 @@ body.cg-modal-open .cg-deck-builder-grid {
 }
 .cg-hand .cg-card.unaffordable { opacity: .4; cursor: not-allowed; filter: grayscale(0.5); }
 .cg-hand .cg-card.unaffordable.selected { transform: none; box-shadow: none; }
+/* 野沢さん指示 2026-05-04: 効果が見切れる → 手札カードの効果欄を 2-3行 表示可能に */
 .cg-hand .cg-card-effect {
-  font-size: 8px;
+  font-size: 8.5px;
   color: #fff;
-  padding: 2px 4px;
+  padding: 3px 4px;
   text-align: center;
-  background: rgba(124, 93, 255, 0.85);
-  line-height: 1.2;
-  height: 14px;
-  display: flex; align-items: center; justify-content: center;
+  background: rgba(124, 93, 255, 0.92);
+  line-height: 1.25;
+  min-height: 28px;
+  max-height: 36px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
   font-weight: 600;
   flex-shrink: 0;
+  word-break: break-all;
 }
 /* 場のカードに置かれたものにも effect 表示 (場合 = small だが見せる) */
 .cg-card .cg-card-effect {
@@ -1808,9 +1824,16 @@ body.cg-modal-open .cg-deck-builder-grid {
   .cg-card-stats { font-size: 10px; height: 22px; }
   .cg-card .cg-card-effect { font-size: 7px; height: 13px; }
   .cg-card-faction { font-size: 7px; padding: 1px 4px 1px 5px; max-width: 65%; }
-  .cg-hand .cg-card { width: 80px; height: 120px; }
-  .cg-hand .cg-card .cg-card-name { font-size: 9px; bottom: 36px; }
-  .cg-hand .cg-card-effect { font-size: 8px; }
+  /* 野沢さん指示 2026-05-04: 手札を縦に伸ばして 効果文 3行 表示可能に */
+  .cg-hand .cg-card { width: 84px; height: 152px; }
+  .cg-hand .cg-card .cg-card-name { font-size: 9px; bottom: 64px; }
+  .cg-hand .cg-card-effect {
+    font-size: 8px;
+    min-height: 36px;
+    max-height: 44px;
+    line-height: 1.22;
+    -webkit-line-clamp: 4;
+  }
   /* レーン縦広がり防止: nowrap + 横スクロール (野沢さん指示 2026-05-04) */
   .cg-lane {
     min-height: 116px;

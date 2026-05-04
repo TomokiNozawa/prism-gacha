@@ -141,11 +141,11 @@ function updateMuteUI() {
 // 優先順位: cards.json (手書き完全override) > effects_override.json (effect+effectText のみ) > pool.json (default)
 async function loadMasters() {
   const [c, k, l, p, eo] = await Promise.all([
-    fetch('./cards.json?v=20260504s').then(r => r.json()),
-    fetch('./combos.json?v=20260504s').then(r => r.json()),
-    fetch('./lane_effects.json?v=20260504s').then(r => r.json()),
-    fetch('./data/pool.json?v=20260504s').then(r => r.json()).catch(() => []),
-    fetch('./effects_override.json?v=20260504s').then(r => r.json()).catch(() => ({})),
+    fetch('./cards.json?v=20260504t').then(r => r.json()),
+    fetch('./combos.json?v=20260504t').then(r => r.json()),
+    fetch('./lane_effects.json?v=20260504t').then(r => r.json()),
+    fetch('./data/pool.json?v=20260504t').then(r => r.json()).catch(() => []),
+    fetch('./effects_override.json?v=20260504t').then(r => r.json()).catch(() => ({})),
   ]);
   // pool 全カード ← effects_override で effect/effectText を上書き ← cards.json で完全 override
   const cardsByName = new Map();
@@ -378,9 +378,8 @@ function startMatch(difficulty, isBO3) {
   updateSeriesHud();
 
   drawTurnStart();
-  const moverLabel = state.firstMover === 'me' ? '先行' : '後攻';
-  const seriesLabel = state.series.isBO3 ? `BO3モード 第${state.series.matchNo}試合 (${moverLabel}) ` : '';
-  setMessage(`${seriesLabel}ターン 1 — レーン効果決定。 マリガン (引き直し1回) 可。`);
+  // 野沢さん指示 2026-05-04: 中央メッセージ短縮 (BO3詳細 / 先攻表示は You/AI 横アイコンに移動済)
+  setMessage(`ターン 1 — マリガン可`);
 }
 
 function _initMatchState() {
@@ -394,6 +393,7 @@ function _initMatchState() {
   state.thisTurnPlacements = [];
   state.mulliganAvailable = true;
   state.thisTurnAiDone = false;
+  state._comboBonusGlobal = 0;  // バグ修正 2026-05-04: 試合間でリセット
 
   // P-5: ユーザーデッキ (localStorage) + AI デッキ (ランダム tier バランス)
   const myDeckCards = getCurrentDeck().map(c => ({ ...c }));
@@ -441,12 +441,12 @@ async function drawTurnStart() {
   if (state.firstMover === 'opp' && !state.ended) {
     state.busy = true;
     renderAll();
-    setMessage(`ターン ${state.turn} (後攻) — AI が先に配置中...`);
+    setMessage(`T${state.turn} — AI 配置中…`);
     await sleep(400);
     await aiTurn();
     state.thisTurnAiDone = true;
     state.busy = false;
-    setMessage(`ターン ${state.turn} (後攻) — あなたの番です`);
+    setMessage(`T${state.turn} — あなたの番`);
   }
   renderAll();
 }
@@ -477,29 +477,49 @@ function factionSynergyFor(card, side, lane) {
   // 同レーンに同派閥 ≥ 2 → そのレーンの同派閥カード全員に +1 (1枚ごとに +1 追加)
   return same >= 2 ? same : 0;
 }
-function comboBonusFor(card, side, lane) {
+// 旧 comboBonusFor (per-card 加算): combo の power が members 数 × power になり過剰加算 → 廃止 (2026-05-04 全体点検)
+// 新仕様: comboLaneBonus(side, lane) でレーン単位 1 回だけ加算 (target='self_lane' or 'all_lanes')
+function comboBonusFor(card, side, lane) { return 0; /* 後方互換のため空関数残し */ }
+
+// プリズマ等の comboBonus 加算 (board 上の自軍 全カードを集計、 silenced は除外)
+function getGlobalComboBonus(side) {
   let bonus = 0;
+  state.board[side].flat().forEach(c => {
+    if (c._silenced) return;
+    const eff = effectiveEffect(c);
+    if (eff && eff.comboBonus) bonus += eff.comboBonus;
+  });
+  return bonus;
+}
+
+function comboLaneBonus(side, lane) {
+  let bonus = 0;
+  const allBoardCards = [].concat(...state.board[side]);
+  const sameLaneCards = state.board[side][lane];
+  const hasInLane = (n) => sameLaneCards.some(c => c.name === n);
+  const hasOnBoard = (n) => allBoardCards.some(c => c.name === n);
+  const globalBonus = getGlobalComboBonus(side);  // プリズマ等の comboBonus 加算
   for (const combo of state.combos) {
-    if (!combo.chars.includes(card.name)) continue;
-    const allCardsAnyLane = [].concat(...state.board[side]);
-    const sameLaneCards = state.board[side][lane];
-    const has = (charName, cards) => cards.some(c => c.name === charName);
     let triggered = false;
-    if (combo.condition === 'same_lane') {
-      triggered = combo.chars.every(c => has(c, sameLaneCards));
-    } else if (combo.condition === 'any_lane') {
-      triggered = combo.chars.every(c => has(c, allCardsAnyLane));
+    if (combo.condition === 'same_lane') triggered = combo.chars.every(hasInLane);
+    else if (combo.condition === 'any_lane') triggered = combo.chars.every(hasOnBoard);
+    if (!triggered) continue;
+    const t = combo.effect.target;
+    // self_lane: 同レーンに揃った時のみ、 そのレーンに +power
+    // all_lanes: 任意レーンに揃った時、 全レーンに +power (3レーン × power)
+    if (t === 'self_lane' || t === 'all_lanes') {
+      bonus += combo.effect.power + globalBonus;
     }
-    if (triggered) bonus += combo.effect.power;
   }
   return bonus;
 }
 function getCardPower(card, side, lane) {
   // B-1.A: freeze 状態は power 0 で固定 (1ターン無効化)
   if ((card._frozenTurns || 0) > 0) return 0;
-  let p = card.basePower + dupeBonusOf(card);
-  // onPlay の固定 delta (相手カードからの -2 等) は _currentPower 経由 (累積)
-  if (card._currentPower != null) p = card._currentPower + dupeBonusOf(card);
+  // バグ修正 2026-05-04 (野沢さん指摘 全体数字計算点検): _currentPower は配置時に既に base+dupe を含むので、
+  // 再度 dupeBonusOf を加算すると dupe が 2 倍カウントされる (例: 配置直後 6 のはずが 7 と表示)。
+  // _currentPower がセット済 = 配置済カード = そのまま使用、 未セット = 手札 = base + dupe で初期化
+  let p = (card._currentPower != null) ? card._currentPower : (card.basePower + dupeBonusOf(card));
   // B-1.A: growth (累計、 自身のみに毎ターン +1)
   if (card._growthCount) p += card._growthCount;
   // B-1.A: immediate (配置ターンのみの 一時 buff、 endTurn でリセット)
@@ -522,7 +542,9 @@ function getCardPower(card, side, lane) {
   return p;
 }
 function getLanePower(side, lane) {
-  return state.board[side][lane].reduce((s, c) => s + getCardPower(c, side, lane), 0);
+  // 各カードの power 合計 + コンボボーナス (レーン単位 1回)
+  const cardSum = state.board[side][lane].reduce((s, c) => s + getCardPower(c, side, lane), 0);
+  return cardSum + comboLaneBonus(side, lane);
 }
 
 // ===== 描画 =====
@@ -530,11 +552,23 @@ function renderAll() {
   $('#hud-turn').textContent = state.turn;
   $('#hud-cost').textContent = (state.cost - state.costUsed) + ' / ' + state.cost;
   $('#hand-count').textContent = state.hand.length;
-  // A-4: BO3 時のみ「試合」 ブロック表示 (シングル時は finishMatch 直前まで 0:0 のまま動かないので非表示)
-  const scoreBlock = $('#hud-score-block');
-  if (scoreBlock) scoreBlock.style.display = state.series.isBO3 ? '' : 'none';
-  $('.cg-score-me').textContent = state.series.isBO3 ? state.series.wins.me : state.scoreMe;
-  $('.cg-score-ai').textContent = state.series.isBO3 ? state.series.wins.opp : state.scoreOpp;
+  // 野沢さん指示 2026-05-04: 試合スコア (0:0) を HUD から削除済 → series-info 行のみで表示
+  // 先攻/後攻 アイコンを You / AI ラベルに表示
+  const meIcon = $('#mover-icon-me');
+  const oppIcon = $('#mover-icon-opp');
+  if (meIcon && oppIcon) {
+    if (state.firstMover === 'me') {
+      meIcon.textContent = '⚔';
+      meIcon.title = '先攻';
+      oppIcon.textContent = '🛡';
+      oppIcon.title = '後攻';
+    } else {
+      meIcon.textContent = '🛡';
+      meIcon.title = '後攻';
+      oppIcon.textContent = '⚔';
+      oppIcon.title = '先攻';
+    }
+  }
   $('#btn-end-turn').disabled = state.busy || state.ended;
   $('#btn-undo').disabled = state.busy || state.ended || state.thisTurnPlacements.length === 0;
   // マリガンボタン: ターン1 で 配置前のみ有効
@@ -658,7 +692,9 @@ function renderHand() {
   state.hand.forEach((card, idx) => {
     const cardEl = makeCardElement(card, true);
     if (state.selectedCardIdx === idx) cardEl.classList.add('selected');
-    if (card.cost > state.cost - state.costUsed) cardEl.classList.add('unaffordable');
+    // バグ修正 2026-05-04: 元 cost ではなく 凸後 + 手札 cost_reduce 反映後で unaffordable 判定
+    const finalCost = Math.max(1, effectiveCost(card) - (card._costReduced || 0));
+    if (finalCost > state.cost - state.costUsed) cardEl.classList.add('unaffordable');
     cardEl.addEventListener('click', () => onHandCardClick(idx));
     handEl.appendChild(cardEl);
   });
@@ -1139,26 +1175,32 @@ function applyEffect(card, lane, side) {
       const cands = oppBoard[lane].filter(isOppTargetable);
       if (cands.length === 0) break;
       cands.sort((a, b) => getCardPower(b, oppSide, lane) - getCardPower(a, oppSide, lane));
-      cands[0]._frozenTurns = (cands[0]._frozenTurns || 0) + (eff.duration || 1);
-      // 自レーン +N (補助 buff)
+      const dur = eff.duration || 1;
+      cands[0]._frozenTurns = (cands[0]._frozenTurns || 0) + dur;
+      card._sideEffects = card._sideEffects || [];
+      card._sideEffects.push({ type: 'freeze', target: cands[0], delta: dur });
       if (eff.power) myBoard[lane].forEach(c => add(c, eff.power));
       break;
     }
     case 'freeze_opp_lane_all': {
-      // 相手 同レーン 全員を 1ターン freeze (氷帝グレイル)
+      const dur = eff.duration || 1;
       oppBoard[lane].filter(isOppTargetable).forEach(c => {
-        c._frozenTurns = (c._frozenTurns || 0) + (eff.duration || 1);
+        c._frozenTurns = (c._frozenTurns || 0) + dur;
+        card._sideEffects = card._sideEffects || [];
+        card._sideEffects.push({ type: 'freeze', target: c, delta: dur });
       });
       if (eff.power) myBoard[lane].forEach(c => add(c, eff.power));
       break;
     }
     case 'silence_opp_lane_top': {
-      // 相手 同レーン 最高 power カードの onPlay 効果を打ち消し (revert _appliedTo)
       const cands = oppBoard[lane].filter(isOppTargetable);
       if (cands.length === 0) break;
       cands.sort((a, b) => getCardPower(b, oppSide, lane) - getCardPower(a, oppSide, lane));
       const tgt = cands[0];
+      const prevSilenced = !!tgt._silenced;
       _silenceCard(tgt);
+      card._sideEffects = card._sideEffects || [];
+      card._sideEffects.push({ type: 'silence', target: tgt, prevSilenced });
       if (eff.power) myBoard[lane].forEach(c => add(c, eff.power));
       break;
     }
@@ -1183,22 +1225,25 @@ function applyEffect(card, lane, side) {
       break;
     }
     case 'cost_reduce_hand': {
-      // 自軍 手札 最高 cost のカードを cost -1 (1回限り、 配置で消費)
       const hand = side === 'me' ? state.hand : state.oppHand;
       if (hand.length === 0) break;
       const candidates = hand.filter(h => !h._costReduced);
       if (candidates.length === 0) break;
       candidates.sort((a, b) => b.cost - a.cost);
-      candidates[0]._costReduced = (candidates[0]._costReduced || 0) + 1;
+      const tgtHand = candidates[0];
+      tgtHand._costReduced = (tgtHand._costReduced || 0) + 1;
+      card._sideEffects = card._sideEffects || [];
+      card._sideEffects.push({ type: 'cost_reduce', handCard: tgtHand, delta: 1 });
       if (eff.power) myBoard[lane].forEach(c => add(c, eff.power));
       break;
     }
     case 'summon_token': {
-      // 自レーンにトークン追加 (派閥別 generic、 cost 0 / power 2)
-      if (myBoard[lane].length >= 4) break;  // 満員ならスキップ
+      if (myBoard[lane].length >= 4) break;
       const tok = _makeToken(card.faction);
       tok._currentPower = tok.basePower;
       myBoard[lane].push(tok);
+      card._sideEffects = card._sideEffects || [];
+      card._sideEffects.push({ type: 'token', tokenId: tok.id, lane });
       if (eff.power) myBoard[lane].forEach(c => { if (c !== tok) add(c, eff.power); });
       break;
     }
@@ -1211,12 +1256,13 @@ function applyEffect(card, lane, side) {
       break;
     }
     case 'golden_self_lane': {
-      // 自レーン 1体に「黄金化」 (退場まで +N 持続、 リオラエル 専用)
-      // 自身以外で最低 power を選ぶ (バニラ救済意図)
       const cands = myBoard[lane].filter(c => c !== card);
       if (cands.length > 0) {
         cands.sort((a, b) => getCardPower(a, side, lane) - getCardPower(b, side, lane));
-        cands[0]._goldenBuff = (cands[0]._goldenBuff || 0) + eff.goldPower;
+        const tgt = cands[0];
+        tgt._goldenBuff = (tgt._goldenBuff || 0) + eff.goldPower;
+        card._sideEffects = card._sideEffects || [];
+        card._sideEffects.push({ type: 'golden', target: tgt, delta: eff.goldPower });
       }
       if (eff.power) myBoard[lane].forEach(c => { if (c !== card) add(c, eff.power); });
       break;
@@ -1225,10 +1271,7 @@ function applyEffect(card, lane, side) {
   if (eff.selfBonus) {
     card._currentPower = (card._currentPower != null ? card._currentPower : (card.basePower + dupeBonusOf(card))) + eff.selfBonus;
   }
-  // B-1.A: コンボパワー強化 (プリズマの「観測の祝福」 等、 自軍コンボに +N)
-  if (eff.comboBonus) {
-    state._comboBonusGlobal = (state._comboBonusGlobal || 0) + eff.comboBonus;
-  }
+  // B-1.A: コンボパワー強化 (プリズマの「観測の祝福」 等) は getGlobalComboBonus(side) で動的計算 (board 上のカードから自動集計)
 }
 
 // B-1.D: snapshot/restore helper (master AI sim の完全復元用)
@@ -1278,6 +1321,25 @@ function undoMyCard(lane, boardIdx) {
     setMessage('前のターンに配置したカードは手札に戻せません', 'alert');
     return;
   }
+  // バグ修正 2026-05-04: 新メカニクスの side effect も revert
+  if (card._sideEffects) {
+    [...card._sideEffects].reverse().forEach(se => {
+      switch (se.type) {
+        case 'freeze': se.target._frozenTurns = Math.max(0, (se.target._frozenTurns || 0) - se.delta); break;
+        case 'silence': se.target._silenced = !!se.prevSilenced; break;
+        case 'token': {
+          for (let L = 0; L < 3; L++) {
+            const idx = state.board.me[L].findIndex(c => c.id === se.tokenId);
+            if (idx >= 0) { state.board.me[L].splice(idx, 1); break; }
+          }
+          break;
+        }
+        case 'golden': se.target._goldenBuff = (se.target._goldenBuff || 0) - se.delta; break;
+        case 'cost_reduce': se.handCard._costReduced = Math.max(0, (se.handCard._costReduced || 0) - se.delta); break;
+      }
+    });
+    card._sideEffects = [];
+  }
   // 効果を逆適用
   if (card._appliedTo) {
     card._appliedTo.forEach(({ target, delta }) => {
@@ -1300,6 +1362,7 @@ function undoMyCard(lane, boardIdx) {
   delete card._growthEnabled;
   delete card._silenced;
   delete card._goldenBuff;
+  delete card._sideEffects;
   state.hand.push(card);
   setMessage(`${card.name} を手札に戻した (⚡${card.cost} 返却)`, 'success');
   renderAll();
@@ -1363,7 +1426,7 @@ async function endTurn() {
   state.turn += 1;
   await drawTurnStart();
   if (state.firstMover === 'me') {
-    setMessage(`ターン ${state.turn} — ⚡コスト ${state.cost}`);
+    setMessage(`T${state.turn}`);
   }
   state.busy = false;
   renderAll();
@@ -1620,16 +1683,17 @@ function rematch() {
 }
 
 function updateSeriesHud() {
+  // 野沢さん指示 2026-05-04 「試合の詳細は消す、 先攻/後攻 は You/AI ラベルに」 → series-info 行 簡略化
   const el = document.getElementById('series-info');
   if (!el) return;
   const diffMap = { easy: '🌱 Easy', normal: '⚔️ Normal', hard: '🔥 Hard', master: '👑 Master' };
   const diffLabel = diffMap[state.difficulty] || '?';
   if (state.series.isBO3) {
     el.style.display = '';
-    el.innerHTML = `<span class="cg-diff-tag">${diffLabel}</span><span class="cg-mode-tag bo3">🏆 BO3モード</span><span class="cg-series-progress">第<b>${state.series.matchNo}</b>/3 — ${state.series.wins.me}<span class="cg-score-vs">:</span>${state.series.wins.opp}</span><span class="cg-mover-tag">${state.firstMover === 'me' ? '先攻' : '後攻'}</span>`;
+    el.innerHTML = `<span class="cg-diff-tag">${diffLabel}</span><span class="cg-series-progress">BO3 第${state.series.matchNo}/3</span>`;
   } else {
     el.style.display = '';
-    el.innerHTML = `<span class="cg-diff-tag">${diffLabel}</span><span class="cg-mode-tag">単発</span>`;
+    el.innerHTML = `<span class="cg-diff-tag">${diffLabel}</span>`;
   }
 }
 
