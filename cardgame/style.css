@@ -933,14 +933,19 @@ body.cg-modal-open .cg-deck-builder-grid {
 .cg-hud-label { font-size: 10px; color: var(--text-dim); letter-spacing: 0.05em; }
 .cg-hud-value { font-size: 16px; font-weight: 700; }
 /* 野沢さん指示 2026-05-04: 試合スコア (0:0) 削除済 — series-info 行に統合 */
-/* You/AI 側の 先攻/後攻 アイコン */
+/* You/AI 側の 先攻/後攻 ラベル (野沢さん指示 2026-05-05 絵文字 → 言葉) */
 .cg-mover-icon {
   display: inline-block;
-  font-size: 12px;
-  margin-right: 4px;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 5px;
+  margin-right: 6px;
   vertical-align: middle;
-  opacity: 0.85;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
 }
+.cg-mover-icon.mover-first { background: rgba(255, 213, 107, 0.25); color: var(--gold); border: 1px solid rgba(255, 213, 107, 0.5); }
+.cg-mover-icon.mover-second { background: rgba(124, 93, 255, 0.22); color: #c9b8ff; border: 1px solid rgba(124, 93, 255, 0.45); }
 .cg-hud-actions {
   margin-left: auto;
   display: flex;
@@ -1968,6 +1973,50 @@ body.cg-modal-open .cg-deck-builder-grid {
 }
 .cg-dupe-effect-cell { font-size: 10px; line-height: 1.35; }
 .cg-dupe-effect-none { opacity: 0.5; }
+
+/* 野沢さん指示 2026-05-05: power 計算 内訳セクション (場のカード詳細にのみ表示) */
+.cg-pwbreak-section {
+  margin: 12px 14px 0;
+  padding: 10px 12px;
+  background: rgba(95, 223, 255, 0.06);
+  border: 1px solid rgba(95, 223, 255, 0.25);
+  border-radius: 10px;
+}
+.cg-pwbreak-title {
+  font-size: 12px;
+  margin: 0 0 8px;
+  color: var(--aurora-2);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+.cg-pwbreak-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+.cg-pwbreak-table td {
+  padding: 5px 6px;
+  border-bottom: 1px dashed rgba(255,255,255,0.06);
+  vertical-align: middle;
+}
+.cg-pwbreak-table td:last-child {
+  text-align: right;
+  white-space: nowrap;
+}
+.cg-pwbreak-table tr.cg-pwbreak-total {
+  background: rgba(255, 213, 107, 0.1);
+  font-weight: 700;
+}
+.cg-pwbreak-table tr.cg-pwbreak-total td:last-child {
+  color: var(--gold);
+  font-size: 13px;
+}
+.cg-pwbreak-note {
+  margin-top: 6px;
+  font-size: 10px;
+  color: var(--text-dim);
+  font-style: italic;
+}
 
 /* ===== A-5: レーン効果 popover ===== */
 .cg-lane-popover {

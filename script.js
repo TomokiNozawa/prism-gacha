@@ -9110,6 +9110,15 @@ async function checkPrismaeraVersion() {
     }
     if (lastSeen === currentVer) return;
 
+    // 野沢さん指示 2026-05-05: 「リリースノートは数字が変わるタイミングだけでOK」
+    // dev suffix 進行 (1.4.2f → 1.4.2g 等) では通知しない。 X.Y.Z (主バージョン) 変更のみ通知。
+    const stripSuffix = (v) => (v || '').replace(/[a-z]+$/i, '');
+    if (stripSuffix(lastSeen) === stripSuffix(currentVer)) {
+      // suffix 違いだけ → 通知せず lastSeen 静かに更新
+      try { localStorage.setItem(PRISMAERA_VERSION_LS_KEY, currentVer); } catch (e) {}
+      return;
+    }
+
     showPrismaeraUpdateModal(lastSeen, currentVer, changelog);
   } catch (e) {
     console.warn('[prismaera] version check failed', e);

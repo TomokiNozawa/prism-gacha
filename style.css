@@ -1385,7 +1385,8 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   padding: 0 24px;
 }
 .result-grid {
-  display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;
+  /* 野沢さん指示 2026-05-05: スクロール可能なんだからカード重ねない、 PC=4列、 モバイル=2列 で大きく */
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
   padding: 12px 24px;
   margin: 0;
   overflow-y: auto;
@@ -3948,7 +3949,8 @@ body.has-offline-banner .topbar { margin-top: 30px; }
 @media (max-width: 640px) {
   .hero { grid-template-columns: 1fr; gap: 24px; margin-bottom: 32px; }
   .cta { justify-content: center; }
-  .result-grid { grid-template-columns: repeat(3, 1fr); }
+  /* 野沢さん指示 2026-05-05: スマホでもカード大きく見えるよう 2列 (キャラ画像が画面の半分くらい) */
+  .result-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
   .topbar {
     padding: 6px 14px 8px;
     gap: 8px;

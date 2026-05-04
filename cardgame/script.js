@@ -141,11 +141,11 @@ function updateMuteUI() {
 // 優先順位: cards.json (手書き完全override) > effects_override.json (effect+effectText のみ) > pool.json (default)
 async function loadMasters() {
   const [c, k, l, p, eo] = await Promise.all([
-    fetch('./cards.json?v=1.4.2g').then(r => r.json()),
-    fetch('./combos.json?v=1.4.2g').then(r => r.json()),
-    fetch('./lane_effects.json?v=1.4.2g').then(r => r.json()),
-    fetch('./data/pool.json?v=1.4.2g').then(r => r.json()).catch(() => []),
-    fetch('./effects_override.json?v=1.4.2g').then(r => r.json()).catch(() => ({})),
+    fetch('./cards.json?v=1.4.2h').then(r => r.json()),
+    fetch('./combos.json?v=1.4.2h').then(r => r.json()),
+    fetch('./lane_effects.json?v=1.4.2h').then(r => r.json()),
+    fetch('./data/pool.json?v=1.4.2h').then(r => r.json()).catch(() => []),
+    fetch('./effects_override.json?v=1.4.2h').then(r => r.json()).catch(() => ({})),
   ]);
   // pool 全カード ← effects_override で effect/effectText を上書き ← cards.json で完全 override
   const cardsByName = new Map();
@@ -180,6 +180,18 @@ const DECK_SLOT_KEY = (n) => `cg_deck_v2_slot${n}`;
 const ACTIVE_SLOT_KEY = 'cg_deck_active_slot';
 // 本体 Prismaera の MAX_DUPS と同期 (script.js 692)
 const MAX_DUPS = { R: 1, SR: 2, SSR: 3, UR: 4, LR: 4 };
+// 野沢さん指示 2026-05-05: LR/UR デッキ枚数制限 (高 tier 偏重を防ぐ)
+const TIER_LIMIT = { LR: 1, UR: 3 };
+
+function _tierLimit(tier) { return TIER_LIMIT[tier]; }
+function _countByTier(deckIds, targetTier) {
+  let n = 0;
+  for (const id of deckIds) {
+    const c = state.allCards.find(x => x.id === id);
+    if (c && c.tier === targetTier) n++;
+  }
+  return n;
+}
 
 function getActiveSlot() {
   const v = parseInt(localStorage.getItem(ACTIVE_SLOT_KEY) || '1', 10);
@@ -300,18 +312,22 @@ function getAiDeck() {
   return ai.slice(0, DECK_SIZE);
 }
 
-// おまかせデッキ生成 (派閥シナジー優先 = 同派閥多めで自動構築)
+// おまかせデッキ生成 (派閥シナジー優先 = 同派閥多めで自動構築、 野沢さん指示 2026-05-05 LR/UR 制限を遵守)
 function generateAutoDeck() {
   const byFaction = {};
   state.allCards.forEach(c => {
     if (!byFaction[c.faction]) byFaction[c.faction] = [];
     byFaction[c.faction].push(c);
   });
-  // 同派閥 ≥ 3 の派閥を優先選択
   const factions = Object.entries(byFaction)
     .filter(([f, arr]) => arr.length >= 3)
     .sort((a, b) => b[1].length - a[1].length);
   const picked = [];
+  const tierCount = { LR: 0, UR: 0, SSR: 0, SR: 0, R: 0 };
+  const canAdd = (c) => {
+    const limit = _tierLimit(c.tier);
+    return limit === undefined || tierCount[c.tier] < limit;
+  };
   for (const [, arr] of factions) {
     const need = DECK_SIZE - picked.length;
     if (need <= 0) break;
@@ -319,13 +335,21 @@ function generateAutoDeck() {
       const order = { LR: 5, UR: 4, SSR: 3, SR: 2, R: 1 };
       return order[b.tier] - order[a.tier];
     });
-    picked.push(...sorted.slice(0, Math.min(4, need)));
+    for (const c of sorted) {
+      if (picked.length >= DECK_SIZE) break;
+      if (picked.some(p => p.id === c.id)) continue;
+      if (!canAdd(c)) continue;
+      picked.push(c);
+      tierCount[c.tier] = (tierCount[c.tier] || 0) + 1;
+      if (picked.filter(p => p.faction === c.faction).length >= 4) break;  // 同派閥は最大4まで
+    }
   }
-  // 足りない分はランダム fill
   while (picked.length < DECK_SIZE) {
-    const remaining = state.allCards.filter(c => !picked.some(p => p.id === c.id));
+    const remaining = state.allCards.filter(c => !picked.some(p => p.id === c.id) && canAdd(c));
     if (remaining.length === 0) break;
-    picked.push(remaining[Math.floor(Math.random() * remaining.length)]);
+    const pick = remaining[Math.floor(Math.random() * remaining.length)];
+    picked.push(pick);
+    tierCount[pick.tier] = (tierCount[pick.tier] || 0) + 1;
   }
   return picked.slice(0, DECK_SIZE).map(c => c.id);
 }
@@ -393,7 +417,10 @@ function _initMatchState() {
   state.thisTurnPlacements = [];
   state.mulliganAvailable = true;
   state.thisTurnAiDone = false;
-  state._comboBonusGlobal = 0;  // バグ修正 2026-05-04: 試合間でリセット
+  state._comboBonusGlobal = 0;
+  // 野沢さん指示 2026-05-05: cost_reduce_hand は 1試合 1回限定
+  state._costReduceUsedMe = false;
+  state._costReduceUsedOpp = false;
 
   // P-5: ユーザーデッキ (localStorage) + AI デッキ (ランダム tier バランス)
   const myDeckCards = getCurrentDeck().map(c => ({ ...c }));
@@ -552,21 +579,20 @@ function renderAll() {
   $('#hud-turn').textContent = state.turn;
   $('#hud-cost').textContent = (state.cost - state.costUsed) + ' / ' + state.cost;
   $('#hand-count').textContent = state.hand.length;
-  // 野沢さん指示 2026-05-04: 試合スコア (0:0) を HUD から削除済 → series-info 行のみで表示
-  // 先攻/後攻 アイコンを You / AI ラベルに表示
+  // 野沢さん指示 2026-05-05: 先攻/後攻 を絵文字 → 言葉表示
   const meIcon = $('#mover-icon-me');
   const oppIcon = $('#mover-icon-opp');
   if (meIcon && oppIcon) {
     if (state.firstMover === 'me') {
-      meIcon.textContent = '⚔';
-      meIcon.title = '先攻';
-      oppIcon.textContent = '🛡';
-      oppIcon.title = '後攻';
+      meIcon.textContent = '先攻';
+      meIcon.className = 'cg-mover-icon mover-first';
+      oppIcon.textContent = '後攻';
+      oppIcon.className = 'cg-mover-icon mover-second';
     } else {
-      meIcon.textContent = '🛡';
-      meIcon.title = '後攻';
-      oppIcon.textContent = '⚔';
-      oppIcon.title = '先攻';
+      meIcon.textContent = '後攻';
+      meIcon.className = 'cg-mover-icon mover-second';
+      oppIcon.textContent = '先攻';
+      oppIcon.className = 'cg-mover-icon mover-first';
     }
   }
   $('#btn-end-turn').disabled = state.busy || state.ended;
@@ -872,6 +898,8 @@ function showCardDetail(card, context, handIdx) {
   $('#char-detail-effect').textContent = card.effectText || '効果なし';
   // A-3: 凸毎効果 段階表 (現在の凸数を強調)
   _renderDupeStageTable(card);
+  // 野沢さん指示 2026-05-05: power 計算 内訳表示 (「-2 が -1 にしか反映されない」 等の調査用)
+  _renderPowerBreakdown(card);
   // 関連コンボ
   const related = state.combos.filter(c => c.chars.includes(card.name));
   const listEl = $('#char-detail-combo-list');
@@ -986,6 +1014,69 @@ function _renderDupeStageTable(card) {
         }).join('')}
       </tbody>
     </table>`;
+}
+
+// 野沢さん指示 2026-05-05: power 計算の内訳表示 (場のカードのみ、 手札では非表示)
+function _renderPowerBreakdown(card) {
+  const wrap = document.getElementById('char-detail-power-breakdown');
+  if (!wrap) return;
+  // カードが場にあるか検索 (board ref で見つかれば 内訳出す)
+  let foundSide = null, foundLane = null, foundCard = null;
+  ['me', 'opp'].forEach(side => {
+    state.board[side].forEach((lane, L) => {
+      lane.forEach(c => { if (c.id === card.id) { foundSide = side; foundLane = L; foundCard = c; } });
+    });
+  });
+  if (!foundCard) {
+    wrap.style.display = 'none';
+    return;
+  }
+  wrap.style.display = '';
+  const c = foundCard;
+  const isFrozen = (c._frozenTurns || 0) > 0;
+  const base = c.basePower;
+  const dupe = dupeBonusOf(c);
+  // _currentPower にすでに base+dupe + 累積 buff/debuff が入っている
+  const cpBase = c._currentPower != null ? c._currentPower : (base + dupe);
+  // _currentPower 内訳 (delta = cpBase - base - dupe = 累積 buff/debuff)
+  const buffDelta = cpBase - base - dupe;
+  const immediate = c._immediateBonus || 0;
+  const growth = c._growthCount || 0;
+  const golden = c._goldenBuff || 0;
+  // lane 効果
+  let laneFx = 0;
+  const e = state.laneEffects[foundLane];
+  if (e) {
+    if (e.rule === 'all_self' && foundSide === 'me') laneFx = e.value;
+    else if (e.rule === 'all_opp' && foundSide === 'opp') laneFx = e.value;
+    else laneFx = laneEffectFor(c, foundLane);
+  }
+  // 派閥シナジー
+  const synergy = factionSynergyFor(c, foundSide, foundLane);
+  // コンボ (このカード単体には付かないが、 lane bonus として表示)
+  const laneCombo = comboLaneBonus(foundSide, foundLane);
+  const total = isFrozen ? 0 : (cpBase + immediate + growth + golden + laneFx + synergy);
+  const rows = [];
+  rows.push(['基礎パワー', base]);
+  if (dupe) rows.push([`凸ボーナス (${c.tier}凸${c.dupes||0})`, `+${dupe}`]);
+  if (buffDelta) rows.push([`onPlay 累積 (相手効果含む)`, `${buffDelta >= 0 ? '+' : ''}${buffDelta}`]);
+  if (immediate) rows.push([`即時 (このターンのみ)`, `+${immediate}`]);
+  if (growth) rows.push([`成長 (毎ターン+1 蓄積)`, `+${growth}`]);
+  if (golden) rows.push([`黄金化 (永続)`, `+${golden}`]);
+  if (laneFx) rows.push([`レーン効果 ${e?e.icon:''} ${e?e.name:''}`, `${laneFx >= 0 ? '+' : ''}${laneFx}`]);
+  if (synergy) rows.push([`派閥シナジー (同レーン同派閥 ${state.board[foundSide][foundLane].filter(x => x.faction === c.faction).length}人)`, `+${synergy}`]);
+  if (isFrozen) rows.push([`❄ 凍結 (${c._frozenTurns}T) — power 0`, `→0`]);
+  rows.push([`このカードの最終 power`, total]);
+  if (laneCombo) rows.push([`レーン全体のコンボボーナス`, `+${laneCombo}`]);
+  wrap.innerHTML = `
+    <h3 class="cg-pwbreak-title">⚙ Power 計算 内訳 (場)</h3>
+    <table class="cg-pwbreak-table">
+      <tbody>
+        ${rows.map(([k, v], i) => `<tr class="${i === rows.length - 1 || (i === rows.length - 2 && laneCombo) ? 'cg-pwbreak-total' : ''}"><td>${k}</td><td><b>${v}</b></td></tr>`).join('')}
+      </tbody>
+    </table>
+    <div class="cg-pwbreak-note">※ コンボはレーン単位で 1 回適用 (各カードには分配されない)</div>
+  `;
 }
 
 // 効果を凸数段階に応じて自然言語化 (effectiveEffect で動的に target/power が変わる)
@@ -1205,9 +1296,9 @@ function applyEffect(card, lane, side) {
       break;
     }
     case 'immediate_self': {
-      // 配置ターンのみ自身 +N (endTurn でリセット)
-      card._immediateBonus = (card._immediateBonus || 0) + eff.power;
-      card._immediateAppliedTurn = state.turn;
+      // 野沢さん指示 2026-05-05 「このターンのみ効果はゲーム性に合わない」 → 廃止
+      // 後方互換: もし古い save data に残っていたら 永続 selfBonus に置き換える
+      card._currentPower = (card._currentPower != null ? card._currentPower : (card.basePower + dupeBonusOf(card))) + eff.power;
       if (eff.alsoSelfLane) myBoard[lane].forEach(c => { if (c !== card) add(c, eff.alsoSelfLane); });
       break;
     }
@@ -1225,15 +1316,29 @@ function applyEffect(card, lane, side) {
       break;
     }
     case 'cost_reduce_hand': {
+      // 野沢さん指示 2026-05-05: 1試合 1回限定 (アクアシス過剰強化対策)
+      const usedKey = side === 'me' ? '_costReduceUsedMe' : '_costReduceUsedOpp';
+      if (state[usedKey]) {
+        // 既使用、 power 補助のみ適用 (cost reduce はスキップ)
+        if (eff.power) myBoard[lane].forEach(c => add(c, eff.power));
+        break;
+      }
       const hand = side === 'me' ? state.hand : state.oppHand;
-      if (hand.length === 0) break;
+      if (hand.length === 0) {
+        if (eff.power) myBoard[lane].forEach(c => add(c, eff.power));
+        break;
+      }
       const candidates = hand.filter(h => !h._costReduced);
-      if (candidates.length === 0) break;
+      if (candidates.length === 0) {
+        if (eff.power) myBoard[lane].forEach(c => add(c, eff.power));
+        break;
+      }
       candidates.sort((a, b) => b.cost - a.cost);
       const tgtHand = candidates[0];
       tgtHand._costReduced = (tgtHand._costReduced || 0) + 1;
+      state[usedKey] = true;
       card._sideEffects = card._sideEffects || [];
-      card._sideEffects.push({ type: 'cost_reduce', handCard: tgtHand, delta: 1 });
+      card._sideEffects.push({ type: 'cost_reduce', handCard: tgtHand, delta: 1, usedKey });
       if (eff.power) myBoard[lane].forEach(c => add(c, eff.power));
       break;
     }
@@ -1335,7 +1440,10 @@ function undoMyCard(lane, boardIdx) {
           break;
         }
         case 'golden': se.target._goldenBuff = (se.target._goldenBuff || 0) - se.delta; break;
-        case 'cost_reduce': se.handCard._costReduced = Math.max(0, (se.handCard._costReduced || 0) - se.delta); break;
+        case 'cost_reduce':
+          se.handCard._costReduced = Math.max(0, (se.handCard._costReduced || 0) - se.delta);
+          if (se.usedKey) state[se.usedKey] = false;  // 1試合1回フラグも解除
+          break;
       }
     });
     card._sideEffects = [];
@@ -2219,13 +2327,29 @@ function toggleDeckCard(id) {
     _deckBuilderState.selected.splice(idx, 1);
   } else {
     if (_deckBuilderState.selected.length >= DECK_SIZE) {
-      // 上限超え: 警告表示
       const counter = $('.cg-deck-builder-counter');
       if (counter) {
         counter.classList.add('flash-alert');
         setTimeout(() => counter.classList.remove('flash-alert'), 600);
       }
       return;
+    }
+    // 野沢さん指示 2026-05-05: LR/UR 枚数制限 (LR=1, UR=3)
+    const card = state.allCards.find(c => c.id === id);
+    if (card) {
+      const limit = _tierLimit(card.tier);
+      if (limit !== undefined) {
+        const cur = _countByTier(_deckBuilderState.selected, card.tier);
+        if (cur >= limit) {
+          // 上限超え: warning toast
+          const status = $('#deck-list-status');
+          if (status) {
+            status.innerHTML = `<span class="cg-deck-tier-limit-warn">⚠️ ${card.tier} は最大 ${limit}枚 までです (高tier偏重防止)</span>`;
+            setTimeout(() => renderDeckBuilderGrid(), 1500);
+          }
+          return;
+        }
+      }
     }
     _deckBuilderState.selected.push(id);
   }

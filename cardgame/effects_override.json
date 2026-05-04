@@ -23,8 +23,8 @@
     "effect": { "trigger": "onPlay", "target": "chain_lane_self", "multiplier": 1, "alsoSelfLane": 2 }
   },
   "焔帝 ヒノオウ": {
-    "effectText": "焔麗の翼: ⚡自身 +4 (このターンのみ)、 自レーン +1",
-    "effect": { "trigger": "onPlay", "target": "immediate_self", "power": 4, "alsoSelfLane": 1 }
+    "effectText": "焔王の威光: 自レーン +3、 自身 +3 (覇者の領域)",
+    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 3, "selfBonus": 3 }
   },
 
   "森の射手 リナエ": {
@@ -73,8 +73,8 @@
     "effect": { "trigger": "onPlay", "target": "adjacent_lanes", "power": 1, "selfBonus": 1 }
   },
   "紅翼 ツキ": {
-    "effectText": "次姫の即興: ⚡自身 +3 (このターンのみ)、 自レーン +1",
-    "effect": { "trigger": "onPlay", "target": "immediate_self", "power": 3, "alsoSelfLane": 1 }
+    "effectText": "紅翼の閃光: 相手 同レーン -2、 自身 +2",
+    "effect": { "trigger": "onPlay", "target": "opp_self_lane", "power": -2, "selfBonus": 2 }
   },
   "薫音": {
     "effectText": "剣師範の構え: 自レーン +2、 自身 +1",
@@ -97,8 +97,8 @@
     "effect": { "trigger": "onPlay", "target": "stealth_self", "power": 0, "duration": 1, "extraOppLane": -1 }
   },
   "焔舞 ヒナカ": {
-    "effectText": "桜散の即興: ⚡自身 +2 (このターンのみ)、 自レーン +1",
-    "effect": { "trigger": "onPlay", "target": "immediate_self", "power": 2, "alsoSelfLane": 1 }
+    "effectText": "桜散の舞: 両隣レーン +2、 自身 +1",
+    "effect": { "trigger": "onPlay", "target": "adjacent_lanes", "power": 2, "selfBonus": 1 }
   },
 
   "ちさと": {
@@ -260,8 +260,8 @@
     "effect": { "trigger": "onPlay", "target": "cost_reduce_hand", "power": 1 }
   },
   "北方剣聖 ハグル": {
-    "effectText": "北方の一閃: ⚡自身 +3 (このターンのみ)、 自レーン +1",
-    "effect": { "trigger": "onPlay", "target": "immediate_self", "power": 3, "alsoSelfLane": 1 }
+    "effectText": "北方の双剣: 相手 同レーン -3、 自レーン +1",
+    "effect": { "trigger": "onPlay", "target": "opp_self_lane", "power": -3, "selfBonus": 1, "extraSelfLane": 1 }
   },
   "空挺城首席学者 ゼピル": {
     "effectText": "理論の召喚: 自レーンに 空挺兵 召喚、 自レーン +1",
@@ -293,8 +293,8 @@
     "effect": { "trigger": "onPlay", "target": "silence_opp_lane_top", "power": 0 }
   },
   "蒸気砲手 ヴィン": {
-    "effectText": "蒸気の一撃: ⚡自身 +2 (このターンのみ)",
-    "effect": { "trigger": "onPlay", "target": "immediate_self", "power": 2 }
+    "effectText": "蒸気砲: 相手 同レーン -2",
+    "effect": { "trigger": "onPlay", "target": "opp_self_lane", "power": -2 }
   },
   "空挺機関士 ジン": {
     "effectText": "機械連結: 自身 += 自レーン自軍数 ×1",
