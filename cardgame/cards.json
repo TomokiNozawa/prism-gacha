@@ -10,9 +10,7 @@
     "chapter": "s1c1",
     "img": "/images/characters/season1/lr/prisma.png",
     "dupes": 0,
-    "dupeBonus": 0,
-    "effectText": "全レーンの自軍 +3",
-    "effect": { "trigger": "onPlay", "target": "all_lanes", "power": 3 }
+    "dupeBonus": 0
   },
   {
     "id": "ur_1_seraph",
@@ -25,9 +23,7 @@
     "chapter": "s1c1",
     "img": "/images/characters/season1/ur/seraph_paladin.png",
     "dupes": 1,
-    "dupeBonus": 1,
-    "effectText": "自レーン +3、 相手の同レーン -2",
-    "effect": { "trigger": "onPlay", "target": "self_lane_attack", "power": 3, "oppPower": -2 }
+    "dupeBonus": 1
   },
   {
     "id": "ur_2_kaguya",
@@ -40,9 +36,7 @@
     "chapter": "s1c1",
     "img": "/images/characters/season1/ur/ancient_sage.png",
     "dupes": 2,
-    "dupeBonus": 1,
-    "effectText": "両隣レーンの自軍 +2",
-    "effect": { "trigger": "onPlay", "target": "adjacent_lanes", "power": 2 }
+    "dupeBonus": 1
   },
   {
     "id": "ssr_1_linae",
@@ -55,9 +49,7 @@
     "chapter": "s1c1",
     "img": "/images/characters/season1/ssr/elf_archer.png",
     "dupes": 2,
-    "dupeBonus": 1,
-    "effectText": "相手の同レーン -2",
-    "effect": { "trigger": "onPlay", "target": "opp_self_lane", "power": -2 }
+    "dupeBonus": 1
   },
   {
     "id": "ssr_2_chanty",
@@ -70,9 +62,7 @@
     "chapter": "s1c2",
     "img": "/images/characters/season1/ssr/pirate_captain.png",
     "dupes": 1,
-    "dupeBonus": 1,
-    "effectText": "自レーン +3",
-    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 3 }
+    "dupeBonus": 1
   },
   {
     "id": "ssr_3_glaciel",
@@ -85,9 +75,7 @@
     "chapter": "s1c2",
     "img": "/images/characters/season1/ssr/ice_mage.png",
     "dupes": 1,
-    "dupeBonus": 1,
-    "effectText": "全レーンの相手 -1",
-    "effect": { "trigger": "onPlay", "target": "all_opp_lanes", "power": -1 }
+    "dupeBonus": 1
   },
   {
     "id": "sr_1_lumina",
@@ -100,9 +88,7 @@
     "chapter": "s1c1",
     "img": "/images/characters/season1/sr/silver_girl.png",
     "dupes": 2,
-    "dupeBonus": 1,
-    "effectText": "自レーン +2",
-    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 2 }
+    "dupeBonus": 1
   },
   {
     "id": "sr_2_tsuki",
@@ -115,9 +101,7 @@
     "chapter": "s1c1",
     "img": "/images/characters/season1/sr/red_twintail.png",
     "dupes": 2,
-    "dupeBonus": 1,
-    "effectText": "基礎パワー高め (バニラ)",
-    "effect": { "trigger": "none", "target": "none", "power": 0 }
+    "dupeBonus": 1
   },
   {
     "id": "sr_3_coralia",
@@ -130,9 +114,7 @@
     "chapter": "s1c2",
     "img": "/images/characters/season1/sr/coral_knight.png",
     "dupes": 2,
-    "dupeBonus": 1,
-    "effectText": "自レーン +1、 自身も+1",
-    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 1, "selfBonus": 1 }
+    "dupeBonus": 1
   },
   {
     "id": "r_1_chisato",
@@ -145,9 +127,7 @@
     "chapter": "s1c1",
     "img": "/images/characters/season1/r/student.png",
     "dupes": 2,
-    "dupeBonus": 1,
-    "effectText": "自レーン +1",
-    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 1 }
+    "dupeBonus": 1
   },
   {
     "id": "r_2_kai",
@@ -160,9 +140,7 @@
     "chapter": "s1c1",
     "img": "/images/characters/season1/r/boy_scout.png",
     "dupes": 2,
-    "dupeBonus": 1,
-    "effectText": "自レーン +1",
-    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 1 }
+    "dupeBonus": 1
   },
   {
     "id": "r_3_viola",
@@ -175,8 +153,6 @@
     "chapter": "s1c1",
     "img": "/images/characters/season1/r/archer.png",
     "dupes": 2,
-    "dupeBonus": 1,
-    "effectText": "自レーン +2",
-    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 2 }
+    "dupeBonus": 1
   }
 ]

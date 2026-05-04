@@ -135,20 +135,34 @@ function updateMuteUI() {
   }
 }
 
-// ===== Master データロード (公開済章のみ filter、 cards.json + pool.json 統合) =====
+// ===== Master データロード (公開済章のみ filter、 cards.json + pool.json + effects_override.json 統合) =====
 // P-6: pool.json は本体 POOL から自動生成 (scripts/export_pool_for_cardgame.py)
-// cards.json は手書き override (同名なら cards.json 優先)
+// B-1: effects_override.json で効果データを 90キャラ全件カスタム
+// 優先順位: cards.json (手書き完全override) > effects_override.json (effect+effectText のみ) > pool.json (default)
 async function loadMasters() {
-  const [c, k, l, p] = await Promise.all([
-    fetch('./cards.json?v=20260504p').then(r => r.json()),
-    fetch('./combos.json?v=20260504p').then(r => r.json()),
-    fetch('./lane_effects.json?v=20260504p').then(r => r.json()),
-    fetch('./data/pool.json?v=20260504p').then(r => r.json()).catch(() => []),
+  const [c, k, l, p, eo] = await Promise.all([
+    fetch('./cards.json?v=20260504q').then(r => r.json()),
+    fetch('./combos.json?v=20260504q').then(r => r.json()),
+    fetch('./lane_effects.json?v=20260504q').then(r => r.json()),
+    fetch('./data/pool.json?v=20260504q').then(r => r.json()).catch(() => []),
+    fetch('./effects_override.json?v=20260504q').then(r => r.json()).catch(() => ({})),
   ]);
-  // pool 全カード ← cards.json で override
+  // pool 全カード ← effects_override で effect/effectText を上書き ← cards.json で完全 override
   const cardsByName = new Map();
-  p.forEach(card => cardsByName.set(card.name, card));
-  c.forEach(card => cardsByName.set(card.name, card));  // override
+  p.forEach(card => {
+    const merged = { ...card };
+    const ov = eo[card.name];
+    if (ov) {
+      merged.effect = ov.effect;
+      merged.effectText = ov.effectText;
+    }
+    cardsByName.set(card.name, merged);
+  });
+  c.forEach(card => {
+    // shallow merge: cards.json は指定フィールドのみ上書き (effect 未指定なら effects_override が残る)
+    const existing = cardsByName.get(card.name) || {};
+    cardsByName.set(card.name, { ...existing, ...card });
+  });
   state.allCards = Array.from(cardsByName.values()).filter(card => isChapterReleased(card.chapter));
   // 後方互換: state.cards は state.allCards のフルセット (デフォルトデッキ用、 デッキ編集で絞られる時もある)
   state.cards = state.allCards;
@@ -413,6 +427,16 @@ async function drawTurnStart() {
   state.costUsed = 0;
   state.thisTurnPlacements = [];
   state.thisTurnAiDone = false;
+  // B-1.A: ターン開始時の状態更新 — growth +1, frozen -1, stealth -1
+  ['me', 'opp'].forEach(side => {
+    [0, 1, 2].forEach(L => {
+      state.board[side][L].forEach(c => {
+        if (c._growthEnabled) c._growthCount = (c._growthCount || 0) + 1;
+        if (c._frozenTurns > 0) c._frozenTurns -= 1;
+        if (c._stealthTurns > 0) c._stealthTurns -= 1;
+      });
+    });
+  });
   // 後攻時はターン頭で AI が先に配置 (ユーザーは AI の手を見てから配置可能)
   if (state.firstMover === 'opp' && !state.ended) {
     state.busy = true;
@@ -471,9 +495,17 @@ function comboBonusFor(card, side, lane) {
   return bonus;
 }
 function getCardPower(card, side, lane) {
+  // B-1.A: freeze 状態は power 0 で固定 (1ターン無効化)
+  if ((card._frozenTurns || 0) > 0) return 0;
   let p = card.basePower + dupeBonusOf(card);
   // onPlay の固定 delta (相手カードからの -2 等) は _currentPower 経由 (累積)
   if (card._currentPower != null) p = card._currentPower + dupeBonusOf(card);
+  // B-1.A: growth (累計、 自身のみに毎ターン +1)
+  if (card._growthCount) p += card._growthCount;
+  // B-1.A: immediate (配置ターンのみの 一時 buff、 endTurn でリセット)
+  if (card._immediateBonus) p += card._immediateBonus;
+  // B-1.A: 黄金化 (リオラエル等、 退場まで持続する固定 buff)
+  if (card._goldenBuff) p += card._goldenBuff;
   // レーン効果
   const le = state.laneEffects[lane];
   if (le) {
@@ -660,22 +692,48 @@ function renderBoard() {
 function makeCardElement(card, showEffect) {
   const el = document.createElement('div');
   el.className = 'cg-card';
+  // B-1.A: トークン (召喚兵) は見た目区別 + 効果無し
+  if (card._isToken) el.classList.add('cg-card-token');
+  // B-1.A: freeze 状態は灰色オーバーレイ
+  if ((card._frozenTurns || 0) > 0) el.classList.add('cg-card-frozen');
+  if (card._silenced) el.classList.add('cg-card-silenced');
+  if ((card._stealthTurns || 0) > 0) el.classList.add('cg-card-stealth');
   el.style.setProperty('--faction-color', factionColor(card.faction));
   const imgUrl = card.img ? '..' + card.img : '';
   const imgStyle = imgUrl ? `background-image: url('${imgUrl}')` : '';
   const imgClass = imgUrl ? '' : 'no-img';
   const dupesBadge = card.dupes > 0 ? `<span class="cg-card-dupes" title="凸 ${card.dupes}">+${card.dupes}</span>` : '';
-  const displayPower = card._currentPower != null ? card._currentPower : (card.basePower + dupeBonusOf(card));
+  // power 計算: _currentPower (onPlay 適用済) + dupe + immediate + growth + golden、 frozen は 0 表示
+  let displayPower;
+  if ((card._frozenTurns || 0) > 0) {
+    displayPower = 0;
+  } else {
+    displayPower = card._currentPower != null ? card._currentPower : (card.basePower + dupeBonusOf(card));
+    if (card._immediateBonus) displayPower += card._immediateBonus;
+    if (card._growthCount) displayPower += card._growthCount;
+    if (card._goldenBuff) displayPower += card._goldenBuff;
+  }
   // A-2: 凸後コスト反映 (MAX凸で cost-1 が適用されたら 元cost 打消線 + 凸後cost を gold で表示)
   const effCost = effectiveCost(card);
-  const costHtml = (effCost !== card.cost)
-    ? `<span class="cg-card-cost cg-cost-reduced" title="MAX凸でコスト-1"><s class="cg-cost-orig">${card.cost}</s>⚡${effCost}</span>`
-    : `<span class="cg-card-cost">⚡${effCost}</span>`;
+  const handCostReduce = card._costReduced || 0;
+  const finalCost = Math.max(1, effCost - handCostReduce);
+  let costHtml;
+  if (handCostReduce > 0) {
+    // cost_reduce_hand バフ適用済 (💴 マーク)
+    costHtml = `<span class="cg-card-cost cg-cost-reduced" title="cost_reduce_hand: -${handCostReduce}"><s class="cg-cost-orig">${card.cost}</s>💴${finalCost}</span>`;
+  } else if (effCost !== card.cost) {
+    costHtml = `<span class="cg-card-cost cg-cost-reduced" title="MAX凸でコスト-1"><s class="cg-cost-orig">${card.cost}</s>⚡${finalCost}</span>`;
+  } else {
+    costHtml = `<span class="cg-card-cost">⚡${effCost}</span>`;
+  }
+  // B-1.B: 状態 badge (frozen/silenced/stealth/immediate/growth/golden) スマホ最適化済
+  const statusBadges = _renderStatusBadges(card);
   el.innerHTML = `
     <div class="cg-card-tier ${card.tier}">${card.tier}${dupesBadge}</div>
     <div class="cg-card-faction" style="background:${factionColor(card.faction)}">${card.faction}</div>
     <div class="cg-card-img ${imgClass}" style="${imgStyle}"></div>
     <button class="cg-card-info-btn" type="button" aria-label="詳細" title="詳細を見る">i</button>
+    ${statusBadges}
     <div class="cg-card-name">${card.name}</div>
     ${showEffect && card.effectText ? `<div class="cg-card-effect">${card.effectText}</div>` : ''}
     <div class="cg-card-stats">
@@ -727,7 +785,8 @@ function updateLanePowers() {
 function onHandCardClick(idx) {
   if (state.busy || state.ended) return;
   const card = state.hand[idx];
-  const cost = effectiveCost(card);
+  // B-1.A: cost_reduce_hand の効果を反映 (手札時点で cost -1)
+  const cost = Math.max(1, effectiveCost(card) - (card._costReduced || 0));
   if (cost > state.cost - state.costUsed) {
     setMessage(`コスト不足: ${card.name} (⚡${cost} 必要、 残${state.cost - state.costUsed})`, 'alert');
     return;
@@ -830,6 +889,30 @@ function showCardDetail(card, context, handIdx) {
 }
 function closeCharDetail() { $('#char-detail-modal').hidden = true; _setBodyModalOpen(); }
 
+// B-1.B: 状態 badge レンダラ (スマホでも見えるよう カード右側に縦積み、 タップで詳細)
+function _renderStatusBadges(card) {
+  const badges = [];
+  if ((card._frozenTurns || 0) > 0) {
+    badges.push(`<span class="cg-state-badge state-frozen" data-state="frozen" title="❄ 凍結 ${card._frozenTurns}ターン: power 0">❄${card._frozenTurns > 1 ? card._frozenTurns : ''}</span>`);
+  }
+  if ((card._stealthTurns || 0) > 0) {
+    badges.push(`<span class="cg-state-badge state-stealth" data-state="stealth" title="🌫 ステルス ${card._stealthTurns}ターン: 相手効果対象外">🌫${card._stealthTurns > 1 ? card._stealthTurns : ''}</span>`);
+  }
+  if (card._silenced) {
+    badges.push(`<span class="cg-state-badge state-silenced" data-state="silenced" title="🔇 沈黙: onPlay効果無効化">🔇</span>`);
+  }
+  if (card._immediateBonus) {
+    badges.push(`<span class="cg-state-badge state-immediate" data-state="immediate" title="⚡ 即時 +${card._immediateBonus}: 配置ターンのみ">⚡+${card._immediateBonus}</span>`);
+  }
+  if (card._growthCount) {
+    badges.push(`<span class="cg-state-badge state-growth" data-state="growth" title="🌱 成長 +${card._growthCount}: ターン毎+1蓄積">🌱+${card._growthCount}</span>`);
+  }
+  if (card._goldenBuff) {
+    badges.push(`<span class="cg-state-badge state-golden" data-state="golden" title="✨ 黄金化 +${card._goldenBuff}: 退場まで持続">✨+${card._goldenBuff}</span>`);
+  }
+  return badges.length > 0 ? `<div class="cg-state-badges">${badges.join('')}</div>` : '';
+}
+
 // A-3: 凸毎効果 段階表 (凸0 / +half / MAX、 各段で 基礎pow / cost / 効果文 を表示)
 function _renderDupeStageTable(card) {
   const wrap = $('#char-detail-dupe-stages');
@@ -881,14 +964,45 @@ function _describeEffect(card) {
     'all_opp_lanes': '全相手レーン',
     'self_lane_attack': '自レーン+相手同レーン',
   };
-  const tlabel = targetMap[e.target] || e.target;
   const power = e.power != null ? e.power : 0;
+  // B-1.A 新メカニクス自然言語化
+  switch (e.target) {
+    case 'buff_faction_lane':
+      return `自レーン 同派閥 +${power}`;
+    case 'buff_faction_all':
+      return `自軍 全レーン 同派閥 +${power}`;
+    case 'freeze_opp_lane_top':
+      return `相手 同レーン 最高Pwを ❄凍結${e.duration || 1}T${power ? ` / 自レーン +${power}` : ''}`;
+    case 'freeze_opp_lane_all':
+      return `相手 同レーン全員を ❄凍結${e.duration || 1}T${power ? ` / 自レーン +${power}` : ''}`;
+    case 'silence_opp_lane_top':
+      return `相手 同レーン 最高Pwの効果を 🔇沈黙${power ? ` / 自レーン +${power}` : ''}`;
+    case 'immediate_self':
+      return `⚡自身 +${power} (配置ターンのみ)${e.alsoSelfLane ? ` / 自レーン +${e.alsoSelfLane}` : ''}`;
+    case 'stealth_self':
+      return `🌫自身 ステルス ${e.duration || 1}T${power ? ` / 自レーン +${power}` : ''}`;
+    case 'growth_self':
+      return `🌱自身 成長 +1/T (毎ターン蓄積)${power ? ` / 自レーン +${power}` : ''}`;
+    case 'cost_reduce_hand':
+      return `💴手札 最高Costを -1${power ? ` / 自レーン +${power}` : ''}`;
+    case 'summon_token':
+      const tok = TOKEN_TEMPLATES[card.faction];
+      const tname = tok ? tok.name : 'トークン';
+      return `自レーンに ${tname} (Pw${tok ? tok.basePower : 2}) 召喚${power ? ` / 自レーン +${power}` : ''}`;
+    case 'chain_lane_self':
+      return `自身 += 自レーン自軍数 ×${e.multiplier || 1}${e.alsoSelfLane ? ` / 自レーン +${e.alsoSelfLane}` : ''}`;
+    case 'golden_self_lane':
+      return `自レーン 1体に ✨黄金化 +${e.goldPower}${power ? ` / 自レーン +${power}` : ''}`;
+  }
+  // 既存6種
+  const tlabel = targetMap[e.target] || e.target;
   if (e.target === 'self_lane_attack') {
     return `${tlabel} (自軍 +${power}, 相手 ${e.oppPower || 0})`;
   }
   const sign = power >= 0 ? '+' : '';
   let txt = `${tlabel} ${sign}${power}`;
   if (e.selfBonus) txt += ` / 自身 +${e.selfBonus}`;
+  if (e.comboBonus) txt += ` / コンボ +${e.comboBonus}`;
   return txt;
 }
 
@@ -911,9 +1025,11 @@ function placeMyCard(handIdx, lane) {
   const card = { ...state.hand[handIdx] };
   card._currentPower = card.basePower + dupeBonusOf(card);
   card._appliedTo = [];
+  // B-1.A: cost_reduce 反映 (handCard で適用された -1 を使用、 配置時に消費)
+  const reducedCost = Math.max(1, effectiveCost(card) - (card._costReduced || 0));
   state.hand.splice(handIdx, 1);
   state.board.me[lane].push(card);
-  state.costUsed += effectiveCost(card);
+  state.costUsed += reducedCost;
   state.thisTurnPlacements.push({ cardId: card.id, lane });
   state.selectedCardIdx = -1;
   applyEffect(card, lane, 'me');
@@ -928,13 +1044,52 @@ function placeMyCard(handIdx, lane) {
   }, 10);
 }
 
-// ===== 効果発動 (onPlay、 凸数で範囲拡大 + power +1) =====
+// ===== B-1.A: トークン サモン (派閥別世界観反映) =====
+const TOKEN_TEMPLATES = {
+  '古龍砂漠サハール':   { name: '砂兵',     img: '', basePower: 2, faction: '古龍砂漠サハール' },
+  '空挺城ゼノニア':     { name: '空挺兵',   img: '', basePower: 2, faction: '空挺城ゼノニア' },
+  '夜焔郷':            { name: '影衆',     img: '', basePower: 2, faction: '夜焔郷' },
+  '白焔教会':          { name: '詠唱兵',   img: '', basePower: 2, faction: '白焔教会' },
+  '原虹':              { name: '虹片',     img: '', basePower: 3, faction: '原虹' },
+  '紫竜王国':          { name: '竜兵',     img: '', basePower: 2, faction: '紫竜王国' },
+  '紅玉海賊団':        { name: '海賊兵',   img: '', basePower: 2, faction: '紅玉海賊団' },
+  'アクアシス':        { name: '海騎',     img: '', basePower: 2, faction: 'アクアシス' },
+  '海淵都市アクアシス': { name: '海騎',     img: '', basePower: 2, faction: 'アクアシス' },
+  '銀霜王国':          { name: '霜兵',     img: '', basePower: 2, faction: '銀霜王国' },
+  '氷霊王国ニーヴル':   { name: '氷兵',     img: '', basePower: 2, faction: '氷霊王国ニーヴル' },
+  '紅翼皇家':          { name: '紅羽',     img: '', basePower: 2, faction: '紅翼皇家' },
+  '黒月衆ノクトス':     { name: '影刀',     img: '', basePower: 2, faction: '黒月衆ノクトス' },
+};
+function _makeToken(faction) {
+  const t = TOKEN_TEMPLATES[faction] || { name: '召喚兵', basePower: 2, faction: faction };
+  return {
+    id: 'token_' + Math.random().toString(36).slice(2, 10),
+    name: t.name,
+    tier: 'TOKEN',
+    cost: 0,
+    basePower: t.basePower,
+    faction: t.faction,
+    role: 'token',
+    chapter: 'token',
+    img: '',
+    dupes: 0,
+    dupeBonus: 0,
+    effectText: 'トークン (基礎パワーのみ)',
+    effect: { trigger: 'none', target: 'none', power: 0 },
+    _isToken: true,
+  };
+}
+
+// ===== 効果発動 (onPlay、 凸数で範囲拡大 + power +1、 B-1.A 9 新メカニクス) =====
 function applyEffect(card, lane, side) {
   const eff = effectiveEffect(card);
   if (!eff || eff.trigger !== 'onPlay') return;
   const myBoard = state.board[side];
   const oppSide = side === 'me' ? 'opp' : 'me';
   const oppBoard = state.board[oppSide];
+
+  // B-1.A: stealth 状態のカードは effect 対象外 (相手 onPlay の target にしない)
+  const isOppTargetable = (c) => !(c._stealthTurns > 0);
 
   const add = (target, delta) => {
     if (target === card) return; // 自身への onPlay 加算は selfBonus 別経路
@@ -956,19 +1111,160 @@ function applyEffect(card, lane, side) {
       [0, 1, 2].forEach(L => myBoard[L].forEach(c => add(c, eff.power)));
       break;
     case 'opp_self_lane':
-      oppBoard[lane].forEach(c => add(c, eff.power));
+      oppBoard[lane].filter(isOppTargetable).forEach(c => add(c, eff.power));
       break;
     case 'all_opp_lanes':
-      [0, 1, 2].forEach(L => oppBoard[L].forEach(c => add(c, eff.power)));
+      [0, 1, 2].forEach(L => oppBoard[L].filter(isOppTargetable).forEach(c => add(c, eff.power)));
       break;
     case 'self_lane_attack':
       myBoard[lane].forEach(c => add(c, eff.power));
-      oppBoard[lane].forEach(c => add(c, eff.oppPower || 0));
+      oppBoard[lane].filter(isOppTargetable).forEach(c => add(c, eff.oppPower || 0));
       break;
+
+    // ===== B-1.A 新メカニクス =====
+    case 'buff_faction_lane': {
+      // 自レーン 同派閥のみ +N
+      const fac = eff.faction || card.faction;
+      myBoard[lane].forEach(c => { if (c.faction === fac) add(c, eff.power); });
+      break;
+    }
+    case 'buff_faction_all': {
+      // 自軍 全レーン 同派閥 +N (ヴィオラ growth と組合せ)
+      const fac = eff.faction || card.faction;
+      [0, 1, 2].forEach(L => myBoard[L].forEach(c => { if (c.faction === fac) add(c, eff.power); }));
+      break;
+    }
+    case 'freeze_opp_lane_top': {
+      // 相手 同レーン 最高 power カードを 1ターン freeze
+      const cands = oppBoard[lane].filter(isOppTargetable);
+      if (cands.length === 0) break;
+      cands.sort((a, b) => getCardPower(b, oppSide, lane) - getCardPower(a, oppSide, lane));
+      cands[0]._frozenTurns = (cands[0]._frozenTurns || 0) + (eff.duration || 1);
+      // 自レーン +N (補助 buff)
+      if (eff.power) myBoard[lane].forEach(c => add(c, eff.power));
+      break;
+    }
+    case 'freeze_opp_lane_all': {
+      // 相手 同レーン 全員を 1ターン freeze (氷帝グレイル)
+      oppBoard[lane].filter(isOppTargetable).forEach(c => {
+        c._frozenTurns = (c._frozenTurns || 0) + (eff.duration || 1);
+      });
+      if (eff.power) myBoard[lane].forEach(c => add(c, eff.power));
+      break;
+    }
+    case 'silence_opp_lane_top': {
+      // 相手 同レーン 最高 power カードの onPlay 効果を打ち消し (revert _appliedTo)
+      const cands = oppBoard[lane].filter(isOppTargetable);
+      if (cands.length === 0) break;
+      cands.sort((a, b) => getCardPower(b, oppSide, lane) - getCardPower(a, oppSide, lane));
+      const tgt = cands[0];
+      _silenceCard(tgt);
+      if (eff.power) myBoard[lane].forEach(c => add(c, eff.power));
+      break;
+    }
+    case 'immediate_self': {
+      // 配置ターンのみ自身 +N (endTurn でリセット)
+      card._immediateBonus = (card._immediateBonus || 0) + eff.power;
+      card._immediateAppliedTurn = state.turn;
+      if (eff.alsoSelfLane) myBoard[lane].forEach(c => { if (c !== card) add(c, eff.alsoSelfLane); });
+      break;
+    }
+    case 'stealth_self': {
+      // 自身に stealth 1ターン (相手の効果対象外、 endTurn 時に decrement)
+      card._stealthTurns = (card._stealthTurns || 0) + (eff.duration || 1);
+      if (eff.power) myBoard[lane].forEach(c => add(c, eff.power));
+      break;
+    }
+    case 'growth_self': {
+      // 自身に毎ターン +1 蓄積 (drawTurnStart で _growthCount++)
+      card._growthCount = card._growthCount || 0;
+      card._growthEnabled = true;
+      if (eff.power) myBoard[lane].forEach(c => add(c, eff.power));
+      break;
+    }
+    case 'cost_reduce_hand': {
+      // 自軍 手札 最高 cost のカードを cost -1 (1回限り、 配置で消費)
+      const hand = side === 'me' ? state.hand : state.oppHand;
+      if (hand.length === 0) break;
+      const candidates = hand.filter(h => !h._costReduced);
+      if (candidates.length === 0) break;
+      candidates.sort((a, b) => b.cost - a.cost);
+      candidates[0]._costReduced = (candidates[0]._costReduced || 0) + 1;
+      if (eff.power) myBoard[lane].forEach(c => add(c, eff.power));
+      break;
+    }
+    case 'summon_token': {
+      // 自レーンにトークン追加 (派閥別 generic、 cost 0 / power 2)
+      if (myBoard[lane].length >= 4) break;  // 満員ならスキップ
+      const tok = _makeToken(card.faction);
+      tok._currentPower = tok.basePower;
+      myBoard[lane].push(tok);
+      if (eff.power) myBoard[lane].forEach(c => { if (c !== tok) add(c, eff.power); });
+      break;
+    }
+    case 'chain_lane_self': {
+      // 自身 += 自レーン 自軍カード数 (即時、 chain)
+      const allyCount = myBoard[lane].length;  // card 本人含む
+      const bonus = allyCount * (eff.multiplier || 1);
+      card._currentPower = (card._currentPower != null ? card._currentPower : (card.basePower + dupeBonusOf(card))) + bonus;
+      if (eff.alsoSelfLane) myBoard[lane].forEach(c => { if (c !== card) add(c, eff.alsoSelfLane); });
+      break;
+    }
+    case 'golden_self_lane': {
+      // 自レーン 1体に「黄金化」 (退場まで +N 持続、 リオラエル 専用)
+      // 自身以外で最低 power を選ぶ (バニラ救済意図)
+      const cands = myBoard[lane].filter(c => c !== card);
+      if (cands.length > 0) {
+        cands.sort((a, b) => getCardPower(a, side, lane) - getCardPower(b, side, lane));
+        cands[0]._goldenBuff = (cands[0]._goldenBuff || 0) + eff.goldPower;
+      }
+      if (eff.power) myBoard[lane].forEach(c => { if (c !== card) add(c, eff.power); });
+      break;
+    }
   }
   if (eff.selfBonus) {
     card._currentPower = (card._currentPower != null ? card._currentPower : (card.basePower + dupeBonusOf(card))) + eff.selfBonus;
   }
+  // B-1.A: コンボパワー強化 (プリズマの「観測の祝福」 等、 自軍コンボに +N)
+  if (eff.comboBonus) {
+    state._comboBonusGlobal = (state._comboBonusGlobal || 0) + eff.comboBonus;
+  }
+}
+
+// B-1.D: snapshot/restore helper (master AI sim の完全復元用)
+const _STATE_FIELDS = ['_currentPower', '_appliedTo', '_frozenTurns', '_stealthTurns', '_silenced',
+  '_immediateBonus', '_immediateAppliedTurn', '_growthCount', '_growthEnabled', '_goldenBuff', '_costReduced'];
+function _snapshotCard(card) {
+  const snap = {};
+  _STATE_FIELDS.forEach(f => {
+    if (f === '_appliedTo' && Array.isArray(card[f])) snap[f] = [...card[f]];
+    else snap[f] = card[f];
+  });
+  return snap;
+}
+function _restoreCard(card, snap) {
+  _STATE_FIELDS.forEach(f => {
+    if (snap[f] === undefined) delete card[f];
+    else card[f] = snap[f];
+  });
+}
+
+// B-1.A: silence helper — 対象カードの _appliedTo を全 revert (与えていた buff/debuff を消す)
+function _silenceCard(target) {
+  if (!target || target._silenced) return;
+  if (target._appliedTo) {
+    target._appliedTo.forEach(({ target: t, delta }) => {
+      if (!t) return;
+      t._currentPower = (t._currentPower != null ? t._currentPower : (t.basePower + dupeBonusOf(t))) - delta;
+    });
+    target._appliedTo = [];
+  }
+  // 自身の selfBonus も revert (effectiveEffect から再計算)
+  const eff = effectiveEffect(target);
+  if (eff && eff.selfBonus) {
+    target._currentPower = (target._currentPower != null ? target._currentPower : (target.basePower + dupeBonusOf(target))) - eff.selfBonus;
+  }
+  target._silenced = true;
 }
 
 // ===== 配置取消 (個別カード undo) =====
@@ -989,11 +1285,21 @@ function undoMyCard(lane, boardIdx) {
     });
   }
   state.board.me[lane].splice(boardIdx, 1);
-  state.costUsed -= effectiveCost(card);
+  // B-1.A: cost_reduce 適用後の cost で返却 (二重計算防止)
+  const refundCost = Math.max(1, effectiveCost(card) - (card._costReduced || 0));
+  state.costUsed -= refundCost;
   state.thisTurnPlacements.splice(placementIdx, 1);
   // hand に戻す (state を綺麗に)
   delete card._appliedTo;
   delete card._currentPower;
+  delete card._immediateBonus;
+  delete card._immediateAppliedTurn;
+  delete card._frozenTurns;
+  delete card._stealthTurns;
+  delete card._growthCount;
+  delete card._growthEnabled;
+  delete card._silenced;
+  delete card._goldenBuff;
   state.hand.push(card);
   setMessage(`${card.name} を手札に戻した (⚡${card.cost} 返却)`, 'success');
   renderAll();
@@ -1037,6 +1343,18 @@ async function endTurn() {
     await aiTurn();
   }
 
+  // B-1.A: ターン終了時 — immediate buff の有効期限 (配置ターン終わり) を切る
+  ['me', 'opp'].forEach(side => {
+    [0, 1, 2].forEach(L => {
+      state.board[side][L].forEach(c => {
+        if (c._immediateAppliedTurn === state.turn && c._immediateBonus) {
+          c._immediateBonus = 0;
+          c._immediateAppliedTurn = null;
+        }
+      });
+    });
+  });
+
   if (state.turn >= state.maxTurn) {
     state.busy = false;
     finishMatch();
@@ -1060,7 +1378,9 @@ async function aiTurn() {
   while (aiCostUsed < aiCost && attempts < 8) {
     attempts++;
     const remaining = aiCost - aiCostUsed;
-    const playable = state.oppHand.map((c, i) => ({ c, i })).filter(x => x.c.cost <= remaining);
+    // B-1.A: AI も effectiveCost (MAX凸 / cost_reduce 反映) を使う
+    const aiEffCost = (c) => Math.max(1, effectiveCost(c) - (c._costReduced || 0));
+    const playable = state.oppHand.map((c, i) => ({ c, i })).filter(x => aiEffCost(x.c) <= remaining);
     if (playable.length === 0) break;
     const openLanes = [0, 1, 2].filter(L => state.board.opp[L].length < 4);
     if (openLanes.length === 0) break;
@@ -1081,7 +1401,7 @@ async function aiTurn() {
       lanes.sort((a, b) => a.d - b.d);
       lane = lanes[0].L;
     } else if (diff === 'hard') {
-      // (card, lane) 評価: コスト価値 + 同派閥シナジー + 劣勢補強 + 高コストカードは終盤温存
+      // (card, lane) 評価: コスト価値 + 同派閥シナジー + 劣勢補強 + 高コストカードは終盤温存 + 新メカニクス
       let best = null;
       for (const p of playable) {
         for (const L of openLanes) {
@@ -1099,6 +1419,25 @@ async function aiTurn() {
             if (e.rule === 'cost_le' && p.c.cost <= e.threshold) score += e.value * 1.5;
             if (e.rule === 'faction' && p.c.faction === e.faction) score += e.value * 2;
           }
+          // B-1.D: 新メカニクス評価 (effect.target に応じて bonus)
+          const eff = effectiveEffect(p.c) || {};
+          const power = eff.power || 0;
+          switch (eff.target) {
+            case 'freeze_opp_lane_top': score += 4 + power; break;  // 高価値 (相手最高pow無効化)
+            case 'freeze_opp_lane_all': score += state.board.me[L].length * 2 + power; break;
+            case 'silence_opp_lane_top': score += 3 + power; break;
+            case 'summon_token': score += 2 + power; break;  // 余分 body
+            case 'chain_lane_self': score += state.board.opp[L].length * (eff.multiplier || 1); break;
+            case 'buff_faction_lane': score += sameFac * (power || 1); break;
+            case 'growth_self': score += (state.maxTurn - state.turn + 1) * 1; break;  // 残ターン数で価値変動
+            case 'immediate_self': score += power; break;  // この turn のみ
+            case 'cost_reduce_hand': score += 1.5; break;
+            case 'golden_self_lane': score += 3; break;
+            case 'all_lanes': score += power * 3; break;
+            case 'all_opp_lanes': score += Math.abs(power) * 2; break;
+            case 'self_lane_attack': score += power + Math.abs(eff.oppPower || 0); break;
+          }
+          if (eff.comboBonus) score += 2;
           // 高コストは終盤温存 (残ターン数考慮)
           const remainingTurns = state.maxTurn - state.turn + 1;
           if (p.c.cost > remainingTurns * 1.5) score -= 1;
@@ -1109,14 +1448,22 @@ async function aiTurn() {
       pickIdx = best.i; lane = best.L;
     } else if (diff === 'master') {
       // 1-ply look-ahead: 配置 simulate → power gain (自) - power loss (相手) を最大化 + コンボ評価 + 派閥シナジー累積
+      // B-1.D: 新メカニクス対応 — 全カード状態を snapshot/restore で完全復元
       let best = null;
       for (const p of playable) {
         for (const L of openLanes) {
-          // simulate
+          // === snapshot (全カード + 全 hand の状態) ===
+          const allBoardCards = [].concat(...state.board.opp, ...state.board.me);
+          const cardSnaps = allBoardCards.map(c => _snapshotCard(c));
+          const handSnaps = state.oppHand.map(h => _snapshotCard(h));
+          const oppLaneLengthsBefore = [0, 1, 2].map(LL => state.board.opp[LL].length);
+
+          // === simulate ===
           const card = { ...p.c, _currentPower: p.c.basePower + dupeBonusOf(p.c), _appliedTo: [] };
           state.board.opp[L].push(card);
           applyEffect(card, L, 'opp');
-          // 配置後の評価: 自軍3レーン total + 「自軍勝ちレーン数」 +5 each
+
+          // === score ===
           let score = 0;
           for (let LL = 0; LL < 3; LL++) {
             const oppP = getLanePower('opp', LL);
@@ -1124,7 +1471,6 @@ async function aiTurn() {
             score += oppP - meP;
             if (oppP > meP) score += 5;
           }
-          // コンボ判定 (簡易)
           for (const combo of state.combos) {
             const oppCardsAll = [].concat(...state.board.opp);
             const inLane = state.board.opp[L];
@@ -1133,13 +1479,18 @@ async function aiTurn() {
             else if (combo.condition === 'any_lane') trig = combo.chars.every(c => oppCardsAll.some(x => x.name === c));
             if (trig) score += combo.effect.power * 1.5;
           }
-          // revert
-          if (card._appliedTo) {
-            card._appliedTo.forEach(({target, delta}) => {
-              target._currentPower = (target._currentPower != null ? target._currentPower : (target.basePower + dupeBonusOf(target))) - delta;
-            });
-          }
-          state.board.opp[L].pop();
+
+          // === restore (snapshot から完全復元、 token 追加分も削除) ===
+          // 1. simulate で追加した card + token を board から削除
+          [0, 1, 2].forEach(LL => {
+            const expected = oppLaneLengthsBefore[LL];
+            while (state.board.opp[LL].length > expected) state.board.opp[LL].pop();
+          });
+          // 2. allBoardCards (snap対象) の状態を restore
+          allBoardCards.forEach((c, i) => _restoreCard(c, cardSnaps[i]));
+          // 3. hand の _costReduced 等も restore
+          state.oppHand.forEach((h, i) => { if (handSnaps[i]) _restoreCard(h, handSnaps[i]); });
+
           if (!best || score > best.score) best = { i: p.i, L, score };
         }
       }
@@ -1147,7 +1498,8 @@ async function aiTurn() {
       pickIdx = best.i; lane = best.L;
     }
 
-    const cardCost = playable.find(x => x.i === pickIdx)?.c.cost || 0;
+    const pickedCard = playable.find(x => x.i === pickIdx)?.c;
+    const cardCost = pickedCard ? aiEffCost(pickedCard) : 0;
     placeAICard(pickIdx, lane);
     aiCostUsed += cardCost;
     await sleep(diff === 'easy' ? 350 : 250);
