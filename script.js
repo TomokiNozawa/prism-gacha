@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.2h — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.2i — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -6469,9 +6469,9 @@ function _persistOfflineBytes() {
 async function _fetchUrlBytes(url) {
   if (_OFFLINE_URL_BYTES.has(url)) return _OFFLINE_URL_BYTES.get(url);
   let bytes = 0;
-  // (2) cache 経由
+  // (2) cache 経由 (ignoreSearch:true で cache buster 違い吸収、 _downloadAllAssets と統一)
   try {
-    const r = await caches.match(url);
+    const r = await caches.match(url, { ignoreSearch: true });
     if (r) {
       const cl = r.headers && r.headers.get && r.headers.get('content-length');
       if (cl && /^\d+$/.test(cl)) bytes = parseInt(cl, 10);
@@ -6519,7 +6519,9 @@ async function _measureUrlsTotal(urls) {
       const sz = await _fetchUrlBytes(url);
       totalBytes += sz;
       try {
-        const r = await caches.match(url);
+        // バグ修正 2026-05-05 (野沢さん指摘 「ダウンロードしても DL されない」): ignoreSearch:true で
+        // cache buster 違い (?v=1.4.2g vs ?v=1.4.2h 等) でも cache hit 判定。 _downloadAllAssets と統一。
+        const r = await caches.match(url, { ignoreSearch: true });
         if (r) { cached++; cachedBytes += sz; }
       } catch (e) {}
     }

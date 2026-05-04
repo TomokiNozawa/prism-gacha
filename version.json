@@ -1,5 +1,5 @@
 {
-  "version": "1.4.2h",
+  "version": "1.4.2i",
   "releasedAt": "2026-05-03",
   "pendingChangelog": [
     "🎴 カードゲーム β を公開しました (アカウント登録者限定、 ホーム右カラムに入口)",
@@ -14,7 +14,8 @@
     "🛠 v1.4.2e: 緊急バグ修正 + PCB UI改善 (野沢さん指摘 2026-05-04)。 ヘッダ ver 表示 「v1.4.2ds」 → 「v1.4.2e」 修正 (cache buster 二重連結廃止)。 PCB コスト計算バグ修正 (凸軽減カード配置時の グレー化判定誤り)。 PCB HUD 簡略化 (絵文字削除 / 試合スコア廃止 / 中央メッセージ短縮 / 先攻後攻は You-AI ラベル横アイコン)。 PCB カード効果文 見切れ修正 (手札カード縦伸長 + 4行表示)。 全体数字計算点検: dupe 二重カウント・コンボ過剰加算バグ修正、 undo で 新メカニクス side effect 完全 revert",
     "📊 v1.4.2f: admin 画面 章更新対応 (TIER_MAX 14/25/28/22 + BGM_LABELS 第3-5章/カードゲーム/サハール/ニーヴル/ゼノニア/黒月/リオラ/銀霜 を追加)。 自動チェック ルール9 (admin TIER_MAX = pool count、 BLOCKER) + ルール10 (BGM_LABELS 全 BGM 登録、 WARNING) を check_repo_rules.py に追加。 admin に 🎴 PCB タブ追加 (アカウント作成者の試合数/勝率/BO3/最終プレイ集計、 cardgame の localStorage を本体ログイン時に Firebase 同期)",
     "🛠 v1.4.2g: cache buster 仕様 大改修 (野沢さん指示 2026-05-05 「同様のミスが二度と起こらないように」)。 cache buster を 日付ベース (?v=20260505a) → version.json と完全同期 (?v=1.4.2g) に統一。 dev suffix は a→z→aa→ab→...→zz→aaa の 無制限 increment (Excel column 風)、 main merge 時に a リセット。 bump_version.py に dev-suffix モード追加 (1コマンドで version + cache buster + SW_VERSION 一括更新)。 check_repo_rules.py ルール7-25 (suffix 1段階 increment 強制、 BLOCKER) + ルール7-26 (cache buster = version 完全同期、 BLOCKER) で機械的に強制。 PCB 中断 → 復帰機能 (state snapshot id-based serialize で localStorage 保存、 ホーム画面に「中断中の試合 を再開」 行 表示、 24時間で自動破棄)",
-    "🎴 v1.4.2h: PCB 大改修 (野沢さん指示 2026-05-05)。 immediate_self (このターンのみ効果) 廃止 → 永続効果に置換 (ヒノオウ/ツキ/ヒナカ/ハグル/ヴィン)。 LR/UR デッキ枚数制限 (LR=1, UR=3) を toggleDeckCard / generateAutoDeck で機械的に強制。 cost_reduce_hand を 1試合 1回限定 (アクアシス過剰強化対策)。 先攻/後攻 を絵文字 → 「先攻」「後攻」 言葉表記。 リリースノート通知を X.Y.Z bump 時のみ表示 (dev suffix 進行 1.4.2g → 1.4.2h は通知抑制)。 ガチャリザルト UI: スマホ 5列 → 2列、 PC 5列 → 4列 (キャラ大きく重なら表示)。 PCB カード詳細に Power 計算 内訳 (基礎/凸/onPlay累積/即時/成長/黄金化/レーン/シナジー/コンボ) 表示 (「-2 が -1 にしか反映されない」 等の調査用)。 sim 結果: 紅翼 18.6→28.6%、 アクアシス 65.2→57.6%、 教会 61.0→59.5%、 観測者 5.7% (単独使用想定外なので OK)"
+    "🎴 v1.4.2h: PCB 大改修 (野沢さん指示 2026-05-05)。 immediate_self (このターンのみ効果) 廃止 → 永続効果に置換 (ヒノオウ/ツキ/ヒナカ/ハグル/ヴィン)。 LR/UR デッキ枚数制限 (LR=1, UR=3) を toggleDeckCard / generateAutoDeck で機械的に強制。 cost_reduce_hand を 1試合 1回限定 (アクアシス過剰強化対策)。 先攻/後攻 を絵文字 → 「先攻」「後攻」 言葉表記。 リリースノート通知を X.Y.Z bump 時のみ表示 (dev suffix 進行 1.4.2g → 1.4.2h は通知抑制)。 ガチャリザルト UI: スマホ 5列 → 2列、 PC 5列 → 4列 (キャラ大きく重なら表示)。 PCB カード詳細に Power 計算 内訳 (基礎/凸/onPlay累積/即時/成長/黄金化/レーン/シナジー/コンボ) 表示 (「-2 が -1 にしか反映されない」 等の調査用)。 sim 結果: 紅翼 18.6→28.6%、 アクアシス 65.2→57.6%、 教会 61.0→59.5%、 観測者 5.7% (単独使用想定外なので OK)",
+    "🛠 v1.4.2i: オフライン保存 致命バグ修正 + コンボ全網羅 + 新メカニクス「常時オーラ」 (野沢さん指示 2026-05-05)。 オフライン保存 「ダウンロードしても DL されない」 バグ: _measureUrlsTotal の caches.match が ignoreSearch:true 未指定で、 cache buster 違いで cache hit 判定漏れ → 「未保存 N件」 のまま DL 試行 → 既 cache 済で 0件 fetch → ユーザー混乱。 _measureUrlsTotal / _fetchUrlBytes 両方に ignoreSearch:true 追加で _downloadAllAssets と統一。 コンボ未登場キャラ 29体 → 30個追加 (s1c5 黒月/銀霜/地底市 + s1c4 後半 + 各章 R) で 全 90体カバー (109コンボ)。 永続効果強さ調整 (ヒノオウ/ツキ/ハグル の selfBonus 抑制)。 新メカニクス「常時オーラ」 追加 (auraSelfLane / auraOppLane、 退場まで持続、 「最終結果に効く」 デザイン): ヒノオウ「焔王の威光」 自レーン全員 +1 オーラ、 グレイル「凍土の威圧」 相手 同レーン全員 -1 オーラ、 ノクトリア「黒月の呪詛」 相手 同レーン -1 オーラ、 リオラエル「黄金の母」 自レーン +1 オーラ + 黄金化。 s1c5 sion_chamber 仮面プロンプトに シオン参照画像 + 仮面 トレース指定 (野沢さん指示「変な仮面とか生成されても困る」)"
   ],
   "changelog": [
     {

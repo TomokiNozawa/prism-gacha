@@ -141,11 +141,11 @@ function updateMuteUI() {
 // 優先順位: cards.json (手書き完全override) > effects_override.json (effect+effectText のみ) > pool.json (default)
 async function loadMasters() {
   const [c, k, l, p, eo] = await Promise.all([
-    fetch('./cards.json?v=1.4.2h').then(r => r.json()),
-    fetch('./combos.json?v=1.4.2h').then(r => r.json()),
-    fetch('./lane_effects.json?v=1.4.2h').then(r => r.json()),
-    fetch('./data/pool.json?v=1.4.2h').then(r => r.json()).catch(() => []),
-    fetch('./effects_override.json?v=1.4.2h').then(r => r.json()).catch(() => ({})),
+    fetch('./cards.json?v=1.4.2i').then(r => r.json()),
+    fetch('./combos.json?v=1.4.2i').then(r => r.json()),
+    fetch('./lane_effects.json?v=1.4.2i').then(r => r.json()),
+    fetch('./data/pool.json?v=1.4.2i').then(r => r.json()).catch(() => []),
+    fetch('./effects_override.json?v=1.4.2i').then(r => r.json()).catch(() => ({})),
   ]);
   // pool 全カード ← effects_override で effect/effectText を上書き ← cards.json で完全 override
   const cardsByName = new Map();
@@ -564,10 +564,34 @@ function getCardPower(card, side, lane) {
   }
   // 派閥シナジー
   p += factionSynergyFor(card, side, lane);
+  // 野沢さん指示 2026-05-05 「もっと良い効果」: オーラ (常時発動、 永続)
+  // auraSelfLane: 自レーン同盟全員に +N (発生源含む)
+  // auraOppLane: 相手レーンの自軍 同レーンに -N (威圧、 silence/frozen で発生せず)
+  p += _auraBonusFor(card, side, lane);
   // ストーリーコンボ
   p += comboBonusFor(card, side, lane);
   return p;
 }
+
+// オーラ計算 (永続効果、 場の状態で動的)
+function _auraBonusFor(card, side, lane) {
+  let bonus = 0;
+  // 自レーンの auraSelfLane 持ちカード合計
+  state.board[side][lane].forEach(c => {
+    if (c._silenced || (c._frozenTurns || 0) > 0) return;
+    const eff = effectiveEffect(c);
+    if (eff && eff.auraSelfLane) bonus += eff.auraSelfLane;
+  });
+  // 相手レーンの auraOppLane 持ちカード合計 (相手 → 自軍 への威圧、 通常 負の値)
+  const oppSide = side === 'me' ? 'opp' : 'me';
+  state.board[oppSide][lane].forEach(c => {
+    if (c._silenced || (c._frozenTurns || 0) > 0) return;
+    const eff = effectiveEffect(c);
+    if (eff && eff.auraOppLane) bonus += eff.auraOppLane;
+  });
+  return bonus;
+}
+
 function getLanePower(side, lane) {
   // 各カードの power 合計 + コンボボーナス (レーン単位 1回)
   const cardSum = state.board[side][lane].reduce((s, c) => s + getCardPower(c, side, lane), 0);
@@ -1130,6 +1154,9 @@ function _describeEffect(card) {
   let txt = `${tlabel} ${sign}${power}`;
   if (e.selfBonus) txt += ` / 自身 +${e.selfBonus}`;
   if (e.comboBonus) txt += ` / コンボ +${e.comboBonus}`;
+  if (e.auraSelfLane) txt += ` / 常時オーラ 自レーン +${e.auraSelfLane}`;
+  if (e.auraOppLane) txt += ` / 常時オーラ 相手レーン ${e.auraOppLane}`;
+  if (e.goldPower) txt += ` / ✨黄金化 +${e.goldPower}`;
   return txt;
 }
 

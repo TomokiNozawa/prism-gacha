@@ -720,5 +720,270 @@
     "effect": { "target": "self_lane", "power": 5 },
     "flavor": "女皇・総監・学者。 空挺城の歯車を回す、 ゼノニアの三柱。",
     "chapter": "s1c4"
+  },
+
+  {
+    "id": "duo_lione_asura",
+    "name": "氷塔師弟",
+    "chars": ["氷塔の聖騎士 リオネ", "氷塔の見習い騎士 アスラ"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 3 },
+    "flavor": "氷塔の祈りを継ぐ、 聖騎士と見習いの絆。",
+    "chapter": "s1c4"
+  },
+  {
+    "id": "duo_yuris_valki",
+    "name": "氷霊宮廷",
+    "chars": ["氷霜の巫女 ユーリス", "摂政 ヴァルキ"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 3 },
+    "flavor": "巫女の祈りと摂政の采配、 ニーヴルの政務を支える二輪。",
+    "chapter": "s1c4"
+  },
+  {
+    "id": "duo_bell_haria",
+    "name": "真鍮師弟",
+    "chars": ["空挺整備士 ベル", "真鍮の女将 ハーニア"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 3 },
+    "flavor": "ハーニア女将の弟子ベル、 機械工房の熱気を二人で守る。",
+    "chapter": "s1c4"
+  },
+  {
+    "id": "duo_jin_garion",
+    "name": "機関士と総監",
+    "chars": ["空挺機関士 ジン", "空挺城総監 ガリオン"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 2 },
+    "flavor": "歯車を回す者と司令塔。 ゼノニアの空はこの二人で持つ。",
+    "chapter": "s1c4"
+  },
+  {
+    "id": "duo_vin_vare",
+    "name": "蒸気砲と女皇",
+    "chars": ["蒸気砲手 ヴィン", "空挺女皇 ヴァーレ"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 3 },
+    "flavor": "女皇の翼を守る蒸気砲手、 一射に翼の重みを乗せる。",
+    "chapter": "s1c4"
+  },
+  {
+    "id": "duo_izun_aluku",
+    "name": "雪原の村の絆",
+    "chars": ["氷牙の戦士 イズン", "凍土の少年 アルク"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 2 },
+    "flavor": "雪原の村で少年に剣を教えた戦士、 二人の足跡が同じ雪原に重なる。",
+    "chapter": "s1c4"
+  },
+  {
+    "id": "duo_shiera_aluku",
+    "name": "凍土の狩人と少年",
+    "chars": ["凍土の狩人 シエラ", "凍土の少年 アルク"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 2 },
+    "flavor": "雪原で道を見失わない狩人、 少年の冒険心を見守る背中。",
+    "chapter": "s1c4"
+  },
+  {
+    "id": "duo_iru_grailru",
+    "name": "凍土の祭司と氷帝",
+    "chars": ["凍土の祭司 イル", "氷帝 グレイル"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 3 },
+    "flavor": "ニーヴルの祭司の祈りが、 氷帝の剣に宿る霜となる。",
+    "chapter": "s1c4"
+  },
+  {
+    "id": "trio_niiruru_resist",
+    "name": "ニーヴル抵抗の三柱",
+    "chars": ["氷帝 グレイル", "凍土の祭司 イル", "氷塔の聖騎士 リオネ"],
+    "condition": "any_lane",
+    "effect": { "target": "all_lanes", "power": 3 },
+    "flavor": "氷帝・祭司・聖騎士。 黒月の影に対峙するニーヴル三柱。",
+    "chapter": "s1c4"
+  },
+
+  {
+    "id": "duo_morga_chanty",
+    "name": "海獣使いと船長",
+    "chars": ["海獣使い モルガ", "紅玉海賊団船長 シャンティ"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 2 },
+    "flavor": "海獣ジンを背負う遊牧民と紅玉号の船長、 海の自由を共に。",
+    "chapter": "s1c2"
+  },
+  {
+    "id": "duo_mika_chanty",
+    "name": "海賊の師弟",
+    "chars": ["海賊見習い ミカ", "紅玉海賊団船長 シャンティ"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 2 },
+    "flavor": "船長を真似ようとして失敗、 自分の色を見つけた見習い。",
+    "chapter": "s1c2"
+  },
+  {
+    "id": "duo_elan_caleb",
+    "name": "漁師と副長",
+    "chars": ["珊瑚漁師 エラン", "紅玉海賊団副長 ケイレブ"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 2 },
+    "flavor": "海溝の地理を知る漁師と紅玉の右腕、 海路の影の支え。",
+    "chapter": "s1c2"
+  },
+  {
+    "id": "duo_rikka_isabel",
+    "name": "教会従士の祈り",
+    "chars": ["白焔教会従士 リッカ", "イザベル"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 2 },
+    "flavor": "ランタンの灯番、 姉さまの背を最も近くで見つめる従士。",
+    "chapter": "s1c2"
+  },
+  {
+    "id": "duo_nadra_sahana",
+    "name": "砂風の語り部と王女",
+    "chars": ["砂風の語り部 ナドラ", "砂海王女 サハナ"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 2 },
+    "flavor": "風を読む語り部と七色の風を呼ぶ王女、 砂漠の声を継ぐ二人。",
+    "chapter": "s1c3"
+  },
+
+  {
+    "id": "trio_dark_observer",
+    "name": "黒月の観測者",
+    "chars": ["シ・ロエン", "黒月の盟主 ノクトリア", "地底市の母 リオラエル"],
+    "condition": "any_lane",
+    "effect": { "target": "all_lanes", "power": 4 },
+    "flavor": "黒月衆の主導・盟主、 地底市の母。 西の月の影を観測する三柱。",
+    "chapter": "s1c5"
+  },
+  {
+    "id": "duo_riorael_shion",
+    "name": "地底の母と仮面",
+    "chars": ["地底市の母 リオラエル", "仮面騎士 シオン"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 4 },
+    "flavor": "黄金の母と銀霜の盾、 黒月の予兆を最初に共有した二人。",
+    "chapter": "s1c5"
+  },
+  {
+    "id": "duo_nova_oriel",
+    "name": "銀霜の双剣",
+    "chars": ["銀霜王 ノヴァ", "銀霜剣聖 オリエル"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 4 },
+    "flavor": "銀霜王と剣聖、 銀霜王国を支える主と剣の絆。",
+    "chapter": "s1c5"
+  },
+  {
+    "id": "duo_galvin_shroen",
+    "name": "堕者の刀",
+    "chars": ["堕者剣聖 ガルヴィン", "シ・ロエン"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 3 },
+    "flavor": "堕ちた剣聖と黒月の主導、 黒月衆を率いる二振りの刀。",
+    "chapter": "s1c5"
+  },
+  {
+    "id": "duo_lunalia_riorael",
+    "name": "影織りと地底の母",
+    "chars": ["影織りの導師 ルナリア", "地底市の母 リオラエル"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 3 },
+    "flavor": "地底市の影を織る導師と、 黄金で照らす母。 リオラの双柱。",
+    "chapter": "s1c5"
+  },
+  {
+    "id": "duo_silver_vs_dark",
+    "name": "銀霜と黒月",
+    "chars": ["銀霜王 ノヴァ", "シ・ロエン"],
+    "condition": "any_lane",
+    "effect": { "target": "all_lanes", "power": 2 },
+    "flavor": "銀の月と黒の月、 第5章の対立軸が同じ場に揃う夜。",
+    "chapter": "s1c5"
+  },
+  {
+    "id": "duo_orfe_lunalia",
+    "name": "地底市の語り",
+    "chars": ["地底市の語り部 オルフェ", "影織りの導師 ルナリア"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 2 },
+    "flavor": "地底の歌い手と影の織り手、 リオラの夜を彩る二人。",
+    "chapter": "s1c5"
+  },
+  {
+    "id": "duo_aster_nova",
+    "name": "月夜の祭司と王",
+    "chars": ["月夜祭司 アスター", "銀霜王 ノヴァ"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 2 },
+    "flavor": "月夜の祈りを捧げる祭司と銀霜王、 銀霜王国の宮廷の支柱。",
+    "chapter": "s1c5"
+  },
+  {
+    "id": "duo_kuro_assassin_shroen",
+    "name": "黒月の刃",
+    "chars": ["黒月の刺客", "シ・ロエン"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 2 },
+    "flavor": "主導の影を担う刺客、 命じる者と斬る者の沈黙の盟。",
+    "chapter": "s1c5"
+  },
+  {
+    "id": "duo_seren_aster",
+    "name": "銀霜近衛の朝",
+    "chars": ["銀霜近衛 セレン", "月夜祭司 アスター"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 2 },
+    "flavor": "近衛の盾と祭司の祈り、 銀霜の朝を護る二人。",
+    "chapter": "s1c5"
+  },
+  {
+    "id": "duo_rapis_lumina",
+    "name": "雪月の灯番",
+    "chars": ["雪月神殿見習い ラピス", "ルミナ"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 2 },
+    "flavor": "雪月神殿の見習いと先輩、 灯を絶やさない祈りの継承。",
+    "chapter": "s1c5"
+  },
+  {
+    "id": "duo_silver_workshop_singer",
+    "name": "工房と歌姫",
+    "chars": ["銀霜の工房娘", "銀霜の歌姫"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 2 },
+    "flavor": "工房の鎚音と祭の歌、 銀霜の市街を支える二色の灯。",
+    "chapter": "s1c5"
+  },
+  {
+    "id": "duo_shieru_riorael",
+    "name": "地底の母娘",
+    "chars": ["地底市の少女 シエル", "地底市の母 リオラエル"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 3 },
+    "flavor": "リオラの少女と母、 黄金の祈りが世代を渡す。",
+    "chapter": "s1c5"
+  },
+  {
+    "id": "trio_silver_top",
+    "name": "銀霜三柱",
+    "chars": ["銀霜王 ノヴァ", "銀霜剣聖 オリエル", "銀霜近衛 セレン"],
+    "condition": "same_lane",
+    "effect": { "target": "self_lane", "power": 5 },
+    "flavor": "王・剣聖・近衛。 銀霜王国の宮廷を支える三柱。",
+    "chapter": "s1c5"
+  },
+
+  {
+    "id": "trio_observer_resist_dark",
+    "name": "観測者の対峙",
+    "chars": ["虹意 プリズマ", "千夜姫 カグヤ", "シ・ロエン"],
+    "condition": "any_lane",
+    "effect": { "target": "all_lanes", "power": 5 },
+    "flavor": "原虹・最古・黒月、 千年を跨ぐ三観測者の対峙の夜。",
+    "chapter": "s1c5"
   }
 ]

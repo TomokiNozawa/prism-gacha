@@ -23,8 +23,8 @@
     "effect": { "trigger": "onPlay", "target": "chain_lane_self", "multiplier": 1, "alsoSelfLane": 2 }
   },
   "焔帝 ヒノオウ": {
-    "effectText": "焔王の威光: 自レーン +3、 自身 +3 (覇者の領域)",
-    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 3, "selfBonus": 3 }
+    "effectText": "焔王の威光: 自レーン +2、 居る限り自レーン全員 +1 (常時オーラ)",
+    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 2, "auraSelfLane": 1 }
   },
 
   "森の射手 リナエ": {
@@ -73,8 +73,8 @@
     "effect": { "trigger": "onPlay", "target": "adjacent_lanes", "power": 1, "selfBonus": 1 }
   },
   "紅翼 ツキ": {
-    "effectText": "紅翼の閃光: 相手 同レーン -2、 自身 +2",
-    "effect": { "trigger": "onPlay", "target": "opp_self_lane", "power": -2, "selfBonus": 2 }
+    "effectText": "紅翼の閃光: 相手 同レーン -2、 自身 +1",
+    "effect": { "trigger": "onPlay", "target": "opp_self_lane", "power": -2, "selfBonus": 1 }
   },
   "薫音": {
     "effectText": "剣師範の構え: 自レーン +2、 自身 +1",
@@ -235,8 +235,8 @@
   },
 
   "氷帝 グレイル": {
-    "effectText": "凍土の支配: 相手 同レーン全員を ❄凍結 1T、 自レーン +2",
-    "effect": { "trigger": "onPlay", "target": "freeze_opp_lane_all", "power": 2, "duration": 1 }
+    "effectText": "凍土の威圧: 自レーン +2、 居る限り相手 同レーン全員 -1 (常時オーラ威圧)",
+    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 2, "auraOppLane": -1 }
   },
   "空挺女皇 ヴァーレ": {
     "effectText": "翼の指令: 全レーン +1、 自レーンに 空挺兵 召喚",
@@ -260,8 +260,8 @@
     "effect": { "trigger": "onPlay", "target": "cost_reduce_hand", "power": 1 }
   },
   "北方剣聖 ハグル": {
-    "effectText": "北方の双剣: 相手 同レーン -3、 自レーン +1",
-    "effect": { "trigger": "onPlay", "target": "opp_self_lane", "power": -3, "selfBonus": 1, "extraSelfLane": 1 }
+    "effectText": "北方の双剣: 相手 同レーン -2、 自身 +1",
+    "effect": { "trigger": "onPlay", "target": "opp_self_lane", "power": -2, "selfBonus": 1 }
   },
   "空挺城首席学者 ゼピル": {
     "effectText": "理論の召喚: 自レーンに 空挺兵 召喚、 自レーン +1",
@@ -323,12 +323,12 @@
     "effect": { "trigger": "onPlay", "target": "silence_opp_lane_top", "power": 0, "extraAllOpp": -1 }
   },
   "黒月の盟主 ノクトリア": {
-    "effectText": "黒月の呪詛: 全相手レーン -2",
-    "effect": { "trigger": "onPlay", "target": "all_opp_lanes", "power": -2 }
+    "effectText": "黒月の呪詛: 全相手レーン -1、 居る限り相手 同レーン全員 -1 (常時オーラ呪詛)",
+    "effect": { "trigger": "onPlay", "target": "all_opp_lanes", "power": -1, "auraOppLane": -1 }
   },
   "地底市の母 リオラエル": {
-    "effectText": "黄金の母: 自レーン +2、 自レーン1体に ✨黄金化 +3",
-    "effect": { "trigger": "onPlay", "target": "golden_self_lane", "power": 2, "goldPower": 3 }
+    "effectText": "黄金の母: 自レーン1体に ✨黄金化 +3、 居る限り自レーン +1 (常時オーラ祝福)",
+    "effect": { "trigger": "onPlay", "target": "golden_self_lane", "power": 0, "goldPower": 3, "auraSelfLane": 1 }
   },
 
   "堕者剣聖 ガルヴィン": {
