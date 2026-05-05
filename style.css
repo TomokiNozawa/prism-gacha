@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.3c — 演出スタイル (Season 1 第1章) / dev は cache buster suffix で進行
+   Prismaera v1.4.3d — 演出スタイル (Season 1 第1章) / dev は cache buster suffix で進行
    ============================================================ */
 :root {
   --bg: #05060d;
@@ -1386,7 +1386,12 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
 }
 .result-grid {
   /* 野沢さん指示 2026-05-05: スクロール可能なんだからカード重ねない、 PC=4列、 モバイル=2列 で大きく */
+  /* grid-auto-rows: max-content 必須 (野沢さん指摘 2026-05-05): 親 flex 内で row 高さが圧縮され
+     cell の aspect-ratio: 2/3 が 無視され カードが上下に重なって全身が見えないバグの対策。
+     max-content で 各行 cell が aspect-ratio 通り (キャラ全身が見える) 縦長を維持、
+     grid 全体が超過した時は overflow-y:auto で スクロール。 */
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+  grid-auto-rows: max-content;
   padding: 12px 24px;
   margin: 0;
   overflow-y: auto;

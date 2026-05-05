@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.3c — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.3d — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -8294,9 +8294,10 @@ document.addEventListener("keydown", e => {
   // モーダル open 中は Space/Enter による裏ガチャ抑止 (野沢さん指摘 2026-05-02 Space バグ対策)
   // _isAllModalsHidden は ranking/result/char-detail/story 等 主要モーダルを網羅チェック
   if (typeof _isAllModalsHidden === 'function' && !_isAllModalsHidden()) return;
-  if (e.key === " ") { e.preventDefault(); doSingle(); }
-  else if (e.key === "Enter") { e.preventDefault(); doTen(); }
-  else if (e.key === "g" || e.key === "G") { e.preventDefault(); openGallery(); }
+  // 野沢さん指示 2026-05-05: ホーム画面からの Space/Enter ガチャショートカット 廃止
+  // (ピックアップ側にヒント無しで レイアウト揃わない問題 + 初心者向けに 不要)
+  // リザルト画面の Enter (もう一度 10連) / Esc (閉じる) は 上の if ブロックで 維持
+  if (e.key === "g" || e.key === "G") { e.preventDefault(); openGallery(); }
 });
 
 // Init
@@ -8708,7 +8709,8 @@ function sanitizeStateForCloud(s) {
     total: s.total || 0,
     ur: s.ur || 0,
     pity: s.pity || 0,
-    history: (Array.isArray(s.history) ? s.history : []).slice(-120),
+    // history は unshift で追加 → 先頭が新しい / 末尾が古い。 slice(-120) は 古い側を残すバグだったため slice(0, 120) で 新しい120件を残す (野沢さん指摘 2026-05-05: 4/24 古いデータが残り 5/4 が消える原因)
+    history: (Array.isArray(s.history) ? s.history : []).slice(0, 120),
     unlockedSet: s.unlockedSet || {},
     dupCounts: s.dupCounts || {},
     galleryViewed: s.galleryViewed || {},
@@ -8847,8 +8849,20 @@ function mergeStates(local, cloud) {
   for (const k of allDupKeys) {
     merged.dupCounts[k] = Math.max((local.dupCounts && local.dupCounts[k]) || 0, (cloud.dupCounts && cloud.dupCounts[k]) || 0);
   }
+  // history 連結 → at 降順 sort → 重複除去 → 新しい120件を保持 (野沢さん指摘 2026-05-05)
+  // 旧 slice(-120) は cloud/local の連結順依存で 新旧入り混じりの末尾120件が 古いデータに偏るバグ
   const combined = [...(cloud.history || []), ...(local.history || [])];
-  merged.history = combined.slice(-120);
+  combined.sort((a, b) => (b.at || 0) - (a.at || 0));
+  // 同一エントリ重複除去 (at + tier + name で identity)
+  const seen = new Set();
+  const dedup = [];
+  for (const e of combined) {
+    const key = `${e.at || 0}|${e.tier || ''}|${e.name || ''}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    dedup.push(e);
+  }
+  merged.history = dedup.slice(0, 120);
   // 偏差値ヒストリー: 高い方/低い方を採用 (記録 -1 は未記録扱いで除外)
   const localBest = (typeof local.bestTScore === 'number' && local.bestTScore >= 0) ? local.bestTScore : -1;
   const cloudBest = (typeof cloud.bestTScore === 'number' && cloud.bestTScore >= 0) ? cloud.bestTScore : -1;
