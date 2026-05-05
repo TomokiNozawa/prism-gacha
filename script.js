@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4m — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4n — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -3286,6 +3286,41 @@ async function _loadPcbCardData() {
   return _pcbCardDataPromise;
 }
 
+function _renderPcbPaneDupeStages(card, c) {
+  // 凸効果 簡易表 (cardgame の dupeBonusOf 仕様: 0/half→+1/MAX→+2 + cost-1 + 効果範囲拡大)
+  const max = (typeof MAX_DUPS !== 'undefined' && MAX_DUPS[c.tier]) || 0;
+  if (max === 0) return '';
+  const half = Math.ceil(max / 2);
+  const stages = max === 1
+    ? [{ label: '凸 0', d: 0 }, { label: 'MAX 凸', d: 1 }]
+    : [{ label: '凸 0', d: 0 }, { label: `半分凸 (${half}凸)`, d: half }, { label: `MAX 凸 (${max}凸)`, d: max }];
+  const cur = (state && state.dupCounts) ? (state.dupCounts[c.tier + '_' + c.name] || 0) : 0;
+  const rowsHtml = stages.map((s, i) => {
+    let bonus = 0;
+    if (s.d >= max) bonus = 2;
+    else if (s.d >= half) bonus = 1;
+    const cost = (s.d >= max && (card.cost || 0) > 0) ? (card.cost - 1) : card.cost;
+    // 現在凸数が この段階に該当するか (次段階より下なら ココ)
+    const nextD = stages[i + 1] ? stages[i + 1].d : Infinity;
+    const isCur = cur >= s.d && cur < nextD;
+    const powerStr = bonus > 0 ? `${card.basePower}+${bonus}=<b>${card.basePower + bonus}</b>` : `<b>${card.basePower}</b>`;
+    const costStr = (s.d >= max && (card.cost || 0) > 0) ? `<s class="pcb-cost-orig">${card.cost}</s><b>${cost}</b>` : `<b>${cost}</b>`;
+    return `<tr class="${isCur ? 'pcb-stage-cur' : ''}">
+      <td>${s.label}${isCur ? ' <span class="pcb-stage-cur-mark">◀現在</span>' : ''}</td>
+      <td>${powerStr}</td>
+      <td>${costStr}</td>
+    </tr>`;
+  }).join('');
+  return `<div class="pcb-pane-stages-block">
+    <div class="pcb-pane-stages-label">📊 凸毎の効果</div>
+    <table class="pcb-pane-stages-table">
+      <thead><tr><th>段階</th><th>ﾊﾟﾜｰ</th><th>ｺｽﾄ</th></tr></thead>
+      <tbody>${rowsHtml}</tbody>
+    </table>
+    <div class="pcb-pane-stages-note">※ MAX 凸: コスト-1 + 効果範囲が拡大</div>
+  </div>`;
+}
+
 async function renderCharDetailPcb(c) {
   const pane = document.getElementById('char-detail-pcb');
   if (!pane) return;
@@ -3302,7 +3337,6 @@ async function renderCharDetailPcb(c) {
   const targetLabel = e => (e && e.target === 'all_lanes' ? '全レーン' : '自レーン');
   let html = `<div class="pcb-pane-stats">
     <div class="pcb-pane-stat-row">
-      <span class="pcb-pane-tier tier-${(card.tier || '').toLowerCase()}">${escapeHtml(card.tier || '?')}</span>
       <span class="pcb-pane-faction" style="background:${facBg}">${escapeHtml(card.faction || '無所属')}</span>
     </div>
     <div class="pcb-pane-stat-grid">
@@ -3316,6 +3350,8 @@ async function renderCharDetailPcb(c) {
       <div class="pcb-pane-effect-text">${escapeHtml(card.effectText)}</div>
     </div>`;
   }
+  // 凸毎効果 表 (野沢さん指示 2026-05-06)
+  html += _renderPcbPaneDupeStages(card, c);
   html += `<div class="pcb-pane-combo-block">
     <div class="pcb-pane-combo-label">関連コンボ <span class="pcb-pane-combo-count">${related.length}件</span></div>`;
   if (related.length === 0) {
@@ -6034,9 +6070,12 @@ function renderScene() {
   setupCutinBlinks();
   $("#story-bg").className = 'story-bg bg-' + (scene.bg || 'default');
   // 場所画像レイヤー: scene.label (例: '2-7') から LOCATION_CONFIG を引き、 あれば画像をフェードイン
+  // label 空 (プロローグ/エピローグ等の h2 直接本文 シーン) は title で lookup
+  // (野沢さん指摘 2026-05-06 「s1c5 で背景・挿絵が反映されない」 修正)
   const locationImgEl = $("#story-location-img");
   if (locationImgEl) {
-    const locConf = (LOCATION_CONFIG[currentStoryId] || {})[scene.label];
+    const sceneKey = scene.label || scene.title;
+    const locConf = (LOCATION_CONFIG[currentStoryId] || {})[sceneKey];
     if (locConf && locConf.img) {
       locationImgEl.style.backgroundImage = `url('${locConf.img}')`;
       locationImgEl.classList.add('active');
@@ -6539,6 +6578,7 @@ const LOCATION_CONFIG = {
   },
   's1c5': {
     // 第5章「黒月の予兆」 背景 (3:4縦長 全 8枚)
+    // h2 直接本文 (プロローグ / エピローグ) は scene.title で lookup されるため key 完全一致が必要
     'プロローグ': { img: '/images/locations/s1c5/thumb/observer_west_realm_thumb.webp' },        // プロローグ 観測者三柱・西の月の異変観測
     '1-1':         { img: '/images/locations/s1c5/thumb/silver_throne_hall_thumb.webp' },        // 1-1 銀霜王宮の月光謁見の間
     '1-2':         { img: '/images/locations/s1c5/thumb/sion_chamber_thumb.webp' },              // 1-2 シオンの私室 (仮面の置かれた机)
@@ -6546,7 +6586,7 @@ const LOCATION_CONFIG = {
     '2-1':         { img: '/images/locations/s1c5/thumb/black_moon_grove_thumb.webp' },          // 2-1 月喰いの森 (黒月衆の祭壇)
     '3-1':         { img: '/images/locations/s1c5/thumb/underworld_liora_full_thumb.webp' },     // 3-1 地底市リオラ全景
     '3-3':         { img: '/images/locations/s1c5/thumb/moon_shrine_altar_thumb.webp' },         // 3-3 雪月神殿の祭壇
-    'エピローグ': { img: '/images/locations/s1c5/thumb/observer_west_close_thumb.webp' },        // エピローグ 観測者三柱・東への引き
+    'エピローグ — 観測者三柱、 七座を仰ぐ': { img: '/images/locations/s1c5/thumb/observer_west_close_thumb.webp' },  // エピローグ scene.title 完全一致
   },
   's1c3': {
     // 各シーンの「印象深い1場面」 を 3:4 縦長背景画像として配置
@@ -6651,7 +6691,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // version 完全同期 (野沢さん指示 2026-05-06): bump_version.py が自動で更新する。
 // 旧 date-suffix '20260504o' を 5/6 で見つけた事故を契機に version-based に統一。
-const IMG_CACHE_VERSION = '1.4.4m';
+const IMG_CACHE_VERSION = '1.4.4n';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる

@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4m — 演出スタイル (Season 1 第1章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4n — 演出スタイル (Season 1 第1章) / dev は cache buster suffix で進行
    ============================================================ */
 :root {
   --bg: #05060d;
@@ -2249,30 +2249,97 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   color: rgba(255,255,255,0.85);
   letter-spacing: 0.03em;
 }
-/* キャラ詳細 タブ UI (ストーリー / PCB 性能) — 野沢さん指示 2026-05-06 */
+/* キャラ詳細 タブ UI (Tier 横配置、 スマホでスクロール不要、 野沢さん指示 2026-05-06) */
+.char-detail-header-row {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+.char-detail-header-row .char-detail-tier { flex: 0 0 auto; margin: 0; }
 .char-detail-tabs {
-  display: flex; gap: 6px;
-  margin: 10px 0 12px;
-  border-bottom: 1px solid rgba(255,255,255,0.12);
+  display: flex; gap: 4px;
+  margin-left: auto;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 999px;
+  padding: 3px;
 }
 .char-detail-tab {
-  flex: 1 1 0;
   background: transparent;
   border: none;
-  padding: 10px 8px 9px;
-  color: rgba(255,255,255,0.55);
-  font-size: 13px; font-weight: 500;
+  padding: 6px 14px;
+  color: rgba(255,255,255,0.6);
+  font-size: 12px; font-weight: 500;
   letter-spacing: 0.04em;
   cursor: pointer;
-  border-bottom: 2px solid transparent;
-  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+  border-radius: 999px;
+  transition: color 0.15s ease, background 0.15s ease;
+  min-height: 32px;
 }
-.char-detail-tab:hover { color: rgba(255,255,255,0.8); background: rgba(255,255,255,0.04); }
+.char-detail-tab:hover { color: rgba(255,255,255,0.85); }
 .char-detail-tab.active {
-  color: #fff;
-  border-bottom-color: rgba(251, 191, 36, 0.7);
+  color: #1a1d2e;
+  background: rgba(251, 191, 36, 0.85);
+  font-weight: 600;
 }
 .char-detail-tab-pane[hidden] { display: none !important; }
+/* 凸毎の効果 表 (PCB タブ内) */
+.pcb-pane-stages-block {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+}
+.pcb-pane-stages-label {
+  font-size: 12px; color: rgba(255,255,255,0.7);
+  letter-spacing: 0.06em; margin-bottom: 8px;
+}
+.pcb-pane-stages-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  table-layout: fixed;
+}
+.pcb-pane-stages-table th, .pcb-pane-stages-table td {
+  padding: 6px 8px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.pcb-pane-stages-table th {
+  font-size: 10px;
+  color: rgba(255,255,255,0.5);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+.pcb-pane-stages-table td:nth-child(2),
+.pcb-pane-stages-table td:nth-child(3),
+.pcb-pane-stages-table th:nth-child(2),
+.pcb-pane-stages-table th:nth-child(3) {
+  width: 70px;
+  text-align: center;
+}
+.pcb-pane-stages-table tr.pcb-stage-cur {
+  background: rgba(251, 191, 36, 0.08);
+}
+.pcb-pane-stages-table tr.pcb-stage-cur td { color: #fff; }
+.pcb-stage-cur-mark {
+  font-size: 10px;
+  color: rgba(251, 191, 36, 0.95);
+  margin-left: 4px;
+}
+.pcb-cost-orig {
+  color: rgba(255,255,255,0.4);
+  text-decoration: line-through;
+  margin-right: 4px;
+  font-size: 10px;
+}
+.pcb-pane-stages-note {
+  font-size: 10px;
+  color: rgba(255,255,255,0.5);
+  margin-top: 6px;
+  letter-spacing: 0.04em;
+}
 /* PCB 性能 ペイン */
 .char-detail-pcb { padding: 4px 0 8px; }
 .pcb-pane-empty {

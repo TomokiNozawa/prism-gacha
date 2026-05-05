@@ -24,8 +24,8 @@
 <link rel="icon" href="/images/icons/icon-32.png" type="image/png" sizes="32x32">
 <link rel="icon" href="/images/icons/icon-16.png" type="image/png" sizes="16x16">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
-<link rel="manifest" href="/manifest.json?v=1.4.4m">
-<link rel="stylesheet" href="/style.css?v=1.4.4m">
+<link rel="manifest" href="/manifest.json?v=1.4.4n">
+<link rel="stylesheet" href="/style.css?v=1.4.4n">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -67,7 +67,7 @@ if ('serviceWorker' in navigator) {
 </div>
 
 <header class="topbar">
-  <div class="title">✦ Prismaera <span class="title-kana">-プリズマエラ-</span> <span class="ver" id="app-version">v1.4.4m</span></div>
+  <div class="title">✦ Prismaera <span class="title-kana">-プリズマエラ-</span> <span class="ver" id="app-version">v1.4.4n</span></div>
   <div class="stats">
     <button id="btn-gallery" class="gallery-btn" title="図鑑 (Gキー)">📖 図鑑</button>
     <button id="btn-relations" class="gallery-btn" title="相関図">🌐 相関図</button>
@@ -329,17 +329,19 @@ if ('serviceWorker' in navigator) {
       <div class="char-detail-zoom-hint">タップで拡大</div>
     </div>
     <div class="char-detail-info">
-      <div class="char-detail-tier" id="char-detail-tier"></div>
-      <div class="char-detail-dup" id="char-detail-dup"></div>
+      <!-- Tier 横にタブ切替 (野沢さん指示 2026-05-06、 スマホでスクロール不要に) -->
+      <div class="char-detail-header-row">
+        <div class="char-detail-tier" id="char-detail-tier"></div>
+        <div class="char-detail-tabs" id="char-detail-tabs">
+          <button type="button" class="char-detail-tab active" data-tab="story">📖 物語</button>
+          <button type="button" class="char-detail-tab" data-tab="pcb">🎴 PCB</button>
+        </div>
+      </div>
       <div class="char-detail-name" id="char-detail-name"></div>
       <div class="char-detail-title" id="char-detail-title"></div>
       <div class="char-detail-caption" id="char-detail-caption"></div>
-      <!-- タブ: ストーリー (既存) / 🎴 PCB 性能 (野沢さん指示 2026-05-06) -->
-      <div class="char-detail-tabs" id="char-detail-tabs">
-        <button type="button" class="char-detail-tab active" data-tab="story">📖 ストーリー</button>
-        <button type="button" class="char-detail-tab" data-tab="pcb">🎴 PCB 性能</button>
-      </div>
       <div class="char-detail-tab-pane" data-tab="story">
+        <div class="char-detail-dup" id="char-detail-dup"></div>
         <div class="char-detail-desc" id="char-detail-desc"></div>
         <div class="char-detail-relations" id="char-detail-relations"></div>
       </div>
@@ -693,7 +695,7 @@ if ('serviceWorker' in navigator) {
 <audio id="bgm-home" preload="auto"></audio>
 
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
-<script src="/script.js?v=1.4.4m"></script>
-<script src="/gasshuku.js?v=1.4.4m"></script>
+<script src="/script.js?v=1.4.4n"></script>
+<script src="/gasshuku.js?v=1.4.4n"></script>
 </body>
 </html>
