@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4ar — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4as — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -3172,16 +3172,31 @@ function selectRarityFilter(tier) {
 }
 
 // 図鑑モーダル「期間限定」 タブの可視性 (gasshuku.js の isGasshukuVisible と連動)
+// + 公開前章タブの非表示 (12:00 前リーク防止、 野沢さん指示 2026-05-06)
 function updateGalleryTabsVisibility() {
   const limited = document.querySelector('.gallery-tab-limited');
-  if (!limited) return;
-  const visible = typeof window.isGasshukuVisible === 'function' && window.isGasshukuVisible();
-  limited.style.display = visible ? '' : 'none';
+  if (limited) {
+    const visible = typeof window.isGasshukuVisible === 'function' && window.isGasshukuVisible();
+    limited.style.display = visible ? '' : 'none';
+  }
+  // 公開前章タブを 非表示 (releaseDate 経過後に 自動的に表示される)
+  document.querySelectorAll('.gallery-tab[data-tab^="s"]').forEach(tab => {
+    const sid = tab.dataset.tab;
+    if (typeof _isChapterReleased === 'function' && !_isChapterReleased(sid)) {
+      tab.style.display = 'none';
+    } else {
+      tab.style.display = '';
+    }
+  });
 }
 window.updateGalleryTabsVisibility = updateGalleryTabsVisibility;
 
 // 章タブ切替
 function selectGalleryTab(tab) {
+  // 公開前章は強制 'all' フォールバック (12:00 前リーク防止)
+  if (tab && tab.startsWith('s') && typeof _isChapterReleased === 'function' && !_isChapterReleased(tab)) {
+    tab = 'all';
+  }
   currentGalleryTab = tab;
   // 章タブ切替時は レアリティフィルターをリセット
   currentGalleryTier = 'all';
@@ -4932,9 +4947,14 @@ const FACTION_WORLD_COORDS = {
 function renderWorldMap() {
   const canvas = document.getElementById('world-map-canvas');
   if (!canvas || typeof FACTIONS === 'undefined') return;
-  // 派閥ごとのメンバー数を集計
+  // 派閥ごとのメンバー数を集計 (公開前章のキャラは除外、 12:00 前リーク防止)
   const memberCount = {};
   for (const name in (typeof CHAR_FACTION !== 'undefined' ? CHAR_FACTION : {})) {
+    // POOL から chapter を取得 → _isChapterReleased で フィルタ
+    const c = (typeof getCharByName === 'function') ? getCharByName(name) : null;
+    if (c && c.chapter && typeof _isChapterReleased === 'function' && !_isChapterReleased(c.chapter)) {
+      continue;
+    }
     const f = CHAR_FACTION[name].f;
     memberCount[f] = (memberCount[f] || 0) + 1;
   }
@@ -5001,6 +5021,9 @@ function renderWorldMap() {
   // 各派閥ノード (ワールド配置)
   factionsForMap.forEach(f => {
     const cnt = memberCount[f.id] || 0;
+    // 公開済章のメンバーが 0 = 全員 公開前章 → 派閥ノード描画スキップ (12:00 前リーク防止)
+    // (既存派閥で 既存メンバーがいる場合は cnt > 0 なので 表示維持)
+    if (cnt === 0) return;
     const r = 92 + Math.min(cnt * 5, 35);  // 92〜127
     const icon = FACTION_ICONS[f.id] || '⚐';
     svg += `<g class="world-faction-node" data-faction="${f.id}" transform="translate(${f.x},${f.y})">
@@ -5022,7 +5045,9 @@ function renderWorldMap() {
   });
   // Phase 2: 章マーカー (主舞台に📖ホットスポット、 公開済はopenStory、 未公開はComing Soon)
   STORY_CHAPTER_MARKERS.forEach(m => {
-    const isPublished = (typeof STORY_FILES !== 'undefined') && !!STORY_FILES[m.storyId];
+    // 公開済 = STORY_FILES 登録 + releaseDate 経過 (両方 必須、 12:00 前 リーク防止)
+    const isPublished = (typeof STORY_FILES !== 'undefined') && !!STORY_FILES[m.storyId]
+                        && (typeof _isChapterReleased !== 'function' || _isChapterReleased(m.storyId));
     const cls = isPublished ? 'world-chapter-marker' : 'world-chapter-marker coming-soon';
     const cap = isPublished ? m.label : `${m.label} 近日`;
     svg += `<g class="${cls}" data-story="${m.storyId}" transform="translate(${m.x},${m.y})">
@@ -6860,7 +6885,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // version 完全同期 (野沢さん指示 2026-05-06): bump_version.py が自動で更新する。
 // 旧 date-suffix '20260504o' を 5/6 で見つけた事故を契機に version-based に統一。
-const IMG_CACHE_VERSION = '1.4.4ar';
+const IMG_CACHE_VERSION = '1.4.4as';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
