@@ -141,11 +141,11 @@ function updateMuteUI() {
 // 優先順位: cards.json (手書き完全override) > effects_override.json (effect+effectText のみ) > pool.json (default)
 async function loadMasters() {
   const [c, k, l, p, eo] = await Promise.all([
-    fetch('./cards.json?v=1.4.2i').then(r => r.json()),
-    fetch('./combos.json?v=1.4.2i').then(r => r.json()),
-    fetch('./lane_effects.json?v=1.4.2i').then(r => r.json()),
-    fetch('./data/pool.json?v=1.4.2i').then(r => r.json()).catch(() => []),
-    fetch('./effects_override.json?v=1.4.2i').then(r => r.json()).catch(() => ({})),
+    fetch('./cards.json?v=1.4.2j').then(r => r.json()),
+    fetch('./combos.json?v=1.4.2j').then(r => r.json()),
+    fetch('./lane_effects.json?v=1.4.2j').then(r => r.json()),
+    fetch('./data/pool.json?v=1.4.2j').then(r => r.json()).catch(() => []),
+    fetch('./effects_override.json?v=1.4.2j').then(r => r.json()).catch(() => ({})),
   ]);
   // pool 全カード ← effects_override で effect/effectText を上書き ← cards.json で完全 override
   const cardsByName = new Map();
@@ -1020,7 +1020,10 @@ function _renderDupeStageTable(card) {
   const fakeCardAt = (d) => ({ ...card, dupes: d });
   wrap.innerHTML = `<h3 class="cg-dupe-stage-title">📊 凸毎の効果</h3>
     <table class="cg-dupe-stage-table">
-      <thead><tr><th>段階</th><th>パワー</th><th>コスト</th><th>効果</th></tr></thead>
+      <colgroup>
+        <col class="col-stage"><col class="col-power"><col class="col-cost"><col class="col-eff">
+      </colgroup>
+      <thead><tr><th>段階</th><th>ﾊﾟﾜｰ</th><th>ｺｽﾄ</th><th>効果</th></tr></thead>
       <tbody>
         ${stages.map(s => {
           const fc = fakeCardAt(s.dupes);
@@ -1031,8 +1034,8 @@ function _renderDupeStageTable(card) {
           const isCur = curDupes === s.dupes || (s.dupes === max && curDupes >= max) || (s.dupes === half && curDupes >= half && curDupes < max);
           return `<tr class="${isCur ? 'cg-dupe-stage-current' : ''}">
             <td>${s.label}${isCur ? ' <span class="cg-dupe-stage-cur-mark">◀現在</span>' : ''}</td>
-            <td>${card.basePower}${bonus > 0 ? ` <span class="cg-dupe-bonus">+${bonus}</span>` : ''} = <b>${tp}</b></td>
-            <td>${ec !== card.cost ? `<s class="cg-cost-orig">${card.cost}</s> <b>${ec}</b>` : `<b>${ec}</b>`}</td>
+            <td>${bonus > 0 ? `${card.basePower}+${bonus}=<b>${tp}</b>` : `<b>${tp}</b>`}</td>
+            <td>${ec !== card.cost ? `<s class="cg-cost-orig">${card.cost}</s><b>${ec}</b>` : `<b>${ec}</b>`}</td>
             <td class="cg-dupe-effect-cell">${effDesc}</td>
           </tr>`;
         }).join('')}

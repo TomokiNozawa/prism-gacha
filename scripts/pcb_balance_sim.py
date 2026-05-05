@@ -53,36 +53,128 @@ def make_default_deck():
     ids = ['lr_001__','ur_002__','ur_005__','ssr_016__','ssr_024__','ssr_026__','sr_041__','sr_044__','sr_052__','r_069__','r_070__','r_072__']
     return [c for c in ALL_CARDS.values() if c.get('id') in ids][:12]
 
+# v1.4.2i LR=1, UR=3 制限を遵守したデッキ生成
+TIER_LIMIT = {'LR': 1, 'UR': 3}
+
+def cards_by_filter_with_limit(predicate, n=12):
+    """LR/UR 制限を遵守して n 枚 抽出"""
+    pool_filtered = [c for c in ALL_CARDS.values() if predicate(c)]
+    random.shuffle(pool_filtered)
+    picked = []
+    tier_count = {'LR': 0, 'UR': 0, 'SSR': 0, 'SR': 0, 'R': 0}
+    for c in pool_filtered:
+        if len(picked) >= n: break
+        t = c['tier']
+        if t in TIER_LIMIT and tier_count[t] >= TIER_LIMIT[t]: continue
+        picked.append(c)
+        tier_count[t] = tier_count.get(t, 0) + 1
+    # 12枚足りなければ全 POOL からランダム fill
+    if len(picked) < n:
+        remaining = [c for c in ALL_CARDS.values() if c not in picked]
+        random.shuffle(remaining)
+        for c in remaining:
+            if len(picked) >= n: break
+            t = c['tier']
+            if t in TIER_LIMIT and tier_count[t] >= TIER_LIMIT[t]: continue
+            picked.append(c); tier_count[t] = tier_count.get(t, 0) + 1
+    return picked[:n]
+
 def make_observer_deck():
-    """観測者 + 原虹 系 (LR/UR 神話級)"""
+    """観測者 + 原虹 系 (LR/UR 制限あり: LR=1 + UR=3)"""
     target = ['原虹', '十国の覇者']
-    return cards_by_filter(lambda c: c.get('faction') in target or c['name'] in ['虹意 プリズマ','セラフィエル','千夜姫 カグヤ','星海のノクス','龍帝 アルテミス','焔帝 ヒノオウ'], 12)
+    return cards_by_filter_with_limit(lambda c: c.get('faction') in target, 12)
 
 def make_aquasis_deck():
-    return cards_by_filter(lambda c: c.get('faction') in ['アクアシス','紅玉海賊団','海淵都市アクアシス'], 12)
+    return cards_by_filter_with_limit(lambda c: c.get('faction') in ['アクアシス','紅玉海賊団','海淵都市アクアシス'], 12)
 
 def make_sahar_deck():
-    return cards_by_filter(lambda c: c.get('faction') == '古龍砂漠サハール', 12)
+    return cards_by_filter_with_limit(lambda c: c.get('faction') == '古龍砂漠サハール', 12)
 
 def make_redwing_deck():
     target = ['紅翼皇家', '夜焔郷', '第七天']
-    return cards_by_filter(lambda c: c.get('faction') in target, 12)
+    return cards_by_filter_with_limit(lambda c: c.get('faction') in target, 12)
 
 def make_niiruru_deck():
     target = ['氷霊王国ニーヴル', '空挺城ゼノニア', '銀霜王国']
-    return cards_by_filter(lambda c: c.get('faction') in target, 12)
+    return cards_by_filter_with_limit(lambda c: c.get('faction') in target, 12)
 
 def make_academy_deck():
-    return cards_by_filter(lambda c: c.get('faction') in ['星霊学院', '深緑樹海', '白焔教会'], 12)
+    return cards_by_filter_with_limit(lambda c: c.get('faction') in ['星霊学院', '深緑樹海', '白焔教会'], 12)
+
+def make_darkmoon_deck():
+    """v1.4.2i 追加: 黒月 + 銀霜 + 地底市 (s1c5 派閥)"""
+    target = ['黒月衆ノクトス', '銀霜王国', '地底市リオラ']
+    return cards_by_filter_with_limit(lambda c: c.get('faction') in target, 12)
+
+# 野沢さん指示 2026-05-05: 派閥外 R/LR/UR 自由混合、 コンボ意識のハードコード デッキ
+def _by_name(*names):
+    """name list → card list (順序維持、 missing は warn)"""
+    out = []
+    for n in names:
+        if n in ALL_CARDS: out.append(ALL_CARDS[n])
+        else: print(f'  ⚠️ 未登場: {n}')
+    return out
+
+def make_north_artemis_deck():
+    """北方 + 龍帝アルテミス (千年の戦友/北方の盟約 コンボ狙い)"""
+    return _by_name(
+        # UR x3 (上限)
+        '龍帝 アルテミス', '焔帝 ヒノオウ', '氷帝 グレイル',
+        # SSR x3 (北方核)
+        '北方剣聖 ハグル', '空挺城総監 ガリオン', '氷塔の聖騎士 リオネ',
+        # SR x3 (北方サポート)
+        '北方剣聖 ハグル' if False else '凍土の祭司 イル', '氷塔の見習い騎士 アスラ', '空挺整備士 ベル',
+        # R x3 (派閥外含むテンポ補強)
+        '凍土の少年 アルク', '雪原の少女 ミウ', 'ちさと',
+    )
+
+def make_aquasis_prism_deck():
+    """海連合 + LR プリズマ (海溝の祈り + 観測者の混合)"""
+    return _by_name(
+        '虹意 プリズマ',  # LR x1
+        '深海女王 ネプテア', '波紋の聖女 イザベル', 'セラフィエル',  # UR x3
+        'アクアシス筆頭魔術師 グラシエル', '紅玉海賊団船長 シャンティ',  # SSR x2 (UR上限のため)
+        '珊瑚鎧の海騎士 コラリア', '紅玉海賊団副長 ケイレブ', '深海巫女 ティアラ',  # SR x3
+        '深海の少女 パール', '海賊見習い ミカ', '海賊団船医 クレオ',  # R x3
+    )
+
+def make_sahar_dragon_vil_deck():
+    """砂海+紫竜 + LRプリズマ (砂海と紫竜 + サハール三柱 コンボ)"""
+    return _by_name(
+        '虹意 プリズマ',  # LR x1
+        '砂海王女 サハナ', '古龍の語り部 ファラー', '千夜姫 カグヤ',  # UR x3 (千年文 コンボ)
+        '砂牙の剣聖 グラン', '竜爵 ヴィル', '紫竜の侍従 リアム',  # SSR x3
+        '祭舞のサフィラ', '古龍鍛冶 オウル', '砂風の戦士 ライ',  # SR x3
+        '砂塵の子 ティナ', '砂風の語り部 ナドラ',  # R x2
+    )
+
+def make_s1c5_observer_deck():
+    """S1C5 + 観測者 (黒月の観測者 + 観測者の対峙 コンボ)"""
+    return _by_name(
+        '虹意 プリズマ',  # LR x1
+        '黒月の盟主 ノクトリア', 'シ・ロエン', '地底市の母 リオラエル',  # UR x3
+        '仮面騎士 シオン', '影織りの導師 ルナリア', '銀霜剣聖 オリエル',  # SSR x3
+        '月夜祭司 アスター', '黒月の刺客', '地底市の語り部 オルフェ',  # SR x3
+        '銀霜近衛 セレン', '地底市の少女 シエル',  # R x2
+    )
+
+def make_academy_observer_deck():
+    """学院+教会+樹海 + 観測者三柱 (始まりの五人 + 観測者三柱 コンボ)"""
+    return _by_name(
+        '虹意 プリズマ',  # LR x1
+        'セラフィエル', '千夜姫 カグヤ', '星海のノクス',  # UR x3 (観測者四柱)
+        'イザベル', '森の射手 リナエ', '白焔教会見習い巫女 ルーナ',  # SSR x3
+        'メイリ', '詠聖 ベル', 'セラフィ',  # SR x3
+        'ちさと', 'カイ',  # R x2
+    )
 
 DECK_PATTERNS = {
-    'デフォルト': make_default_deck,
-    '観測者(原虹+覇者)': make_observer_deck,
-    'アクアシス連合': make_aquasis_deck,
-    '古龍砂漠サハール': make_sahar_deck,
-    '紅翼皇家+夜焔郷': make_redwing_deck,
-    '氷霊+空挺+銀霜': make_niiruru_deck,
-    '星霊学院+教会': make_academy_deck,
+    'デフォルト': make_default_deck,  # 比較基準
+    '海+プリズマ': make_aquasis_prism_deck,
+    '北方+アルテミス': make_north_artemis_deck,
+    '砂漠+紫竜+プリズマ': make_sahar_dragon_vil_deck,
+    'S1C5+観測者': make_s1c5_observer_deck,
+    '聖学+観測者三柱': make_academy_observer_deck,
 }
 
 # ===== ゲームエンジン (簡易版) =====
@@ -135,6 +227,8 @@ class Match:
         self.my_diff = my_diff; self.opp_diff = opp_diff
         self.verbose = verbose
         self.first_mover = random.choice(['me', 'opp'])
+        # v1.4.2i: cost_reduce_hand 1試合1回 制限
+        self.cost_reduce_used = {'me': False, 'opp': False}
 
     def card_power(self, card, side, lane):
         if card._frozen > 0: return 0
@@ -150,6 +244,16 @@ class Match:
         # 派閥シナジー
         same = sum(1 for c in self.board[side][lane] if c.faction == card.faction)
         if same >= 2: p += same
+        # v1.4.2i 常時オーラ (auraSelfLane / auraOppLane)
+        for c in self.board[side][lane]:
+            if c._silenced or c._frozen > 0: continue
+            asl = (c.effect or {}).get('auraSelfLane', 0)
+            if asl: p += asl
+        opp_side = 'opp' if side == 'me' else 'me'
+        for c in self.board[opp_side][lane]:
+            if c._silenced or c._frozen > 0: continue
+            aol = (c.effect or {}).get('auraOppLane', 0)
+            if aol: p += aol
         return p
 
     def lane_combo_bonus(self, side, lane):
@@ -240,11 +344,16 @@ class Match:
             card._growthEnabled = True
             for c in my[lane]: add(c, power)
         elif target == 'cost_reduce_hand':
+            # v1.4.2i: 1試合1回 制限
+            if self.cost_reduce_used.get(side):
+                if power: [add(c, power) for c in my[lane]]
+                return
             hand = self.hand_me if side == 'me' else self.hand_opp
             cands = [h for h in hand if h._costReduced == 0]
             if cands:
                 cands.sort(key=lambda h: -h.cost)
                 cands[0]._costReduced += 1
+                self.cost_reduce_used[side] = True
             for c in my[lane]: add(c, power)
         elif target == 'summon_token':
             if len(my[lane]) < 4:
@@ -388,63 +497,89 @@ class Match:
 
 
 # ===== sim 実行 =====
-def run_sim(my_deck_name, opp_deck_name, opp_diff='hard', n=50):
+def run_sim(my_deck_name, opp_deck_name, opp_diff='master', n=50):
+    """野沢さん指示 2026-05-05: AI 段階を Master でテスト"""
     results = Counter()
     for _ in range(n):
         my_deck = DECK_PATTERNS[my_deck_name]()
         opp_deck = DECK_PATTERNS[opp_deck_name]()
-        match = Match(my_deck, opp_deck, my_diff='hard', opp_diff=opp_diff)
+        match = Match(my_deck, opp_deck, my_diff='master', opp_diff=opp_diff)
         results[match.play()] += 1
     return results
 
+def show_deck_compositions():
+    """各デッキの構成をサンプル表示 (野沢さん指示 2026-05-05)"""
+    print()
+    print("=" * 90)
+    print("📦 デッキ構成サンプル (各デッキ 1 例)")
+    print("=" * 90)
+    for deck_name, builder in DECK_PATTERNS.items():
+        deck = builder()
+        print(f"\n--- {deck_name} ---")
+        # tier 順 sort
+        order = {'LR': 0, 'UR': 1, 'SSR': 2, 'SR': 3, 'R': 4}
+        tier_count = Counter(c['tier'] for c in deck)
+        fac_count = Counter(c.get('faction', '?') for c in deck)
+        sorted_deck = sorted(deck, key=lambda c: (order[c['tier']], -c.get('cost', 0)))
+        tier_str = ' / '.join(f"{t}{tier_count[t]}" for t in ['LR','UR','SSR','SR','R'] if tier_count[t] > 0)
+        print(f"  Tier: {tier_str} (計{len(deck)}枚)")
+        fac_str = ' / '.join(f"{f}={n}" for f, n in fac_count.most_common())
+        print(f"  派閥: {fac_str}")
+        for c in sorted_deck:
+            cost = c.get('cost', 0)
+            bp = c.get('basePower', 0)
+            eff = c.get('effect', {})
+            target = eff.get('target', 'none')
+            power = eff.get('power', 0)
+            etext = c.get('effectText', '')[:35]
+            print(f"  [{c['tier']:>3}] {c['name']:<22} cost{cost} pw{bp:>2} | {etext}")
 
+
+show_deck_compositions()
 print()
 print("=" * 90)
-print("📊 PCB バランス sim — 各デッキ vs 各 AI 段階 (各 50戦)")
+print("📊 PCB バランス sim — 各デッキ vs 各 AI 段階 (各 50戦、 Master AI)")
 print("=" * 90)
 print()
 deck_names = list(DECK_PATTERNS.keys())
-diff_levels = ['easy', 'normal', 'hard', 'master']
 
-# Round 1: my_deck (hard) vs default opp deck (各 AI 段階)
-print("=== Round 1: 各デッキ × デフォルト相手 (デフォルト AI 4段階) ===")
-print(f"{'deck':<10} | " + " | ".join(f"{d:^14}" for d in diff_levels))
-print("-" * 90)
+# Round 1: my_deck vs default opp deck (Master AI)
+print("=== Round 1: 各デッキ × デフォルト相手 (Master AI 50戦) ===")
+print(f"{'deck':<24} | {'Master':^16}")
+print("-" * 50)
 for deck in deck_names:
-    row = [f"{deck:<10}"]
-    for diff in diff_levels:
-        r = run_sim(deck, 'デフォルト', opp_diff=diff, n=50)
-        wr = r['win'] / 50 * 100
-        row.append(f"W{r['win']:>2}/L{r['loss']:>2}/D{r['draw']:>2} ({wr:>4.0f}%)")
-    print(" | ".join(row))
+    r = run_sim(deck, 'デフォルト', opp_diff='master', n=50)
+    wr = r['win'] / 50 * 100
+    print(f"{deck:<24} | W{r['win']:>2}/L{r['loss']:>2}/D{r['draw']:>2} ({wr:>4.0f}%)")
 
 print()
-print("=== Round 2: 各デッキ vs 各デッキ (Hard AI、 各 30戦) ===")
-print(f"{'my\\opp':<10} | " + " | ".join(f"{d:^7}" for d in deck_names))
-print("-" * 90)
+print("=== Round 2: 各デッキ vs 各デッキ (Master AI、 各 30戦) ===")
+print(f"{'my\\opp':<24} | " + " | ".join(f"{d:^14}" for d in deck_names))
+print("-" * 130)
 matrix = {}
 for my in deck_names:
-    row = [f"{my:<10}"]
+    row = [f"{my:<24}"]
     for opp in deck_names:
-        r = run_sim(my, opp, opp_diff='hard', n=30)
+        r = run_sim(my, opp, opp_diff='master', n=30)
         wr = r['win'] / 30 * 100
         matrix[(my, opp)] = wr
         row.append(f"{wr:>5.0f}% ")
     print(" | ".join(row))
 
 print()
-print("=== 派閥バランス所感 ===")
-# 各デッキの平均勝率 (vs 全デッキ 平均)
-print(f"{'deck':<10} | avg WR vs all decks")
-print("-" * 50)
+print("=== 派閥バランス所感 (Master AI) ===")
+# 各デッキの平均勝率 (vs 全デッキ 平均、 自身対自身は除外)
+print(f"{'deck':<24} | avg WR vs all decks")
+print("-" * 60)
 deck_avg = []
 for deck in deck_names:
-    avg = sum(matrix[(deck, opp)] for opp in deck_names) / len(deck_names)
+    others = [opp for opp in deck_names if opp != deck]
+    avg = sum(matrix[(deck, opp)] for opp in others) / len(others) if others else 0
     deck_avg.append((deck, avg))
 deck_avg.sort(key=lambda x: -x[1])
 for deck, avg in deck_avg:
     bar = "█" * int(avg / 5)
-    print(f"  {deck:<10} {avg:>5.1f}% {bar}")
+    print(f"  {deck:<24} {avg:>5.1f}% {bar}")
 
 print()
 print("=" * 90)

@@ -1905,22 +1905,38 @@ body.cg-modal-open .cg-deck-builder-grid {
 
 /* ===== PC最適化 (768px以上) ===== */
 @media (min-width: 768px) {
-  .cg-card { width: 88px; height: 124px; }
+  /* 野沢さん指示 2026-05-05: PC で 効果文がカード幅超えて隣に被る → 縦伸長 + 3-4行 wrap */
+  .cg-card { width: 100px; height: 168px; }
   .cg-card-name { font-size: 11px; bottom: 26px; }
   .cg-card-stats { font-size: 13px; height: 26px; }
-  .cg-card .cg-card-effect { font-size: 9px; padding: 2px 4px; }
-  .cg-hand .cg-card { width: 110px; height: 156px; }
-  .cg-hand .cg-card .cg-card-name { font-size: 12px; bottom: 44px; }
-  .cg-hand .cg-card-effect { font-size: 10px; height: 18px; }
-  .cg-lane { min-height: 156px; }
-  .cg-lane-slots { min-height: 124px; }
+  .cg-card .cg-card-effect {
+    font-size: 9px; padding: 2px 4px;
+    line-height: 1.25;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    word-break: break-all;
+  }
+  .cg-hand .cg-card { width: 130px; height: 188px; }
+  .cg-hand .cg-card .cg-card-name { font-size: 12px; bottom: 70px; }
+  .cg-hand .cg-card-effect {
+    font-size: 10px;
+    min-height: 44px;
+    max-height: 56px;
+    line-height: 1.3;
+    -webkit-line-clamp: 4;
+    height: auto;
+  }
+  .cg-lane { min-height: 196px; }
+  .cg-lane-slots { min-height: 164px; }
   .cg-hero-title { font-size: 36px; }
   .cg-hero-tagline { font-size: 15px; }
 }
 
-/* ===== A-3: 凸毎効果 段階表 ===== */
+/* ===== A-3: 凸毎効果 段階表 (野沢さん指示 2026-05-05: 上下セクションと幅統一 + 半角カナで列縮小) ===== */
 .cg-dupe-stages {
-  margin: 12px 14px 0;
+  margin: 12px 0 0;  /* 左右margin 0、 .cg-char-detail-effect / .cg-char-detail-combos と同 width */
   padding: 10px 12px;
   background: rgba(124, 93, 255, 0.07);
   border: 1px solid rgba(124, 93, 255, 0.25);
@@ -1937,19 +1953,26 @@ body.cg-modal-open .cg-deck-builder-grid {
   width: 100%;
   border-collapse: collapse;
   font-size: 11px;
+  table-layout: fixed;  /* 列幅 固定で安定化 */
 }
+.cg-dupe-stage-table col.col-stage { width: 28%; }
+.cg-dupe-stage-table col.col-power { width: 22%; }
+.cg-dupe-stage-table col.col-cost  { width: 14%; }
+.cg-dupe-stage-table col.col-eff   { width: 36%; }
 .cg-dupe-stage-table th {
   text-align: left;
-  padding: 4px 6px;
+  padding: 4px 4px;
   font-weight: 600;
   color: var(--text-dim);
   border-bottom: 1px solid var(--border);
   font-size: 10px;
+  white-space: nowrap;  /* 「ﾊﾟﾜｰ」「ｺｽﾄ」 が改行されないように */
 }
 .cg-dupe-stage-table td {
-  padding: 6px 6px;
+  padding: 6px 4px;
   border-bottom: 1px dashed rgba(255,255,255,0.06);
   vertical-align: middle;
+  word-break: break-all;
 }
 .cg-dupe-stage-table tr:last-child td { border-bottom: none; }
 .cg-dupe-stage-current {

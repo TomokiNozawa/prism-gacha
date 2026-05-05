@@ -22,7 +22,7 @@
     "name": "観測者の三柱",
     "chars": ["セラフィエル", "千夜姫 カグヤ", "虹意 プリズマ"],
     "condition": "any_lane",
-    "effect": { "target": "all_lanes", "power": 4 },
+    "effect": { "target": "all_lanes", "power": 6 },
     "flavor": "至天・最古・原虹、 三柱の祈りで世界が震える。",
     "chapter": "s1c1"
   },
@@ -270,7 +270,7 @@
     "name": "始まりの五人",
     "chars": ["ちさと", "カイ", "アルス", "ミレイア", "ヴィオラ"],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 6 },
+    "effect": { "target": "self_lane", "power": 8 },
     "flavor": "学院の四人と樹海の弓姫。 同じレーンに揃う日、 始まりの絆が炸裂する。",
     "chapter": "s1c1"
   },
@@ -436,7 +436,7 @@
     "name": "海の姉妹盟約",
     "chars": ["深海女王 ネプテア", "波紋の聖女 イザベル"],
     "condition": "any_lane",
-    "effect": { "target": "all_lanes", "power": 4 },
+    "effect": { "target": "all_lanes", "power": 5 },
     "flavor": "海の姉と陸の妹。 黒月が空に昇る時、 共に立つ約束。",
     "chapter": "s1c2"
   },
@@ -536,7 +536,7 @@
     "name": "砂海と紫竜",
     "chars": ["砂海王女 サハナ", "竜爵 ヴィル"],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 5 },
+    "effect": { "target": "self_lane", "power": 7 },
     "flavor": "紫水晶のかけらの半分。 距離も時も越えて、 紫の光は脈動する。",
     "chapter": "s1c3"
   },
@@ -855,7 +855,7 @@
     "name": "黒月の観測者",
     "chars": ["シ・ロエン", "黒月の盟主 ノクトリア", "地底市の母 リオラエル"],
     "condition": "any_lane",
-    "effect": { "target": "all_lanes", "power": 4 },
+    "effect": { "target": "all_lanes", "power": 6 },
     "flavor": "黒月衆の主導・盟主、 地底市の母。 西の月の影を観測する三柱。",
     "chapter": "s1c5"
   },

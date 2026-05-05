@@ -28,16 +28,16 @@
   },
 
   "森の射手 リナエ": {
-    "effectText": "祖木の弓: 相手 同レーン -3 (一矢必中)",
-    "effect": { "trigger": "onPlay", "target": "opp_self_lane", "power": -3 }
+    "effectText": "祖木の弓: 相手 同レーン -1 (一矢必中)",
+    "effect": { "trigger": "onPlay", "target": "opp_self_lane", "power": -1 }
   },
   "獣牙 ガルド": {
     "effectText": "月牙の集合: 両隣レーン +2 (群れの号令)",
     "effect": { "trigger": "onPlay", "target": "adjacent_lanes", "power": 2 }
   },
   "竜爵 ヴィル": {
-    "effectText": "紫竜の血: 自レーン 紫竜王国 +3",
-    "effect": { "trigger": "onPlay", "target": "buff_faction_lane", "faction": "紫竜王国", "power": 3 }
+    "effectText": "紫竜の血: 自レーン 紫竜王国 +4、 自レーン +1",
+    "effect": { "trigger": "onPlay", "target": "buff_faction_lane", "faction": "紫竜王国", "power": 4 }
   },
   "仮面騎士 シオン": {
     "effectText": "誓盾と裁罰: 自レーン +2、 相手 同レーン最高Pwを 🔇沈黙",
@@ -52,8 +52,8 @@
     "effect": { "trigger": "onPlay", "target": "all_opp_lanes", "power": -1, "selfBonus": 2 }
   },
   "イザベル": {
-    "effectText": "波紋の祈り: 自レーン +2、 自身 🌱成長 (毎ターン+1)",
-    "effect": { "trigger": "onPlay", "target": "growth_self", "power": 2 }
+    "effectText": "波紋の祈り: 自レーン +1、 自身 🌱成長 (毎ターン+1)",
+    "effect": { "trigger": "onPlay", "target": "growth_self", "power": 1 }
   },
   "ひなた": {
     "effectText": "紅翼の桜散: 自レーン 紅翼皇家 +3",
@@ -85,8 +85,8 @@
     "effect": { "trigger": "onPlay", "target": "buff_faction_lane", "faction": "紫竜王国", "power": 2 }
   },
   "メイリ": {
-    "effectText": "治癒の祈り: 自レーン +2 (浄化)",
-    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 2 }
+    "effectText": "治癒の祈り: 自レーン +1 (浄化)",
+    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 1 }
   },
   "詠聖 ベル": {
     "effectText": "原虹の歌声: 自レーン +1、 コンボ強化 +1",
@@ -127,17 +127,17 @@
   },
 
   "深海女王 ネプテア": {
-    "effectText": "海溝の祈り: 全レーン +2、 💴手札 最高Costを -1",
-    "effect": { "trigger": "onPlay", "target": "cost_reduce_hand", "power": 2 }
+    "effectText": "海溝の祈り: 全レーン +1 (千年の祈り)",
+    "effect": { "trigger": "onPlay", "target": "all_lanes", "power": 1 }
   },
   "波紋の聖女 イザベル": {
-    "effectText": "七色の祈り: 自レーン アクアシス +3、 自レーン +1",
-    "effect": { "trigger": "onPlay", "target": "buff_faction_lane", "faction": "アクアシス", "power": 3 }
+    "effectText": "七色の祈り: 自レーン アクアシス +1、 自レーン +1",
+    "effect": { "trigger": "onPlay", "target": "buff_faction_lane", "faction": "アクアシス", "power": 1 }
   },
 
   "紅玉海賊団船長 シャンティ": {
-    "effectText": "船長の指示: 💴手札 最高Costを -1、 自レーン +2",
-    "effect": { "trigger": "onPlay", "target": "cost_reduce_hand", "power": 2 }
+    "effectText": "船長の采配: 自レーン 紅玉海賊団 +1、 自身 +1",
+    "effect": { "trigger": "onPlay", "target": "buff_faction_lane", "faction": "紅玉海賊団", "power": 1, "selfBonus": 1 }
   },
   "白焔教会見習い巫女 ルーナ": {
     "effectText": "見習いの覚醒: 自レーン +1、 自身 🌱成長",
@@ -165,8 +165,8 @@
     "effect": { "trigger": "onPlay", "target": "buff_faction_lane", "faction": "紅玉海賊団", "power": 2 }
   },
   "白焔教会騎士 ラナス": {
-    "effectText": "銀白鎧の誓い: 自レーン +2",
-    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 2 }
+    "effectText": "銀白鎧の誓い: 自レーン +1",
+    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 1 }
   },
 
   "深海の少女 パール": {
@@ -191,12 +191,12 @@
   },
 
   "砂海王女 サハナ": {
-    "effectText": "七色の風: 自レーン 古龍砂漠サハール +3、 自レーン +1",
-    "effect": { "trigger": "onPlay", "target": "buff_faction_lane", "faction": "古龍砂漠サハール", "power": 3 }
+    "effectText": "七色の風: 自レーン 古龍砂漠サハール +6、 自レーン +1、 自身 +2 (砂海連携の核)",
+    "effect": { "trigger": "onPlay", "target": "buff_faction_lane", "faction": "古龍砂漠サハール", "power": 6, "selfBonus": 2 }
   },
   "古龍の語り部 ファラー": {
-    "effectText": "千年の語り: 両隣レーン +2、 自身 🌱成長",
-    "effect": { "trigger": "onPlay", "target": "growth_self", "power": 2, "alsoTarget": "adjacent_lanes" }
+    "effectText": "千年の語り: 自レーン +4、 自身 🌱成長 +1/T (長期戦の語り部)",
+    "effect": { "trigger": "onPlay", "target": "growth_self", "power": 4 }
   },
 
   "隊商長 アーシャ": {
@@ -204,8 +204,8 @@
     "effect": { "trigger": "onPlay", "target": "cost_reduce_hand", "power": 1 }
   },
   "砂牙の剣聖 グラン": {
-    "effectText": "砂牙の風: 両隣レーン +2、 自身 +1",
-    "effect": { "trigger": "onPlay", "target": "adjacent_lanes", "power": 2, "selfBonus": 1 }
+    "effectText": "砂牙の風: 両隣レーン +4、 自身 +1",
+    "effect": { "trigger": "onPlay", "target": "adjacent_lanes", "power": 4, "selfBonus": 1 }
   },
   "紫竜の侍従 リアム": {
     "effectText": "侍従の忠誠: 自レーン 紫竜王国 +2、 自レーン +1",
@@ -235,21 +235,21 @@
   },
 
   "氷帝 グレイル": {
-    "effectText": "凍土の威圧: 自レーン +2、 居る限り相手 同レーン全員 -1 (常時オーラ威圧)",
-    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 2, "auraOppLane": -1 }
+    "effectText": "凍土の威圧: 自レーン +2、 居る限り相手 同レーン全員 -2 (常時オーラ威圧)",
+    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 2, "auraOppLane": -2 }
   },
   "空挺女皇 ヴァーレ": {
-    "effectText": "翼の指令: 全レーン +1、 自レーンに 空挺兵 召喚",
-    "effect": { "trigger": "onPlay", "target": "summon_token", "power": 1, "alsoTarget": "all_lanes" }
+    "effectText": "翼の指令: 全レーン +2、 自レーンに 空挺兵 召喚",
+    "effect": { "trigger": "onPlay", "target": "all_lanes", "power": 2, "summonToken": true }
   },
 
   "氷塔の聖騎士 リオネ": {
-    "effectText": "氷塔の祈り: 相手 同レーン最高Pwを ❄凍結、 自レーン +1",
-    "effect": { "trigger": "onPlay", "target": "freeze_opp_lane_top", "power": 1, "duration": 1 }
+    "effectText": "氷塔の祈り: 相手 同レーン最高Pwを ❄凍結 2T、 自レーン +1",
+    "effect": { "trigger": "onPlay", "target": "freeze_opp_lane_top", "power": 1, "duration": 2 }
   },
   "空挺城総監 ガリオン": {
-    "effectText": "機械連結: 自身 += 自レーン自軍数、 自レーン +1",
-    "effect": { "trigger": "onPlay", "target": "chain_lane_self", "multiplier": 1, "alsoSelfLane": 1 }
+    "effectText": "機械連結: 自身 += 自レーン自軍数 ×2、 自レーン +1",
+    "effect": { "trigger": "onPlay", "target": "chain_lane_self", "multiplier": 2, "alsoSelfLane": 1 }
   },
   "氷霜の巫女 ユーリス": {
     "effectText": "氷霜の祈り: 相手 同レーン最高Pwを 🔇沈黙、 自レーン +1",
@@ -260,8 +260,8 @@
     "effect": { "trigger": "onPlay", "target": "cost_reduce_hand", "power": 1 }
   },
   "北方剣聖 ハグル": {
-    "effectText": "北方の双剣: 相手 同レーン -2、 自身 +1",
-    "effect": { "trigger": "onPlay", "target": "opp_self_lane", "power": -2, "selfBonus": 1 }
+    "effectText": "北方の双剣: 相手 同レーン -4、 自身 +2",
+    "effect": { "trigger": "onPlay", "target": "opp_self_lane", "power": -4, "selfBonus": 2 }
   },
   "空挺城首席学者 ゼピル": {
     "effectText": "理論の召喚: 自レーンに 空挺兵 召喚、 自レーン +1",
@@ -319,16 +319,16 @@
   },
 
   "シ・ロエン": {
-    "effectText": "黒月の主導: 相手 同レーン最高Pwを 🔇沈黙、 全相手 -1",
-    "effect": { "trigger": "onPlay", "target": "silence_opp_lane_top", "power": 0, "extraAllOpp": -1 }
+    "effectText": "黒月の主導: 相手 同レーン最高Pwを 🔇沈黙、 相手 同レーン -3、 自身 +2",
+    "effect": { "trigger": "onPlay", "target": "silence_opp_lane_top", "power": -3, "selfBonus": 2 }
   },
   "黒月の盟主 ノクトリア": {
-    "effectText": "黒月の呪詛: 全相手レーン -1、 居る限り相手 同レーン全員 -1 (常時オーラ呪詛)",
-    "effect": { "trigger": "onPlay", "target": "all_opp_lanes", "power": -1, "auraOppLane": -1 }
+    "effectText": "黒月の呪詛: 全相手レーン -3、 居る限り相手 同レーン全員 -2 (常時オーラ呪詛)",
+    "effect": { "trigger": "onPlay", "target": "all_opp_lanes", "power": -3, "auraOppLane": -2 }
   },
   "地底市の母 リオラエル": {
-    "effectText": "黄金の母: 自レーン1体に ✨黄金化 +3、 居る限り自レーン +1 (常時オーラ祝福)",
-    "effect": { "trigger": "onPlay", "target": "golden_self_lane", "power": 0, "goldPower": 3, "auraSelfLane": 1 }
+    "effectText": "黄金の母: 自レーン1体に ✨黄金化 +5、 居る限り自レーン +2 (常時オーラ祝福)",
+    "effect": { "trigger": "onPlay", "target": "golden_self_lane", "power": 0, "goldPower": 5, "auraSelfLane": 2 }
   },
 
   "堕者剣聖 ガルヴィン": {
