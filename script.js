@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4b — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4f — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -3833,6 +3833,7 @@ function openRelations() {
 
   bindRelationsPan(canvas);
   bindRelationsZoomWheel(canvas);
+  bindRelationsZoomPinch(canvas);  // スマホ ピンチ拡縮 (野沢さん指示 2026-05-05)
   // タブ初期化 (スマホはリストをデフォルト)
   setupRelationsTabs();
   const isMobile = window.matchMedia('(max-width: 720px)').matches;
@@ -3903,6 +3904,16 @@ function setRelationsMode(mode) {
   } else {
     if (canvas) canvas.style.display = '';
     if (list) list.style.display = 'none';
+    // graph mode 切替時に 中央 scroll (野沢さん指摘 2026-05-05 「相関図 全体図のスタート位置が
+    //   左上で 最初に何も表示されていない状態、 中央に変えてください」)
+    setTimeout(() => {
+      if (!canvas) return;
+      const sw = canvas.scrollWidth, sh = canvas.scrollHeight;
+      if (sw > 0 && sh > 0) {
+        canvas.scrollLeft = Math.max(0, (sw - canvas.clientWidth) / 2);
+        canvas.scrollTop = Math.max(0, (sh - canvas.clientHeight) / 2);
+      }
+    }, 0);
   }
 }
 function renderRelationsList(container) {
@@ -4015,6 +4026,8 @@ function bindRelationsPan(canvas) {
   const move = (e) => {
     if (!relationsPanActive) return;
     const isTouch = e.type === 'touchmove';
+    // ピンチ (2点タッチ) 中は pan しない (野沢さん指示 2026-05-05、 ピンチ拡大優先)
+    if (isTouch && e.touches.length >= 2) return;
     const x = isTouch ? e.touches[0].clientX : e.clientX;
     const y = isTouch ? e.touches[0].clientY : e.clientY;
     const dx = x - relPanStartX, dy = y - relPanStartY;
@@ -4038,6 +4051,61 @@ function bindRelationsPan(canvas) {
   document.addEventListener('touchmove', move, {passive: false});
   document.addEventListener('touchend', end);
   canvas.style.cursor = 'grab';
+}
+
+// 相関図 ピンチイン/アウト (野沢さん指示 2026-05-05、 スマホでも ワールドマップと同様に 2点指で
+//   拡縮できるように)。 _relationsZoom (CSS変数 経由) を 2点 distance 比 で 直接更新。
+let _relationsPinchBound = false;
+function bindRelationsZoomPinch(canvas) {
+  if (_relationsPinchBound) return;
+  _relationsPinchBound = true;
+  const pts = new Map();
+  let lastDist = null;
+  canvas.addEventListener('touchstart', (e) => {
+    for (const t of e.touches) pts.set(t.identifier, { x: t.clientX, y: t.clientY });
+    if (pts.size === 2) {
+      const arr = [...pts.values()];
+      lastDist = Math.hypot(arr[0].x - arr[1].x, arr[0].y - arr[1].y);
+      // ピンチ開始: pan を 強制終了 (pan の touchstart が 1点目で 既に始まっている場合の対策)
+      relationsPanActive = false;
+    }
+  }, { passive: true });
+  canvas.addEventListener('touchmove', (e) => {
+    if (e.touches.length < 2) return;
+    e.preventDefault();
+    for (const t of e.touches) pts.set(t.identifier, { x: t.clientX, y: t.clientY });
+    const arr = [...pts.values()].slice(0, 2);
+    if (arr.length < 2) return;
+    const dist = Math.hypot(arr[0].x - arr[1].x, arr[0].y - arr[1].y);
+    if (lastDist && lastDist > 0) {
+      const factor = dist / lastDist;
+      // anchor zoom (野沢さん指示 2026-05-05、 ピンチ操作位置を中心に拡大):
+      //   旧実装は setRelationsZoom 呼ぶだけで svg 左上 (0,0) anchor で 拡大されていた。
+      //   修正: ピンチ中心 (2点の中間) の svg 内座標が 拡大前/後で 同じ viewport 位置に
+      //   留まるよう scrollLeft/Top を 補正。
+      const rect = canvas.getBoundingClientRect();
+      const cx = (arr[0].x + arr[1].x) / 2;  // viewport client x
+      const cy = (arr[0].y + arr[1].y) / 2;
+      const offsetX = cx - rect.left;          // canvas 左端からのピンチ中心距離
+      const offsetY = cy - rect.top;
+      const svgX_before = canvas.scrollLeft + offsetX;  // 拡大前 svg 内座標
+      const svgY_before = canvas.scrollTop + offsetY;
+      const oldZoom = _relationsZoom;
+      setRelationsZoom(oldZoom * factor);
+      const realFactor = _relationsZoom / oldZoom;     // clamp 後の実効 factor
+      if (realFactor !== 1) {
+        canvas.scrollLeft = svgX_before * realFactor - offsetX;
+        canvas.scrollTop  = svgY_before * realFactor - offsetY;
+      }
+    }
+    lastDist = dist;
+  }, { passive: false });
+  const onEnd = (e) => {
+    for (const t of (e.changedTouches || [])) pts.delete(t.identifier);
+    if (pts.size < 2) lastDist = null;
+  };
+  canvas.addEventListener('touchend', onEnd);
+  canvas.addEventListener('touchcancel', (e) => { pts.clear(); lastDist = null; });
 }
 
 function closeRelations() {
@@ -4690,22 +4758,7 @@ function renderWorldMap() {
     </g>`;
   });
   svg += `</g>`; // close .world-zoom-layer
-  // ズームコントロール (zoom-layer の外、 viewBox 右上に固定)
-  svg += `<g class="world-zoom-controls" transform="translate(${W-180},80)">
-    <rect x="0" y="0" width="160" height="48" rx="24" fill="rgba(10,14,29,0.85)" stroke="rgba(200,180,255,0.3)" stroke-width="1.5"/>
-    <g class="zoom-btn" data-zoom="out" transform="translate(28,24)">
-      <circle r="18" fill="rgba(255,255,255,0.08)"/>
-      <text y="9" font-size="28" fill="#e8ecff" text-anchor="middle" pointer-events="none">−</text>
-    </g>
-    <g class="zoom-btn" data-zoom="reset" transform="translate(80,24)">
-      <circle r="18" fill="rgba(255,255,255,0.08)"/>
-      <text y="9" font-size="20" fill="#e8ecff" text-anchor="middle" pointer-events="none">⊙</text>
-    </g>
-    <g class="zoom-btn" data-zoom="in" transform="translate(132,24)">
-      <circle r="18" fill="rgba(255,255,255,0.08)"/>
-      <text y="9" font-size="28" fill="#e8ecff" text-anchor="middle" pointer-events="none">+</text>
-    </g>
-  </g>`;
+  // ズームコントロールは index.html world-map-header に HTML ボタンとして格上げ済 (野沢さん指示 2026-05-05)
   svg += `</svg>`;
   canvas.innerHTML = svg;
   // Phase 2: 章マーカー click → 章ギャラリー (場所画像 + キャラ) を side panel に表示。 drag距離 4px 超は click 無視
@@ -5071,6 +5124,9 @@ function _setupWorldMapZoomPan(svg, layer) {
     }
     layer.setAttribute('transform', `translate(${tx},${ty}) scale(${scale})`);
     _worldMapZoomState = { scale, tx, ty };
+    // header 上の zoom-level 表示も同期 (wheel / pinch / drag 等 全経路)
+    const lvl = document.getElementById('wm-zoom-level');
+    if (lvl) lvl.textContent = Math.round(scale * 100) + '%';
   };
   update();
   // wheel zoom (PC)
@@ -5145,23 +5201,26 @@ function _setupWorldMapZoomPan(svg, layer) {
     scale = 1; tx = 0; ty = 0;
     update();
   });
-  // ズームコントロール (+ / − / ⊙)
-  svg.querySelectorAll('.zoom-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const kind = btn.dataset.zoom;
-      if (kind === 'reset') { scale = 1; tx = 0; ty = 0; update(); return; }
-      const factor = (kind === 'in') ? 1.3 : (1 / 1.3);
-      const newScale = Math.max(MIN, Math.min(MAX, scale * factor));
-      if (newScale === scale) return;
-      // 中央 anchor zoom
-      const cx = W / 2, cy = H / 2;
-      tx = cx - (cx - tx) * (newScale / scale);
-      ty = cy - (cy - ty) * (newScale / scale);
-      scale = newScale;
-      update();
-    });
-  });
+  // ズームコントロール (header の HTML ボタンに bind、 野沢さん指示 2026-05-05 「拡大縮小ボタンは
+  //   相関図と同じく上部に配置」)。 グローバル関数 経由で 現在の scale/tx/ty を 操作。
+  const _applyZoomFactor = (factor) => {
+    const newScale = Math.max(MIN, Math.min(MAX, scale * factor));
+    if (newScale === scale) return;
+    const cx = W / 2, cy = H / 2;
+    tx = cx - (cx - tx) * (newScale / scale);
+    ty = cy - (cy - ty) * (newScale / scale);
+    scale = newScale;
+    update();
+    _updateWorldMapZoomLevel();
+  };
+  window.zoomWorldMapIn = () => _applyZoomFactor(1.3);
+  window.zoomWorldMapOut = () => _applyZoomFactor(1 / 1.3);
+  window.zoomWorldMapReset = () => { scale = 1; tx = 0; ty = 0; update(); _updateWorldMapZoomLevel(); };
+  _updateWorldMapZoomLevel();
+  function _updateWorldMapZoomLevel() {
+    const lvl = document.getElementById('wm-zoom-level');
+    if (lvl) lvl.textContent = Math.round(scale * 100) + '%';
+  }
 }
 // B1: モバイル topbar ⋮ メニュー (デスクトップは display:contents で表示なので影響なし)
 (function setupTopbarMore() {
@@ -10137,14 +10196,18 @@ async function loadNotifications() {
 }
 
 function _updateNotifBadge() {
-  const badge = document.getElementById('notif-badge');
-  if (!badge) return;
   const unread = _notifications.filter(n => !n.read).length;
-  if (unread > 0) {
-    badge.style.display = '';
-    badge.textContent = unread > 99 ? '99+' : String(unread);
-  } else {
-    badge.style.display = 'none';
+  // 両バッジ更新: ベル本体 (PC/メニュー内) + スマホ ≡ ハンバーガーボタン
+  // (野沢さん指示 2026-05-05 「スマホ版で 通知来たら ≡ ボタンにも数字、 じゃないと気づかない」)
+  for (const id of ['notif-badge', 'notif-badge-mobile']) {
+    const b = document.getElementById(id);
+    if (!b) continue;
+    if (unread > 0) {
+      b.style.display = '';
+      b.textContent = unread > 99 ? '99+' : String(unread);
+    } else {
+      b.style.display = 'none';
+    }
   }
 }
 

@@ -1359,6 +1359,39 @@ print(f"  ルール7-25 (dev suffix 1段階 increment): {n7_25}件 検査 [BLOCK
 n7_26 = check_cache_buster_format()
 print(f"  ルール7-26 (cache buster = version 完全同期): {n7_26}件 検査 [BLOCKER]")
 
+def check_main_no_suffix():
+    """ルール7-27 (BLOCKER 2026-05-05): main branch で commit する version は suffix なし (X.Y.Z 形式) 必須。
+    2026-05-05 v1.4.4 main reach 後の 緊急 hotfix で dev → main merge --no-ff した時、 dev の cache buster
+    (?v=1.4.4b) + version.json (1.4.4b) + sw.js + manifest が そのまま main に流入して 「v1.4.4b」 が
+    本番表示された事故の再発防止。 ルール7-24 (main で version bump 必須) では suffix 残存を検出できなかった。
+    野沢さん 「何回も言わすな、 本当にふざけんなよ」 強い叱責。
+    詳細: CLAUDE.md feedback_prismaera_version_suffix.md
+    """
+    if _current_branch() != "main":
+        return 0
+    ver_path = ROOT / "version.json"
+    if not ver_path.exists():
+        return 0
+    try:
+        cur_ver = json.load(ver_path.open(encoding="utf-8"))["version"]
+    except Exception:
+        return 0
+    # X.Y.Z (数字のみ) 形式以外は suffix 残存 と判定
+    if not re.match(r'^\d+\.\d+\.\d+$', cur_ver):
+        violations.append(
+            f"[ルール7-27 main suffix 残存 BLOCKER] main の version='{cur_ver}' に suffix が残っている。\n"
+            f"      → main branch では 必ず X.Y.Z (数字のみ) 形式、 dev suffix (a/b/c...) は 除去必須\n"
+            f"      → dev → main merge --no-ff 直後は 必ず version.json / index.html cache buster /\n"
+            f"        cardgame/script.js / sw.js / manifest.json / README.md の 6 ファイル全部で\n"
+            f"        suffix 残存していないか 目視確認 (or sed で 一括 strip)\n"
+            f"      → 2026-05-05 v1.4.4b 本番流入事故 (野沢さん 「何回も言わすな」 強い叱責) 再発防止\n"
+            f"      → 詳細: CLAUDE.md feedback_prismaera_version_suffix.md"
+        )
+    return 1
+
+n7_27 = check_main_no_suffix()
+print(f"  ルール7-27 (main で suffix なし 必須): {n7_27}件 検査 [BLOCKER]")
+
 
 def check_admin_tier_max():
     """ルール9 (BLOCKER 2026-05-04 野沢さん指示「自動チェックにも入れたほうが良い」):
