@@ -148,11 +148,11 @@ function updateMuteUI() {
 // 優先順位: cards.json (手書き完全override) > effects_override.json (effect+effectText のみ) > pool.json (default)
 async function loadMasters() {
   const [c, k, l, p, eo] = await Promise.all([
-    fetch('./cards.json?v=1.4.4ac').then(r => r.json()),
-    fetch('./combos.json?v=1.4.4ac').then(r => r.json()),
-    fetch('./lane_effects.json?v=1.4.4ac').then(r => r.json()),
-    fetch('./data/pool.json?v=1.4.4ac').then(r => r.json()).catch(() => []),
-    fetch('./effects_override.json?v=1.4.4ac').then(r => r.json()).catch(() => ({})),
+    fetch('./cards.json?v=1.4.4ad').then(r => r.json()),
+    fetch('./combos.json?v=1.4.4ad').then(r => r.json()),
+    fetch('./lane_effects.json?v=1.4.4ad').then(r => r.json()),
+    fetch('./data/pool.json?v=1.4.4ad').then(r => r.json()).catch(() => []),
+    fetch('./effects_override.json?v=1.4.4ad').then(r => r.json()).catch(() => ({})),
   ]);
   // pool 全カード ← effects_override で effect/effectText を上書き ← cards.json で完全 override
   const cardsByName = new Map();
@@ -1860,6 +1860,61 @@ function _renderHomeStreaks() {
   });
 }
 
+// ホーム 使用中デッキプレビュー + 性能ヒント (野沢さん指示 2026-05-06、 案2 + 案4)
+function _renderHomeDeckPreview() {
+  const previewEl = document.getElementById('cg-deck-preview');
+  const hintEl = document.getElementById('cg-deck-hint');
+  if (!previewEl || !hintEl) return;
+  if (!state || !state.allCards || state.allCards.length === 0) {
+    hintEl.textContent = '読込中…';
+    previewEl.innerHTML = '';
+    return;
+  }
+  let deck;
+  try { deck = getCurrentDeck(); } catch (e) { deck = []; }
+  if (!deck || deck.length === 0) {
+    hintEl.textContent = 'デッキ未設定';
+    previewEl.innerHTML = '';
+    return;
+  }
+  // 12 サムネ表示 (tier クラス + 凸マーク)
+  const dups = (typeof getUserDupCounts === 'function') ? getUserDupCounts() : {};
+  previewEl.innerHTML = deck.map(c => {
+    const dup = dups[c.name] || 0;
+    const dupBadge = dup > 0 ? `<span class="cg-preview-dup">+${dup}</span>` : '';
+    const img = c.img ? `..${c.img}` : '';
+    return `<div class="cg-preview-card cg-tier-${(c.tier || '').toLowerCase()}" title="${c.name} (${c.tier} ${c.cost}/${c.basePower})">
+      <img src="${img}" alt="${c.name}" loading="lazy">
+      ${dupBadge}
+    </div>`;
+  }).join('');
+  // 性能ヒント計算
+  const facCount = {};
+  deck.forEach(c => {
+    const f = c.faction || '無所属';
+    facCount[f] = (facCount[f] || 0) + 1;
+  });
+  const sortedFac = Object.entries(facCount).sort((a, b) => b[1] - a[1]);
+  const topFac = sortedFac[0];
+  const topFacName = topFac ? topFac[0] : '無所属';
+  const topFacCount = topFac ? topFac[1] : 0;
+  // コンボ数 (デッキ12枚で揃うコンボ)
+  const deckNames = new Set(deck.map(c => c.name));
+  const combos = (state && state.combos) || [];
+  const matchedCombos = combos.filter(co =>
+    Array.isArray(co.chars) && co.chars.every(n => deckNames.has(n))
+  ).length;
+  // 派閥数
+  const facCountTotal = Object.keys(facCount).length;
+  // ヒント文 組み立て
+  let typeLabel;
+  if (topFacCount >= 6) typeLabel = `${topFacName} 特化型`;
+  else if (topFacCount >= 4) typeLabel = `${topFacName} 主軸型`;
+  else if (facCountTotal >= 5) typeLabel = `多派閥バランス型`;
+  else typeLabel = `${topFacName} 寄り混合型`;
+  hintEl.textContent = `🎯 ${typeLabel} / コンボ ${matchedCombos}個 / 派閥 ${facCountTotal}種`;
+}
+
 // ホーム 戦績ダッシュボード + 🏆 ポイント (野沢さん指示 2026-05-06)
 function _renderHomeStats() {
   try {
@@ -2059,6 +2114,7 @@ function backToCardgameHome() {
   // AI レベル別 連勝数 + 戦績ダッシュボード (野沢さん指示 2026-05-06)
   if (typeof _renderHomeStreaks === 'function') _renderHomeStreaks();
   if (typeof _renderHomeStats === 'function') _renderHomeStats();
+  if (typeof _renderHomeDeckPreview === 'function') _renderHomeDeckPreview();
 }
 
 function backToPrismaeraHome() {
@@ -2733,7 +2789,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadMasters();
   _refreshHomeResumeButton();  // 中断中の試合があれば「再開」 ボタンを home に表示
   if (typeof _renderHomeStreaks === 'function') _renderHomeStreaks();  // AI レベル別 連勝数
-  if (typeof _renderHomeStats === 'function') _renderHomeStats();  // 戦績ダッシュボード + ポイント (野沢さん指示 2026-05-06)
+  if (typeof _renderHomeStats === 'function') _renderHomeStats();
+  if (typeof _renderHomeDeckPreview === 'function') _renderHomeDeckPreview();  // 戦績ダッシュボード + ポイント (野沢さん指示 2026-05-06)
   // BO3 toggle (localStorage 永続化)
   const bo3Toggle = document.getElementById('bo3-toggle');
   if (bo3Toggle) {

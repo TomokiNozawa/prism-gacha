@@ -2389,3 +2389,72 @@ body.cg-browse-mode .cg-deck-list-remove {
   border-left: 3px solid rgba(252, 211, 77, 0.5);
   text-align: left;
 }
+
+/* 使用中デッキ プレビュー + 性能ヒント (野沢さん指示 2026-05-06、 案2 + 案4) */
+.cg-deck-card {
+  background: rgba(20, 22, 51, 0.6);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 10px 12px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.cg-deck-card .cg-deck-btn {
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 6px 4px;
+  display: flex; align-items: center; gap: 12px;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+.cg-deck-card .cg-deck-btn:hover { background: rgba(255,255,255,0.04); }
+.cg-deck-hint {
+  font-size: 11px;
+  color: rgba(252, 211, 77, 0.85);
+  background: rgba(252, 211, 77, 0.08);
+  border: 1px solid rgba(252, 211, 77, 0.25);
+  padding: 6px 10px;
+  border-radius: 8px;
+  letter-spacing: 0.04em;
+}
+.cg-deck-preview {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+}
+.cg-preview-card {
+  position: relative;
+  aspect-ratio: 1 / 1.4;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1.5px solid rgba(255,255,255,0.15);
+  background: rgba(0,0,0,0.3);
+}
+.cg-preview-card img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.cg-preview-card.cg-tier-lr  { border-color: rgba(255,224,122,0.85); box-shadow: 0 0 6px rgba(255,224,122,0.4); }
+.cg-preview-card.cg-tier-ur  { border-color: rgba(192,132,252,0.85); box-shadow: 0 0 6px rgba(192,132,252,0.35); }
+.cg-preview-card.cg-tier-ssr { border-color: rgba(252,211,77,0.7); }
+.cg-preview-card.cg-tier-sr  { border-color: rgba(163,163,163,0.7); }
+.cg-preview-card.cg-tier-r   { border-color: rgba(255,255,255,0.18); }
+.cg-preview-dup {
+  position: absolute;
+  bottom: 2px; right: 2px;
+  font-size: 9px;
+  font-weight: 700;
+  color: #fcd34d;
+  background: rgba(0, 0, 0, 0.75);
+  padding: 1px 4px;
+  border-radius: 4px;
+  letter-spacing: 0.02em;
+}
+@media (max-width: 480px) {
+  .cg-deck-preview { grid-template-columns: repeat(6, 1fr); gap: 3px; }
+  .cg-preview-dup { font-size: 8px; padding: 1px 3px; }
+}

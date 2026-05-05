@@ -7,7 +7,7 @@
 <title>PCB | Prismaera Cards Battle</title>
 <link rel="icon" href="/images/icons/icon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
-<link rel="stylesheet" href="./style.css?v=1.4.4ac">
+<link rel="stylesheet" href="./style.css?v=1.4.4ad">
 </head>
 <body>
 
@@ -49,15 +49,20 @@
     </label>
   </div>
 
+  <!-- 使用中デッキ プレビュー + 性能ヒント (野沢さん指示 2026-05-06、 案2 + 案4) -->
   <div class="cg-deck-row">
-    <button type="button" class="cg-deck-btn" id="btn-open-deck-builder">
-      <span class="cg-deck-icon">⚙️</span>
-      <span class="cg-deck-text">
-        <span class="cg-deck-title">デッキ編集 / キャラ確認</span>
-        <span class="cg-deck-sub" id="deck-builder-sub">12 枚 — デフォルト使用中</span>
-      </span>
-      <span class="cg-deck-arrow">→</span>
-    </button>
+    <div class="cg-deck-card">
+      <button type="button" class="cg-deck-btn" id="btn-open-deck-builder">
+        <span class="cg-deck-icon">⚙️</span>
+        <span class="cg-deck-text">
+          <span class="cg-deck-title">デッキ編集 / キャラ確認</span>
+          <span class="cg-deck-sub" id="deck-builder-sub">12 枚 — デフォルト使用中</span>
+        </span>
+        <span class="cg-deck-arrow">→</span>
+      </button>
+      <div class="cg-deck-hint" id="cg-deck-hint">読込中…</div>
+      <div class="cg-deck-preview" id="cg-deck-preview"></div>
+    </div>
   </div>
 
   <div class="cg-modes">
@@ -487,6 +492,6 @@
   </div>
 </div>
 
-<script src="./script.js?v=1.4.4ac"></script>
+<script src="./script.js?v=1.4.4ad"></script>
 </body>
 </html>
