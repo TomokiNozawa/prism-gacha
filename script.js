@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4b — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4a — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -3903,6 +3903,16 @@ function setRelationsMode(mode) {
   } else {
     if (canvas) canvas.style.display = '';
     if (list) list.style.display = 'none';
+    // graph mode 切替時に 中央 scroll (野沢さん指摘 2026-05-05 「相関図 全体図のスタート位置が
+    //   左上で 最初に何も表示されていない状態、 中央に変えてください」)
+    setTimeout(() => {
+      if (!canvas) return;
+      const sw = canvas.scrollWidth, sh = canvas.scrollHeight;
+      if (sw > 0 && sh > 0) {
+        canvas.scrollLeft = Math.max(0, (sw - canvas.clientWidth) / 2);
+        canvas.scrollTop = Math.max(0, (sh - canvas.clientHeight) / 2);
+      }
+    }, 0);
   }
 }
 function renderRelationsList(container) {
@@ -4690,22 +4700,7 @@ function renderWorldMap() {
     </g>`;
   });
   svg += `</g>`; // close .world-zoom-layer
-  // ズームコントロール (zoom-layer の外、 viewBox 右上に固定)
-  svg += `<g class="world-zoom-controls" transform="translate(${W-180},80)">
-    <rect x="0" y="0" width="160" height="48" rx="24" fill="rgba(10,14,29,0.85)" stroke="rgba(200,180,255,0.3)" stroke-width="1.5"/>
-    <g class="zoom-btn" data-zoom="out" transform="translate(28,24)">
-      <circle r="18" fill="rgba(255,255,255,0.08)"/>
-      <text y="9" font-size="28" fill="#e8ecff" text-anchor="middle" pointer-events="none">−</text>
-    </g>
-    <g class="zoom-btn" data-zoom="reset" transform="translate(80,24)">
-      <circle r="18" fill="rgba(255,255,255,0.08)"/>
-      <text y="9" font-size="20" fill="#e8ecff" text-anchor="middle" pointer-events="none">⊙</text>
-    </g>
-    <g class="zoom-btn" data-zoom="in" transform="translate(132,24)">
-      <circle r="18" fill="rgba(255,255,255,0.08)"/>
-      <text y="9" font-size="28" fill="#e8ecff" text-anchor="middle" pointer-events="none">+</text>
-    </g>
-  </g>`;
+  // ズームコントロールは index.html world-map-header に HTML ボタンとして格上げ済 (野沢さん指示 2026-05-05)
   svg += `</svg>`;
   canvas.innerHTML = svg;
   // Phase 2: 章マーカー click → 章ギャラリー (場所画像 + キャラ) を side panel に表示。 drag距離 4px 超は click 無視
@@ -5071,6 +5066,9 @@ function _setupWorldMapZoomPan(svg, layer) {
     }
     layer.setAttribute('transform', `translate(${tx},${ty}) scale(${scale})`);
     _worldMapZoomState = { scale, tx, ty };
+    // header 上の zoom-level 表示も同期 (wheel / pinch / drag 等 全経路)
+    const lvl = document.getElementById('wm-zoom-level');
+    if (lvl) lvl.textContent = Math.round(scale * 100) + '%';
   };
   update();
   // wheel zoom (PC)
@@ -5145,23 +5143,26 @@ function _setupWorldMapZoomPan(svg, layer) {
     scale = 1; tx = 0; ty = 0;
     update();
   });
-  // ズームコントロール (+ / − / ⊙)
-  svg.querySelectorAll('.zoom-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const kind = btn.dataset.zoom;
-      if (kind === 'reset') { scale = 1; tx = 0; ty = 0; update(); return; }
-      const factor = (kind === 'in') ? 1.3 : (1 / 1.3);
-      const newScale = Math.max(MIN, Math.min(MAX, scale * factor));
-      if (newScale === scale) return;
-      // 中央 anchor zoom
-      const cx = W / 2, cy = H / 2;
-      tx = cx - (cx - tx) * (newScale / scale);
-      ty = cy - (cy - ty) * (newScale / scale);
-      scale = newScale;
-      update();
-    });
-  });
+  // ズームコントロール (header の HTML ボタンに bind、 野沢さん指示 2026-05-05 「拡大縮小ボタンは
+  //   相関図と同じく上部に配置」)。 グローバル関数 経由で 現在の scale/tx/ty を 操作。
+  const _applyZoomFactor = (factor) => {
+    const newScale = Math.max(MIN, Math.min(MAX, scale * factor));
+    if (newScale === scale) return;
+    const cx = W / 2, cy = H / 2;
+    tx = cx - (cx - tx) * (newScale / scale);
+    ty = cy - (cy - ty) * (newScale / scale);
+    scale = newScale;
+    update();
+    _updateWorldMapZoomLevel();
+  };
+  window.zoomWorldMapIn = () => _applyZoomFactor(1.3);
+  window.zoomWorldMapOut = () => _applyZoomFactor(1 / 1.3);
+  window.zoomWorldMapReset = () => { scale = 1; tx = 0; ty = 0; update(); _updateWorldMapZoomLevel(); };
+  _updateWorldMapZoomLevel();
+  function _updateWorldMapZoomLevel() {
+    const lvl = document.getElementById('wm-zoom-level');
+    if (lvl) lvl.textContent = Math.round(scale * 100) + '%';
+  }
 }
 // B1: モバイル topbar ⋮ メニュー (デスクトップは display:contents で表示なので影響なし)
 (function setupTopbarMore() {
