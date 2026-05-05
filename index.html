@@ -24,8 +24,8 @@
 <link rel="icon" href="/images/icons/icon-32.png" type="image/png" sizes="32x32">
 <link rel="icon" href="/images/icons/icon-16.png" type="image/png" sizes="16x16">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
-<link rel="manifest" href="/manifest.json?v=20260503q25">
-<link rel="stylesheet" href="/style.css?v=20260503q">
+<link rel="manifest" href="/manifest.json?v=1.4.2j">
+<link rel="stylesheet" href="/style.css?v=1.4.2j">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -67,7 +67,7 @@ if ('serviceWorker' in navigator) {
 </div>
 
 <header class="topbar">
-  <div class="title">✦ Prismaera <span class="title-kana">-プリズマエラ-</span> <span class="ver" id="app-version">v1.4.2</span></div>
+  <div class="title">✦ Prismaera <span class="title-kana">-プリズマエラ-</span> <span class="ver" id="app-version">v1.4.2j</span></div>
   <div class="stats">
     <button id="btn-gallery" class="gallery-btn" title="図鑑 (Gキー)">📖 図鑑</button>
     <button id="btn-relations" class="gallery-btn" title="相関図">🌐 相関図</button>
@@ -173,16 +173,29 @@ if ('serviceWorker' in navigator) {
         <div class="story-next-teaser" aria-label="次章準備中"></div>
       </div>
 
-      <!-- 右カラム: ご意見・ご要望 (コンパクト) -->
-      <div class="home-feedback">
-        <button type="button" class="home-feedback-card" onclick="openFeedbackModal()">
-          <div class="home-feedback-icon">📨</div>
-          <div class="home-feedback-text">
-            <div class="home-feedback-title">ご意見・ご要望</div>
-            <div class="home-feedback-sub">Prismaeraをもっと良くするため、声を聞かせてください</div>
+      <!-- 右カラム: ご意見・ご要望 + (ログイン者限定) カードゲームβ -->
+      <div class="home-right-col">
+        <!-- カードゲーム (Phase 0 PoC) — アカウント登録者限定で表示 -->
+        <a class="home-cardgame-card" id="home-cardgame-card" href="/cardgame/" style="display:none" aria-label="カードゲームPoC">
+          <div class="home-cardgame-aurora"></div>
+          <div class="home-cardgame-icon">🎴</div>
+          <div class="home-cardgame-text">
+            <div class="home-cardgame-title">カードゲーム <span class="home-cardgame-badge">β</span></div>
+            <div class="home-cardgame-sub">Phase 0 PoC 公開中 — vs AI で試遊</div>
           </div>
-          <div class="home-feedback-arrow">→</div>
-        </button>
+          <div class="home-cardgame-arrow">→</div>
+        </a>
+        <!-- ご意見・ご要望 -->
+        <div class="home-feedback">
+          <button type="button" class="home-feedback-card" onclick="openFeedbackModal()">
+            <div class="home-feedback-icon">📨</div>
+            <div class="home-feedback-text">
+              <div class="home-feedback-title">ご意見・ご要望</div>
+              <div class="home-feedback-sub">Prismaeraをもっと良くするため、声を聞かせてください</div>
+            </div>
+            <div class="home-feedback-arrow">→</div>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -255,14 +268,9 @@ if ('serviceWorker' in navigator) {
   <div class="stage-skip">クリック / Space でスキップ</div>
 </div>
 
-<!-- Result modal after 10-roll -->
+<!-- Result modal after 10-roll (C-1: 上下重複ボタン廃止 → 下部 sticky 1セット + 中身スクロール) -->
 <div id="result" class="result">
   <div class="result-inner">
-    <!-- モバイル用 上部 アクション — 順序は下部と統一 (閉じる左 / もう一度10連右) -->
-    <div class="result-actions result-actions-top">
-      <button id="result-close-top" class="result-btn secondary" type="button">閉じる<span class="esc-hint"> (Esc)</span></button>
-      <button id="result-again-ten-top" class="result-btn primary" type="button">もう一度10連<span class="esc-hint"> (Enter)</span></button>
-    </div>
     <h2 id="result-title">結果</h2>
     <div id="result-rarity" class="result-rarity"></div>
     <div id="result-grid" class="result-grid"></div>
@@ -612,7 +620,7 @@ if ('serviceWorker' in navigator) {
 <audio id="bgm-home" preload="auto"></audio>
 
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
-<script src="/script.js?v=20260503q"></script>
-<script src="/gasshuku.js?v=20260503q"></script>
+<script src="/script.js?v=1.4.2j"></script>
+<script src="/gasshuku.js?v=1.4.2j"></script>
 </body>
 </html>

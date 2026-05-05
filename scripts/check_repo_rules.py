@@ -21,6 +21,8 @@ pre-commit フック (.githooks/pre-commit) から自動呼出。
 """
 import re
 import sys
+import json
+import subprocess
 from pathlib import Path
 
 try:
@@ -1169,6 +1171,275 @@ n7_21 = check_all_chars_have_faction(pool_x, script_text_x)
 print(f"  ルール7-21 (CHAR_FACTION 全キャラ登録): {n7_21}未登録 検査 [BLOCKER]")
 n7_22 = check_chapter_factions_registered(sf_ids_x, script_text_x)
 print(f"  ルール7-22 (章 新派閥 FACTIONS 登録): {n7_22}派閥 検査 [BLOCKER]")
+
+# === バージョン管理 ルール (BLOCKER 2026-05-04 野沢さん指示「同様のミスが起きないように」) ===
+def _current_branch():
+    r = subprocess.run(["git", "-C", str(ROOT), "rev-parse", "--abbrev-ref", "HEAD"],
+                       capture_output=True, text=True, encoding="utf-8", errors="replace")
+    return (r.stdout or "").strip() if r.returncode == 0 else ""
+
+def _read_version_at(ref):
+    """指定 ref の version.json から version を読む。 取れなければ None"""
+    r = subprocess.run(["git", "-C", str(ROOT), "show", f"{ref}:version.json"],
+                       capture_output=True, text=True, encoding="utf-8", errors="replace")
+    if r.returncode != 0 or not r.stdout:
+        return None
+    try:
+        return json.loads(r.stdout).get("version")
+    except Exception:
+        return None
+
+def check_dev_version_suffix():
+    """ルール7-23 (BLOCKER 2026-05-04): dev branch では version は X.Y.Z または {X.Y.Z}{suffix(a-z+)} 形式必須。
+    主バージョン (X.Y.Z) bump は main マージ時のみ、 dev では suffix a/b/c... で進行 (a→z→aa→ab→...)。
+    詳細: CLAUDE.md feedback_prismaera_version_suffix.md
+    """
+    if _current_branch() != "dev":
+        return 0
+    ver_path = ROOT / "version.json"
+    if not ver_path.exists():
+        return 0
+    try:
+        cur_ver = json.load(ver_path.open(encoding="utf-8"))["version"]
+    except Exception:
+        return 0
+    main_ver = _read_version_at("origin/main")
+    if main_ver is None:
+        return 0
+    ok = False
+    if cur_ver == main_ver:
+        ok = True
+    elif cur_ver.startswith(main_ver):
+        suffix = cur_ver[len(main_ver):]
+        if re.fullmatch(r"[a-z]+", suffix):
+            ok = True
+    if not ok:
+        violations.append(
+            f"[ルール7-23 dev version 不正 BLOCKER] dev branch の version='{cur_ver}' は不正。\n"
+            f"      origin/main='{main_ver}' と同じ、 または '{main_ver}a' / '{main_ver}b' ... '{main_ver}z' / '{main_ver}aa' / '{main_ver}ab' ... の suffix 形式 必須。\n"
+            f"      → 主バージョン (X.Y.Z) bump は main マージ時のみ、 dev では手動で suffix 進行。\n"
+            f"      → 詳細: CLAUDE.md feedback_prismaera_version_suffix.md"
+        )
+    return 1
+
+
+def _increment_suffix(s):
+    """Excel column 風 文字列 increment: '' → 'a', 'a' → 'b', ..., 'z' → 'aa', 'aa' → 'ab', ..., 'zz' → 'aaa'"""
+    if not s:
+        return "a"
+    chars = list(s)
+    i = len(chars) - 1
+    while i >= 0:
+        if chars[i] < "z":
+            chars[i] = chr(ord(chars[i]) + 1)
+            return "".join(chars)
+        chars[i] = "a"
+        i -= 1
+    return "a" + "".join(chars)
+
+
+def check_dev_suffix_progression():
+    """ルール7-25 (BLOCKER 2026-05-05 野沢さん指示「同様のミスが二度と起こらないように」):
+    dev branch で commit する時、 suffix は前 commit から 1段階増分 必須 (a→b、 z→aa、 zz→aaa)。
+    X.Y.Z 跨ぎ (main merge 直後) は suffix 'a' で開始 必須。
+    suffix skip (a→c)、 後退 (b→a)、 同一 (a→a) は全て BLOCKER。
+    """
+    if _current_branch() != "dev":
+        return 0
+    ver_path = ROOT / "version.json"
+    if not ver_path.exists():
+        return 0
+    try:
+        cur_ver = json.load(ver_path.open(encoding="utf-8"))["version"]
+    except Exception:
+        return 0
+    parent_ver = _read_version_at("HEAD")  # 親 commit (今 commit が積まれる前)
+    if parent_ver is None or parent_ver == cur_ver:
+        # 初回 commit or 同じ (= bump し忘れ)、 同じなら別ルール (7-23) で検出
+        return 0
+    m_cur = re.match(r"^(\d+\.\d+\.\d+)([a-z]*)$", cur_ver)
+    m_par = re.match(r"^(\d+\.\d+\.\d+)([a-z]*)$", parent_ver)
+    if not m_cur or not m_par:
+        return 0
+    cur_base, cur_suffix = m_cur.groups()
+    par_base, par_suffix = m_par.groups()
+    if cur_base != par_base:
+        # X.Y.Z 跨ぎ → main merge 直後、 suffix='a' で開始
+        if cur_suffix != "a":
+            violations.append(
+                f"[ルール7-25 dev suffix リセット 不正 BLOCKER] X.Y.Z bump 後 ({parent_ver} → {cur_ver}) の dev suffix は 'a' で開始必須。\n"
+                f"      → 期待: {cur_base}a / 実際: {cur_ver}\n"
+                f"      → main merge 直後の dev は a から再開する仕様 (野沢さん指示 2026-05-05)"
+            )
+            return 1
+        return 0
+    expected = _increment_suffix(par_suffix or "")
+    if cur_suffix != expected:
+        violations.append(
+            f"[ルール7-25 dev suffix 不正増分 BLOCKER] {parent_ver} → {cur_ver} は不正。\n"
+            f"      → 期待: {par_base}{expected} (前 suffix '{par_suffix}' を 1段階 increment)\n"
+            f"      → 仕様: a→b→...→z→aa→ab→...→az→ba→...→zz→aaa (skip / 後退 / 同一 全て NG)\n"
+            f"      → bump_version.py dev-suffix で自動進行可能 (野沢さん指示 2026-05-05)"
+        )
+        return 1
+    return 0
+
+
+def check_cache_buster_format():
+    """ルール7-26 (BLOCKER 2026-05-05 野沢さん指示): cache buster (?v=) は version.json の version と完全同期 必須。
+    日付ベース (?v=20260505a 等) や 不一致 cache buster は 旧仕様残存・同期漏れ で BLOCKER。
+    """
+    ver_path = ROOT / "version.json"
+    if not ver_path.exists():
+        return 0
+    try:
+        ver = json.load(ver_path.open(encoding="utf-8"))["version"]
+    except Exception:
+        return 0
+    targets = [
+        ROOT / "index.html",
+        ROOT / "cardgame" / "index.html",
+        ROOT / "cardgame" / "script.js",
+        ROOT / "sw.js",
+    ]
+    found_violations = 0
+    for path in targets:
+        if not path.exists():
+            continue
+        text = path.read_text(encoding="utf-8")
+        # ?v= で始まる cache buster
+        for m in re.finditer(r"\?v=([\w.]+)", text):
+            cb = m.group(1)
+            if cb != ver:
+                # 例外: manifest.json の cache buster は version + suffix (例: 1.4.2g1) も許容
+                if path.name == "index.html" and re.match(r"^" + re.escape(ver) + r"\d+$", cb):
+                    continue
+                violations.append(
+                    f"[ルール7-26 cache buster 不一致 BLOCKER] {path.relative_to(ROOT)} に '?v={cb}' (version='{ver}' と不一致)\n"
+                    f"      → 全 cache buster は version.json の version と完全同期 必須\n"
+                    f"      → 旧仕様 (?v=YYYYMMDDx) 残存検出 or bump_version.py 同期漏れ\n"
+                    f"      → bump_version.py dev-suffix で全ファイル一括統一 可能"
+                )
+                found_violations += 1
+                break  # 同ファイル内の他箇所も同じ問題なので 1 件だけ記録
+    return found_violations
+
+def check_main_version_bumped():
+    """ルール7-24 (BLOCKER 2026-05-04): main branch で commit する時、 version は HEAD (= 親 commit) より bump 必須。
+    2026-05-03 朝のセッションで v1.4.1 を 7 回 main merge した事故の再発防止。
+    詳細: CLAUDE.md feedback_prismaera_version_suffix.md
+    """
+    if _current_branch() != "main":
+        return 0
+    ver_path = ROOT / "version.json"
+    if not ver_path.exists():
+        return 0
+    try:
+        cur_ver = json.load(ver_path.open(encoding="utf-8"))["version"]
+    except Exception:
+        return 0
+    parent_ver = _read_version_at("HEAD")
+    if parent_ver is None:
+        return 0
+    if cur_ver == parent_ver:
+        violations.append(
+            f"[ルール7-24 main version 未 bump BLOCKER] main で commit する version='{cur_ver}' が前 commit と同一。\n"
+            f"      → main release 時は必ず X.Y.Z を 1 段以上 bump (例: 1.4.2 → 1.4.3)\n"
+            f"      → 同じ X.Y.Z で main merge 連発はルール違反 (2026-05-03 v1.4.1 7回事故 再発防止)\n"
+            f"      → 詳細: CLAUDE.md feedback_prismaera_version_suffix.md"
+        )
+    return 1
+
+n7_23 = check_dev_version_suffix()
+print(f"  ルール7-23 (dev version suffix bump): {n7_23}件 検査 [BLOCKER]")
+n7_24 = check_main_version_bumped()
+print(f"  ルール7-24 (main version bump 必須): {n7_24}件 検査 [BLOCKER]")
+n7_25 = check_dev_suffix_progression()
+print(f"  ルール7-25 (dev suffix 1段階 increment): {n7_25}件 検査 [BLOCKER]")
+n7_26 = check_cache_buster_format()
+print(f"  ルール7-26 (cache buster = version 完全同期): {n7_26}件 検査 [BLOCKER]")
+
+
+def check_admin_tier_max():
+    """ルール9 (BLOCKER 2026-05-04 野沢さん指示「自動チェックにも入れたほうが良い」):
+    admin.html の TIER_MAX が cardgame/data/pool.json の tier 別 count と一致するか確認。
+    章追加時に TIER_MAX 更新漏れで「ガチャコンプ判定」 が永遠に届かなくなる事故防止。"""
+    admin_path = ROOT / "admin.html"
+    pool_path = ROOT / "cardgame" / "data" / "pool.json"
+    if not admin_path.exists() or not pool_path.exists():
+        return 0
+    try:
+        pool = json.loads(pool_path.read_text(encoding="utf-8"))
+    except Exception:
+        return 0
+    from collections import Counter
+    actual = Counter(c.get("tier", "?") for c in pool)
+    admin_text = admin_path.read_text(encoding="utf-8")
+    m = re.search(r"const\s+TIER_MAX\s*=\s*\{([^}]+)\}", admin_text)
+    if not m:
+        return 0
+    declared = {}
+    for kv in re.finditer(r"(\w+)\s*:\s*(\d+)", m.group(1)):
+        declared[kv.group(1)] = int(kv.group(2))
+    diffs = []
+    for tier in ["LR", "UR", "SSR", "SR", "R"]:
+        a = actual.get(tier, 0)
+        d = declared.get(tier, 0)
+        if a != d:
+            diffs.append(f"{tier}: admin={d} vs pool={a}")
+    if diffs:
+        violations.append(
+            f"[ルール9 admin TIER_MAX 不一致 BLOCKER] {' / '.join(diffs)}\n"
+            f"      → admin.html の TIER_MAX を pool.json の実数 (LR{actual.get('LR',0)}/UR{actual.get('UR',0)}/SSR{actual.get('SSR',0)}/SR{actual.get('SR',0)}/R{actual.get('R',0)}) に更新\n"
+            f"      → 章追加時に admin 画面のガチャコンプ統計が永遠に届かない事故を防ぐ自動チェック (野沢さん指示 2026-05-04)"
+        )
+    return len(diffs)
+
+
+def check_admin_bgm_labels():
+    """ルール10 (WARNING 2026-05-04): prompt/bgm/ 配下の全 BGM が admin.html の BGM_LABELS に登録済確認。
+    新章 BGM プロンプト追加時に admin の display label 更新漏れを警告 (再生回数統計の表示に必要)。"""
+    admin_path = ROOT / "admin.html"
+    bgm_dir = ROOT / "prompt" / "bgm"
+    if not admin_path.exists() or not bgm_dir.exists():
+        return 0
+    admin_text = admin_path.read_text(encoding="utf-8")
+    # BGM_LABELS 内の id を抽出 (1箇所目: const BGM_LABELS = { 'id': ... } )
+    m = re.search(r"const\s+BGM_LABELS\s*=\s*\{([^}]+\}\s*,?\s*)*\s*\}", admin_text, re.DOTALL)
+    if not m:
+        return 0
+    label_ids = set(re.findall(r"['\"]([\w_]+)['\"]\s*:\s*\{", m.group(0)))
+    # prompt/bgm/ 配下の md ファイル名から BGM id を逆引き (最低限のもの)
+    expected_ids = set()
+    for f in bgm_dir.glob("*.md"):
+        name = f.stem
+        # 章テーマ: chapter_s1cN.md → s1cN は admin label にないが BGM id はある程度推測
+        # 派閥テーマ: faction_<name>.md or factions/<name>.md → admin の id と一致しそうな文字列
+        m2 = re.match(r"chapter_s1c(\d+)", name)
+        if m2:
+            ch = int(m2.group(1))
+            # 第1章=watch, 第2章=tide, 第3章=sands, 第4章=frost, 第5章=blackmoon
+            chmap = {1: "watch", 2: "tide", 3: "sands", 4: "frost", 5: "blackmoon"}
+            if ch in chmap:
+                expected_ids.add(chmap[ch])
+            continue
+        # cardgame.md
+        if name == "cardgame":
+            expected_ids.add("cards")
+            continue
+    missing = expected_ids - label_ids
+    if missing:
+        warnings_only.append(
+            f"[ルール10 admin BGM_LABELS 未登録 WARNING] prompt/bgm/ にある BGM が admin.html BGM_LABELS に未登録: {', '.join(sorted(missing))}\n"
+            f"      → admin.html の BGM_LABELS / BGM_LABELS_DETAIL に追加すると BGM 再生統計が正しく表示される (野沢さん指示 2026-05-04 自動チェック)"
+        )
+    return len(missing)
+
+
+n9 = check_admin_tier_max()
+print(f"  ルール9 (admin TIER_MAX = pool count): {n9}件 検査 [BLOCKER]")
+n10 = check_admin_bgm_labels()
+print(f"  ルール10 (admin BGM_LABELS 全 BGM 登録): {n10}件 検査 [WARNING]")
 
 # === Warning ルール (commit はブロックせず、 開発者手動 review) ===
 violations_blocker = list(violations)  # ここまでが blocker 違反

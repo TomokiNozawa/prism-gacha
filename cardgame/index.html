@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="theme-color" content="#0a0a1a">
+<title>PCB | Prismaera Cards Battle</title>
+<link rel="icon" href="/images/icons/icon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="/images/icons/icon-180.png">
+<link rel="stylesheet" href="./style.css?v=1.4.2j">
+</head>
+<body>
+
+<header class="cg-topbar">
+  <a class="cg-back" href="/" aria-label="戻る">←</a>
+  <div class="cg-title">
+    ✦ <span class="cg-title-sub">PCB</span>
+    <span class="cg-phase">β</span>
+  </div>
+  <div class="cg-topbar-right">
+    <button class="cg-iconbtn" id="btn-cg-mute" aria-label="BGMミュート切替" title="BGM 切替">🔊</button>
+    <button class="cg-iconbtn" id="btn-help" aria-label="ルール" title="ルール">?</button>
+  </div>
+</header>
+
+<!-- ホーム画面 (タイトル → モード選択) -->
+<section id="home-screen" class="cg-screen active">
+  <div class="cg-hero">
+    <div class="cg-aurora"></div>
+    <div class="cg-hero-icon">🎴</div>
+    <h1 class="cg-hero-title">PCB</h1>
+    <p class="cg-hero-tagline">Prismaera Cards Battle — 虹霊界のキャラと共に、 3レーンの読み合い</p>
+  </div>
+  <div class="cg-bo3-toggle">
+    <label class="cg-bo3-label">
+      <input type="checkbox" id="bo3-toggle">
+      <div class="cg-bo3-text-wrap">
+        <span class="cg-bo3-text">🏆 BO3モード</span>
+        <span class="cg-bo3-sub">先攻 → 後攻 → ランダム の3本、 2本先取で勝利</span>
+      </div>
+    </label>
+  </div>
+
+  <div class="cg-deck-row">
+    <button type="button" class="cg-deck-btn" id="btn-open-deck-builder">
+      <span class="cg-deck-icon">⚙️</span>
+      <span class="cg-deck-text">
+        <span class="cg-deck-title">デッキ編集</span>
+        <span class="cg-deck-sub" id="deck-builder-sub">12 枚 — デフォルト使用中</span>
+      </span>
+      <span class="cg-deck-arrow">→</span>
+    </button>
+  </div>
+
+  <div class="cg-modes">
+    <button class="cg-mode-btn primary" id="btn-start-easy">
+      <div class="cg-mode-icon">🌱</div>
+      <div class="cg-mode-text">
+        <div class="cg-mode-title">AIと対戦 (Easy)</div>
+        <div class="cg-mode-sub">ルール体験 / 初心者向け</div>
+      </div>
+    </button>
+    <button class="cg-mode-btn" id="btn-start-normal">
+      <div class="cg-mode-icon">⚔️</div>
+      <div class="cg-mode-text">
+        <div class="cg-mode-title">AIと対戦 (Normal)</div>
+        <div class="cg-mode-sub">コスト最大化 + 劣勢補強</div>
+      </div>
+    </button>
+    <button class="cg-mode-btn" id="btn-start-hard">
+      <div class="cg-mode-icon">🔥</div>
+      <div class="cg-mode-text">
+        <div class="cg-mode-title">AIと対戦 (Hard)</div>
+        <div class="cg-mode-sub">派閥シナジー + レーン効果意識</div>
+      </div>
+    </button>
+    <button class="cg-mode-btn" id="btn-start-master">
+      <div class="cg-mode-icon">👑</div>
+      <div class="cg-mode-text">
+        <div class="cg-mode-title">AIと対戦 (Master)</div>
+        <div class="cg-mode-sub">1手先まで読む + コンボ評価</div>
+      </div>
+    </button>
+    <button class="cg-mode-btn disabled" disabled>
+      <div class="cg-mode-icon">🌐</div>
+      <div class="cg-mode-text">
+        <div class="cg-mode-title">オンラインPvP</div>
+        <div class="cg-mode-sub">準備中</div>
+      </div>
+    </button>
+    <button class="cg-mode-btn secondary" id="btn-tutorial">
+      <div class="cg-mode-icon">📘</div>
+      <div class="cg-mode-text">
+        <div class="cg-mode-title">チュートリアル</div>
+        <div class="cg-mode-sub">3分で覚えるルール</div>
+      </div>
+    </button>
+  </div>
+  <div class="cg-foot-note">PCB β — Phase 1 機能 (派閥シナジー / 凸数 / レーン効果 / ストーリーコンボ / マリガン / BO3) 実装済</div>
+</section>
+
+<!-- 試合画面 -->
+<section id="match-screen" class="cg-screen">
+
+  <!-- 試合HUD (野沢さん指示 2026-05-04: 絵文字削除 + 試合スコア削除 + ラベルは半角カナ) -->
+  <div class="cg-hud">
+    <div class="cg-hud-block" title="ターン進行 (現/全6)">
+      <div class="cg-hud-label">ﾀｰﾝ</div>
+      <div class="cg-hud-value"><span id="hud-turn">1</span> / 6</div>
+    </div>
+    <div class="cg-hud-block" title="このターン使えるコスト (残/合計)">
+      <div class="cg-hud-label">ｺｽﾄ</div>
+      <div class="cg-hud-value"><span id="hud-cost">1</span></div>
+    </div>
+    <div class="cg-hud-block" id="hud-pause-block" title="試合を中断">
+      <button class="cg-hud-pause" id="btn-pause" aria-label="中断" title="試合を中断">⏸</button>
+    </div>
+    <div class="cg-hud-actions">
+      <button class="cg-hud-btn" id="btn-mulligan" style="display:none" title="手札を引き直す (1回のみ、 ターン1)">🔄 引直</button>
+      <button class="cg-hud-btn" id="btn-combos" title="現在の手札+場で発動可能なコンボを確認">💡</button>
+      <button class="cg-hud-btn" id="btn-undo" title="このターンの配置を全てリセット">↩</button>
+      <button class="cg-end-turn" id="btn-end-turn">ターン終了 →</button>
+    </div>
+  </div>
+  <!-- BO3 series 表示 (簡略化済) -->
+  <div id="series-info" class="cg-series-info"></div>
+
+  <!-- 相手の場 (側ラベルに 先攻/後攻 アイコン、 野沢さん指示 2026-05-04) -->
+  <div class="cg-board cg-board-opp">
+    <div class="cg-side-label"><span class="cg-mover-icon" id="mover-icon-opp"></span>AI</div>
+    <div class="cg-lanes" id="lanes-opp">
+      <div class="cg-lane" data-lane="0">
+        <div class="cg-lane-header"><span class="cg-lane-name">L1</span><span class="cg-lane-power" id="opp-power-0">0</span></div>
+        <div class="cg-lane-slots" id="opp-slots-0"></div>
+      </div>
+      <div class="cg-lane" data-lane="1">
+        <div class="cg-lane-header"><span class="cg-lane-name">L2</span><span class="cg-lane-power" id="opp-power-1">0</span></div>
+        <div class="cg-lane-slots" id="opp-slots-1"></div>
+      </div>
+      <div class="cg-lane" data-lane="2">
+        <div class="cg-lane-header"><span class="cg-lane-name">L3</span><span class="cg-lane-power" id="opp-power-2">0</span></div>
+        <div class="cg-lane-slots" id="opp-slots-2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 中央: メッセージログ -->
+  <div class="cg-message" id="match-message">手札からカードをタップ → 配置先レーンをタップ</div>
+
+  <!-- 自分の場 -->
+  <div class="cg-board cg-board-me">
+    <div class="cg-side-label"><span class="cg-mover-icon" id="mover-icon-me"></span>You</div>
+    <div class="cg-lanes" id="lanes-me">
+      <div class="cg-lane" data-lane="0">
+        <div class="cg-lane-header"><span class="cg-lane-name">L1</span><span class="cg-lane-power" id="me-power-0">0</span></div>
+        <div class="cg-lane-slots" id="me-slots-0"></div>
+      </div>
+      <div class="cg-lane" data-lane="1">
+        <div class="cg-lane-header"><span class="cg-lane-name">L2</span><span class="cg-lane-power" id="me-power-1">0</span></div>
+        <div class="cg-lane-slots" id="me-slots-1"></div>
+      </div>
+      <div class="cg-lane" data-lane="2">
+        <div class="cg-lane-header"><span class="cg-lane-name">L3</span><span class="cg-lane-power" id="me-power-2">0</span></div>
+        <div class="cg-lane-slots" id="me-slots-2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PC 用 コンボ常時パネル (right side floating、 スマホは display:none) -->
+  <aside id="cg-combos-panel" class="cg-combos-panel" aria-label="発動可能コンボ一覧">
+    <h3 class="cg-combos-panel-title">💡 コンボ <span class="cg-combos-panel-sub">手札+場で発動可能</span></h3>
+    <div class="cg-combos-panel-body" id="cg-combos-panel-body"></div>
+  </aside>
+
+  <!-- 手札 -->
+  <div class="cg-hand-area">
+    <div class="cg-hand-label">手札 <span class="cg-hand-count"><span id="hand-count">0</span> 枚</span></div>
+    <div class="cg-hand" id="hand"></div>
+  </div>
+
+</section>
+
+<!-- 結果モーダル (backdrop 半透明 + 場が見える) -->
+<div id="result-modal" class="cg-modal cg-modal-result" hidden>
+  <div class="cg-modal-backdrop" onclick="peekBoard()"></div>
+  <div class="cg-modal-card">
+    <div class="cg-modal-icon" id="result-icon">🏆</div>
+    <h2 class="cg-modal-title" id="result-title">勝利</h2>
+    <div class="cg-modal-detail" id="result-detail"></div>
+    <div class="cg-modal-actions">
+      <button class="cg-btn secondary" onclick="peekBoard()">場を見る</button>
+      <button class="cg-btn primary" id="result-next-btn" onclick="nextMatch()" style="display:none">次の試合へ →</button>
+      <button class="cg-btn primary" onclick="rematch()">もう一回</button>
+    </div>
+    <div class="cg-modal-actions" style="margin-top:8px">
+      <button class="cg-btn secondary" onclick="backToCardgameHome()">カードゲームHome</button>
+      <button class="cg-btn secondary" onclick="backToPrismaeraHome()">Prismaera Home</button>
+    </div>
+  </div>
+</div>
+
+<!-- 結果に戻る floating ボタン (場を見る時に右下) -->
+<button id="result-peek-btn" class="cg-result-peek-btn" onclick="reopenResult()" hidden>📋 結果に戻る</button>
+
+<!-- P-5: スロット選択モーダル (デッキ編集前段、 野沢さん指示 2026-05-04 「最初に選ばせて」) -->
+<div id="deck-slot-picker-modal" class="cg-modal" hidden>
+  <div class="cg-modal-backdrop" onclick="closeDeckSlotPicker()"></div>
+  <div class="cg-modal-card cg-deck-slot-picker-card">
+    <button class="cg-modal-close" onclick="closeDeckSlotPicker()" aria-label="閉じる">×</button>
+    <h2 class="cg-modal-title">⚙️ どのデッキを編集?</h2>
+    <p class="cg-modal-detail">3つのデッキスロットから選んで編集します。 「⭐使用中」 が現在対戦で使うデッキです。</p>
+    <div class="cg-deck-slot-picker-list" id="deck-slot-picker-list"></div>
+    <div class="cg-modal-actions">
+      <button class="cg-btn secondary" onclick="closeDeckSlotPicker()">キャンセル</button>
+    </div>
+  </div>
+</div>
+
+<!-- P-5: デッキ編集モーダル (1スロット編集に絞る、 切替は前段で済む) -->
+<div id="deck-builder-modal" class="cg-modal" hidden>
+  <div class="cg-modal-backdrop" onclick="closeDeckBuilder()"></div>
+  <div class="cg-modal-card cg-deck-builder-card">
+    <button class="cg-modal-close" onclick="closeDeckBuilder()" aria-label="閉じる">×</button>
+    <div class="cg-deck-builder-header">
+      <button type="button" class="cg-deck-builder-back" onclick="backToSlotPicker()" title="スロット選択へ戻る">← Slot</button>
+      <h2 class="cg-modal-title">⚙️ Slot <span id="deck-builder-slot-num">1</span></h2>
+      <div class="cg-deck-builder-counter">
+        <span id="deck-builder-count">0</span> / 12 枚
+      </div>
+    </div>
+    <div class="cg-deck-active-toggle-row">
+      <button type="button" class="cg-deck-active-toggle" id="btn-deck-set-active">
+        ⭐ このスロットを使用中に
+      </button>
+    </div>
+    <div class="cg-deck-builder-actions">
+      <button class="cg-btn secondary" id="btn-deck-filter">🔍 <span id="filter-count-badge"></span> フィルター</button>
+      <button class="cg-btn secondary" id="btn-deck-clear">クリア</button>
+      <button class="cg-btn secondary" id="btn-deck-auto">🎲 おまかせ</button>
+      <button class="cg-btn secondary" id="btn-deck-default">🔁 デフォ</button>
+    </div>
+    <div class="cg-deck-list-status" id="deck-list-status"></div>
+    <div class="cg-deck-builder-list" id="deck-builder-grid"></div>
+    <div class="cg-modal-actions">
+      <button class="cg-btn secondary" onclick="closeDeckBuilder()">キャンセル</button>
+      <button class="cg-btn primary" id="btn-deck-save">💾 このスロットに保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- フィルター ポップアップ (野沢さん指示 2026-05-04 「フィルター欄こそポップアップで」) -->
+<div id="deck-filter-modal" class="cg-modal" hidden>
+  <div class="cg-modal-backdrop" onclick="closeDeckFilter()"></div>
+  <div class="cg-modal-card cg-deck-filter-card">
+    <button class="cg-modal-close" onclick="closeDeckFilter()" aria-label="閉じる">×</button>
+    <h2 class="cg-modal-title">🔍 フィルター</h2>
+    <div class="cg-deck-filter-section">
+      <div class="cg-deck-filter-label">レア度</div>
+      <div class="cg-deck-builder-tabs" id="deck-builder-tabs">
+        <button type="button" class="cg-deck-tab active" data-tier="all">全Tier</button>
+        <button type="button" class="cg-deck-tab" data-tier="LR">LR</button>
+        <button type="button" class="cg-deck-tab" data-tier="UR">UR</button>
+        <button type="button" class="cg-deck-tab" data-tier="SSR">SSR</button>
+        <button type="button" class="cg-deck-tab" data-tier="SR">SR</button>
+        <button type="button" class="cg-deck-tab" data-tier="R">R</button>
+      </div>
+    </div>
+    <div class="cg-deck-filter-section">
+      <div class="cg-deck-filter-label">章</div>
+      <div class="cg-deck-builder-tabs" id="deck-builder-chapter-tabs">
+        <button type="button" class="cg-deck-tab active" data-chapter="all">全章</button>
+        <button type="button" class="cg-deck-tab" data-chapter="s1c1">第1章</button>
+        <button type="button" class="cg-deck-tab" data-chapter="s1c2">第2章</button>
+        <button type="button" class="cg-deck-tab" data-chapter="s1c3">第3章</button>
+        <button type="button" class="cg-deck-tab" data-chapter="s1c4">第4章</button>
+      </div>
+    </div>
+    <div class="cg-deck-filter-section">
+      <div class="cg-deck-filter-label">名前検索</div>
+      <input type="text" id="deck-search-input" class="cg-deck-search" placeholder="例: プリズマ">
+    </div>
+    <div class="cg-deck-filter-section">
+      <div class="cg-deck-filter-label">派閥</div>
+      <select id="deck-faction-filter" class="cg-deck-faction-select">
+        <option value="all">全派閥</option>
+      </select>
+    </div>
+    <div class="cg-deck-filter-section">
+      <label class="cg-deck-owned-toggle">
+        <input type="checkbox" id="deck-owned-only">
+        <span>所持しているカードのみ表示</span>
+      </label>
+    </div>
+    <div class="cg-modal-actions">
+      <button class="cg-btn secondary" id="btn-filter-reset">🔁 リセット</button>
+      <button class="cg-btn primary" onclick="closeDeckFilter()">適用して閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- キャラ詳細モーダル (P-1、 カードタップで開く) -->
+<div id="char-detail-modal" class="cg-modal" hidden>
+  <div class="cg-modal-backdrop" onclick="closeCharDetail()"></div>
+  <div class="cg-modal-card cg-char-detail-card">
+    <button class="cg-modal-close" onclick="closeCharDetail()" aria-label="閉じる">×</button>
+    <div class="cg-char-detail-img" id="char-detail-img"></div>
+    <div class="cg-char-detail-info">
+      <div class="cg-char-detail-tier-row">
+        <span id="char-detail-tier" class="cg-char-detail-tier">UR</span>
+        <span id="char-detail-faction" class="cg-char-detail-faction">原虹</span>
+        <span id="char-detail-dupes" class="cg-char-detail-dupes">+2 凸</span>
+      </div>
+      <h2 id="char-detail-name" class="cg-char-detail-name">キャラ名</h2>
+      <div class="cg-char-detail-stats">
+        <span>⚡ <b id="char-detail-cost">5</b></span>
+        <span>⚔ 基礎 <b id="char-detail-base">7</b></span>
+        <span>凸 <b id="char-detail-bonus">+0</b></span>
+        <span>計 <b id="char-detail-total">7</b></span>
+      </div>
+      <div class="cg-char-detail-effect" id="char-detail-effect">効果なし</div>
+      <!-- A-3: 凸毎効果 段階表 -->
+      <div id="char-detail-dupe-stages" class="cg-dupe-stages"></div>
+      <!-- 野沢さん指示 2026-05-05: power 計算 内訳 (場のカードのみ表示) -->
+      <div id="char-detail-power-breakdown" class="cg-pwbreak-section" style="display:none"></div>
+      <div class="cg-char-detail-combos">
+        <h3>関連コンボ</h3>
+        <div id="char-detail-combo-list"></div>
+      </div>
+    </div>
+    <div class="cg-modal-actions">
+      <button class="cg-btn secondary" onclick="closeCharDetail()">戻る</button>
+      <button class="cg-btn primary" id="char-detail-place-btn" style="display:none">📍 配置先を選ぶ</button>
+      <button class="cg-btn primary" id="char-detail-deck-add-btn" style="display:none">📥 デッキに加える</button>
+      <button class="cg-btn secondary" id="char-detail-deck-remove-btn" style="display:none">✕ デッキから外す</button>
+    </div>
+  </div>
+</div>
+
+<!-- コンボ確認モーダル -->
+<div id="combos-modal" class="cg-modal" hidden>
+  <div class="cg-modal-backdrop" onclick="closeCombosModal()"></div>
+  <div class="cg-modal-card cg-combos-card">
+    <button class="cg-modal-close" onclick="closeCombosModal()" aria-label="閉じる">×</button>
+    <h2 class="cg-modal-title">💡 発動可能コンボ</h2>
+    <div class="cg-modal-detail">手札+場 のキャラから発動条件を表示。 ✓ = 揃っている</div>
+    <div class="cg-combos-body" id="combos-body"></div>
+    <div class="cg-modal-actions">
+      <button class="cg-btn primary" onclick="closeCombosModal()">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- ルールモーダル -->
+<div id="help-modal" class="cg-modal" hidden>
+  <div class="cg-modal-backdrop" onclick="closeHelp()"></div>
+  <div class="cg-modal-card cg-help-card">
+    <button class="cg-modal-close" onclick="closeHelp()" aria-label="閉じる">×</button>
+    <h2 class="cg-modal-title">ルール (3分で覚える)</h2>
+    <div class="cg-help-body">
+      <p><b>🎯 勝利条件</b>: 6ターン後、3レーンのうち <b>2レーン以上</b> パワーが高ければ勝ち。</p>
+      <p><b>📊 コスト</b>: ターン数 = そのターン使えるコスト (T1=1, T2=2 ... T6=6)。</p>
+      <p><b>🃏 配置</b>: 手札のカードをタップ → 自分側のレーン (L1/L2/L3) をタップで配置。</p>
+      <p><b>✨ 効果</b>: 配置時(onPlay)に効果発動。「自レーン +N」「相手レーン -N」「両隣レーン +N」 等。</p>
+      <p><b>🏁 ターン終了</b>: もう置かないなら「ターン終了」 をタップ。 AI が動き、 次ターンへ。</p>
+      <p style="opacity:.7;font-size:13px;margin-top:14px;">PoC v0.1 — Phase 1 で派閥シナジー / 凸数効果 / レーン効果 / 演出 / カード画像が追加されます。</p>
+    </div>
+  </div>
+</div>
+
+<!-- チュートリアルモーダル -->
+<div id="tutorial-modal" class="cg-modal" hidden>
+  <div class="cg-modal-backdrop" onclick="closeTutorial()"></div>
+  <div class="cg-modal-card">
+    <button class="cg-modal-close" onclick="closeTutorial()" aria-label="閉じる">×</button>
+    <h2 class="cg-modal-title">📘 チュートリアル</h2>
+    <div class="cg-help-body">
+      <div class="cg-tut-step">
+        <span class="cg-tut-no">1</span>
+        <div>
+          <b>3レーンに別々の戦いがある</b><br>
+          <span class="cg-tut-sub">L1/L2/L3 それぞれパワーを競う。 2レーン取れば勝ち。</span>
+        </div>
+      </div>
+      <div class="cg-tut-step">
+        <span class="cg-tut-no">2</span>
+        <div>
+          <b>コストはターンごとに増える</b><br>
+          <span class="cg-tut-sub">T1=1, T6=6。 序盤は弱いカード、 終盤に強いカード。</span>
+        </div>
+      </div>
+      <div class="cg-tut-step">
+        <span class="cg-tut-no">3</span>
+        <div>
+          <b>配置時に効果発動</b><br>
+          <span class="cg-tut-sub">「自レーン+3」「相手-2」 等。 効果はカードに書いてある。</span>
+        </div>
+      </div>
+      <div class="cg-tut-step">
+        <span class="cg-tut-no">4</span>
+        <div>
+          <b>同じレーンに集めるか、 散らすか</b><br>
+          <span class="cg-tut-sub">読み合いの核心。 AIの陣形を見てから自分の手を決める。</span>
+        </div>
+      </div>
+    </div>
+    <div class="cg-modal-actions">
+      <button class="cg-btn primary" onclick="closeTutorial()">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<script src="./script.js?v=1.4.2j"></script>
+</body>
+</html>

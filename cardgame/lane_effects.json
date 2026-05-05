@@ -1,0 +1,70 @@
+[
+  {
+    "id": "throne",
+    "name": "翡翠の玉座",
+    "chapter": "s1c4",
+    "icon": "👑",
+    "description": "コスト4以上のカード +2 power",
+    "rule": "cost_ge",
+    "threshold": 4,
+    "value": 2
+  },
+  {
+    "id": "trench",
+    "name": "海溝アクアシス",
+    "chapter": "s1c2",
+    "icon": "🌊",
+    "description": "コスト2以下のカード +1 power",
+    "rule": "cost_le",
+    "threshold": 2,
+    "value": 1
+  },
+  {
+    "id": "academy",
+    "name": "星霊学院",
+    "chapter": "s1c1",
+    "icon": "🏛",
+    "description": "全自軍カード +1 power",
+    "rule": "all_self",
+    "value": 1
+  },
+  {
+    "id": "moon_altar",
+    "name": "黒月の祭壇",
+    "chapter": "s1c5",
+    "icon": "🌑",
+    "description": "全相手カード -1 power",
+    "rule": "all_opp",
+    "value": -1
+  },
+  {
+    "id": "ember_chapel",
+    "name": "焔の地",
+    "chapter": "s1c1",
+    "icon": "🔥",
+    "description": "白焔教会カード +2 power",
+    "rule": "faction",
+    "faction": "白焔教会",
+    "value": 2
+  },
+  {
+    "id": "forest_glade",
+    "name": "深緑の樹海",
+    "chapter": "s1c1",
+    "icon": "🌳",
+    "description": "深緑樹海カード +2 power",
+    "rule": "faction",
+    "faction": "深緑樹海",
+    "value": 2
+  },
+  {
+    "id": "moonlit_shrine",
+    "name": "月光の社",
+    "chapter": "s1c1",
+    "icon": "🌙",
+    "description": "コスト3以下のカード +1 power",
+    "rule": "cost_le",
+    "threshold": 3,
+    "value": 1
+  }
+]

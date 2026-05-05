@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.2 — 演出&ゲームロジック (Season 1 第1〜2章)
+   Prismaera v1.4.2j — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -6253,7 +6253,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260503q';
+const IMG_CACHE_VERSION = '20260504o';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -6339,6 +6339,11 @@ function _collectAssetUrlsByCategory() {
   const char_thumb = new Set();
   const loc_full = new Set();
   const loc_thumb = new Set();
+  // 公開済章のみ filter (野沢さん指摘 2026-05-04 「オフライン保存うまく動かない」 = s1c5 場所画像 未取込で 404 連発、 「未保存」 がリセットされない事故修正)
+  // s1c5 など未公開章のアセットは存在しない (5/6 12:00 で自動的に DL 対象に追加される)
+  const isReleased = (sid) => {
+    try { return typeof _isChapterReleased === 'function' ? _isChapterReleased(sid) : true; } catch (e) { return true; }
+  };
   try {
     if (typeof BGM_LIST !== 'undefined') BGM_LIST.forEach(b => { if (b && b.file) bgm.add(b.file); });
   } catch (e) {}
@@ -6347,6 +6352,7 @@ function _collectAssetUrlsByCategory() {
       for (const tier of ['LR','UR','SSR','SR','R']) {
         (POOL[tier] || []).forEach(c => {
           if (!c || !c.img) return;
+          if (c.chapter && !isReleased(c.chapter)) return;  // 未公開章キャラ skip
           char_full.add(c.img);
           char_thumb.add(toThumbUrl(c.img));
         });
@@ -6355,11 +6361,11 @@ function _collectAssetUrlsByCategory() {
   } catch (e) {}
   try {
     for (const sid in LOCATION_CONFIG) {
+      if (!isReleased(sid)) continue;  // 未公開章 location skip
       const conf = LOCATION_CONFIG[sid] || {};
       for (const k in conf) {
         if (conf[k] && conf[k].img) {
           loc_thumb.add(conf[k].img);
-          // 原寸PNG (拡大表示用) — 失敗しても _downloadAllAssets が無視
           loc_full.add(toFullUrl(conf[k].img));
         }
       }
@@ -6367,6 +6373,7 @@ function _collectAssetUrlsByCategory() {
   } catch (e) {}
   try {
     for (const sid in STORY_LOCATION_INLINE_CONFIG) {
+      if (!isReleased(sid)) continue;  // 未公開章 inline location skip
       (STORY_LOCATION_INLINE_CONFIG[sid] || []).forEach(e2 => {
         if (e2 && e2.img) {
           loc_thumb.add(e2.img);
@@ -6462,9 +6469,9 @@ function _persistOfflineBytes() {
 async function _fetchUrlBytes(url) {
   if (_OFFLINE_URL_BYTES.has(url)) return _OFFLINE_URL_BYTES.get(url);
   let bytes = 0;
-  // (2) cache 経由
+  // (2) cache 経由 (ignoreSearch:true で cache buster 違い吸収、 _downloadAllAssets と統一)
   try {
-    const r = await caches.match(url);
+    const r = await caches.match(url, { ignoreSearch: true });
     if (r) {
       const cl = r.headers && r.headers.get && r.headers.get('content-length');
       if (cl && /^\d+$/.test(cl)) bytes = parseInt(cl, 10);
@@ -6512,7 +6519,9 @@ async function _measureUrlsTotal(urls) {
       const sz = await _fetchUrlBytes(url);
       totalBytes += sz;
       try {
-        const r = await caches.match(url);
+        // バグ修正 2026-05-05 (野沢さん指摘 「ダウンロードしても DL されない」): ignoreSearch:true で
+        // cache buster 違い (?v=1.4.2g vs ?v=1.4.2h 等) でも cache hit 判定。 _downloadAllAssets と統一。
+        const r = await caches.match(url, { ignoreSearch: true });
         if (r) { cached++; cachedBytes += sz; }
       } catch (e) {}
     }
@@ -7130,10 +7139,20 @@ function _syncStoriesHeightToTeaser() {
   const btn = document.querySelector('.story-entry-block .story-entry-btn');
   if (!teaser || !btn) return;
   if (teaser.style.display === 'none' || teaser.offsetParent === null) {
-    btn.style.minHeight = '';  // 非表示時はリセット
+    btn.style.minHeight = '';
     return;
   }
-  const h = teaser.getBoundingClientRect().height;
+  // スマホ + 2分割ティザー時は「1章分の高さ」 に揃える (野沢さん指示 2026-05-04 「2倍は大きすぎ」)
+  // PC は teaser 全体高さ (= 既存仕様)、 単独章ティザーは どちらも teaser 全体高さ
+  const isMobile = window.innerWidth <= 600;
+  const isSplit = teaser.classList.contains('teaser-split');
+  let h;
+  if (isMobile && isSplit) {
+    const firstCol = teaser.querySelector('.story-next-col');
+    h = firstCol ? firstCol.getBoundingClientRect().height : teaser.getBoundingClientRect().height / 2;
+  } else {
+    h = teaser.getBoundingClientRect().height;
+  }
   if (h > 0) btn.style.minHeight = h + 'px';
 }
 // ティザーのサイズ変更 (章更新 / 画面回転 / フォントロード後 等) を ResizeObserver で追跡
@@ -7783,12 +7802,25 @@ function _updateBgmProgress() {
   }
   cur.textContent = _bgmFormatTime(t);
 }
-setInterval(() => {
-  // 野沢さん指摘 2026-05-03 電池消費改善: hidden 時 + BGM 一時停止時 はスキップ
-  if (document.hidden) return;
-  if (bgmAudio && bgmAudio.paused) return;  // 再生中のみ プログレス更新
-  _updateBgmProgress();
-}, 500);
+// C-3 強化: powerSaver ON 時は 500ms → 1500ms に間引き (3倍 CPU 節約)、 BGM パネル開いている時のみ動く
+let _bgmProgressTimer = null;
+function _restartBgmProgressTimer() {
+  if (_bgmProgressTimer) clearInterval(_bgmProgressTimer);
+  const interval = _isPowerSaverActive() ? 1500 : 500;
+  _bgmProgressTimer = setInterval(() => {
+    if (document.hidden) return;
+    if (bgmAudio && bgmAudio.paused) return;
+    // C-3: BGM パネルが閉じている時はスキップ (見えない progress 計算は無駄)
+    const panel = document.getElementById('bgm-panel');
+    if (panel && !panel.classList.contains('open')) return;
+    _updateBgmProgress();
+  }, interval);
+}
+_restartBgmProgressTimer();
+// power-saver toggle 時に再起動
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) _restartBgmProgressTimer();
+});
 
 // 再生位置バー click → seek (panel 開いてる間のみ動作)
 document.addEventListener('click', (e) => {
@@ -8330,6 +8362,26 @@ async function logVisitAndStreak(user) {
       streakMax: maxStreak,
     });
   } catch (e) { console.warn('[visit] user/streak log failed', e); }
+  // PCB プレイ履歴 を Firebase に sync (cardgame で localStorage に蓄積したものを uploads)
+  try { await syncPcbStatsToFirebase(user); } catch (e) { console.warn('[pcb] sync failed', e); }
+}
+
+// PCB プレイ履歴 同期 (cardgame は localStorage 蓄積、 本体ログイン時に Firebase へ送信、 admin で集計表示)
+async function syncPcbStatsToFirebase(user) {
+  if (!user || !fbDb) return;
+  let stats, history;
+  try {
+    stats = JSON.parse(localStorage.getItem('prism-pcb-stats') || 'null');
+    history = JSON.parse(localStorage.getItem('prism-pcb-history') || '[]');
+  } catch (e) { return; }
+  if (!stats || !stats.totalMatches) return;
+  const userRef = fbDb.ref('prism-gacha/users/' + user.uid);
+  // pcbStats: 集計値 (admin で per-user 表示)
+  await userRef.child('pcbStats').set(stats);
+  // pcbHistory: 直近 50 試合 (admin で履歴一覧)
+  if (Array.isArray(history) && history.length > 0) {
+    await userRef.child('pcbHistory').set(history);
+  }
 }
 
 try {
@@ -8728,6 +8780,11 @@ function updateAccountButton() {
   const envDevBtn = document.getElementById('btn-env-dev');
   if (envProdBtn) envProdBtn.style.display = isDevEnv ? '' : 'none';
   if (envDevBtn) envDevBtn.style.display = (isProdEnv && authUser && isPrismAdmin) ? '' : 'none';
+  // Home カードゲーム入口 (Phase 0 PoC) はアカウント登録者限定
+  const cardgameEntry = document.getElementById('home-cardgame-card');
+  if (cardgameEntry) {
+    cardgameEntry.style.display = authUser ? 'flex' : 'none';
+  }
 }
 
 let isPrismAdmin = false;
@@ -9040,20 +9097,10 @@ async function checkPrismaeraVersion() {
     _prismaeraChangelogCache = changelog;
 
     // ヘッダーのバージョン表記を version.json で上書き
-    // dev 環境では cache buster 末尾の文字 (a/b/c...) を suffix として表示 (確認用)
+    // 【単一 source 統一 2026-05-04】 旧仕様 (cache buster suffix を末尾連結) は version.json の dev suffix と
+    // 二重化して 「v1.4.2ds」 のようなバグ表示の原因になるため廃止。 version.json の version をそのまま表示する。
     const verEl = document.getElementById('app-version');
-    if (verEl) {
-      let suffix = '';
-      const isDevHost = location.hostname.startsWith('dev.') || location.hostname.includes('localhost');
-      if (isDevHost) {
-        try {
-          // [a-z]+ で複数文字 suffix (z 到達後の aa, bb, cc... も対応)
-          const cb = (document.querySelector('link[rel=stylesheet]')?.href || '').match(/\?v=\d{8}([a-z]+)/);
-          if (cb) suffix = cb[1];
-        } catch (e) {}
-      }
-      verEl.textContent = `v${currentVer}${suffix}`;
-    }
+    if (verEl) verEl.textContent = `v${currentVer}`;
 
     let lastSeen = null;
     try { lastSeen = localStorage.getItem(PRISMAERA_VERSION_LS_KEY); } catch (e) {}
@@ -9064,6 +9111,15 @@ async function checkPrismaeraVersion() {
       return;
     }
     if (lastSeen === currentVer) return;
+
+    // 野沢さん指示 2026-05-05: 「リリースノートは数字が変わるタイミングだけでOK」
+    // dev suffix 進行 (1.4.2f → 1.4.2g 等) では通知しない。 X.Y.Z (主バージョン) 変更のみ通知。
+    const stripSuffix = (v) => (v || '').replace(/[a-z]+$/i, '');
+    if (stripSuffix(lastSeen) === stripSuffix(currentVer)) {
+      // suffix 違いだけ → 通知せず lastSeen 静かに更新
+      try { localStorage.setItem(PRISMAERA_VERSION_LS_KEY, currentVer); } catch (e) {}
+      return;
+    }
 
     showPrismaeraUpdateModal(lastSeen, currentVer, changelog);
   } catch (e) {
@@ -9221,9 +9277,41 @@ function applySettings(s) {
   // 文字サイズ (大/中/小)
   const root = document.documentElement;
   root.dataset.fontsize = s.fontSize || 'medium';
-  // 省電力モード (発熱対策 2026-05-01) — アンビエントアニメ + blur 停止
-  document.body.classList.toggle('power-saver', !!s.powerSaver);
+  // 省電力モード (発熱対策 2026-05-01、 強化 C-3 2026-05-04) — アンビエントアニメ + blur + transition 全停止 + lightmode 自動有効
+  const ps = !!s.powerSaver;
+  document.body.classList.toggle('power-saver', ps);
+  // C-3: powerSaver ON で lightmode も自動有効化 (両方の対策が必要)
+  if (ps && !getLightmode()) setLightmode(true);
 }
+
+// C-3: Battery API でバッテリー残量低下時に省電力 自動 ON 提案 (2026-05-04 野沢さん指摘 「全然省電力になっていません」)
+async function _initBatterySaverHook() {
+  if (!navigator.getBattery) return;
+  try {
+    const battery = await navigator.getBattery();
+    const checkBatteryLevel = () => {
+      // バッテリー 20% 未満 + 充電してない時 → power-saver 自動 ON 提案 (1度だけ)
+      if (battery.level < 0.2 && !battery.charging) {
+        const s = loadSettings();
+        if (!s.powerSaver && !s._batterySaverPrompted) {
+          s._batterySaverPrompted = true;
+          saveSettings(s);
+          // ユーザー判断 — 強制 ON にはせず、 trayメッセージ的に通知
+          if (confirm(`🔋 バッテリー残量 ${Math.round(battery.level*100)}% です。 省電力モードを ON にして電池消費を抑えますか?`)) {
+            const news = loadSettings();
+            news.powerSaver = true;
+            saveSettings(news);
+            applySettings(news);
+          }
+        }
+      }
+    };
+    checkBatteryLevel();
+    battery.addEventListener('levelchange', checkBatteryLevel);
+    battery.addEventListener('chargingchange', checkBatteryLevel);
+  } catch (e) { /* Battery API 非対応端末 */ }
+}
+document.addEventListener('DOMContentLoaded', _initBatterySaverHook);
 // OS reduced-motion または ユーザー省電力モード ON 時 true
 function _isPowerSaverActive() {
   try {
@@ -9273,7 +9361,7 @@ function openSettingsModal() {
               <span class="settings-toggle-track"></span>
             </label>
           </div>
-          <div class="settings-power-saver-desc">背景アニメ・キャラ瞬きを停止して発熱を抑えます。 (OS の省電力モード ON 時は自動有効)</div>
+          <div class="settings-power-saver-desc">背景アニメ・キャラ瞬き・blur(GPU 重)・全 transition・hover アニメを停止 + 軽量モード自動有効。 GPU/CPU 負荷を大幅減し発熱・電池消費を抑えます。 ガチャ演出は維持されます。</div>
         </div>
         <div class="settings-section settings-offline-section">
           <div class="settings-label">📥 オフライン用にデータ保存</div>
@@ -9362,15 +9450,18 @@ function openSettingsModal() {
         m.querySelectorAll('.settings-fontsize-btn').forEach(bb => bb.classList.toggle('active', bb.dataset.size === sz));
       });
     });
-    // 省電力モード (発熱対策 2026-05-01)
+    // 省電力モード (発熱対策 2026-05-01、 強化 C-3 2026-05-04)
     const psEl = m.querySelector('#settings-power-saver');
     psEl.addEventListener('change', () => {
       const s = loadSettings(); s.powerSaver = psEl.checked; saveSettings(s);
+      applySettings(s);  // body.power-saver class + lightmode 自動連動
       // 即座にblink loop 停止/再起動 (現在表示中のシーンに反映)
       try { if (typeof clearBlinkTimers === 'function') clearBlinkTimers(); } catch {}
       if (!psEl.checked) {
         try { if (typeof setupCharBlinkAnimations === 'function') setupCharBlinkAnimations(); } catch {}
       }
+      // C-3: BGM progress timer も interval を切り替え (500ms <-> 1500ms)
+      try { if (typeof _restartBgmProgressTimer === 'function') _restartBgmProgressTimer(); } catch {}
     });
     // M4: 全アセットDL — 状態管理 (未DL数 > 0 の時だけボタン表示)
     const dlBtn = m.querySelector('#settings-offline-dl');

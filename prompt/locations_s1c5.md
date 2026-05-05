@@ -112,9 +112,13 @@ original character setting, no logos, no text, no watermark
 - **被写体**: シンプルな騎士の私室、 木製の机に銀の仮面が静かに置かれている、 壁に剣と盾が掛かっている、 月光が窓から差し込む
 - **ストーリー使用**: ✅ s1c5 1-2 背景
 - **コード参照**: `LOCATION_CONFIG['s1c5']['1-2']`
+- **キャラ参照画像 添付**: `images/characters/season1/ssr/masked_knight.png` (シオン本人は描かないが、 **仮面の形状を一致させるため必須参照**)
+  - 野沢さん指示 2026-05-05 「変な仮面とか生成されても困る」 → シオン参照画像から仮面 (額に十字紋、 銀の頬当て、 目の開口部) を **正確にトレース**
 
 ```
-fantasy painting of a quiet austere knight's private chamber at midnight in the silver-frost kingdom, a simple wooden writing desk in the center with a single silver knight's mask placed on it carefully (the mask facing upward, its empty eyes catching the moonlight), an open window in the background with pale-blue moonlight streaming through casting a long shadow of the mask across the wooden floor, a single silver mace and round shield hanging on the wall to the left, a folded knight's tabard on a chair, a small silver oil lamp on the desk with a dim flame, atmospheric perspective showing a chamber simultaneously peaceful and lonely, dust motes catching the moonlight, deep contemplative quiet atmosphere, no people, no characters, anime fantasy game background painting style, high detail, Aspect ratio 3:4, vertical orientation 1024x1536.
+[Attached: reference image 1 = "Sion's mask reference" / 銀霜王国 仮面騎士シオン (SSR) — note: only the mask shape/design from this reference, no character body in this scene]
+
+fantasy painting of a quiet austere knight's private chamber at midnight in the silver-frost kingdom, a simple wooden writing desk in the center with a single silver knight's mask placed on it carefully (CRITICAL: the mask design must EXACTLY match the attached reference image's mask — silver metallic mask with a small cross/sigil engraved on the forehead, two eye openings (empty, catching moonlight), cheek guards, slight curvature following a face shape, no decorative ornaments other than the forehead sigil — do NOT invent new mask designs, NO horns, NO feathers, NO ornate engravings beyond the forehead sigil), an open window in the background with pale-blue moonlight streaming through casting a long shadow of the mask across the wooden floor, a single silver mace and round shield hanging on the wall to the left, a folded knight's tabard on a chair, a small silver oil lamp on the desk with a dim flame, atmospheric perspective showing a chamber simultaneously peaceful and lonely, dust motes catching the moonlight, deep contemplative quiet atmosphere, no people, no characters in scene (only the mask object on the desk), anime fantasy game background painting style, high detail, Aspect ratio 3:4, vertical orientation 1024x1536.
 
 original character setting, no logos, no text, no watermark
 ```

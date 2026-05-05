@@ -594,10 +594,11 @@ body {
 
   <div id="notice" class="notice"></div>
 
-  <!-- タブ切替 (詳細統計 + ユーザー + 要望) -->
+  <!-- タブ切替 (詳細統計 + ユーザー + PCB + 要望) -->
   <div class="admin-tabs">
     <button class="admin-tab active" data-panel="users">👥 ユーザー</button>
     <button class="admin-tab" data-panel="stats">📊 詳細統計</button>
+    <button class="admin-tab" data-panel="pcb">🎴 PCB</button>
     <button class="admin-tab" data-panel="feedback">📨 要望 <span class="tab-badge" id="tab-fb-badge" style="display:none">0</span></button>
   </div>
 
@@ -647,6 +648,34 @@ body {
     </div>
   </div>
 
+  <!-- PCB プレイ履歴タブ (野沢さん指示 2026-05-04) -->
+  <div class="admin-panel" id="panel-pcb">
+    <div class="breakdown-section">
+      <div class="breakdown-title">🎴 PCB プレイ統計 (アカウント作成者のみ)</div>
+      <div id="pcb-summary" style="font-size:13px;color:#aaa;margin-bottom:10px;">読込中...</div>
+      <div class="users-table pcb-table" id="pcb-users-table">
+        <div class="users-row users-head">
+          <div>NICKNAME</div>
+          <div>試合数</div>
+          <div>勝率</div>
+          <div>勝</div>
+          <div>敗</div>
+          <div>引</div>
+          <div>BO3</div>
+          <div>最終プレイ</div>
+        </div>
+        <div id="pcb-users-body"></div>
+      </div>
+    </div>
+  </div>
+  <style>
+    /* PCB タブ専用 8カラム grid (.users-row はデフォ10カラム なので上書き) */
+    .pcb-table .users-row { grid-template-columns: minmax(140px, 1.6fr) 0.7fr 0.7fr 0.5fr 0.5fr 0.5fr 0.6fr 1.2fr; }
+    @media (max-width: 720px) {
+      .pcb-table .users-row { grid-template-columns: 110px 50px 55px 40px 40px 40px 45px 95px; font-size: 11px; }
+    }
+  </style>
+
   <!-- 要望タブ -->
   <div class="admin-panel" id="panel-feedback">
     <h2 class="section-title">📨 ご意見・ご要望 <span class="fb-unread-pill" id="fb-unread-pill" style="display:none">0 未読</span></h2>
@@ -689,7 +718,8 @@ let isAdmin = false;
 const $ = s => document.querySelector(s);
 
 // Season1 定員 (キャラマスター)
-const TIER_MAX = { LR: 1, UR: 7, SSR: 11, SR: 15, R: 11 };  // S1C2 (v1.2.0) 反映: UR+2, SSR+3, SR+5, R+5
+const TIER_MAX = { LR: 1, UR: 14, SSR: 25, SR: 28, R: 22 };  // s1c1〜s1c5 全章 公開済 (LR1+UR14+SSR25+SR28+R22 = 90体、 2026-05-04 v1.4.2e 更新)
+// 章追加時は scripts/check_repo_rules.py ルール9 (admin TIER_MAX = POOL count 一致) で BLOCKER 自動検出
 // 凸ヒート ソート用: 各tier内のキャラ順 (script.js POOL の定義順 = ID順)。 キャラ追加時は同期更新必須。
 const TIER_ORDER = { LR: 0, UR: 1, SSR: 2, SR: 3, R: 4 };
 const CHAR_ORDER = {
@@ -1265,15 +1295,25 @@ function renderUsers(users, uidToNickname, guestDevices) {
     const bgm = (window._eventStats && window._eventStats.bgm) || {};
     const playCounts = bgm.play || {};
     const endedCounts = bgm.ended || {};
-    // BGM_LIST と同期した label テーブル (script.js と一致させること)
+    // BGM_LIST と同期した label テーブル (script.js と一致させること、 章追加時に必ず更新 — 自動チェック ルール10 BLOCKER)
     const BGM_LABELS = {
-      'dawn':    { label: 'メインテーマ',     desc: 'Prism Dawn (夜明けの希望)' },
-      'watch':   { label: '第1章テーマ',      desc: 'Prism Watch (三柱の夜警)' },
-      'tide':    { label: '第2章テーマ',      desc: 'Prism Tide (虹の潮)' },
-      'rift':    { label: '戦闘テーマ',       desc: 'Prismatic Rift Overture (虹裂の序曲)' },
-      'church':  { label: '白焔教会テーマ',   desc: 'Prism Sanctus (白焔の祈り)' },
-      'aquasis': { label: 'アクアシステーマ', desc: 'Prism Abyss (深海の宮)' },
-      'crimson': { label: '紅玉海賊団テーマ', desc: 'Prism Sailborn (紅潮の風)' },
+      'dawn':       { label: 'メインテーマ',       desc: 'Prism Dawn (夜明けの希望)' },
+      'watch':      { label: '第1章テーマ',        desc: 'Prism Watch (三柱の夜警)' },
+      'tide':       { label: '第2章テーマ',        desc: 'Prism Tide (虹の潮)' },
+      'sands':      { label: '第3章テーマ',        desc: 'Prism Sands (砂塵の隊商)' },
+      'frost':      { label: '第4章テーマ',        desc: 'Prism Frost (凍土と空)' },
+      'blackmoon':  { label: '第5章テーマ',        desc: 'Prism Blackmoon (黒月の予兆)' },
+      'rift':       { label: '戦闘テーマ',         desc: 'Prismatic Rift Overture (虹裂の序曲)' },
+      'cards':      { label: 'カードゲームテーマ', desc: 'Prism Cards (PCB BGM)' },
+      'church':     { label: '白焔教会テーマ',     desc: 'Prism Sanctus (白焔の祈り)' },
+      'aquasis':    { label: 'アクアシステーマ',   desc: 'Prism Abyss (深海の宮)' },
+      'crimson':    { label: '紅玉海賊団テーマ',   desc: 'Prism Sailborn (紅潮の風)' },
+      'sahar':      { label: '古龍砂漠サハール',   desc: 'Prism Sahar (砂海の風)' },
+      'niiruru':    { label: '氷霊王国ニーヴル',   desc: 'Prism Niiruru (氷霊の王宮)' },
+      'zenonia':    { label: '空挺城ゼノニア',     desc: 'Prism Zenonia (空挺の歯車)' },
+      'darkmoon':   { label: '黒月衆ノクトス',     desc: 'Prism Darkmoon (黒月の刃)' },
+      'liora':      { label: '地底市リオラ',       desc: 'Prism Liora (地底の黄金)' },
+      'silver':     { label: '銀霜王国',           desc: 'Prism Silver (銀霜の月)' },
     };
     const allIds = new Set([...Object.keys(playCounts), ...Object.keys(endedCounts), ...Object.keys(BGM_LABELS)]);
     const rows = [];
@@ -1378,8 +1418,62 @@ function bindTabs() {
       const target = tab.dataset.panel;
       document.querySelectorAll('.admin-tab').forEach(t => t.classList.toggle('active', t === tab));
       document.querySelectorAll('.admin-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + target));
+      // PCB タブ初回 open で render
+      if (target === 'pcb' && !window._pcbRendered) {
+        renderPcbStats();
+        window._pcbRendered = true;
+      }
     });
   });
+}
+
+// PCB プレイ統計 タブ (野沢さん指示 2026-05-04: アカウント作成者の PCB 戦績を per-user 表示)
+async function renderPcbStats() {
+  const summaryEl = document.getElementById('pcb-summary');
+  const bodyEl = document.getElementById('pcb-users-body');
+  if (!summaryEl || !bodyEl) return;
+  try {
+    const usersSnap = await db.ref('prism-gacha/users').once('value');
+    const users = usersSnap.val() || {};
+    const rows = [];
+    let totalMatches = 0, totalWins = 0;
+    let activeUsers = 0;
+    for (const uid in users) {
+      const u = users[uid];
+      const ps = u.pcbStats;
+      if (!ps || !ps.totalMatches) continue;
+      activeUsers++;
+      totalMatches += ps.totalMatches || 0;
+      totalWins += ps.wins || 0;
+      const wr = ps.totalMatches > 0 ? Math.round((ps.wins || 0) / ps.totalMatches * 100) : 0;
+      rows.push({
+        uid, nickname: u.nickname || '(no name)',
+        matches: ps.totalMatches, wins: ps.wins || 0, losses: ps.losses || 0, draws: ps.draws || 0,
+        winrate: wr, bo3: ps.bo3Matches || 0, lastPlayedAt: ps.lastPlayedAt || 0,
+      });
+    }
+    rows.sort((a, b) => b.lastPlayedAt - a.lastPlayedAt);
+    const overallWr = totalMatches > 0 ? Math.round(totalWins / totalMatches * 100) : 0;
+    summaryEl.innerHTML = `アクティブユーザー <b>${activeUsers}</b>人 / 累計試合 <b>${totalMatches}</b>戦 / 全体勝率 <b>${overallWr}%</b>`;
+    bodyEl.innerHTML = rows.map(r => `
+      <div class="users-row">
+        <div>${r.nickname}</div>
+        <div>${r.matches}</div>
+        <div>${r.winrate}%</div>
+        <div style="color:#7aff8a">${r.wins}</div>
+        <div style="color:#ff8d8d">${r.losses}</div>
+        <div style="color:#aaa">${r.draws}</div>
+        <div>${r.bo3}</div>
+        <div style="font-size:11px;color:#aaa">${r.lastPlayedAt ? new Date(r.lastPlayedAt).toLocaleString('ja-JP', {month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '-'}</div>
+      </div>
+    `).join('');
+    if (rows.length === 0) {
+      bodyEl.innerHTML = '<div style="padding:20px;text-align:center;color:#888">PCB をプレイしたアカウント作成者はまだいません。</div>';
+    }
+  } catch (e) {
+    summaryEl.textContent = '読み込み失敗: ' + (e.message || e);
+    console.error('[admin] pcb stats failed', e);
+  }
 }
 
 async function loadGasshukuStats() {
@@ -1523,8 +1617,10 @@ function buildDetail(u, s) {
   // 個別ユーザーの BGM 再生統計 (users/{uid}/bgmStats から)
   const userBgmStats = u.bgmStats || {};
   const BGM_LABELS_DETAIL = {
-    dawn: 'メインテーマ', watch: '第1章', tide: '第2章', rift: '戦闘',
+    dawn: 'メイン', watch: '第1章', tide: '第2章', sands: '第3章', frost: '第4章', blackmoon: '第5章',
+    rift: '戦闘', cards: 'カードゲーム',
     church: '白焔教会', aquasis: 'アクアシス', crimson: '紅玉海賊団',
+    sahar: 'サハール', niiruru: 'ニーヴル', zenonia: 'ゼノニア', darkmoon: 'ノクトス', liora: 'リオラ', silver: '銀霜',
   };
   let bgmHtml = '';
   const bgmIds = Object.keys(userBgmStats);

@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.2 — 演出スタイル (Season 1 第1章)
+   Prismaera v1.4.2j — 演出スタイル (Season 1 第1章) / dev は cache buster suffix で進行
    ============================================================ */
 :root {
   --bg: #05060d;
@@ -112,17 +112,8 @@ body::before {
   }
 }
 
-/* ガチャリザルト 上部アクション: モバイル時のみ表示 (画面上部からも操作できるように) */
-.result-actions-top { display: none; }
-@media (max-width: 700px) {
-  .result-actions-top {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 14px;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-}
+/* C-1: 旧上部アクション完全廃止 (下部 sticky に統一) */
+.result-actions-top { display: none !important; }
 .title {
   font-size: 20px; font-weight: 700; letter-spacing: 0.08em;
   background: linear-gradient(90deg, #ffd84d, #5fffd4, #c87dff, #ff5faa);
@@ -1373,20 +1364,35 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   padding: 20px;
 }
 .result.active { display: flex; }
+/* C-1: result-inner を flex column 化 — タイトル/レア度 (固定) + grid (スクロール) + actions (sticky下) */
 .result-inner {
   max-width: 720px; width: 100%;
   background: rgba(15,20,40,0.9);
   border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 16px; padding: 24px;
-  max-height: 90vh; overflow: auto;
+  border-radius: 16px;
+  max-height: 90vh;
+  display: flex; flex-direction: column;
+  overflow: hidden;
 }
 .result-inner h2 {
-  margin: 0 0 16px; font-size: 22px; text-align: center;
+  margin: 0; padding: 24px 24px 8px;
+  font-size: 22px; text-align: center;
   letter-spacing: 0.1em;
+  flex-shrink: 0;
+}
+.result-rarity {
+  flex-shrink: 0;
+  padding: 0 24px;
 }
 .result-grid {
-  display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;
-  margin-bottom: 16px;
+  /* 野沢さん指示 2026-05-05: スクロール可能なんだからカード重ねない、 PC=4列、 モバイル=2列 で大きく */
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+  padding: 12px 24px;
+  margin: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 .rcard {
   aspect-ratio: 2/3; border-radius: 8px;
@@ -2346,11 +2352,17 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   font-size: 12px; color: #fff;
 }
 
-/* result 画面のアクションボタン */
+/* result 画面のアクションボタン (C-1: sticky bottom、 ✕上部重複廃止、 grid スクロールでも常時visible) */
 .result-actions {
   display: flex; gap: 14px; justify-content: center;
-  margin-top: 24px; flex-wrap: wrap;
+  padding: 14px 24px 18px;
+  margin: 0;
+  flex-wrap: wrap;
   align-items: center;
+  flex-shrink: 0;
+  background: linear-gradient(to bottom, rgba(15,20,40,0.55), rgba(15,20,40,0.95) 35%);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
 }
 .result-btn {
   font-family: inherit; font-size: 14px; font-weight: 700;
@@ -2875,7 +2887,8 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   grid-column: 1 / -1; /* hero(1fr auto)の全列スパン → 右端が10連と揃う */
 }
 .home-actions-row > .story-stack,
-.home-actions-row > .home-feedback {
+.home-actions-row > .home-feedback,
+.home-actions-row > .home-right-col {
   display: flex; flex-direction: column;
   margin: 0;
   padding: 0;
@@ -3061,6 +3074,89 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   .home-feedback-icon { font-size: 22px; }
   .home-feedback-title { font-size: 14px; }
   .home-feedback-sub { font-size: 11px; }
+}
+
+/* ───── ホーム右カラム (カードゲーム + ご意見要望 を縦に並べる) ───── */
+.home-right-col { gap: 14px; }
+.home-actions-row > .home-right-col > .home-feedback {
+  margin: 0; max-width: none; padding: 0;
+}
+
+/* ───── ホーム カードゲーム入口 (アカウント作成者限定) ───── */
+.home-cardgame-card {
+  position: relative;
+  width: 100%;
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(124,93,255,0.20), rgba(95,223,255,0.18));
+  border: 1px solid rgba(124,93,255,0.42);
+  color: var(--text);
+  text-decoration: none;
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  overflow: hidden;
+}
+.home-cardgame-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(124,93,255,0.75);
+  box-shadow: 0 4px 28px rgba(124,93,255,0.32), 0 2px 12px rgba(95,223,255,0.25);
+}
+.home-cardgame-aurora {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 30% 50%, rgba(124,93,255,0.55), transparent 60%),
+    radial-gradient(ellipse at 80% 50%, rgba(95,223,255,0.4), transparent 55%);
+  filter: blur(22px);
+  z-index: 0;
+  pointer-events: none;
+  animation: cardgameAuroraFlow 7s ease-in-out infinite alternate;
+}
+@keyframes cardgameAuroraFlow {
+  0%   { transform: translate(0,0) scale(1); }
+  100% { transform: translate(18px,-8px) scale(1.15); }
+}
+.home-cardgame-icon {
+  font-size: 28px; line-height: 1;
+  filter: drop-shadow(0 0 8px rgba(255, 213, 107, 0.5));
+  position: relative; z-index: 1;
+}
+.home-cardgame-text { flex: 1; min-width: 0; position: relative; z-index: 1; }
+.home-cardgame-title {
+  font-size: 15px; font-weight: 700; letter-spacing: 0.05em;
+  background: linear-gradient(120deg, #ff9a4a, #ffd56b, #ff8ddc, #5fdfff, #7c5dff);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.home-cardgame-badge {
+  font-size: 10px;
+  background: rgba(255,213,107,0.22);
+  color: #ffd56b;
+  padding: 2px 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,213,107,0.4);
+  -webkit-text-fill-color: #ffd56b;
+  font-weight: 700;
+}
+.home-cardgame-sub {
+  font-size: 12px; color: rgba(255,255,255,0.72);
+  margin-top: 3px; line-height: 1.5;
+}
+.home-cardgame-arrow {
+  font-size: 20px; color: rgba(255,255,255,0.55);
+  transition: transform 0.15s ease;
+  position: relative; z-index: 1;
+}
+.home-cardgame-card:hover .home-cardgame-arrow {
+  transform: translateX(3px); color: #fff;
+}
+@media (max-width: 600px) {
+  .home-cardgame-card { padding: 13px 14px; gap: 11px; }
+  .home-cardgame-icon { font-size: 24px; }
+  .home-cardgame-title { font-size: 14px; }
+  .home-cardgame-sub { font-size: 11px; }
+  .home-cardgame-badge { font-size: 9px; padding: 1px 5px; }
 }
 
 /* ───── 要望フォームモーダル ───── */
@@ -3740,12 +3836,19 @@ body.has-offline-banner .topbar { margin-top: 30px; }
   .char-detail-relations .rel-role { font-size: 9px; }
   .char-detail-relations .rel-name { font-size: 11px; }
 }
-/* 結果画面アクションボタンのモバイル */
+/* 結果画面アクションボタンのモバイル (C-1: 横並び維持で省スペース、 縦並びにすると 2行で sticky bar が高くなる) */
 @media (max-width: 600px) {
-  .result-actions { flex-direction: column-reverse; gap: 10px; margin-top: 16px; }
-  .result-btn { width: 100%; max-width: 280px; }
-  .result-btn.primary { padding: 14px 24px; }
-  .result-btn.secondary { padding: 10px 24px; font-size: 13px; }
+  .result-actions {
+    flex-direction: row;
+    gap: 8px;
+    padding: 10px 14px 14px;
+  }
+  .result-btn { flex: 1; max-width: none; }
+  .result-btn.primary { padding: 12px 16px; font-size: 14px; }
+  .result-btn.secondary { padding: 10px 16px; font-size: 13px; }
+  .result-inner h2 { padding: 16px 16px 6px; font-size: 18px; }
+  .result-rarity { padding: 0 16px; }
+  .result-grid { padding: 10px 14px; }
 }
 /* 画像ズームコントロールのモバイル */
 @media (max-width: 600px) {
@@ -3846,7 +3949,8 @@ body.has-offline-banner .topbar { margin-top: 30px; }
 @media (max-width: 640px) {
   .hero { grid-template-columns: 1fr; gap: 24px; margin-bottom: 32px; }
   .cta { justify-content: center; }
-  .result-grid { grid-template-columns: repeat(3, 1fr); }
+  /* 野沢さん指示 2026-05-05: スマホでもカード大きく見えるよう 2列 (キャラ画像が画面の半分くらい) */
+  .result-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
   .topbar {
     padding: 6px 14px 8px;
     gap: 8px;
@@ -8352,7 +8456,9 @@ body.app-paused *::after {
   .topbar { backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
 }
 
-/* 省電力モード (設定からユーザー切替) — アンビエントアニメ全停止 + blur OFF */
+/* 省電力モード (設定からユーザー切替) — C-3 強化版 (野沢さん指摘 2026-05-04 「全然省電力になっていません、 端末が熱くなる」)
+   主因: backdrop-filter (GPU 高負荷) / 全面 animation / 大画像の頻繁な再描画 / hover transition
+   対策: 全 backdrop-filter OFF、 transition 即時化、 hover transform 抑制、 アニメ全停止 */
 body.power-saver::before,
 body.power-saver::after {
   animation: none !important;
@@ -8364,10 +8470,42 @@ body.power-saver::after {
 body.power-saver.t-1000 #bg-layer {
   animation: none !important;
 }
-body.power-saver .topbar {
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  background: rgba(10, 14, 29, 0.92);
+/* C-3: 全 backdrop-filter (blur) を OFF — これがモバイル GPU 最大の負荷 */
+body.power-saver *,
+body.power-saver *::before,
+body.power-saver *::after {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+body.power-saver .topbar { background: rgba(10, 14, 29, 0.92); }
+body.power-saver .modal { background: rgba(0,0,0,0.85); }
+body.power-saver .gallery-modal { background: rgba(0,0,0,0.85); }
+body.power-saver .result { background: rgba(0,0,0,0.92); }
+body.power-saver .result-actions { background: rgba(15,20,40,0.95); }
+/* C-3: 全 transition を 0s に (hover 等の細かい transition も停止、 GPU 節約) */
+body.power-saver *:not(.stage *):not(.result *):not(.summon *) {
+  transition: none !important;
+}
+/* C-3: hover transform 抑制 (cards / mode buttons の transform: translateY 等を無効化) */
+body.power-saver .cg-card:hover,
+body.power-saver .card:hover,
+body.power-saver .mode-btn:hover,
+body.power-saver .gallery-card:hover,
+body.power-saver .lib-card:hover,
+body.power-saver .topbar-btn:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+/* C-3: 全 animation を一括停止 (ガチャ演出系は除外、 .stage/.summon/.result 配下) */
+body.power-saver *:not(.stage *):not(.summon *):not(.result *):not(.gacha-anim *) {
+  animation: none !important;
+}
+/* C-3: image-rendering 軽量化 (large image scaling 軽減) */
+body.power-saver img,
+body.power-saver .gallery-card-img,
+body.power-saver .rcard-img,
+body.power-saver .cg-card-img {
+  image-rendering: optimizeSpeed;
 }
 
 /* 設定モーダル: 省電力モードセクション (label+toggle 横並び + desc 下段、 モバイル対応) */

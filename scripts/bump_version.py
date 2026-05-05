@@ -2,17 +2,32 @@
 """Prismaera バージョン自動bumpスクリプト
 
 使い方:
+    # main branch (X.Y.Z bump):
     python scripts/bump_version.py patch    --note "表紙UX修正"
     python scripts/bump_version.py chapter  --note "第2章追加"
     python scripts/bump_version.py season   --note "Season 2 開幕"
     python scripts/bump_version.py patch    --note "..." --dry-run
     python scripts/bump_version.py patch    --note "..." --auto-commit
 
+    # dev branch (suffix 1段階 増分):
+    python scripts/bump_version.py dev-suffix
+    # → 1.4.2g → 1.4.2h、 1.4.2z → 1.4.2aa、 1.4.2zz → 1.4.2aaa (無制限 increment)
+
+仕様 (野沢さん指示 2026-05-05、 二度と起こらない設計):
+    - cache buster と version.json の version は完全同期
+      ?v=1.4.2g (旧 ?v=20260505a 廃止、 日付ベースは禁止)
+    - dev での suffix 進行は a→b→...→z→aa→ab→...→zz→aaa→...
+    - main merge 後の dev は a から再開 (例: main 1.4.3 → dev 1.4.3a)
+    - 主バージョン X.Y.Z bump は main release 時のみ
+
 処理:
     1. version.json を読んで次バージョン計算
-    2. changelog[0] に新エントリ追加
-    3. 同期対象ファイルを更新 (manifest.json, index.html, README.md, script.js, style.css)
-    4. diff表示 → Enter確認
+    2. dev-suffix の場合: suffix を 1段階増分
+       patch/chapter/season の場合: X.Y.Z bump + suffix を空に
+    3. changelog[0] に新エントリ追加 (dev-suffix は changelog 追加せず pendingChangelog のまま)
+    4. 同期対象ファイルの cache buster + version 表示を一括更新
+       (manifest.json, index.html, cardgame/index.html, cardgame/script.js,
+        script.js, style.css, sw.js, README.md)
     5. --auto-commit 指定時は git add + commit
 """
 
@@ -30,9 +45,14 @@ ROOT = Path(__file__).resolve().parent.parent
 VERSION_JSON = ROOT / "version.json"
 MANIFEST_JSON = ROOT / "manifest.json"
 INDEX_HTML = ROOT / "index.html"
+CARDGAME_INDEX = ROOT / "cardgame" / "index.html"
+CARDGAME_SCRIPT = ROOT / "cardgame" / "script.js"
+SW_JS = ROOT / "sw.js"
 README_MD = ROOT / "README.md"
 SCRIPT_JS = ROOT / "script.js"
 STYLE_CSS = ROOT / "style.css"
+
+CACHE_BUSTER_FILES = [INDEX_HTML, CARDGAME_INDEX, CARDGAME_SCRIPT, SW_JS]
 
 
 def load_version() -> dict:
@@ -40,8 +60,38 @@ def load_version() -> dict:
         return json.load(f)
 
 
+def parse_version(v: str) -> tuple[str, str]:
+    """1.4.2g → ('1.4.2', 'g'); 1.4.2 → ('1.4.2', ''); 1.4.2zz → ('1.4.2', 'zz')"""
+    m = re.match(r"^(\d+\.\d+\.\d+)([a-z]*)$", v)
+    if not m:
+        raise ValueError(f"unexpected version: {v!r} (期待形式: X.Y.Z or X.Y.Z<suffix>)")
+    return m.group(1), m.group(2)
+
+
+def increment_suffix(s: str) -> str:
+    """Excel column 風の 文字列 increment:
+    '' → 'a', 'a' → 'b', ..., 'z' → 'aa', 'aa' → 'ab', ..., 'zz' → 'aaa'"""
+    if not s:
+        return "a"
+    chars = list(s)
+    i = len(chars) - 1
+    while i >= 0:
+        if chars[i] < "z":
+            chars[i] = chr(ord(chars[i]) + 1)
+            return "".join(chars)
+        chars[i] = "a"
+        i -= 1
+    # 全 z だった → 1 文字長くして 'a' prefix
+    return "a" + "".join(chars)
+
+
 def next_version(current: str, mode: str) -> str:
-    s, c, p = [int(x) for x in current.split(".")]
+    base, suffix = parse_version(current)
+    if mode == "dev-suffix":
+        # dev: suffix を 1段階 increment、 X.Y.Z 部分は維持
+        return base + increment_suffix(suffix)
+    # main release: X.Y.Z bump、 suffix は空に reset
+    s, c, p = [int(x) for x in base.split(".")]
     if mode == "patch":
         return f"{s}.{c}.{p + 1}"
     if mode == "chapter":
@@ -51,37 +101,55 @@ def next_version(current: str, mode: str) -> str:
     raise ValueError(f"unknown mode: {mode}")
 
 
-def bump_cache_buster(text: str) -> tuple[str, bool]:
-    today = date.today().strftime("%Y%m%d")
-    # suffix は 1〜2文字 a-z (1日に z を超えて zb/zc... と続けるケース対応)
-    pattern = re.compile(r"\?v=\d{8}[a-z]{1,2}")
-    changed = False
+def update_all_cache_busters(new_ver: str) -> int:
+    """対象ファイルの ?v=<old> を ?v=<new_ver> に一括統一。
+    旧 date-based (?v=20260505a) も version-based (?v=1.4.2g) も両方カバー。"""
+    pattern = re.compile(r"\?v=[\w.]+")
+    count = 0
+    for path in CACHE_BUSTER_FILES:
+        if not path.exists():
+            continue
+        text = path.read_text(encoding="utf-8")
+        new_text, n = pattern.subn(f"?v={new_ver}", text)
+        if n > 0:
+            path.write_text(new_text, encoding="utf-8")
+            count += n
+            print(f"  cache buster: {path.relative_to(ROOT)} ({n} 箇所)")
+    return count
 
-    def repl(m: re.Match[str]) -> str:
-        nonlocal changed
-        changed = True
-        return f"?v={today}a"
 
-    return pattern.sub(repl, text), changed
+def update_sw_version(new_ver: str) -> None:
+    """sw.js の SW_VERSION を version 同期"""
+    if not SW_JS.exists():
+        return
+    text = SW_JS.read_text(encoding="utf-8")
+    text2 = re.sub(r"const\s+SW_VERSION\s*=\s*'[\w.]+';", f"const SW_VERSION = '{new_ver}';", text)
+    if text != text2:
+        SW_JS.write_text(text2, encoding="utf-8")
+        print(f"  SW_VERSION: sw.js")
 
 
-def update_version_json(data: dict, new_ver: str, mode: str, notes: list[str]) -> None:
+def update_version_json(data: dict, new_ver: str, mode: str, notes: list[str] | None) -> None:
     today = date.today().isoformat()
     data["version"] = new_ver
-    data["releasedAt"] = today
-    entry = {
-        "version": new_ver,
-        "date": today,
-        "type": "patch" if mode == "patch" else "major",
-        "notes": notes,
-    }
-    data.setdefault("changelog", []).insert(0, entry)
+    if mode != "dev-suffix":
+        data["releasedAt"] = today
+        if notes:
+            entry = {
+                "version": new_ver,
+                "date": today,
+                "type": "patch" if mode == "patch" else "major",
+                "notes": notes,
+            }
+            data.setdefault("changelog", []).insert(0, entry)
     with VERSION_JSON.open("w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
         f.write("\n")
 
 
 def update_manifest(new_ver: str) -> None:
+    if not MANIFEST_JSON.exists():
+        return
     with MANIFEST_JSON.open(encoding="utf-8") as f:
         m = json.load(f)
     m["version"] = new_ver
@@ -90,14 +158,16 @@ def update_manifest(new_ver: str) -> None:
         f.write("\n")
 
 
-def update_index(new_ver: str) -> None:
+def update_index_header_ver(new_ver: str) -> None:
+    """index.html の <span class="ver"> 表示を更新"""
+    if not INDEX_HTML.exists():
+        return
     text = INDEX_HTML.read_text(encoding="utf-8")
     text = re.sub(
-        r'(<span class="ver"[^>]*>)v[\d.]+(</span>)',
+        r'(<span class="ver"[^>]*>)v[\w.]+(</span>)',
         lambda m: f"{m.group(1)}v{new_ver}{m.group(2)}",
         text,
     )
-    text, _ = bump_cache_buster(text)
     INDEX_HTML.write_text(text, encoding="utf-8")
 
 
@@ -120,65 +190,85 @@ def update_code_comments(new_ver: str) -> None:
         if not path.exists():
             continue
         text = path.read_text(encoding="utf-8")
-        text = re.sub(
-            r"Prismaera v[\d.]+",
-            f"Prismaera v{new_ver}",
-            text,
-            count=1,
-        )
+        text = re.sub(r"Prismaera v[\w.]+", f"Prismaera v{new_ver}", text, count=1)
         path.write_text(text, encoding="utf-8")
 
 
-def git_commit(new_ver: str) -> None:
-    targets = [
-        str(VERSION_JSON.relative_to(ROOT)),
-        str(MANIFEST_JSON.relative_to(ROOT)),
-        str(INDEX_HTML.relative_to(ROOT)),
-        str(README_MD.relative_to(ROOT)),
-        str(SCRIPT_JS.relative_to(ROOT)),
-        str(STYLE_CSS.relative_to(ROOT)),
-    ]
-    subprocess.run(["git", "-C", str(ROOT), "add", *targets], check=True)
-    subprocess.run(
-        ["git", "-C", str(ROOT), "commit", "-m", f"chore(version): v{new_ver}"],
-        check=True,
+def git_branch() -> str:
+    res = subprocess.run(
+        ["git", "-C", str(ROOT), "rev-parse", "--abbrev-ref", "HEAD"],
+        capture_output=True, text=True, encoding="utf-8", errors="replace",
     )
+    return (res.stdout or "").strip() if res.returncode == 0 else ""
+
+
+def git_commit(new_ver: str, mode: str) -> None:
+    targets = [str(p.relative_to(ROOT)) for p in [
+        VERSION_JSON, MANIFEST_JSON, INDEX_HTML, CARDGAME_INDEX, CARDGAME_SCRIPT,
+        SW_JS, README_MD, SCRIPT_JS, STYLE_CSS,
+    ] if p.exists()]
+    subprocess.run(["git", "-C", str(ROOT), "add", *targets], check=True)
+    msg = f"chore(version): v{new_ver}" if mode != "dev-suffix" else f"chore(dev-suffix): v{new_ver}"
+    subprocess.run(["git", "-C", str(ROOT), "commit", "-m", msg], check=True)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Prismaera version bumper")
-    parser.add_argument("mode", choices=["patch", "chapter", "season"])
-    parser.add_argument("--note", action="append", required=True, help="changelog項目(複数可)")
+    parser.add_argument("mode", choices=["patch", "chapter", "season", "dev-suffix"])
+    parser.add_argument("--note", action="append", default=None,
+                        help="changelog 項目 (複数可、 main release 時必須、 dev-suffix では不要)")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--auto-commit", action="store_true")
+    parser.add_argument("--force", action="store_true",
+                        help="branch 安全装置を override (緊急時のみ、 通常使わない)")
     args = parser.parse_args()
+
+    branch = git_branch()
+    if args.mode == "dev-suffix":
+        if branch != "dev" and not args.force:
+            print(f"❌ ERROR: dev-suffix モードは dev branch でのみ実行可能。 現在: {branch}", file=sys.stderr)
+            return 1
+    else:
+        # patch / chapter / season は main branch でのみ
+        if branch == "dev" and not args.force:
+            print("❌ ERROR: bump_version.py {patch,chapter,season} は main branch でのみ実行可能。", file=sys.stderr)
+            print("   dev では `python scripts/bump_version.py dev-suffix` で suffix のみ進行。", file=sys.stderr)
+            print("   詳細: CLAUDE.md feedback_prismaera_version_suffix.md", file=sys.stderr)
+            return 1
+        if not args.note:
+            print("❌ ERROR: main release では --note が必須 (changelog エントリ)", file=sys.stderr)
+            return 1
 
     data = load_version()
     current = data["version"]
     new_ver = next_version(current, args.mode)
 
     print(f"バージョン: v{current} → v{new_ver} ({args.mode})")
-    print("変更ノート:")
-    for n in args.note:
-        print(f"  - {n}")
+    if args.note:
+        print("変更ノート:")
+        for n in args.note:
+            print(f"  - {n}")
     print()
 
     if args.dry_run:
         print("[dry-run] ファイルは変更しません")
         return 0
 
-    update_version_json(data, new_ver, args.mode, list(args.note))
+    update_version_json(data, new_ver, args.mode, args.note)
     update_manifest(new_ver)
-    update_index(new_ver)
+    update_index_header_ver(new_ver)
     update_readme(new_ver)
     update_code_comments(new_ver)
+    print("=== cache buster 統一 (?v={new_ver}) ===".format(new_ver=new_ver))
+    update_all_cache_busters(new_ver)
+    update_sw_version(new_ver)
     print("ファイル更新完了")
 
     if args.auto_commit:
-        git_commit(new_ver)
-        print(f"git commit 実行完了 (chore(version): v{new_ver})")
+        git_commit(new_ver, args.mode)
+        print(f"git commit 実行完了 (v{new_ver})")
     else:
-        print("git commit はスキップ(--auto-commit で自動化可能)")
+        print("git commit はスキップ (--auto-commit で自動化可能)")
 
     return 0
 
