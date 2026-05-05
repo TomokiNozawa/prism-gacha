@@ -52,14 +52,14 @@ S1C5「黒月の予兆」 (POV: シオン、 銀霜王国 仮面騎士) の場�
 
 | # | filename | 比率 | 役割 | 対応シーン | キャラ |
 |---|---|---|---|---|---|
-| 1 | observer_west_realm.png | 3:4 | 背景 | プロローグ (観測者三柱「次は西」 観測の場) | (純風景、 天空界の景色) |
+| 1 | observer_west_realm.png | 3:4 | 挿絵風背景 | プロローグ (観測者三柱「次は西」 観測の場) | セラフィエル+カグヤ+ノクス (添付3枚、 ※再生成) |
 | 2 | silver_throne_hall.png | 3:4 | 背景 | 1-1 銀霜王宮 月光謁見の間 | (純風景) |
 | 3 | sion_chamber.png | 3:4 | 背景 | 1-2 シオンの私室 (仮面の置かれた机) | (純風景、 静謐) |
 | 4 | silver_festival_street.png | 3:4 | 背景 | 1-3 銀霜の市街・祭夜 | (純風景、 群衆遠景のみ) |
 | 5 | black_moon_grove.png | 3:4 | 背景 | 2-1 月喰いの森 (黒月衆の隠れ家) | (純風景) |
 | 6 | underworld_liora_full.png | 3:4 | 背景 | 3-1 地底市リオラ全景 | (純風景、 都市俯瞰) |
 | 7 | moon_shrine_altar.png | 3:4 | 背景 | 3-3 雪月神殿の祭壇 (儀式準備) | (純風景) |
-| 8 | observer_west_close.png | 3:4 | 背景 | エピローグ (観測者三柱「次は東」) | (純風景、 天空界、 1番と微差) |
+| 8 | observer_west_close.png | 3:4 | 挿絵風背景 | エピローグ (観測者三柱「次は東」) | セラフィエル+カグヤ+ノクス (添付3枚、 ※再生成、 1番と微差) |
 | 9 | royal_assassination_flashback.png | 16:9 | 挿絵 | 2-2 王族暗殺未遂現場 (回想 + 現在) | シオン+刺客 (添付2枚) |
 | 10 | church_tower_reunion.png | 16:9 | 挿絵 | 2-3 教会の塔 (シオン+ラナス再会) | シオン+ラナス (添付2枚) |
 | 11 | shadow_loom_workshop.png | 16:9 | 挿絵 | 3-2 影織りの工房 (リオラエル + ルナリア + シオン) | 3人 (添付3枚) |
@@ -70,19 +70,30 @@ S1C5「黒月の予兆」 (POV: シオン、 銀霜王国 仮面騎士) の場�
 
 ---
 
-# 【1】observer_west_realm.png — 観測者三柱・西の月の異変観測 (背景、 3:4、 純風景)
+# 【1】observer_west_realm.png — 観測者三柱・西の月の異変観測 (挿絵風背景、 3:4、 観測者三柱 添付3枚)
+
+**⚠️ 生成前に必ず添付してください** (3枚):
+- `images/characters/season1/ur/seraph_paladin.png` (既存 UR セラフィエル)
+- `images/characters/season1/ur/ancient_sage.png` (既存 UR 千夜姫 カグヤ)
+- `images/characters/season1/ur/cosmic_witch.png` (既存 UR 星海のノクス)
 
 - **対応シーン**: プロローグ (観測者三柱が銀霜の月の異変を観測)
-- **本文行**: `STORY/s1c5.md` (執筆後に追記)
-- **役割**: 単独表示、 章冒頭の場面を象徴 (s1c4 エピローグの続き)
-- **被写体**: 天空界の天空、 七色の渦、 三つの観測者の座 (うっすら輪郭)、 西の銀霜の月が黒く欠け始めている
+- **本文行**: `STORY/s1c5.md` プロローグ — 観測者三柱、 銀霜の月の欠落を見る
+- **役割**: 単独表示、 章冒頭の場面を象徴 (s1c4 エピローグの続き)。 三柱は本章で 5回 (プロローグ + エピローグ + 言及2回) 登場する重要存在のため、 純風景ではなく 三柱を ちゃんと描く (野沢さん指示 2026-05-06「謎な見た目のキャラが出るくらいなら キャラ添付して描け」)
+- **被写体**: 天空界の天空、 七色の渦、 三柱が それぞれの座から 西の銀霜の月 (黒く欠け始めている) を見つめる構図
 - **ストーリー使用**: ✅ s1c5 プロローグ 背景
 - **コード参照**: `LOCATION_CONFIG['s1c5']['プロローグ']`
 
 ```
-fantasy painting of an ethereal celestial observation realm of the seven seats with three thrones partially visible as luminous outlines, vast cosmic backdrop with the seven prismatic streams of the genso (rainbow rivers) flowing slowly across an infinite navy violet void, in the upper-LEFT portion of the sky (WEST direction) a silver crescent moon is partially eclipsing into a black crescent shape with violet void cracks beginning to spread from its edges, scattered floating star fragments and broken silver light particles drifting through the void, three faint translucent silhouettes of seated divine observers in the foreground (only soft outlines visible, identities deliberately obscured) gazing toward the western (left) eclipsing moon, atmospheric perspective with the eclipsing silver-to-black moon as the visual focus, ominous yet beautiful prophetic atmosphere, no specific characters visible only soft silhouettes, anime fantasy game background painting style, high detail, Aspect ratio 3:4, vertical orientation 1024x1536.
+[Attached: reference image 1 = "Seraphiel" (UR、 六枚翼の至天天使), reference image 2 = "Chiyo Kaguya" (UR、 千夜姫、 月影の杖を持つ), reference image 3 = "Nox" (UR、 星海のノクス、 銀河の髪を持つ)]
 
-original character setting, no logos, no text, no watermark
+Please create a celestial observation scene illustration of these three divine observers from the attached references in their seven-seat realm at the moment they sense the silver moon's eclipsing anomaly. Keep the facial features and identities EXACTLY as in the references. Optimize for a vast cosmic composition with the eclipsing moon as the visual focus.
+
+anime-style celestial observation hall illustration of three divine observers from the references seated on three of seven luminous thrones in an ethereal realm of the seven seats, on the LEFT seraphiel the six-winged celestial angel (SAME face as reference 1 unchanged) seated upright with her six white feathered wings half-spread, her hands resting on her armrest as she gazes toward the western sky with serene concern, in the CENTER chiyo kaguya the eternal moon-princess (SAME face as reference 2 unchanged) standing in front of her throne holding her moon-shadow staff vertically and tapping its tip lightly toward the western sky, her long dark hair flowing with traces of starlight, on the RIGHT nox the cosmic-star observer (SAME face as reference 3 unchanged) seated quietly with her flowing galaxy-hair drifting in the void, her starlit eyes turned toward the same western direction, all three observers looking toward the upper-LEFT portion of the sky (WEST direction) where a silver crescent moon is partially eclipsing into a black crescent shape with violet void cracks beginning to spread from its edges, four other thrones in the BACKGROUND visible as faint luminous outlines (representing the still-unfilled four seats of the seven), the seven prismatic streams of the genso (rainbow rivers) flowing slowly across the infinite navy violet void backdrop, scattered floating star fragments and broken silver light particles drifting through the void, atmospheric perspective with the eclipsing silver-to-black moon as the secondary focal point and the three observers as the primary subjects, ominous yet beautiful prophetic atmosphere, anime fantasy painting style, high detail, Aspect ratio 3:4, vertical orientation 1024x1536, original character, no logos, no text, no watermark.
+
+CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand for all three characters, anatomically correct joints, realistic grip on Kaguya's moon-shadow staff.
+
+元画像から表情や姿勢は変わってOKです
 ```
 
 ---
@@ -197,19 +208,30 @@ original character setting, no logos, no text, no watermark
 
 ---
 
-# 【8】observer_west_close.png — 観測者三柱・東への引き (背景、 3:4、 純風景)
+# 【8】observer_west_close.png — 観測者三柱・東への引き (挿絵風背景、 3:4、 観測者三柱 添付3枚)
+
+**⚠️ 生成前に必ず添付してください** (3枚):
+- `images/characters/season1/ur/seraph_paladin.png` (既存 UR セラフィエル)
+- `images/characters/season1/ur/ancient_sage.png` (既存 UR 千夜姫 カグヤ)
+- `images/characters/season1/ur/cosmic_witch.png` (既存 UR 星海のノクス)
 
 - **対応シーン**: エピローグ (観測者三柱「次は東、 七座満つる」 と s1c6 への引き)
-- **本文行**: `STORY/s1c5.md` (執筆後に追記)
-- **役割**: 単独表示、 章末の余韻と次章 (s1c6) への引き
-- **被写体**: 天空界、 七色の渦、 観測者三柱の座、 東の空に「七色の灯篭」 が灯り始めている (s1c6 = 七座満つる の予兆)
+- **本文行**: `STORY/s1c5.md` エピローグ — 観測者三柱、 七座を仰ぐ
+- **役割**: 単独表示、 章末の余韻と次章 (s1c6) への引き。 1番と同じく純風景ではなく 三柱を ちゃんと描く (野沢さん指示 2026-05-06)
+- **被写体**: 天空界、 七色の渦、 三柱が それぞれの座から 東の空 (七色の灯篭が4つ灯り始めている、 s1c6 = 七座満つる の予兆) を仰ぐ構図、 西の月は満ちた銀の月に戻っている
 - **ストーリー使用**: ✅ s1c5 エピローグ 背景
 - **コード参照**: `LOCATION_CONFIG['s1c5']['エピローグ']`
 
 ```
-fantasy painting of an ethereal celestial observation realm of the seven seats with three thrones partially visible as luminous outlines, vast cosmic backdrop with the seven prismatic streams of the genso (rainbow rivers) flowing across an infinite navy violet void, the silver full moon now restored to its complete radiance in the upper-left portion of the sky (the eclipse has passed, the moon has returned to its normal full state), in the upper-right portion of the sky four small lantern-like prismatic lights are gently flickering into existence one by one (representing the gradually filling seven seats — foreshadowing s1c6), three faint translucent silhouettes of seated divine observers in the foreground (only soft outlines visible, identities deliberately obscured) gazing toward the eastern lights, scattered floating star fragments drifting peacefully through the void, atmospheric perspective with the eastern awakening lights as the visual focus, hopeful prophetic atmosphere of dawn-after-storm, no specific characters visible only soft silhouettes, anime fantasy game background painting style, high detail, Aspect ratio 3:4, vertical orientation 1024x1536.
+[Attached: reference image 1 = "Seraphiel" (UR、 六枚翼の至天天使), reference image 2 = "Chiyo Kaguya" (UR、 千夜姫、 月影の杖を持つ), reference image 3 = "Nox" (UR、 星海のノクス、 銀河の髪を持つ)]
 
-original character setting, no logos, no text, no watermark
+Please create a celestial scene illustration of these three divine observers from the attached references in their seven-seat realm at the dawn after the silver moon has been restored, all three now turning their gaze from the west to the east where four new prismatic lights are awakening. Keep the facial features and identities EXACTLY as in the references. Optimize for a hopeful prophetic composition with the eastern awakening lights as the visual focus.
+
+anime-style celestial observation hall illustration of three divine observers from the references in an ethereal realm of the seven seats, on the LEFT seraphiel the six-winged celestial angel (SAME face as reference 1 unchanged) standing in front of her throne with her six white feathered wings gently half-spread, her right hand placed lightly on her chest, gazing toward the eastern sky with serene resolve, in the CENTER chiyo kaguya the eternal moon-princess (SAME face as reference 2 unchanged) standing with her moon-shadow staff held diagonally as she taps its tip lightly toward the eastern direction, a faint smile on her face, her long dark hair flowing with traces of starlight, on the RIGHT nox the cosmic-star observer (SAME face as reference 3 unchanged) standing quietly with her flowing galaxy-hair drifting in the void toward the east, her starlit eyes calmly turned toward the eastern lights, all three observers looking toward the upper-RIGHT portion of the sky (EAST direction) where four small lantern-like prismatic lights are gently flickering into existence one by one (representing the gradually filling four-of-seven seats — foreshadowing s1c6), in the upper-LEFT portion of the sky (WEST direction) the silver full moon now restored to its complete radiance with no eclipse visible, four other thrones in the BACKGROUND visible as faint luminous outlines (representing the still-unfilled four seats of the seven, three of which are about to be filled), the seven prismatic streams of the genso flowing softly across the infinite navy violet void backdrop, scattered floating star fragments drifting peacefully through the void, atmospheric perspective with the eastern awakening lights as the secondary focal point and the three observers as the primary subjects, hopeful prophetic atmosphere of dawn-after-storm, anime fantasy painting style, high detail, Aspect ratio 3:4, vertical orientation 1024x1536, original character, no logos, no text, no watermark.
+
+CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand for all three characters, anatomically correct joints, realistic grip on Kaguya's moon-shadow staff.
+
+元画像から表情や姿勢は変わってOKです
 ```
 
 ---
@@ -369,14 +391,14 @@ CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand for both c
 
 | # | filename | 比率 | シーン | キャラ添付 |
 |---|---|---|---|---|
-| 1 | observer_west_realm.png | 3:4 | プロローグ | なし (純風景) |
+| 1 | observer_west_realm.png | 3:4 | プロローグ | セラフィエル + カグヤ + ノクス (添付3枚、 ※再生成) |
 | 2 | silver_throne_hall.png | 3:4 | 1-1 王宮 | なし |
 | 3 | sion_chamber.png | 3:4 | 1-2 私室 | なし |
 | 4 | silver_festival_street.png | 3:4 | 1-3 祭夜 | なし |
 | 5 | black_moon_grove.png | 3:4 | 2-1 月喰いの森 | なし |
 | 6 | underworld_liora_full.png | 3:4 | 3-1 地底市全景 | なし |
 | 7 | moon_shrine_altar.png | 3:4 | 3-3 雪月神殿 | なし |
-| 8 | observer_west_close.png | 3:4 | エピローグ | なし |
+| 8 | observer_west_close.png | 3:4 | エピローグ | セラフィエル + カグヤ + ノクス (添付3枚、 ※再生成) |
 | 9 | royal_assassination_flashback.png | 16:9 | 2-2 暗殺現場 | シオン + 黒月の刺客 |
 | 10 | church_tower_reunion.png | 16:9 | 2-3 教会の塔 | シオン + ラナス |
 | 11 | shadow_loom_workshop.png | 16:9 | 3-2 影織り | リオラエル + ルナリア + シオン |

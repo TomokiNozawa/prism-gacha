@@ -1626,8 +1626,93 @@ def check_combo_pair_uniqueness():
     return len(combos)
 
 
+def check_illustration_position_consistency():
+    """ルール7-34 (WARNING 2026-05-06): 章別 prompt/locations_s1cN.md の同一シーン内 挿絵で
+    同じキャラの LEFT/RIGHT が プロンプト間で 揺れていないか チェック。
+    2026-05-06 17 (twin_palms_rainbow) で 12 (mask_separation_ritual) と 位置逆転 (シオン左右逆) が
+    発覚し 野沢さん 「整合性チェック漏れるなら自動チェック入れなさい」 指摘。 再発防止。
+
+    現状: 同じシーン (例 4-1) 内で 同じキャラ (例 シオン) が LEFT と RIGHT 両方で 検出されたら WARNING。
+    検出は キャラ slug を simple text match (英語キャラ slug 名 or 既知 alias)、 完全自動は難しいため
+    WARNING に留め、 開発者が 手動で 12 と 17 など 並び比較する 補助とする。
+    """
+    target_dir = ROOT / "prompt"
+    if not target_dir.exists():
+        return 0
+    # キャラ slug → 識別 alias (英語表記、 LEFT/RIGHT 文章で頻出する語)
+    KNOWN_ALIAS = {
+        "Sion": "シオン",
+        "Shi-Loen": "シ・ロエン",
+        "Lanas": "ラナス",
+        "Lumina": "ルミナ",
+        "Aster": "アスター",
+        "Seraphiel": "セラフィエル",
+        "Kaguya": "カグヤ",
+        "Nox": "ノクス",
+        "Nokutoria": "ノクトリア",
+        "Garvin": "ガルヴィン",
+        "Galvin": "ガルヴィン",
+        "Nova": "ノヴァ",
+        "Lunalia": "ルナリア",
+        "Riorael": "リオラエル",
+    }
+    checked = 0
+    issues = 0
+    for path in sorted(target_dir.glob("locations_s1c*.md")):
+        text = path.read_text(encoding="utf-8")
+        m = re.search(r'locations_(s1c\d+)\.md', path.name)
+        if not m:
+            continue
+        sections = re.split(r'^# 【\d+】', text, flags=re.M)[1:]
+        # scene_id -> { alias -> set(positions) } and -> { alias -> set(filenames) }
+        from collections import defaultdict
+        scene_pos = defaultdict(lambda: defaultdict(set))
+        scene_files = defaultdict(lambda: defaultdict(set))
+        for sec in sections:
+            scene_m = re.search(r'\*\*対応シーン\*\*[:：]\s*([^\s,。、（(]+)', sec)
+            if not scene_m:
+                continue
+            scene_id = scene_m.group(1).strip()
+            # filename 取得 (section 冒頭の [filename].png)
+            fn_m = re.search(r'([a-z0-9_]+\.png)', sec.split("\n", 1)[0])
+            filename = fn_m.group(1) if fn_m else "?"
+            prompt_m = re.search(r'```(.+?)```', sec, flags=re.S)
+            if not prompt_m:
+                continue
+            prompt = prompt_m.group(1)
+            # 「on the LEFT [...] <Alias> (SAME face as reference N」 のように
+            # 主体配置を示す パターンのみ抽出 (相対参照「standing as Shi-Loen's mirror」 等の偽陽性 除外)
+            for m2 in re.finditer(
+                r'\bon the (LEFT|RIGHT)\b([^.]*?)\b([A-Z][a-z]+(?:[- ][A-Z][a-z]+)*)\s*\(SAME (?:face|body)',
+                prompt):
+                pos = m2.group(1)
+                cand = m2.group(3)
+                # cand を KNOWN_ALIAS で 正規化 (alias は文字どおり一致 or 大文字小文字許容)
+                for alias in KNOWN_ALIAS:
+                    if cand == alias or cand.lower() == alias.lower():
+                        scene_pos[scene_id][alias].add(pos)
+                        scene_files[scene_id][alias].add(filename)
+                        break
+            checked += 1
+        # 同一シーン内で 同じ alias が LEFT と RIGHT 両方で検出されたら 違反
+        for scene_id, alias_pos in scene_pos.items():
+            for alias, positions in alias_pos.items():
+                if "LEFT" in positions and "RIGHT" in positions:
+                    files = sorted(scene_files[scene_id][alias])
+                    warnings_only.append(
+                        f"[ルール7-34 挿絵位置不整合 WARNING] {path.name} シーン {scene_id} の "
+                        f"キャラ「{KNOWN_ALIAS[alias]} ({alias})」 が LEFT/RIGHT 両方で検出: {files}\n"
+                        f"      → 同じシーン内で 同じキャラの 左右配置 が 揺れています、 再生成前に意図確認\n"
+                        f"      → 2026-05-06 17 vs 12 シオン左右逆事故 再発防止"
+                    )
+                    issues += 1
+    return checked
+
+
 n7_33 = check_combo_pair_uniqueness()
 print(f"  ルール7-33 (combos 重複ペア 禁止): {n7_33}件 検査 [BLOCKER]")
+n7_34 = check_illustration_position_consistency()
+print(f"  ルール7-34 (挿絵 同一シーン内 LEFT/RIGHT 整合): {n7_34}件 検査 [WARNING]")
 
 def check_main_no_suffix():
     """ルール7-27 (BLOCKER 2026-05-05): main branch で commit する version は suffix なし (X.Y.Z 形式) 必須。
