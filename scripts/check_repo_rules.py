@@ -1589,6 +1589,46 @@ print(f"  ルール7-31 (キャラ desc メタ表現禁止): {n7_31}件 検査 [
 n7_32 = check_inline_location_markers()
 print(f"  ルール7-32 (inline location marker 実在): {n7_32}件 検査 [BLOCKER]")
 
+
+def check_combo_pair_uniqueness():
+    """ルール7-33 (BLOCKER 2026-05-06): cardgame/combos.json で 同一キャラ集合 が 2件以上 登録 禁止。
+    2026-05-06 v1.4.4ai セッションで 銀霜の歌姫+工房娘 / オルフェ+ルナリア / セラフィエル+カグヤ+プリズマ で
+    重複コンボが残存し、 野沢さん指摘 「2種類のコンボ被ってる、 これだとこの2体で強すぎない?」。
+    再発防止のため 機械チェック化。
+    """
+    combos_path = ROOT / "cardgame" / "combos.json"
+    if not combos_path.exists():
+        return 0
+    try:
+        combos = json.loads(combos_path.read_text(encoding="utf-8"))
+    except Exception as e:
+        violations.append(f"[ルール7-33 combos.json 読込失敗 BLOCKER] {e}")
+        return 0
+    from collections import defaultdict
+    g = defaultdict(list)
+    for c in combos:
+        chars = tuple(sorted(c.get("chars", [])))
+        if not chars:
+            continue
+        g[chars].append(c.get("id", "?"))
+    dupes = {k: v for k, v in g.items() if len(v) >= 2}
+    if dupes:
+        sample_lines = []
+        for chars, ids in list(dupes.items())[:3]:
+            sample_lines.append(f"      ・{'+'.join(chars)} → {ids}")
+        more = "" if len(dupes) <= 3 else f"\n      ... 他 {len(dupes)-3} ペア"
+        violations.append(
+            f"[ルール7-33 combos 重複ペア BLOCKER] 同一キャラ集合 で {len(dupes)} ペアが 2件以上:\n"
+            + "\n".join(sample_lines) + more
+            + "\n      → cardgame/combos.json から 重複id を削除 (1ペア 1コンボ)\n"
+            + "      → 2026-05-06 銀霜歌姫+工房娘 等の事故 再発防止"
+        )
+    return len(combos)
+
+
+n7_33 = check_combo_pair_uniqueness()
+print(f"  ルール7-33 (combos 重複ペア 禁止): {n7_33}件 検査 [BLOCKER]")
+
 def check_main_no_suffix():
     """ルール7-27 (BLOCKER 2026-05-05): main branch で commit する version は suffix なし (X.Y.Z 形式) 必須。
     2026-05-05 v1.4.4 main reach 後の 緊急 hotfix で dev → main merge --no-ff した時、 dev の cache buster

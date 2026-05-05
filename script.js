@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4ai — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4aj — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -3911,7 +3911,7 @@ const RELATIONS = [
 
   // ===== S1C5 黒月の予兆 (2026-05-03 反映) =====
   { a: '仮面騎士 シオン',             b: 'シ・ロエン',                 type: 'blood', label: '分離した自分' },
-  { a: '仮面騎士 シオン',             b: 'イザベル',                   type: 'childhood', label: '幼馴染' },
+  // (シオン↔イザベル は line 3813 「銀霜」 セクションで既出につき重複削除)
   { a: '仮面騎士 シオン',             b: '銀霜剣聖 オリエル',         type: 'master', aRole: '弟子', bRole: '師' },
   { a: '仮面騎士 シオン',             b: '銀霜王 ノヴァ',             type: 'admire', aRole: '盾', bRole: '主君' },
   { a: '銀霜近衛 セレン',             b: '仮面騎士 シオン',           type: 'admire', aRole: '後輩', bRole: '先輩' },
@@ -6852,7 +6852,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // version 完全同期 (野沢さん指示 2026-05-06): bump_version.py が自動で更新する。
 // 旧 date-suffix '20260504o' を 5/6 で見つけた事故を契機に version-based に統一。
-const IMG_CACHE_VERSION = '1.4.4ai';
+const IMG_CACHE_VERSION = '1.4.4aj';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる

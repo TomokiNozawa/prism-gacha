@@ -182,22 +182,6 @@
     "chapter": "s1c2"
   },
   {
-    "id": "trio_genso_full",
-    "name": "原虹完全顕現",
-    "chars": [
-      "虹意 プリズマ",
-      "セラフィエル",
-      "千夜姫 カグヤ"
-    ],
-    "condition": "same_lane",
-    "effect": {
-      "target": "self_lane",
-      "power": 8
-    },
-    "flavor": "プリズマ・セラフィエル・カグヤ。 一つのレーンに観測者三柱が揃う、 神話級の奇跡。",
-    "chapter": "s1c1"
-  },
-  {
     "id": "trio_academy",
     "name": "星霊学院 三人組",
     "chars": [
@@ -1507,21 +1491,6 @@
     "chapter": "s1c5"
   },
   {
-    "id": "duo_orfe_lunalia",
-    "name": "地底市の語り",
-    "chars": [
-      "地底市の語り部 オルフェ",
-      "影織りの導師 ルナリア"
-    ],
-    "condition": "same_lane",
-    "effect": {
-      "target": "self_lane",
-      "power": 2
-    },
-    "flavor": "地底の歌い手と影の織り手、 リオラの夜を彩る二人。",
-    "chapter": "s1c5"
-  },
-  {
     "id": "duo_aster_nova",
     "name": "月夜の祭司と王",
     "chars": [
@@ -1579,21 +1548,6 @@
       "power": 2
     },
     "flavor": "雪月神殿の見習いと先輩、 灯を絶やさない祈りの継承。",
-    "chapter": "s1c5"
-  },
-  {
-    "id": "duo_silver_workshop_singer",
-    "name": "工房と歌姫",
-    "chars": [
-      "銀霜の工房娘",
-      "銀霜の歌姫"
-    ],
-    "condition": "same_lane",
-    "effect": {
-      "target": "self_lane",
-      "power": 2
-    },
-    "flavor": "工房の鎚音と祭の歌、 銀霜の市街を支える二色の灯。",
     "chapter": "s1c5"
   },
   {
