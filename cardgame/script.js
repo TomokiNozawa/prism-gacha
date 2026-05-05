@@ -148,11 +148,11 @@ function updateMuteUI() {
 // 優先順位: cards.json (手書き完全override) > effects_override.json (effect+effectText のみ) > pool.json (default)
 async function loadMasters() {
   const [c, k, l, p, eo] = await Promise.all([
-    fetch('./cards.json?v=1.4.4z').then(r => r.json()),
-    fetch('./combos.json?v=1.4.4z').then(r => r.json()),
-    fetch('./lane_effects.json?v=1.4.4z').then(r => r.json()),
-    fetch('./data/pool.json?v=1.4.4z').then(r => r.json()).catch(() => []),
-    fetch('./effects_override.json?v=1.4.4z').then(r => r.json()).catch(() => ({})),
+    fetch('./cards.json?v=1.4.4aa').then(r => r.json()),
+    fetch('./combos.json?v=1.4.4aa').then(r => r.json()),
+    fetch('./lane_effects.json?v=1.4.4aa').then(r => r.json()),
+    fetch('./data/pool.json?v=1.4.4aa').then(r => r.json()).catch(() => []),
+    fetch('./effects_override.json?v=1.4.4aa').then(r => r.json()).catch(() => ({})),
   ]);
   // pool 全カード ← effects_override で effect/effectText を上書き ← cards.json で完全 override
   const cardsByName = new Map();
@@ -1860,6 +1860,46 @@ function _renderHomeStreaks() {
   });
 }
 
+// ホーム 戦績ダッシュボード + 🏆 ポイント (野沢さん指示 2026-05-06)
+function _renderHomeStats() {
+  try {
+    const stats = JSON.parse(localStorage.getItem(PCB_STATS_KEY) || '{}');
+    const m = document.getElementById('cg-stat-matches');
+    const w = document.getElementById('cg-stat-winrate');
+    const p = document.getElementById('cg-stat-points');
+    const total = stats.totalMatches || 0;
+    const wins = stats.wins || 0;
+    const wr = total > 0 ? Math.round(wins / total * 100) : 0;
+    if (m) m.textContent = String(total);
+    if (w) w.textContent = total > 0 ? `${wr}%` : '-%';
+    if (p) p.textContent = String(stats.pcbPoints || 0);
+  } catch (e) {}
+}
+
+// ショップ modal (Phase 1 = 近日公開、 Phase 2 で 実装予定、 野沢さん指示 2026-05-06)
+function openShop() {
+  const m = document.getElementById('shop-modal');
+  if (!m) return;
+  m.hidden = false;
+  _setBodyModalOpen();
+  // 所持ポイント反映
+  try {
+    const stats = JSON.parse(localStorage.getItem(PCB_STATS_KEY) || '{}');
+    const el = document.getElementById('shop-points');
+    if (el) el.textContent = String(stats.pcbPoints || 0);
+  } catch (e) {}
+}
+function closeShop() {
+  const m = document.getElementById('shop-modal');
+  if (!m) return;
+  m.hidden = true;
+  _setBodyModalOpen();
+}
+
+// AI レベル別 ポイント (野沢さん指示 2026-05-06、 アカウント単位累積、 ショップで使用)
+const PCB_POINTS_BY_DIFF = { easy: 1, normal: 2, hard: 4, master: 8 };
+const PCB_POINTS_BO3_BONUS = 5;
+
 function _logPcbMatch(result, difficulty, isBO3, scoreMe, scoreOpp) {
   // result: 'win' | 'loss' | 'draw' | 'pause' (PvE 中断は記録しない)
   if (result === 'pause') return;
@@ -1875,6 +1915,12 @@ function _logPcbMatch(result, difficulty, isBO3, scoreMe, scoreOpp) {
     stats.byDifficulty[difficulty][result === 'win' ? 'wins' : (result === 'loss' ? 'losses' : 'draws')] += 1;
     if (isBO3) stats.bo3Matches = (stats.bo3Matches || 0) + 1;
     stats.lastPlayedAt = Date.now();
+    // ポイント加算 (野沢さん指示 2026-05-06、 win 時のみ、 BO3 勝利で +5 ボーナス)
+    if (result === 'win') {
+      const baseFor = PCB_POINTS_BY_DIFF[difficulty] || 0;
+      const bonus = isBO3 ? PCB_POINTS_BO3_BONUS : 0;
+      stats.pcbPoints = (stats.pcbPoints || 0) + baseFor + bonus;
+    }
     localStorage.setItem(PCB_STATS_KEY, JSON.stringify(stats));
     // 直近 50 試合の履歴
     const history = JSON.parse(localStorage.getItem(PCB_HISTORY_KEY) || '[]');
@@ -2010,8 +2056,9 @@ function backToCardgameHome() {
   $('#match-screen').classList.remove('active');
   $('#home-screen').classList.add('active');
   _setBodyModalOpen();
-  // AI レベル別 連勝数 を 各ボタンに反映 (野沢さん指示 2026-05-06)
+  // AI レベル別 連勝数 + 戦績ダッシュボード (野沢さん指示 2026-05-06)
   if (typeof _renderHomeStreaks === 'function') _renderHomeStreaks();
+  if (typeof _renderHomeStats === 'function') _renderHomeStats();
 }
 
 function backToPrismaeraHome() {
@@ -2685,7 +2732,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   _initLaneEffectPopover();
   await loadMasters();
   _refreshHomeResumeButton();  // 中断中の試合があれば「再開」 ボタンを home に表示
-  if (typeof _renderHomeStreaks === 'function') _renderHomeStreaks();  // AI レベル別 連勝数 (野沢さん指示 2026-05-06)
+  if (typeof _renderHomeStreaks === 'function') _renderHomeStreaks();  // AI レベル別 連勝数
+  if (typeof _renderHomeStats === 'function') _renderHomeStats();  // 戦績ダッシュボード + ポイント (野沢さん指示 2026-05-06)
   // BO3 toggle (localStorage 永続化)
   const bo3Toggle = document.getElementById('bo3-toggle');
   if (bo3Toggle) {
@@ -2704,6 +2752,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 📗 ルールブック (バトル中 ヘッダー + ホーム mode-btn の 両方からアクセス、 野沢さん指示 2026-05-06)
   document.getElementById('btn-rulebook')?.addEventListener('click', openRulebook);
   document.getElementById('btn-rulebook-home')?.addEventListener('click', openRulebook);
+  // 🛒 ショップ (野沢さん指示 2026-05-06、 Phase 1 = 近日公開 modal)
+  document.getElementById('btn-shop')?.addEventListener('click', openShop);
   $('#btn-undo').addEventListener('click', resetThisTurn);
   $('#btn-combos').addEventListener('click', openCombosModal);
   $('#btn-mulligan').addEventListener('click', mulligan);
@@ -2784,6 +2834,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (isOpen('cg-help-modal'))        { closeHelp(); return; }
       if (isOpen('tutorial-modal'))       { closeTutorial(); return; }
       if (isOpen('rulebook-modal'))       { closeRulebook(); return; }
+      if (isOpen('shop-modal'))           { closeShop(); return; }
       if (isOpen('combos-modal'))         { closeCombosModal(); return; }
       if (isOpen('char-detail-modal'))    { closeCharDetail(); return; }
       if (isOpen('deck-filter-modal'))    { closeDeckFilter(); return; }
@@ -2807,6 +2858,8 @@ window.closeCombosModal = closeCombosModal;
 window.closeCharDetail = closeCharDetail;
 window.openRulebook = openRulebook;
 window.closeRulebook = closeRulebook;
+window.openShop = openShop;
+window.closeShop = closeShop;
 window.closeDeckBuilder = closeDeckBuilder;
 window.closeDeckFilter = closeDeckFilter;
 window.closeDeckSlotPicker = closeDeckSlotPicker;

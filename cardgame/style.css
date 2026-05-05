@@ -2265,3 +2265,112 @@ body.cg-browse-mode .cg-deck-list-remove {
   font-weight: 700;
 }
 .cg-rb-dupe-table tr:hover td { background: rgba(255,255,255,0.03); }
+
+/* 戦績ダッシュボード (野沢さん指示 2026-05-06、 ホーム最上部の 累計戦数 + 勝率 + ポイント) */
+.cg-stats-row {
+  display: flex; gap: 8px;
+  padding: 12px 14px;
+  margin: 8px 0 10px;
+  background: linear-gradient(135deg, rgba(124, 93, 255, 0.12), rgba(91, 217, 255, 0.12));
+  border: 1px solid rgba(124, 93, 255, 0.3);
+  border-radius: 12px;
+}
+.cg-stat-cell {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 6px;
+  border-right: 1px solid rgba(255,255,255,0.08);
+}
+.cg-stat-cell:last-child { border-right: none; }
+.cg-stat-label {
+  font-size: 10px;
+  color: rgba(255,255,255,0.6);
+  letter-spacing: 0.06em;
+}
+.cg-stat-val {
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+}
+.cg-stat-unit {
+  font-size: 10px;
+  color: rgba(255,255,255,0.55);
+}
+.cg-stat-points .cg-stat-val { color: #fcd34d; }
+.cg-stat-points .cg-stat-label { color: rgba(252, 211, 77, 0.85); }
+@media (max-width: 480px) {
+  .cg-stats-row { padding: 10px 8px; gap: 4px; }
+  .cg-stat-val { font-size: 16px; }
+}
+
+/* 「近日公開」 バッジ (mode-btn タイトル横) */
+.cg-mode-badge-soon {
+  display: inline-block;
+  font-size: 9px;
+  padding: 2px 6px;
+  background: rgba(255, 138, 58, 0.2);
+  color: #ff8a3a;
+  border: 1px solid rgba(255, 138, 58, 0.5);
+  border-radius: 999px;
+  margin-left: 6px;
+  vertical-align: middle;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+}
+
+/* 🛒 ショップ modal (Phase 1 = 近日公開、 Phase 2 で実装予定) */
+.cg-shop-card { max-width: 580px; }
+.cg-shop-points-box {
+  background: linear-gradient(135deg, rgba(252, 211, 77, 0.18), rgba(255, 138, 58, 0.18));
+  border: 1px solid rgba(252, 211, 77, 0.45);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin: 14px 0;
+}
+.cg-shop-points-label {
+  font-size: 11px;
+  color: rgba(252, 211, 77, 0.95);
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
+.cg-shop-points-val {
+  font-size: 28px;
+  font-weight: 800;
+  color: #fcd34d;
+  letter-spacing: 0.02em;
+}
+.cg-shop-points-unit {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(252, 211, 77, 0.75);
+  margin-left: 4px;
+}
+.cg-shop-points-detail {
+  font-size: 11px;
+  color: rgba(255,255,255,0.6);
+  margin-top: 6px;
+  line-height: 1.6;
+}
+.cg-shop-coming-soon {
+  text-align: center;
+  padding: 24px 16px;
+  background: rgba(255,255,255,0.04);
+  border: 1px dashed rgba(255,255,255,0.18);
+  border-radius: 12px;
+}
+.cg-shop-coming-icon { font-size: 36px; margin-bottom: 6px; }
+.cg-shop-coming-title { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+.cg-shop-coming-detail { font-size: 12px; color: rgba(255,255,255,0.7); line-height: 1.7; margin-bottom: 14px; }
+.cg-shop-coming-list { display: flex; flex-direction: column; gap: 6px; }
+.cg-shop-coming-item {
+  font-size: 12px;
+  color: rgba(255,255,255,0.85);
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 8px;
+  border-left: 3px solid rgba(252, 211, 77, 0.5);
+  text-align: left;
+}

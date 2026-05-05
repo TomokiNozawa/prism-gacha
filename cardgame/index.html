@@ -7,7 +7,7 @@
 <title>PCB | Prismaera Cards Battle</title>
 <link rel="icon" href="/images/icons/icon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
-<link rel="stylesheet" href="./style.css?v=1.4.4z">
+<link rel="stylesheet" href="./style.css?v=1.4.4aa">
 </head>
 <body>
 
@@ -32,12 +32,19 @@
     <h1 class="cg-hero-title">PCB</h1>
     <p class="cg-hero-tagline">Prismaera Cards Battle — 虹霊界のキャラと共に、 3レーンの読み合い</p>
   </div>
+  <!-- 戦績ダッシュボード (野沢さん指示 2026-05-06、 累計戦数 + 勝率 + 🏆 ポイント バッジ) -->
+  <div class="cg-stats-row" id="cg-stats-row">
+    <div class="cg-stat-cell"><span class="cg-stat-label">累計</span><span class="cg-stat-val" id="cg-stat-matches">0</span><span class="cg-stat-unit">戦</span></div>
+    <div class="cg-stat-cell"><span class="cg-stat-label">勝率</span><span class="cg-stat-val" id="cg-stat-winrate">-%</span></div>
+    <div class="cg-stat-cell cg-stat-points"><span class="cg-stat-label">🏆 ポイント</span><span class="cg-stat-val" id="cg-stat-points">0</span><span class="cg-stat-unit">pts</span></div>
+  </div>
+
   <div class="cg-bo3-toggle">
     <label class="cg-bo3-label">
       <input type="checkbox" id="bo3-toggle">
       <div class="cg-bo3-text-wrap">
         <span class="cg-bo3-text">🏆 BO3モード</span>
-        <span class="cg-bo3-sub">先攻 → 後攻 → ランダム の3本、 2本先取で勝利</span>
+        <span class="cg-bo3-sub">先攻 → 後攻 → ランダム の3本、 2本先取で勝利 (BO3勝利で +5 ポイント)</span>
       </div>
     </label>
   </div>
@@ -91,6 +98,13 @@
       <div class="cg-mode-text">
         <div class="cg-mode-title">オンラインPvP</div>
         <div class="cg-mode-sub">準備中</div>
+      </div>
+    </button>
+    <button class="cg-mode-btn secondary" id="btn-shop">
+      <div class="cg-mode-icon">🛒</div>
+      <div class="cg-mode-text">
+        <div class="cg-mode-title">ショップ <span class="cg-mode-badge-soon">近日公開</span></div>
+        <div class="cg-mode-sub">スリーブ / スキン / キャラ衣装 を ポイントで交換</div>
       </div>
     </button>
     <button class="cg-mode-btn secondary" id="btn-rulebook-home">
@@ -374,6 +388,30 @@
   </div>
 </div>
 
+<!-- 🛒 ショップ モーダル (野沢さん指示 2026-05-06、 Phase 1 = 近日公開、 Phase 2 で スリーブ販売予定) -->
+<div id="shop-modal" class="cg-modal" hidden>
+  <div class="cg-modal-backdrop" onclick="closeShop()"></div>
+  <div class="cg-modal-card cg-shop-card">
+    <button class="cg-modal-close" onclick="closeShop()" aria-label="閉じる">×</button>
+    <h2 class="cg-modal-title">🛒 ショップ</h2>
+    <div class="cg-shop-points-box">
+      <div class="cg-shop-points-label">🏆 所持ポイント</div>
+      <div class="cg-shop-points-val"><span id="shop-points">0</span> <span class="cg-shop-points-unit">pts</span></div>
+      <div class="cg-shop-points-detail">勝率に応じてポイント獲得 ─ Easy 1pt / Normal 2pt / Hard 4pt / Master 8pt / BO3勝利 +5pt</div>
+    </div>
+    <div class="cg-shop-coming-soon">
+      <div class="cg-shop-coming-icon">🚧</div>
+      <div class="cg-shop-coming-title">準備中 (近日公開)</div>
+      <div class="cg-shop-coming-detail">スリーブ / カード裏面装飾 を 1〜2日後に 販売開始予定。 引き続きポイントを 貯めてお待ちください。</div>
+      <div class="cg-shop-coming-list">
+        <div class="cg-shop-coming-item">🎨 カードスリーブ (50-100 pts/種、 4-6種)</div>
+        <div class="cg-shop-coming-item">✨ ホーム背景スキン (近日)</div>
+        <div class="cg-shop-coming-item">👗 キャラ衣装 (Phase 3 で実装予定)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- 📗 ルールブック モーダル (野沢さん指示 2026-05-06、 ホーム + バトル中の両方からアクセス) -->
 <div id="rulebook-modal" class="cg-modal" hidden>
   <div class="cg-modal-backdrop" onclick="closeRulebook()"></div>
@@ -449,6 +487,6 @@
   </div>
 </div>
 
-<script src="./script.js?v=1.4.4z"></script>
+<script src="./script.js?v=1.4.4aa"></script>
 </body>
 </html>
