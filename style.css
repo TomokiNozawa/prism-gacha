@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4aw — 演出スタイル (Season 1 第1章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4ax — 演出スタイル (Season 1 第1章) / dev は cache buster suffix で進行
    ============================================================ */
 :root {
   --bg: #05060d;
@@ -1583,6 +1583,16 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   background: linear-gradient(90deg, #ffd84d, #5fffd4, #c87dff);
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
+/* 排出率モーダル ✕: scroll 非追従 右上固定 (野沢さん指示 2026-05-06)
+   row(height:0+sticky top:0) で card top に貼り付き、 close は row 内 flex 右端配置。
+   absolute は scroll content と一緒に動く CSS 仕様だったため sticky に切替。 */
+.rate-detail-close-row {
+  position: sticky; top: 0;
+  height: 0;
+  display: flex; justify-content: flex-end;
+  z-index: 3;
+  pointer-events: none;
+}
 .rate-detail-close {
   background: rgba(255,255,255,0.18);
   border: 1px solid rgba(255,255,255,0.3);
@@ -1591,12 +1601,11 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   border-radius: 50%;
   font-size: 20px; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  /* card 直下 absolute で スクロール関係なく カード内右上固定 (野沢さん指示 2026-05-06)
-     タイトルは rate-detail-head 内で 通常 flow、 スクロールで 流れる */
-  position: absolute; top: 14px; right: 14px; z-index: 3;
+  pointer-events: auto;
   backdrop-filter: blur(4px);
+  transform: translateY(4px);  /* height:0 row なので 上端から少し下げて視認性確保 */
 }
-.rate-detail-close:hover { background: rgba(255,255,255,0.15); }
+.rate-detail-close:hover { background: rgba(255,255,255,0.28); }
 .rate-detail-body { display: flex; flex-direction: column; gap: 18px; }
 .rate-detail-section h3 {
   font-size: 13px; font-weight: 700;

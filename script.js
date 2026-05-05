@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4aw — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4ax — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -1415,7 +1415,9 @@ function showRateDetail() {
   }
   modal.innerHTML = `
     <div class="rate-detail-card">
-      <button type="button" class="rate-detail-close" onclick="closeRateDetail()" aria-label="閉じる">×</button>
+      <div class="rate-detail-close-row">
+        <button type="button" class="rate-detail-close" onclick="closeRateDetail()" aria-label="閉じる">×</button>
+      </div>
       <div class="rate-detail-head">
         <div class="rate-detail-title">📊 排出率詳細</div>
       </div>
@@ -6886,7 +6888,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // version 完全同期 (野沢さん指示 2026-05-06): bump_version.py が自動で更新する。
 // 旧 date-suffix '20260504o' を 5/6 で見つけた事故を契機に version-based に統一。
-const IMG_CACHE_VERSION = '1.4.4aw';
+const IMG_CACHE_VERSION = '1.4.4ax';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
