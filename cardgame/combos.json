@@ -2,988 +2,1735 @@
   {
     "id": "duo_aqua",
     "name": "アクアシスの灯",
-    "chars": ["アクアシス筆頭魔術師 グラシエル", "珊瑚鎧の海騎士 コラリア"],
+    "chars": [
+      "アクアシス筆頭魔術師 グラシエル",
+      "珊瑚鎧の海騎士 コラリア"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "海淵の魔と海騎士、 同じ波紋を纏う。",
     "chapter": "s1c2"
   },
   {
     "id": "duo_forest",
     "name": "深緑の絆",
-    "chars": ["森の射手 リナエ", "ヴィオラ"],
+    "chars": [
+      "森の射手 リナエ",
+      "ヴィオラ"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "弓の達人と弟子。 同じ祖木の弓が二度鳴る。",
     "chapter": "s1c1"
   },
   {
     "id": "trio_observer",
     "name": "観測者の三柱",
-    "chars": ["セラフィエル", "千夜姫 カグヤ", "虹意 プリズマ"],
+    "chars": [
+      "セラフィエル",
+      "千夜姫 カグヤ",
+      "虹意 プリズマ"
+    ],
     "condition": "any_lane",
-    "effect": { "target": "all_lanes", "power": 6 },
+    "effect": {
+      "target": "all_lanes",
+      "power": 6
+    },
     "flavor": "至天・最古・原虹、 三柱の祈りで世界が震える。",
     "chapter": "s1c1"
   },
   {
     "id": "duo_prisma_seraph",
     "name": "原虹の双翼",
-    "chars": ["虹意 プリズマ", "セラフィエル"],
+    "chars": [
+      "虹意 プリズマ",
+      "セラフィエル"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 5 },
+    "effect": {
+      "target": "self_lane",
+      "power": 5
+    },
     "flavor": "プリズマと、 その羽。 原虹そのものの顕現。",
     "chapter": "s1c1"
   },
   {
     "id": "duo_chanty_coralia",
     "name": "紅玉と珊瑚",
-    "chars": ["紅玉海賊団船長 シャンティ", "珊瑚鎧の海騎士 コラリア"],
+    "chars": [
+      "紅玉海賊団船長 シャンティ",
+      "珊瑚鎧の海騎士 コラリア"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 2 },
+    "effect": {
+      "target": "self_lane",
+      "power": 2
+    },
     "flavor": "海の二派、 同じ航路を往く時のみ。",
     "chapter": "s1c2"
   },
   {
     "id": "duo_apprentices",
     "name": "学び舎の灯",
-    "chars": ["ちさと", "カイ"],
+    "chars": [
+      "ちさと",
+      "カイ"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 2 },
+    "effect": {
+      "target": "self_lane",
+      "power": 2
+    },
     "flavor": "見習いと学院の少女。 始まりの友。",
     "chapter": "s1c1"
   },
   {
     "id": "duo_kaguya_prisma",
     "name": "千年の絆",
-    "chars": ["虹意 プリズマ", "千夜姫 カグヤ"],
+    "chars": [
+      "虹意 プリズマ",
+      "千夜姫 カグヤ"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 4 },
+    "effect": {
+      "target": "self_lane",
+      "power": 4
+    },
     "flavor": "原虹と最古の記憶の番人、 千年を共に歩んだ二柱。",
     "chapter": "s1c1"
   },
   {
     "id": "duo_seraph_kaguya",
     "name": "至天と月夜",
-    "chars": ["セラフィエル", "千夜姫 カグヤ"],
+    "chars": [
+      "セラフィエル",
+      "千夜姫 カグヤ"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "至天の祈りと最古の月、 観測者三柱の二角。",
     "chapter": "s1c1"
   },
   {
     "id": "trio_ocean",
     "name": "海洋連盟",
-    "chars": ["紅玉海賊団船長 シャンティ", "アクアシス筆頭魔術師 グラシエル", "珊瑚鎧の海騎士 コラリア"],
+    "chars": [
+      "紅玉海賊団船長 シャンティ",
+      "アクアシス筆頭魔術師 グラシエル",
+      "珊瑚鎧の海騎士 コラリア"
+    ],
     "condition": "any_lane",
-    "effect": { "target": "all_lanes", "power": 3 },
+    "effect": {
+      "target": "all_lanes",
+      "power": 3
+    },
     "flavor": "紅玉海賊団とアクアシス、 海の二派が同じ場に揃う時。",
     "chapter": "s1c2"
   },
   {
     "id": "duo_academy_archer",
     "name": "学院と樹海",
-    "chars": ["カイ", "ヴィオラ"],
+    "chars": [
+      "カイ",
+      "ヴィオラ"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 2 },
+    "effect": {
+      "target": "self_lane",
+      "power": 2
+    },
     "flavor": "学院の見習いと樹海の弓姫、 弓を介した不器用な共闘。",
     "chapter": "s1c1"
   },
   {
     "id": "duo_silver_redwing",
     "name": "白と紅",
-    "chars": ["ルミナ", "紅翼 ツキ"],
+    "chars": [
+      "ルミナ",
+      "紅翼 ツキ"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "銀霜の月夜と紅翼の閃光、 対極の二色が交わる夜。",
     "chapter": "s1c1"
   },
   {
     "id": "duo_linae_chanty",
     "name": "矢と帆",
-    "chars": ["森の射手 リナエ", "紅玉海賊団船長 シャンティ"],
+    "chars": [
+      "森の射手 リナエ",
+      "紅玉海賊団船長 シャンティ"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 2 },
+    "effect": {
+      "target": "self_lane",
+      "power": 2
+    },
     "flavor": "樹海の達人射手と紅玉の海将軍、 異なる先導者の出会い。",
     "chapter": "s1c2"
   },
   {
     "id": "trio_genso_full",
     "name": "原虹完全顕現",
-    "chars": ["虹意 プリズマ", "セラフィエル", "千夜姫 カグヤ"],
+    "chars": [
+      "虹意 プリズマ",
+      "セラフィエル",
+      "千夜姫 カグヤ"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 8 },
+    "effect": {
+      "target": "self_lane",
+      "power": 8
+    },
     "flavor": "プリズマ・セラフィエル・カグヤ。 一つのレーンに観測者三柱が揃う、 神話級の奇跡。",
     "chapter": "s1c1"
   },
   {
     "id": "trio_academy",
     "name": "星霊学院 三人組",
-    "chars": ["ちさと", "カイ", "ヴィオラ"],
+    "chars": [
+      "ちさと",
+      "カイ",
+      "ヴィオラ"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 4 },
+    "effect": {
+      "target": "self_lane",
+      "power": 4
+    },
     "flavor": "学院の同期三人。 樹海の弟子も加えた、 始まりの絆。",
     "chapter": "s1c1"
   },
-
   {
     "id": "quad_observer_full",
     "name": "観測者の四柱",
-    "chars": ["虹意 プリズマ", "セラフィエル", "千夜姫 カグヤ", "星海のノクス"],
+    "chars": [
+      "虹意 プリズマ",
+      "セラフィエル",
+      "千夜姫 カグヤ",
+      "星海のノクス"
+    ],
     "condition": "any_lane",
-    "effect": { "target": "all_lanes", "power": 5 },
+    "effect": {
+      "target": "all_lanes",
+      "power": 5
+    },
     "flavor": "原虹・至天・最古・銀河——四柱が一つの場に揃う、 千年に一度の夜。",
     "chapter": "s1c1"
   },
   {
     "id": "duo_kaguya_nox",
     "name": "千年の月夜",
-    "chars": ["千夜姫 カグヤ", "星海のノクス"],
+    "chars": [
+      "千夜姫 カグヤ",
+      "星海のノクス"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "月の化身と星海の魔女、 千年に一度の夜会。",
     "chapter": "s1c1"
   },
   {
     "id": "duo_prisma_nox",
     "name": "原虹と銀河",
-    "chars": ["虹意 プリズマ", "星海のノクス"],
+    "chars": [
+      "虹意 プリズマ",
+      "星海のノクス"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 4 },
+    "effect": {
+      "target": "self_lane",
+      "power": 4
+    },
     "flavor": "光は虹に、 闇は星海に。 原虹がノクスに虚境を託した日。",
     "chapter": "s1c1"
   },
-
   {
     "id": "duo_artemis_hinoo",
     "name": "千年の戦友",
-    "chars": ["龍帝 アルテミス", "焔帝 ヒノオウ"],
+    "chars": [
+      "龍帝 アルテミス",
+      "焔帝 ヒノオウ"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 5 },
+    "effect": {
+      "target": "self_lane",
+      "power": 5
+    },
     "flavor": "二十歳の戦場で背を預け合って千年。 帝同士、 言葉のいらぬ盟約。",
     "chapter": "s1c1"
   },
   {
     "id": "duo_artemis_riririm",
     "name": "おじうえと姪",
-    "chars": ["龍帝 アルテミス", "リリム"],
+    "chars": [
+      "龍帝 アルテミス",
+      "リリム"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 2 },
+    "effect": {
+      "target": "self_lane",
+      "power": 2
+    },
     "flavor": "ピンクの鱗の姪に、 覇王はいつも酒の話で誤魔化す。",
     "chapter": "s1c1"
   },
   {
     "id": "duo_artemis_himata",
     "name": "おにーさまの土産",
-    "chars": ["龍帝 アルテミス", "ひなた"],
+    "chars": [
+      "龍帝 アルテミス",
+      "ひなた"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "覇王の宝箱には、 紅翼の末妹のための土産がいつも積まれている。",
     "chapter": "s1c1"
   },
-
   {
     "id": "duo_hinoo_hinaka",
     "name": "焔の師弟",
-    "chars": ["焔帝 ヒノオウ", "焔舞 ヒナカ"],
+    "chars": [
+      "焔帝 ヒノオウ",
+      "焔舞 ヒナカ"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "舞台のヒナカが見上げる時、 焔麗の翼が一振り——『合格』のサイン。",
     "chapter": "s1c1"
   },
   {
     "id": "duo_tsuki_himata",
     "name": "紅翼姉妹",
-    "chars": ["紅翼 ツキ", "ひなた"],
+    "chars": [
+      "紅翼 ツキ",
+      "ひなた"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "次女と末妹、 姉ばかりに背負わせない。 紅翼の血は世代を渡る。",
     "chapter": "s1c1"
   },
   {
     "id": "trio_redwing",
     "name": "紅翼三羽",
-    "chars": ["紅翼 ツキ", "ひなた", "薫音"],
+    "chars": [
+      "紅翼 ツキ",
+      "ひなた",
+      "薫音"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 5 },
+    "effect": {
+      "target": "self_lane",
+      "power": 5
+    },
     "flavor": "次姫・末妹・剣師範。 紅翼皇家の家を支える三羽の翼。",
     "chapter": "s1c1"
   },
   {
     "id": "duo_kuro_kuon",
     "name": "兄弟弟子",
-    "chars": ["黒刃 玄", "薫音"],
+    "chars": [
+      "黒刃 玄",
+      "薫音"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "皇家を出た兄弟子と、 残った妹弟子。 同じ剣の型を、 別の場所で稽古する。",
     "chapter": "s1c1"
   },
   {
     "id": "duo_kuro_milei",
     "name": "盾と剣の非公式",
-    "chars": ["黒刃 玄", "ミレイア"],
+    "chars": [
+      "黒刃 玄",
+      "ミレイア"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 2 },
+    "effect": {
+      "target": "self_lane",
+      "power": 2
+    },
     "flavor": "故郷の少女に似た学院の盾使い、 浪人は今も非公式に剣を教えている。",
     "chapter": "s1c1"
   },
-
   {
     "id": "duo_vil_riririm",
     "name": "紫竜の姉妹",
-    "chars": ["竜爵 ヴィル", "リリム"],
+    "chars": [
+      "竜爵 ヴィル",
+      "リリム"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "ピンクの鱗を讃えた姉の一言が、 従妹を初飛行へ運んだ。",
     "chapter": "s1c1"
   },
   {
     "id": "duo_vil_garudo",
     "name": "親友の盟約",
-    "chars": ["竜爵 ヴィル", "獣牙 ガルド"],
+    "chars": [
+      "竜爵 ヴィル",
+      "獣牙 ガルド"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "三日三晩斬り合った末の親友。 戦場で背を預ける仲——出会い方は最悪だったほうがいい。",
     "chapter": "s1c1"
   },
   {
     "id": "duo_riamu_vil",
     "name": "侍従の忠誠",
-    "chars": ["竜爵 ヴィル", "紫竜の侍従 リアム"],
+    "chars": [
+      "竜爵 ヴィル",
+      "紫竜の侍従 リアム"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "三月の砂時計を毎晩見つめた侍従と、 約束通り帰った王女。 紫翼が静かに頷く。",
     "chapter": "s1c3"
   },
-
   {
     "id": "quad_academy",
     "name": "学院四人組",
-    "chars": ["ちさと", "カイ", "アルス", "ミレイア"],
+    "chars": [
+      "ちさと",
+      "カイ",
+      "アルス",
+      "ミレイア"
+    ],
     "condition": "any_lane",
-    "effect": { "target": "all_lanes", "power": 3 },
+    "effect": {
+      "target": "all_lanes",
+      "power": 3
+    },
     "flavor": "剣と弓と呪文と盾——四人で一つの陣形。",
     "chapter": "s1c1"
   },
   {
     "id": "penta_academy_full",
     "name": "始まりの五人",
-    "chars": ["ちさと", "カイ", "アルス", "ミレイア", "ヴィオラ"],
+    "chars": [
+      "ちさと",
+      "カイ",
+      "アルス",
+      "ミレイア",
+      "ヴィオラ"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 8 },
+    "effect": {
+      "target": "self_lane",
+      "power": 8
+    },
     "flavor": "学院の四人と樹海の弓姫。 同じレーンに揃う日、 始まりの絆が炸裂する。",
     "chapter": "s1c1"
   },
   {
     "id": "duo_kai_linae",
     "name": "憧れの弓",
-    "chars": ["カイ", "森の射手 リナエ"],
+    "chars": [
+      "カイ",
+      "森の射手 リナエ"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 2 },
+    "effect": {
+      "target": "self_lane",
+      "power": 2
+    },
     "flavor": "夜こっそり弓を引く少年と、 一矢も外さぬ先輩。 憧れは、 続けるための燃料。",
     "chapter": "s1c1"
   },
   {
     "id": "duo_alus_noa",
     "name": "黒曜塔の絆",
-    "chars": ["アルス", "黒猫 ノア"],
+    "chars": [
+      "アルス",
+      "黒猫 ノア"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 2 },
+    "effect": {
+      "target": "self_lane",
+      "power": 2
+    },
     "flavor": "魔導書を返却期限通りに返す眼鏡の少年と、 『あなたなら来れる』 と告げた先輩。",
     "chapter": "s1c1"
   },
-
   {
     "id": "duo_linae_shin",
     "name": "森と影衆の好敵手",
-    "chars": ["森の射手 リナエ", "影刃 シン"],
+    "chars": [
+      "森の射手 リナエ",
+      "影刃 シン"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "矢を番えて挨拶、 短刀を構えて応えた。 三秒の静止が、 三年続く好敵手の証。",
     "chapter": "s1c1"
   },
   {
     "id": "trio_yakai",
     "name": "夜焔郷の絆",
-    "chars": ["朱音", "影刃 シン", "こはね"],
+    "chars": [
+      "朱音",
+      "影刃 シン",
+      "こはね"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 4 },
+    "effect": {
+      "target": "self_lane",
+      "power": 4
+    },
     "flavor": "雨の夜に拾われた狐獣人と、 影衆の若頭と、 紅月の遊芸師。 夜焔郷の三つの灯。",
     "chapter": "s1c1"
   },
   {
     "id": "duo_kaguya_akane",
     "name": "九尾の系譜",
-    "chars": ["千夜姫 カグヤ", "朱音"],
+    "chars": [
+      "千夜姫 カグヤ",
+      "朱音"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "天狐と黒狐、 千年前に分かれた血が花街の酒を共に舐める。",
     "chapter": "s1c1"
   },
   {
     "id": "duo_akane_kohane",
     "name": "雨の夜の母娘",
-    "chars": ["朱音", "こはね"],
+    "chars": [
+      "朱音",
+      "こはね"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "『面倒くさいな』と抱き上げた、 あの雨の夜。 紅月は今も狐獣人の子を見つめる。",
     "chapter": "s1c1"
   },
   {
     "id": "duo_akane_vil",
     "name": "酒の姉妹",
-    "chars": ["朱音", "竜爵 ヴィル"],
+    "chars": [
+      "朱音",
+      "竜爵 ヴィル"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "月二度の隠れ酒場、 『今日もよく生きた』 『うむ』。 戦場帰りの夜だけ同じ匂い。",
     "chapter": "s1c1"
   },
   {
     "id": "duo_hinaka_akane",
     "name": "焔の競演",
-    "chars": ["焔舞 ヒナカ", "朱音"],
+    "chars": [
+      "焔舞 ヒナカ",
+      "朱音"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "九尾の焔と第七天の焔、 二つの焔が舞台で渦を巻く夜。",
     "chapter": "s1c1"
   },
-
   {
     "id": "duo_nox_noa",
     "name": "夜の弟子",
-    "chars": ["星海のノクス", "黒猫 ノア"],
+    "chars": [
+      "星海のノクス",
+      "黒猫 ノア"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "月一度の論文に毎回 ☆ 一文字。 黒曜塔の先輩は、 後輩を密かに楽しみにしている。",
     "chapter": "s1c1"
   },
   {
     "id": "duo_noa_kohane",
     "name": "禁書庫の絵本",
-    "chars": ["黒猫 ノア", "こはね"],
+    "chars": [
+      "黒猫 ノア",
+      "こはね"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 2 },
+    "effect": {
+      "target": "self_lane",
+      "power": 2
+    },
     "flavor": "規則違反の絵本を月一度。 獣人姉妹の縁が、 世代を超えて続く。",
     "chapter": "s1c1"
   },
-
   {
     "id": "trio_church_apprentices",
     "name": "見習い三人組",
-    "chars": ["メイリ", "セラフィ", "詠聖 ベル"],
+    "chars": [
+      "メイリ",
+      "セラフィ",
+      "詠聖 ベル"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 4 },
+    "effect": {
+      "target": "self_lane",
+      "power": 4
+    },
     "flavor": "治癒のメイリ、 詠唱のセラフィ、 歌のベル。 教会の自習室から始まる絆。",
     "chapter": "s1c1"
   },
   {
     "id": "duo_seraphi_bell",
     "name": "新人時代の相方",
-    "chars": ["セラフィ", "詠聖 ベル"],
+    "chars": [
+      "セラフィ",
+      "詠聖 ベル"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "喧嘩から始まった合唱魔法。 一番長続きする友情の形。",
     "chapter": "s1c1"
   },
   {
     "id": "duo_meiri_isabel",
     "name": "波紋の姉妹",
-    "chars": ["イザベル", "メイリ"],
+    "chars": [
+      "イザベル",
+      "メイリ"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "心の中で『姉さま』と呼んでいた。 ある日、 勇気を出して口に出してみた。",
     "chapter": "s1c1"
   },
   {
     "id": "duo_seraph_isabel_proxy",
     "name": "代理と神",
-    "chars": ["セラフィエル", "イザベル"],
+    "chars": [
+      "セラフィエル",
+      "イザベル"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 4 },
+    "effect": {
+      "target": "self_lane",
+      "power": 4
+    },
     "flavor": "天の境から見守る至天と、 地で代わりに『生きる』 不器用な聖巫騎士。",
     "chapter": "s1c1"
   },
   {
     "id": "duo_lumina_isabel",
     "name": "灯の同志",
-    "chars": ["ルミナ", "イザベル"],
+    "chars": [
+      "ルミナ",
+      "イザベル"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 2 },
+    "effect": {
+      "target": "self_lane",
+      "power": 2
+    },
     "flavor": "雪月神殿の灯番と、 白焔教会の聖巫騎士。 治療の情報交換は、 ただの口実。",
     "chapter": "s1c1"
   },
   {
     "id": "duo_shion_isabel",
     "name": "幼馴染",
-    "chars": ["仮面騎士 シオン", "イザベル"],
+    "chars": [
+      "仮面騎士 シオン",
+      "イザベル"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 4 },
+    "effect": {
+      "target": "self_lane",
+      "power": 4
+    },
     "flavor": "事件で姉を失った夜、 隣の少年が『俺が姉さんになる』と宣言した。",
     "chapter": "s1c1"
   },
   {
     "id": "duo_shion_ranas",
     "name": "兄弟弟子",
-    "chars": ["仮面騎士 シオン", "白焔教会騎士 ラナス"],
+    "chars": [
+      "仮面騎士 シオン",
+      "白焔教会騎士 ラナス"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 2 },
+    "effect": {
+      "target": "self_lane",
+      "power": 2
+    },
     "flavor": "同じ師範から剣と盾を学んだ遠縁の兄弟弟子。 沈黙の誓いが、 仮面の下を尊重する。",
     "chapter": "s1c2"
   },
-
   {
     "id": "duo_neptea_isabel",
     "name": "海の姉妹盟約",
-    "chars": ["深海女王 ネプテア", "波紋の聖女 イザベル"],
+    "chars": [
+      "深海女王 ネプテア",
+      "波紋の聖女 イザベル"
+    ],
     "condition": "any_lane",
-    "effect": { "target": "all_lanes", "power": 5 },
+    "effect": {
+      "target": "all_lanes",
+      "power": 5
+    },
     "flavor": "海の姉と陸の妹。 黒月が空に昇る時、 共に立つ約束。",
     "chapter": "s1c2"
   },
   {
     "id": "duo_neptea_pearl",
     "name": "海の母娘",
-    "chars": ["深海女王 ネプテア", "深海の少女 パール"],
+    "chars": [
+      "深海女王 ネプテア",
+      "深海の少女 パール"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "孤児院から迎えた夜、 海の女王は『お役目こそ守る理由になる』と微笑んだ。",
     "chapter": "s1c2"
   },
   {
     "id": "duo_chanty_isabel_awake",
     "name": "海賊と聖巫騎士",
-    "chars": ["紅玉海賊団船長 シャンティ", "波紋の聖女 イザベル"],
+    "chars": [
+      "紅玉海賊団船長 シャンティ",
+      "波紋の聖女 イザベル"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 4 },
+    "effect": {
+      "target": "self_lane",
+      "power": 4
+    },
     "flavor": "『次は陸でも会おうぜ』。 教会の祈りと自由商人の風が、 同じ波紋で結ばれた朝。",
     "chapter": "s1c2"
   },
   {
     "id": "duo_chanty_caleb",
     "name": "船長と副長",
-    "chars": ["紅玉海賊団船長 シャンティ", "紅玉海賊団副長 ケイレブ"],
+    "chars": [
+      "紅玉海賊団船長 シャンティ",
+      "紅玉海賊団副長 ケイレブ"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "『誰を守りたいか分かってない』 と言われた夜から十年。 紅玉号の右腕。",
     "chapter": "s1c2"
   },
   {
     "id": "duo_caleb_kreo",
     "name": "幼馴染の薬箱",
-    "chars": ["紅玉海賊団副長 ケイレブ", "海賊団船医 クレオ"],
+    "chars": [
+      "紅玉海賊団副長 ケイレブ",
+      "海賊団船医 クレオ"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 2 },
+    "effect": {
+      "target": "self_lane",
+      "power": 2
+    },
     "flavor": "薬箱に一本だけ余分な包帯——副長専用。 母さんではなく、 幼馴染の証。",
     "chapter": "s1c2"
   },
   {
     "id": "trio_aquasis_top",
     "name": "アクアシス三柱",
-    "chars": ["深海女王 ネプテア", "アクアシス筆頭魔術師 グラシエル", "珊瑚鎧の海騎士 コラリア"],
+    "chars": [
+      "深海女王 ネプテア",
+      "アクアシス筆頭魔術師 グラシエル",
+      "珊瑚鎧の海騎士 コラリア"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 5 },
+    "effect": {
+      "target": "self_lane",
+      "power": 5
+    },
     "flavor": "海の女王・参謀・近衛。 海溝の宮殿を支える三つの祈り。",
     "chapter": "s1c2"
   },
   {
     "id": "duo_grasiel_nox",
     "name": "文通の友",
-    "chars": ["アクアシス筆頭魔術師 グラシエル", "星海のノクス"],
+    "chars": [
+      "アクアシス筆頭魔術師 グラシエル",
+      "星海のノクス"
+    ],
     "condition": "any_lane",
-    "effect": { "target": "all_lanes", "power": 2 },
+    "effect": {
+      "target": "all_lanes",
+      "power": 2
+    },
     "flavor": "海と空、 青と紫——十数年の論文文通。 二つの観測が交差する日のために。",
     "chapter": "s1c2"
   },
   {
     "id": "trio_apprentices_kaisou",
     "name": "海溝で覚醒した三人",
-    "chars": ["メイリ", "セラフィ", "白焔教会見習い巫女 ルーナ"],
+    "chars": [
+      "メイリ",
+      "セラフィ",
+      "白焔教会見習い巫女 ルーナ"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 4 },
+    "effect": {
+      "target": "self_lane",
+      "power": 4
+    },
     "flavor": "『あなただけの祈りを見つけて』——海溝の底で、 三人組は本当の覚醒を迎えた。",
     "chapter": "s1c2"
   },
   {
     "id": "duo_isabel_meiri_letter",
     "name": "波紋の手紙",
-    "chars": ["波紋の聖女 イザベル", "メイリ"],
+    "chars": [
+      "波紋の聖女 イザベル",
+      "メイリ"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "『私は、 私自身を見つけたわ』——海から戻った姉さまの長い手紙。",
     "chapter": "s1c2"
   },
   {
     "id": "duo_grasiel_tiara",
     "name": "海溝の観測",
-    "chars": ["アクアシス筆頭魔術師 グラシエル", "深海巫女 ティアラ"],
+    "chars": [
+      "アクアシス筆頭魔術師 グラシエル",
+      "深海巫女 ティアラ"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 2 },
+    "effect": {
+      "target": "self_lane",
+      "power": 2
+    },
     "flavor": "氷盤の異変と水晶玉の影——『青の音』 を最初に察した二人。",
     "chapter": "s1c2"
   },
   {
     "id": "duo_tiara_bell",
     "name": "歌と予言",
-    "chars": ["深海巫女 ティアラ", "詠聖 ベル"],
+    "chars": [
+      "深海巫女 ティアラ",
+      "詠聖 ベル"
+    ],
     "condition": "any_lane",
-    "effect": { "target": "all_lanes", "power": 2 },
+    "effect": {
+      "target": "all_lanes",
+      "power": 2
+    },
     "flavor": "海と陸、 別の方法で原虹に触れる二人。 ベルが歌う夜、 水晶玉が淡く光る。",
     "chapter": "s1c2"
   },
-
   {
     "id": "duo_sahana_vil",
     "name": "砂海と紫竜",
-    "chars": ["砂海王女 サハナ", "竜爵 ヴィル"],
+    "chars": [
+      "砂海王女 サハナ",
+      "竜爵 ヴィル"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 7 },
+    "effect": {
+      "target": "self_lane",
+      "power": 7
+    },
     "flavor": "紫水晶のかけらの半分。 距離も時も越えて、 紫の光は脈動する。",
     "chapter": "s1c3"
   },
   {
     "id": "duo_sahana_far",
     "name": "風紋の声",
-    "chars": ["砂海王女 サハナ", "古龍の語り部 ファラー"],
+    "chars": [
+      "砂海王女 サハナ",
+      "古龍の語り部 ファラー"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 4 },
+    "effect": {
+      "target": "self_lane",
+      "power": 4
+    },
     "flavor": "額に七色の風紋。 千年級の婆さんが見守る、 七座級の前夜。",
     "chapter": "s1c3"
   },
   {
     "id": "duo_sahana_gran",
     "name": "兄貴分の風",
-    "chars": ["砂海王女 サハナ", "砂牙の剣聖 グラン"],
+    "chars": [
+      "砂海王女 サハナ",
+      "砂牙の剣聖 グラン"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "『剣は風で振るうものだ』——双剣シャマールが七色の風を纏った夜、 兄貴分は初めて笑った。",
     "chapter": "s1c3"
   },
   {
     "id": "duo_far_kaguya",
     "name": "千年文(ふみ)",
-    "chars": ["古龍の語り部 ファラー", "千夜姫 カグヤ"],
+    "chars": [
+      "古龍の語り部 ファラー",
+      "千夜姫 カグヤ"
+    ],
     "condition": "any_lane",
-    "effect": { "target": "all_lanes", "power": 3 },
+    "effect": {
+      "target": "all_lanes",
+      "power": 3
+    },
     "flavor": "千年前に砂漠で出会った二人。 『お主こそ、 月をひとりで抱え過ぎるな』。",
     "chapter": "s1c3"
   },
   {
     "id": "duo_far_vil",
     "name": "次の千年の鍵",
-    "chars": ["古龍の語り部 ファラー", "竜爵 ヴィル"],
+    "chars": [
+      "古龍の語り部 ファラー",
+      "竜爵 ヴィル"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 4 },
+    "effect": {
+      "target": "self_lane",
+      "power": 4
+    },
     "flavor": "『余白の血』 を持つ第三王女——千年前から知っていたが、 今は告げない。",
     "chapter": "s1c3"
   },
   {
     "id": "trio_sahar_top",
     "name": "サハール三柱",
-    "chars": ["砂海王女 サハナ", "古龍の語り部 ファラー", "砂牙の剣聖 グラン"],
+    "chars": [
+      "砂海王女 サハナ",
+      "古龍の語り部 ファラー",
+      "砂牙の剣聖 グラン"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 6 },
+    "effect": {
+      "target": "self_lane",
+      "power": 6
+    },
     "flavor": "風を呼ぶ王女、 千年の語り部、 古龍血の剣聖。 砂海の三つの柱。",
     "chapter": "s1c3"
   },
   {
     "id": "duo_gran_oul",
     "name": "古龍の鍛冶",
-    "chars": ["砂牙の剣聖 グラン", "古龍鍛冶 オウル"],
+    "chars": [
+      "砂牙の剣聖 グラン",
+      "古龍鍛冶 オウル"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "鱗の屑を鍛える炉と、 弟弟子の名を刻んだ大剣サンガ。 守れなかった命を、 二度と忘れない。",
     "chapter": "s1c3"
   },
   {
     "id": "duo_oul_safira",
     "name": "七色絹と鱗",
-    "chars": ["古龍鍛冶 オウル", "祭舞のサフィラ"],
+    "chars": [
+      "古龍鍛冶 オウル",
+      "祭舞のサフィラ"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 2 },
+    "effect": {
+      "target": "self_lane",
+      "power": 2
+    },
     "flavor": "古龍の鱗を粉にして七色に染める。 七つの月の周期を経た、 母と祖母の祈り。",
     "chapter": "s1c3"
   },
   {
     "id": "duo_sahana_lai",
     "name": "妹分の憧れ",
-    "chars": ["砂海王女 サハナ", "砂風の戦士 ライ"],
+    "chars": [
+      "砂海王女 サハナ",
+      "砂風の戦士 ライ"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 2 },
+    "effect": {
+      "target": "self_lane",
+      "power": 2
+    },
     "flavor": "『立てるか、 ぼうず』——五年経っても、 あの手の温度は冷めない。",
     "chapter": "s1c3"
   },
   {
     "id": "duo_lai_tina",
     "name": "砂風の妹",
-    "chars": ["砂風の戦士 ライ", "砂塵の子 ティナ"],
+    "chars": [
+      "砂風の戦士 ライ",
+      "砂塵の子 ティナ"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 2 },
+    "effect": {
+      "target": "self_lane",
+      "power": 2
+    },
     "flavor": "『この子の前では、 絶対に死なない』。 砂漠の風は、 こうして世代を渡る。",
     "chapter": "s1c3"
   },
   {
     "id": "duo_sahana_asha",
     "name": "鞭の預け",
-    "chars": ["砂海王女 サハナ", "隊商長 アーシャ"],
+    "chars": [
+      "砂海王女 サハナ",
+      "隊商長 アーシャ"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 2 },
+    "effect": {
+      "target": "self_lane",
+      "power": 2
+    },
     "flavor": "『預けとくよ、 王女』——十二歳のサハナの腰に結ばれた、 商人の鞭。",
     "chapter": "s1c3"
   },
   {
     "id": "duo_asha_vil",
     "name": "紫の襟を見抜いた夜",
-    "chars": ["隊商長 アーシャ", "竜爵 ヴィル"],
+    "chars": [
+      "隊商長 アーシャ",
+      "竜爵 ヴィル"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 2 },
+    "effect": {
+      "target": "self_lane",
+      "power": 2
+    },
     "flavor": "焚き火越しに紫竜の刺繍を見抜いて、 何も言わずに見張り当番を変えた。",
     "chapter": "s1c3"
   },
-
   {
     "id": "duo_artemis_grailru",
     "name": "北方の盟約",
-    "chars": ["龍帝 アルテミス", "氷帝 グレイル"],
+    "chars": [
+      "龍帝 アルテミス",
+      "氷帝 グレイル"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 5 },
+    "effect": {
+      "target": "self_lane",
+      "power": 5
+    },
     "flavor": "凍土と覇王。 千年の戦友に並ぶ、 もう一柱の北方の帝。",
     "chapter": "s1c4"
   },
   {
     "id": "duo_grailru_vare",
     "name": "北方二大帝",
-    "chars": ["氷帝 グレイル", "空挺女皇 ヴァーレ"],
+    "chars": [
+      "氷帝 グレイル",
+      "空挺女皇 ヴァーレ"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 5 },
+    "effect": {
+      "target": "self_lane",
+      "power": 5
+    },
     "flavor": "凍土の帝と空挺の女皇。 北方の空と地が、 一つの戦線で繋がる時。",
     "chapter": "s1c4"
   },
   {
     "id": "trio_kitanorth_emperors",
     "name": "北方三帝",
-    "chars": ["龍帝 アルテミス", "氷帝 グレイル", "空挺女皇 ヴァーレ"],
+    "chars": [
+      "龍帝 アルテミス",
+      "氷帝 グレイル",
+      "空挺女皇 ヴァーレ"
+    ],
     "condition": "any_lane",
-    "effect": { "target": "all_lanes", "power": 4 },
+    "effect": {
+      "target": "all_lanes",
+      "power": 4
+    },
     "flavor": "覇王・氷帝・空挺女皇。 北方の三帝が同じ場に揃う、 第四章の頂点。",
     "chapter": "s1c4"
   },
   {
     "id": "duo_aluku_miu",
     "name": "雪原の幼馴染",
-    "chars": ["凍土の少年 アルク", "雪原の少女 ミウ"],
+    "chars": [
+      "凍土の少年 アルク",
+      "雪原の少女 ミウ"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "凍土と雪原、 同じ村で育った少年と少女。 ニーヴルの春の灯。",
     "chapter": "s1c4"
   },
   {
     "id": "duo_pip_pit",
     "name": "空の双子",
-    "chars": ["空の少女 ピピ", "空の少年 ピット"],
+    "chars": [
+      "空の少女 ピピ",
+      "空の少年 ピット"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "空挺城の歯車を回す双子の手。 ゼノニアの未来は、 この二人の翼にある。",
     "chapter": "s1c4"
   },
   {
     "id": "trio_niiruru_top",
     "name": "氷霊三柱",
-    "chars": ["氷帝 グレイル", "摂政 ヴァルキ", "氷塔の聖騎士 リオネ"],
+    "chars": [
+      "氷帝 グレイル",
+      "摂政 ヴァルキ",
+      "氷塔の聖騎士 リオネ"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 5 },
+    "effect": {
+      "target": "self_lane",
+      "power": 5
+    },
     "flavor": "氷帝・摂政・聖騎士。 ニーヴルの政務と剣を支える三つの柱。",
     "chapter": "s1c4"
   },
   {
     "id": "duo_haguru_artemis",
     "name": "北方剣聖と覇者",
-    "chars": ["北方剣聖 ハグル", "龍帝 アルテミス"],
+    "chars": [
+      "北方剣聖 ハグル",
+      "龍帝 アルテミス"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "凍土の腕組みと、 千年の覇王の眼差し。 剣聖同士の黙礼。",
     "chapter": "s1c4"
   },
   {
     "id": "duo_riorne_isabel",
     "name": "聖騎士の祈り",
-    "chars": ["氷塔の聖騎士 リオネ", "イザベル"],
+    "chars": [
+      "氷塔の聖騎士 リオネ",
+      "イザベル"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 2 },
+    "effect": {
+      "target": "self_lane",
+      "power": 2
+    },
     "flavor": "凍土と聖都、 別々の塔で同じ祈りを唱える二人の聖騎士。",
     "chapter": "s1c4"
   },
   {
     "id": "trio_zenonia_top",
     "name": "ゼノニア三柱",
-    "chars": ["空挺女皇 ヴァーレ", "空挺城総監 ガリオン", "空挺城首席学者 ゼピル"],
+    "chars": [
+      "空挺女皇 ヴァーレ",
+      "空挺城総監 ガリオン",
+      "空挺城首席学者 ゼピル"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 5 },
+    "effect": {
+      "target": "self_lane",
+      "power": 5
+    },
     "flavor": "女皇・総監・学者。 空挺城の歯車を回す、 ゼノニアの三柱。",
     "chapter": "s1c4"
   },
-
   {
     "id": "duo_lione_asura",
     "name": "氷塔師弟",
-    "chars": ["氷塔の聖騎士 リオネ", "氷塔の見習い騎士 アスラ"],
+    "chars": [
+      "氷塔の聖騎士 リオネ",
+      "氷塔の見習い騎士 アスラ"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "氷塔の祈りを継ぐ、 聖騎士と見習いの絆。",
     "chapter": "s1c4"
   },
   {
     "id": "duo_yuris_valki",
     "name": "氷霊宮廷",
-    "chars": ["氷霜の巫女 ユーリス", "摂政 ヴァルキ"],
+    "chars": [
+      "氷霜の巫女 ユーリス",
+      "摂政 ヴァルキ"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "巫女の祈りと摂政の采配、 ニーヴルの政務を支える二輪。",
     "chapter": "s1c4"
   },
   {
     "id": "duo_bell_haria",
     "name": "真鍮師弟",
-    "chars": ["空挺整備士 ベル", "真鍮の女将 ハーニア"],
+    "chars": [
+      "空挺整備士 ベル",
+      "真鍮の女将 ハーニア"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "ハーニア女将の弟子ベル、 機械工房の熱気を二人で守る。",
     "chapter": "s1c4"
   },
   {
     "id": "duo_jin_garion",
     "name": "機関士と総監",
-    "chars": ["空挺機関士 ジン", "空挺城総監 ガリオン"],
+    "chars": [
+      "空挺機関士 ジン",
+      "空挺城総監 ガリオン"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 2 },
+    "effect": {
+      "target": "self_lane",
+      "power": 2
+    },
     "flavor": "歯車を回す者と司令塔。 ゼノニアの空はこの二人で持つ。",
     "chapter": "s1c4"
   },
   {
     "id": "duo_vin_vare",
     "name": "蒸気砲と女皇",
-    "chars": ["蒸気砲手 ヴィン", "空挺女皇 ヴァーレ"],
+    "chars": [
+      "蒸気砲手 ヴィン",
+      "空挺女皇 ヴァーレ"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "女皇の翼を守る蒸気砲手、 一射に翼の重みを乗せる。",
     "chapter": "s1c4"
   },
   {
     "id": "duo_izun_aluku",
     "name": "雪原の村の絆",
-    "chars": ["氷牙の戦士 イズン", "凍土の少年 アルク"],
+    "chars": [
+      "氷牙の戦士 イズン",
+      "凍土の少年 アルク"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 2 },
+    "effect": {
+      "target": "self_lane",
+      "power": 2
+    },
     "flavor": "雪原の村で少年に剣を教えた戦士、 二人の足跡が同じ雪原に重なる。",
     "chapter": "s1c4"
   },
   {
     "id": "duo_shiera_aluku",
     "name": "凍土の狩人と少年",
-    "chars": ["凍土の狩人 シエラ", "凍土の少年 アルク"],
+    "chars": [
+      "凍土の狩人 シエラ",
+      "凍土の少年 アルク"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 2 },
+    "effect": {
+      "target": "self_lane",
+      "power": 2
+    },
     "flavor": "雪原で道を見失わない狩人、 少年の冒険心を見守る背中。",
     "chapter": "s1c4"
   },
   {
     "id": "duo_iru_grailru",
     "name": "凍土の祭司と氷帝",
-    "chars": ["凍土の祭司 イル", "氷帝 グレイル"],
+    "chars": [
+      "凍土の祭司 イル",
+      "氷帝 グレイル"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "ニーヴルの祭司の祈りが、 氷帝の剣に宿る霜となる。",
     "chapter": "s1c4"
   },
   {
     "id": "trio_niiruru_resist",
     "name": "ニーヴル抵抗の三柱",
-    "chars": ["氷帝 グレイル", "凍土の祭司 イル", "氷塔の聖騎士 リオネ"],
+    "chars": [
+      "氷帝 グレイル",
+      "凍土の祭司 イル",
+      "氷塔の聖騎士 リオネ"
+    ],
     "condition": "any_lane",
-    "effect": { "target": "all_lanes", "power": 3 },
+    "effect": {
+      "target": "all_lanes",
+      "power": 3
+    },
     "flavor": "氷帝・祭司・聖騎士。 黒月の影に対峙するニーヴル三柱。",
     "chapter": "s1c4"
   },
-
   {
     "id": "duo_morga_chanty",
     "name": "海獣使いと船長",
-    "chars": ["海獣使い モルガ", "紅玉海賊団船長 シャンティ"],
+    "chars": [
+      "海獣使い モルガ",
+      "紅玉海賊団船長 シャンティ"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 2 },
+    "effect": {
+      "target": "self_lane",
+      "power": 2
+    },
     "flavor": "海獣ジンを背負う遊牧民と紅玉号の船長、 海の自由を共に。",
     "chapter": "s1c2"
   },
   {
     "id": "duo_mika_chanty",
     "name": "海賊の師弟",
-    "chars": ["海賊見習い ミカ", "紅玉海賊団船長 シャンティ"],
+    "chars": [
+      "海賊見習い ミカ",
+      "紅玉海賊団船長 シャンティ"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 2 },
+    "effect": {
+      "target": "self_lane",
+      "power": 2
+    },
     "flavor": "船長を真似ようとして失敗、 自分の色を見つけた見習い。",
     "chapter": "s1c2"
   },
   {
     "id": "duo_elan_caleb",
     "name": "漁師と副長",
-    "chars": ["珊瑚漁師 エラン", "紅玉海賊団副長 ケイレブ"],
+    "chars": [
+      "珊瑚漁師 エラン",
+      "紅玉海賊団副長 ケイレブ"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 2 },
+    "effect": {
+      "target": "self_lane",
+      "power": 2
+    },
     "flavor": "海溝の地理を知る漁師と紅玉の右腕、 海路の影の支え。",
     "chapter": "s1c2"
   },
   {
     "id": "duo_rikka_isabel",
     "name": "教会従士の祈り",
-    "chars": ["白焔教会従士 リッカ", "イザベル"],
+    "chars": [
+      "白焔教会従士 リッカ",
+      "イザベル"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 2 },
+    "effect": {
+      "target": "self_lane",
+      "power": 2
+    },
     "flavor": "ランタンの灯番、 姉さまの背を最も近くで見つめる従士。",
     "chapter": "s1c2"
   },
   {
     "id": "duo_nadra_sahana",
     "name": "砂風の語り部と王女",
-    "chars": ["砂風の語り部 ナドラ", "砂海王女 サハナ"],
+    "chars": [
+      "砂風の語り部 ナドラ",
+      "砂海王女 サハナ"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 2 },
+    "effect": {
+      "target": "self_lane",
+      "power": 2
+    },
     "flavor": "風を読む語り部と七色の風を呼ぶ王女、 砂漠の声を継ぐ二人。",
     "chapter": "s1c3"
   },
-
   {
     "id": "trio_dark_observer",
     "name": "黒月の観測者",
-    "chars": ["シ・ロエン", "黒月の盟主 ノクトリア", "地底市の母 リオラエル"],
+    "chars": [
+      "シ・ロエン",
+      "黒月の盟主 ノクトリア",
+      "地底市の母 リオラエル"
+    ],
     "condition": "any_lane",
-    "effect": { "target": "all_lanes", "power": 6 },
+    "effect": {
+      "target": "all_lanes",
+      "power": 6
+    },
     "flavor": "黒月衆の主導・盟主、 地底市の母。 西の月の影を観測する三柱。",
     "chapter": "s1c5"
   },
   {
     "id": "duo_riorael_shion",
     "name": "地底の母と仮面",
-    "chars": ["地底市の母 リオラエル", "仮面騎士 シオン"],
+    "chars": [
+      "地底市の母 リオラエル",
+      "仮面騎士 シオン"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 4 },
+    "effect": {
+      "target": "self_lane",
+      "power": 4
+    },
     "flavor": "黄金の母と銀霜の盾、 黒月の予兆を最初に共有した二人。",
     "chapter": "s1c5"
   },
   {
     "id": "duo_nova_oriel",
     "name": "銀霜の双剣",
-    "chars": ["銀霜王 ノヴァ", "銀霜剣聖 オリエル"],
+    "chars": [
+      "銀霜王 ノヴァ",
+      "銀霜剣聖 オリエル"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 4 },
+    "effect": {
+      "target": "self_lane",
+      "power": 4
+    },
     "flavor": "銀霜王と剣聖、 銀霜王国を支える主と剣の絆。",
     "chapter": "s1c5"
   },
   {
     "id": "duo_galvin_shroen",
     "name": "堕者の刀",
-    "chars": ["堕者剣聖 ガルヴィン", "シ・ロエン"],
+    "chars": [
+      "堕者剣聖 ガルヴィン",
+      "シ・ロエン"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "堕ちた剣聖と黒月の主導、 黒月衆を率いる二振りの刀。",
     "chapter": "s1c5"
   },
   {
     "id": "duo_lunalia_riorael",
     "name": "影織りと地底の母",
-    "chars": ["影織りの導師 ルナリア", "地底市の母 リオラエル"],
+    "chars": [
+      "影織りの導師 ルナリア",
+      "地底市の母 リオラエル"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "地底市の影を織る導師と、 黄金で照らす母。 リオラの双柱。",
     "chapter": "s1c5"
   },
   {
     "id": "duo_silver_vs_dark",
     "name": "銀霜と黒月",
-    "chars": ["銀霜王 ノヴァ", "シ・ロエン"],
+    "chars": [
+      "銀霜王 ノヴァ",
+      "シ・ロエン"
+    ],
     "condition": "any_lane",
-    "effect": { "target": "all_lanes", "power": 2 },
+    "effect": {
+      "target": "all_lanes",
+      "power": 2
+    },
     "flavor": "銀の月と黒の月、 第5章の対立軸が同じ場に揃う夜。",
     "chapter": "s1c5"
   },
   {
     "id": "duo_orfe_lunalia",
     "name": "地底市の語り",
-    "chars": ["地底市の語り部 オルフェ", "影織りの導師 ルナリア"],
+    "chars": [
+      "地底市の語り部 オルフェ",
+      "影織りの導師 ルナリア"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 2 },
+    "effect": {
+      "target": "self_lane",
+      "power": 2
+    },
     "flavor": "地底の歌い手と影の織り手、 リオラの夜を彩る二人。",
     "chapter": "s1c5"
   },
   {
     "id": "duo_aster_nova",
     "name": "月夜の祭司と王",
-    "chars": ["月夜祭司 アスター", "銀霜王 ノヴァ"],
+    "chars": [
+      "月夜祭司 アスター",
+      "銀霜王 ノヴァ"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 2 },
+    "effect": {
+      "target": "self_lane",
+      "power": 2
+    },
     "flavor": "月夜の祈りを捧げる祭司と銀霜王、 銀霜王国の宮廷の支柱。",
     "chapter": "s1c5"
   },
   {
     "id": "duo_kuro_assassin_shroen",
     "name": "黒月の刃",
-    "chars": ["黒月の刺客", "シ・ロエン"],
+    "chars": [
+      "黒月の刺客",
+      "シ・ロエン"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 2 },
+    "effect": {
+      "target": "self_lane",
+      "power": 2
+    },
     "flavor": "主導の影を担う刺客、 命じる者と斬る者の沈黙の盟。",
     "chapter": "s1c5"
   },
   {
     "id": "duo_seren_aster",
     "name": "銀霜近衛の朝",
-    "chars": ["銀霜近衛 セレン", "月夜祭司 アスター"],
+    "chars": [
+      "銀霜近衛 セレン",
+      "月夜祭司 アスター"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 2 },
+    "effect": {
+      "target": "self_lane",
+      "power": 2
+    },
     "flavor": "近衛の盾と祭司の祈り、 銀霜の朝を護る二人。",
     "chapter": "s1c5"
   },
   {
     "id": "duo_rapis_lumina",
     "name": "雪月の灯番",
-    "chars": ["雪月神殿見習い ラピス", "ルミナ"],
+    "chars": [
+      "雪月神殿見習い ラピス",
+      "ルミナ"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 2 },
+    "effect": {
+      "target": "self_lane",
+      "power": 2
+    },
     "flavor": "雪月神殿の見習いと先輩、 灯を絶やさない祈りの継承。",
     "chapter": "s1c5"
   },
   {
     "id": "duo_silver_workshop_singer",
     "name": "工房と歌姫",
-    "chars": ["銀霜の工房娘", "銀霜の歌姫"],
+    "chars": [
+      "銀霜の工房娘",
+      "銀霜の歌姫"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 2 },
+    "effect": {
+      "target": "self_lane",
+      "power": 2
+    },
     "flavor": "工房の鎚音と祭の歌、 銀霜の市街を支える二色の灯。",
     "chapter": "s1c5"
   },
   {
     "id": "duo_shieru_riorael",
     "name": "地底の母娘",
-    "chars": ["地底市の少女 シエル", "地底市の母 リオラエル"],
+    "chars": [
+      "地底市の少女 シエル",
+      "地底市の母 リオラエル"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 3 },
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
     "flavor": "リオラの少女と母、 黄金の祈りが世代を渡す。",
     "chapter": "s1c5"
   },
   {
     "id": "trio_silver_top",
     "name": "銀霜三柱",
-    "chars": ["銀霜王 ノヴァ", "銀霜剣聖 オリエル", "銀霜近衛 セレン"],
+    "chars": [
+      "銀霜王 ノヴァ",
+      "銀霜剣聖 オリエル",
+      "銀霜近衛 セレン"
+    ],
     "condition": "same_lane",
-    "effect": { "target": "self_lane", "power": 5 },
+    "effect": {
+      "target": "self_lane",
+      "power": 5
+    },
     "flavor": "王・剣聖・近衛。 銀霜王国の宮廷を支える三柱。",
     "chapter": "s1c5"
   },
-
   {
     "id": "trio_observer_resist_dark",
     "name": "観測者の対峙",
-    "chars": ["虹意 プリズマ", "千夜姫 カグヤ", "シ・ロエン"],
+    "chars": [
+      "虹意 プリズマ",
+      "千夜姫 カグヤ",
+      "シ・ロエン"
+    ],
     "condition": "any_lane",
-    "effect": { "target": "all_lanes", "power": 5 },
+    "effect": {
+      "target": "all_lanes",
+      "power": 5
+    },
     "flavor": "原虹・最古・黒月、 千年を跨ぐ三観測者の対峙の夜。",
+    "chapter": "s1c5"
+  },
+  {
+    "id": "duo_liora_bard",
+    "name": "地底市の母娘",
+    "chars": [
+      "地底市の母 リオラエル",
+      "地底市の語り部 オルフェ"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "千年の主と語り部。 歴史は歌で受け継がれる。",
+    "chapter": "s1c5"
+  },
+  {
+    "id": "duo_loom_bard",
+    "name": "影織りの伝承",
+    "chars": [
+      "影織りの導師 ルナリア",
+      "地底市の語り部 オルフェ"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "織物と歌、 地底市の二つの文化継承。",
+    "chapter": "s1c5"
+  },
+  {
+    "id": "duo_silver_street",
+    "name": "銀霜の祭夜",
+    "chars": [
+      "銀霜の工房娘",
+      "銀霜の歌姫"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "紙の三日月灯篭の下、 灯と歌が祭夜を彩る。",
+    "chapter": "s1c5"
+  },
+  {
+    "id": "duo_silent_townsfolk",
+    "name": "沈黙の盾の街娘",
+    "chars": [
+      "仮面騎士 シオン",
+      "銀霜の工房娘"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "街娘が手を振り、 仮面騎士は仮面の下で微かに頷く。",
+    "chapter": "s1c5"
+  },
+  {
+    "id": "duo_song_echo",
+    "name": "重なる歌",
+    "chars": [
+      "銀霜の歌姫",
+      "詠聖 ベル"
+    ],
+    "condition": "any_lane",
+    "effect": {
+      "target": "all_lanes",
+      "power": 2
+    },
+    "flavor": "銀霜の祭夜の歌と教会の祈りの歌、 響きが似ていた。",
+    "chapter": "s1c5"
+  },
+  {
+    "id": "duo_blackmoon_dagger",
+    "name": "黒月の使い手",
+    "chars": [
+      "黒月の盟主 ノクトリア",
+      "黒月の刺客"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 4
+    },
+    "flavor": "盟主の手の中で、 影は刃となる。",
     "chapter": "s1c5"
   }
 ]

@@ -2098,3 +2098,47 @@ body.cg-modal-open .cg-deck-builder-grid {
 }
 .cg-lane-header { cursor: pointer; }
 .cg-lane-header:hover { color: var(--aurora-2); }
+
+/* キャラ確認 (browse mode) ボタン (slot-picker-modal の 一番上、 野沢さん指示 2026-05-06) */
+.cg-deck-slot-picker-browse {
+  margin: 6px 0 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.cg-deck-slot-browse-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(124, 93, 255, 0.18), rgba(91, 217, 255, 0.18));
+  border: 1px solid rgba(124, 93, 255, 0.45);
+  border-radius: 12px;
+  color: #fff;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  min-height: 56px;
+}
+.cg-deck-slot-browse-btn:hover {
+  background: linear-gradient(135deg, rgba(124, 93, 255, 0.28), rgba(91, 217, 255, 0.28));
+  border-color: rgba(124, 93, 255, 0.7);
+}
+.cg-deck-slot-browse-btn:active { transform: translateY(1px); }
+.cg-deck-slot-browse-icon { font-size: 22px; flex: 0 0 auto; }
+.cg-deck-slot-browse-text { flex: 1 1 auto; min-width: 0; }
+.cg-deck-slot-browse-title { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
+.cg-deck-slot-browse-sub { font-size: 11px; color: rgba(255,255,255,0.65); }
+.cg-deck-slot-browse-arrow { font-size: 18px; color: rgba(255,255,255,0.6); flex: 0 0 auto; }
+
+/* 閲覧モード: deck-builder-modal の 編集系 UI を 一括 hide (野沢さん指示 2026-05-06) */
+body.cg-browse-mode .cg-deck-active-toggle-row,
+body.cg-browse-mode .cg-deck-builder-counter,
+body.cg-browse-mode #btn-deck-clear,
+body.cg-browse-mode #char-detail-place-btn,
+body.cg-browse-mode #char-detail-deck-add-btn,
+body.cg-browse-mode #char-detail-deck-remove-btn,
+body.cg-browse-mode .cg-deck-list-add,
+body.cg-browse-mode .cg-deck-list-remove {
+  display: none !important;
+}

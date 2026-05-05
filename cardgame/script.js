@@ -148,11 +148,11 @@ function updateMuteUI() {
 // 優先順位: cards.json (手書き完全override) > effects_override.json (effect+effectText のみ) > pool.json (default)
 async function loadMasters() {
   const [c, k, l, p, eo] = await Promise.all([
-    fetch('./cards.json?v=1.4.4o').then(r => r.json()),
-    fetch('./combos.json?v=1.4.4o').then(r => r.json()),
-    fetch('./lane_effects.json?v=1.4.4o').then(r => r.json()),
-    fetch('./data/pool.json?v=1.4.4o').then(r => r.json()).catch(() => []),
-    fetch('./effects_override.json?v=1.4.4o').then(r => r.json()).catch(() => ({})),
+    fetch('./cards.json?v=1.4.4p').then(r => r.json()),
+    fetch('./combos.json?v=1.4.4p').then(r => r.json()),
+    fetch('./lane_effects.json?v=1.4.4p').then(r => r.json()),
+    fetch('./data/pool.json?v=1.4.4p').then(r => r.json()).catch(() => []),
+    fetch('./effects_override.json?v=1.4.4p').then(r => r.json()).catch(() => ({})),
   ]);
   // pool 全カード ← effects_override で effect/effectText を上書き ← cards.json で完全 override
   const cardsByName = new Map();
@@ -2174,6 +2174,7 @@ function _renderDeckSlotPicker() {
 
 // 編集モードへ (slot 引数で対象スロット指定)
 function openDeckBuilder(slot) {
+  _deckBuilderState.browseMode = false;
   _deckBuilderState.editSlot = slot || getActiveSlot();
   _loadEditingSlot();
   _deckBuilderState.tierFilter = 'all';
@@ -2191,6 +2192,35 @@ function openDeckBuilder(slot) {
   _updateActiveToggleUI();
   renderDeckBuilderGrid();
   $('#deck-builder-modal').hidden = false;
+  document.body.classList.remove('cg-browse-mode');
+  _setBodyModalOpen();
+}
+
+// キャラ確認モード (野沢さん指示 2026-05-06): 既存 deck-builder-modal を 閲覧専用で開く。
+// +/-ボタン非表示、 「使用中に」 トグル非表示、 タイトル「キャラ一覧」、 カード tap で showCardDetail で能力詳細。
+function openCharBrowse() {
+  _deckBuilderState.browseMode = true;
+  _deckBuilderState.editSlot = 0;  // 0 = 閲覧モード sentinel
+  _deckBuilderState.selected = [];
+  _deckBuilderState.tierFilter = 'all';
+  _deckBuilderState.chapterFilter = 'all';
+  _deckBuilderState.factionFilter = 'all';
+  _deckBuilderState.search = '';
+  _deckBuilderState.ownedOnly = false;
+  $$('#deck-builder-tabs .cg-deck-tab').forEach(t => t.classList.toggle('active', t.dataset.tier === 'all'));
+  $$('#deck-builder-chapter-tabs .cg-deck-tab').forEach(t => t.classList.toggle('active', t.dataset.chapter === 'all'));
+  const search = $('#deck-search-input'); if (search) search.value = '';
+  const fac = $('#deck-faction-filter'); if (fac) fac.value = 'all';
+  const owned = $('#deck-owned-only'); if (owned) owned.checked = false;
+  _populateFactionFilter();
+  // タイトル/header を 閲覧モード表示に
+  const slotNum = $('#deck-builder-slot-num');
+  if (slotNum && slotNum.parentElement) slotNum.parentElement.firstChild.textContent = '📚 キャラ一覧 ';
+  if (slotNum) slotNum.textContent = '';
+  renderDeckBuilderGrid();
+  $('#deck-builder-modal').hidden = false;
+  // body class で +/- ボタン群 + 使用中トグル を CSS で 一括 hide
+  document.body.classList.add('cg-browse-mode');
   _setBodyModalOpen();
 }
 
@@ -2552,6 +2582,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   // P-5: デッキ編集 (ホームの「デッキ編集」 ボタン → スロット選択)
   const openDeckBtn = document.getElementById('btn-open-deck-builder');
   if (openDeckBtn) openDeckBtn.addEventListener('click', openDeckSlotPicker);
+  // キャラ確認 ボタン (slot-picker-modal の 一番上、 野沢さん指示 2026-05-06)
+  const browseBtn = document.getElementById('btn-open-char-browse');
+  if (browseBtn) browseBtn.addEventListener('click', () => {
+    closeDeckSlotPicker();
+    openCharBrowse();
+  });
   const tabsEl = document.getElementById('deck-builder-tabs');
   if (tabsEl) {
     tabsEl.addEventListener('click', (e) => {

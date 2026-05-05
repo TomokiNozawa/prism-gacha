@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4o — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4p — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -3858,6 +3858,13 @@ const RELATIONS = [
   { a: 'ルミナ',                       b: 'イザベル',                   type: 'fellow', label: '治療の情報交換 (文通)' },
   // 2026-05-03 全章 desc + LORE 通読で発見した S1C5 漏れ
   { a: '地底市の母 リオラエル',       b: '仮面騎士 シオン',           type: 'master', aRole: '導く', bRole: '影と共に生きる選択' },  // UR_リオラエル POOL desc
+  // 2026-05-06 自動チェック (ルール7-30) で発見した相関漏れキャラ 4体 を追加
+  { a: '地底市の語り部 オルフェ',     b: '地底市の母 リオラエル',     type: 'admire', aRole: '語り部', bRole: '千年の主' },              // 地底市の歴史を歌で伝える
+  { a: '地底市の語り部 オルフェ',     b: '影織りの導師 ルナリア',     type: 'fellow', label: '地底市の文化継承者' },                     // 同郷、 歴史と織物の両輪
+  { a: '黒月の刺客',                   b: '黒月の盟主 ノクトリア',     type: 'admire', aRole: '刺客', bRole: '盟主' },                    // 王族暗殺の手駒、 主従
+  { a: '銀霜の工房娘',                 b: '仮面騎士 シオン',           type: 'admire', aRole: '街娘', bRole: '沈黙の盾' },                // 1-3 祭夜で手を振る街娘
+  { a: '銀霜の歌姫',                   b: '銀霜の工房娘',              type: 'fellow', label: '祭夜の街娘たち' },                          // 1-3 祭夜の灯と歌
+  { a: '銀霜の歌姫',                   b: '詠聖 ベル',                 type: 'fellow', label: '同じ調べを歌う者' },                        // 1-3 シオンが「ベルの歌に似ている」 と聞く
 ];
 
 const REL_STYLE = {
@@ -6691,7 +6698,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // version 完全同期 (野沢さん指示 2026-05-06): bump_version.py が自動で更新する。
 // 旧 date-suffix '20260504o' を 5/6 で見つけた事故を契機に version-based に統一。
-const IMG_CACHE_VERSION = '1.4.4o';
+const IMG_CACHE_VERSION = '1.4.4p';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる

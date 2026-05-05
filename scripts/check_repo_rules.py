@@ -1427,6 +1427,37 @@ def check_location_images_exist():
     return found_violations
 
 
+def check_relations_coverage():
+    """ルール7-30 (BLOCKER 2026-05-06): POOL 全キャラが RELATIONS に 1つ以上含まれる必須。
+    s1c5 公開直前で 4キャラ (オルフェ/工房娘/歌姫/刺客) が 相関なしの状態で 発見 → 相関図に
+    孤立点として 表示される事故。 新キャラ追加時に必ず relation を 1+ 設定する仕組みで防御。
+    """
+    script_path = ROOT / "script.js"
+    if not script_path.exists():
+        return 0
+    text = script_path.read_text(encoding="utf-8")
+    pool_names = set()
+    for m in re.finditer(r'name:\s*"([^"]+)"\s*,\s*season:\s*\d+\s*,\s*chapter:', text):
+        pool_names.add(m.group(1))
+    rel_match = re.search(r"const RELATIONS\s*=\s*\[([\s\S]*?)\n\];", text)
+    rel_chars = set()
+    if rel_match:
+        for m in re.finditer(r"a:\s*'([^']+)'\s*,\s*b:\s*'([^']+)'", rel_match.group(1)):
+            rel_chars.add(m.group(1))
+            rel_chars.add(m.group(2))
+    missing = sorted(n for n in pool_names if n not in rel_chars)
+    if missing:
+        sample = ', '.join(f"「{n}」" for n in missing[:5])
+        more = f" 他 {len(missing) - 5}件" if len(missing) > 5 else ""
+        violations.append(
+            f"[ルール7-30 相関漏れ BLOCKER] POOL {len(missing)}キャラが RELATIONS に未登場: {sample}{more}\n"
+            f"      → script.js RELATIONS に それぞれ 1つ以上の relation を 追加 必須\n"
+            f"      → 相関図で 孤立点として 表示される事故対策 (野沢さん指摘 2026-05-06、 s1c5 で 4キャラ漏れ発覚)"
+        )
+        return 1
+    return 0
+
+
 def check_main_version_bumped():
     """ルール7-24 (BLOCKER 2026-05-04): main branch で commit する時、 version は HEAD (= 親 commit) より bump 必須。
     2026-05-03 朝のセッションで v1.4.1 を 7 回 main merge した事故の再発防止。
@@ -1465,6 +1496,8 @@ n7_28 = check_img_cache_version_sync()
 print(f"  ルール7-28 (IMG_CACHE_VERSION = version 完全同期): {n7_28}件 検査 [BLOCKER]")
 n7_29 = check_location_images_exist()
 print(f"  ルール7-29 (LOCATION_CONFIG 画像 実在): {n7_29}件 検査 [BLOCKER]")
+n7_30 = check_relations_coverage()
+print(f"  ルール7-30 (POOL 全キャラ RELATIONS 登録): {n7_30}件 検査 [BLOCKER]")
 
 def check_main_no_suffix():
     """ルール7-27 (BLOCKER 2026-05-05): main branch で commit する version は suffix なし (X.Y.Z 形式) 必須。
