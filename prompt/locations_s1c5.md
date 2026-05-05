@@ -382,9 +382,41 @@ CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand for both c
 | 11 | shadow_loom_workshop.png | 16:9 | 3-2 影織り | リオラエル + ルナリア + シオン |
 | 12 | mask_separation_ritual.png | 16:9 | **4-1 山場** | シオン + シ・ロエン + ラナス + ルミナ + アスター |
 | 13 | shi_loen_departure.png | 16:9 | 4-2 別れ | シオン + シ・ロエン |
+| 14 | silver_throne_oath.png | 16:9 | 1-1 王宮謁見・誓いの作法 | シオン + ノヴァ (添付2枚) |
 
 生成結果は `images/locations/s1c5/<filename>` にそのまま保存。
 完了時に thumb 版 `images/locations/s1c5/thumb/<basename>_thumb.webp` を作成 (Phase 1-B 完了後の規約)。
+
+---
+
+# 【14】silver_throne_oath.png — 銀霜王宮・誓いの作法 (挿絵、 16:9、 シオン+ノヴァ 添付2枚)
+
+**⚠️ 生成前に必ず添付してください**:
+- `images/characters/season1/ssr/masked_knight.png` (既存 SSR シオン)
+- `images/characters/season1/ssr/silver_king.png` (新規 SSR 銀霜王 ノヴァ)
+
+- **対応シーン**: 1-1 銀霜王宮 月光謁見の間 (シオンが片膝から立ち上がり、 仮面の縁に指を添える「銀霜国仮面騎士の古い作法」)
+- **本文行**: `STORY/s1c5.md` 1-1 末尾「俺は、 立ち上がり、 仮面の縁に指を一度添えて、 礼の代わりとした。 銀霜国の仮面騎士の、 古い作法だった。」 (野沢さん指示 2026-05-06)
+- **役割**: 1-1 シーンの締めくくり、 仮面騎士の作法を視覚化、 王と盾の絆の象徴
+- **被写体**: 大広間の中央、 シオンが立ち上がる瞬間、 仮面の縁に指を添える、 玉座のノヴァが見守る
+- **ストーリー使用**: ✅ s1c5 1-1 挿絵
+- **コード参照**: `STORY_LOCATION_INLINE_CONFIG['s1c5']` (scene='1-1', position='after')
+
+```
+[Attached: reference image 1 = "Sion" / 銀霜王国の仮面騎士シオン (SSR), reference image 2 = "Nova" / 銀霜王 ノヴァ (SSR)]
+
+Please create a quiet ceremonial illustration of these two characters from the attached references at the moment of the silver-frost knight's old salute. Keep the facial features and identities EXACTLY as in the references. Optimize for a moonlit throne hall with the ritual gesture as the visual focus.
+
+anime-style ceremonial illustration of two characters from the references in a vast silver-frost throne hall at midnight, in the FOREGROUND CENTER the silver-frost masked knight Sion (SAME face as reference 1 unchanged) standing upright having JUST risen from a half-kneeling salute, his right hand index finger gently touching the rim of his silver mask in the traditional silent gesture of the masked knights, his white cape flowing behind him with quiet dignity, his silver mace and shield slung at his hip, looking toward the throne with respectful silence, in the BACKGROUND on a raised dais of three steps the young silver-frost king Nova (SAME face as reference 2 unchanged) seated on an ornate silver throne, his hand gripping the armrest with quiet emotion as he watches the masked knight rise, his silver and white royal robe flowing, his ceremonial silver scepter resting beside the throne, between them tall silver columns lining both sides of the hall with pale-blue moonlight streaming through tall arched windows casting long crescent moon shadows across the polished silver floor, twin silver royal banners with crescent moon emblems flanking the throne, silver chandeliers with floating pale-blue spirit lanterns gently illuminating the scene, the seven prismatic streams of the genso flowing softly visible through the high windows, atmospheric perspective with cold pale-blue mist drifting between the columns, dignified solemn moonlit atmosphere of unspoken loyalty between king and shield, dramatic rim lighting with soft silver-blue glow, detailed linework, high-quality illustration, Aspect ratio 16:9, horizontal orientation 1672x941, original character, no logos, no text, no watermark.
+
+CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand for both characters, anatomically correct joints, realistic finger placement on the mask rim and throne armrest.
+
+元画像から表情や姿勢は変わってOKです
+```
+
+**伏線視覚化**: シオンの「仮面の縁に指を添える作法」 を 公式画化、 これは銀霜国の伝統で 言葉を持たぬ騎士の沈黙の表現。 王と盾の関係 (ノヴァ依存) を視覚化、 ノヴァが玉座から見守る姿で「弟が兄に縋る」 描写 (本文 desc と整合)。
+
+---
 
 ## 派閥背景キーワード追加 (`prompt/_common.md` への todo)
 
