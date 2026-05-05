@@ -678,6 +678,52 @@ body {
 }
 .reply-send:hover { filter: brightness(1.1); }
 .reply-send:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* 返信履歴 モーダル (案A、 野沢さん指示 2026-05-05) */
+.reply-history-card { max-width: 560px; }
+.reply-history-list {
+  max-height: 50vh; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 6px 2px 2px;
+}
+.reply-history-item {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.reply-history-head {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+.reply-history-title-text {
+  flex: 1 1 auto; font-weight: 700; color: #ffb4dc;
+  font-size: 13px;
+}
+.reply-history-date {
+  flex: 0 0 auto; color: rgba(255, 255, 255, 0.5);
+}
+.reply-history-body {
+  font-size: 13px; color: rgba(255, 255, 255, 0.85);
+  line-height: 1.6; white-space: pre-wrap; word-break: break-word;
+}
+.reply-history-empty {
+  text-align: center; padding: 24px; color: rgba(255, 255, 255, 0.4);
+  font-size: 13px;
+}
+
+/* feedback row 内の 「📜 返信履歴 N件」 ボタン */
+.fb-history-btn {
+  font-size: 11px; padding: 4px 10px;
+  background: rgba(95, 200, 255, 0.14);
+  color: #a5d8ff;
+  border: 1px solid rgba(95, 200, 255, 0.36);
+  border-radius: 6px;
+  cursor: pointer; font-family: inherit;
+  margin-right: 6px;
+}
+.fb-history-btn:hover { background: rgba(95, 200, 255, 0.28); color: #fff; }
 </style>
 </head>
 <body>
@@ -850,6 +896,17 @@ body {
         <button class="reply-cancel" onclick="closeReplyModal()">キャンセル</button>
         <button class="reply-send" onclick="sendReply()">送信</button>
       </div>
+    </div>
+  </div>
+
+  <!-- 返信履歴 モーダル (feedback row の 「📜 返信履歴 N件」 から開く、 案A) -->
+  <div id="reply-history-modal" class="reply-modal" style="display:none">
+    <div class="reply-backdrop" onclick="closeReplyHistoryModal()"></div>
+    <div class="reply-card reply-history-card">
+      <button class="reply-close" onclick="closeReplyHistoryModal()" aria-label="閉じる">×</button>
+      <h3 class="reply-title">📜 返信履歴</h3>
+      <div class="reply-target" id="reply-history-target"></div>
+      <div class="reply-history-list" id="reply-history-list"></div>
     </div>
   </div>
 </div>
@@ -1983,6 +2040,7 @@ function renderFeedback() {
           <span class="fb-time">${date} ${originLbl}</span>
           <button class="fb-copy-btn" onclick="copyFeedbackItem('${f.id}')" title="この要望を Clipboard にコピー">📋 コピー</button>
           <button class="fb-reply-btn" onclick="openReplyModal('${f.id}')" title="このユーザーに アプリ内お知らせで返信">💬 返信</button>
+          ${(_replyHistoryByFeedbackId[f.id] || []).length > 0 ? `<button class="fb-history-btn" onclick="openReplyHistoryModal('${f.id}')" title="この要望への 過去返信を 確認">📜 返信履歴 ${_replyHistoryByFeedbackId[f.id].length}件</button>` : ''}
           <button class="fb-toggle ${f.read ? 'read-state' : ''}" onclick="toggleFeedbackRead('${f.id}', ${f.read ? 'true' : 'false'})">${f.read ? '未読に戻す' : '既読にする'}</button>
         </div>
         <div class="fb-text">${escapeHtml(f.text || '')}</div>
@@ -2058,13 +2116,98 @@ function closeReplyModal() {
   _replyTargetFeedbackId = null;
 }
 
-// Esc で 返信モーダルを 閉じる (野沢さん指摘 2026-05-05 「Escで閉じれない、 毎回言ってない?」)
+// ───── 案A: 返信履歴 機能 (野沢さん指示 2026-05-05) ─────
+// 全 notifications を root level で fetch (admin Rule で 許可)、 relatedFeedbackId 別に index 化
+let _allNotifications = [];                     // { ...n, _targetUid, _id } の配列
+let _replyHistoryByFeedbackId = {};              // feedbackId -> [notif, ...]
+
+async function loadAllNotifications() {
+  if (typeof db === 'undefined' || !db) return;
+  try {
+    const ref = db.ref('prism-gacha/notifications');
+    const snap = await ref.once('value');
+    const all = snap.val() || {};
+    const items = [];
+    Object.entries(all).forEach(([uid, notifs]) => {
+      if (uid === '_broadcast' || !notifs) return;
+      Object.entries(notifs).forEach(([id, n]) => {
+        if (!n) return;
+        items.push({ ...n, _targetUid: uid, _id: id });
+      });
+    });
+    items.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+    _allNotifications = items;
+    // feedbackId 別 index
+    _replyHistoryByFeedbackId = {};
+    for (const n of items) {
+      if (!n.relatedFeedbackId) continue;
+      if (!_replyHistoryByFeedbackId[n.relatedFeedbackId]) _replyHistoryByFeedbackId[n.relatedFeedbackId] = [];
+      _replyHistoryByFeedbackId[n.relatedFeedbackId].push(n);
+    }
+    // feedback list を 再描画 (返信履歴 N件 バッジを 反映)
+    if (typeof renderFeedback === 'function') renderFeedback();
+  } catch (e) {
+    console.warn('[reply history] fetch failed:', e);
+  }
+}
+
+function openReplyHistoryModal(feedbackId) {
+  const f = feedbackItems.find(x => x.id === feedbackId);
+  const list = _replyHistoryByFeedbackId[feedbackId] || [];
+  const modal = document.getElementById('reply-history-modal');
+  const targetEl = document.getElementById('reply-history-target');
+  const listEl = document.getElementById('reply-history-list');
+  if (!modal || !targetEl || !listEl) return;
+  if (f) {
+    const date = f.createdAt ? new Date(f.createdAt).toLocaleString('ja-JP', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '-';
+    targetEl.textContent = `元の要望: ${f.name || '(名前なし)'} [${f.category} / ${date}]\n${(f.text || '').slice(0, 200)}`;
+  } else {
+    targetEl.textContent = '元の要望情報を取得できませんでした';
+  }
+  if (list.length === 0) {
+    listEl.innerHTML = '<div class="reply-history-empty">返信履歴はまだありません</div>';
+  } else {
+    listEl.innerHTML = list.map(n => {
+      const dt = n.createdAt ? new Date(n.createdAt) : null;
+      const dtStr = dt && !isNaN(dt) ? `${dt.getMonth()+1}/${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}` : '';
+      return `
+        <div class="reply-history-item">
+          <div class="reply-history-head">
+            <span class="reply-history-title-text">${escapeHtml(n.title || '(無題)')}</span>
+            <span class="reply-history-date">${dtStr}</span>
+          </div>
+          <div class="reply-history-body">${escapeHtml(n.body || '')}</div>
+        </div>
+      `;
+    }).join('');
+  }
+  modal.style.display = 'flex';
+  // Esc / Tab フォーカス: close ボタンに initial focus
+  setTimeout(() => {
+    const closeBtn = modal.querySelector('.reply-close');
+    if (closeBtn) closeBtn.focus();
+  }, 50);
+}
+
+function closeReplyHistoryModal() {
+  const modal = document.getElementById('reply-history-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+// 全 modals 共通 Esc 閉じ (野沢さん指示 2026-05-05 「Escで閉じれない、 毎回言ってない?」)
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
   const replyM = document.getElementById('reply-modal');
   if (replyM && replyM.style.display === 'flex') {
     e.preventDefault();
     closeReplyModal();
+    return;
+  }
+  const histM = document.getElementById('reply-history-modal');
+  if (histM && histM.style.display === 'flex') {
+    e.preventDefault();
+    closeReplyHistoryModal();
+    return;
   }
 });
 
@@ -2095,6 +2238,8 @@ async function sendReply() {
     if (!f.read) await toggleFeedbackRead(_replyTargetFeedbackId, false);
     _showAdminNotice('💬 ' + (f.name || 'ユーザー') + ' さんに返信を送信しました');
     closeReplyModal();
+    // 返信履歴 索引を 再 fetch して feedback row の「📜 返信履歴 N件」 を 最新化
+    if (typeof loadAllNotifications === 'function') loadAllNotifications();
   } catch (e) {
     console.error('[reply] send failed:', e);
     alert('送信失敗: ' + (e.message || e));
@@ -2164,6 +2309,8 @@ const _origLoadAll = loadAll;
 loadAll = async function() {
   await _origLoadAll();
   await loadFeedback();
+  // 返信履歴 索引も 同時取得 (野沢さん指示 2026-05-05、 案A)
+  if (typeof loadAllNotifications === 'function') await loadAllNotifications();
 };
 
 // ===== BGM継続再生 (index.htmlで再生中の曲を引き継ぐ) =====
