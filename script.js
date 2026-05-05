@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4b — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4c — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -3756,18 +3756,23 @@ function _redrawRelationsCanvas() {
       viewBoxAttr = `${fx} ${fy} ${focusW} ${focusH}`;
     }
   }
+  // SVG transform 方式 (野沢さん指示 2026-05-05、 ワールドマップと同形式の 滑らかピンチ):
+  //   svg 全コンテンツを <g class="rel-pan-layer"> で 包む → JS で translate + scale 適用
+  //   旧 CSS calc + scrollLeft 方式は reflow heavy で ぎこちない、 transform は GPU 加速
   canvas.innerHTML = `<svg viewBox="${viewBoxAttr}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" class="relations-svg${_relationsFocusFaction ? ' focused' : ''}">
     <defs>${renderArrowMarkers()}</defs>
-    ${renderFactionBg()}
-    ${renderRelationLines()}
-    ${renderFactionLabels()}
-    ${renderCharNodes()}
+    <g class="rel-pan-layer">
+      ${renderFactionBg()}
+      ${renderRelationLines()}
+      ${renderFactionLabels()}
+      ${renderCharNodes()}
+    </g>
   </svg>`;
   _bindRelationsClickHandlers(canvas);
-  // focus 中は SVG が画面中央に派閥を表示するので canvas scroll は中央に reset
+  // focus 中は viewBox が 該当派閥に絞り込まれるので transform リセット
   if (_relationsFocusFaction) {
-    const sw = canvas.scrollWidth, sh = canvas.scrollHeight;
-    canvas.scrollTo({ left: (sw - canvas.clientWidth) / 2, top: (sh - canvas.clientHeight) / 2, behavior: 'smooth' });
+    _relationsTx = 0; _relationsTy = 0; _relationsZoom = 1;
+    _applyRelationsTransform();
   }
   // focus 表示用「全表示に戻る」 ボタン
   const banner = document.getElementById('relations-focus-banner');
@@ -3824,11 +3829,11 @@ function openRelations() {
   _redrawRelationsCanvas();
   document.getElementById('relations').classList.add('active');
 
-  // 初期位置: 中央寄せ
+  // 初期位置: transform リセット (viewBox preserveAspectRatio で 元から中央表示、
+  //   SVG transform 方式に移行済、 野沢さん指示 2026-05-05)
   setTimeout(() => {
-    const sw = canvas.scrollWidth, sh = canvas.scrollHeight;
-    canvas.scrollLeft = (sw - canvas.clientWidth) / 2;
-    canvas.scrollTop = (sh - canvas.clientHeight) / 2;
+    _relationsTx = 0; _relationsTy = 0; _relationsZoom = 1.0;
+    _applyRelationsTransform();
   }, 0);
 
   bindRelationsPan(canvas);
@@ -3842,41 +3847,87 @@ function openRelations() {
   setRelationsZoom(1.0);
 }
 
-// 相関図 拡大縮小 (野沢さん指示 2026-05-03)
-// CSS で svg width/height = 2200x1820 px。 _relationsZoom 倍率で動的に上書き
+// 相関図 拡大縮小 + パン (野沢さん指示 2026-05-05、 ワールドマップ方式の SVG transform 移行):
+//   svg 内 <g class="rel-pan-layer"> に transform: translate(tx,ty) scale(zoom) を適用。
+//   旧 CSS calc + scrollLeft 方式は reflow heavy で ピンチがぎこちなかった。
+//   transform は GPU 加速で 滑らか + anchor zoom が 正確。
 let _relationsZoom = 1.0;
+let _relationsTx = 0;
+let _relationsTy = 0;
 const REL_ZOOM_MIN = 0.5, REL_ZOOM_MAX = 2.5, REL_ZOOM_STEP = 0.2;
-const REL_SVG_BASE_W = 2200, REL_SVG_BASE_H = 1820;
-function setRelationsZoom(z) {
-  _relationsZoom = Math.max(REL_ZOOM_MIN, Math.min(REL_ZOOM_MAX, z));
-  // CSS 変数 --rel-zoom を 親 .relations-canvas に setProperty:
-  // svg 要素の width/height は CSS calc(2200px * var(--rel-zoom)) で 動的計算される。
-  // 旧実装は svg.style.width で 直接 inline 書き込みだったが renderRelations で svg innerHTML
-  // が再生成された 際に inline style がクリアされて ボタン押下しても 反映されない事故 (yuppi8213
-  // さん 2026-05-05 「ボタン押せない」 報告) があったため CSS 変数経由に変更。
-  const canvas = document.getElementById('relations-canvas');
-  if (canvas) {
-    canvas.style.setProperty('--rel-zoom', String(_relationsZoom));
-  }
+// SVG viewBox 座標系のサイズ (W=2000*1.5+200pad×2=3400、 H=1600*1.5+200pad×2=2800)
+const REL_VBX_W = 3400, REL_VBX_H = 2800;
+
+function _applyRelationsTransform() {
+  const layer = document.querySelector('.rel-pan-layer');
+  if (!layer) return;
+  // pan 範囲: scale が大きいほど 動かせる量も増える (端まで届く)、 範囲外は clamp
+  const cw = REL_VBX_W * _relationsZoom;
+  const ch = REL_VBX_H * _relationsZoom;
+  // viewport (= svg) は 元 viewBox 全域 表示、 scale で拡大した分だけ pan 可能
+  const maxOffX = (cw - REL_VBX_W) / 2 + REL_VBX_W * 0.3;  // 余裕を持たせる
+  const maxOffY = (ch - REL_VBX_H) / 2 + REL_VBX_H * 0.3;
+  _relationsTx = Math.max(-maxOffX, Math.min(maxOffX, _relationsTx));
+  _relationsTy = Math.max(-maxOffY, Math.min(maxOffY, _relationsTy));
+  layer.setAttribute('transform', `translate(${_relationsTx},${_relationsTy}) scale(${_relationsZoom})`);
   const lvl = document.getElementById('rel-zoom-level');
   if (lvl) lvl.textContent = Math.round(_relationsZoom * 100) + '%';
 }
-function zoomRelationsIn()    { setRelationsZoom(_relationsZoom + REL_ZOOM_STEP); }
-function zoomRelationsOut()   { setRelationsZoom(_relationsZoom - REL_ZOOM_STEP); }
-function zoomRelationsReset() { setRelationsZoom(1.0); }
+
+function setRelationsZoom(z) {
+  _relationsZoom = Math.max(REL_ZOOM_MIN, Math.min(REL_ZOOM_MAX, z));
+  _applyRelationsTransform();
+}
+
+// anchor zoom: 中心点 (svg viewBox 座標) を 同位置に保つよう tx/ty 補正
+function _zoomRelationsAnchored(newZoom, anchorX, anchorY) {
+  const oldZoom = _relationsZoom;
+  const clamped = Math.max(REL_ZOOM_MIN, Math.min(REL_ZOOM_MAX, newZoom));
+  if (clamped === oldZoom) return;
+  // tx/ty は scale 適用前の svg 座標系で 表現、 anchor 中心を 同位置に保つ式:
+  //   newTx = anchorX - (anchorX - oldTx) * (newZoom / oldZoom)
+  _relationsTx = anchorX - (anchorX - _relationsTx) * (clamped / oldZoom);
+  _relationsTy = anchorY - (anchorY - _relationsTy) * (clamped / oldZoom);
+  _relationsZoom = clamped;
+  _applyRelationsTransform();
+}
+
+function zoomRelationsIn()    { _zoomRelationsAnchored(_relationsZoom + REL_ZOOM_STEP, REL_VBX_W / 2, REL_VBX_H / 2); }
+function zoomRelationsOut()   { _zoomRelationsAnchored(_relationsZoom - REL_ZOOM_STEP, REL_VBX_W / 2, REL_VBX_H / 2); }
+function zoomRelationsReset() { _relationsTx = 0; _relationsTy = 0; _relationsZoom = 1.0; _applyRelationsTransform(); }
 window.zoomRelationsIn = zoomRelationsIn;
 window.zoomRelationsOut = zoomRelationsOut;
 window.zoomRelationsReset = zoomRelationsReset;
+
+// svg viewport (clientX, clientY) → svg 内 viewBox 座標 に変換
+function _relViewportToSvg(canvas, clientX, clientY) {
+  const svg = canvas.querySelector('svg');
+  if (!svg) return { x: 0, y: 0 };
+  const rect = svg.getBoundingClientRect();
+  // svg は preserveAspectRatio="xMidYMid meet" + viewBox なので、 client 内の正規化位置から
+  // viewBox 座標を 計算 (-PAD オフセット込み)
+  const PAD = 200;  // _redrawRelationsCanvas の PAD と一致
+  const W = REL_VBX_W, H = REL_VBX_H;
+  // svg client area の中で 等倍表示される領域 (meet で fit)
+  const ratio = Math.min(rect.width / W, rect.height / H);
+  const drawW = W * ratio, drawH = H * ratio;
+  const drawX = rect.left + (rect.width - drawW) / 2;
+  const drawY = rect.top + (rect.height - drawH) / 2;
+  const svgX = (clientX - drawX) / ratio - PAD;
+  const svgY = (clientY - drawY) / ratio - PAD;
+  return { x: svgX, y: svgY };
+}
+
 let _relationsZoomWheelBound = false;
 function bindRelationsZoomWheel(canvas) {
   if (_relationsZoomWheelBound) return;
   _relationsZoomWheelBound = true;
-  // Ctrl/Cmd + ホイールで拡縮 (普通のスクロールと区別)、 タッチパッドのピンチも Ctrl 扱いされる
   canvas.addEventListener('wheel', e => {
     if (!e.ctrlKey && !e.metaKey) return;
     e.preventDefault();
-    const delta = e.deltaY > 0 ? -0.1 : 0.1;
-    setRelationsZoom(_relationsZoom + delta);
+    const factor = e.deltaY > 0 ? 0.9 : 1.1;
+    const anchor = _relViewportToSvg(canvas, e.clientX, e.clientY);
+    _zoomRelationsAnchored(_relationsZoom * factor, anchor.x, anchor.y);
   }, { passive: false });
 }
 
@@ -3904,15 +3955,11 @@ function setRelationsMode(mode) {
   } else {
     if (canvas) canvas.style.display = '';
     if (list) list.style.display = 'none';
-    // graph mode 切替時に 中央 scroll (野沢さん指摘 2026-05-05 「相関図 全体図のスタート位置が
-    //   左上で 最初に何も表示されていない状態、 中央に変えてください」)
+    // graph mode 切替時 transform リセット (中央 = tx/ty=0、 viewBox preserveAspectRatio で
+    //   元から中央表示。 SVG transform 方式に移行済、 野沢さん指示 2026-05-05)
     setTimeout(() => {
-      if (!canvas) return;
-      const sw = canvas.scrollWidth, sh = canvas.scrollHeight;
-      if (sw > 0 && sh > 0) {
-        canvas.scrollLeft = Math.max(0, (sw - canvas.clientWidth) / 2);
-        canvas.scrollTop = Math.max(0, (sh - canvas.clientHeight) / 2);
-      }
+      _relationsTx = 0; _relationsTy = 0; _relationsZoom = 1.0;
+      _applyRelationsTransform();
     }, 0);
   }
 }
@@ -4011,6 +4058,15 @@ function bindRelationsPan(canvas) {
   if (relationsPanBound) return;
   relationsPanBound = true;
 
+  // viewport pixel → svg viewBox 座標 ratio (drag 量を svg 座標系に変換)
+  function _viewportToSvgRatio() {
+    const svg = canvas.querySelector('svg');
+    if (!svg) return 1;
+    const rect = svg.getBoundingClientRect();
+    const ratio = Math.min(rect.width / REL_VBX_W, rect.height / REL_VBX_H);
+    return ratio || 1;
+  }
+
   const start = (e) => {
     // キャラサムネ上で押した時もパン開始可 (移動量で判別)
     if (e.type === 'mousedown' && e.button !== 0) return;
@@ -4020,21 +4076,25 @@ function bindRelationsPan(canvas) {
     const x = isTouch ? e.touches[0].clientX : e.clientX;
     const y = isTouch ? e.touches[0].clientY : e.clientY;
     relPanStartX = x; relPanStartY = y;
-    relPanScrollX = canvas.scrollLeft; relPanScrollY = canvas.scrollTop;
+    // 旧 scrollLeft/Top → 現在の transform tx/ty を起点に (野沢さん指示 2026-05-05、 SVG transform 方式)
+    relPanScrollX = _relationsTx; relPanScrollY = _relationsTy;
     canvas.style.cursor = 'grabbing';
   };
   const move = (e) => {
     if (!relationsPanActive) return;
     const isTouch = e.type === 'touchmove';
-    // ピンチ (2点タッチ) 中は pan しない (野沢さん指示 2026-05-05、 ピンチ拡大優先)
+    // ピンチ (2点タッチ) 中は pan しない
     if (isTouch && e.touches.length >= 2) return;
     const x = isTouch ? e.touches[0].clientX : e.clientX;
     const y = isTouch ? e.touches[0].clientY : e.clientY;
     const dx = x - relPanStartX, dy = y - relPanStartY;
     if (Math.abs(dx) > 4 || Math.abs(dy) > 4) relationsDragMoved = true;
     if (relationsDragMoved) {
-      canvas.scrollLeft = relPanScrollX - dx;
-      canvas.scrollTop = relPanScrollY - dy;
+      // viewport の dx/dy を svg viewBox 座標系に 変換 (= ratio で割る)
+      const r = _viewportToSvgRatio();
+      _relationsTx = relPanScrollX + dx / r;
+      _relationsTy = relPanScrollY + dy / r;
+      _applyRelationsTransform();
       if (isTouch) e.preventDefault();
     }
   };
@@ -4079,24 +4139,12 @@ function bindRelationsZoomPinch(canvas) {
     const dist = Math.hypot(arr[0].x - arr[1].x, arr[0].y - arr[1].y);
     if (lastDist && lastDist > 0) {
       const factor = dist / lastDist;
-      // anchor zoom (野沢さん指示 2026-05-05、 ピンチ操作位置を中心に拡大):
-      //   旧実装は setRelationsZoom 呼ぶだけで svg 左上 (0,0) anchor で 拡大されていた。
-      //   修正: ピンチ中心 (2点の中間) の svg 内座標が 拡大前/後で 同じ viewport 位置に
-      //   留まるよう scrollLeft/Top を 補正。
-      const rect = canvas.getBoundingClientRect();
-      const cx = (arr[0].x + arr[1].x) / 2;  // viewport client x
+      // anchor zoom: ピンチ中心の svg viewBox 座標を 計算 → _zoomRelationsAnchored で
+      //   拡大前/後 同じ viewport 位置に保つ tx/ty 補正 (ワールドマップ方式の SVG transform)
+      const cx = (arr[0].x + arr[1].x) / 2;
       const cy = (arr[0].y + arr[1].y) / 2;
-      const offsetX = cx - rect.left;          // canvas 左端からのピンチ中心距離
-      const offsetY = cy - rect.top;
-      const svgX_before = canvas.scrollLeft + offsetX;  // 拡大前 svg 内座標
-      const svgY_before = canvas.scrollTop + offsetY;
-      const oldZoom = _relationsZoom;
-      setRelationsZoom(oldZoom * factor);
-      const realFactor = _relationsZoom / oldZoom;     // clamp 後の実効 factor
-      if (realFactor !== 1) {
-        canvas.scrollLeft = svgX_before * realFactor - offsetX;
-        canvas.scrollTop  = svgY_before * realFactor - offsetY;
-      }
+      const anchor = _relViewportToSvg(canvas, cx, cy);
+      _zoomRelationsAnchored(_relationsZoom * factor, anchor.x, anchor.y);
     }
     lastDist = dist;
   }, { passive: false });
