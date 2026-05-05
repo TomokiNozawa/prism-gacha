@@ -210,6 +210,17 @@ DECK_PATTERNS = {
     '教会連合': make_church_alliance_deck,
 }
 
+MAX_DUPS = { 'R': 1, 'SR': 2, 'SSR': 3, 'UR': 4, 'LR': 4 }
+# 凸完凸 sim flag (野沢さん指示 2026-05-06、 完凸状態でのバランス確認)
+# True にすると Card init 時に 各凸 +1 ﾎﾟﾜｰ + cost-1 + onPlay 効果値 +1 + 効果範囲拡大 を反映
+# CLI: py scripts/pcb_balance_sim.py --maxed で MAXED_DUPES=True
+MAXED_DUPES = '--maxed' in sys.argv
+_EFFECT_RANGE_EXPAND = {
+    'self_lane': 'adjacent_lanes',
+    'adjacent_lanes': 'all_lanes',
+    'opp_self_lane': 'all_opp_lanes',
+}
+
 # ===== ゲームエンジン (簡易版) =====
 class Card:
     """シミュレート用 card (深 copy 用)"""
@@ -224,6 +235,20 @@ class Card:
         self.faction = src.get('faction', '?')
         self.effect = src.get('effect', {})
         self.effectText = src.get('effectText', '')
+        self._isToken = src.get('_isToken', False)
+        # 完凸 sim: 凸 MAX 状態を反映 (各凸 +1 ﾎﾟﾜｰ + cost-1 + onPlay 効果値 +1 + 範囲拡大)
+        if MAXED_DUPES and not self._isToken:
+            max_d = MAX_DUPS.get(self.tier, 0)
+            if max_d > 0:
+                self.basePower += max_d
+                self.cost = max(1, self.cost - 1)
+                if self.effect:
+                    self.effect = dict(self.effect)
+                    if 'power' in self.effect and isinstance(self.effect['power'], (int, float)):
+                        self.effect['power'] += 1
+                    t = self.effect.get('target')
+                    if t in _EFFECT_RANGE_EXPAND:
+                        self.effect['target'] = _EFFECT_RANGE_EXPAND[t]
         self._currentPower = None
         self._appliedTo = []
         self._frozen = 0
@@ -233,7 +258,6 @@ class Card:
         self._growthEnabled = False
         self._golden = 0
         self._costReduced = 0
-        self._isToken = src.get('_isToken', False)
 
     @classmethod
     def from_dict(cls, d):
@@ -571,7 +595,8 @@ def show_deck_compositions():
 show_deck_compositions()
 print()
 print("=" * 90)
-print("📊 PCB バランス sim — 各デッキ vs 各 AI 段階 (各 50戦、 Master AI)")
+mode_label = "完凸 (各凸 +1 + ｺｽﾄ-1 + 効果値+1 + 範囲拡大)" if MAXED_DUPES else "基礎ﾊﾟﾜｰ (dupes=0)"
+print(f"📊 PCB バランス sim [{mode_label}] — 各デッキ vs 各 AI 段階 (各 50戦、 Master AI)")
 print("=" * 90)
 print()
 deck_names = list(DECK_PATTERNS.keys())
