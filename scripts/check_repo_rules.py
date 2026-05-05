@@ -1547,6 +1547,12 @@ def check_relations_coverage():
 def check_main_version_bumped():
     """ルール7-24 (BLOCKER 2026-05-04): main branch で commit する時、 version は HEAD (= 親 commit) より bump 必須。
     2026-05-03 朝のセッションで v1.4.1 を 7 回 main merge した事故の再発防止。
+
+    2026-05-06 拡張: scheduledRelease モード対応。 data.version は 旧 維持で
+    data.scheduledRelease.version が 新 ver (12:00 自動切替)。 比較対象を 切替:
+    - scheduledRelease あり: scheduledRelease.version で 親 と 比較
+    - scheduledRelease なし: data.version で 親 と 比較 (従来挙動)
+
     詳細: CLAUDE.md feedback_prismaera_version_suffix.md
     """
     if _current_branch() != "main":
@@ -1555,12 +1561,31 @@ def check_main_version_bumped():
     if not ver_path.exists():
         return 0
     try:
-        cur_ver = json.load(ver_path.open(encoding="utf-8"))["version"]
+        cur_data = json.load(ver_path.open(encoding="utf-8"))
+        cur_ver = cur_data.get("version", "")
+        cur_scheduled = (cur_data.get("scheduledRelease") or {}).get("version")
     except Exception:
         return 0
-    parent_ver = _read_version_at("HEAD")
-    if parent_ver is None:
+    # 親 commit の version.json を 取得
+    try:
+        head_text = subprocess.check_output(
+            ["git", "show", "HEAD:version.json"], stderr=subprocess.DEVNULL, cwd=str(ROOT)
+        ).decode("utf-8")
+        parent_data = json.loads(head_text)
+        parent_ver = parent_data.get("version", "")
+        parent_scheduled = (parent_data.get("scheduledRelease") or {}).get("version")
+    except Exception:
         return 0
+    # scheduledRelease モード: scheduledRelease.version で 比較
+    if cur_scheduled:
+        if cur_scheduled == parent_scheduled:
+            violations.append(
+                f"[ルール7-24 scheduledRelease.version 未 bump BLOCKER] main で commit する scheduledRelease.version='{cur_scheduled}' が前 commit と同一。\n"
+                f"      → 同じ scheduledRelease.version で main commit 連発は ルール違反\n"
+                f"      → 詳細: CLAUDE.md feedback_prismaera_version_suffix.md"
+            )
+        return 1
+    # 通常 mode: data.version で 比較 (parent 側 scheduledRelease 解除直後の場合 = 即時 release)
     if cur_ver == parent_ver:
         violations.append(
             f"[ルール7-24 main version 未 bump BLOCKER] main で commit する version='{cur_ver}' が前 commit と同一。\n"
