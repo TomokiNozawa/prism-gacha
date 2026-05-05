@@ -38,7 +38,7 @@ import json
 import re
 import subprocess
 import sys
-from datetime import date
+from datetime import date, datetime, timezone, timedelta
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -140,7 +140,10 @@ def update_sw_version(new_ver: str) -> None:
 
 
 def update_version_json(data: dict, new_ver: str, mode: str, notes: list[str] | None) -> None:
-    today = date.today().isoformat()
+    # 野沢さん指示 2026-05-05: releasedAt + changelog.date を 日時 (ISO 8601 + JST) に 変更
+    # 同日に複数 release (緊急 hotfix 第1弾/第2弾 等) があった場合 区別可能、 データ量増は微々
+    JST = timezone(timedelta(hours=9))
+    now_iso = datetime.now(JST).isoformat(timespec="seconds")
     data["version"] = new_ver
     # 案A: lastDevSuffix を 連続管理 (野沢さん指示 2026-05-05)
     # dev-suffix → 新 suffix を 記録 (= 同 X.Y.Z 系列で 二度使わないため)
@@ -151,11 +154,11 @@ def update_version_json(data: dict, new_ver: str, mode: str, notes: list[str] | 
     else:
         data["lastDevSuffix"] = ""
     if mode != "dev-suffix":
-        data["releasedAt"] = today
+        data["releasedAt"] = now_iso
         if notes:
             entry = {
                 "version": new_ver,
-                "date": today,
+                "date": now_iso,
                 "type": "patch" if mode == "patch" else "major",
                 "notes": notes,
             }

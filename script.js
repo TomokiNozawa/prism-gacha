@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4a — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4b — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -9570,7 +9570,7 @@ function showPrismaeraUpdateModal(fromVer, toVer, changelog) {
       section.className = 'update-history-entry';
       const h = document.createElement('summary');
       h.className = 'update-history-head';
-      h.textContent = 'v' + entry.version + ' (' + (entry.date || '') + ')';
+      h.textContent = 'v' + entry.version + ' (' + _fmtChangelogDate(entry.date) + ')';
       section.appendChild(h);
       const ul = document.createElement('ul');
       (entry.notes || []).forEach(n => {
@@ -9637,7 +9637,7 @@ function openVersionHistoryModal() {
         section.className = 'update-history-entry';
         const h = document.createElement('summary');
         h.className = 'update-history-head';
-        h.textContent = 'v' + entry.version + ' (' + (entry.date || '') + ')';
+        h.textContent = 'v' + entry.version + ' (' + _fmtChangelogDate(entry.date) + ')';
         section.appendChild(h);
         const ul = document.createElement('ul');
         (entry.notes || []).forEach(n => {
@@ -10118,6 +10118,31 @@ function _saveNotifReadSet(set) {
   try { localStorage.setItem(NOTIF_READ_KEY, JSON.stringify([...set])); } catch {}
 }
 
+// changelog の date field を 両形式 (旧 "2026-05-05" / 新 ISO 8601 "2026-05-05T21:30:00+09:00") から
+// ms timestamp に変換 (野沢さん指示 2026-05-05、 同日複数 release 区別のため日時化)
+function _parseChangelogDate(d) {
+  if (!d) return 0;
+  if (typeof d !== 'string') return 0;
+  if (d.includes('T')) return Date.parse(d) || 0;
+  return Date.parse(d + 'T00:00:00+09:00') || 0;
+}
+// changelog の date 表示用 整形 (日時 ISO なら m/d HH:MM、 日付のみなら m/d、 既存 互換)
+function _fmtChangelogDate(d) {
+  if (!d) return '';
+  if (typeof d !== 'string') return '';
+  if (d.includes('T')) {
+    const dt = new Date(d);
+    if (isNaN(dt.getTime())) return d;
+    const m = dt.getMonth() + 1, dd = dt.getDate();
+    const hh = String(dt.getHours()).padStart(2, '0'), mm = String(dt.getMinutes()).padStart(2, '0');
+    return `${m}/${dd} ${hh}:${mm}`;
+  }
+  // 旧 "YYYY-MM-DD" 互換
+  const m = d.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (m) return `${parseInt(m[2])}/${parseInt(m[3])}`;
+  return d;
+}
+
 async function loadNotifications() {
   const items = [];
   // (1) リリースノート: version.json から changelog を取得 → release 通知化
@@ -10128,7 +10153,7 @@ async function loadNotifications() {
       const changelog = Array.isArray(j && j.changelog) ? j.changelog : [];
       changelog.forEach(entry => {
         if (!entry || !entry.version) return;
-        const at = entry.date ? Date.parse(entry.date + 'T00:00:00+09:00') : 0;
+        const at = _parseChangelogDate(entry.date);
         const body = (entry.notes || []).map(n => '・' + n).join('\n');
         items.push({
           id: 'release_' + entry.version,
