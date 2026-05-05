@@ -81,9 +81,179 @@ const FACTION_COLORS = {
 };
 function factionColor(f) { return FACTION_COLORS[f] || '#aaa'; }
 
-// ===== BGM (1曲ループ、 ミュート localStorage 保存) =====
+// ============================================================
+// Firebase Cloud Sync (PCB データを アカウント依存化、 野沢さん指示 2026-05-06
+// 「PCBでアカウント依存で良いものは1つもありません」)
+// 全 PCB データ (stats / decks / activeSlot / history / paused / bo3Toggle / bgmMute)
+// を Firebase RTDB の pcbData/{uid}/ に保存。 localStorage は migration + offline fallback のみ。
+// ============================================================
+const PCB_FB_CONFIG = {
+  apiKey: "AIzaSyBFSjOheMb_epwOXCjviAA_FLQFPNiED6g",
+  authDomain: "task-board-fbf1e.firebaseapp.com",
+  databaseURL: "https://task-board-fbf1e-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "task-board-fbf1e",
+  storageBucket: "task-board-fbf1e.firebasestorage.app",
+  messagingSenderId: "174442724697",
+  appId: "1:174442724697:web:06ac83b275780717c06048"
+};
+let cgFbApp = null, cgFbAuth = null, cgFbDb = null, cgUid = null;
+const pcbCloud = {
+  loaded: false,
+  stats: {},
+  decks: {},          // { 1: [ids], 2: [ids], 3: [ids] }
+  activeSlot: 1,
+  history: [],
+  paused: null,
+  bo3Toggle: false,
+  bgmMute: false,
+};
+
+function pcbInitFirebase() {
+  try {
+    if (typeof firebase === 'undefined') return;
+    cgFbApp = firebase.initializeApp(PCB_FB_CONFIG, 'pcb');
+    cgFbAuth = cgFbApp.auth();
+    cgFbDb = cgFbApp.database();
+    cgFbAuth.onAuthStateChanged(user => {
+      cgUid = user ? user.uid : null;
+      if (cgUid) {
+        pcbCloudInit();
+      } else {
+        pcbCloud.loaded = false;
+      }
+      _refreshAccountGate();
+    });
+  } catch (e) { console.warn('PCB Firebase init failed:', e); }
+}
+
+async function _pcbGet(path) {
+  if (!cgUid || !cgFbDb) return null;
+  try {
+    const snap = await cgFbDb.ref(`pcbData/${cgUid}/${path}`).once('value');
+    return snap.val();
+  } catch (e) { return null; }
+}
+function _pcbSet(path, value) {
+  if (!cgUid || !cgFbDb) return;
+  try { cgFbDb.ref(`pcbData/${cgUid}/${path}`).set(value); } catch (e) {}
+}
+
+async function pcbCloudInit() {
+  // Cloud から全データロード
+  const [stats, decks, activeSlot, history, paused, bo3Toggle, bgmMute] = await Promise.all([
+    _pcbGet('stats'), _pcbGet('decks'), _pcbGet('activeSlot'),
+    _pcbGet('history'), _pcbGet('paused'), _pcbGet('bo3Toggle'), _pcbGet('bgmMute'),
+  ]);
+  pcbCloud.stats      = stats || {};
+  pcbCloud.decks      = decks || {};
+  pcbCloud.activeSlot = activeSlot || 1;
+  pcbCloud.history    = Array.isArray(history) ? history : [];
+  pcbCloud.paused     = paused || null;
+  pcbCloud.bo3Toggle  = bo3Toggle === true;
+  pcbCloud.bgmMute    = bgmMute === true;
+  pcbCloud.loaded     = true;
+  // localStorage の既存データ migration (Cloud が空 + localStorage に既存データ → Cloud に移行)
+  pcbMigrateFromLocalStorage();
+  // UI 再描画
+  if (cgBgm) cgBgm.muted = pcbCloud.bgmMute;
+  updateMuteUI();
+  if (typeof _renderHomeStats === 'function') _renderHomeStats();
+  if (typeof _renderHomeStreaks === 'function') _renderHomeStreaks();
+  if (typeof _renderHomeDeckPreview === 'function') _renderHomeDeckPreview();
+  // BO3 toggle UI
+  const bo3El = document.getElementById('bo3-toggle');
+  if (bo3El) bo3El.checked = pcbCloud.bo3Toggle;
+}
+
+function pcbMigrateFromLocalStorage() {
+  try {
+    // stats
+    const lsStatsRaw = localStorage.getItem('prism-pcb-stats');
+    if (lsStatsRaw && !pcbCloud.stats.totalMatches) {
+      const lsStats = JSON.parse(lsStatsRaw);
+      if (lsStats && lsStats.totalMatches) {
+        pcbCloud.stats = lsStats;
+        _pcbSet('stats', lsStats);
+      }
+    }
+    // history
+    const lsHistRaw = localStorage.getItem('prism-pcb-history');
+    if (lsHistRaw && pcbCloud.history.length === 0) {
+      const lsHist = JSON.parse(lsHistRaw);
+      if (Array.isArray(lsHist) && lsHist.length) {
+        pcbCloud.history = lsHist;
+        _pcbSet('history', lsHist);
+      }
+    }
+    // decks (3 slots)
+    for (const n of [1, 2, 3]) {
+      if (pcbCloud.decks[n]) continue;
+      const raw = localStorage.getItem(`cg_deck_v2_slot${n}`);
+      if (raw) {
+        try {
+          const ids = JSON.parse(raw);
+          if (Array.isArray(ids)) {
+            pcbCloud.decks[n] = ids;
+            _pcbSet(`decks/${n}`, ids);
+          }
+        } catch (e) {}
+      }
+    }
+    // activeSlot
+    const lsActive = parseInt(localStorage.getItem('cg_deck_active_slot') || '1', 10);
+    if (lsActive >= 1 && lsActive <= 3 && pcbCloud.activeSlot === 1 && lsActive !== 1) {
+      pcbCloud.activeSlot = lsActive;
+      _pcbSet('activeSlot', lsActive);
+    }
+    // paused
+    const lsPaused = localStorage.getItem('prism-pcb-paused');
+    if (lsPaused && !pcbCloud.paused) {
+      try { pcbCloud.paused = JSON.parse(lsPaused); _pcbSet('paused', pcbCloud.paused); } catch (e) {}
+    }
+    // bo3 toggle (旧 lsKey 'cg_bo3' or 'cg_bo3_mode')
+    const lsBo3 = localStorage.getItem('cg_bo3') || localStorage.getItem('cg_bo3_mode');
+    if (lsBo3 === '1' && !pcbCloud.bo3Toggle) {
+      pcbCloud.bo3Toggle = true;
+      _pcbSet('bo3Toggle', true);
+    }
+    // bgmMute
+    const lsMute = localStorage.getItem('cg_bgm_muted');
+    if (lsMute === '1' && !pcbCloud.bgmMute) {
+      pcbCloud.bgmMute = true;
+      _pcbSet('bgmMute', true);
+    }
+  } catch (e) {}
+}
+
+// アカウント未ログイン時のゲート (PCB はアカウント登録者限定 — 野沢さん方針)
+function _refreshAccountGate() {
+  const screen = document.getElementById('home-screen');
+  if (!screen) return;
+  // ログイン済みなら gate 表示なし、 未ログインなら 警告 + ボタン無効化
+  let gate = document.getElementById('cg-account-gate');
+  if (cgUid) {
+    if (gate) gate.hidden = true;
+    screen.querySelectorAll('.cg-mode-btn').forEach(b => b.disabled = false);
+    return;
+  }
+  if (!gate) {
+    gate = document.createElement('div');
+    gate.id = 'cg-account-gate';
+    gate.className = 'cg-account-gate';
+    gate.innerHTML = `
+      <div class="cg-gate-icon">🔒</div>
+      <div class="cg-gate-title">アカウント登録が必要です</div>
+      <div class="cg-gate-sub">PCB の戦績・デッキ編成は アカウント に紐づいて保存されます。<br>本体 (Prismaera) でアカウント登録 (nickname + 合言葉) してから プレイしてください。</div>
+      <a class="cg-gate-link" href="/">← 本体に戻ってログイン</a>
+    `;
+    screen.insertBefore(gate, screen.firstChild);
+  }
+  gate.hidden = false;
+  screen.querySelectorAll('.cg-mode-btn').forEach(b => b.disabled = true);
+}
+
+// ===== BGM (1曲ループ、 ミュート Cloud 保存) =====
 const BGM_URL = '/assets/bgm/prism-cards.mp3';
-const BGM_MUTE_KEY = 'cg_bgm_muted';
 let cgBgm = null;
 
 // スマホ電池対策: タブ非アクティブ時に BGM 停止 (visibilitychange)
@@ -104,8 +274,8 @@ function initBgm() {
   cgBgm.preload = 'auto';
   // 初回 load エラーは握り潰す (BGM ファイル未配備時のフォールバック)
   cgBgm.addEventListener('error', () => { /* BGM ファイル無し時の silent fail */ });
-  const muted = localStorage.getItem(BGM_MUTE_KEY) === '1';
-  cgBgm.muted = muted;
+  // mute 初期値: pcbCloud (ロード済なら) → デフォルト false
+  cgBgm.muted = pcbCloud.loaded ? pcbCloud.bgmMute : false;
   updateMuteUI();
   // ブラウザ自動再生規制対策: 最初のユーザー interact で play 試行
   const tryPlay = () => {
@@ -121,7 +291,8 @@ function initBgm() {
 function toggleBgmMute() {
   if (!cgBgm) return;
   cgBgm.muted = !cgBgm.muted;
-  localStorage.setItem(BGM_MUTE_KEY, cgBgm.muted ? '1' : '0');
+  pcbCloud.bgmMute = cgBgm.muted;
+  _pcbSet('bgmMute', cgBgm.muted);
   updateMuteUI();
   if (!cgBgm.muted && cgBgm.paused) {
     cgBgm.play().catch(() => {});
@@ -148,11 +319,11 @@ function updateMuteUI() {
 // 優先順位: cards.json (手書き完全override) > effects_override.json (effect+effectText のみ) > pool.json (default)
 async function loadMasters() {
   const [c, k, l, p, eo] = await Promise.all([
-    fetch('./cards.json?v=1.4.4ao').then(r => r.json()),
-    fetch('./combos.json?v=1.4.4ao').then(r => r.json()),
-    fetch('./lane_effects.json?v=1.4.4ao').then(r => r.json()),
-    fetch('./data/pool.json?v=1.4.4ao').then(r => r.json()).catch(() => []),
-    fetch('./effects_override.json?v=1.4.4ao').then(r => r.json()).catch(() => ({})),
+    fetch('./cards.json?v=1.4.4ap').then(r => r.json()),
+    fetch('./combos.json?v=1.4.4ap').then(r => r.json()),
+    fetch('./lane_effects.json?v=1.4.4ap').then(r => r.json()),
+    fetch('./data/pool.json?v=1.4.4ap').then(r => r.json()).catch(() => []),
+    fetch('./effects_override.json?v=1.4.4ap').then(r => r.json()).catch(() => ({})),
   ]);
   // pool 全カード ← effects_override で effect/effectText を上書き ← cards.json で完全 override
   const cardsByName = new Map();
@@ -180,11 +351,9 @@ async function loadMasters() {
   applyUserDupes();
 }
 
-// ===== P-5: デッキ管理 (3スロット、 localStorage 永続化、 12枚) =====
+// ===== P-5: デッキ管理 (3スロット、 Firebase Cloud 永続化、 12枚) =====
 const DECK_SIZE = 12;
 const DECK_SLOT_COUNT = 3;
-const DECK_SLOT_KEY = (n) => `cg_deck_v2_slot${n}`;
-const ACTIVE_SLOT_KEY = 'cg_deck_active_slot';
 // 本体 Prismaera の MAX_DUPS と同期 (script.js 692)
 const MAX_DUPS = { R: 1, SR: 2, SSR: 3, UR: 4, LR: 4 };
 // 野沢さん指示 2026-05-05: LR/UR デッキ枚数制限 (高 tier 偏重を防ぐ)
@@ -201,22 +370,23 @@ function _countByTier(deckIds, targetTier) {
 }
 
 function getActiveSlot() {
-  const v = parseInt(localStorage.getItem(ACTIVE_SLOT_KEY) || '1', 10);
+  const v = pcbCloud.activeSlot || 1;
   return v >= 1 && v <= DECK_SLOT_COUNT ? v : 1;
 }
 function setActiveSlot(n) {
-  if (n >= 1 && n <= DECK_SLOT_COUNT) localStorage.setItem(ACTIVE_SLOT_KEY, String(n));
+  if (n >= 1 && n <= DECK_SLOT_COUNT) {
+    pcbCloud.activeSlot = n;
+    _pcbSet('activeSlot', n);
+  }
 }
 function loadDeckSlot(n) {
-  try {
-    const raw = localStorage.getItem(DECK_SLOT_KEY(n));
-    if (!raw) return null;
-    const ids = JSON.parse(raw);
-    return Array.isArray(ids) ? ids : null;
-  } catch (e) { return null; }
+  const ids = pcbCloud.decks ? pcbCloud.decks[n] : null;
+  return Array.isArray(ids) ? ids : null;
 }
 function saveDeckSlot(n, ids) {
-  localStorage.setItem(DECK_SLOT_KEY(n), JSON.stringify(ids));
+  if (!pcbCloud.decks) pcbCloud.decks = {};
+  pcbCloud.decks[n] = ids;
+  _pcbSet(`decks/${n}`, ids);
 }
 
 // 現在使用するデッキ (= active slot)
@@ -1826,23 +1996,19 @@ function placeAICard(handIdx, lane) {
   }, 10);
 }
 
-// ===== PCB プレイ履歴 (localStorage 蓄積、 本体側で Firebase 同期、 admin で表示) =====
-const PCB_STATS_KEY = 'prism-pcb-stats';
-const PCB_HISTORY_KEY = 'prism-pcb-history';
+// ===== PCB プレイ履歴 (Firebase Cloud 蓄積、 アカウント依存) =====
 const PCB_HISTORY_MAX = 50;
 
-// AI レベル別 連勝数 (野沢さん指示 2026-05-06、 ホームの各 AI モードボタンに表示)
+// AI レベル別 連勝数 (ホームの各 AI モードボタンに表示)
 function _streakForDiff(diff) {
-  try {
-    const hist = JSON.parse(localStorage.getItem(PCB_HISTORY_KEY) || '[]');
-    let streak = 0;
-    for (const h of hist) {
-      if (h.difficulty !== diff) continue;  // 別 difficulty は skip
-      if (h.result === 'win') streak++;
-      else break;  // 負け/引分 で 連勝終了
-    }
-    return streak;
-  } catch (e) { return 0; }
+  const hist = pcbCloud.history || [];
+  let streak = 0;
+  for (const h of hist) {
+    if (h.difficulty !== diff) continue;
+    if (h.result === 'win') streak++;
+    else break;
+  }
+  return streak;
 }
 function _renderHomeStreaks() {
   const screen = document.getElementById('home-screen');
@@ -1915,20 +2081,18 @@ function _renderHomeDeckPreview() {
   hintEl.textContent = `🎯 ${typeLabel} / コンボ ${matchedCombos}個 / 派閥 ${facCountTotal}種`;
 }
 
-// ホーム 戦績ダッシュボード + 🏆 ポイント (野沢さん指示 2026-05-06)
+// ホーム 戦績ダッシュボード + 🏆 ポイント (Cloud)
 function _renderHomeStats() {
-  try {
-    const stats = JSON.parse(localStorage.getItem(PCB_STATS_KEY) || '{}');
-    const m = document.getElementById('cg-stat-matches');
-    const w = document.getElementById('cg-stat-winrate');
-    const p = document.getElementById('cg-stat-points');
-    const total = stats.totalMatches || 0;
-    const wins = stats.wins || 0;
-    const wr = total > 0 ? Math.round(wins / total * 100) : 0;
-    if (m) m.textContent = String(total);
-    if (w) w.textContent = total > 0 ? `${wr}%` : '-%';
-    if (p) p.textContent = String(stats.pcbPoints || 0);
-  } catch (e) {}
+  const stats = pcbCloud.stats || {};
+  const m = document.getElementById('cg-stat-matches');
+  const w = document.getElementById('cg-stat-winrate');
+  const p = document.getElementById('cg-stat-points');
+  const total = stats.totalMatches || 0;
+  const wins = stats.wins || 0;
+  const wr = total > 0 ? Math.round(wins / total * 100) : 0;
+  if (m) m.textContent = String(total);
+  if (w) w.textContent = total > 0 ? `${wr}%` : '-%';
+  if (p) p.textContent = String(stats.pcbPoints || 0);
 }
 
 // ショップ modal (Phase 1 = 近日公開、 Phase 2 で 実装予定、 野沢さん指示 2026-05-06)
@@ -1937,12 +2101,10 @@ function openShop() {
   if (!m) return;
   m.hidden = false;
   _setBodyModalOpen();
-  // 所持ポイント反映
-  try {
-    const stats = JSON.parse(localStorage.getItem(PCB_STATS_KEY) || '{}');
-    const el = document.getElementById('shop-points');
-    if (el) el.textContent = String(stats.pcbPoints || 0);
-  } catch (e) {}
+  // 所持ポイント反映 (Cloud)
+  const stats = pcbCloud.stats || {};
+  const el = document.getElementById('shop-points');
+  if (el) el.textContent = String(stats.pcbPoints || 0);
 }
 function closeShop() {
   const m = document.getElementById('shop-modal');
@@ -1958,35 +2120,32 @@ const PCB_POINTS_BO3_BONUS = 5;
 function _logPcbMatch(result, difficulty, isBO3, scoreMe, scoreOpp) {
   // result: 'win' | 'loss' | 'draw' | 'pause' (PvE 中断は記録しない)
   if (result === 'pause') return;
-  try {
-    const stats = JSON.parse(localStorage.getItem(PCB_STATS_KEY) || '{}');
-    stats.totalMatches = (stats.totalMatches || 0) + 1;
-    stats.wins = (stats.wins || 0) + (result === 'win' ? 1 : 0);
-    stats.losses = (stats.losses || 0) + (result === 'loss' ? 1 : 0);
-    stats.draws = (stats.draws || 0) + (result === 'draw' ? 1 : 0);
-    stats.byDifficulty = stats.byDifficulty || {};
-    stats.byDifficulty[difficulty] = stats.byDifficulty[difficulty] || { matches: 0, wins: 0, losses: 0, draws: 0 };
-    stats.byDifficulty[difficulty].matches += 1;
-    stats.byDifficulty[difficulty][result === 'win' ? 'wins' : (result === 'loss' ? 'losses' : 'draws')] += 1;
-    if (isBO3) stats.bo3Matches = (stats.bo3Matches || 0) + 1;
-    stats.lastPlayedAt = Date.now();
-    // ポイント加算 (野沢さん指示 2026-05-06、 win 時のみ、 BO3 勝利で +5 ボーナス)
-    if (result === 'win') {
-      const baseFor = PCB_POINTS_BY_DIFF[difficulty] || 0;
-      const bonus = isBO3 ? PCB_POINTS_BO3_BONUS : 0;
-      stats.pcbPoints = (stats.pcbPoints || 0) + baseFor + bonus;
-    }
-    localStorage.setItem(PCB_STATS_KEY, JSON.stringify(stats));
-    // 直近 50 試合の履歴
-    const history = JSON.parse(localStorage.getItem(PCB_HISTORY_KEY) || '[]');
-    history.unshift({
-      ts: Date.now(), result, difficulty, isBO3,
-      scoreMe, scoreOpp,
-      firstMover: state.firstMover,
-    });
-    if (history.length > PCB_HISTORY_MAX) history.length = PCB_HISTORY_MAX;
-    localStorage.setItem(PCB_HISTORY_KEY, JSON.stringify(history));
-  } catch (e) { /* localStorage 失敗時は silent */ }
+  const stats = pcbCloud.stats || (pcbCloud.stats = {});
+  stats.totalMatches = (stats.totalMatches || 0) + 1;
+  stats.wins = (stats.wins || 0) + (result === 'win' ? 1 : 0);
+  stats.losses = (stats.losses || 0) + (result === 'loss' ? 1 : 0);
+  stats.draws = (stats.draws || 0) + (result === 'draw' ? 1 : 0);
+  stats.byDifficulty = stats.byDifficulty || {};
+  stats.byDifficulty[difficulty] = stats.byDifficulty[difficulty] || { matches: 0, wins: 0, losses: 0, draws: 0 };
+  stats.byDifficulty[difficulty].matches += 1;
+  stats.byDifficulty[difficulty][result === 'win' ? 'wins' : (result === 'loss' ? 'losses' : 'draws')] += 1;
+  if (isBO3) stats.bo3Matches = (stats.bo3Matches || 0) + 1;
+  stats.lastPlayedAt = Date.now();
+  if (result === 'win') {
+    const baseFor = PCB_POINTS_BY_DIFF[difficulty] || 0;
+    const bonus = isBO3 ? PCB_POINTS_BO3_BONUS : 0;
+    stats.pcbPoints = (stats.pcbPoints || 0) + baseFor + bonus;
+  }
+  _pcbSet('stats', stats);
+  // 直近 50 試合の履歴
+  const history = pcbCloud.history || (pcbCloud.history = []);
+  history.unshift({
+    ts: Date.now(), result, difficulty, isBO3,
+    scoreMe, scoreOpp,
+    firstMover: state.firstMover,
+  });
+  if (history.length > PCB_HISTORY_MAX) history.length = PCB_HISTORY_MAX;
+  _pcbSet('history', history);
 }
 
 // ===== 試合終了 (BO3 series 累積 / 単発リザルト) =====
@@ -2134,8 +2293,7 @@ function reopenResult() {
   _setBodyModalOpen();
 }
 
-// C-4: PvE 中断 → 復帰 機能 (野沢さん指示 2026-05-05 「中断した後の復帰は?」)
-const PCB_PAUSED_KEY = 'prism-pcb-paused-match';
+// C-4: PvE 中断 → 復帰 機能 (Cloud 保存)
 
 // _appliedTo は循環参照 (target が card refs) なので id-based に変換して serialize 可能化
 function _serializeBoardState() {
@@ -2252,7 +2410,8 @@ function pauseMatch() {
   try {
     const snap = _serializeBoardState();
     snap.savedAt = Date.now();
-    localStorage.setItem(PCB_PAUSED_KEY, JSON.stringify(snap));
+    pcbCloud.paused = snap;
+    _pcbSet('paused', snap);
   } catch (e) {
     console.warn('[pcb] pause save failed', e);
     if (!confirm('保存に失敗しました。 中断データなしで戻りますか?')) return;
@@ -2264,44 +2423,38 @@ function pauseMatch() {
 }
 
 function _hasPausedMatch() {
-  try {
-    const raw = localStorage.getItem(PCB_PAUSED_KEY);
-    if (!raw) return false;
-    const snap = JSON.parse(raw);
-    if (Date.now() - (snap.savedAt || 0) > 24 * 60 * 60 * 1000) {
-      localStorage.removeItem(PCB_PAUSED_KEY);
-      return false;
-    }
-    return true;
-  } catch (e) { return false; }
+  const snap = pcbCloud.paused;
+  if (!snap) return false;
+  if (Date.now() - (snap.savedAt || 0) > 24 * 60 * 60 * 1000) {
+    pcbCloud.paused = null;
+    _pcbSet('paused', null);
+    return false;
+  }
+  return true;
 }
 
 function _getPausedMatchInfo() {
-  try {
-    const snap = JSON.parse(localStorage.getItem(PCB_PAUSED_KEY) || 'null');
-    if (!snap) return null;
-    return {
-      turn: snap.turn, maxTurn: 6,
-      difficulty: snap.difficulty,
-      isBO3: snap.series && snap.series.isBO3,
-      matchNo: snap.series && snap.series.matchNo,
-      savedAt: snap.savedAt,
-    };
-  } catch (e) { return null; }
+  const snap = pcbCloud.paused;
+  if (!snap) return null;
+  return {
+    turn: snap.turn, maxTurn: 6,
+    difficulty: snap.difficulty,
+    isBO3: snap.series && snap.series.isBO3,
+    matchNo: snap.series && snap.series.matchNo,
+    savedAt: snap.savedAt,
+  };
 }
 
 async function resumePausedMatch() {
-  let snap;
-  try {
-    snap = JSON.parse(localStorage.getItem(PCB_PAUSED_KEY) || 'null');
-  } catch (e) { return; }
+  const snap = pcbCloud.paused;
   if (!snap) return;
   if (!state.allCards || state.allCards.length === 0) await loadMasters();
   if (!_deserializeBoardState(snap)) {
     setMessage('中断データの復元に失敗しました', 'alert');
     return;
   }
-  localStorage.removeItem(PCB_PAUSED_KEY);
+  pcbCloud.paused = null;
+  _pcbSet('paused', null);
   $('#home-screen').classList.remove('active');
   $('#match-screen').classList.add('active');
   $('#result-modal').hidden = true;
@@ -2349,7 +2502,8 @@ function _refreshHomeResumeButton() {
   document.getElementById('btn-resume-paused').addEventListener('click', resumePausedMatch);
   document.getElementById('btn-resume-discard').addEventListener('click', () => {
     if (!confirm('中断データを破棄しますか? (再開できなくなります)')) return;
-    localStorage.removeItem(PCB_PAUSED_KEY);
+    pcbCloud.paused = null;
+    _pcbSet('paused', null);
     _refreshHomeResumeButton();
   });
 }
@@ -2783,6 +2937,8 @@ function onBackClick(e) {
 
 // ===== Init =====
 document.addEventListener('DOMContentLoaded', async () => {
+  pcbInitFirebase();  // Firebase 初期化 (auth state 変化で pcbCloudInit が走る)
+  _refreshAccountGate();  // 未ログイン時の警告 (auth state 確定までは仮表示)
   initBgm();
   _initVisibilityHandler();
   _initLaneEffectPopover();
@@ -2791,12 +2947,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (typeof _renderHomeStreaks === 'function') _renderHomeStreaks();  // AI レベル別 連勝数
   if (typeof _renderHomeStats === 'function') _renderHomeStats();
   if (typeof _renderHomeDeckPreview === 'function') _renderHomeDeckPreview();  // 戦績ダッシュボード + ポイント (野沢さん指示 2026-05-06)
-  // BO3 toggle (localStorage 永続化)
+  // BO3 toggle (Cloud 永続化、 アカウント依存)
   const bo3Toggle = document.getElementById('bo3-toggle');
   if (bo3Toggle) {
-    bo3Toggle.checked = localStorage.getItem('cg_bo3') === '1';
+    bo3Toggle.checked = pcbCloud.bo3Toggle === true;
     bo3Toggle.addEventListener('change', () => {
-      localStorage.setItem('cg_bo3', bo3Toggle.checked ? '1' : '0');
+      pcbCloud.bo3Toggle = bo3Toggle.checked;
+      _pcbSet('bo3Toggle', bo3Toggle.checked);
     });
   }
   const getBo3 = () => bo3Toggle && bo3Toggle.checked;

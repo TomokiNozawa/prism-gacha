@@ -7,7 +7,10 @@
 <title>PCB | Prismaera Cards Battle</title>
 <link rel="icon" href="/images/icons/icon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
-<link rel="stylesheet" href="./style.css?v=1.4.4ao">
+<link rel="stylesheet" href="./style.css?v=1.4.4ap">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
@@ -71,32 +74,32 @@
       <div class="cg-mode-text">
         <div class="cg-mode-title">AIと対戦 (Easy)</div>
         <div class="cg-mode-sub">ルール体験 / 初心者向け</div>
+        <span class="cg-mode-streak" data-streak="easy" hidden>🔥 0連勝</span>
       </div>
-      <span class="cg-mode-streak" data-streak="easy" hidden>🔥 0連勝</span>
     </button>
     <button class="cg-mode-btn" id="btn-start-normal" data-diff="normal">
       <div class="cg-mode-icon">⚔️</div>
       <div class="cg-mode-text">
         <div class="cg-mode-title">AIと対戦 (Normal)</div>
         <div class="cg-mode-sub">コスト最大化 + 劣勢補強</div>
+        <span class="cg-mode-streak" data-streak="normal" hidden>🔥 0連勝</span>
       </div>
-      <span class="cg-mode-streak" data-streak="normal" hidden>🔥 0連勝</span>
     </button>
     <button class="cg-mode-btn" id="btn-start-hard" data-diff="hard">
       <div class="cg-mode-icon">🔥</div>
       <div class="cg-mode-text">
         <div class="cg-mode-title">AIと対戦 (Hard)</div>
         <div class="cg-mode-sub">派閥シナジー + レーン効果意識</div>
+        <span class="cg-mode-streak" data-streak="hard" hidden>🔥 0連勝</span>
       </div>
-      <span class="cg-mode-streak" data-streak="hard" hidden>🔥 0連勝</span>
     </button>
     <button class="cg-mode-btn" id="btn-start-master" data-diff="master">
       <div class="cg-mode-icon">👑</div>
       <div class="cg-mode-text">
         <div class="cg-mode-title">AIと対戦 (Master)</div>
         <div class="cg-mode-sub">1手先まで読む + コンボ評価</div>
+        <span class="cg-mode-streak" data-streak="master" hidden>🔥 0連勝</span>
       </div>
-      <span class="cg-mode-streak" data-streak="master" hidden>🔥 0連勝</span>
     </button>
     <button class="cg-mode-btn disabled" disabled>
       <div class="cg-mode-icon">🌐</div>
@@ -492,6 +495,6 @@
   </div>
 </div>
 
-<script src="./script.js?v=1.4.4ao"></script>
+<script src="./script.js?v=1.4.4ap"></script>
 </body>
 </html>
