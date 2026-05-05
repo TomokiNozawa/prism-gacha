@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4c — 演出スタイル (Season 1 第1章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4d — 演出スタイル (Season 1 第1章) / dev は cache buster suffix で進行
    ============================================================ */
 :root {
   --bg: #05060d;
@@ -3864,7 +3864,7 @@ body.has-offline-banner .topbar { margin-top: 30px; }
   .world-map-header { padding: 10px 14px; padding-top: calc(env(safe-area-inset-top, 0px) + 10px); gap: 8px; }
   .world-map-header h2 { font-size: 14px; margin: 0; }
   .world-map-header > .close { font-size: 11px; padding: 5px 10px; min-height: 32px; }
-  .world-map-header > .wm-zoom { margin: 4px auto 0; padding: 2px 4px; }
+  /* スマホ wm-zoom は base スタイルで OK (中身fit + 中央寄せ)、 padding 上書き不要 */
   .relations-header h2 { font-size: 16px; margin: 0; text-align: center; }
   .relations-legend { justify-content: center; gap: 6px; font-size: 10px; }
   .relations-legend .leg-line { width: 18px; height: 2px; margin-right: 2px; }
@@ -5547,10 +5547,18 @@ body.gasshuku-modal-open {
   white-space: nowrap;
 }
 .world-map-header > .close:hover { background: rgba(255,255,255,0.15); }
+/* flex-wrap 強制改行 hack: 不可視 div で 行を分け、 zoom 自身は 中身fit 幅 (野沢さん指示
+   2026-05-05 「Zoom の枠が広くなってる、 相関図と同じコンパクト枠に」) */
+.world-map-header > .wm-line-break {
+  flex-basis: 100%;
+  width: 100%;
+  height: 0;
+  margin: 0;
+  padding: 0;
+}
 .world-map-header > .wm-zoom {
-  flex: 0 0 100%;  /* zoom controls は 別行 (full width)、 中央寄せ */
-  justify-content: center;
-  margin: 4px auto 0;
+  flex: 0 0 auto;          /* 中身 fit (relations-zoom と同形式の コンパクト枠) */
+  margin: 4px auto 0;       /* 別行 + 中央寄せ */
 }
 .world-map-body {
   flex: 1; display: grid; grid-template-columns: 1fr 320px;
