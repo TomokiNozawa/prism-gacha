@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4l — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4m — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -3246,6 +3246,106 @@ function showCharDetail(c) {
   _lockBodyScroll();
 }
 
+// ============================================================
+// キャラ詳細 PCB タブ data fetcher (野沢さん指示 2026-05-06、 v1.5.0 リリースに合わせて
+// キャラ詳細画面で カードゲーム能力を タブ切替で確認できるようにする。 cardgame の
+// pool.json + cards.json + effects_override.json + combos.json を merge して キャラ名で
+// lookup 可能な map に変換、 lazy fetch + cache)
+// ============================================================
+let _pcbCardDataCache = null;
+let _pcbCardDataPromise = null;
+async function _loadPcbCardData() {
+  if (_pcbCardDataCache) return _pcbCardDataCache;
+  if (_pcbCardDataPromise) return _pcbCardDataPromise;
+  _pcbCardDataPromise = (async () => {
+    try {
+      const [pool, cards, effects, combos] = await Promise.all([
+        fetch('/cardgame/data/pool.json').then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch('/cardgame/cards.json').then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch('/cardgame/effects_override.json').then(r => r.ok ? r.json() : {}).catch(() => ({})),
+        fetch('/cardgame/combos.json').then(r => r.ok ? r.json() : []).catch(() => []),
+      ]);
+      const byName = new Map();
+      (pool || []).forEach(c => byName.set(c.name, { ...c }));
+      Object.entries(effects || {}).forEach(([name, ov]) => {
+        const c = byName.get(name);
+        if (c && ov) {
+          if (ov.effect) c.effect = ov.effect;
+          if (ov.effectText) c.effectText = ov.effectText;
+        }
+      });
+      (cards || []).forEach(c => { if (c && c.name) byName.set(c.name, { ...c }); });
+      _pcbCardDataCache = { byName, combos: Array.isArray(combos) ? combos : [] };
+      return _pcbCardDataCache;
+    } catch (e) {
+      console.warn('[pcb-tab] data fetch failed:', e);
+      _pcbCardDataCache = { byName: new Map(), combos: [] };
+      return _pcbCardDataCache;
+    }
+  })();
+  return _pcbCardDataPromise;
+}
+
+async function renderCharDetailPcb(c) {
+  const pane = document.getElementById('char-detail-pcb');
+  if (!pane) return;
+  pane.innerHTML = '<div style="padding:14px;color:rgba(255,255,255,0.5);font-size:12px;">読込中…</div>';
+  const data = await _loadPcbCardData();
+  const card = data.byName.get(c.name);
+  if (!card) {
+    pane.innerHTML = `<div class="pcb-pane-empty">このキャラは PCB のカードプールに 未登録です。<br><small>(本編未公開キャラ or 観測者三柱等の TD 専用キャラの可能性)</small></div>`;
+    return;
+  }
+  const related = (data.combos || []).filter(co => Array.isArray(co.chars) && co.chars.includes(c.name));
+  const facBg = (typeof FACTION_COLORS !== 'undefined' && FACTION_COLORS[card.faction]) || '#5a5a8a';
+  const condLabel = co => (co.condition === 'same_lane' ? '同レーンに揃える' : 'いずれかの場に揃える');
+  const targetLabel = e => (e && e.target === 'all_lanes' ? '全レーン' : '自レーン');
+  let html = `<div class="pcb-pane-stats">
+    <div class="pcb-pane-stat-row">
+      <span class="pcb-pane-tier tier-${(card.tier || '').toLowerCase()}">${escapeHtml(card.tier || '?')}</span>
+      <span class="pcb-pane-faction" style="background:${facBg}">${escapeHtml(card.faction || '無所属')}</span>
+    </div>
+    <div class="pcb-pane-stat-grid">
+      <div><span class="pcb-pane-label">コスト</span><span class="pcb-pane-val">${card.cost ?? '-'}</span></div>
+      <div><span class="pcb-pane-label">ﾊﾟﾜｰ</span><span class="pcb-pane-val">${card.basePower ?? '-'}</span></div>
+    </div>
+  </div>`;
+  if (card.effectText) {
+    html += `<div class="pcb-pane-effect-block">
+      <div class="pcb-pane-effect-label">効果</div>
+      <div class="pcb-pane-effect-text">${escapeHtml(card.effectText)}</div>
+    </div>`;
+  }
+  html += `<div class="pcb-pane-combo-block">
+    <div class="pcb-pane-combo-label">関連コンボ <span class="pcb-pane-combo-count">${related.length}件</span></div>`;
+  if (related.length === 0) {
+    html += `<div class="pcb-pane-combo-empty">このキャラを含むコンボなし</div>`;
+  } else {
+    html += related.map(co => {
+      const others = co.chars.filter(n => n !== c.name);
+      const power = (co.effect && co.effect.power) || 0;
+      return `<div class="pcb-pane-combo-item">
+        <div class="pcb-pane-combo-name">✨ ${escapeHtml(co.name)}</div>
+        <div class="pcb-pane-combo-cond">${condLabel(co)}: ${escapeHtml(others.join(' + ') || '(単独)')}</div>
+        <div class="pcb-pane-combo-effect">→ ${targetLabel(co.effect)} +${power} power</div>
+        ${co.flavor ? `<div class="pcb-pane-combo-flavor">${escapeHtml(co.flavor)}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+  html += `</div>`;
+  pane.innerHTML = html;
+}
+
+function _switchCharDetailTab(tabName, currentChar) {
+  document.querySelectorAll('#char-detail-tabs .char-detail-tab').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === tabName);
+  });
+  document.querySelectorAll('.char-detail-tab-pane').forEach(p => {
+    p.hidden = (p.dataset.tab !== tabName);
+  });
+  if (tabName === 'pcb' && currentChar) renderCharDetailPcb(currentChar);
+}
+
 function renderCharDetail(c) {
   $("#char-detail-img").src = c.img;
   $("#char-detail-img").alt = c.name;
@@ -3275,6 +3375,21 @@ function renderCharDetail(c) {
   renderCharDup(c);
   // 関連キャラ表示
   renderCharRelations(c);
+  // タブを「ストーリー」 既定に戻す + click handler を 現在のキャラ参照付きで再設定
+  // (キャラ切替時に PCB タブが残ったままにならないように)
+  _switchCharDetailTab('story', c);
+  const tabBar = document.getElementById('char-detail-tabs');
+  if (tabBar && !tabBar._handlerBound) {
+    tabBar._handlerBound = true;
+    tabBar.addEventListener('click', e => {
+      const btn = e.target.closest('.char-detail-tab');
+      if (!btn || !btn.dataset.tab) return;
+      // 現在表示中のキャラを参照 (detailUnlockedList[detailIdx])
+      const cur = (Array.isArray(detailUnlockedList) && detailIdx >= 0)
+        ? detailUnlockedList[detailIdx] : null;
+      _switchCharDetailTab(btn.dataset.tab, cur);
+    });
+  }
   // 詳細画面を開いたら拡大は解除
   $("#char-img-zoom").classList.remove("active");
   // 閲覧マーク(NEWを消す)
@@ -6536,7 +6651,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // version 完全同期 (野沢さん指示 2026-05-06): bump_version.py が自動で更新する。
 // 旧 date-suffix '20260504o' を 5/6 で見つけた事故を契機に version-based に統一。
-const IMG_CACHE_VERSION = '1.4.4l';
+const IMG_CACHE_VERSION = '1.4.4m';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる

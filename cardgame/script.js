@@ -45,6 +45,13 @@ const CHAPTER_RELEASE = {
 };
 function isChapterReleased(ch) {
   if (!ch || !CHAPTER_RELEASE.hasOwnProperty(ch)) return true;
+  // dev preview (dev.prismaera.pages.dev) では releaseDate を bypass、 全章キャラ + コンボ + レーン効果 解放
+  // 野沢さん要望 2026-05-06: dev で実物見ながら s1c5 PCB のフィードバックを送れるように
+  if (typeof location !== 'undefined' && location.hostname &&
+      (location.hostname.startsWith('dev.') || location.hostname === 'localhost' ||
+       location.hostname === '127.0.0.1')) {
+    return true;
+  }
   return Date.now() >= CHAPTER_RELEASE[ch];
 }
 
@@ -141,11 +148,11 @@ function updateMuteUI() {
 // 優先順位: cards.json (手書き完全override) > effects_override.json (effect+effectText のみ) > pool.json (default)
 async function loadMasters() {
   const [c, k, l, p, eo] = await Promise.all([
-    fetch('./cards.json?v=1.4.4l').then(r => r.json()),
-    fetch('./combos.json?v=1.4.4l').then(r => r.json()),
-    fetch('./lane_effects.json?v=1.4.4l').then(r => r.json()),
-    fetch('./data/pool.json?v=1.4.4l').then(r => r.json()).catch(() => []),
-    fetch('./effects_override.json?v=1.4.4l').then(r => r.json()).catch(() => ({})),
+    fetch('./cards.json?v=1.4.4m').then(r => r.json()),
+    fetch('./combos.json?v=1.4.4m').then(r => r.json()),
+    fetch('./lane_effects.json?v=1.4.4m').then(r => r.json()),
+    fetch('./data/pool.json?v=1.4.4m').then(r => r.json()).catch(() => []),
+    fetch('./effects_override.json?v=1.4.4m').then(r => r.json()).catch(() => ({})),
   ]);
   // pool 全カード ← effects_override で effect/effectText を上書き ← cards.json で完全 override
   const cardsByName = new Map();

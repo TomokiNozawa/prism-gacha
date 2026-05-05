@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4l — 演出スタイル (Season 1 第1章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4m — 演出スタイル (Season 1 第1章) / dev は cache buster suffix で進行
    ============================================================ */
 :root {
   --bg: #05060d;
@@ -2248,6 +2248,126 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   font-size: 14px; line-height: 1.9;
   color: rgba(255,255,255,0.85);
   letter-spacing: 0.03em;
+}
+/* キャラ詳細 タブ UI (ストーリー / PCB 性能) — 野沢さん指示 2026-05-06 */
+.char-detail-tabs {
+  display: flex; gap: 6px;
+  margin: 10px 0 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+}
+.char-detail-tab {
+  flex: 1 1 0;
+  background: transparent;
+  border: none;
+  padding: 10px 8px 9px;
+  color: rgba(255,255,255,0.55);
+  font-size: 13px; font-weight: 500;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+.char-detail-tab:hover { color: rgba(255,255,255,0.8); background: rgba(255,255,255,0.04); }
+.char-detail-tab.active {
+  color: #fff;
+  border-bottom-color: rgba(251, 191, 36, 0.7);
+}
+.char-detail-tab-pane[hidden] { display: none !important; }
+/* PCB 性能 ペイン */
+.char-detail-pcb { padding: 4px 0 8px; }
+.pcb-pane-empty {
+  text-align: center;
+  padding: 30px 20px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+  line-height: 1.7;
+}
+.pcb-pane-stats {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
+.pcb-pane-stat-row {
+  display: flex; gap: 8px; align-items: center;
+  margin-bottom: 10px;
+}
+.pcb-pane-tier {
+  display: inline-block; padding: 3px 10px; border-radius: 999px;
+  font-size: 12px; font-weight: 700; letter-spacing: 0.08em;
+  background: rgba(255,255,255,0.1); color: #fff;
+}
+.pcb-pane-tier.tier-lr  { background: linear-gradient(135deg,#ffe07a,#ff8a3a); color:#1a1d2e; }
+.pcb-pane-tier.tier-ur  { background: linear-gradient(135deg,#ff8ddc,#a06eff); }
+.pcb-pane-tier.tier-ssr { background: linear-gradient(135deg,#ffd56b,#ffa84a); color:#1a1d2e; }
+.pcb-pane-tier.tier-sr  { background: linear-gradient(135deg,#a3a3a3,#7a9bff); }
+.pcb-pane-tier.tier-r   { background: rgba(255,255,255,0.16); color: rgba(255,255,255,0.85); }
+.pcb-pane-faction {
+  display: inline-block; padding: 3px 10px; border-radius: 999px;
+  font-size: 11px; font-weight: 600;
+  color: rgba(0,0,0,0.7);
+}
+.pcb-pane-stat-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
+.pcb-pane-stat-grid > div {
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.pcb-pane-label { font-size: 10px; color: rgba(255,255,255,0.5); letter-spacing: 0.06em; }
+.pcb-pane-val { font-size: 18px; font-weight: 700; color: #fff; }
+.pcb-pane-effect-block {
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+}
+.pcb-pane-effect-label {
+  font-size: 11px; color: rgba(251, 191, 36, 0.85);
+  letter-spacing: 0.08em; margin-bottom: 4px;
+}
+.pcb-pane-effect-text {
+  font-size: 13px; line-height: 1.7;
+  color: rgba(255,255,255,0.9);
+}
+.pcb-pane-combo-block { margin-bottom: 8px; }
+.pcb-pane-combo-label {
+  font-size: 12px; color: rgba(255,255,255,0.7);
+  letter-spacing: 0.06em; margin-bottom: 8px;
+  display: flex; gap: 8px; align-items: center;
+}
+.pcb-pane-combo-count {
+  font-size: 10px; padding: 2px 8px; border-radius: 999px;
+  background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6);
+}
+.pcb-pane-combo-empty {
+  font-size: 12px; color: rgba(255,255,255,0.5);
+  padding: 12px 0; text-align: center;
+}
+.pcb-pane-combo-item {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+}
+.pcb-pane-combo-name {
+  font-size: 13px; font-weight: 600; color: #fff;
+  margin-bottom: 3px;
+}
+.pcb-pane-combo-cond {
+  font-size: 11px; color: rgba(255,255,255,0.65); margin-bottom: 2px;
+}
+.pcb-pane-combo-effect {
+  font-size: 12px; color: rgba(122, 255, 138, 0.95);
+}
+.pcb-pane-combo-flavor {
+  font-size: 10px; color: rgba(255,255,255,0.45);
+  font-style: italic; margin-top: 4px;
 }
 .close-detail {
   /* iOS Safari 対応 (野沢さん指摘 2026-05-03 「閉じる ボタンが押せない、 特にキャラ詳細から戻れない」):

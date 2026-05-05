@@ -1352,6 +1352,81 @@ def check_cache_buster_format():
                 break  # 同ファイル内の他箇所も同じ問題なので 1 件だけ記録
     return found_violations
 
+def check_img_cache_version_sync():
+    """ルール7-28 (BLOCKER 2026-05-06 野沢さん指示): script.js の IMG_CACHE_VERSION は
+    version.json の version と完全同期 必須。
+    背景: 5/4 の 20260504o から 5/6 までの 5日間 bump 漏れで SW cache が 古版で 404 を キャッシュ → 場所画像/挿絵が反映されない 致命バグが 発生 (s1c5 公開直前)。
+    bump_version.py の update_img_cache_version で 自動同期するが、 念のため commit 時に
+    機械的に検証 (二度と起こさない物理防御)。
+    """
+    ver_path = ROOT / "version.json"
+    script_path = ROOT / "script.js"
+    if not (ver_path.exists() and script_path.exists()):
+        return 0
+    try:
+        ver = json.load(ver_path.open(encoding="utf-8"))["version"]
+    except Exception:
+        return 0
+    text = script_path.read_text(encoding="utf-8")
+    m = re.search(r"const\s+IMG_CACHE_VERSION\s*=\s*'([\w.]+)'", text)
+    if not m:
+        return 0
+    img_ver = m.group(1)
+    if img_ver != ver:
+        violations.append(
+            f"[ルール7-28 IMG_CACHE_VERSION 不一致 BLOCKER] script.js IMG_CACHE_VERSION='{img_ver}' "
+            f"が version.json version='{ver}' と 不一致。\n"
+            f"      → 場所画像/挿絵が SW cache で 古版 (?v={img_ver}) のまま固定化される事故 (5/4-5/6 5日間 bump 漏れ事故 再発防止)\n"
+            f"      → bump_version.py dev-suffix or chapter/patch/season で 自動同期 可能"
+        )
+        return 1
+    return 0
+
+
+def check_location_images_exist():
+    """ルール7-29 (BLOCKER 2026-05-06): script.js の LOCATION_CONFIG / STORY_LOCATION_INLINE_CONFIG で
+    指定された画像 path が repo 上に実在するか 検査。
+    背景: 章公開直前に「場所画像が反映されていない」 で気づくのは 手遅れ。 commit 時に検証して
+    img path 設定漏れ・タイポ・取込忘れ を 防御 (野沢さん指示 2026-05-06)。
+    `/images/...` 形式の path を repo root からの相対 file path に変換して 存在確認。
+    """
+    script_path = ROOT / "script.js"
+    if not script_path.exists():
+        return 0
+    text = script_path.read_text(encoding="utf-8")
+    # LOCATION_CONFIG / STORY_LOCATION_INLINE_CONFIG ブロックを抽出
+    # シンプルな正規表現で img: '/images/...' の path を全部 列挙
+    block_match = re.search(
+        r"const\s+LOCATION_CONFIG\s*=\s*\{[\s\S]*?\n\};",
+        text,
+    )
+    inline_match = re.search(
+        r"const\s+STORY_LOCATION_INLINE_CONFIG\s*=\s*\{[\s\S]*?\n\};",
+        text,
+    )
+    blocks = []
+    if block_match:
+        blocks.append(("LOCATION_CONFIG", block_match.group(0)))
+    if inline_match:
+        blocks.append(("STORY_LOCATION_INLINE_CONFIG", inline_match.group(0)))
+    found_violations = 0
+    for label, block in blocks:
+        for m in re.finditer(r"img:\s*'(/images/[^']+)'", block):
+            url = m.group(1)
+            # /images/... → ROOT/images/...
+            rel_path = url.lstrip("/")
+            full_path = ROOT / rel_path
+            if not full_path.exists():
+                violations.append(
+                    f"[ルール7-29 場所画像 不在 BLOCKER] {label} の img='{url}' が 実在しない。\n"
+                    f"      → 期待 path: {rel_path}\n"
+                    f"      → 章公開直前で「場所画像が反映されない」 事故対策。 取込忘れ / タイポ を 検出。\n"
+                    f"      → 該当 PNG/WebP を 配置するか、 LOCATION_CONFIG entry を 修正する。"
+                )
+                found_violations += 1
+    return found_violations
+
+
 def check_main_version_bumped():
     """ルール7-24 (BLOCKER 2026-05-04): main branch で commit する時、 version は HEAD (= 親 commit) より bump 必須。
     2026-05-03 朝のセッションで v1.4.1 を 7 回 main merge した事故の再発防止。
@@ -1386,6 +1461,10 @@ n7_25 = check_dev_suffix_progression()
 print(f"  ルール7-25 (dev suffix 1段階 increment): {n7_25}件 検査 [BLOCKER]")
 n7_26 = check_cache_buster_format()
 print(f"  ルール7-26 (cache buster = version 完全同期): {n7_26}件 検査 [BLOCKER]")
+n7_28 = check_img_cache_version_sync()
+print(f"  ルール7-28 (IMG_CACHE_VERSION = version 完全同期): {n7_28}件 検査 [BLOCKER]")
+n7_29 = check_location_images_exist()
+print(f"  ルール7-29 (LOCATION_CONFIG 画像 実在): {n7_29}件 検査 [BLOCKER]")
 
 def check_main_no_suffix():
     """ルール7-27 (BLOCKER 2026-05-05): main branch で commit する version は suffix なし (X.Y.Z 形式) 必須。
