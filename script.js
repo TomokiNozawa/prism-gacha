@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4h — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4i — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -4894,11 +4894,18 @@ function _showFactionSide(fid) {
   html += `</div>`;
   side.innerHTML = html;
   // メンバークリックでキャラ詳細
+  // 派閥フィルタリスト = 解放済みメンバーのみで構築、 ←→ ナビが派閥内だけを循環
+  const factionUnlocked = chars
+    .map(({ char }) => char)
+    .filter(c => c && (typeof isUnlocked === 'function' ? isUnlocked(c) : false));
   side.querySelectorAll('.world-map-side-member:not(.locked)').forEach(el => {
     el.addEventListener('click', () => {
       const name = el.dataset.name;
       const c = getCharByName ? getCharByName(name) : null;
-      if (c && typeof showCharDetail === 'function') showCharDetail(c);
+      if (c && typeof showCharDetail === 'function') {
+        detailUnlockedList = factionUnlocked;
+        showCharDetail(c);
+      }
     });
   });
 }
@@ -5023,12 +5030,17 @@ function _showChapterGallery(storyId) {
       _openLocImageZoom(fullUrl, { list: visibleLocs, index: visIdx });
     });
   });
-  // キャラ click → キャラ詳細 (既存)
+  // キャラ click → キャラ詳細
+  // 章ギャラリーフィルタリスト = 該当章の解放済みキャラのみで構築、 ←→ ナビが章内だけを循環
+  const chapterUnlocked = chars.filter(c => (typeof isUnlocked === 'function') ? isUnlocked(c) : false);
   side.querySelectorAll('.world-map-side-member:not(.locked)').forEach(el => {
     el.addEventListener('click', () => {
       const name = el.dataset.name;
       const c = (typeof getCharByName === 'function') ? getCharByName(name) : null;
-      if (c && typeof showCharDetail === 'function') showCharDetail(c);
+      if (c && typeof showCharDetail === 'function') {
+        detailUnlockedList = chapterUnlocked;
+        showCharDetail(c);
+      }
     });
   });
 }
@@ -6091,8 +6103,8 @@ function renderSceneChars(scene) {
         const isFinalScene = /^第[\d一二三四五六七八九十]+章\s*終$/.test(scene.title || '');
         const tokens = _povTokens(povName);
         const hasName = tokens.some(t => t && contentMd.includes(t));
-        // first-person pronoun 検出 (POVが narrator として「私 / わたし」 を使う場合)
-        const hasPronoun = /[「『（\s。、]?(?:私|わたし|わたくし)(?:[はがにのを、。\s「『])/m.test(contentMd);
+        // first-person pronoun 検出 (POVが narrator として「私 / わたし / 俺」 を使う場合、 s1c5 シオンの「俺」 も含む)
+        const hasPronoun = /[「『（\s。、]?(?:私|わたし|わたくし|俺)(?:[はがにのを、。\s「『])/m.test(contentMd);
         if (isFinalScene || hasName || hasPronoun) {
           const povChar = _findPovChar(povName);
           if (povChar) top.unshift(povChar);
@@ -6929,6 +6941,11 @@ const STORY_POV_EXCLUDE_SCENES = {
   's1c4': [
     // 観測者三柱 (カグヤ + ノクス + セラフィエル) — POV (アルテミス) ではないので除外
     '銀霜の月に呼ばれる者',
+  ],
+  's1c5': [
+    // プロローグ + エピローグ は観測者三柱 POV — POV (シオン) ではないので除外
+    'プロローグ',
+    'エピローグ — 観測者三柱、 七座を仰ぐ',
   ],
 };
 

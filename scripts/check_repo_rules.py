@@ -1189,6 +1189,18 @@ def _read_version_at(ref):
     except Exception:
         return None
 
+
+def _read_last_dev_suffix_at(ref):
+    """指定 ref の version.json から lastDevSuffix を読む (案A 連続管理用)。 無ければ ''"""
+    r = subprocess.run(["git", "-C", str(ROOT), "show", f"{ref}:version.json"],
+                       capture_output=True, text=True, encoding="utf-8", errors="replace")
+    if r.returncode != 0 or not r.stdout:
+        return ""
+    try:
+        return json.loads(r.stdout).get("lastDevSuffix", "") or ""
+    except Exception:
+        return ""
+
 def check_dev_version_suffix():
     """ルール7-23 (BLOCKER 2026-05-04): dev branch では version は X.Y.Z または {X.Y.Z}{suffix(a-z+)} 形式必須。
     主バージョン (X.Y.Z) bump は main マージ時のみ、 dev では suffix a/b/c... で進行 (a→z→aa→ab→...)。
@@ -1273,6 +1285,22 @@ def check_dev_suffix_progression():
             )
             return 1
         return 0
+    # 案A 連続管理 (野沢さん指示 2026-05-05): parent commit の version が X.Y.Z で suffix 空、
+    # かつ lastDevSuffix が残っている場合 (緊急 hotfix sed strip 後の同 X.Y.Z 系列継続) は、
+    # lastDevSuffix を seed に increment 期待 (例: par='1.4.4' + lastDevSuffix='h' → cur='1.4.4i')
+    if not par_suffix:
+        parent_last_dev = _read_last_dev_suffix_at("HEAD")
+        if parent_last_dev:
+            expected = _increment_suffix(parent_last_dev)
+            if cur_suffix != expected:
+                violations.append(
+                    f"[ルール7-25 dev suffix 案A 不正増分 BLOCKER] {parent_ver} (lastDevSuffix='{parent_last_dev}') → {cur_ver} は不正。\n"
+                    f"      → 期待: {par_base}{expected} (lastDevSuffix '{parent_last_dev}' を 1段階 increment)\n"
+                    f"      → 案A 連続管理 (緊急 hotfix sed strip 後で 同 X.Y.Z 系列継続時) の挙動。\n"
+                    f"      → bump_version.py dev-suffix で自動進行可能"
+                )
+                return 1
+            return 0
     expected = _increment_suffix(par_suffix or "")
     if cur_suffix != expected:
         violations.append(
