@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4f — 演出スタイル (Season 1 第1章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4g — 演出スタイル (Season 1 第1章) / dev は cache buster suffix で進行
    ============================================================ */
 :root {
   --bg: #05060d;
@@ -7897,10 +7897,20 @@ body.gasshuku-mode-fantasy .fx-win {
   padding: 0 4px;
 }
 .rel-zoom-reset { font-size: 14px; }
+/* ピンチ操作 hint (モバイルのみ表示、 野沢さん指示 2026-05-05、 PC は 不要なため非表示) */
+.zoom-hint-mobile {
+  display: none;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.55);
+  margin-left: 6px;
+  white-space: nowrap;
+  align-items: center;
+}
 @media (max-width: 720px) {
   .relations-zoom { margin: 4px auto; }
   .rel-zoom-btn { width: 36px; height: 36px; font-size: 18px; }  /* タップ領域 ≥36px */
   .rel-zoom-level { min-width: 50px; font-size: 13px; }
+  .zoom-hint-mobile { display: inline-flex; }
 }
 .relations-list {
   position: absolute;
