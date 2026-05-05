@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.3k — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.3l — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -10106,8 +10106,14 @@ async function loadNotifications() {
   }
 
   // 既読 set を 適用
+  // release (changelog) は 常に既読扱い (野沢さん指示 2026-05-05): 新版初回アクセス時に
+  //   既存 update-modal で ほぼ必ず確認されるため、 ベル経由は 「振り返り」 用途のみ。
+  //   未読バッジ / 未読タブには 含めない (個別返信 + broadcast のみ未読化)。
   const readSet = _getNotifReadSet();
-  items.forEach(n => { n.read = readSet.has(n.id); });
+  items.forEach(n => {
+    if (n.kind === 'release') n.read = true;
+    else n.read = readSet.has(n.id);
+  });
   // 新しい順
   items.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
   _notifications = items;
