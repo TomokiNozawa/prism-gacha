@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.3e — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.3f — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -8969,6 +8969,46 @@ function showAccountModal() {
   modal.classList.add('active');
 }
 
+// デバッグ: state.history + best/worst の状態を Clipboard にコピー (admin user のみ)
+// 野沢さんがスマホで開いた時、 5/4 R10連 が history に存在するか直接確認するため
+function _dumpTScoreDebug() {
+  try {
+    const dump = {
+      device: navigator.userAgent.slice(0, 80),
+      url: location.host,
+      ver: document.getElementById('app-version')?.textContent || '?',
+      authUid: (typeof authUser !== 'undefined' && authUser) ? authUser.uid.slice(0, 8) : '(guest)',
+      tScoreBackfilledVersion: state.tScoreBackfilledVersion,
+      tScoreBackfilled: state.tScoreBackfilled,
+      bestTScore: state.bestTScore,
+      bestAt: state.bestAt ? new Date(state.bestAt).toISOString() : null,
+      bestResultsCount: (state.bestResults || []).length,
+      worstTScore: state.worstTScore,
+      worstAt: state.worstAt ? new Date(state.worstAt).toISOString() : null,
+      worstResultsCount: (state.worstResults || []).length,
+      historyCount: (state.history || []).length,
+      historySummary: (state.history || []).slice(0, 60).map(e => ({
+        at: e.at ? new Date(e.at).toISOString().replace('T', ' ').slice(0, 19) : null,
+        tier: e.tier,
+        name: e.name,
+      })),
+    };
+    const text = JSON.stringify(dump, null, 2);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        if (typeof showToast === 'function') showToast('履歴デバッグ情報をコピーしました');
+      }).catch(() => {
+        prompt('Clipboard 失敗 — 下記をコピーして送ってください', text);
+      });
+    } else {
+      prompt('Clipboard API なし — 下記をコピーして送ってください', text);
+    }
+  } catch (e) {
+    if (typeof showToast === 'function') showToast('debug dump エラー: ' + e.message);
+    console.error(e);
+  }
+}
+
 // 偏差値ヒストリー UI: best/worst を レンダリング、 未記録なら empty メッセージのみ
 function _renderTScoreHistorySection() {
   const bestRow = document.getElementById('account-tscore-best');
@@ -8992,6 +9032,11 @@ function _renderTScoreHistorySection() {
     worstRow.style.display = 'none';
   }
   emptyEl.style.display = (hasBest || hasWorst) ? 'none' : '';
+  // デバッグボタン: admin user のみ表示 (野沢さんが 履歴を確認してチャットに貼り付けるため)
+  const debugBtn = document.getElementById('ts-debug-btn');
+  if (debugBtn) {
+    debugBtn.style.display = (typeof isPrismAdmin !== 'undefined' && isPrismAdmin) ? '' : 'none';
+  }
 }
 
 function _formatTScoreDate(ts) {
