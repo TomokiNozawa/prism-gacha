@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4f — 演出スタイル (Season 1 第1章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4a — 演出スタイル (Season 1 第1章) / dev は cache buster suffix で進行
    ============================================================ */
 :root {
   --bg: #05060d;
@@ -3862,10 +3862,10 @@ body.has-offline-banner .topbar { margin-top: 30px; }
   .relations-header { padding: 10px 12px 10px 12px; padding-top: 48px; gap: 6px; flex-direction: column; align-items: stretch; }  /* close は absolute 右上配置のため、 上に padding-top 48px で zoom 等を下にずらして被り回避 */
   /* ワールドマップは シンプル 1行 layout 維持 (野沢さん指示 2026-05-05、 column 化撤回)、
      余白は 相関図と同等の コンパクトさに 詰める (野沢さん指示 2026-05-05) */
-  .world-map-header { padding: 6px 12px; padding-top: calc(env(safe-area-inset-top, 0px) + 6px); gap: 6px; }
+  .world-map-header { padding: 6px 12px; padding-top: calc(env(safe-area-inset-top, 0px) + 6px); column-gap: 6px; row-gap: 0; }
   .world-map-header h2 { font-size: 14px; margin: 0; }
   .world-map-header > .close { font-size: 11px; padding: 4px 9px; min-height: 28px; }
-  .world-map-header > .wm-zoom { margin: 2px auto 0; }
+  .world-map-header > .wm-zoom { margin: 1px auto 0; }  /* スマホは 行間 1px で 詰める */
   /* スマホ wm-zoom は base スタイルで OK (中身fit + 中央寄せ)、 padding 上書き不要 */
   .relations-header h2 { font-size: 16px; margin: 0; text-align: center; }
   .relations-legend { justify-content: center; gap: 6px; font-size: 10px; }
@@ -5523,7 +5523,10 @@ body.gasshuku-modal-open {
 .world-map-header {
   display: flex; align-items: center; justify-content: space-between;
   padding: 10px 14px;
-  gap: 8px;
+  /* col 8px / row 0: 行間は zoom margin で 微調整 (野沢さん指示 2026-05-05 「タイトル行と
+     Zoom行の間隔が 若干広い、 詰めて」) — 旧 gap 8px が row-gap にも効いて間延びしていた */
+  column-gap: 8px;
+  row-gap: 0;
   background: rgba(0,0,0,0.5);
   border-bottom: 1px solid rgba(255,255,255,0.1);
   backdrop-filter: blur(8px);
@@ -5561,7 +5564,7 @@ body.gasshuku-modal-open {
 }
 .world-map-header > .wm-zoom {
   flex: 0 0 auto;          /* 中身 fit (relations-zoom と同形式の コンパクト枠) */
-  margin: 4px auto 0;       /* 別行 + 中央寄せ */
+  margin: 2px auto 0;       /* 別行 + 中央寄せ、 タイトル行との間隔は 微小に */
 }
 .world-map-body {
   flex: 1; display: grid; grid-template-columns: 1fr 320px;
