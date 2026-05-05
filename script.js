@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4d — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4e — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -3829,12 +3829,8 @@ function openRelations() {
   _redrawRelationsCanvas();
   document.getElementById('relations').classList.add('active');
 
-  // 初期位置: transform リセット (viewBox preserveAspectRatio で 元から中央表示、
-  //   SVG transform 方式に移行済、 野沢さん指示 2026-05-05)
-  setTimeout(() => {
-    _relationsTx = 0; _relationsTy = 0; _relationsZoom = 1.0;
-    _applyRelationsTransform();
-  }, 0);
+  // 初期位置: デフォルト zoom (1.5x) + 中央 anchor (野沢さん指示 2026-05-05 「100%が遠すぎ」)
+  setTimeout(() => { zoomRelationsReset(); }, 0);
 
   bindRelationsPan(canvas);
   bindRelationsZoomWheel(canvas);
@@ -3851,10 +3847,15 @@ function openRelations() {
 //   svg 内 <g class="rel-pan-layer"> に transform: translate(tx,ty) scale(zoom) を適用。
 //   旧 CSS calc + scrollLeft 方式は reflow heavy で ピンチがぎこちなかった。
 //   transform は GPU 加速で 滑らか + anchor zoom が 正確。
-let _relationsZoom = 1.0;
+// REL_ZOOM_DEFAULT (野沢さん指示 2026-05-05 「100% が 遠すぎ」):
+//   svg viewBox + preserveAspectRatio fit で 元 (=1.0) は 周囲 PAD 込み 全表示 → コンテンツが
+//   画面の半分程度 で 小さい印象 → デフォルト 1.5x で 「100% 表示」 = 画面いっぱい近い 体感。
+//   zoom level 表示は (zoom / DEFAULT) × 100 % で デフォルト = 100% に なるよう変換。
+const REL_ZOOM_DEFAULT = 1.5;
+let _relationsZoom = REL_ZOOM_DEFAULT;
 let _relationsTx = 0;
 let _relationsTy = 0;
-const REL_ZOOM_MIN = 0.5, REL_ZOOM_MAX = 2.5, REL_ZOOM_STEP = 0.2;
+const REL_ZOOM_MIN = REL_ZOOM_DEFAULT * 0.4, REL_ZOOM_MAX = REL_ZOOM_DEFAULT * 2.0, REL_ZOOM_STEP = 0.3;
 // SVG viewBox 座標系のサイズ (W=2000*1.5+200pad×2=3400、 H=1600*1.5+200pad×2=2800)
 const REL_VBX_W = 3400, REL_VBX_H = 2800;
 
@@ -3871,7 +3872,8 @@ function _applyRelationsTransform() {
   _relationsTy = Math.max(-maxOffY, Math.min(maxOffY, _relationsTy));
   layer.setAttribute('transform', `translate(${_relationsTx},${_relationsTy}) scale(${_relationsZoom})`);
   const lvl = document.getElementById('rel-zoom-level');
-  if (lvl) lvl.textContent = Math.round(_relationsZoom * 100) + '%';
+  // zoom level 表示は デフォルト = 100% で 換算 (野沢さん指示 2026-05-05)
+  if (lvl) lvl.textContent = Math.round((_relationsZoom / REL_ZOOM_DEFAULT) * 100) + '%';
 }
 
 function setRelationsZoom(z) {
@@ -3892,9 +3894,16 @@ function _zoomRelationsAnchored(newZoom, anchorX, anchorY) {
   _applyRelationsTransform();
 }
 
-function zoomRelationsIn()    { _zoomRelationsAnchored(_relationsZoom + REL_ZOOM_STEP, REL_VBX_W / 2, REL_VBX_H / 2); }
-function zoomRelationsOut()   { _zoomRelationsAnchored(_relationsZoom - REL_ZOOM_STEP, REL_VBX_W / 2, REL_VBX_H / 2); }
-function zoomRelationsReset() { _relationsTx = 0; _relationsTy = 0; _relationsZoom = 1.0; _applyRelationsTransform(); }
+// viewBox 中心 (= svg コンテンツの 中心点、 viewBox 内座標で (1500, 1200))
+function _relCenter() { return { x: REL_VBX_W / 2 - 200, y: REL_VBX_H / 2 - 200 }; }
+function zoomRelationsIn()    { const c = _relCenter(); _zoomRelationsAnchored(_relationsZoom + REL_ZOOM_STEP, c.x, c.y); }
+function zoomRelationsOut()   { const c = _relCenter(); _zoomRelationsAnchored(_relationsZoom - REL_ZOOM_STEP, c.x, c.y); }
+function zoomRelationsReset() {
+  // デフォルト zoom (REL_ZOOM_DEFAULT = 1.5x) で 中央 anchor リセット (野沢さん指示 2026-05-05)
+  _relationsTx = 0; _relationsTy = 0; _relationsZoom = 1.0;
+  const c = _relCenter();
+  _zoomRelationsAnchored(REL_ZOOM_DEFAULT, c.x, c.y);
+}
 window.zoomRelationsIn = zoomRelationsIn;
 window.zoomRelationsOut = zoomRelationsOut;
 window.zoomRelationsReset = zoomRelationsReset;
@@ -3955,12 +3964,8 @@ function setRelationsMode(mode) {
   } else {
     if (canvas) canvas.style.display = '';
     if (list) list.style.display = 'none';
-    // graph mode 切替時 transform リセット (中央 = tx/ty=0、 viewBox preserveAspectRatio で
-    //   元から中央表示。 SVG transform 方式に移行済、 野沢さん指示 2026-05-05)
-    setTimeout(() => {
-      _relationsTx = 0; _relationsTy = 0; _relationsZoom = 1.0;
-      _applyRelationsTransform();
-    }, 0);
+    // graph mode 切替時 デフォルト zoom (1.5x) + 中央 anchor (野沢さん指示 2026-05-05)
+    setTimeout(() => { zoomRelationsReset(); }, 0);
   }
 }
 function renderRelationsList(container) {
