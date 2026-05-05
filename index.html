@@ -24,8 +24,8 @@
 <link rel="icon" href="/images/icons/icon-32.png" type="image/png" sizes="32x32">
 <link rel="icon" href="/images/icons/icon-16.png" type="image/png" sizes="16x16">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
-<link rel="manifest" href="/manifest.json?v=1.4.3">
-<link rel="stylesheet" href="/style.css?v=1.4.3">
+<link rel="manifest" href="/manifest.json?v=1.4.3o">
+<link rel="stylesheet" href="/style.css?v=1.4.3o">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -67,7 +67,7 @@ if ('serviceWorker' in navigator) {
 </div>
 
 <header class="topbar">
-  <div class="title">✦ Prismaera <span class="title-kana">-プリズマエラ-</span> <span class="ver" id="app-version">v1.4.3</span></div>
+  <div class="title">✦ Prismaera <span class="title-kana">-プリズマエラ-</span> <span class="ver" id="app-version">v1.4.3o</span></div>
   <div class="stats">
     <button id="btn-gallery" class="gallery-btn" title="図鑑 (Gキー)">📖 図鑑</button>
     <button id="btn-relations" class="gallery-btn" title="相関図">🌐 相関図</button>
@@ -81,6 +81,7 @@ if ('serviceWorker' in navigator) {
       <button class="topbar-secondary-close" id="btn-secondary-close" type="button" aria-label="閉じる">×</button>
       <button id="btn-history" class="gallery-btn" title="ガチャ履歴">📜 <span class="btn-short">履歴</span><span class="btn-long">ガチャ履歴</span></button>
       <button id="btn-bgm" class="gallery-btn" title="BGM詳細">🎵 <span class="btn-short">BGM</span><span class="btn-long">BGM設定</span></button>
+      <button id="btn-notifications" class="gallery-btn notif-btn" title="お知らせ" onclick="openNotificationsModal()">🔔 <span class="btn-short">お知らせ</span><span class="btn-long">お知らせ</span><span class="notif-badge" id="notif-badge" style="display:none">0</span></button>
       <button id="btn-settings" class="gallery-btn" title="設定" onclick="openSettingsModal()">⚙️ <span class="btn-short">設定</span><span class="btn-long">設定</span></button>
       <a id="btn-env-prod" class="gallery-btn env-switch env-prod" href="https://prismaera.pages.dev/" title="本番環境へ移動" style="display:none;text-decoration:none">🚀 本番</a>
       <a id="btn-env-dev" class="gallery-btn env-switch env-dev" href="https://dev.prismaera.pages.dev/" title="開発環境へ移動 (gengor専用)" style="display:none;text-decoration:none">🧪 dev</a>
@@ -112,11 +113,9 @@ if ('serviceWorker' in navigator) {
         <div class="cta-card-buttons">
           <button id="btn-single" class="summon single">
             <span class="lbl">単発</span>
-            <span class="hint">Space</span>
           </button>
           <button id="btn-ten" class="summon ten">
             <span class="lbl">10連</span>
-            <span class="hint">Enter</span>
           </button>
         </div>
       </div>
@@ -142,6 +141,26 @@ if ('serviceWorker' in navigator) {
         </div>
       </div>
     </div>
+
+    <!-- カードバトル 主役行 (アカウント登録者限定、 hero 直下に full-width で格上げ表示) -->
+    <a class="home-cardgame-row" id="home-cardgame-row" href="/cardgame/" style="display:none" aria-label="カードバトル β">
+      <div class="home-cardgame-row-aurora"></div>
+      <div class="home-cardgame-row-icon">🎴</div>
+      <div class="home-cardgame-row-text">
+        <div class="home-cardgame-row-title">
+          <span class="home-cardgame-row-headline">カードバトル</span>
+          <span class="home-cardgame-badge">β</span>
+          <span class="home-cardgame-badge home-cardgame-new" id="home-cardgame-new" style="display:none">NEW!</span>
+        </div>
+        <div class="home-cardgame-row-tagline">虹霊たちが、 場に降りる ─ 派閥シナジー & 章コンボの戦略バトル</div>
+        <div class="home-cardgame-row-meta">
+          <span class="home-cardgame-row-meta-tag">vs AI 4段階</span>
+          <span class="home-cardgame-row-meta-sep">ー</span>
+          <span class="home-cardgame-row-meta-tag">3レーン × 6ターン</span>
+        </div>
+      </div>
+      <div class="home-cardgame-row-arrow">▶</div>
+    </a>
 
     <div class="home-actions-row">
       <!-- 左カラム (主役): Story Entry + 次章ティザー -->
@@ -173,18 +192,8 @@ if ('serviceWorker' in navigator) {
         <div class="story-next-teaser" aria-label="次章準備中"></div>
       </div>
 
-      <!-- 右カラム: ご意見・ご要望 + (ログイン者限定) カードゲームβ -->
+      <!-- 右カラム: ご意見・ご要望 -->
       <div class="home-right-col">
-        <!-- カードゲーム (Phase 0 PoC) — アカウント登録者限定で表示 -->
-        <a class="home-cardgame-card" id="home-cardgame-card" href="/cardgame/" style="display:none" aria-label="カードゲームPoC">
-          <div class="home-cardgame-aurora"></div>
-          <div class="home-cardgame-icon">🎴</div>
-          <div class="home-cardgame-text">
-            <div class="home-cardgame-title">カードゲーム <span class="home-cardgame-badge">β</span></div>
-            <div class="home-cardgame-sub">Phase 0 PoC 公開中 — vs AI で試遊</div>
-          </div>
-          <div class="home-cardgame-arrow">→</div>
-        </a>
         <!-- ご意見・ご要望 -->
         <div class="home-feedback">
           <button type="button" class="home-feedback-card" onclick="openFeedbackModal()">
@@ -460,7 +469,51 @@ if ('serviceWorker' in navigator) {
         <div class="account-info-row"><span>所持LR</span><b id="account-info-lr">0</b></div>
         <div class="account-info-row"><span>最終同期</span><b id="account-info-sync">-</b></div>
       </div>
+
+      <!-- 偏差値ヒストリー (10連 自己ベスト/ワースト、 「結果を見る」 で過去リザルト 再表示) -->
+      <div class="account-tscore-section">
+        <div class="account-tscore-title">📊 偏差値ヒストリー</div>
+        <div class="account-tscore-rows">
+          <div class="account-tscore-row" id="account-tscore-best" style="display:none">
+            <div class="ts-label ts-label-best">最高</div>
+            <div class="ts-main">
+              <div class="ts-value" id="account-tscore-best-value">-</div>
+              <div class="ts-date" id="account-tscore-best-date">-</div>
+            </div>
+            <button type="button" class="ts-view" onclick="showTScoreArchive('best')">結果を見る</button>
+          </div>
+          <div class="account-tscore-row" id="account-tscore-worst" style="display:none">
+            <div class="ts-label ts-label-worst">最低</div>
+            <div class="ts-main">
+              <div class="ts-value" id="account-tscore-worst-value">-</div>
+              <div class="ts-date" id="account-tscore-worst-date">-</div>
+            </div>
+            <button type="button" class="ts-view" onclick="showTScoreArchive('worst')">結果を見る</button>
+          </div>
+        </div>
+        <div class="account-tscore-empty" id="account-tscore-empty">10連を引くとここに記録されます</div>
+        <!-- デバッグ: admin user のみ表示。 履歴 JSON を Clipboard コピー → チャット貼付で 確認 -->
+        <button type="button" class="ts-debug-btn" id="ts-debug-btn" onclick="_dumpTScoreDebug()" style="display:none">🔧 履歴デバッグ情報をコピー</button>
+      </div>
+
       <button class="account-logout" onclick="doAccountLogout()">ログアウト (ゲストに戻る)</button>
+    </div>
+  </div>
+</div>
+
+<!-- Notifications Modal (お知らせ: 個別返信 + admin broadcast + リリースノート 統合) -->
+<div id="notifications-modal" class="notifications-modal">
+  <div class="notif-inner">
+    <button class="notif-close" onclick="closeNotificationsModal()" aria-label="閉じる">×</button>
+    <h2 class="notif-title">🔔 お知らせ</h2>
+    <div class="notif-tabs">
+      <button class="notif-tab active" data-filter="all" onclick="setNotificationFilter('all')">すべて <span id="notif-cnt-all">0</span></button>
+      <button class="notif-tab" data-filter="unread" onclick="setNotificationFilter('unread')">未読 <span id="notif-cnt-unread">0</span></button>
+      <button class="notif-tab" data-filter="reply" onclick="setNotificationFilter('reply')">返信 <span id="notif-cnt-reply">0</span></button>
+      <button class="notif-tab" data-filter="release" onclick="setNotificationFilter('release')">更新履歴 <span id="notif-cnt-release">0</span></button>
+    </div>
+    <div class="notif-list" id="notif-list">
+      <div class="notif-empty">読込中...</div>
     </div>
   </div>
 </div>
@@ -620,7 +673,7 @@ if ('serviceWorker' in navigator) {
 <audio id="bgm-home" preload="auto"></audio>
 
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
-<script src="/script.js?v=1.4.3"></script>
-<script src="/gasshuku.js?v=1.4.3"></script>
+<script src="/script.js?v=1.4.3o"></script>
+<script src="/gasshuku.js?v=1.4.3o"></script>
 </body>
 </html>

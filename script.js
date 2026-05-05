@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.3 — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.3o — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -1053,6 +1053,15 @@ function loadState() {
       unlockedSet: raw.unlockedSet || {},  // "UR_セラフィエル": true （永続）
       dupCounts: raw.dupCounts || {},       // "UR_セラフィエル": 凸数 (初回0)
       storyProgress: raw.storyProgress || {}, // {s1c1: {lastSceneIndex, totalScenes, lastReadAt, completed}}
+      // 偏差値ヒストリー (野沢さん指示 2026-05-05): 10連 偏差値の自己ベスト/ワーストを記録
+      bestTScore: typeof raw.bestTScore === 'number' ? raw.bestTScore : -1,
+      worstTScore: typeof raw.worstTScore === 'number' ? raw.worstTScore : -1,
+      bestAt: raw.bestAt || 0,
+      worstAt: raw.worstAt || 0,
+      bestResults: Array.isArray(raw.bestResults) ? raw.bestResults : [],
+      worstResults: Array.isArray(raw.worstResults) ? raw.worstResults : [],
+      tScoreBackfilled: !!raw.tScoreBackfilled,                     // 互換: 旧 v1 backfill 完了 flag
+      tScoreBackfilledVersion: raw.tScoreBackfilledVersion || 0,    // backfill ロジック version (v2 = at連続性 chunking)
     };
     // マイグレーション: 既存 history からunlockedSetを補完 (旧セーブデータ救済)
     for (const h of s.history) {
@@ -1061,7 +1070,8 @@ function loadState() {
     }
     return s;
   } catch {
-    return { total:0, ur:0, pity:0, history:[], galleryViewed:{}, unlockedSet:{}, dupCounts:{}, storyProgress:{} };
+    return { total:0, ur:0, pity:0, history:[], galleryViewed:{}, unlockedSet:{}, dupCounts:{}, storyProgress:{},
+      bestTScore: -1, worstTScore: -1, bestAt: 0, worstAt: 0, bestResults: [], worstResults: [], tScoreBackfilled: false, tScoreBackfilledVersion: 0 };
   }
 }
 function saveState() {
@@ -1463,7 +1473,7 @@ function _unlockBodyScroll() {
   }
 }
 function _isAllModalsHidden() {
-  const checkActive = ['#char-detail', '#story-modal', '#bgm-panel', '#feedback-modal', '#history-modal', '#migration-modal', '#update-modal', '#account-modal', '#welcome-modal', '#settings-modal', '#account-prompt', '#story-list-modal', '#world-map', '#char-img-zoom', '#relations', '#gallery', '#result', '#rank-table-modal', '#rate-detail-modal'];
+  const checkActive = ['#char-detail', '#story-modal', '#bgm-panel', '#feedback-modal', '#history-modal', '#migration-modal', '#update-modal', '#account-modal', '#welcome-modal', '#settings-modal', '#account-prompt', '#story-list-modal', '#world-map', '#char-img-zoom', '#relations', '#gallery', '#result', '#rank-table-modal', '#rate-detail-modal', '#notifications-modal'];
   for (const sel of checkActive) {
     const el = document.querySelector(sel);
     if (!el) continue;
@@ -2848,7 +2858,10 @@ function hideHintTap() {
   if (h) h.remove();
 }
 
-function showResult(results, best) {
+function showResult(results, best, opts) {
+  // opts.archive: 過去ベスト/ワースト 再表示モード (best/worst 更新せず、 ヘッダ文言を変える)
+  const isArchive = !!(opts && opts.archive);
+  const archiveAt = opts && opts.archiveAt;
   const grid = $("#result-grid");
   grid.innerHTML = "";
   // 最高レアを最後にソート(結果確認しやすい)
@@ -2866,8 +2879,11 @@ function showResult(results, best) {
     imgEl.decoding = "async";
     imgEl.draggable = false;
     c.appendChild(imgEl);
-    c.style.cursor = 'pointer';
-    c.addEventListener('click', () => showCharDetail(r));
+    if (!isArchive) {
+      // archive モードでは sanitized オブジェクト渡しで showCharDetail 動作不安定 → click 無効化
+      c.style.cursor = 'pointer';
+      c.addEventListener('click', () => showCharDetail(r));
+    }
     if (r.isNew) {
       const nb = document.createElement("div");
       nb.className = "rcard-new";
@@ -2892,10 +2908,17 @@ function showResult(results, best) {
   const nUR = results.filter(r => r.tier === "UR").length;
   const nSSR = results.filter(r => r.tier === "SSR").length;
   const nNew = results.filter(r => r.isNew).length;
-  let title = hasLR ? `👑 LEGEND ×${nLR} 降臨!!!` :
-              hasUR ? `🌈 UR ×${nUR} 獲得!!` :
-              hasSSR ? `✨ SSR ×${nSSR} 獲得!` : "10連結果";
-  if (nNew > 0) title += `  /  NEW ×${nNew}`;
+  let title;
+  if (isArchive) {
+    const dt = archiveAt ? new Date(archiveAt) : null;
+    const dateStr = dt ? `${dt.getMonth()+1}/${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}` : '';
+    title = `📊 過去のリザルト${dateStr ? ' (' + dateStr + ' 記録)' : ''}`;
+  } else {
+    title = hasLR ? `👑 LEGEND ×${nLR} 降臨!!!` :
+            hasUR ? `🌈 UR ×${nUR} 獲得!!` :
+            hasSSR ? `✨ SSR ×${nSSR} 獲得!` : "10連結果";
+    if (nNew > 0) title += `  /  NEW ×${nNew}`;
+  }
   $("#result-title").textContent = title;
 
   // 希少度表示
@@ -2917,8 +2940,110 @@ function showResult(results, best) {
     `<button type="button" class="rank-help-btn" onclick="showRankTable()" title="ランク表を表示">ランク表 (?)</button>`;
   rarBox.appendChild(lineEl);
 
+  // 偏差値ヒストリー: 10連 (10件) のみ自己ベスト/ワーストを更新 (archive モード時はスキップ)
+  if (!isArchive && results.length === 10) {
+    _updateTScoreHistory(results, rar.tScore);
+  }
+
   $("#result").classList.add("active");
   resultOpenedAt = Date.now();
+}
+
+// 偏差値ヒストリー: 10連 結果と tScore で自己ベスト/ワーストを更新
+function _updateTScoreHistory(results, tScore) {
+  const now = Date.now();
+  const snap = results.map(_sanitizeResultEntryForCloud);
+  let bestUpdated = false, worstUpdated = false;
+  if (state.bestTScore < 0 || tScore > state.bestTScore) {
+    state.bestTScore = tScore;
+    state.bestAt = now;
+    state.bestResults = snap;
+    bestUpdated = true;
+  }
+  if (state.worstTScore < 0 || tScore < state.worstTScore) {
+    state.worstTScore = tScore;
+    state.worstAt = now;
+    state.worstResults = snap;
+    worstUpdated = true;
+  }
+  if (bestUpdated || worstUpdated) {
+    saveState();
+    // 即時 cloud sync (野沢さん指示 2026-05-05 「端末ごとじゃなくてアカウントごとにしてね」):
+    //   通常の saveStateCloud は scheduleCloudSync で 800ms debounce → ブラウザ閉じ等で
+    //   sync 漏れ → 端末間で best/worst が ズレる事故。 best/worst 更新時のみ debounce skip
+    //   して 即座に saveStateCloud で push、 アカウント単位 整合性を 確実化。
+    if (typeof saveStateCloud === 'function' && typeof authUser !== 'undefined' && authUser) {
+      saveStateCloud();
+    }
+    if (bestUpdated && state.bestTScore >= 50 && typeof showToast === 'function') {
+      // 控えめな更新通知 (派手なエフェクト無し、 電池配慮)
+      showToast(`📊 自己ベスト更新! 偏差値 ${tScore}`);
+    }
+  }
+}
+
+// 偏差値ヒストリー: 永続保持仕様 (野沢さん指示 2026-05-05)
+//   max/min は 一度記録されたら 履歴 cap (120件) を超えても 永続保持される。
+//   forward update (showResult → _updateTScoreHistory) のみで「現在結果 vs 保持 max/min」
+//   を比較し 更新ある時のみ 保持データを 書き換える。
+//   backfill (history からの一括 再計算) は **未記録時の初期化のみ** 実行 (= 新規 user
+//   が history を持つが best/worst 未記録の場合)。 既に記録済の値は 二度と上書きしない
+//   (= cap 外データが 失われる事故 を 防ぐ)。
+const TSCORE_BACKFILL_VERSION = 3;
+function backfillTScoreFromHistory() {
+  // 永続保持: 既に best/worst 両方 記録済なら 触らない (forward update のみで運用)
+  const hasBest = typeof state.bestTScore === 'number' && state.bestTScore >= 0;
+  const hasWorst = typeof state.worstTScore === 'number' && state.worstTScore >= 0;
+  if (hasBest && hasWorst) {
+    state.tScoreBackfilledVersion = TSCORE_BACKFILL_VERSION;
+    state.tScoreBackfilled = true;
+    return;
+  }
+  if (!Array.isArray(state.history) || state.history.length < 10) {
+    state.tScoreBackfilledVersion = TSCORE_BACKFILL_VERSION;
+    state.tScoreBackfilled = true;
+    saveState();
+    return;
+  }
+  // 未記録 (片方 or 両方) の場合のみ history から 初期値推定
+  // history は unshift で追加 = 新しい順、 at 降順 を期待。 念のため sort。
+  const sorted = [...state.history].sort((a, b) => (b.at || 0) - (a.at || 0));
+  // at 差で「10連」 group を検出: 同一 10連の 10件は ms 差で連続 (50-100ms 程度)、
+  //   単発 と 10連 の境目は通常 数秒以上離れる。 threshold 1000ms で 安全に切り分け。
+  const GROUP_GAP_MS = 1000;
+  const groups = [];
+  let cur = [];
+  for (const entry of sorted) {
+    if (cur.length === 0) { cur.push(entry); continue; }
+    const prevAt = cur[cur.length - 1].at || 0;
+    const at = entry.at || 0;
+    if (Math.abs(prevAt - at) <= GROUP_GAP_MS) {
+      cur.push(entry);
+    } else {
+      groups.push(cur);
+      cur = [entry];
+    }
+  }
+  if (cur.length > 0) groups.push(cur);
+
+  // 各 group を確認、 size === 10 のものだけ tScore 計算 (単発 group や 端数 group は除外)
+  // 既に hasBest=true なら best は 触らず、 hasWorst=true なら worst は 触らない (永続保持)
+  for (const group of groups) {
+    if (group.length !== 10) continue;
+    const rar = computeTenRollRarity(group);
+    const at = group[0].at || Date.now();
+    if (!hasBest && (state.bestTScore < 0 || rar.tScore > state.bestTScore)) {
+      state.bestTScore = rar.tScore; state.bestAt = at;
+      state.bestResults = group.map(_sanitizeResultEntryForCloud);
+    }
+    if (!hasWorst && (state.worstTScore < 0 || rar.tScore < state.worstTScore)) {
+      state.worstTScore = rar.tScore; state.worstAt = at;
+      state.worstResults = group.map(_sanitizeResultEntryForCloud);
+    }
+  }
+  state.tScoreBackfilledVersion = TSCORE_BACKFILL_VERSION;
+  state.tScoreBackfilled = true;
+  saveState();
 }
 
 function closeResult() {
@@ -3723,10 +3848,14 @@ const REL_ZOOM_MIN = 0.5, REL_ZOOM_MAX = 2.5, REL_ZOOM_STEP = 0.2;
 const REL_SVG_BASE_W = 2200, REL_SVG_BASE_H = 1820;
 function setRelationsZoom(z) {
   _relationsZoom = Math.max(REL_ZOOM_MIN, Math.min(REL_ZOOM_MAX, z));
-  const svg = document.querySelector('.relations-canvas svg');
-  if (svg) {
-    svg.style.width  = (REL_SVG_BASE_W * _relationsZoom) + 'px';
-    svg.style.height = (REL_SVG_BASE_H * _relationsZoom) + 'px';
+  // CSS 変数 --rel-zoom を 親 .relations-canvas に setProperty:
+  // svg 要素の width/height は CSS calc(2200px * var(--rel-zoom)) で 動的計算される。
+  // 旧実装は svg.style.width で 直接 inline 書き込みだったが renderRelations で svg innerHTML
+  // が再生成された 際に inline style がクリアされて ボタン押下しても 反映されない事故 (yuppi8213
+  // さん 2026-05-05 「ボタン押せない」 報告) があったため CSS 変数経由に変更。
+  const canvas = document.getElementById('relations-canvas');
+  if (canvas) {
+    canvas.style.setProperty('--rel-zoom', String(_relationsZoom));
   }
   const lvl = document.getElementById('rel-zoom-level');
   if (lvl) lvl.textContent = Math.round(_relationsZoom * 100) + '%';
@@ -7172,6 +7301,14 @@ function _initTeaserHeightSync() {
 }
 document.addEventListener('DOMContentLoaded', _initTeaserHeightSync);
 document.addEventListener('DOMContentLoaded', () => { _refreshPickupChapter(); _refreshChapterReleaseLocks(); _renderHomeNextTeaser(); });
+// 偏差値ヒストリー 後計算: ゲスト時も含めて localStorage の history があれば 1度だけ backfill
+//   v2 ロジック (at連続性 chunking) に移行済の場合のみ skip。 旧 v1 backfill 済 user は v2 で再計算。
+document.addEventListener('DOMContentLoaded', () => {
+  if (typeof backfillTScoreFromHistory === 'function'
+      && state.tScoreBackfilledVersion !== TSCORE_BACKFILL_VERSION) {
+    try { backfillTScoreFromHistory(); } catch (e) { console.error('tScore backfill error:', e); }
+  }
+});
 // 2分毎に再判定 (リリース時刻を跨いだ瞬間に自動 unlock + ピックアップ章 自動切替 + ティザー切替)
 // 野沢さん指摘 2026-05-03 「スマホ電池の減りが凄い」: 60秒→120秒に緩和 + Page Visibility API で hidden 時はスキップ
 setInterval(() => {
@@ -8057,6 +8194,12 @@ document.addEventListener("keydown", e => {
     if (e.key === "Escape") { e.preventDefault(); if (typeof dismissAccountPrompt === 'function') dismissAccountPrompt(); }
     return;
   }
+  // 🔔 お知らせモーダル (Esc 対応、 野沢さん指摘 2026-05-05 「Esc で閉じれない」)
+  const _nm = document.getElementById('notifications-modal');
+  if (_nm && _nm.classList.contains('active')) {
+    if (e.key === "Escape") { e.preventDefault(); if (typeof closeNotificationsModal === 'function') closeNotificationsModal(); }
+    return;
+  }
   // アカウントモーダル (signup/login フォーム)
   const _am = document.getElementById('account-modal');
   if (_am && _am.classList.contains('active')) {
@@ -8172,9 +8315,10 @@ document.addEventListener("keydown", e => {
   // モーダル open 中は Space/Enter による裏ガチャ抑止 (野沢さん指摘 2026-05-02 Space バグ対策)
   // _isAllModalsHidden は ranking/result/char-detail/story 等 主要モーダルを網羅チェック
   if (typeof _isAllModalsHidden === 'function' && !_isAllModalsHidden()) return;
-  if (e.key === " ") { e.preventDefault(); doSingle(); }
-  else if (e.key === "Enter") { e.preventDefault(); doTen(); }
-  else if (e.key === "g" || e.key === "G") { e.preventDefault(); openGallery(); }
+  // 野沢さん指示 2026-05-05: ホーム画面からの Space/Enter ガチャショートカット 廃止
+  // (ピックアップ側にヒント無しで レイアウト揃わない問題 + 初心者向けに 不要)
+  // リザルト画面の Enter (もう一度 10連) / Esc (閉じる) は 上の if ブロックで 維持
+  if (e.key === "g" || e.key === "G") { e.preventDefault(); openGallery(); }
 });
 
 // Init
@@ -8395,6 +8539,8 @@ try {
       authUser = user;
       updateAccountButton();
       if (user && !signupInProgress) { await onAuthReady(user); }
+      // 🔔 お知らせ: ログイン状態確定後 個別 + broadcast を再 fetch (auth前は changelog のみ)
+      if (typeof window._notifReloadOnAuth === 'function') window._notifReloadOnAuth();
       // admin判定も並列で (失敗してもUIには影響しない)
       checkPrismAdmin();
       // F1: visit/streak 記録 (page load毎に1回)
@@ -8586,12 +8732,32 @@ function sanitizeStateForCloud(s) {
     total: s.total || 0,
     ur: s.ur || 0,
     pity: s.pity || 0,
-    history: (Array.isArray(s.history) ? s.history : []).slice(-120),
+    // history は unshift で追加 → 先頭が新しい / 末尾が古い。 slice(-120) は 古い側を残すバグだったため slice(0, 120) で 新しい120件を残す (野沢さん指摘 2026-05-05: 4/24 古いデータが残り 5/4 が消える原因)
+    history: (Array.isArray(s.history) ? s.history : []).slice(0, 120),
     unlockedSet: s.unlockedSet || {},
     dupCounts: s.dupCounts || {},
     galleryViewed: s.galleryViewed || {},
     storyProgress: s.storyProgress || {},
+    bestTScore: typeof s.bestTScore === 'number' ? s.bestTScore : -1,
+    worstTScore: typeof s.worstTScore === 'number' ? s.worstTScore : -1,
+    bestAt: s.bestAt || 0,
+    worstAt: s.worstAt || 0,
+    bestResults: Array.isArray(s.bestResults) ? s.bestResults.slice(0, 10).map(_sanitizeResultEntryForCloud) : [],
+    worstResults: Array.isArray(s.worstResults) ? s.worstResults.slice(0, 10).map(_sanitizeResultEntryForCloud) : [],
+    tScoreBackfilled: !!s.tScoreBackfilled,
+    tScoreBackfilledVersion: s.tScoreBackfilledVersion || 0,
     updatedAt: Date.now(),
+  };
+}
+
+// 偏差値ヒストリー: 10連 results を Firebase 保存用に圧縮 (容量節約 + 必要 field のみ)
+function _sanitizeResultEntryForCloud(r) {
+  return {
+    name: r && r.name ? String(r.name) : '',
+    tier: r && r.tier ? String(r.tier) : 'R',
+    img: r && r.img ? String(r.img) : '',
+    season: r && r.season ? r.season : 1,
+    chapter: r && r.chapter ? String(r.chapter) : '',
   };
 }
 
@@ -8634,22 +8800,23 @@ async function onAuthReady(user) {
     const cloudTotal = cloudState.total || 0;
     const collision = localHasProgress && cloudTotal > 0 && !statesEqual(state, cloudState);
 
-    if (collision) {
-      // 差分あり → 無言で合算 (両者のmax/unionを取り、損失なし)
+    // 進捗退行バグ修正 (野沢さん指摘 2026-05-05、 yuppi8213 さんの 4章+75キャラ → 3章+45キャラ
+    // 退行報告): 旧実装は statesEqual で「衝突なし」 と判定された場合 applyCloudState(cloudState)
+    // で local を 単純上書き → cloud が古い state なら 退行が発生していた。
+    // 新実装: 常に mergeStates 経由で union (max/union ベース、 退行物理的に不可) を取る。
+    // collision 判定は「データを最新化しました」 トーストの 出すかどうかにのみ使用。
+    if (cloudTotal > 0 || localHasProgress) {
       const merged = mergeStates(state, cloudState);
       applyCloudState(merged);
+      // 偏差値ヒストリー: 永続保持仕様、 未記録時のみ history から 初期推定
+      if (typeof backfillTScoreFromHistory === 'function'
+          && state.tScoreBackfilledVersion !== TSCORE_BACKFILL_VERSION) {
+        backfillTScoreFromHistory();
+      }
       await saveStateCloud();
-      showToast('データを最新化しました');
-      try { await fbDb.ref('prism-gacha/users/' + user.uid + '/lastLoginAt').set(Date.now()); } catch (e) {}
-      return;
+      if (collision) showToast('データを最新化しました');
     }
-
-    // 衝突なし → cloud が優位 (cloudが空ならlocalを送る)
-    if (cloudTotal > 0) {
-      applyCloudState(cloudState);
-    } else {
-      await saveStateCloud();
-    }
+    // local も cloud も空: 何もしない (新規ユーザー)
 
     try { await fbDb.ref('prism-gacha/users/' + user.uid + '/lastLoginAt').set(Date.now()); } catch (e) {}
   } catch (e) {
@@ -8666,11 +8833,41 @@ function applyCloudState(cs) {
   state.total = cs.total || 0;
   state.ur = cs.ur || 0;
   state.pity = cs.pity || 0;
-  state.history = Array.isArray(cs.history) ? cs.history : [];
+  // history は cloud と local を merge (野沢さん指摘 2026-05-05 「スマホで開いても反映されない」 対策):
+  // 旧実装は cloud の history で local を 単純上書きしていたため、 local にしか無い 10連
+  // (例: スマホ で 5/4 引いた R10連 が cloud sync 漏れていた場合) が 永久に消失していた。
+  // → 新実装: 連結 + at 降順 sort + 重複除去 (at|tier|name) + 新しい120件保持。 local に
+  //   しか無い 10連 entry も 保護され、 直後の saveStateCloud で cloud に書き戻される。
+  const localHist = Array.isArray(state.history) ? state.history : [];
+  const cloudHist = Array.isArray(cs.history) ? cs.history : [];
+  const histCombined = [...cloudHist, ...localHist];
+  histCombined.sort((a, b) => (b.at || 0) - (a.at || 0));
+  const histSeen = new Set();
+  const histDedup = [];
+  for (const e of histCombined) {
+    const key = `${e.at || 0}|${e.tier || ''}|${e.name || ''}`;
+    if (histSeen.has(key)) continue;
+    histSeen.add(key);
+    histDedup.push(e);
+  }
+  state.history = histDedup.slice(0, 120);
+
   state.galleryViewed = cs.galleryViewed || {};
   state.unlockedSet = cs.unlockedSet || {};
   state.dupCounts = cs.dupCounts || {};
   state.storyProgress = cs.storyProgress || {};
+  // 偏差値ヒストリー (cloud → local) — backfill v3 で history から 再計算するので 一旦 cloud 値を採用
+  state.bestTScore = typeof cs.bestTScore === 'number' ? cs.bestTScore : -1;
+  state.worstTScore = typeof cs.worstTScore === 'number' ? cs.worstTScore : -1;
+  state.bestAt = cs.bestAt || 0;
+  state.worstAt = cs.worstAt || 0;
+  state.bestResults = Array.isArray(cs.bestResults) ? cs.bestResults : [];
+  state.worstResults = Array.isArray(cs.worstResults) ? cs.worstResults : [];
+  state.tScoreBackfilled = !!cs.tScoreBackfilled;
+  // 永続保持仕様 (野沢さん指示 2026-05-05): cloud から取得した version を そのまま採用、
+  //   backfill 強制再走させない。 既に best/worst 記録済なら 二度と history から 上書きしない
+  //   (= cap 外データが 失われる事故 を 防ぐ)。 未記録時のみ backfill が 初期推定する。
+  state.tScoreBackfilledVersion = cs.tScoreBackfilledVersion || 0;
   localStorage.setItem("prism-gacha", JSON.stringify(state));
   updateHUD();
   if (typeof renderHistory === 'function') renderHistory();
@@ -8691,8 +8888,46 @@ function mergeStates(local, cloud) {
   for (const k of allDupKeys) {
     merged.dupCounts[k] = Math.max((local.dupCounts && local.dupCounts[k]) || 0, (cloud.dupCounts && cloud.dupCounts[k]) || 0);
   }
+  // history 連結 → at 降順 sort → 重複除去 → 新しい120件を保持 (野沢さん指摘 2026-05-05)
+  // 旧 slice(-120) は cloud/local の連結順依存で 新旧入り混じりの末尾120件が 古いデータに偏るバグ
   const combined = [...(cloud.history || []), ...(local.history || [])];
-  merged.history = combined.slice(-120);
+  combined.sort((a, b) => (b.at || 0) - (a.at || 0));
+  // 同一エントリ重複除去 (at + tier + name で identity)
+  const seen = new Set();
+  const dedup = [];
+  for (const e of combined) {
+    const key = `${e.at || 0}|${e.tier || ''}|${e.name || ''}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    dedup.push(e);
+  }
+  merged.history = dedup.slice(0, 120);
+  // 偏差値ヒストリー: 高い方/低い方を採用 (記録 -1 は未記録扱いで除外)
+  const localBest = (typeof local.bestTScore === 'number' && local.bestTScore >= 0) ? local.bestTScore : -1;
+  const cloudBest = (typeof cloud.bestTScore === 'number' && cloud.bestTScore >= 0) ? cloud.bestTScore : -1;
+  if (localBest >= 0 && (cloudBest < 0 || localBest >= cloudBest)) {
+    merged.bestTScore = localBest; merged.bestAt = local.bestAt || 0;
+    merged.bestResults = Array.isArray(local.bestResults) ? local.bestResults : [];
+  } else if (cloudBest >= 0) {
+    merged.bestTScore = cloudBest; merged.bestAt = cloud.bestAt || 0;
+    merged.bestResults = Array.isArray(cloud.bestResults) ? cloud.bestResults : [];
+  } else {
+    merged.bestTScore = -1; merged.bestAt = 0; merged.bestResults = [];
+  }
+  const localWorst = (typeof local.worstTScore === 'number' && local.worstTScore >= 0) ? local.worstTScore : -1;
+  const cloudWorst = (typeof cloud.worstTScore === 'number' && cloud.worstTScore >= 0) ? cloud.worstTScore : -1;
+  if (localWorst >= 0 && (cloudWorst < 0 || localWorst <= cloudWorst)) {
+    merged.worstTScore = localWorst; merged.worstAt = local.worstAt || 0;
+    merged.worstResults = Array.isArray(local.worstResults) ? local.worstResults : [];
+  } else if (cloudWorst >= 0) {
+    merged.worstTScore = cloudWorst; merged.worstAt = cloud.worstAt || 0;
+    merged.worstResults = Array.isArray(cloud.worstResults) ? cloud.worstResults : [];
+  } else {
+    merged.worstTScore = -1; merged.worstAt = 0; merged.worstResults = [];
+  }
+  merged.tScoreBackfilled = !!(local.tScoreBackfilled || cloud.tScoreBackfilled);
+  // backfill version は max を採用 (新 version で再計算した方を 優先 = 「より正しい」 計算結果)
+  merged.tScoreBackfilledVersion = Math.max(local.tScoreBackfilledVersion || 0, cloud.tScoreBackfilledVersion || 0);
   const spKeys = new Set([...Object.keys(local.storyProgress || {}), ...Object.keys(cloud.storyProgress || {})]);
   for (const k of spKeys) {
     const l = (local.storyProgress && local.storyProgress[k]) || {};
@@ -8731,6 +8966,8 @@ function showAccountModal() {
     $('#account-info-sync').textContent = authUser.metadata && authUser.metadata.lastSignInTime
       ? new Date(authUser.metadata.lastSignInTime).toLocaleString('ja-JP')
       : '-';
+    // 偏差値ヒストリー rendering
+    _renderTScoreHistorySection();
   } else {
     $('#account-guest-view').style.display = '';
     $('#account-logged-view').style.display = 'none';
@@ -8738,6 +8975,112 @@ function showAccountModal() {
     setTimeout(() => { const el = $('#login-nickname'); if (el) el.focus(); }, 50);
   }
   modal.classList.add('active');
+}
+
+// デバッグ: state.history + best/worst の状態を Clipboard にコピー (admin user のみ)
+// 野沢さんがスマホで開いた時、 5/4 R10連 が history に存在するか直接確認するため
+function _dumpTScoreDebug() {
+  try {
+    const dump = {
+      device: navigator.userAgent.slice(0, 80),
+      url: location.host,
+      ver: document.getElementById('app-version')?.textContent || '?',
+      authUid: (typeof authUser !== 'undefined' && authUser) ? authUser.uid.slice(0, 8) : '(guest)',
+      tScoreBackfilledVersion: state.tScoreBackfilledVersion,
+      tScoreBackfilled: state.tScoreBackfilled,
+      bestTScore: state.bestTScore,
+      bestAt: state.bestAt ? new Date(state.bestAt).toISOString() : null,
+      bestResultsCount: (state.bestResults || []).length,
+      worstTScore: state.worstTScore,
+      worstAt: state.worstAt ? new Date(state.worstAt).toISOString() : null,
+      worstResultsCount: (state.worstResults || []).length,
+      historyCount: (state.history || []).length,
+      historySummary: (state.history || []).slice(0, 60).map(e => ({
+        at: e.at ? new Date(e.at).toISOString().replace('T', ' ').slice(0, 19) : null,
+        tier: e.tier,
+        name: e.name,
+      })),
+    };
+    const text = JSON.stringify(dump, null, 2);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        if (typeof showToast === 'function') showToast('履歴デバッグ情報をコピーしました');
+      }).catch(() => {
+        prompt('Clipboard 失敗 — 下記をコピーして送ってください', text);
+      });
+    } else {
+      prompt('Clipboard API なし — 下記をコピーして送ってください', text);
+    }
+  } catch (e) {
+    if (typeof showToast === 'function') showToast('debug dump エラー: ' + e.message);
+    console.error(e);
+  }
+}
+
+// 偏差値ヒストリー UI: best/worst を レンダリング、 未記録なら empty メッセージのみ
+function _renderTScoreHistorySection() {
+  const bestRow = document.getElementById('account-tscore-best');
+  const worstRow = document.getElementById('account-tscore-worst');
+  const emptyEl = document.getElementById('account-tscore-empty');
+  if (!bestRow || !worstRow || !emptyEl) return;
+  const hasBest = typeof state.bestTScore === 'number' && state.bestTScore >= 0;
+  const hasWorst = typeof state.worstTScore === 'number' && state.worstTScore >= 0;
+  if (hasBest) {
+    bestRow.style.display = '';
+    document.getElementById('account-tscore-best-value').textContent = `偏差値 ${state.bestTScore}`;
+    document.getElementById('account-tscore-best-date').textContent = _formatTScoreDate(state.bestAt);
+  } else {
+    bestRow.style.display = 'none';
+  }
+  if (hasWorst) {
+    worstRow.style.display = '';
+    document.getElementById('account-tscore-worst-value').textContent = `偏差値 ${state.worstTScore}`;
+    document.getElementById('account-tscore-worst-date').textContent = _formatTScoreDate(state.worstAt);
+  } else {
+    worstRow.style.display = 'none';
+  }
+  emptyEl.style.display = (hasBest || hasWorst) ? 'none' : '';
+  // デバッグボタン: admin user のみ表示 (野沢さんが 履歴を確認してチャットに貼り付けるため)
+  const debugBtn = document.getElementById('ts-debug-btn');
+  if (debugBtn) {
+    debugBtn.style.display = (typeof isPrismAdmin !== 'undefined' && isPrismAdmin) ? '' : 'none';
+  }
+}
+
+function _formatTScoreDate(ts) {
+  if (!ts) return '-';
+  const d = new Date(ts);
+  if (isNaN(d.getTime())) return '-';
+  const m = d.getMonth() + 1, dd = d.getDate();
+  const hh = String(d.getHours()).padStart(2, '0'), mm = String(d.getMinutes()).padStart(2, '0');
+  return `${m}/${dd} ${hh}:${mm}`;
+}
+
+// 「結果を見る」: 過去 best/worst の 10連 リザルトを再表示 (showResult を archive モードで呼出)
+function showTScoreArchive(type) {
+  const results = (type === 'best') ? state.bestResults : state.worstResults;
+  const at = (type === 'best') ? state.bestAt : state.worstAt;
+  if (!Array.isArray(results) || results.length !== 10) return;
+  // showResult が要求する 最低限の field を補完 (img/name/tier はあるはず)
+  const filled = results.map(r => ({
+    name: r.name || '',
+    tier: r.tier || 'R',
+    img: r.img || '',
+    season: r.season || 1,
+    chapter: r.chapter || '',
+    isNew: false,
+    dupGained: null,
+  }));
+  // safety net: 残骸 stage / 他 modal を 全部 閉じてから result 単独で開く
+  // (アカウントモーダル 閉じた直後の DOM 状態で stage が active 残存していると result-grid に重なる懸念)
+  closeAccountModal();
+  if (typeof closeStage === 'function') {
+    try { closeStage(); } catch (e) {}
+  }
+  // 念のため次フレームで result 開く (close 系の DOM 反映を確実に終わらせてから)
+  requestAnimationFrame(() => {
+    showResult(filled, null, { archive: true, archiveAt: at });
+  });
 }
 
 function closeAccountModal() {
@@ -8780,10 +9123,18 @@ function updateAccountButton() {
   const envDevBtn = document.getElementById('btn-env-dev');
   if (envProdBtn) envProdBtn.style.display = isDevEnv ? '' : 'none';
   if (envDevBtn) envDevBtn.style.display = (isProdEnv && authUser && isPrismAdmin) ? '' : 'none';
-  // Home カードゲーム入口 (Phase 0 PoC) はアカウント登録者限定
-  const cardgameEntry = document.getElementById('home-cardgame-card');
+  // Home カードバトル 主役行 はアカウント登録者限定
+  const cardgameEntry = document.getElementById('home-cardgame-row');
   if (cardgameEntry) {
     cardgameEntry.style.display = authUser ? 'flex' : 'none';
+  }
+  // NEW! バッジ: PCB β リリース日 (2026-05-05 12:00 JST) から 14日間表示
+  const newBadge = document.getElementById('home-cardgame-new');
+  if (newBadge) {
+    const PCB_RELEASE_AT = Date.parse('2026-05-05T12:00:00+09:00');
+    const NEW_BADGE_DURATION_MS = 14 * 24 * 60 * 60 * 1000;  // 14日
+    const elapsed = Date.now() - PCB_RELEASE_AT;
+    newBadge.style.display = (elapsed >= 0 && elapsed < NEW_BADGE_DURATION_MS) ? '' : 'none';
   }
 }
 
@@ -9410,9 +9761,7 @@ function openSettingsModal() {
             </div>
           </div>
         </div>
-        <div class="settings-section">
-          <button type="button" class="settings-history-link" onclick="closeSettingsModal();openVersionHistoryModal()">📜 アップデート履歴を見る</button>
-        </div>
+        <!-- 「アップデート履歴を見る」 ボタン廃止 (野沢さん指示 2026-05-05、 トップバー 🔔 ベル に統一) -->
         <div class="settings-section">
           <button type="button" class="settings-feedback-link" onclick="closeSettingsModal();openFeedbackModal()">📨 ご意見・ご要望を送る</button>
         </div>
@@ -9689,3 +10038,223 @@ function dismissWelcomeModal(openSignup) {
 
 // 起動時の表示は Firebase auth 確定後 (initialAuthCheckDone) に呼ばれる。
 // DOMContentLoaded起動だと authUser未確定で既ログインユーザーにも welcome 出てしまう問題あり (2026-04-26 修正)。
+
+// ════════════════════════════════════════════════════════════════════════════
+// 🔔 お知らせ機能 (野沢さん指示 2026-05-05)
+//   個別返信 (admin → 特定 user) + broadcast (admin → 全 user) + リリースノート (version.json
+//   の changelog を release 通知に統合) を 統一 UI で振り返り可能に。
+//   取得タイミング: 起動時 + visibilitychange visible 時のみ (周期 polling 廃止、 電池配慮)。
+//   設定モーダルの「アップデート履歴」 ボタンは 廃止、 ベル経由に一本化。
+// ════════════════════════════════════════════════════════════════════════════
+let _notifications = [];        // 統合表示用配列 [{id, kind, title, body, createdAt, read, _src}]
+let _notifFilter = 'all';
+const NOTIF_READ_KEY = 'prism-notif-read';   // localStorage: 個別+broadcast+release の既読 id Set
+const NOTIF_RELEASE_SEEN_KEY = 'prism-changelog-seen-versions';  // 既読 release version の Set
+
+function _getNotifReadSet() {
+  try { return new Set(JSON.parse(localStorage.getItem(NOTIF_READ_KEY) || '[]')); }
+  catch { return new Set(); }
+}
+function _saveNotifReadSet(set) {
+  try { localStorage.setItem(NOTIF_READ_KEY, JSON.stringify([...set])); } catch {}
+}
+
+async function loadNotifications() {
+  const items = [];
+  // (1) リリースノート: version.json から changelog を取得 → release 通知化
+  try {
+    const res = await fetch('/version.json?_t=' + Date.now());
+    if (res.ok) {
+      const j = await res.json();
+      const changelog = Array.isArray(j && j.changelog) ? j.changelog : [];
+      changelog.forEach(entry => {
+        if (!entry || !entry.version) return;
+        const at = entry.date ? Date.parse(entry.date + 'T00:00:00+09:00') : 0;
+        const body = (entry.notes || []).map(n => '・' + n).join('\n');
+        items.push({
+          id: 'release_' + entry.version,
+          kind: 'release',
+          title: 'v' + entry.version + ' 公開' + (entry.title ? ' — ' + entry.title : ''),
+          body: body,
+          createdAt: at || 0,
+          _src: 'changelog',
+        });
+      });
+    }
+  } catch (e) { console.warn('changelog fetch failed:', e); }
+
+  // (2) ログイン済 user のみ Firebase から個別 + broadcast を fetch
+  if (typeof authUser !== 'undefined' && authUser && typeof fbDb !== 'undefined' && fbDb) {
+    try {
+      const personalSnap = await fbDb.ref('prism-gacha/notifications/' + authUser.uid).once('value');
+      const personal = personalSnap.val() || {};
+      Object.entries(personal).forEach(([id, n]) => {
+        if (!n) return;
+        items.push({
+          id: 'personal_' + id,
+          kind: n.kind || 'reply',
+          title: n.title || '(無題)',
+          body: n.body || '',
+          createdAt: n.createdAt || 0,
+          _src: 'personal',
+          _refId: id,
+        });
+      });
+    } catch (e) { console.warn('personal notif fetch failed:', e); }
+    try {
+      const broadcastSnap = await fbDb.ref('prism-gacha/notifications/_broadcast').once('value');
+      const broadcast = broadcastSnap.val() || {};
+      Object.entries(broadcast).forEach(([id, n]) => {
+        if (!n) return;
+        items.push({
+          id: 'broadcast_' + id,
+          kind: 'broadcast',
+          title: n.title || '(無題)',
+          body: n.body || '',
+          createdAt: n.createdAt || 0,
+          _src: 'broadcast',
+        });
+      });
+    } catch (e) { console.warn('broadcast fetch failed:', e); }
+  }
+
+  // 既読 set を 適用
+  // release (changelog) は 常に既読扱い (野沢さん指示 2026-05-05): 新版初回アクセス時に
+  //   既存 update-modal で ほぼ必ず確認されるため、 ベル経由は 「振り返り」 用途のみ。
+  //   未読バッジ / 未読タブには 含めない (個別返信 + broadcast のみ未読化)。
+  const readSet = _getNotifReadSet();
+  items.forEach(n => {
+    if (n.kind === 'release') n.read = true;
+    else n.read = readSet.has(n.id);
+  });
+  // 新しい順
+  items.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  _notifications = items;
+  _updateNotifBadge();
+  // モーダル open 中なら 即時 再描画
+  const modal = document.getElementById('notifications-modal');
+  if (modal && modal.classList.contains('active')) renderNotifications();
+}
+
+function _updateNotifBadge() {
+  const badge = document.getElementById('notif-badge');
+  if (!badge) return;
+  const unread = _notifications.filter(n => !n.read).length;
+  if (unread > 0) {
+    badge.style.display = '';
+    badge.textContent = unread > 99 ? '99+' : String(unread);
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function setNotificationFilter(filter) {
+  _notifFilter = filter;
+  document.querySelectorAll('.notif-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.filter === filter);
+  });
+  renderNotifications();
+}
+
+function renderNotifications() {
+  const list = document.getElementById('notif-list');
+  if (!list) return;
+  // 「すべて」 / 「未読」 タブからも release は除外 (野沢さん指示 2026-05-05、 update-modal で
+  //   告知済の changelog を 通知一覧に 並べると ノイズ、 「更新履歴」 タブ専用に隔離)。
+  const nonRelease = _notifications.filter(n => n.kind !== 'release');
+  const cntAll = nonRelease.length;
+  const cntUnread = nonRelease.filter(n => !n.read).length;
+  const cntReply = nonRelease.filter(n => n.kind === 'reply').length;
+  const cntRelease = _notifications.filter(n => n.kind === 'release').length;
+  const setCnt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = String(v); };
+  setCnt('notif-cnt-all', cntAll);
+  setCnt('notif-cnt-unread', cntUnread);
+  setCnt('notif-cnt-reply', cntReply);
+  setCnt('notif-cnt-release', cntRelease);
+
+  let filtered;
+  if (_notifFilter === 'all')        filtered = nonRelease;
+  else if (_notifFilter === 'unread') filtered = nonRelease.filter(n => !n.read);
+  else if (_notifFilter === 'release') filtered = _notifications.filter(n => n.kind === 'release');
+  else                                filtered = nonRelease.filter(n => n.kind === _notifFilter);
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="notif-empty">' + (_notifFilter === 'unread' ? '未読のお知らせはありません' : 'お知らせはまだありません') + '</div>';
+    return;
+  }
+
+  const KIND_LABEL = { reply: '💬 返信', broadcast: '📢 お知らせ', release: '🆕 更新', system: '⚙️ システム' };
+  list.innerHTML = filtered.map(n => {
+    const dt = n.createdAt ? new Date(n.createdAt) : null;
+    const dtStr = dt && !isNaN(dt) ? `${dt.getMonth()+1}/${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}` : '';
+    const kindLbl = KIND_LABEL[n.kind] || n.kind;
+    return `
+      <div class="notif-item ${n.read ? 'read' : 'unread'}" data-id="${escapeHtml(n.id)}" onclick="markNotificationRead('${escapeHtml(n.id)}')">
+        <div class="notif-item-head">
+          <span class="notif-kind ${n.kind}">${kindLbl}</span>
+          <span class="notif-item-title">${escapeHtml(n.title)}</span>
+          <span class="notif-item-date">${dtStr}</span>
+        </div>
+        <div class="notif-item-body">${escapeHtml(n.body)}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function markNotificationRead(id) {
+  const n = _notifications.find(x => x.id === id);
+  if (!n) return;
+  if (n.read) return;
+  n.read = true;
+  const set = _getNotifReadSet();
+  set.add(id);
+  _saveNotifReadSet(set);
+  _updateNotifBadge();
+  renderNotifications();
+}
+
+function openNotificationsModal() {
+  // モバイル: トップバー ≡ メニューの <dialog> が showModal で top-layer に居ると、
+  //   通常の z-index 12000 の通知モーダルが その下に隠れて 「何も出てこない」 ように見える。
+  //   → ≡ dialog を 先に close してから 通知モーダルを 表示。
+  try {
+    const secondary = document.getElementById('topbar-secondary');
+    if (secondary && typeof secondary.close === 'function' && secondary.open) {
+      secondary.close();
+    }
+  } catch (e) {}
+  const modal = document.getElementById('notifications-modal');
+  if (!modal) return;
+  modal.classList.add('active');
+  // body scroll lock: 既存ヘルパー _lockBodyScroll を使う (top inline 設定で iOS PWA 対応、
+  //   modal-open class 単純付与だと top 不在で body 表示が壊れる事故対策、 野沢さん 2026-05-05 「何も出てこない」)
+  if (typeof _lockBodyScroll === 'function') _lockBodyScroll();
+  // 開いた時 最新を fetch (起動時の cache が古いケース対策)
+  loadNotifications().then(() => renderNotifications());
+  renderNotifications();
+}
+
+function closeNotificationsModal() {
+  const modal = document.getElementById('notifications-modal');
+  if (!modal) return;
+  modal.classList.remove('active');
+  if (typeof _unlockBodyScroll === 'function') _unlockBodyScroll();
+}
+
+// HTML escape util (お知らせ rendering 用、 既存 escapeHtml が無ければ 定義)
+if (typeof escapeHtml !== 'function') {
+  window.escapeHtml = function (s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  };
+}
+
+// 起動時 + visibility 復帰時 fetch (周期 polling なし、 電池配慮)
+document.addEventListener('DOMContentLoaded', () => { loadNotifications(); });
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') loadNotifications();
+});
+// onAuthStateChanged で auth 確定後にも 再 fetch (個別/broadcast は ログイン後のみ取得可能)
+// 既存の onAuthStateChanged 内で呼ばれるよう、 グローバル exposeして 後でフック化
+window._notifReloadOnAuth = loadNotifications;

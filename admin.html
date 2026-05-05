@@ -40,6 +40,13 @@ body {
   color: #d4b5ff;
   letter-spacing: 0.05em;
 }
+.header h1 .admin-ver {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: 0.04em;
+  margin-left: 6px;
+  font-weight: normal;
+}
 .header-actions { display: flex; gap: 8px; }
 .header-btn {
   padding: 8px 14px; font-size: 13px;
@@ -286,7 +293,7 @@ body {
 }
 .users-row {
   display: grid;
-  grid-template-columns: minmax(140px, 1.6fr) 0.7fr 0.8fr 0.6fr 0.6fr 0.85fr 1.0fr 0.65fr 1.15fr 1.15fr;
+  grid-template-columns: minmax(140px, 1.6fr) 0.7fr 0.8fr 0.6fr 0.6fr 0.55fr 0.55fr 0.85fr 1.0fr 0.65fr 1.15fr 1.15fr;
   gap: 8px;
   padding: 14px 18px;
   border-bottom: 1px solid rgba(200, 180, 255, 0.08);
@@ -346,8 +353,8 @@ body {
     -webkit-overflow-scrolling: touch;
   }
   .users-row {
-    grid-template-columns: 140px 60px 75px 55px 55px 80px 95px 60px 100px 110px;
-    min-width: 920px;
+    grid-template-columns: 140px 60px 75px 55px 55px 50px 50px 80px 95px 60px 100px 110px;
+    min-width: 1000px;
   }
   .users-head { position: relative; }
   .admin-tab { padding: 8px 12px; font-size: 12px; }
@@ -459,7 +466,7 @@ body {
     font-size: 12px;
     gap: 6px;
   }
-  .users-row .col-lr, .users-row .col-dup, .users-row .col-lastlogin { display: none; }
+  .users-row .col-lr, .users-row .col-dup, .users-row .col-tscore-best, .users-row .col-tscore-worst, .users-row .col-lastlogin { display: none; }
   .users-head .col-ur::after { content: '/ログイン'; display: block; font-size: 9px; color: rgba(200,180,255,0.4); }
 }
 
@@ -527,6 +534,22 @@ body {
 }
 .fb-toggle.read-state { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.5); border-color: rgba(255,255,255,0.12); }
 .fb-toggle:hover { filter: brightness(1.15); }
+.fb-copy-btn {
+  font-size: 11px; padding: 4px 10px;
+  background: rgba(124,93,255,0.18); color: #c5b9ff;
+  border: 1px solid rgba(124,93,255,0.4); border-radius: 6px;
+  cursor: pointer; font-family: inherit;
+  margin-right: 6px;
+}
+.fb-copy-btn:hover { background: rgba(124,93,255,0.32); color: #fff; }
+.fb-reply-btn {
+  font-size: 11px; padding: 4px 10px;
+  background: rgba(255,141,220,0.18); color: #ffb4dc;
+  border: 1px solid rgba(255,141,220,0.4); border-radius: 6px;
+  cursor: pointer; font-family: inherit;
+  margin-right: 6px;
+}
+.fb-reply-btn:hover { background: rgba(255,141,220,0.32); color: #fff; }
 .fb-text {
   font-size: 14px; color: #e6edf3; line-height: 1.6;
   white-space: pre-wrap; word-break: break-word;
@@ -545,12 +568,168 @@ body {
 @media (max-width: 720px) {
   .fb-time { margin-left: 0; width: 100%; }
 }
+
+/* ───── 📢 broadcast 一斉送信 + 💬 個別返信 (野沢さん指示 2026-05-05) ───── */
+.broadcast-section {
+  max-width: 1000px; margin: 8px auto 24px;
+  background: rgba(255, 141, 220, 0.06);
+  border: 1px solid rgba(255, 141, 220, 0.25);
+  border-radius: 14px;
+  padding: 16px 18px;
+}
+.broadcast-title {
+  font-size: 14px; font-weight: 700; color: #ffb4dc;
+  margin-bottom: 10px; letter-spacing: 0.04em;
+}
+.broadcast-input, .broadcast-textarea {
+  width: 100%; box-sizing: border-box;
+  background: rgba(20, 16, 40, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #e6edf3;
+  padding: 9px 12px; border-radius: 8px;
+  font-family: inherit; font-size: 13px;
+  margin-bottom: 8px;
+}
+.broadcast-textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+.broadcast-input:focus, .broadcast-textarea:focus {
+  outline: none; border-color: rgba(255, 141, 220, 0.55);
+}
+.broadcast-actions {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap;
+}
+.broadcast-hint { font-size: 11px; color: rgba(255, 255, 255, 0.5); }
+.broadcast-send {
+  font-size: 13px; padding: 8px 18px; font-weight: 700;
+  background: linear-gradient(135deg, #ff5faa, #ff8a5f);
+  color: #fff; border: none; border-radius: 8px;
+  cursor: pointer; font-family: inherit;
+  box-shadow: 0 2px 10px rgba(255, 95, 170, 0.32);
+}
+.broadcast-send:hover { filter: brightness(1.1); }
+.broadcast-send:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* 個別返信モーダル */
+.reply-modal {
+  position: fixed; inset: 0; z-index: 13000;
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+}
+.reply-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px);
+}
+.reply-card {
+  position: relative;
+  background: linear-gradient(180deg, rgba(30, 24, 56, 0.98), rgba(20, 16, 40, 0.98));
+  border: 1px solid rgba(255, 141, 220, 0.4);
+  border-radius: 16px;
+  padding: 22px 22px 18px;
+  width: 100%; max-width: 480px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 30px rgba(255, 141, 220, 0.20);
+}
+.reply-close {
+  position: absolute; top: 8px; right: 12px;
+  background: none; border: none; color: #aaa;
+  font-size: 22px; cursor: pointer;
+}
+.reply-close:hover { color: #fff; }
+.reply-title {
+  font-size: 16px; margin: 0 0 12px; color: #ffb4dc;
+}
+.reply-target {
+  font-size: 12px; color: rgba(255, 255, 255, 0.65);
+  margin-bottom: 12px; padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 6px;
+  border-left: 3px solid rgba(255, 141, 220, 0.5);
+  white-space: pre-wrap; word-break: break-word;
+}
+.reply-input, .reply-textarea {
+  width: 100%; box-sizing: border-box;
+  background: rgba(20, 16, 40, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #e6edf3;
+  padding: 9px 12px; border-radius: 8px;
+  font-family: inherit; font-size: 13px;
+  margin-bottom: 8px;
+}
+.reply-textarea { resize: vertical; min-height: 100px; line-height: 1.5; }
+.reply-input:focus, .reply-textarea:focus {
+  outline: none; border-color: rgba(255, 141, 220, 0.55);
+}
+.reply-actions {
+  display: flex; gap: 10px; justify-content: flex-end;
+  margin-top: 8px;
+}
+.reply-cancel, .reply-send {
+  font-size: 13px; padding: 8px 16px; font-weight: 600;
+  border-radius: 8px; cursor: pointer; font-family: inherit;
+}
+.reply-cancel {
+  background: rgba(255, 255, 255, 0.06); color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.reply-cancel:hover { background: rgba(255, 255, 255, 0.12); }
+.reply-send {
+  background: linear-gradient(135deg, #ff5faa, #ff8a5f);
+  color: #fff; border: none;
+  box-shadow: 0 2px 10px rgba(255, 95, 170, 0.32);
+}
+.reply-send:hover { filter: brightness(1.1); }
+.reply-send:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* 返信履歴 モーダル (案A、 野沢さん指示 2026-05-05) */
+.reply-history-card { max-width: 560px; }
+.reply-history-list {
+  max-height: 50vh; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 6px 2px 2px;
+}
+.reply-history-item {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.reply-history-head {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+.reply-history-title-text {
+  flex: 1 1 auto; font-weight: 700; color: #ffb4dc;
+  font-size: 13px;
+}
+.reply-history-date {
+  flex: 0 0 auto; color: rgba(255, 255, 255, 0.5);
+}
+.reply-history-body {
+  font-size: 13px; color: rgba(255, 255, 255, 0.85);
+  line-height: 1.6; white-space: pre-wrap; word-break: break-word;
+}
+.reply-history-empty {
+  text-align: center; padding: 24px; color: rgba(255, 255, 255, 0.4);
+  font-size: 13px;
+}
+
+/* feedback row 内の 「📜 返信履歴 N件」 ボタン */
+.fb-history-btn {
+  font-size: 11px; padding: 4px 10px;
+  background: rgba(95, 200, 255, 0.14);
+  color: #a5d8ff;
+  border: 1px solid rgba(95, 200, 255, 0.36);
+  border-radius: 6px;
+  cursor: pointer; font-family: inherit;
+  margin-right: 6px;
+}
+.fb-history-btn:hover { background: rgba(95, 200, 255, 0.28); color: #fff; }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <h1>✦ Prismaera <span class="tag">ADMIN</span></h1>
+  <h1>✦ Prismaera <span class="tag">ADMIN</span> <span class="admin-ver" id="admin-ver">v?.?.?</span></h1>
   <div class="header-actions">
     <a href="index.html" class="header-btn">← ガチャに戻る</a>
     <button class="header-btn" id="toggle-show-owners" title="自分のデバイス (admin uid または 手動マーク済) を一覧/集計に含めるか切替"></button>
@@ -638,6 +817,8 @@ body {
         <div class="col-ur" data-sort="ur">UR</div>
         <div class="col-lr" data-sort="lr">LR</div>
         <div class="col-dup" data-sort="dup">凸</div>
+        <div class="col-tscore-best" data-sort="best-tscore">📊最高</div>
+        <div class="col-tscore-worst" data-sort="worst-tscore">最低</div>
         <div class="col-gasshuku" data-sort="gasshuku">🎌召喚数</div>
         <div class="col-story" data-sort="story">📖物語</div>
         <div class="col-streak" data-sort="streak">🔥連続</div>
@@ -679,6 +860,16 @@ body {
   <!-- 要望タブ -->
   <div class="admin-panel" id="panel-feedback">
     <h2 class="section-title">📨 ご意見・ご要望 <span class="fb-unread-pill" id="fb-unread-pill" style="display:none">0 未読</span></h2>
+    <!-- broadcast 一斉送信フォーム (野沢さん指示 2026-05-05) -->
+    <div class="broadcast-section">
+      <div class="broadcast-title">📢 全ユーザーに一斉お知らせを送る</div>
+      <input type="text" id="bc-title" class="broadcast-input" placeholder="タイトル (必須、 例: メンテナンスのお知らせ)" maxlength="60">
+      <textarea id="bc-body" class="broadcast-textarea" placeholder="本文 (必須、 例: 2/10 22:00〜23:00 メンテナンスのため一時的に Cloud 同期が停止します)" maxlength="500" rows="4"></textarea>
+      <div class="broadcast-actions">
+        <span class="broadcast-hint">※ 送信先: 全ログイン済ユーザー (ベルアイコン未読として表示)</span>
+        <button type="button" class="broadcast-send" onclick="sendBroadcast()">📢 全員に送信</button>
+      </div>
+    </div>
     <div class="feedback-section">
       <div class="feedback-filter">
         <button class="fb-fbtn active" data-filter="all">全て (<span id="fb-cnt-all">0</span>)</button>
@@ -689,6 +880,33 @@ body {
         <button class="fb-fbtn" data-filter="other">💬 その他 (<span id="fb-cnt-other">0</span>)</button>
       </div>
       <div id="fb-list" class="fb-list"></div>
+    </div>
+  </div>
+
+  <!-- 個別返信 モーダル (feedback row の 「💬 返信」 から開く) -->
+  <div id="reply-modal" class="reply-modal" style="display:none">
+    <div class="reply-backdrop" onclick="closeReplyModal()"></div>
+    <div class="reply-card">
+      <button class="reply-close" onclick="closeReplyModal()" aria-label="閉じる">×</button>
+      <h3 class="reply-title">💬 個別返信</h3>
+      <div class="reply-target" id="reply-target"></div>
+      <input type="text" id="reply-input-title" class="reply-input" placeholder="タイトル (例: ご報告ありがとうございます)" maxlength="60">
+      <textarea id="reply-input-body" class="reply-textarea" placeholder="本文 (例: 修正版を v1.4.4 で公開しました...)" maxlength="500" rows="5"></textarea>
+      <div class="reply-actions">
+        <button class="reply-cancel" onclick="closeReplyModal()">キャンセル</button>
+        <button class="reply-send" onclick="sendReply()">送信</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 返信履歴 モーダル (feedback row の 「📜 返信履歴 N件」 から開く、 案A) -->
+  <div id="reply-history-modal" class="reply-modal" style="display:none">
+    <div class="reply-backdrop" onclick="closeReplyHistoryModal()"></div>
+    <div class="reply-card reply-history-card">
+      <button class="reply-close" onclick="closeReplyHistoryModal()" aria-label="閉じる">×</button>
+      <h3 class="reply-title">📜 返信履歴</h3>
+      <div class="reply-target" id="reply-history-target"></div>
+      <div class="reply-history-list" id="reply-history-list"></div>
     </div>
   </div>
 </div>
@@ -997,9 +1215,12 @@ function renderUsers(users, uidToNickname, guestDevices) {
     const story = storyProgressText(s.storyProgress);
     const gasshukuCnt = gasshukuByUid[u.uid] || 0;
 
+    const bestTScore = (typeof s.bestTScore === 'number' && s.bestTScore >= 0) ? s.bestTScore : -1;
+    const worstTScore = (typeof s.worstTScore === 'number' && s.worstTScore >= 0) ? s.worstTScore : -1;
     userRowData.push({
       uid: u.uid, nickname, nicknameDim, isMe: u.uid === currentUid,
       total, ur, lr, dup, gasshukuCnt, story,
+      bestTScore, worstTScore,
       lastAt, lastAtTs: u.lastLoginAt || 0,
       registeredAt, registeredAtTs: u.createdAt || 0,
       streakCur: u.streakCurrent || 0,
@@ -1043,6 +1264,8 @@ function renderUsers(users, uidToNickname, guestDevices) {
       case 'ur': av = a.ur; bv = b.ur; break;
       case 'lr': av = a.lr; bv = b.lr; break;
       case 'dup': av = a.dup; bv = b.dup; break;
+      case 'best-tscore': av = a.bestTScore !== undefined ? a.bestTScore : -1; bv = b.bestTScore !== undefined ? b.bestTScore : -1; break;
+      case 'worst-tscore': av = a.worstTScore !== undefined ? a.worstTScore : -1; bv = b.worstTScore !== undefined ? b.worstTScore : -1; break;
       case 'gasshuku': av = a.gasshukuCnt; bv = b.gasshukuCnt; break;
       case 'story': av = a.story.sortKey; bv = b.story.sortKey; break;
       case 'streak': av = a.streakCur || 0; bv = b.streakCur || 0; break;
@@ -1068,6 +1291,8 @@ function renderUsers(users, uidToNickname, guestDevices) {
         <div class="u-count col-ur dim">—</div>
         <div class="u-count col-lr dim">—</div>
         <div class="u-count col-dup dim">—</div>
+        <div class="u-count col-tscore-best dim">—</div>
+        <div class="u-count col-tscore-worst dim">—</div>
         <div class="u-count col-gasshuku ${d.gasshukuCnt === 0 ? 'dim' : ''}">${d.gasshukuCnt > 0 ? d.gasshukuCnt : '—'}</div>
         <div class="u-story dim">—</div>
         <div class="u-streak dim col-streak">—</div>
@@ -1100,12 +1325,20 @@ function renderUsers(users, uidToNickname, guestDevices) {
         detail.classList.toggle('active');
       });
     } else {
+      const bestCell = (typeof d.bestTScore === 'number' && d.bestTScore >= 0)
+        ? `<div class="u-count col-tscore-best">${d.bestTScore}</div>`
+        : `<div class="u-count col-tscore-best dim">—</div>`;
+      const worstCell = (typeof d.worstTScore === 'number' && d.worstTScore >= 0)
+        ? `<div class="u-count col-tscore-worst">${d.worstTScore}</div>`
+        : `<div class="u-count col-tscore-worst dim">—</div>`;
       row.innerHTML = `
         <div class="u-nickname ${d.isMe ? 'me' : ''} ${d.nicknameDim ? 'u-uid-fallback' : ''}">${escapeHtml(d.nickname)}</div>
         <div class="u-count ${d.total === 0 ? 'dim' : ''}">${d.total}</div>
         <div class="u-count col-ur ${d.ur === 0 ? 'dim' : ''}">${d.ur}/${TIER_MAX.UR}</div>
         <div class="u-count col-lr ${d.lr === 0 ? 'dim' : ''}">${d.lr}/${TIER_MAX.LR}</div>
         <div class="u-count col-dup ${d.dup === 0 ? 'dim' : ''}">${d.dup}</div>
+        ${bestCell}
+        ${worstCell}
         <div class="u-count col-gasshuku ${d.gasshukuCnt === 0 ? 'dim' : ''}">${d.gasshukuCnt}</div>
         <div class="u-story ${d.story.dim ? 'dim' : ''}">${d.story.text}</div>
         <div class="u-streak col-streak ${d.streakCur === 0 ? 'dim' : ''}">${d.streakCur || 0}<span class="streak-max">/${d.streakMax || 0}</span></div>
@@ -1805,6 +2038,9 @@ function renderFeedback() {
           <span class="fb-cat ${f.category}">${catLbl}</span>
           <span class="fb-name">${name}</span>
           <span class="fb-time">${date} ${originLbl}</span>
+          <button class="fb-copy-btn" onclick="copyFeedbackItem('${f.id}')" title="この要望を Clipboard にコピー">📋 コピー</button>
+          <button class="fb-reply-btn" onclick="openReplyModal('${f.id}')" title="このユーザーに アプリ内お知らせで返信">💬 返信</button>
+          ${(_replyHistoryByFeedbackId[f.id] || []).length > 0 ? `<button class="fb-history-btn" onclick="openReplyHistoryModal('${f.id}')" title="この要望への 過去返信を 確認">📜 返信履歴 ${_replyHistoryByFeedbackId[f.id].length}件</button>` : ''}
           <button class="fb-toggle ${f.read ? 'read-state' : ''}" onclick="toggleFeedbackRead('${f.id}', ${f.read ? 'true' : 'false'})">${f.read ? '未読に戻す' : '既読にする'}</button>
         </div>
         <div class="fb-text">${escapeHtml(f.text || '')}</div>
@@ -1815,6 +2051,229 @@ function renderFeedback() {
       </div>
     `;
   }).join('');
+}
+
+// 1件の feedback を Clipboard にコピー (Claude へ貼り付ける用、 整形テキスト)
+function copyFeedbackItem(id) {
+  const f = feedbackItems.find(x => x.id === id);
+  if (!f) return;
+  const date = f.createdAt ? new Date(f.createdAt).toLocaleString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '-';
+  const catLbl = FB_CAT_LABEL[f.category] || f.category || '?';
+  const text = `[${catLbl}] ${f.name || '(名前なし)'} — ${date}\n${f.text || ''}\nuid: ${(f.uid || '').slice(0, 12)}…\norigin: ${f.origin || '-'}\nver: ${f.ver || '-'}`;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      _showAdminNotice('📋 1件コピーしました');
+    }).catch(() => {
+      prompt('Clipboard 失敗 — 下記をコピー', text);
+    });
+  } else {
+    prompt('Clipboard API なし — 下記をコピー', text);
+  }
+}
+
+// admin notice ヘルパー: .notice デフォルト display:none なので inline で 制御 + auto clear
+function _showAdminNotice(msg, ms) {
+  const noticeEl = document.getElementById('notice');
+  if (!noticeEl) return;
+  noticeEl.textContent = msg;
+  noticeEl.style.display = 'block';
+  noticeEl.style.background = 'rgba(95,255,212,0.12)';
+  noticeEl.style.border = '1px solid rgba(95,255,212,0.4)';
+  noticeEl.style.color = '#b8ffe5';
+  setTimeout(() => {
+    if (noticeEl.textContent === msg) {
+      noticeEl.textContent = '';
+      noticeEl.style.display = '';
+      noticeEl.style.background = '';
+      noticeEl.style.border = '';
+      noticeEl.style.color = '';
+    }
+  }, ms || 2500);
+}
+
+// ───── 💬 個別返信 + 📢 broadcast 一斉送信 (野沢さん指示 2026-05-05) ─────
+let _replyTargetFeedbackId = null;
+
+function openReplyModal(feedbackId) {
+  const f = feedbackItems.find(x => x.id === feedbackId);
+  if (!f) return;
+  _replyTargetFeedbackId = feedbackId;
+  const modal = document.getElementById('reply-modal');
+  const targetEl = document.getElementById('reply-target');
+  const titleEl = document.getElementById('reply-input-title');
+  const bodyEl = document.getElementById('reply-input-body');
+  const date = f.createdAt ? new Date(f.createdAt).toLocaleString('ja-JP', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '-';
+  targetEl.textContent = `宛先: ${f.name || '(名前なし)'} (uid: ${(f.uid || '').slice(0, 12)}…)\n元の要望 [${f.category} / ${date}]:\n${(f.text || '').slice(0, 200)}`;
+  titleEl.value = '';
+  bodyEl.value = '';
+  modal.style.display = 'flex';
+  setTimeout(() => titleEl.focus(), 50);
+}
+
+function closeReplyModal() {
+  const modal = document.getElementById('reply-modal');
+  if (modal) modal.style.display = 'none';
+  _replyTargetFeedbackId = null;
+}
+
+// ───── 案A: 返信履歴 機能 (野沢さん指示 2026-05-05) ─────
+// 全 notifications を root level で fetch (admin Rule で 許可)、 relatedFeedbackId 別に index 化
+let _allNotifications = [];                     // { ...n, _targetUid, _id } の配列
+let _replyHistoryByFeedbackId = {};              // feedbackId -> [notif, ...]
+
+async function loadAllNotifications() {
+  if (typeof db === 'undefined' || !db) return;
+  try {
+    const ref = db.ref('prism-gacha/notifications');
+    const snap = await ref.once('value');
+    const all = snap.val() || {};
+    const items = [];
+    Object.entries(all).forEach(([uid, notifs]) => {
+      if (uid === '_broadcast' || !notifs) return;
+      Object.entries(notifs).forEach(([id, n]) => {
+        if (!n) return;
+        items.push({ ...n, _targetUid: uid, _id: id });
+      });
+    });
+    items.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+    _allNotifications = items;
+    // feedbackId 別 index
+    _replyHistoryByFeedbackId = {};
+    for (const n of items) {
+      if (!n.relatedFeedbackId) continue;
+      if (!_replyHistoryByFeedbackId[n.relatedFeedbackId]) _replyHistoryByFeedbackId[n.relatedFeedbackId] = [];
+      _replyHistoryByFeedbackId[n.relatedFeedbackId].push(n);
+    }
+    // feedback list を 再描画 (返信履歴 N件 バッジを 反映)
+    if (typeof renderFeedback === 'function') renderFeedback();
+  } catch (e) {
+    console.warn('[reply history] fetch failed:', e);
+  }
+}
+
+function openReplyHistoryModal(feedbackId) {
+  const f = feedbackItems.find(x => x.id === feedbackId);
+  const list = _replyHistoryByFeedbackId[feedbackId] || [];
+  const modal = document.getElementById('reply-history-modal');
+  const targetEl = document.getElementById('reply-history-target');
+  const listEl = document.getElementById('reply-history-list');
+  if (!modal || !targetEl || !listEl) return;
+  if (f) {
+    const date = f.createdAt ? new Date(f.createdAt).toLocaleString('ja-JP', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '-';
+    targetEl.textContent = `元の要望: ${f.name || '(名前なし)'} [${f.category} / ${date}]\n${(f.text || '').slice(0, 200)}`;
+  } else {
+    targetEl.textContent = '元の要望情報を取得できませんでした';
+  }
+  if (list.length === 0) {
+    listEl.innerHTML = '<div class="reply-history-empty">返信履歴はまだありません</div>';
+  } else {
+    listEl.innerHTML = list.map(n => {
+      const dt = n.createdAt ? new Date(n.createdAt) : null;
+      const dtStr = dt && !isNaN(dt) ? `${dt.getMonth()+1}/${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}` : '';
+      return `
+        <div class="reply-history-item">
+          <div class="reply-history-head">
+            <span class="reply-history-title-text">${escapeHtml(n.title || '(無題)')}</span>
+            <span class="reply-history-date">${dtStr}</span>
+          </div>
+          <div class="reply-history-body">${escapeHtml(n.body || '')}</div>
+        </div>
+      `;
+    }).join('');
+  }
+  modal.style.display = 'flex';
+  // Esc / Tab フォーカス: close ボタンに initial focus
+  setTimeout(() => {
+    const closeBtn = modal.querySelector('.reply-close');
+    if (closeBtn) closeBtn.focus();
+  }, 50);
+}
+
+function closeReplyHistoryModal() {
+  const modal = document.getElementById('reply-history-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+// 全 modals 共通 Esc 閉じ (野沢さん指示 2026-05-05 「Escで閉じれない、 毎回言ってない?」)
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  const replyM = document.getElementById('reply-modal');
+  if (replyM && replyM.style.display === 'flex') {
+    e.preventDefault();
+    closeReplyModal();
+    return;
+  }
+  const histM = document.getElementById('reply-history-modal');
+  if (histM && histM.style.display === 'flex') {
+    e.preventDefault();
+    closeReplyHistoryModal();
+    return;
+  }
+});
+
+async function sendReply() {
+  if (!_replyTargetFeedbackId) return;
+  const f = feedbackItems.find(x => x.id === _replyTargetFeedbackId);
+  if (!f || !f.uid) { alert('宛先 uid が取得できませんでした'); return; }
+  const title = document.getElementById('reply-input-title').value.trim();
+  const body = document.getElementById('reply-input-body').value.trim();
+  if (!title) { alert('タイトルを入力してください'); return; }
+  if (!body) { alert('本文を入力してください'); return; }
+  const sendBtn = document.querySelector('.reply-send');
+  if (sendBtn) sendBtn.disabled = true;
+  try {
+    // createdAt は ServerValue.TIMESTAMP を使う (野沢さん指摘 2026-05-05 PERMISSION_DENIED 修正):
+    //   Date.now() は client clock で、 Firebase Rules `newData.val() <= now` の now は
+    //   server time → client が数 ms でも進んでいると弾かれていた
+    const TS = (typeof firebase !== 'undefined' && firebase.database && firebase.database.ServerValue)
+      ? firebase.database.ServerValue.TIMESTAMP : Date.now();
+    await db.ref('prism-gacha/notifications/' + f.uid).push({
+      kind: 'reply',
+      title: title,
+      body: body,
+      createdAt: TS,
+      relatedFeedbackId: _replyTargetFeedbackId,
+    });
+    // feedback 側も「既読」 + 返信済 マーキング (今は read true で代用)
+    if (!f.read) await toggleFeedbackRead(_replyTargetFeedbackId, false);
+    _showAdminNotice('💬 ' + (f.name || 'ユーザー') + ' さんに返信を送信しました');
+    closeReplyModal();
+    // 返信履歴 索引を 再 fetch して feedback row の「📜 返信履歴 N件」 を 最新化
+    if (typeof loadAllNotifications === 'function') loadAllNotifications();
+  } catch (e) {
+    console.error('[reply] send failed:', e);
+    alert('送信失敗: ' + (e.message || e));
+  } finally {
+    if (sendBtn) sendBtn.disabled = false;
+  }
+}
+
+async function sendBroadcast() {
+  const title = document.getElementById('bc-title').value.trim();
+  const body = document.getElementById('bc-body').value.trim();
+  if (!title) { alert('タイトルを入力してください'); return; }
+  if (!body) { alert('本文を入力してください'); return; }
+  if (!confirm('全ログイン済ユーザーに 一斉送信します。 よろしいですか?\n\nタイトル: ' + title)) return;
+  const sendBtn = document.querySelector('.broadcast-send');
+  if (sendBtn) sendBtn.disabled = true;
+  try {
+    const TS_BC = (typeof firebase !== 'undefined' && firebase.database && firebase.database.ServerValue)
+      ? firebase.database.ServerValue.TIMESTAMP : Date.now();
+    await db.ref('prism-gacha/notifications/_broadcast').push({
+      kind: 'broadcast',
+      title: title,
+      body: body,
+      createdAt: TS_BC,
+    });
+    document.getElementById('bc-title').value = '';
+    document.getElementById('bc-body').value = '';
+    _showAdminNotice('📢 broadcast を全ユーザーに送信しました');
+  } catch (e) {
+    console.error('[broadcast] send failed:', e);
+    alert('送信失敗: ' + (e.message || e));
+  } finally {
+    if (sendBtn) sendBtn.disabled = false;
+  }
 }
 
 async function toggleFeedbackRead(id, currentRead) {
@@ -1850,6 +2309,8 @@ const _origLoadAll = loadAll;
 loadAll = async function() {
   await _origLoadAll();
   await loadFeedback();
+  // 返信履歴 索引も 同時取得 (野沢さん指示 2026-05-05、 案A)
+  if (typeof loadAllNotifications === 'function') await loadAllNotifications();
 };
 
 // ===== BGM継続再生 (index.htmlで再生中の曲を引き継ぐ) =====
@@ -1912,6 +2373,17 @@ loadAll = async function() {
   // フォールバック: 1クリック/キー操作で再生
   document.addEventListener('click', tryPlay, { once: true });
   document.addEventListener('keydown', tryPlay, { once: true });
+})();
+
+// admin header の version 表示 (野沢さん指示 2026-05-05)
+(async function _initAdminVersion() {
+  try {
+    const res = await fetch('/version.json?_t=' + Date.now());
+    if (!res.ok) return;
+    const j = await res.json();
+    const verEl = document.getElementById('admin-ver');
+    if (verEl && j && j.version) verEl.textContent = 'v' + j.version;
+  } catch (e) { /* 失敗してもUI動作には影響しない */ }
 })();
 
 </script>
