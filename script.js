@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4n — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4o — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -6691,7 +6691,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // version 完全同期 (野沢さん指示 2026-05-06): bump_version.py が自動で更新する。
 // 旧 date-suffix '20260504o' を 5/6 で見つけた事故を契機に version-based に統一。
-const IMG_CACHE_VERSION = '1.4.4n';
+const IMG_CACHE_VERSION = '1.4.4o';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -7752,22 +7752,24 @@ $("#story-stage").addEventListener('click', e => {
 // ============ v1.1.3: Master Mute + BGM プレイヤー (拡張版) ============
 // BGM_LIST: labelは「メインテーマ」「第1章テーマ」など使用場面を表記、descは原曲名
 // duration はffprobeで実測した固定値 (新曲追加時は scripts/measure_bgm.sh で取得→更新)
+// category: 'chapter' (メイン+各章) / 'faction' (派閥) / 'other' (戦闘等)
+// 野沢さん指示 2026-05-06: BGM panel ポップアップで タブ分け表示するため category 明示
 const BGM_LIST = [
-  { id: 'dawn',    label: 'メインテーマ',     desc: 'Prism Dawn (夜明けの希望)',          duration: '2:49', file: '/assets/bgm/home.mp3' },
-  { id: 'watch',   label: '第1章テーマ',      desc: 'Prism Watch (三柱の夜警)',           duration: '2:17', file: '/assets/bgm/prism-watch.mp3' },
-  { id: 'tide',    label: '第2章テーマ',      desc: 'Prism Tide (虹の潮)',                 duration: '2:44', file: '/assets/bgm/prism-tide.mp3' },
-  { id: 'sands',   label: '第3章テーマ',      desc: 'Prism Sands (砂塵の鼓動)',           duration: '3:02', file: '/assets/bgm/prism-sands.mp3' },
-  { id: 'rift',    label: '戦闘テーマ',        desc: 'Prismatic Rift Overture (虹裂の序曲)', duration: '3:08', file: '/assets/bgm/Prismatic Rift Overture.mp3' },
-  { id: 'church',  label: '白焔教会テーマ',    desc: 'Prism Sanctus (白焔の祈り)',         duration: '3:09', file: '/assets/bgm/prism-church.mp3' },
-  { id: 'aquasis', label: 'アクアシステーマ',  desc: 'Prism Abyss (深海の宮)',             duration: '2:59', file: '/assets/bgm/prism-aquasis.mp3' },
-  { id: 'crimson', label: '紅玉海賊団テーマ',  desc: 'Prism Sailborn (紅潮の風)',          duration: '2:51', file: '/assets/bgm/prism-crimson.mp3' },
-  { id: 'sahar',   label: 'サハールテーマ',    desc: 'Prism Sahar (古龍の風)',             duration: '2:48', file: '/assets/bgm/prism-sahar.mp3' },
+  { id: 'dawn',    label: 'メインテーマ',     desc: 'Prism Dawn (夜明けの希望)',          category: 'chapter', duration: '2:49', file: '/assets/bgm/home.mp3' },
+  { id: 'watch',   label: '第1章テーマ',      desc: 'Prism Watch (三柱の夜警)',           category: 'chapter', duration: '2:17', file: '/assets/bgm/prism-watch.mp3' },
+  { id: 'tide',    label: '第2章テーマ',      desc: 'Prism Tide (虹の潮)',                 category: 'chapter', duration: '2:44', file: '/assets/bgm/prism-tide.mp3' },
+  { id: 'sands',   label: '第3章テーマ',      desc: 'Prism Sands (砂塵の鼓動)',           category: 'chapter', duration: '3:02', file: '/assets/bgm/prism-sands.mp3' },
+  { id: 'rift',    label: '戦闘テーマ',        desc: 'Prismatic Rift Overture (虹裂の序曲)', category: 'other',   duration: '3:08', file: '/assets/bgm/Prismatic Rift Overture.mp3' },
+  { id: 'church',  label: '白焔教会テーマ',    desc: 'Prism Sanctus (白焔の祈り)',         category: 'faction', duration: '3:09', file: '/assets/bgm/prism-church.mp3' },
+  { id: 'aquasis', label: 'アクアシステーマ',  desc: 'Prism Abyss (深海の宮)',             category: 'faction', duration: '2:59', file: '/assets/bgm/prism-aquasis.mp3' },
+  { id: 'crimson', label: '紅玉海賊団テーマ',  desc: 'Prism Sailborn (紅潮の風)',          category: 'faction', duration: '2:51', file: '/assets/bgm/prism-crimson.mp3' },
+  { id: 'sahar',   label: 'サハールテーマ',    desc: 'Prism Sahar (古龍の風)',             category: 'faction', duration: '2:48', file: '/assets/bgm/prism-sahar.mp3' },
   // ===== S1C4 追加 (3曲: 章テーマ + 派閥BGM x2) =====
-  { id: 'frost',    label: '第4章テーマ',      desc: 'Prism Frost (凍空の鼓動)',           duration: '2:53', file: '/assets/bgm/prism-frost.mp3' },
-  { id: 'niflheim', label: 'ニーヴルテーマ',   desc: 'Prism Niflheim (氷霊の歌)',          duration: '3:09', file: '/assets/bgm/prism-niflheim.mp3' },
-  { id: 'aether',   label: 'ゼノニアテーマ',   desc: 'Prism Aether (蒸気の鼓動)',          duration: '3:08', file: '/assets/bgm/prism-aether.mp3' },
+  { id: 'frost',    label: '第4章テーマ',      desc: 'Prism Frost (凍空の鼓動)',           category: 'chapter', duration: '2:53', file: '/assets/bgm/prism-frost.mp3' },
+  { id: 'niflheim', label: 'ニーヴルテーマ',   desc: 'Prism Niflheim (氷霊の歌)',          category: 'faction', duration: '3:09', file: '/assets/bgm/prism-niflheim.mp3' },
+  { id: 'aether',   label: 'ゼノニアテーマ',   desc: 'Prism Aether (蒸気の鼓動)',          category: 'faction', duration: '3:08', file: '/assets/bgm/prism-aether.mp3' },
   // ===== S1C5 追加 (1曲: 章テーマ、 派閥 BGM は 5キャラ閾値到達後に追加予定) =====
-  { id: 'blackmoon', label: '第5章テーマ',     desc: 'Prism Blackmoon (黒月の予兆)',       duration: '3:07', file: '/assets/bgm/prism-blackmoon.mp3' },
+  { id: 'blackmoon', label: '第5章テーマ',     desc: 'Prism Blackmoon (黒月の予兆)',       category: 'chapter', duration: '3:07', file: '/assets/bgm/prism-blackmoon.mp3' },
 ];
 const bgmAudio = document.getElementById("bgm-home");
 
@@ -7912,7 +7914,9 @@ function loadBgmSrc(id) {
   // タイトル表示形式: "Prismaera -[曲名]-"
   if ('mediaSession' in navigator) {
     try {
-      const songName = (track.desc || '').replace(/\s*\([^)]*\)\s*$/, '').trim() || track.label;
+      // 野沢さん指示 2026-05-06: スマホ ロック画面の曲名を 日本語タイトル (label) メインに変更
+      // 旧: 英題ベース (Prism Dawn 等) / 新: 日本語ベース (メインテーマ / 第1章テーマ / サハールテーマ 等)
+      const songName = track.label || track.desc || '';
       navigator.mediaSession.metadata = new MediaMetadata({
         title: `Prismaera -${songName}-`,
         artist: 'Prismaera',
@@ -8352,11 +8356,18 @@ function renderBgmPanel() {
     }
   }
 
-  // 曲リスト
+  // カテゴリタブ active 反映
+  document.querySelectorAll('#bgm-cat-tabs .bgm-cat-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.cat === _bgmCatFilter);
+  });
+  // 曲リスト (野沢さん指示 2026-05-06、 カテゴリタブで filter)
   const list = $("#bgm-list");
   if (!list) return;
   list.innerHTML = '';
-  BGM_LIST.forEach(b => {
+  const filtered = _bgmCatFilter === 'all'
+    ? BGM_LIST
+    : BGM_LIST.filter(b => (b.category || 'other') === _bgmCatFilter);
+  filtered.forEach(b => {
     const row = document.createElement('div');
     row.className = 'bgm-row' + (b.id === bgmCurrentId ? ' now' : '');
     const checked = bgmPlaylist[b.id] ? 'checked' : '';
@@ -8384,6 +8395,20 @@ function renderBgmPanel() {
     });
   });
 }
+
+// BGM カテゴリ filter state (all / chapter / faction / other)
+let _bgmCatFilter = 'all';
+document.addEventListener('DOMContentLoaded', () => {
+  const tabBar = document.getElementById('bgm-cat-tabs');
+  if (tabBar) {
+    tabBar.addEventListener('click', e => {
+      const t = e.target.closest('.bgm-cat-tab');
+      if (!t) return;
+      _bgmCatFilter = t.dataset.cat;
+      renderBgmPanel();
+    });
+  }
+});
 
 // ───── ヘッダーボタンと panel 内コントロール配線 ─────
 $("#btn-bgm").addEventListener("click", openBgmPanel);

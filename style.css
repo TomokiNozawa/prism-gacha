@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4n — 演出スタイル (Season 1 第1章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4o — 演出スタイル (Season 1 第1章) / dev は cache buster suffix で進行
    ============================================================ */
 :root {
   --bg: #05060d;
@@ -9062,4 +9062,33 @@ body.lightmode .result * {
   animation-iteration-count: revert !important;
 }
 /* ===== END LIGHTMODE ===== */
+
+/* BGM カテゴリタブ (野沢さん指示 2026-05-06、 章テーマ/派閥テーマ/その他) */
+.bgm-cat-tabs {
+  display: flex; gap: 4px;
+  margin: 8px 0 10px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 999px;
+  padding: 3px;
+}
+.bgm-cat-tab {
+  flex: 1 1 0;
+  background: transparent;
+  border: none;
+  padding: 7px 8px;
+  color: rgba(255,255,255,0.6);
+  font-size: 12px; font-weight: 500;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  border-radius: 999px;
+  transition: color 0.15s ease, background 0.15s ease;
+  min-height: 32px;
+}
+.bgm-cat-tab:hover { color: rgba(255,255,255,0.85); }
+.bgm-cat-tab.active {
+  color: #1a1d2e;
+  background: rgba(251, 191, 36, 0.85);
+  font-weight: 600;
+}
 

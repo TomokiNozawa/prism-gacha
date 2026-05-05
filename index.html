@@ -24,8 +24,8 @@
 <link rel="icon" href="/images/icons/icon-32.png" type="image/png" sizes="32x32">
 <link rel="icon" href="/images/icons/icon-16.png" type="image/png" sizes="16x16">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
-<link rel="manifest" href="/manifest.json?v=1.4.4n">
-<link rel="stylesheet" href="/style.css?v=1.4.4n">
+<link rel="manifest" href="/manifest.json?v=1.4.4o">
+<link rel="stylesheet" href="/style.css?v=1.4.4o">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -67,7 +67,7 @@ if ('serviceWorker' in navigator) {
 </div>
 
 <header class="topbar">
-  <div class="title">✦ Prismaera <span class="title-kana">-プリズマエラ-</span> <span class="ver" id="app-version">v1.4.4n</span></div>
+  <div class="title">✦ Prismaera <span class="title-kana">-プリズマエラ-</span> <span class="ver" id="app-version">v1.4.4o</span></div>
   <div class="stats">
     <button id="btn-gallery" class="gallery-btn" title="図鑑 (Gキー)">📖 図鑑</button>
     <button id="btn-relations" class="gallery-btn" title="相関図">🌐 相関図</button>
@@ -600,6 +600,13 @@ if ('serviceWorker' in navigator) {
       </button>
     </div>
     <div class="bgm-section-label">再生候補 (チェックを付けた曲がローテーション対象)</div>
+    <!-- カテゴリタブ (野沢さん指示 2026-05-06、 章テーマ/派閥テーマ/その他) -->
+    <div class="bgm-cat-tabs" id="bgm-cat-tabs">
+      <button type="button" class="bgm-cat-tab active" data-cat="all">全て</button>
+      <button type="button" class="bgm-cat-tab" data-cat="chapter">章テーマ</button>
+      <button type="button" class="bgm-cat-tab" data-cat="faction">派閥テーマ</button>
+      <button type="button" class="bgm-cat-tab" data-cat="other">その他</button>
+    </div>
     <div class="bgm-list" id="bgm-list"></div>
   </div>
 </div>
@@ -695,7 +702,7 @@ if ('serviceWorker' in navigator) {
 <audio id="bgm-home" preload="auto"></audio>
 
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
-<script src="/script.js?v=1.4.4n"></script>
-<script src="/gasshuku.js?v=1.4.4n"></script>
+<script src="/script.js?v=1.4.4o"></script>
+<script src="/gasshuku.js?v=1.4.4o"></script>
 </body>
 </html>
