@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4e — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4f — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -10196,14 +10196,18 @@ async function loadNotifications() {
 }
 
 function _updateNotifBadge() {
-  const badge = document.getElementById('notif-badge');
-  if (!badge) return;
   const unread = _notifications.filter(n => !n.read).length;
-  if (unread > 0) {
-    badge.style.display = '';
-    badge.textContent = unread > 99 ? '99+' : String(unread);
-  } else {
-    badge.style.display = 'none';
+  // 両バッジ更新: ベル本体 (PC/メニュー内) + スマホ ≡ ハンバーガーボタン
+  // (野沢さん指示 2026-05-05 「スマホ版で 通知来たら ≡ ボタンにも数字、 じゃないと気づかない」)
+  for (const id of ['notif-badge', 'notif-badge-mobile']) {
+    const b = document.getElementById(id);
+    if (!b) continue;
+    if (unread > 0) {
+      b.style.display = '';
+      b.textContent = unread > 99 ? '99+' : String(unread);
+    } else {
+      b.style.display = 'none';
+    }
   }
 }
 
