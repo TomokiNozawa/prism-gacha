@@ -1912,6 +1912,48 @@ print(f"  ルール7-35 (同一シーン 背景→挿絵 参照添付): {n7_35}�
 n7_37 = check_pool_length_leak()
 print(f"  ルール7-37 (POOL length 公開前章リーク): {n7_37}件 検出 [WARNING]")
 
+
+def check_home_teaser_next2_date_hidden():
+    """ルール7-38 (BLOCKER 2026-05-06): ホーム画面ティザー (`_renderHomeNextTeaser`) で 翌翌章 (next2) の
+    releaseDate を 日時公表しない 必須。
+    過去事故: 2026-05-03 指示で `_refreshChapterReleaseLocks` に反映されたが ホーム側で漏れ、
+    v1.5.0 release 直前に 第6章の公開予定日時 (2026-05-10 12:00) が 表示されてしまった。
+    """
+    target = ROOT / "script.js"
+    if not target.exists():
+        return 0
+    text = target.read_text(encoding="utf-8")
+    m = re.search(r'function\s+_renderHomeNextTeaser\s*\([^)]*\)\s*\{', text)
+    if not m:
+        return 0
+    start = m.end()
+    end = text.find("\nfunction ", start)
+    if end < 0:
+        end = start + 4000
+    body = text[start:end]
+    m2 = re.search(r'colHTML\s*\(\s*next2\s*,\s*(\w+)\s*\)', body)
+    if not m2:
+        if re.search(r'colHTML\s*\(\s*next2\s*\)', body):
+            violations.append(
+                f"[ルール7-38 ホームティザー翌翌章日時公表 BLOCKER] _renderHomeNextTeaser で\n"
+                f"      colHTML(next2) 引数なし呼出 = 翌翌章の日時を 公表してしまう。\n"
+                f"      → colHTML(next2, false) に 修正必須\n"
+                f"      → 野沢さん指示 2026-05-03 + 2026-05-06 再指摘"
+            )
+        return 1
+    if m2.group(1) != "false":
+        violations.append(
+            f"[ルール7-38 ホームティザー翌翌章日時公表 BLOCKER] _renderHomeNextTeaser で\n"
+            f"      colHTML(next2, {m2.group(1)}) = 翌翌章の日時公表。\n"
+            f"      → colHTML(next2, false) に 修正必須"
+        )
+    return 1
+
+
+n7_38 = check_home_teaser_next2_date_hidden()
+print(f"  ルール7-38 (ホームティザー翌翌章日時非公表): {n7_38}件 検査 [BLOCKER]")
+
+
 def check_main_no_suffix():
     """ルール7-27 (BLOCKER 2026-05-05): main branch で commit する version は suffix なし (X.Y.Z 形式) 必須。
     2026-05-05 v1.4.4 main reach 後の 緊急 hotfix で dev → main merge --no-ff した時、 dev の cache buster

@@ -7749,10 +7749,13 @@ function _renderHomeNextTeaser() {
   }
   if (!next1) { el.style.display = 'none'; return; }
   el.style.display = '';
-  function colHTML(ch) {
-    const releaseStr = ch.releaseDate
+  // 翌章 (next1) のみ 公開予定日 を 表示、 翌翌章 (next2) は「現在制作中」 (日時非公表)
+  // 野沢さん指示 2026-05-03 + 2026-05-06 再指摘「翌翌章は翌章公開後に日時公表」
+  // (story-list-modal _refreshChapterReleaseLocks と表記統一)
+  function colHTML(ch, isNext) {
+    const releaseStr = (ch.releaseDate && isNext)
       ? `📅 <b>${_formatReleaseDate(ch.id)}</b> 公開予定`
-      : `📅 公開予定 — お楽しみに`;
+      : `🔮 現在制作中`;
     const povLine = ch.povCharName ? `<div class="story-next-pov">主人公: ${escapeHtml(ch.povCharName)}</div>` : '';
     return `<div class="story-next-col">
       <div class="story-next-badge">Coming Soon</div>
@@ -7766,7 +7769,7 @@ function _renderHomeNextTeaser() {
       </div>
     </div>`;
   }
-  el.innerHTML = next2 ? (colHTML(next1) + colHTML(next2)) : colHTML(next1);
+  el.innerHTML = next2 ? (colHTML(next1, true) + colHTML(next2, false)) : colHTML(next1, true);
   el.classList.toggle('teaser-split', !!next2);
   // ティザー側の高さに Stories ボタンを揃える (野沢さん指示 2026-05-03)
   // レイアウト確定後に同期 (innerHTML 直後は box 計測値が安定しないので RAF)
