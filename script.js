@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.3f — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.3g — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -2975,24 +2975,30 @@ function _updateTScoreHistory(results, tScore) {
   }
 }
 
-// 偏差値ヒストリー: 過去 history (Firebase 同期 直近120件) を 10連 単位で 後計算
-// 起動時に1回だけ実行 (tScoreBackfilledVersion で多重実行防止)
-//
-// v2 (2026-05-05): at 差で 10連 group を検出 → 連続性 chunking。
-//   旧 v1 は 単純に 10件ずつ chunk していたため 単発+10連 混在 history で chunk が
-//   実際の 10連と ズレて 偽の tScore を計算していた。
-// v3 (2026-05-05 同日): version bump で v2 で skip 状態だったユーザー も 強制再走。
-//   applyCloudState の merge 化で local が cloud で 上書き消失せず、 再 backfill で
-//   local 内 5/4 R10連 等 を 検出可能に (野沢さん指摘 「スマホで開いても反映されない」 対策)。
+// 偏差値ヒストリー: 永続保持仕様 (野沢さん指示 2026-05-05)
+//   max/min は 一度記録されたら 履歴 cap (120件) を超えても 永続保持される。
+//   forward update (showResult → _updateTScoreHistory) のみで「現在結果 vs 保持 max/min」
+//   を比較し 更新ある時のみ 保持データを 書き換える。
+//   backfill (history からの一括 再計算) は **未記録時の初期化のみ** 実行 (= 新規 user
+//   が history を持つが best/worst 未記録の場合)。 既に記録済の値は 二度と上書きしない
+//   (= cap 外データが 失われる事故 を 防ぐ)。
 const TSCORE_BACKFILL_VERSION = 3;
 function backfillTScoreFromHistory() {
-  if (state.tScoreBackfilledVersion === TSCORE_BACKFILL_VERSION) return;
+  // 永続保持: 既に best/worst 両方 記録済なら 触らない (forward update のみで運用)
+  const hasBest = typeof state.bestTScore === 'number' && state.bestTScore >= 0;
+  const hasWorst = typeof state.worstTScore === 'number' && state.worstTScore >= 0;
+  if (hasBest && hasWorst) {
+    state.tScoreBackfilledVersion = TSCORE_BACKFILL_VERSION;
+    state.tScoreBackfilled = true;
+    return;
+  }
   if (!Array.isArray(state.history) || state.history.length < 10) {
     state.tScoreBackfilledVersion = TSCORE_BACKFILL_VERSION;
     state.tScoreBackfilled = true;
     saveState();
     return;
   }
+  // 未記録 (片方 or 両方) の場合のみ history から 初期値推定
   // history は unshift で追加 = 新しい順、 at 降順 を期待。 念のため sort。
   const sorted = [...state.history].sort((a, b) => (b.at || 0) - (a.at || 0));
   // at 差で「10連」 group を検出: 同一 10連の 10件は ms 差で連続 (50-100ms 程度)、
@@ -3013,21 +3019,17 @@ function backfillTScoreFromHistory() {
   }
   if (cur.length > 0) groups.push(cur);
 
-  // v2 起動時: 旧 v1 で書き込まれた 不正値 を 上書きするため リセット
-  state.bestTScore = -1; state.worstTScore = -1;
-  state.bestAt = 0; state.worstAt = 0;
-  state.bestResults = []; state.worstResults = [];
-
   // 各 group を確認、 size === 10 のものだけ tScore 計算 (単発 group や 端数 group は除外)
+  // 既に hasBest=true なら best は 触らず、 hasWorst=true なら worst は 触らない (永続保持)
   for (const group of groups) {
     if (group.length !== 10) continue;
     const rar = computeTenRollRarity(group);
     const at = group[0].at || Date.now();
-    if (state.bestTScore < 0 || rar.tScore > state.bestTScore) {
+    if (!hasBest && (state.bestTScore < 0 || rar.tScore > state.bestTScore)) {
       state.bestTScore = rar.tScore; state.bestAt = at;
       state.bestResults = group.map(_sanitizeResultEntryForCloud);
     }
-    if (state.worstTScore < 0 || rar.tScore < state.worstTScore) {
+    if (!hasWorst && (state.worstTScore < 0 || rar.tScore < state.worstTScore)) {
       state.worstTScore = rar.tScore; state.worstAt = at;
       state.worstResults = group.map(_sanitizeResultEntryForCloud);
     }
@@ -8857,9 +8859,10 @@ function applyCloudState(cs) {
   state.bestResults = Array.isArray(cs.bestResults) ? cs.bestResults : [];
   state.worstResults = Array.isArray(cs.worstResults) ? cs.worstResults : [];
   state.tScoreBackfilled = !!cs.tScoreBackfilled;
-  // history が cloud で更新されたので backfill 再走を強制 (version リセット)
-  // → local 保護された 5/4 R10連 等を再検出する経路
-  state.tScoreBackfilledVersion = 0;
+  // 永続保持仕様 (野沢さん指示 2026-05-05): cloud から取得した version を そのまま採用、
+  //   backfill 強制再走させない。 既に best/worst 記録済なら 二度と history から 上書きしない
+  //   (= cap 外データが 失われる事故 を 防ぐ)。 未記録時のみ backfill が 初期推定する。
+  state.tScoreBackfilledVersion = cs.tScoreBackfilledVersion || 0;
   localStorage.setItem("prism-gacha", JSON.stringify(state));
   updateHUD();
   if (typeof renderHistory === 'function') renderHistory();
