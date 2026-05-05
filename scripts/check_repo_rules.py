@@ -1833,6 +1833,35 @@ def check_prompt_body_meta_pollution():
     return checked
 
 
+def check_pool_length_leak():
+    """ルール7-37 (WARNING 2026-05-06): script.js 内で POOL.{Tier}.length / POOL[X].length が
+    _isChapterReleased でフィルタせずに 直接使われている箇所を検出。 公開前章キャラが
+    分母に含まれて 隠れキャラ数が ユーザーに 推測される リーク防止。
+
+    2026-05-06 アカウント情報の urMax/lrMax 分母に s1c5 UR3体 が含まれていた
+    リーク事故 (野沢さん指摘) の 再発防止。
+    """
+    target = ROOT / "script.js"
+    if not target.exists():
+        return 0
+    text = target.read_text(encoding="utf-8")
+    pat = re.compile(r'POOL(?:\.\w+|\[["\']\w+["\']\])\.length')
+    issues = 0
+    for i, line in enumerate(text.split("\n"), 1):
+        if pat.search(line):
+            # 同一行に filter / _isChapterReleased / _released が 含まれていれば OK
+            if any(k in line for k in ['filter(', '_isChapterReleased', '_released', '// CHAPTER_FILTER_OK']):
+                continue
+            warnings_only.append(
+                f"[ルール7-37 POOL length 直接 WARNING] script.js:{i} `{line.strip()[:120]}`\n"
+                f"      → 公開前章キャラが 分母に含まれ ユーザーに 隠れキャラ数を 推測される リスク\n"
+                f"      → POOL.X.filter(c => !c.chapter || _isChapterReleased(c.chapter)).length を使う\n"
+                f"      → 意図的なら 行末に `// CHAPTER_FILTER_OK` コメントで 抑制可"
+            )
+            issues += 1
+    return issues
+
+
 n7_33 = check_combo_pair_uniqueness()
 print(f"  ルール7-33 (combos 重複ペア 禁止): {n7_33}件 検査 [BLOCKER]")
 n7_36 = check_prompt_body_meta_pollution()
@@ -1841,6 +1870,8 @@ n7_34 = check_illustration_position_consistency()
 print(f"  ルール7-34 (挿絵 同一シーン内 LEFT/RIGHT 整合): {n7_34}件 検査 [WARNING]")
 n7_35 = check_illustration_setting_reference()
 print(f"  ルール7-35 (同一シーン 背景→挿絵 参照添付): {n7_35}件 検査 [WARNING]")
+n7_37 = check_pool_length_leak()
+print(f"  ルール7-37 (POOL length 公開前章リーク): {n7_37}件 検出 [WARNING]")
 
 def check_main_no_suffix():
     """ルール7-27 (BLOCKER 2026-05-05): main branch で commit する version は suffix なし (X.Y.Z 形式) 必須。
