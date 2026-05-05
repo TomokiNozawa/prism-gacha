@@ -38,7 +38,7 @@ import json
 import re
 import subprocess
 import sys
-from datetime import date
+from datetime import date, datetime, timezone, timedelta
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -85,11 +85,21 @@ def increment_suffix(s: str) -> str:
     return "a" + "".join(chars)
 
 
-def next_version(current: str, mode: str) -> str:
+def next_version(current: str, mode: str, last_dev_suffix: str = "") -> str:
+    """次の version を 計算。
+    案A (野沢さん指示 2026-05-05、 同 X.Y.Z 系列での suffix 衝突回避):
+      dev-suffix mode は **last_dev_suffix を ベースに +1**。
+      これで main 緊急 hotfix で sed strip → version が "1.4.4" に戻っても、
+      次の dev-suffix は "1.4.4g" (前回 f だった場合) で連続。 同 X.Y.Z 系列で
+      同 suffix が 二度 登場しない。
+      patch/chapter/season は lastDevSuffix を "" にリセットする想定 (新 X.Y.Z namespace)。
+    """
     base, suffix = parse_version(current)
     if mode == "dev-suffix":
-        # dev: suffix を 1段階 increment、 X.Y.Z 部分は維持
-        return base + increment_suffix(suffix)
+        # 連続管理: last_dev_suffix が あれば それを +1、 無ければ 現在 version の suffix から +1
+        # (互換性: 既存 user で lastDevSuffix field 不在の場合 旧挙動)
+        seed = last_dev_suffix if last_dev_suffix else suffix
+        return base + increment_suffix(seed)
     # main release: X.Y.Z bump、 suffix は空に reset
     s, c, p = [int(x) for x in base.split(".")]
     if mode == "patch":
@@ -130,14 +140,25 @@ def update_sw_version(new_ver: str) -> None:
 
 
 def update_version_json(data: dict, new_ver: str, mode: str, notes: list[str] | None) -> None:
-    today = date.today().isoformat()
+    # 野沢さん指示 2026-05-05: releasedAt + changelog.date を 日時 (ISO 8601 + JST) に 変更
+    # 同日に複数 release (緊急 hotfix 第1弾/第2弾 等) があった場合 区別可能、 データ量増は微々
+    JST = timezone(timedelta(hours=9))
+    now_iso = datetime.now(JST).isoformat(timespec="seconds")
     data["version"] = new_ver
+    # 案A: lastDevSuffix を 連続管理 (野沢さん指示 2026-05-05)
+    # dev-suffix → 新 suffix を 記録 (= 同 X.Y.Z 系列で 二度使わないため)
+    # main release (patch/chapter/season) → 主バージョン bump で 新 namespace、 "" にリセット
+    _, new_suffix = parse_version(new_ver)
+    if mode == "dev-suffix":
+        data["lastDevSuffix"] = new_suffix
+    else:
+        data["lastDevSuffix"] = ""
     if mode != "dev-suffix":
-        data["releasedAt"] = today
+        data["releasedAt"] = now_iso
         if notes:
             entry = {
                 "version": new_ver,
-                "date": today,
+                "date": now_iso,
                 "type": "patch" if mode == "patch" else "major",
                 "notes": notes,
             }
@@ -241,7 +262,9 @@ def main() -> int:
 
     data = load_version()
     current = data["version"]
-    new_ver = next_version(current, args.mode)
+    # 案A: lastDevSuffix を 連続管理 (野沢さん指示 2026-05-05、 同 X.Y.Z 系列で suffix 衝突回避)
+    last_dev_suffix = data.get("lastDevSuffix", "") or ""
+    new_ver = next_version(current, args.mode, last_dev_suffix)
 
     print(f"バージョン: v{current} → v{new_ver} ({args.mode})")
     if args.note:

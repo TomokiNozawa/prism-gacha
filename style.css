@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4f — 演出スタイル (Season 1 第1章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4h — 演出スタイル (Season 1 第1章) / dev は cache buster suffix で進行
    ============================================================ */
 :root {
   --bg: #05060d;
@@ -3823,28 +3823,19 @@ body.has-offline-banner .topbar { margin-top: 30px; }
 .leg-sister    { background: #ff9fd0; }
 .relations-canvas {
   flex: 1;
-  overflow: auto;
-  display: flex; align-items: flex-start; justify-content: flex-start;
-  /* 2026-05-03 野沢さん指示「スクロールしても見切れる」 対策: 余白を 60px に拡大 */
-  padding: 60px;
+  /* SVG transform 方式に移行 (野沢さん指示 2026-05-05): 旧 overflow:auto + scrollLeft で
+     pan していたが reflow heavy。 svg 内 <g> に translate+scale を直接適用する方式 (= ワールド
+     マップ流) に変更、 canvas 自体は overflow:hidden で fit。 ピンチ滑らかさ大幅改善。 */
+  overflow: hidden;
+  position: relative;
   cursor: grab;
   user-select: none;
-  -webkit-overflow-scrolling: touch;
+  touch-action: none;  /* ピンチ + pan を JS 側で完全制御 */
 }
 .relations-canvas:active { cursor: grabbing; }
 .relations-canvas svg {
-  /* 2026-05-03 野沢さん指示「最初拡大されすぎ」 対策:
-   * 内部viewBox = 座標 scale 後の総空間 (3000x2400) + 周囲200pxバッファ = 3400x2800 (比率 1.214)
-   * 表示サイズ 2200x1820 で比率一致、 縮小率 0.647 → 画面に収まりやすく + スクロール量抑制
-   *
-   * 拡大縮小 (野沢さん指示 2026-05-03、 yuppi8213 さん 2026-05-05 「ボタン押せない」 修正):
-   * 親 .relations-canvas に CSS 変数 --rel-zoom を JS で setProperty (デフォ 1.0)、
-   * width/height は calc で 動的計算。 旧実装は svg.style.width を 直接書き込んでいたが
-   * renderRelations の svg innerHTML 再生成で inline style がリセットされ ズーム反映されない
-   * バグがあった → CSS 変数を 親 div に書く 方式で svg 再 render に対しても堅牢化 */
-  width: calc(2200px * var(--rel-zoom, 1));
-  height: calc(1820px * var(--rel-zoom, 1));
-  flex-shrink: 0;
+  width: 100%; height: 100%;
+  display: block;
   pointer-events: auto;
 }
 /* スマホ: スクロール領域に下余白を確保 (ホームバー/safe-area対応) */
@@ -3862,10 +3853,10 @@ body.has-offline-banner .topbar { margin-top: 30px; }
   .relations-header { padding: 10px 12px 10px 12px; padding-top: 48px; gap: 6px; flex-direction: column; align-items: stretch; }  /* close は absolute 右上配置のため、 上に padding-top 48px で zoom 等を下にずらして被り回避 */
   /* ワールドマップは シンプル 1行 layout 維持 (野沢さん指示 2026-05-05、 column 化撤回)、
      余白は 相関図と同等の コンパクトさに 詰める (野沢さん指示 2026-05-05) */
-  .world-map-header { padding: 6px 12px; padding-top: calc(env(safe-area-inset-top, 0px) + 6px); gap: 6px; }
+  .world-map-header { padding: 6px 12px; padding-top: calc(env(safe-area-inset-top, 0px) + 6px); column-gap: 6px; row-gap: 0; }
   .world-map-header h2 { font-size: 14px; margin: 0; }
   .world-map-header > .close { font-size: 11px; padding: 4px 9px; min-height: 28px; }
-  .world-map-header > .wm-zoom { margin: 2px auto 0; }
+  .world-map-header > .wm-zoom { margin: 1px auto 0; }  /* スマホは 行間 1px で 詰める */
   /* スマホ wm-zoom は base スタイルで OK (中身fit + 中央寄せ)、 padding 上書き不要 */
   .relations-header h2 { font-size: 16px; margin: 0; text-align: center; }
   .relations-legend { justify-content: center; gap: 6px; font-size: 10px; }
@@ -5523,7 +5514,10 @@ body.gasshuku-modal-open {
 .world-map-header {
   display: flex; align-items: center; justify-content: space-between;
   padding: 10px 14px;
-  gap: 8px;
+  /* col 8px / row 0: 行間は zoom margin で 微調整 (野沢さん指示 2026-05-05 「タイトル行と
+     Zoom行の間隔が 若干広い、 詰めて」) — 旧 gap 8px が row-gap にも効いて間延びしていた */
+  column-gap: 8px;
+  row-gap: 0;
   background: rgba(0,0,0,0.5);
   border-bottom: 1px solid rgba(255,255,255,0.1);
   backdrop-filter: blur(8px);
@@ -5561,7 +5555,7 @@ body.gasshuku-modal-open {
 }
 .world-map-header > .wm-zoom {
   flex: 0 0 auto;          /* 中身 fit (relations-zoom と同形式の コンパクト枠) */
-  margin: 4px auto 0;       /* 別行 + 中央寄せ */
+  margin: 2px auto 0;       /* 別行 + 中央寄せ、 タイトル行との間隔は 微小に */
 }
 .world-map-body {
   flex: 1; display: grid; grid-template-columns: 1fr 320px;
@@ -7903,10 +7897,20 @@ body.gasshuku-mode-fantasy .fx-win {
   padding: 0 4px;
 }
 .rel-zoom-reset { font-size: 14px; }
+/* ピンチ操作 hint (モバイルのみ表示、 野沢さん指示 2026-05-05、 PC は 不要なため非表示) */
+.zoom-hint-mobile {
+  display: none;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.55);
+  margin-left: 6px;
+  white-space: nowrap;
+  align-items: center;
+}
 @media (max-width: 720px) {
   .relations-zoom { margin: 4px auto; }
   .rel-zoom-btn { width: 36px; height: 36px; font-size: 18px; }  /* タップ領域 ≥36px */
   .rel-zoom-level { min-width: 50px; font-size: 13px; }
+  .zoom-hint-mobile { display: inline-flex; }
 }
 .relations-list {
   position: absolute;
