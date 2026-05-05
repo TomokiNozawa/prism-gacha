@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.3h — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.3i — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -3841,10 +3841,14 @@ const REL_ZOOM_MIN = 0.5, REL_ZOOM_MAX = 2.5, REL_ZOOM_STEP = 0.2;
 const REL_SVG_BASE_W = 2200, REL_SVG_BASE_H = 1820;
 function setRelationsZoom(z) {
   _relationsZoom = Math.max(REL_ZOOM_MIN, Math.min(REL_ZOOM_MAX, z));
-  const svg = document.querySelector('.relations-canvas svg');
-  if (svg) {
-    svg.style.width  = (REL_SVG_BASE_W * _relationsZoom) + 'px';
-    svg.style.height = (REL_SVG_BASE_H * _relationsZoom) + 'px';
+  // CSS 変数 --rel-zoom を 親 .relations-canvas に setProperty:
+  // svg 要素の width/height は CSS calc(2200px * var(--rel-zoom)) で 動的計算される。
+  // 旧実装は svg.style.width で 直接 inline 書き込みだったが renderRelations で svg innerHTML
+  // が再生成された 際に inline style がクリアされて ボタン押下しても 反映されない事故 (yuppi8213
+  // さん 2026-05-05 「ボタン押せない」 報告) があったため CSS 変数経由に変更。
+  const canvas = document.getElementById('relations-canvas');
+  if (canvas) {
+    canvas.style.setProperty('--rel-zoom', String(_relationsZoom));
   }
   const lvl = document.getElementById('rel-zoom-level');
   if (lvl) lvl.textContent = Math.round(_relationsZoom * 100) + '%';
@@ -8781,39 +8785,25 @@ async function onAuthReady(user) {
     const cloudTotal = cloudState.total || 0;
     const collision = localHasProgress && cloudTotal > 0 && !statesEqual(state, cloudState);
 
-    if (collision) {
-      // 差分あり → 無言で合算 (両者のmax/unionを取り、損失なし)
+    // 進捗退行バグ修正 (野沢さん指摘 2026-05-05、 yuppi8213 さんの 4章+75キャラ → 3章+45キャラ
+    // 退行報告): 旧実装は statesEqual で「衝突なし」 と判定された場合 applyCloudState(cloudState)
+    // で local を 単純上書き → cloud が古い state なら 退行が発生していた。
+    // 新実装: 常に mergeStates 経由で union (max/union ベース、 退行物理的に不可) を取る。
+    // collision 判定は「データを最新化しました」 トーストの 出すかどうかにのみ使用。
+    if (cloudTotal > 0 || localHasProgress) {
       const merged = mergeStates(state, cloudState);
       applyCloudState(merged);
-      // 偏差値ヒストリー: applyCloudState で version リセット済み、 merge 後の history で再計算
+      // 偏差値ヒストリー: 永続保持仕様、 未記録時のみ history から 初期推定
       if (typeof backfillTScoreFromHistory === 'function'
           && state.tScoreBackfilledVersion !== TSCORE_BACKFILL_VERSION) {
         backfillTScoreFromHistory();
       }
       await saveStateCloud();
-      showToast('データを最新化しました');
-      try { await fbDb.ref('prism-gacha/users/' + user.uid + '/lastLoginAt').set(Date.now()); } catch (e) {}
-      return;
+      if (collision) showToast('データを最新化しました');
     }
-
-    // 衝突なし → cloud が優位 (cloudが空ならlocalを送る)
-    if (cloudTotal > 0) {
-      applyCloudState(cloudState);
-    } else {
-      await saveStateCloud();
-    }
+    // local も cloud も空: 何もしない (新規ユーザー)
 
     try { await fbDb.ref('prism-gacha/users/' + user.uid + '/lastLoginAt').set(Date.now()); } catch (e) {}
-
-    // 偏差値ヒストリー 後計算 (applyCloudState で history が merge され version=0 にリセットされるので 必ず走る)
-    // → 走った後 cloud にも 書き戻し (history merge 結果 + 新 best/worst を端末間整合)
-    if (typeof backfillTScoreFromHistory === 'function'
-        && state.tScoreBackfilledVersion !== TSCORE_BACKFILL_VERSION) {
-      backfillTScoreFromHistory();
-      if (typeof saveStateCloud === 'function') {
-        try { await saveStateCloud(); } catch (e) {}
-      }
-    }
   } catch (e) {
     console.error('onAuthReady error:', e);
   }

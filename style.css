@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.3h — 演出スタイル (Season 1 第1章) / dev は cache buster suffix で進行
+   Prismaera v1.4.3i — 演出スタイル (Season 1 第1章) / dev は cache buster suffix で進行
    ============================================================ */
 :root {
   --bg: #05060d;
@@ -3835,8 +3835,15 @@ body.has-offline-banner .topbar { margin-top: 30px; }
 .relations-canvas svg {
   /* 2026-05-03 野沢さん指示「最初拡大されすぎ」 対策:
    * 内部viewBox = 座標 scale 後の総空間 (3000x2400) + 周囲200pxバッファ = 3400x2800 (比率 1.214)
-   * 表示サイズ 2200x1820 で比率一致、 縮小率 0.647 → 画面に収まりやすく + スクロール量抑制 */
-  width: 2200px; height: 1820px;
+   * 表示サイズ 2200x1820 で比率一致、 縮小率 0.647 → 画面に収まりやすく + スクロール量抑制
+   *
+   * 拡大縮小 (野沢さん指示 2026-05-03、 yuppi8213 さん 2026-05-05 「ボタン押せない」 修正):
+   * 親 .relations-canvas に CSS 変数 --rel-zoom を JS で setProperty (デフォ 1.0)、
+   * width/height は calc で 動的計算。 旧実装は svg.style.width を 直接書き込んでいたが
+   * renderRelations の svg innerHTML 再生成で inline style がリセットされ ズーム反映されない
+   * バグがあった → CSS 変数を 親 div に書く 方式で svg 再 render に対しても堅牢化 */
+  width: calc(2200px * var(--rel-zoom, 1));
+  height: calc(1820px * var(--rel-zoom, 1));
   flex-shrink: 0;
   pointer-events: auto;
 }
