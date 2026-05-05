@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.3d — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.3e — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -2978,11 +2978,13 @@ function _updateTScoreHistory(results, tScore) {
 // 偏差値ヒストリー: 過去 history (Firebase 同期 直近120件) を 10連 単位で 後計算
 // 起動時に1回だけ実行 (tScoreBackfilledVersion で多重実行防止)
 //
-// v2 (2026-05-05 修正): at 差で 10連 group を検出 → 連続性 chunking
-//   旧 v1 は 単純に 10件ずつ chunk していたため、 単発+10連 混在 history で chunk が
-//   実際の 10連と ズレて 偽の tScore を計算していた (野沢さん指摘 2026-05-05 v1.4.3a)。
-//   v2 起動時は best/worst を リセットして 全 history から 再計算 (v1 不正値 を 上書き)。
-const TSCORE_BACKFILL_VERSION = 2;
+// v2 (2026-05-05): at 差で 10連 group を検出 → 連続性 chunking。
+//   旧 v1 は 単純に 10件ずつ chunk していたため 単発+10連 混在 history で chunk が
+//   実際の 10連と ズレて 偽の tScore を計算していた。
+// v3 (2026-05-05 同日): version bump で v2 で skip 状態だったユーザー も 強制再走。
+//   applyCloudState の merge 化で local が cloud で 上書き消失せず、 再 backfill で
+//   local 内 5/4 R10連 等 を 検出可能に (野沢さん指摘 「スマホで開いても反映されない」 対策)。
+const TSCORE_BACKFILL_VERSION = 3;
 function backfillTScoreFromHistory() {
   if (state.tScoreBackfilledVersion === TSCORE_BACKFILL_VERSION) return;
   if (!Array.isArray(state.history) || state.history.length < 10) {
@@ -8781,6 +8783,11 @@ async function onAuthReady(user) {
       // 差分あり → 無言で合算 (両者のmax/unionを取り、損失なし)
       const merged = mergeStates(state, cloudState);
       applyCloudState(merged);
+      // 偏差値ヒストリー: applyCloudState で version リセット済み、 merge 後の history で再計算
+      if (typeof backfillTScoreFromHistory === 'function'
+          && state.tScoreBackfilledVersion !== TSCORE_BACKFILL_VERSION) {
+        backfillTScoreFromHistory();
+      }
       await saveStateCloud();
       showToast('データを最新化しました');
       try { await fbDb.ref('prism-gacha/users/' + user.uid + '/lastLoginAt').set(Date.now()); } catch (e) {}
@@ -8796,10 +8803,14 @@ async function onAuthReady(user) {
 
     try { await fbDb.ref('prism-gacha/users/' + user.uid + '/lastLoginAt').set(Date.now()); } catch (e) {}
 
-    // 偏差値ヒストリー 後計算 (cloud 同期完了後の history を at連続性 chunking で 10連 group 化 → 1度だけ)
+    // 偏差値ヒストリー 後計算 (applyCloudState で history が merge され version=0 にリセットされるので 必ず走る)
+    // → 走った後 cloud にも 書き戻し (history merge 結果 + 新 best/worst を端末間整合)
     if (typeof backfillTScoreFromHistory === 'function'
         && state.tScoreBackfilledVersion !== TSCORE_BACKFILL_VERSION) {
       backfillTScoreFromHistory();
+      if (typeof saveStateCloud === 'function') {
+        try { await saveStateCloud(); } catch (e) {}
+      }
     }
   } catch (e) {
     console.error('onAuthReady error:', e);
@@ -8815,12 +8826,30 @@ function applyCloudState(cs) {
   state.total = cs.total || 0;
   state.ur = cs.ur || 0;
   state.pity = cs.pity || 0;
-  state.history = Array.isArray(cs.history) ? cs.history : [];
+  // history は cloud と local を merge (野沢さん指摘 2026-05-05 「スマホで開いても反映されない」 対策):
+  // 旧実装は cloud の history で local を 単純上書きしていたため、 local にしか無い 10連
+  // (例: スマホ で 5/4 引いた R10連 が cloud sync 漏れていた場合) が 永久に消失していた。
+  // → 新実装: 連結 + at 降順 sort + 重複除去 (at|tier|name) + 新しい120件保持。 local に
+  //   しか無い 10連 entry も 保護され、 直後の saveStateCloud で cloud に書き戻される。
+  const localHist = Array.isArray(state.history) ? state.history : [];
+  const cloudHist = Array.isArray(cs.history) ? cs.history : [];
+  const histCombined = [...cloudHist, ...localHist];
+  histCombined.sort((a, b) => (b.at || 0) - (a.at || 0));
+  const histSeen = new Set();
+  const histDedup = [];
+  for (const e of histCombined) {
+    const key = `${e.at || 0}|${e.tier || ''}|${e.name || ''}`;
+    if (histSeen.has(key)) continue;
+    histSeen.add(key);
+    histDedup.push(e);
+  }
+  state.history = histDedup.slice(0, 120);
+
   state.galleryViewed = cs.galleryViewed || {};
   state.unlockedSet = cs.unlockedSet || {};
   state.dupCounts = cs.dupCounts || {};
   state.storyProgress = cs.storyProgress || {};
-  // 偏差値ヒストリー (cloud → local)
+  // 偏差値ヒストリー (cloud → local) — backfill v3 で history から 再計算するので 一旦 cloud 値を採用
   state.bestTScore = typeof cs.bestTScore === 'number' ? cs.bestTScore : -1;
   state.worstTScore = typeof cs.worstTScore === 'number' ? cs.worstTScore : -1;
   state.bestAt = cs.bestAt || 0;
@@ -8828,7 +8857,9 @@ function applyCloudState(cs) {
   state.bestResults = Array.isArray(cs.bestResults) ? cs.bestResults : [];
   state.worstResults = Array.isArray(cs.worstResults) ? cs.worstResults : [];
   state.tScoreBackfilled = !!cs.tScoreBackfilled;
-  state.tScoreBackfilledVersion = cs.tScoreBackfilledVersion || 0;
+  // history が cloud で更新されたので backfill 再走を強制 (version リセット)
+  // → local 保護された 5/4 R10連 等を再検出する経路
+  state.tScoreBackfilledVersion = 0;
   localStorage.setItem("prism-gacha", JSON.stringify(state));
   updateHUD();
   if (typeof renderHistory === 'function') renderHistory();
