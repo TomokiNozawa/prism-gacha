@@ -1666,8 +1666,16 @@ async function renderPcbStats() {
   const bodyEl = document.getElementById('pcb-users-body');
   if (!summaryEl || !bodyEl) return;
   try {
-    const usersSnap = await db.ref('prism-gacha/users').once('value');
+    // users + userIndex 両方を 取得 (userIndex で nickname → uid map → 逆引きで uid → nickname)
+    const [usersSnap, indexSnap] = await Promise.all([
+      db.ref('prism-gacha/users').once('value'),
+      db.ref('prism-gacha/_meta/userIndex').once('value'),
+    ]);
     const users = usersSnap.val() || {};
+    const userIndex = indexSnap.val() || {};
+    const uidToNickname = {};
+    for (const nick in userIndex) uidToNickname[userIndex[nick]] = nick;
+
     const rows = [];
     let totalMatches = 0, totalWins = 0;
     let activeUsers = 0;
@@ -1679,8 +1687,10 @@ async function renderPcbStats() {
       totalMatches += ps.totalMatches || 0;
       totalWins += ps.wins || 0;
       const wr = ps.totalMatches > 0 ? Math.round((ps.wins || 0) / ps.totalMatches * 100) : 0;
+      // nickname 解決: displayName (Firebase Auth field) → userIndex 逆引き → fallback (野沢さん指摘 2026-05-05、 旧実装は u.nickname 参照で 必ず undefined だった)
+      const resolvedNickname = u.displayName || uidToNickname[uid] || `(unset) ${uid.slice(0, 8)}…`;
       rows.push({
-        uid, nickname: u.nickname || '(no name)',
+        uid, nickname: resolvedNickname,
         matches: ps.totalMatches, wins: ps.wins || 0, losses: ps.losses || 0, draws: ps.draws || 0,
         winrate: wr, bo3: ps.bo3Matches || 0, lastPlayedAt: ps.lastPlayedAt || 0,
       });
