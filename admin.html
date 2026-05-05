@@ -909,6 +909,34 @@ body {
       <div class="reply-history-list" id="reply-history-list"></div>
     </div>
   </div>
+
+  <!-- PCB ユーザー詳細 モーダル (野沢さん指示 2026-05-06、 ユーザー行 click で AI レベル別戦績を表示) -->
+  <div id="pcb-detail-modal" class="reply-modal" style="display:none">
+    <div class="reply-backdrop" onclick="closePcbDetailModal()"></div>
+    <div class="reply-card pcb-detail-card">
+      <button class="reply-close" onclick="closePcbDetailModal()" aria-label="閉じる">×</button>
+      <h3 class="reply-title">🎴 PCB プレイ詳細</h3>
+      <div class="reply-target" id="pcb-detail-target"></div>
+      <div class="pcb-detail-summary" id="pcb-detail-summary"></div>
+      <div class="pcb-detail-table" id="pcb-detail-table"></div>
+    </div>
+  </div>
+  <style>
+    .pcb-detail-card { max-width: 600px; }
+    .pcb-detail-summary { font-size: 13px; color: #aaa; margin: 10px 0 14px; padding: 10px 14px; background: rgba(255,255,255,0.04); border-radius: 8px; }
+    .pcb-detail-summary b { color: #fff; }
+    .pcb-detail-table { display: grid; grid-template-columns: 1fr 0.7fr 0.7fr 0.5fr 0.5fr 0.5fr; gap: 1px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; overflow: hidden; }
+    .pcb-detail-table > div { background: #1a1d2e; padding: 10px 12px; font-size: 13px; }
+    .pcb-detail-table > div.head { background: rgba(255,255,255,0.06); color: #aaa; font-size: 11px; letter-spacing: 0.04em; }
+    .pcb-detail-table .diff-name { color: #fff; font-weight: 500; }
+    .pcb-detail-table .diff-easy   { color: #7aff8a; }
+    .pcb-detail-table .diff-normal { color: #fcd34d; }
+    .pcb-detail-table .diff-hard   { color: #ff8d8d; }
+    .pcb-detail-table .diff-master { color: #c084fc; }
+    .pcb-detail-table .pcb-empty { grid-column: 1 / -1; text-align: center; color: #888; padding: 20px; }
+    .pcb-table .users-row.clickable { cursor: pointer; transition: background-color 0.15s ease; }
+    .pcb-table .users-row.clickable:hover { background-color: rgba(255,255,255,0.04); }
+  </style>
 </div>
 
 <script>
@@ -1698,8 +1726,14 @@ async function renderPcbStats() {
     rows.sort((a, b) => b.lastPlayedAt - a.lastPlayedAt);
     const overallWr = totalMatches > 0 ? Math.round(totalWins / totalMatches * 100) : 0;
     summaryEl.innerHTML = `アクティブユーザー <b>${activeUsers}</b>人 / 累計試合 <b>${totalMatches}</b>戦 / 全体勝率 <b>${overallWr}%</b>`;
+    // 行 click → AI レベル別詳細 (野沢さん指示 2026-05-06): row に data-uid 付与 + .clickable で hover、
+    // _pcbStatsCache で uid → ps を保持して click 時に modal で表示
+    _pcbStatsCache = {};
+    rows.forEach(r => {
+      _pcbStatsCache[r.uid] = users[r.uid] && users[r.uid].pcbStats ? users[r.uid].pcbStats : null;
+    });
     bodyEl.innerHTML = rows.map(r => `
-      <div class="users-row">
+      <div class="users-row clickable" data-uid="${r.uid}" title="クリックで AI レベル別の詳細を表示">
         <div>${r.nickname}</div>
         <div>${r.matches}</div>
         <div>${r.winrate}%</div>
@@ -1710,6 +1744,13 @@ async function renderPcbStats() {
         <div style="font-size:11px;color:#aaa">${r.lastPlayedAt ? new Date(r.lastPlayedAt).toLocaleString('ja-JP', {month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '-'}</div>
       </div>
     `).join('');
+    bodyEl.querySelectorAll('.users-row.clickable').forEach(el => {
+      el.addEventListener('click', () => {
+        const uid = el.dataset.uid;
+        const r = rows.find(x => x.uid === uid);
+        if (r) openPcbDetailModal(r);
+      });
+    });
     if (rows.length === 0) {
       bodyEl.innerHTML = '<div style="padding:20px;text-align:center;color:#888">PCB をプレイしたアカウント作成者はまだいません。</div>';
     }
@@ -1718,6 +1759,60 @@ async function renderPcbStats() {
     console.error('[admin] pcb stats failed', e);
   }
 }
+
+// PCB ユーザー詳細 モーダル: AI レベル (Easy/Normal/Hard/Master) ごとの試合数 / 勝率 / 勝/敗/引 (野沢さん指示 2026-05-06)
+let _pcbStatsCache = {};
+const _DIFF_ORDER = ['easy', 'normal', 'hard', 'master'];
+const _DIFF_LABELS = { easy: 'Easy', normal: 'Normal', hard: 'Hard', master: 'Master' };
+
+function openPcbDetailModal(row) {
+  const ps = _pcbStatsCache[row.uid];
+  const targetEl = document.getElementById('pcb-detail-target');
+  const summaryEl = document.getElementById('pcb-detail-summary');
+  const tableEl = document.getElementById('pcb-detail-table');
+  if (!targetEl || !summaryEl || !tableEl) return;
+  targetEl.textContent = row.nickname;
+  const last = row.lastPlayedAt ? new Date(row.lastPlayedAt).toLocaleString('ja-JP') : '-';
+  summaryEl.innerHTML =
+    `累計 <b>${row.matches}</b>戦 / 勝率 <b>${row.winrate}%</b> / ` +
+    `<span style="color:#7aff8a">${row.wins}勝</span> ` +
+    `<span style="color:#ff8d8d">${row.losses}敗</span> ` +
+    `<span style="color:#aaa">${row.draws}引</span> / ` +
+    `BO3 <b>${row.bo3}</b>戦 / 最終 <b>${last}</b>`;
+  const byDiff = (ps && ps.byDifficulty) || {};
+  const playedDiffs = _DIFF_ORDER.filter(d => byDiff[d] && byDiff[d].matches > 0);
+  let html = '<div class="head">AI レベル</div><div class="head">試合数</div><div class="head">勝率</div>' +
+             '<div class="head">勝</div><div class="head">敗</div><div class="head">引</div>';
+  if (playedDiffs.length === 0) {
+    html += '<div class="pcb-empty">AI レベル別の戦績データがまだありません (古いプレイ履歴の可能性)</div>';
+  } else {
+    for (const d of playedDiffs) {
+      const r = byDiff[d];
+      const wr = r.matches > 0 ? Math.round((r.wins || 0) / r.matches * 100) : 0;
+      html += `<div class="diff-name diff-${d}">${_DIFF_LABELS[d]}</div>` +
+              `<div>${r.matches}</div>` +
+              `<div>${wr}%</div>` +
+              `<div style="color:#7aff8a">${r.wins || 0}</div>` +
+              `<div style="color:#ff8d8d">${r.losses || 0}</div>` +
+              `<div style="color:#aaa">${r.draws || 0}</div>`;
+    }
+  }
+  tableEl.innerHTML = html;
+  document.getElementById('pcb-detail-modal').style.display = '';
+}
+
+function closePcbDetailModal() {
+  const m = document.getElementById('pcb-detail-modal');
+  if (m) m.style.display = 'none';
+}
+
+// Esc キーで閉じる (新UI 5点セルフチェック準拠: Esc / Tab / ≥44 / scroll lock / 既存デザイン)
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const m = document.getElementById('pcb-detail-modal');
+    if (m && m.style.display !== 'none') closePcbDetailModal();
+  }
+});
 
 async function loadGasshukuStats() {
   try {

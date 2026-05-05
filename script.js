@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4j — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4k — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -10220,12 +10220,66 @@ let _notifFilter = 'all';
 const NOTIF_READ_KEY = 'prism-notif-read';   // localStorage: 個別+broadcast+release の既読 id Set
 const NOTIF_RELEASE_SEEN_KEY = 'prism-changelog-seen-versions';  // 既読 release version の Set
 
-function _getNotifReadSet() {
+// アカウント依存の既読管理 (野沢さん指示 2026-05-06):
+// 端末跨ぎ同期 — Firebase /prism-gacha/users/{uid}/notifReadIds に Set 同期。
+// ログイン中: localStorage + Firebase の union を採用、 mark read で 両方更新。
+// ログアウト中: localStorage のみ (従来挙動)。
+let _notifReadSetFirebase = new Set();  // Firebase fetch 結果 cache (uid 紐付き)
+let _notifReadFirebaseUid = null;       // どの uid の cache か (auth 切替時に invalidate)
+
+function _getLocalNotifReadSet() {
   try { return new Set(JSON.parse(localStorage.getItem(NOTIF_READ_KEY) || '[]')); }
   catch { return new Set(); }
 }
-function _saveNotifReadSet(set) {
+function _saveLocalNotifReadSet(set) {
   try { localStorage.setItem(NOTIF_READ_KEY, JSON.stringify([...set])); } catch {}
+}
+function _getNotifReadSet() {
+  // ログイン中: Firebase cache + localStorage の union を返す (端末跨ぎ反映)
+  // ログアウト: localStorage のみ
+  const local = _getLocalNotifReadSet();
+  if (typeof authUser !== 'undefined' && authUser && _notifReadFirebaseUid === authUser.uid) {
+    return new Set([...local, ..._notifReadSetFirebase]);
+  }
+  return local;
+}
+function _saveNotifReadSet(set) {
+  // localStorage は常時書き込み (offline 時のバックアップ)
+  _saveLocalNotifReadSet(set);
+  // ログイン中なら Firebase にも同期 (fire-and-forget、 失敗時は localStorage が残るので次回 merge で復活)
+  if (typeof authUser !== 'undefined' && authUser && typeof fbDb !== 'undefined' && fbDb) {
+    const arr = [...set];
+    fbDb.ref('prism-gacha/users/' + authUser.uid + '/notifReadIds').set(arr).catch(e => {
+      console.warn('[notif] firebase write failed (localStorage は保存済):', e);
+    });
+    _notifReadSetFirebase = new Set(arr);
+    _notifReadFirebaseUid = authUser.uid;
+  }
+}
+async function _loadFirebaseNotifReadSet() {
+  // 起動時 + auth 確定時に Firebase fetch、 cache 更新
+  if (typeof authUser === 'undefined' || !authUser || typeof fbDb === 'undefined' || !fbDb) {
+    _notifReadSetFirebase = new Set();
+    _notifReadFirebaseUid = null;
+    return;
+  }
+  try {
+    const snap = await fbDb.ref('prism-gacha/users/' + authUser.uid + '/notifReadIds').once('value');
+    const arr = snap.val() || [];
+    _notifReadSetFirebase = new Set(Array.isArray(arr) ? arr : Object.values(arr));
+    _notifReadFirebaseUid = authUser.uid;
+    // localStorage と Firebase の union を Firebase に書き戻す (初回ログイン時の マージ)
+    const local = _getLocalNotifReadSet();
+    if ([...local].some(id => !_notifReadSetFirebase.has(id))) {
+      const merged = new Set([...local, ..._notifReadSetFirebase]);
+      const arrM = [...merged];
+      fbDb.ref('prism-gacha/users/' + authUser.uid + '/notifReadIds').set(arrM).catch(() => {});
+      _notifReadSetFirebase = merged;
+      _saveLocalNotifReadSet(merged);
+    }
+  } catch (e) {
+    console.warn('[notif] firebase read failed:', e);
+  }
 }
 
 // changelog の date field を 両形式 (旧 "2026-05-05" / 新 ISO 8601 "2026-05-05T21:30:00+09:00") から
@@ -10257,6 +10311,15 @@ function _fmtChangelogDate(d) {
 }
 
 async function loadNotifications() {
+  // ログイン中なら Firebase 既読 set を 先に取得 (端末跨ぎ既読、 野沢さん指示 2026-05-06)
+  if (typeof authUser !== 'undefined' && authUser) {
+    if (_notifReadFirebaseUid !== authUser.uid) {
+      await _loadFirebaseNotifReadSet();
+    }
+  } else {
+    _notifReadSetFirebase = new Set();
+    _notifReadFirebaseUid = null;
+  }
   const items = [];
   // (1) リリースノート: version.json から changelog を取得 → release 通知化
   try {
