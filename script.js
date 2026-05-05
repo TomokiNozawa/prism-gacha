@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4at — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4au — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -1165,7 +1165,7 @@ function _refreshPickupChapter() {
   // 野沢さん指摘 2026-05-03 「嘘つかないでください」 → ラベルが PICKUP_CHAPTER と乖離していた問題の解消
   if (typeof updatePickupChapterLabels === 'function') updatePickupChapterLabels();
 }
-const PICKUP_WEIGHT = 2;
+const PICKUP_WEIGHT = 2.5;
 
 function rollOne(opts = {}) {
   // 天井廃止 (2026-05-02): 純粋確率のみ。 state.pity は記録としてはまだ更新するが UR 確定処理なし
@@ -3066,9 +3066,10 @@ function backfillTScoreFromHistory() {
     return;
   }
   if (!Array.isArray(state.history) || state.history.length < 10) {
-    state.tScoreBackfilledVersion = TSCORE_BACKFILL_VERSION;
-    state.tScoreBackfilled = true;
-    saveState();
+    // 🐛 修正 2026-05-06 (野沢さん指摘 「jonny さんの偏差値ヒストリー反映されない」):
+    // 初回起動時等 history 未復元の状態で tScoreBackfilledVersion=3 を 設定してしまうと、
+    // その値が Cloud sync で 保存され、 後から history が Cloud から復元されても backfill が
+    // 永久に skip → bestTScore=-1 で 永久固定。 → version 更新せず 次回起動時に再試行させる。
     return;
   }
   // 未記録 (片方 or 両方) の場合のみ history から 初期値推定
@@ -6885,7 +6886,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // version 完全同期 (野沢さん指示 2026-05-06): bump_version.py が自動で更新する。
 // 旧 date-suffix '20260504o' を 5/6 で見つけた事故を契機に version-based に統一。
-const IMG_CACHE_VERSION = '1.4.4at';
+const IMG_CACHE_VERSION = '1.4.4au';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
