@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.3i — 演出スタイル (Season 1 第1章) / dev は cache buster suffix で進行
+   Prismaera v1.4.3j — 演出スタイル (Season 1 第1章) / dev は cache buster suffix で進行
    ============================================================ */
 :root {
   --bg: #05060d;
@@ -4385,6 +4385,140 @@ body.has-offline-banner .topbar { margin-top: 30px; }
   .bgm-current-title { font-size: 15px; }
   .bgm-mode-btn { font-size: 11px; padding: 7px 0; }
   .bgm-row { padding: 9px 10px; }
+}
+
+/* ───── 🔔 お知らせ機能 (野沢さん指示 2026-05-05、 個別返信 + broadcast + リリースノート 統合) ───── */
+/* トップバー ベルボタン (未読バッジ) */
+.notif-btn { position: relative; }
+.notif-badge {
+  position: absolute; top: 1px; right: 2px;
+  min-width: 16px; height: 16px;
+  background: linear-gradient(135deg, #ff5faa, #ff8a5f);
+  color: #fff;
+  font-size: 10px; font-weight: 700;
+  border-radius: 999px;
+  padding: 0 4px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid rgba(15, 10, 35, 0.85);
+  box-shadow: 0 0 8px rgba(255,95,170,0.6);
+}
+
+/* お知らせモーダル */
+.notifications-modal {
+  position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85);
+  display: none; align-items: center; justify-content: center;
+  z-index: 12000; padding: 16px;
+  backdrop-filter: blur(8px);
+}
+.notifications-modal.active { display: flex; }
+.notif-inner {
+  background: linear-gradient(180deg, rgba(30, 24, 56, 0.98), rgba(20, 16, 40, 0.98));
+  border: 1px solid rgba(200, 180, 255, 0.3);
+  border-radius: 20px; padding: 24px 22px 18px;
+  width: 100%; max-width: 540px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(200, 125, 255, 0.2);
+  position: relative;
+  max-height: min(90vh, 760px);
+  display: flex; flex-direction: column;
+}
+.notif-close {
+  position: absolute; top: 10px; right: 12px;
+  background: none; border: none; color: #aaa;
+  font-size: 24px; cursor: pointer; padding: 4px 10px;
+  transition: color 0.15s;
+}
+.notif-close:hover { color: #fff; }
+.notif-title {
+  font-size: 20px; margin: 0 0 14px; color: #fff; text-align: center;
+  letter-spacing: 0.04em;
+}
+.notif-tabs {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.notif-tab {
+  flex: 1 0 auto; min-width: 70px;
+  font-size: 11px; padding: 7px 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  color: rgba(255, 255, 255, 0.65);
+  border-radius: 8px; cursor: pointer;
+  font-family: inherit;
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+}
+.notif-tab.active {
+  background: rgba(124, 93, 255, 0.22);
+  border-color: rgba(124, 93, 255, 0.55);
+  color: #fff;
+}
+.notif-tab span {
+  font-size: 10px;
+  background: rgba(255, 255, 255, 0.10);
+  padding: 1px 5px; border-radius: 4px;
+  font-weight: 700;
+}
+.notif-tab.active span {
+  background: rgba(255, 213, 107, 0.30);
+  color: #ffd56b;
+}
+.notif-list {
+  flex: 1 1 auto; overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex; flex-direction: column; gap: 8px;
+  padding-right: 2px;
+}
+.notif-item {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px; padding: 12px 14px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.notif-item:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+.notif-item.unread {
+  background: rgba(124, 93, 255, 0.10);
+  border-color: rgba(124, 93, 255, 0.32);
+}
+.notif-item-head {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 6px;
+}
+.notif-kind {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.04em;
+  padding: 3px 7px; border-radius: 6px;
+}
+.notif-kind.reply { background: rgba(95,255,212,0.18); color: #b8ffe5; border: 1px solid rgba(95,255,212,0.4); }
+.notif-kind.broadcast { background: rgba(255,141,220,0.20); color: #ffb4dc; border: 1px solid rgba(255,141,220,0.45); }
+.notif-kind.release { background: rgba(255,213,107,0.18); color: #ffd56b; border: 1px solid rgba(255,213,107,0.4); }
+.notif-kind.system { background: rgba(155,180,216,0.14); color: #b4c8e4; border: 1px solid rgba(155,180,216,0.35); }
+.notif-item-title {
+  flex: 1 1 auto; font-size: 14px; font-weight: 700; color: #fff;
+  overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+}
+.notif-item-date { font-size: 11px; color: rgba(255, 255, 255, 0.50); flex: 0 0 auto; }
+.notif-item-body {
+  font-size: 13px; color: rgba(255, 255, 255, 0.85);
+  line-height: 1.6; white-space: pre-wrap; word-break: break-word;
+}
+.notif-item.unread .notif-item-title::before {
+  content: '●'; color: #ff5faa; font-size: 9px; margin-right: 5px; vertical-align: middle;
+}
+.notif-empty {
+  text-align: center; padding: 40px 16px; color: rgba(255, 255, 255, 0.4);
+  font-size: 13px;
+}
+@media (max-width: 600px) {
+  .notif-inner { padding: 20px 16px 14px; max-height: 92vh; }
+  .notif-title { font-size: 18px; }
+  .notif-tab { font-size: 10px; padding: 6px 8px; }
+  .notif-item { padding: 11px 12px; }
+  .notif-item-title { font-size: 13px; }
+  .notif-item-body { font-size: 12px; }
 }
 
 /* ============ Account Modal ============ */

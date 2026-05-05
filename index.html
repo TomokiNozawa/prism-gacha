@@ -24,8 +24,8 @@
 <link rel="icon" href="/images/icons/icon-32.png" type="image/png" sizes="32x32">
 <link rel="icon" href="/images/icons/icon-16.png" type="image/png" sizes="16x16">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
-<link rel="manifest" href="/manifest.json?v=1.4.3i">
-<link rel="stylesheet" href="/style.css?v=1.4.3i">
+<link rel="manifest" href="/manifest.json?v=1.4.3j">
+<link rel="stylesheet" href="/style.css?v=1.4.3j">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -67,7 +67,7 @@ if ('serviceWorker' in navigator) {
 </div>
 
 <header class="topbar">
-  <div class="title">✦ Prismaera <span class="title-kana">-プリズマエラ-</span> <span class="ver" id="app-version">v1.4.3i</span></div>
+  <div class="title">✦ Prismaera <span class="title-kana">-プリズマエラ-</span> <span class="ver" id="app-version">v1.4.3j</span></div>
   <div class="stats">
     <button id="btn-gallery" class="gallery-btn" title="図鑑 (Gキー)">📖 図鑑</button>
     <button id="btn-relations" class="gallery-btn" title="相関図">🌐 相関図</button>
@@ -81,6 +81,7 @@ if ('serviceWorker' in navigator) {
       <button class="topbar-secondary-close" id="btn-secondary-close" type="button" aria-label="閉じる">×</button>
       <button id="btn-history" class="gallery-btn" title="ガチャ履歴">📜 <span class="btn-short">履歴</span><span class="btn-long">ガチャ履歴</span></button>
       <button id="btn-bgm" class="gallery-btn" title="BGM詳細">🎵 <span class="btn-short">BGM</span><span class="btn-long">BGM設定</span></button>
+      <button id="btn-notifications" class="gallery-btn notif-btn" title="お知らせ" onclick="openNotificationsModal()">🔔 <span class="btn-short">お知らせ</span><span class="btn-long">お知らせ</span><span class="notif-badge" id="notif-badge" style="display:none">0</span></button>
       <button id="btn-settings" class="gallery-btn" title="設定" onclick="openSettingsModal()">⚙️ <span class="btn-short">設定</span><span class="btn-long">設定</span></button>
       <a id="btn-env-prod" class="gallery-btn env-switch env-prod" href="https://prismaera.pages.dev/" title="本番環境へ移動" style="display:none;text-decoration:none">🚀 本番</a>
       <a id="btn-env-dev" class="gallery-btn env-switch env-dev" href="https://dev.prismaera.pages.dev/" title="開発環境へ移動 (gengor専用)" style="display:none;text-decoration:none">🧪 dev</a>
@@ -500,6 +501,23 @@ if ('serviceWorker' in navigator) {
   </div>
 </div>
 
+<!-- Notifications Modal (お知らせ: 個別返信 + admin broadcast + リリースノート 統合) -->
+<div id="notifications-modal" class="notifications-modal">
+  <div class="notif-inner">
+    <button class="notif-close" onclick="closeNotificationsModal()" aria-label="閉じる">×</button>
+    <h2 class="notif-title">🔔 お知らせ</h2>
+    <div class="notif-tabs">
+      <button class="notif-tab active" data-filter="all" onclick="setNotificationFilter('all')">すべて <span id="notif-cnt-all">0</span></button>
+      <button class="notif-tab" data-filter="unread" onclick="setNotificationFilter('unread')">未読 <span id="notif-cnt-unread">0</span></button>
+      <button class="notif-tab" data-filter="reply" onclick="setNotificationFilter('reply')">返信 <span id="notif-cnt-reply">0</span></button>
+      <button class="notif-tab" data-filter="release" onclick="setNotificationFilter('release')">更新履歴 <span id="notif-cnt-release">0</span></button>
+    </div>
+    <div class="notif-list" id="notif-list">
+      <div class="notif-empty">読込中...</div>
+    </div>
+  </div>
+</div>
+
 <!-- Account Prompt Modal (ゲスト+既存進捗ありユーザーに案内) -->
 <div id="account-prompt" class="account-prompt">
   <div class="account-prompt-inner">
@@ -655,7 +673,7 @@ if ('serviceWorker' in navigator) {
 <audio id="bgm-home" preload="auto"></audio>
 
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
-<script src="/script.js?v=1.4.3i"></script>
-<script src="/gasshuku.js?v=1.4.3i"></script>
+<script src="/script.js?v=1.4.3j"></script>
+<script src="/gasshuku.js?v=1.4.3j"></script>
 </body>
 </html>

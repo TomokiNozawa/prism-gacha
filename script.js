@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.3i — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.3j — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -8526,6 +8526,8 @@ try {
       authUser = user;
       updateAccountButton();
       if (user && !signupInProgress) { await onAuthReady(user); }
+      // 🔔 お知らせ: ログイン状態確定後 個別 + broadcast を再 fetch (auth前は changelog のみ)
+      if (typeof window._notifReloadOnAuth === 'function') window._notifReloadOnAuth();
       // admin判定も並列で (失敗してもUIには影響しない)
       checkPrismAdmin();
       // F1: visit/streak 記録 (page load毎に1回)
@@ -9746,9 +9748,7 @@ function openSettingsModal() {
             </div>
           </div>
         </div>
-        <div class="settings-section">
-          <button type="button" class="settings-history-link" onclick="closeSettingsModal();openVersionHistoryModal()">📜 アップデート履歴を見る</button>
-        </div>
+        <!-- 「アップデート履歴を見る」 ボタン廃止 (野沢さん指示 2026-05-05、 トップバー 🔔 ベル に統一) -->
         <div class="settings-section">
           <button type="button" class="settings-feedback-link" onclick="closeSettingsModal();openFeedbackModal()">📨 ご意見・ご要望を送る</button>
         </div>
@@ -10025,3 +10025,202 @@ function dismissWelcomeModal(openSignup) {
 
 // 起動時の表示は Firebase auth 確定後 (initialAuthCheckDone) に呼ばれる。
 // DOMContentLoaded起動だと authUser未確定で既ログインユーザーにも welcome 出てしまう問題あり (2026-04-26 修正)。
+
+// ════════════════════════════════════════════════════════════════════════════
+// 🔔 お知らせ機能 (野沢さん指示 2026-05-05)
+//   個別返信 (admin → 特定 user) + broadcast (admin → 全 user) + リリースノート (version.json
+//   の changelog を release 通知に統合) を 統一 UI で振り返り可能に。
+//   取得タイミング: 起動時 + visibilitychange visible 時のみ (周期 polling 廃止、 電池配慮)。
+//   設定モーダルの「アップデート履歴」 ボタンは 廃止、 ベル経由に一本化。
+// ════════════════════════════════════════════════════════════════════════════
+let _notifications = [];        // 統合表示用配列 [{id, kind, title, body, createdAt, read, _src}]
+let _notifFilter = 'all';
+const NOTIF_READ_KEY = 'prism-notif-read';   // localStorage: 個別+broadcast+release の既読 id Set
+const NOTIF_RELEASE_SEEN_KEY = 'prism-changelog-seen-versions';  // 既読 release version の Set
+
+function _getNotifReadSet() {
+  try { return new Set(JSON.parse(localStorage.getItem(NOTIF_READ_KEY) || '[]')); }
+  catch { return new Set(); }
+}
+function _saveNotifReadSet(set) {
+  try { localStorage.setItem(NOTIF_READ_KEY, JSON.stringify([...set])); } catch {}
+}
+
+async function loadNotifications() {
+  const items = [];
+  // (1) リリースノート: version.json から changelog を取得 → release 通知化
+  try {
+    const res = await fetch('/version.json?_t=' + Date.now());
+    if (res.ok) {
+      const j = await res.json();
+      const changelog = Array.isArray(j && j.changelog) ? j.changelog : [];
+      changelog.forEach(entry => {
+        if (!entry || !entry.version) return;
+        const at = entry.date ? Date.parse(entry.date + 'T00:00:00+09:00') : 0;
+        const body = (entry.notes || []).map(n => '・' + n).join('\n');
+        items.push({
+          id: 'release_' + entry.version,
+          kind: 'release',
+          title: 'v' + entry.version + ' 公開' + (entry.title ? ' — ' + entry.title : ''),
+          body: body,
+          createdAt: at || 0,
+          _src: 'changelog',
+        });
+      });
+    }
+  } catch (e) { console.warn('changelog fetch failed:', e); }
+
+  // (2) ログイン済 user のみ Firebase から個別 + broadcast を fetch
+  if (typeof authUser !== 'undefined' && authUser && typeof fbDb !== 'undefined' && fbDb) {
+    try {
+      const personalSnap = await fbDb.ref('prism-gacha/notifications/' + authUser.uid).once('value');
+      const personal = personalSnap.val() || {};
+      Object.entries(personal).forEach(([id, n]) => {
+        if (!n) return;
+        items.push({
+          id: 'personal_' + id,
+          kind: n.kind || 'reply',
+          title: n.title || '(無題)',
+          body: n.body || '',
+          createdAt: n.createdAt || 0,
+          _src: 'personal',
+          _refId: id,
+        });
+      });
+    } catch (e) { console.warn('personal notif fetch failed:', e); }
+    try {
+      const broadcastSnap = await fbDb.ref('prism-gacha/notifications/_broadcast').once('value');
+      const broadcast = broadcastSnap.val() || {};
+      Object.entries(broadcast).forEach(([id, n]) => {
+        if (!n) return;
+        items.push({
+          id: 'broadcast_' + id,
+          kind: 'broadcast',
+          title: n.title || '(無題)',
+          body: n.body || '',
+          createdAt: n.createdAt || 0,
+          _src: 'broadcast',
+        });
+      });
+    } catch (e) { console.warn('broadcast fetch failed:', e); }
+  }
+
+  // 既読 set を 適用
+  const readSet = _getNotifReadSet();
+  items.forEach(n => { n.read = readSet.has(n.id); });
+  // 新しい順
+  items.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  _notifications = items;
+  _updateNotifBadge();
+  // モーダル open 中なら 即時 再描画
+  const modal = document.getElementById('notifications-modal');
+  if (modal && modal.classList.contains('active')) renderNotifications();
+}
+
+function _updateNotifBadge() {
+  const badge = document.getElementById('notif-badge');
+  if (!badge) return;
+  const unread = _notifications.filter(n => !n.read).length;
+  if (unread > 0) {
+    badge.style.display = '';
+    badge.textContent = unread > 99 ? '99+' : String(unread);
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function setNotificationFilter(filter) {
+  _notifFilter = filter;
+  document.querySelectorAll('.notif-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.filter === filter);
+  });
+  renderNotifications();
+}
+
+function renderNotifications() {
+  const list = document.getElementById('notif-list');
+  if (!list) return;
+  // カウント更新
+  const cntAll = _notifications.length;
+  const cntUnread = _notifications.filter(n => !n.read).length;
+  const cntReply = _notifications.filter(n => n.kind === 'reply').length;
+  const cntRelease = _notifications.filter(n => n.kind === 'release').length;
+  const setCnt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = String(v); };
+  setCnt('notif-cnt-all', cntAll);
+  setCnt('notif-cnt-unread', cntUnread);
+  setCnt('notif-cnt-reply', cntReply);
+  setCnt('notif-cnt-release', cntRelease);
+
+  let filtered = _notifications;
+  if (_notifFilter === 'unread') filtered = _notifications.filter(n => !n.read);
+  else if (_notifFilter !== 'all') filtered = _notifications.filter(n => n.kind === _notifFilter);
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="notif-empty">' + (_notifFilter === 'unread' ? '未読のお知らせはありません' : 'お知らせはまだありません') + '</div>';
+    return;
+  }
+
+  const KIND_LABEL = { reply: '💬 返信', broadcast: '📢 お知らせ', release: '🆕 更新', system: '⚙️ システム' };
+  list.innerHTML = filtered.map(n => {
+    const dt = n.createdAt ? new Date(n.createdAt) : null;
+    const dtStr = dt && !isNaN(dt) ? `${dt.getMonth()+1}/${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}` : '';
+    const kindLbl = KIND_LABEL[n.kind] || n.kind;
+    return `
+      <div class="notif-item ${n.read ? 'read' : 'unread'}" data-id="${escapeHtml(n.id)}" onclick="markNotificationRead('${escapeHtml(n.id)}')">
+        <div class="notif-item-head">
+          <span class="notif-kind ${n.kind}">${kindLbl}</span>
+          <span class="notif-item-title">${escapeHtml(n.title)}</span>
+          <span class="notif-item-date">${dtStr}</span>
+        </div>
+        <div class="notif-item-body">${escapeHtml(n.body)}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function markNotificationRead(id) {
+  const n = _notifications.find(x => x.id === id);
+  if (!n) return;
+  if (n.read) return;
+  n.read = true;
+  const set = _getNotifReadSet();
+  set.add(id);
+  _saveNotifReadSet(set);
+  _updateNotifBadge();
+  renderNotifications();
+}
+
+function openNotificationsModal() {
+  const modal = document.getElementById('notifications-modal');
+  if (!modal) return;
+  modal.classList.add('active');
+  document.body.classList.add('modal-open');
+  // 開いた時 最新を fetch (起動時の cache が古いケース対策)
+  loadNotifications().then(() => renderNotifications());
+  renderNotifications();
+}
+
+function closeNotificationsModal() {
+  const modal = document.getElementById('notifications-modal');
+  if (!modal) return;
+  modal.classList.remove('active');
+  document.body.classList.remove('modal-open');
+}
+
+// HTML escape util (お知らせ rendering 用、 既存 escapeHtml が無ければ 定義)
+if (typeof escapeHtml !== 'function') {
+  window.escapeHtml = function (s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  };
+}
+
+// 起動時 + visibility 復帰時 fetch (周期 polling なし、 電池配慮)
+document.addEventListener('DOMContentLoaded', () => { loadNotifications(); });
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') loadNotifications();
+});
+// onAuthStateChanged で auth 確定後にも 再 fetch (個別/broadcast は ログイン後のみ取得可能)
+// 既存の onAuthStateChanged 内で呼ばれるよう、 グローバル exposeして 後でフック化
+window._notifReloadOnAuth = loadNotifications;
