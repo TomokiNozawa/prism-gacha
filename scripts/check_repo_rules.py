@@ -1316,12 +1316,21 @@ def check_dev_suffix_progression():
 def check_cache_buster_format():
     """ルール7-26 (BLOCKER 2026-05-05 野沢さん指示): cache buster (?v=) は version.json の version と完全同期 必須。
     日付ベース (?v=20260505a 等) や 不一致 cache buster は 旧仕様残存・同期漏れ で BLOCKER。
+
+    2026-05-06 拡張: scheduledRelease モード対応。 同モードでは data.version が 旧 維持で
+    既にデプロイされる JS / CSS / 画像 は 新 version 機能を含むため、 cache buster は
+    scheduledRelease.version (= effective version) と同期すべき。
     """
     ver_path = ROOT / "version.json"
     if not ver_path.exists():
         return 0
     try:
-        ver = json.load(ver_path.open(encoding="utf-8"))["version"]
+        data = json.load(ver_path.open(encoding="utf-8"))
+        ver = data.get("version", "")
+        scheduled_ver = (data.get("scheduledRelease") or {}).get("version")
+        # scheduled モードでは scheduledRelease.version で 比較 (cache buster は 新版同期)
+        if scheduled_ver:
+            ver = scheduled_ver
     except Exception:
         return 0
     targets = [
@@ -1364,7 +1373,12 @@ def check_img_cache_version_sync():
     if not (ver_path.exists() and script_path.exists()):
         return 0
     try:
-        ver = json.load(ver_path.open(encoding="utf-8"))["version"]
+        data = json.load(ver_path.open(encoding="utf-8"))
+        ver = data.get("version", "")
+        scheduled_ver = (data.get("scheduledRelease") or {}).get("version")
+        # scheduled モードでは scheduledRelease.version 同期 (cache buster は新版同期)
+        if scheduled_ver:
+            ver = scheduled_ver
     except Exception:
         return 0
     text = script_path.read_text(encoding="utf-8")
