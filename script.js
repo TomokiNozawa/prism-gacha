@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4h — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4az — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -102,21 +102,21 @@ const POOL = {
       name: "シ・ロエン", season: 1, chapter: 's1c5',
       title: "銀霜黒月衆の使徒、 シオン分離後の影",
       caption: "やあ、 兄上。 また会おう、 黒月の決戦の夜に。",
-      desc: "仮面騎士シオンが分離した「影の側」 として黒月衆へ去った存在。 同じ顔・体格、 髪は漆黒、 仮面は半割れ。 「俺が代わりに堕ちる」 と微笑み、 影の側として世界を観る。 S2C1「眠れる主の世界」 主人公として再登場予定。",
+      desc: "仮面騎士シオンが分離した「影の側」 として黒月衆へ去った存在。 同じ顔・体格、 髪は漆黒、 仮面は半割れ。 「俺が代わりに堕ちる」 と微笑み、 影の側として世界を観る。 兄上 (シオン) との約束 — 次に会うのは、 黒月の決戦の夜。",
       img: `${S1}/ur/shadow_apostle.png`,
     },
     {
       name: "黒月の盟主 ノクトリア", season: 1, chapter: 's1c5',
       title: "黒月衆を統べる影の女王、 ヴォイドラの代弁者",
       caption: "影の側を、 私たちが引き取ろう。",
-      desc: "黒月衆ノクトスを率いる威厳の女王。 長い濃紫の髪、 黒の三日月の刺青、 黒い三日月を頂く長い杖。 ヴォイドラ陣営の代弁者として、 シオンに「取引」 を持ちかける。 S1C7 黒月決戦の主敵 + S2C5「影との和解」 交渉役として再登場予定。",
+      desc: "黒月衆ノクトスを率いる威厳の女王。 長い濃紫の髪、 黒の三日月の刺青、 黒い三日月を頂く長い杖。 観測されない者ヴォイドラの声を、 額の刺青から受け取る代弁者。 シオンに「影の側を引き取る」 取引を持ちかけ、 拒まれた後も静かに微笑んでいた。",
       img: `${S1}/ur/black_moon_lord.png`,
     },
     {
       name: "地底市の母 リオラエル", season: 1, chapter: 's1c5',
       title: "地底市リオラの古女王、 影と共生する文化の守護者",
       caption: "あなたの中の影を、 抱きしめてから手放しなさい。",
-      desc: "地底市リオラの民を千年率いる古き存在。 「観測者の前から在る」 古龍の血と影の血を引く長命種。 銀紫の長髪、 紫水晶のような瞳、 光と影が織り合わさる衣。 シオンに「影と共に生きる選択」 を教える。 S2C4「記憶の海」 千年記憶解放のキー。",
+      desc: "地底市リオラの民を千年率いる古き存在。 「観測者の前から在る」 古龍の血と影の血を引く長命種。 銀紫の長髪、 紫水晶のような瞳、 光と影が織り合わさる衣。 シオンに「影と共に生きる選択」 を教えた。 影織りの導師ルナリアは弟子、 地底市の少女シエルは娘として迎えた子。",
       img: `${S1}/ur/underworld_matriarch.png`,
     },
     // ===== S1C4 追加 (UR2、 凍土の覇者+空挺の女皇) =====
@@ -240,28 +240,28 @@ const POOL = {
       name: "堕者剣聖 ガルヴィン", season: 1, chapter: 's1c5',
       title: "元教会破門の堕者剣聖、 黒月衆の旧教会勢",
       caption: "お前の道の先に、 何があるか——俺は、 知っている。",
-      desc: "元・白焔教会の盾の系譜の剣聖。 表向き「破門」、 実は教会の腐敗を看過できず自ら出ていった。 顳から顎までの古傷、 半腐敗の聖剣。 シオンの兄弟弟子の知り合い。 S1C7 旧教会勢 (イザベル/ラナス) との対峙シーンで再登場予定。",
+      desc: "元・白焔教会の盾の系譜の剣聖。 表向き「破門」、 実は教会の腐敗を看過できず自ら出ていった。 顳から顎までの古傷、 銀と黒が半々に染まった聖剣。 シオンとは五年前に教会の修練場で剣を交わした兄弟子。 黒月衆の中でも 旧友を斬らないと決めている。",
       img: `${S1}/ssr/fallen_paladin.png`,
     },
     {
       name: "影織りの導師 ルナリア", season: 1, chapter: 's1c5',
       title: "地底市の上級織り手、 影と光の織物職人",
       caption: "光と影は、 等価に織られた時、 七色になります。",
-      desc: "地底市リオラの若き影織り導師。 銀紫の長髪、 紫水晶の織機の前で、 銀の糸と黒の糸を等価に織り合わせる。 章テーマ「影を抱きしめる」 を視覚化する重要キャラ。 山場 4-1 分離儀式の触媒となる織物の制作者。",
+      desc: "地底市リオラの若き影織り導師。 銀紫の長髪、 紫水晶の織機の前で、 銀の糸と黒の糸を等価に織り合わせる。 二色が等価に織られた瞬間、 七色の原虹が立ち上がる ── 千年前にリオラエル様の祖母が始めた、 影を抱きしめる織物。 シオンの分離の儀式に、 一枚の特別な布を贈った。",
       img: `${S1}/ssr/shadow_weaver.png`,
     },
     {
       name: "銀霜剣聖 オリエル", season: 1, chapter: 's1c5',
       title: "銀霜剣術の上席師範、 シオンの師匠",
       caption: "(仮面の縁に指を一度添えて、 行け、 弟子よ)",
-      desc: "銀霜国剣術の上席師範。 五年前、 仮面の意味を言葉ではなく沈黙で教えた人物。 銀青の長髪、 平面的な剣士の落ち着き。 シオンの仮面騎士の作法の源流。 北方剣聖ハグル (s1c4) と並列の立ち位置。",
+      desc: "銀霜国剣術の上席師範。 五年前、 シオンに銀の仮面を授け、 仮面の意味を言葉ではなく沈黙で教えた人物。 銀青の長髪、 平面的な剣士の落ち着き。 弟子と目を合わせない流儀 — 目を合わせれば苦しみが伝わり、 沈黙の意味が薄れるから。 仮面騎士の作法で 軽く片手を上げる、 それで「行け、 弟子よ」 が伝わる。",
       img: `${S1}/ssr/silver_swordmaster.png`,
     },
     {
       name: "銀霜王 ノヴァ", season: 1, chapter: 's1c5',
       title: "銀霜王国の若き王、 千年継承の血",
       caption: "シオン。 ……あなたが居て、 よかった。",
-      desc: "銀霜王国の若き戴冠者、 即位半年。 銀の髪、 蒼い瞳、 細い肩。 玉座の重みに耐え始めたばかりで、 仮面騎士シオンに精神的依存しつつある。 黒月衆の暗殺未遂を経験。 S2 龍譲位編との類比 (覇者と後継の関係) への伏線。",
+      desc: "銀霜王国の若き戴冠者、 即位半年。 銀の髪、 蒼い瞳、 細い肩。 父王の急逝で 急ぎ即位、 玉座の重みに耐え始めたばかりで、 仮面騎士シオンに精神的依存しつつある。 黒月衆の暗殺未遂を経験。 「シオン、 あなたが居てよかった」 ──王の言葉ではなく、 弟が兄に縋る声で。",
       img: `${S1}/ssr/silver_king.png`,
     },
     // ===== S1C4 追加 (SSR7、 ニーヴル+ゼノニア の主要キャラ) =====
@@ -621,14 +621,14 @@ const POOL = {
       name: "雪月神殿見習い ラピス", season: 1, chapter: 's1c5',
       title: "雪月神殿の見習い少年、 灯火を運ぶ",
       caption: "(灯篭を両手で慎重に持ち、 静かに礼)",
-      desc: "雪月神殿の若き見習い少年、 十四歳ほど。 銀青の短髪、 銀の三日月の髪飾り。 銀青の見習い衣、 銀の腕輪。 ルミナ姉の後輩として灯火を運ぶ。 山場 4-1 分離儀式で月鏡周辺の灯篭を担当。",
+      desc: "雪月神殿の若き見習い少年、 十四歳ほど。 銀青の短髪、 銀の三日月の髪飾り。 銀青の見習い衣、 銀の腕輪。 ルミナ姉の後輩として灯火を運ぶ。 父は前代の月夜祭司で、 ラピスは父の遺志を継いで神殿に身を寄せた。",
       img: `${S1}/r/moon_acolyte.png`,
     },
     {
       name: "地底市の少女 シエル", season: 1, chapter: 's1c5',
       title: "地底市リオラの少女、 影喰いを「友達」 と呼ぶ純粋な視点",
       caption: "これ、 私のお友達です!",
-      desc: "地底市リオラの少女、 八-九歳。 銀の髪、 紫の瞳。 影喰いの幼体を「お友達」 として手のひらに乗せる。 「影と共生する文化」 を子供視点で象徴する存在。 S2C5 への伏線。",
+      desc: "地底市リオラの少女、 八-九歳。 銀の髪、 紫の瞳。 影喰いの幼体を「お友達」 として手のひらに乗せる。 「影と共生する文化」 を 子供視点で象徴する存在。 リオラエル様を「お母様」 と呼ぶ — 母を失った日に 抱き上げてもらった。",
       img: `${S1}/r/underworld_girl.png`,
     },
     {
@@ -715,7 +715,7 @@ const LORE_BY_KEY = {
   "UR_星海のノクス": [
     { title: "『最初の一戦』", body: "影喰いとの『最初の一戦』——あの時、世界は三日間夜が明けなかった。ノクスはたった一人で虚境を織り、影の王を閉じ込めた。代償として、銀河を髪に、惑星を従者に縛り付けた。以降、彼女の身は宇宙そのものと融合している。瞬きひとつで星が流れ、眠れば夜が長くなる。誰にも言わぬが、本当は——その境界を、少し持て余している。" },
     { title: "黒猫ノアの論文", body: "黒曜塔の後輩、黒猫ノア。彼女が月に一度送りつけてくる論文を、ノクスは欠かさず読んでいる。『まだ甘い』と返すのは、ほんのささやかな悪戯だ。ノアの着眼点は鋭い。このまま育てば、やがて自分を超える魔女になる——ノクスはそう確信している。返信の最後に毎回一文字だけ加える、『☆』のマーク。それが『次も楽しみにしている』という、誰にも明かさぬ暗号だ。" },
-    { title: "三柱の夜会", body: "千年に一度、観測者の三柱は月影宮の一室に集まる。議題は『世界の観測結果』——だがそれは建前。実際は、セラフィエルの愚痴とカグヤの茶目っ気と、ノクスの沈黙が溶け合う、ただの女子会だ。千夜姫は必ず菓子を差し入れる。セラフィエルは天候を整える。ノクスは、星を一つだけ夜空に加える。『これは、今日の記念』と。三人だけが気付く、小さな光だ。" },
+    { title: "三柱の常夜", body: "観測者の三柱は、 世界が静かな夜に、 月影宮の常夜の卓に集う。 議題は『世界の観測結果』。 セラフィエルが天候の流れを語り、 カグヤが月の機微を伝え、 ノクスが星の動きを記す。 ノクスは時折、 星を一つだけ夜空に加える——『これは、 今日の記念』と。 三人だけが気付く、 小さな光だ。" },
     { title: "星杖『虚境』の代償", body: "星杖『虚境』は、時間と因果を織る神器——その代償は、ノクス自身の『今』である。杖を振るうたび、彼女の『今』が過去と未来へ散り、少しずつ希薄になっていく。だからノクスは杖を使う回数を厳しく制限している。『誰かが大切な存在を喪う』瞬間にしか、虚境は編まれない。次にその時が来るとき、ノクスは自分の輪郭が今より一段薄くなることを、静かに受け入れている。" },
   ],
   "UR_千夜姫 カグヤ": [
@@ -1039,6 +1039,72 @@ const LORE_BY_KEY = {
   "R_空の少年 ピット": [
     { title: "ピットと、 兄の責任", body: "ピットがゼノニア工房に入ったのは13歳の春。 一年早く始めたはずの修行を、 12歳の妹ピピは半年で追い越そうとしている。 「妹に負けないように」 と毎朝、 ピットは誰よりも早く工房に入り、 真鍮歯車の油塗りから始める。 ベル姉は彼を『真面目な弟分』 と呼び、 焦らずやれと諭してくれる。 だが、 ピットは知っている。 兄として後ろを歩かせるのが嫌なのではなく、 ピピが眩しすぎて、 自分も光らないと並んで歩けないのだ、 と。 龍帝アルテミスが工房を訪れた日、 ピットが緊張した面持ちで一礼したのも、 妹に「兄として恥ずかしくない姿」 を見せたかった、 ただそれだけ。 兄妹の朱色は、 同じ朝陽を浴びて伸びていく。" },
   ],
+  // ===== S1C5 凸秘話 (黒月衆 + 地底市リオラ + 銀霜王国補強) =====
+  "UR_シ・ロエン": [
+    { title: "八つの夜の俺", body: "シ・ロエンの「俺」 は、 八つの夜のシオンだ。 イザベルの姉を屋根の上から見ていながら、 動けなかった少年。 仮面の奥に閉じ込められて、 二十四になるまで誰にも抱きしめられなかった。 雪月神殿の月鏡の前で「出てこい」 と呼ばれた時、 ようやく息ができた気がした。 「兄上」 と呼んだのは、 シオンの方が「光の側」 を引き受けてくれたから。 影は影で生きる、 抱きしめてくれた背中があれば。" },
+    { title: "黒月衆という棲家", body: "ノクトリアの取引を「半分」 だけ受けた。 操り人形にはならない、 けれど黒月衆の中で生きる。 ガルヴィンは「同じ系譜だな」 と笑い、 シ・ロエンは「お前の道は俺の道とは違う」 と返した。 影喰いと共に在ることは堕ちることではない——地底市リオラエルの「影と共生する歴史」 が、 黒月衆の側にも届いていた。 シ・ロエンは黒月衆を「敵」 ではなく「もう一つの観測点」 として歩む。" },
+    { title: "イザベルへの手紙、 書けず", body: "別れの朝、 雪原の遠くから振り返った時、 シ・ロエンの胸には書かない手紙があった。 「あなたの姉さんを守れなかった少年は、 もうここにいる。 だから、 兄上 (シオン) が声を取り戻したら、 あなたの古い傷は閉じる」——口にしないと決めた言葉。 イザベルが波紋の聖女として七座級に立つ夜、 シ・ロエンは黒月の側から海を見つめる。 海に届くのは、 影だけ。 それで充分だ。" },
+    { title: "S2 — 眠れる主の世界へ", body: "プリズマが眠る世界で、 シ・ロエンは裏側から世界の安定に尽力する。 並行同位体が現れる夜、 「もう一人のシオン」 と再会する瞬間、 互いに知らない自分を学ぶ。 兄上 (S1 シオン) と再会するのは、 黒月決戦の夜——その日まで、 影の側として観測者七座と並走する。 兄弟ではない、 同じ俺の二つの形。 別々の道を歩むことが、 唯一の救済だった。" },
+  ],
+  "UR_黒月の盟主 ノクトリア": [
+    { title: "ヴォイドラの声を聞く者", body: "ノクトリアは「観測されない者」 ヴォイドラの声を、 額の三日月の刺青を通して受け取る。 千年前、 古龍ファラーが「世界の縫い目」 と呼んだ綻びから、 細く流れ込む声。 「私は罰を求めていない、 ただ観測されたかっただけ」——それがヴォイドラの本心だった。 ノクトリアは代弁者として、 黒月衆を率いる。 取引、 ではなく、 願いの代行者として。 シオンへの「影の側を引き取りたい」 も、 罪悪感の重荷を分かち合いたいヴォイドラの願いだった。" },
+    { title: "杖の三日月、 母から", body: "黒の杖を頂く三日月のオーブ——あれは、 ノクトリアの母から受け継いだもの。 母は黒月衆の前代盟主で、 三日月病 (千年に一度の異界病) で逝った。 「次に三日月を受け取った者が、 ヴォイドラの声を聴く」——母の遺言通り、 ノクトリアは継承の儀の夜に初めて声を聞いた。 杖を握るたび、 母の指の温度を思い出す。 千年前は、 こんなに重い杖ではなかったかもしれない。" },
+    { title: "ガルヴィンへの『同志』", body: "堕者剣聖ガルヴィンを黒月衆に迎えた夜、 ノクトリアは「あなたは罪人ではなく、 真実を見抜いた者だ」 と告げた。 ガルヴィンは膝をつき、 「主と呼ばせてくれ」 と返した。 ノクトリアは首を振り、 「同志でいい。 私は誰の主にもなりたくない」 と言った。 ガルヴィンは以来、 ノクトリアを「盟主」 と呼ぶ。 主従ではなく、 同じ夜を歩く同志として。 黒月衆の絆は、 そういう契りで結ばれている。" },
+    { title: "S1C7 — 黒月決戦への祈り", body: "黒月決戦の夜、 ノクトリアはヴォイドラと プリズマの対話の場に立つ。 「戦いではなく、 合意による決着を」——ノクトリアの願いがヴォイドラに届くか、 試される瞬間。 ヴォイドラが「私の影として認める」 と告げられたなら、 ノクトリアは杖を下ろす。 母の遺品の杖を、 千年ぶりに地に置く儀式。 「お母様、 私は代弁者の役目を、 ようやく終えます」——その夜、 三日月の刺青が静かに薄れる。" },
+  ],
+  "UR_地底市の母 リオラエル": [
+    { title: "観測者の前から", body: "リオラエルは「観測者の前から在る」——古龍の血と影の血を細く濃く引き、 千年生きる長命種。 観測者七座が天空界に座る前、 既に地底市リオラの民を率いていた。 カグヤが化身として顕現した日も、 ノクスが虚境を編んだ夜も、 リオラエルは静かに見届けた。 「観測者は新しい仕組み、 私たちは古い仕組み」——どちらが正しいではなく、 並走する。 ファラーとも千年の友。 互いに「次の千年も会いましょう」 と挨拶する。" },
+    { title: "影織りの千年", body: "千年前、 地底市の民は一つの選択をした。 影喰いを斬って消すのではなく、 共に生きる。 小さな影は友になり得る、 大きな影には別の対処を学ぶ。 リオラエルが選び、 ルナリアの祖母が織り始めた——銀の糸と黒の糸を等価に交差させる影織り。 一枚の布が完成するのに百年。 千年で十枚しか織られていない。 仮面騎士シオンに見せた一枚は、 リオラエルが幼い頃に祖母から受け継いだ最古のもの。 「あなたの中の影も、 同じだ」——その教えは、 千年の織機から生まれた。" },
+    { title: "シエルという娘", body: "リオラエルには血の娘ではない、 けれど娘と呼ぶ少女がいる——シエル。 八歳の頃、 地底市の路地で迷子だった子を抱き上げた。 母を失った直後の少女は、 影喰いの幼体を「お友達」 と呼んでいた。 リオラエルは「この子は地底市の千年の象徴になる」 と直感し、 自らの娘として育てている。 シエルが影喰いの幼体を手のひらに乗せる仕草は、 千年前の自分にそっくりだった。" },
+    { title: "S2 — 千年記憶のキー", body: "プリズマが眠る世界で、 千年記憶の海に潜るカグヤを、 リオラエルが導く。 「観測者の前から在る」 リオラエルだけが知る記憶——プリズマ生誕の瞬間、 観測者七座の祈りの夜、 ヴォイドラの最初の囁き。 千年の織機が織った布の数だけ、 リオラエルは記憶を持つ。 カグヤと並んで月影宮の一室に座り、 「これが、 始まりの夜」 と告げる時、 世界はようやく自分の系譜を取り戻す。" },
+  ],
+  "SSR_堕者剣聖 ガルヴィン": [
+    { title: "教会を出た夜", body: "ガルヴィンは「破門」 されたのではない。 自ら教会を出た。 五年前のある夜、 教会の祭壇室で、 司教が貧民の寄進を着服する現場を見た。 翌朝、 司教は「これは祈りに必要な経費だ」 と説く。 ガルヴィンは聖剣を祭壇に立て、 「私はあなたの祈りに加担しない」 と告げて去った。 教会は彼を「破門の堕者」 と公表した——真実を隠すために。 ラナスだけが、 真実を知っている。 「あの人は、 教会を救うために堕ちた」——兄弟弟子の沈黙の証言。" },
+    { title: "シオンへの『同じ系譜』", body: "教会の盾の修練場で、 ガルヴィンとシオンは一度だけ剣を交わした。 五年前、 ガルヴィンが教会を出る前夜。 「お前は、 沈黙の盾になる」——ガルヴィンが見抜き、 シオンは仮面を握り締めて頷いた。 二人とも、 言葉ではなく行動で答える系譜。 月喰いの森の祭壇で再会した夜、 ガルヴィンは笑った。 「お前の道の先に何があるか、 俺は知っている」——同じ系譜だからこそ、 行き先も似ている。 だが道は違う。" },
+    { title: "聖剣の半分", body: "ガルヴィンの聖剣は、 半分が銀のまま、 半分が黒く堕ちている。 教会を出る時、 司教の祭壇に剣を立てた瞬間、 銀の半分は残り、 もう半分はヴォイドラの声に応えて黒く染まった。 「私は完全な堕者ではない、 完全な聖者でもない」——ガルヴィンの位置取りは、 剣が示している。 黒月衆の中でも、 仲間を斬らない、 教会の旧友を見れば剣を引く。 半分の剣、 半分の覚悟。 それでも、 黒月衆の前線に立っている。" },
+  ],
+  "SSR_影織りの導師 ルナリア": [
+    { title: "祖母から受け継いだ織機", body: "ルナリアの織機は、 千年前にリオラエル様の祖母が組んだもの。 木と銀の組み合わせ、 千年動き続けて、 一度も狂ったことがない。 ルナリアは20歳で導師を継いだ若手。 祖母の膝の上で銀の糸を絡める練習をしたのが八歳の頃。 「銀と黒は等価」——祖母が教えた最初の言葉が、 今もルナリアの指に染み付いている。 シオンに織り見せた時、 ルナリアは祖母の声を聞いた気がした。 「この若い騎士に、 千年の織りを伝えなさい」——そう。" },
+    { title: "オルフェの歌、 機織りの伴奏", body: "地底市の語り部オルフェは、 ルナリアの織機の前で歌うのが好きだ。 オルフェの竪琴の音が、 ルナリアの織りのリズムを整える。 「あなたが歌う夜、 布が早く織れる」——ルナリアが照れて告げると、 オルフェは「俺が歌うのは、 ルナリアの織りを見届けるためだ」 と返した。 千年前から、 影織りの導師と語り部は対だったらしい。 二人がどんな関係になるか、 リオラエル様が遠くから微笑んで見守っている。" },
+    { title: "シオンの織物", body: "シオンが分離の儀式で握り締めた銀と黒の糸は、 ルナリアが特別に織り上げた一枚。 シオンが地底市を去る前、 ルナリアは「これを儀式の触媒に」 と渡した。 銀の糸はシオンの「光の側」、 黒の糸はシ・ロエンの「影の側」。 二人が等価に手のひらに乗せた時、 七色の原虹が立ち上がった——あの一瞬の光は、 ルナリアの千年の織機が生んだ最高傑作。 シオンが帰った後、 ルナリアは織機の前で静かに泣いた。 嬉し涙だった。" },
+  ],
+  "SSR_銀霜剣聖 オリエル": [
+    { title: "シオンに仮面を渡した日", body: "オリエルがシオンに銀の仮面を授けたのは、 五年前。 イザベルの姉を守れなかった夜から三年、 シオンは塞ぎ込んでいた。 オリエルは仮面を差し出し、 「言葉ではなく、 沈黙で語れ」 とだけ告げた。 シオンは仮面を受け取り、 声を捨てた。 オリエルはそれ以来、 シオンと目を合わせない——目を合わせると、 弟子の苦しみが伝わって、 仮面の意味が薄れるから。 仮面騎士の作法で、 軽く片手を上げる。 それで、 充分に「行け、 弟子よ」 と言える。" },
+    { title: "銀霜剣術の心得", body: "オリエルの銀霜剣術は「沈黙の剣」 と呼ばれる。 攻撃の予兆を相手に読ませない、 静寂の中の一撃。 弟子は数年で離れていく——オリエルの厳しさに耐えられない。 シオンだけが五年残った。 「お前は、 沈黙の意味を生まれつき知っている」 とオリエルは口に出さず、 思っていた。 月夜の祭夜、 オリエルが街を歩く時、 道行く子供は「銀霜剣聖だ」 と囁く。 オリエルは小さく頷くだけ。 言葉は、 必要な時にしか使わない。" },
+    { title: "雪月神殿の儀式に立ち会わず", body: "二重月夜の祭壇——シオンの分離の儀式に、 オリエルは姿を現さなかった。 弟子の最大の決断に、 師は立ち会わない。 オリエルの流儀。 神殿の外、 雪原の縁に立って、 オリエルは月鏡から立ち上がる七色の光を遠くから見届けた。 「お前は、 もう仮面を外す覚悟ができた」——心の中で、 一度だけ呟いた。 翌朝、 シオンが神殿から戻った時、 オリエルは王宮の柱の影でいつも通り片手を上げた。 何も変わらない、 けれど、 すべてが変わった作法だった。" },
+  ],
+  "SSR_銀霜王 ノヴァ": [
+    { title: "若き王の戴冠の夜", body: "ノヴァが銀霜王として戴冠したのは、 21歳の春。 父王 (前王) の急逝で、 即位の儀は急ぎ執り行われた。 戴冠の夜、 ノヴァは王宮の北の塔で一人、 玉座の重みに耐えきれず泣いた——その時、 仮面騎士シオンが塔に上がってきた。 「お一人にしないでください」 と告げず、 ただ柱の影に立っていた。 ノヴァは泣き顔を見られないように背を向けて泣き続け、 シオンは朝まで動かなかった。 それが、 王と盾の最初の夜だった。" },
+    { title: "シオン依存という弱さ", body: "ノヴァは自覚している——シオンに依存しすぎている、 と。 玉座の重みに耐え始めたばかりの王にとって、 沈黙の盾は「盾以上のもの」 になりつつある。 老臣ヴェルディは時折、 「陛下、 一人で歩くお練習を」 と諭す。 ノヴァは頷くが、 シオンが王宮を離れる夜は眠れない。 暗殺未遂の夜、 シオンに「ありがとう」 と告げた声が震えたのは、 王の感謝ではなく、 弟が兄に縋る声だった。 ノヴァは知っている——いつかシオンを「行かせる」 日が来る、 と。" },
+    { title: "S2 — 龍譲位編との類比", body: "ノヴァのシオン依存は、 後に龍帝アルテミスがグレイルへ譲位を考える時の「先例」 として語られる。 「覇者と後継、 主君と盾——どこかで切り離さねばならぬ」。 アルテミスはノヴァの治世を遠くから見て、 自らの譲位の覚悟を固める。 ノヴァは知らないが、 銀霜の若き王の苦悩が、 龍国の未来を変える触媒になった。 主君の弱さも、 系譜の中では一つの強さに変わる。 王権の継承は、 そういう連環で続く。" },
+  ],
+  "SR_黒月の刺客": [
+    { title: "名を捨てた手駒", body: "黒月の刺客は、 名を持たない。 黒月衆の中でも、 ノクトリアにすら本名を告げない手駒。 顔を覆う黒仮面、 双の短剣、 影の中で動く修練。 元は銀霜国の孤児——五歳で両親を失い、 路地で凍えていた処を黒月衆に拾われた。 「名を捨てれば、 過去から自由になる」——盟主ノクトリアの教えを、 刺客は深く信じている。 王族暗殺は失敗したが、 仮面騎士シオンの一撃で打ち倒された後、 刺客は不思議と微笑んでいた。 「沈黙の盾に止められるなら、 本望だ」——名を持たぬ影の、 静かな満足。" },
+    { title: "刺客と盟主の主従", body: "ノクトリアは刺客の本名を一度だけ尋ねた。 刺客は「もう、 忘れました」 と答えた。 ノクトリアは頷き、 「ならば、 私だけは覚えていよう」 と告げた。 ノクトリアの杖の中の千年日記には、 名を捨てた者たちの記憶が刻まれている。 刺客の名も、 そこに書かれている。 王族暗殺で打ち倒された後、 刺客は黒月衆の隠れ家で目覚め、 ノクトリアが看病してくれていた。 「失敗してもよい、 戻ってくることが大事だ」——刺客は、 初めて泣いた。 名を捨てた目から、 生まれて初めての涙だった。" },
+  ],
+  "SR_月夜祭司 アスター": [
+    { title: "ルミナとの灯番ペア", body: "月夜祭司アスターと雪月神殿の灯番ルミナは、 神殿の二本柱。 アスターが儀式を進行し、 ルミナが灯を絶やさず護る。 二人の役目は完全に違うが、 同じ神殿で五年共に務めてきた仲。 二重月夜の儀式の前夜、 アスターはルミナに「明日、 もし何かあったら——」 と切り出し、 ルミナは「灯は私が絶やしません」 と返した。 言葉は短く、 でも完璧な信頼。 シオンの分離の儀式が成功したのは、 灯と祭司の二本柱が揺らがなかったから。 神殿の千年は、 そういう静かな絆で続く。" },
+    { title: "見習いラピスへの教え", body: "見習いの少年ラピス (14歳) は、 アスターの最初の弟子。 ラピスの父は前代の祭司で、 アスターは父の遺志を継いで少年を預かった。 「祭司の儀式は、 言葉ではなく、 姿勢で覚える」——アスターが繰り返す教え。 ラピスは月夜の儀式の度に灯篭を運び、 アスターの所作を盗み見て真似する。 二重月夜の祭壇で、 ラピスは初めて月鏡周辺の灯篭を任された。 緊張で手が震えたが、 アスターが横で「お前は、 前代の血を引いている」 と一言。 灯は、 一度も揺らがなかった。" },
+  ],
+  "SR_地底市の語り部 オルフェ": [
+    { title: "千年の口伝の継承者", body: "地底市リオラの語り部は、 千年前から一族で代々継承される。 オルフェは現代の継承者で、 22歳。 祖父から千年の物語を受け継ぎ、 竪琴杖を握って歌う。 物語は短いものから長いものまで、 全部で108篇——「影と共生する民の千年」 を、 オルフェは全部頭の中に持っている。 シオンが地底市を訪れた夜、 オルフェは特別な一篇を歌った——「仮面の下のもう一人」。 千年前、 似た境遇の銀霜の騎士の物語。 シオンは仮面の下で、 古い同志に出会った気がした。" },
+    { title: "ルナリアへの伴奏", body: "オルフェの竪琴は、 影織りの導師ルナリアの織機の伴奏でもある。 ルナリアが千年の織機を動かす時、 オルフェの歌が織りのリズムを整える。 二人は幼馴染——いや、 もう少し近い。 オルフェがルナリアの工房に通うのは、 物語の継承だけが理由ではない。 ルナリアは知っている、 オルフェは知っている、 でも口に出さない。 地底市の千年の習わし——「言葉ではなく、 隣にいる時間で愛を伝える」。 リオラエル様が遠くから「次の千年、 二人の名を一族の系譜に加えよう」 と微笑んでいる。" },
+  ],
+  "R_銀霜近衛 セレン": [
+    { title: "シオンを慕う、 後輩の沈黙", body: "銀霜近衛セレンは、 シオンの三つ年下の後輩騎士。 シオンが王宮警備に出る夜、 必ず横を歩く。 シオンの沈黙を「数拍の遅れ」 で察するのが、 セレンだけが持つ才能。 「シオン様、 今夜は冷えますね」 と話しかけて、 仮面の縁に指が一度添えられたら、 セレンは「同意」 と読み取って隣を歩き続ける。 セレンが本当に憧れているのは、 仮面の下の素顔ではない——シオンの「沈黙で全部を語る作法」 そのもの。 自分も、 いつかあの境地に至りたい。 銀霜の若き騎士は、 沈黙の系譜を継ぐべく、 今夜も無口で警備に出る。" },
+  ],
+  "R_雪月神殿見習い ラピス": [
+    { title: "前代祭司の息子、 灯を運ぶ", body: "ラピスの父は前代の月夜祭司——3年前に亡くなった。 14歳のラピスは、 父の遺志を継いで雪月神殿に身を寄せ、 見習いとして月鏡の灯篭を運ぶ役を与えられた。 アスター先生は厳しいが、 父の親友でもある。 ラピスは父の墓に毎月一度、 月夜の灯篭を一基だけ供える。 「お父さん、 今月も灯を絶やしませんでした」——その小さな報告が、 ラピスの一ヶ月の励み。 二重月夜の儀式で月鏡周辺の灯篭を任された夜、 ラピスは父の墓に最初に知らせた。 「お父さん、 私は祭司の道を歩いています」——灯篭の炎が、 静かに揺れた。" },
+  ],
+  "R_地底市の少女 シエル": [
+    { title: "影喰いはお友達", body: "シエルは八歳。 地底市リオラで生まれ、 影喰いの幼体を「お友達」 と呼ぶ純粋な視点を持つ。 母を失った日、 リオラエル様が抱き上げてくれて、 以来「お母様」 と呼んでいる。 シエルの手のひらに乗る影喰いの幼体は、 害のない小動物のような存在——でも、 銀霜国の戦士の頭の中には入っていない発想。 仮面騎士シオンが地底市を訪れた夜、 シエルが手のひらの影喰いを見せた瞬間、 千年の文化が一人の騎士に伝わった。 シエルは知らない——自分の小さな手が、 世界の影と光のバランスを変えた、 と。" },
+  ],
+  "R_銀霜の工房娘": [
+    { title: "灯篭の温度を預かる娘", body: "銀の髪を一房垂らした朗らかな工房娘——名前を、 街の人は「リル」 と呼ぶ。 銀霜の月夜祭で紙の三日月灯篭を組み上げる工房の若手。 仮面騎士シオン様が街を歩く時、 必ず手を振って「シオン様、 今夜の月、 細いですねっ」 と声をかける。 仮面の縁に指が一度添えられた瞬間が、 リルにとって今夜一番の宝物。 リルは知らない——その夜、 シオン様の仮面の中で、 「街の灯篭の温度が、 銀霜の青の音を一段強くしている」 と気付いた感謝が、 仮面の下で微かに微笑んでいたことを。 灯篭は、 そういう祈りで光る。" },
+  ],
+  "R_銀霜の歌姫": [
+    { title: "重なる調べの夜", body: "銀霜の祭夜の歌姫——名前は「ティルナ」。 17歳の若い歌姫で、 月夜祭で古い子守歌を歌う。 ティルナは知らない、 自分の歌が海の向こうの白焔教会の詠聖ベルの調べに似ている、 と。 千年前、 銀霜の歌姫の血と教会の聖歌の血が、 一度だけ交わった——それが ティルナの祖母の祖母の祖母。 ティルナの歌は、 千年の血の記憶を運ぶ。 仮面騎士シオン様が祭夜の路地で歌姫の声を「知らないはずなのに、 知っている気がする」 と感じたのは、 千年の血が騎士の耳に届いた一瞬だった。 ティルナは、 ただ歌い続ける。 千年の調べを、 今夜も。" },
+  ],
 };
 
 function loadState() {
@@ -1099,7 +1165,7 @@ function _refreshPickupChapter() {
   // 野沢さん指摘 2026-05-03 「嘘つかないでください」 → ラベルが PICKUP_CHAPTER と乖離していた問題の解消
   if (typeof updatePickupChapterLabels === 'function') updatePickupChapterLabels();
 }
-const PICKUP_WEIGHT = 2;
+const PICKUP_WEIGHT = 2.5;
 
 function rollOne(opts = {}) {
   // 天井廃止 (2026-05-02): 純粋確率のみ。 state.pity は記録としてはまだ更新するが UR 確定処理なし
@@ -1349,9 +1415,11 @@ function showRateDetail() {
   }
   modal.innerHTML = `
     <div class="rate-detail-card">
+      <div class="rate-detail-close-row">
+        <button type="button" class="rate-detail-close" onclick="closeRateDetail()" aria-label="閉じる">×</button>
+      </div>
       <div class="rate-detail-head">
         <div class="rate-detail-title">📊 排出率詳細</div>
-        <button type="button" class="rate-detail-close" onclick="closeRateDetail()" aria-label="閉じる">×</button>
       </div>
       <div class="rate-detail-body">
         <div class="rate-detail-section">
@@ -3000,9 +3068,10 @@ function backfillTScoreFromHistory() {
     return;
   }
   if (!Array.isArray(state.history) || state.history.length < 10) {
-    state.tScoreBackfilledVersion = TSCORE_BACKFILL_VERSION;
-    state.tScoreBackfilled = true;
-    saveState();
+    // 🐛 修正 2026-05-06 (野沢さん指摘 「jonny さんの偏差値ヒストリー反映されない」):
+    // 初回起動時等 history 未復元の状態で tScoreBackfilledVersion=3 を 設定してしまうと、
+    // その値が Cloud sync で 保存され、 後から history が Cloud から復元されても backfill が
+    // 永久に skip → bestTScore=-1 で 永久固定。 → version 更新せず 次回起動時に再試行させる。
     return;
   }
   // 未記録 (片方 or 両方) の場合のみ history から 初期値推定
@@ -3106,16 +3175,31 @@ function selectRarityFilter(tier) {
 }
 
 // 図鑑モーダル「期間限定」 タブの可視性 (gasshuku.js の isGasshukuVisible と連動)
+// + 公開前章タブの非表示 (12:00 前リーク防止、 野沢さん指示 2026-05-06)
 function updateGalleryTabsVisibility() {
   const limited = document.querySelector('.gallery-tab-limited');
-  if (!limited) return;
-  const visible = typeof window.isGasshukuVisible === 'function' && window.isGasshukuVisible();
-  limited.style.display = visible ? '' : 'none';
+  if (limited) {
+    const visible = typeof window.isGasshukuVisible === 'function' && window.isGasshukuVisible();
+    limited.style.display = visible ? '' : 'none';
+  }
+  // 公開前章タブを 非表示 (releaseDate 経過後に 自動的に表示される)
+  document.querySelectorAll('.gallery-tab[data-tab^="s"]').forEach(tab => {
+    const sid = tab.dataset.tab;
+    if (typeof _isChapterReleased === 'function' && !_isChapterReleased(sid)) {
+      tab.style.display = 'none';
+    } else {
+      tab.style.display = '';
+    }
+  });
 }
 window.updateGalleryTabsVisibility = updateGalleryTabsVisibility;
 
 // 章タブ切替
 function selectGalleryTab(tab) {
+  // 公開前章は強制 'all' フォールバック (12:00 前リーク防止)
+  if (tab && tab.startsWith('s') && typeof _isChapterReleased === 'function' && !_isChapterReleased(tab)) {
+    tab = 'all';
+  }
   currentGalleryTab = tab;
   // 章タブ切替時は レアリティフィルターをリセット
   currentGalleryTier = 'all';
@@ -3246,6 +3330,142 @@ function showCharDetail(c) {
   _lockBodyScroll();
 }
 
+// ============================================================
+// キャラ詳細 PCB タブ data fetcher (野沢さん指示 2026-05-06、 v1.5.0 リリースに合わせて
+// キャラ詳細画面で カードゲーム能力を タブ切替で確認できるようにする。 cardgame の
+// pool.json + cards.json + effects_override.json + combos.json を merge して キャラ名で
+// lookup 可能な map に変換、 lazy fetch + cache)
+// ============================================================
+let _pcbCardDataCache = null;
+let _pcbCardDataPromise = null;
+async function _loadPcbCardData() {
+  if (_pcbCardDataCache) return _pcbCardDataCache;
+  if (_pcbCardDataPromise) return _pcbCardDataPromise;
+  _pcbCardDataPromise = (async () => {
+    try {
+      const [pool, cards, effects, combos] = await Promise.all([
+        fetch('/cardgame/data/pool.json').then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch('/cardgame/cards.json').then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch('/cardgame/effects_override.json').then(r => r.ok ? r.json() : {}).catch(() => ({})),
+        fetch('/cardgame/combos.json').then(r => r.ok ? r.json() : []).catch(() => []),
+      ]);
+      const byName = new Map();
+      (pool || []).forEach(c => byName.set(c.name, { ...c }));
+      Object.entries(effects || {}).forEach(([name, ov]) => {
+        const c = byName.get(name);
+        if (c && ov) {
+          if (ov.effect) c.effect = ov.effect;
+          if (ov.effectText) c.effectText = ov.effectText;
+        }
+      });
+      (cards || []).forEach(c => { if (c && c.name) byName.set(c.name, { ...c }); });
+      _pcbCardDataCache = { byName, combos: Array.isArray(combos) ? combos : [] };
+      return _pcbCardDataCache;
+    } catch (e) {
+      console.warn('[pcb-tab] data fetch failed:', e);
+      _pcbCardDataCache = { byName: new Map(), combos: [] };
+      return _pcbCardDataCache;
+    }
+  })();
+  return _pcbCardDataPromise;
+}
+
+function _renderPcbPaneDupeStages(card, c) {
+  // 凸毎の効果 全段階表示 (野沢さん指示 2026-05-06、 各凸で ﾊﾟﾜｰ +1 ずつ)
+  // 仕様: dupes 数 = ﾊﾟﾜｰﾎﾞｰﾅｽ値、 半分凸以上で onPlay 効果値 +1、 MAX 凸で ｺｽﾄ-1 + 効果範囲拡大
+  const max = (typeof MAX_DUPS !== 'undefined' && MAX_DUPS[c.tier]) || 0;
+  if (max === 0) return '';
+  const half = Math.ceil(max / 2);
+  const cur = (state && state.dupCounts) ? (state.dupCounts[c.tier + '_' + c.name] || 0) : 0;
+  const rows = [];
+  for (let d = 0; d <= max; d++) {
+    const isMax = d === max;
+    const isHalf = !isMax && d >= half;
+    const bonus = d;  // 各凸で +1
+    const cost = (isMax && (card.cost || 0) > 0) ? (card.cost - 1) : card.cost;
+    const isCur = cur === d;
+    const powerStr = bonus > 0 ? `${card.basePower}+${bonus}=<b>${card.basePower + bonus}</b>` : `<b>${card.basePower}</b>`;
+    const costStr = isMax && (card.cost || 0) > 0 ? `<s class="pcb-cost-orig">${card.cost}</s><b>${cost}</b>` : `<b>${cost}</b>`;
+    let stageLabel = `${d}凸`;
+    if (isMax) stageLabel += ' <span class="pcb-stage-tag pcb-stage-tag-max">MAX</span>';
+    else if (isHalf) stageLabel += ' <span class="pcb-stage-tag pcb-stage-tag-half">効果+1</span>';
+    rows.push(`<tr class="${isCur ? 'pcb-stage-cur' : ''}">
+      <td>${stageLabel}${isCur ? ' <span class="pcb-stage-cur-mark">◀現在</span>' : ''}</td>
+      <td>${powerStr}</td>
+      <td>${costStr}</td>
+    </tr>`);
+  }
+  return `<div class="pcb-pane-stages-block">
+    <div class="pcb-pane-stages-label">📊 凸毎の効果</div>
+    <table class="pcb-pane-stages-table">
+      <thead><tr><th>段階</th><th>ﾊﾟﾜｰ</th><th>ｺｽﾄ</th></tr></thead>
+      <tbody>${rows.join('')}</tbody>
+    </table>
+    <div class="pcb-pane-stages-note">※ ﾊﾟﾜｰは各凸で +1、 半分凸以上で 効果値+1、 MAX 凸で ｺｽﾄ-1 + 効果範囲拡大</div>
+  </div>`;
+}
+
+async function renderCharDetailPcb(c) {
+  const pane = document.getElementById('char-detail-pcb');
+  if (!pane) return;
+  pane.innerHTML = '<div style="padding:14px;color:rgba(255,255,255,0.5);font-size:12px;">読込中…</div>';
+  const data = await _loadPcbCardData();
+  const card = data.byName.get(c.name);
+  if (!card) {
+    pane.innerHTML = `<div class="pcb-pane-empty">このキャラは PCB のカードプールに 未登録です。<br><small>(本編未公開キャラ or 観測者三柱等の TD 専用キャラの可能性)</small></div>`;
+    return;
+  }
+  const related = (data.combos || []).filter(co => Array.isArray(co.chars) && co.chars.includes(c.name));
+  const facBg = (typeof FACTION_COLORS !== 'undefined' && FACTION_COLORS[card.faction]) || '#5a5a8a';
+  const condLabel = co => (co.condition === 'same_lane' ? '同レーンに揃える' : 'いずれかの場に揃える');
+  const targetLabel = e => (e && e.target === 'all_lanes' ? '全レーン' : '自レーン');
+  let html = `<div class="pcb-pane-stats">
+    <div class="pcb-pane-stat-row">
+      <span class="pcb-pane-faction" style="background:${facBg}">${escapeHtml(card.faction || '無所属')}</span>
+    </div>
+    <div class="pcb-pane-stat-grid">
+      <div><span class="pcb-pane-label">コスト</span><span class="pcb-pane-val">${card.cost ?? '-'}</span></div>
+      <div><span class="pcb-pane-label">ﾊﾟﾜｰ</span><span class="pcb-pane-val">${card.basePower ?? '-'}</span></div>
+    </div>
+  </div>`;
+  if (card.effectText) {
+    html += `<div class="pcb-pane-effect-block">
+      <div class="pcb-pane-effect-label">効果</div>
+      <div class="pcb-pane-effect-text">${escapeHtml(card.effectText)}</div>
+    </div>`;
+  }
+  // 凸毎効果 表 (野沢さん指示 2026-05-06)
+  html += _renderPcbPaneDupeStages(card, c);
+  html += `<div class="pcb-pane-combo-block">
+    <div class="pcb-pane-combo-label">関連コンボ <span class="pcb-pane-combo-count">${related.length}件</span></div>`;
+  if (related.length === 0) {
+    html += `<div class="pcb-pane-combo-empty">このキャラを含むコンボなし</div>`;
+  } else {
+    html += related.map(co => {
+      const others = co.chars.filter(n => n !== c.name);
+      const power = (co.effect && co.effect.power) || 0;
+      return `<div class="pcb-pane-combo-item">
+        <div class="pcb-pane-combo-name">✨ ${escapeHtml(co.name)}</div>
+        <div class="pcb-pane-combo-cond">${condLabel(co)}: ${escapeHtml(others.join(' + ') || '(単独)')}</div>
+        <div class="pcb-pane-combo-effect">→ ${targetLabel(co.effect)} +${power} power</div>
+        ${co.flavor ? `<div class="pcb-pane-combo-flavor">${escapeHtml(co.flavor)}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+  html += `</div>`;
+  pane.innerHTML = html;
+}
+
+function _switchCharDetailTab(tabName, currentChar) {
+  document.querySelectorAll('#char-detail-tabs .char-detail-tab').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === tabName);
+  });
+  document.querySelectorAll('.char-detail-tab-pane').forEach(p => {
+    p.hidden = (p.dataset.tab !== tabName);
+  });
+  if (tabName === 'pcb' && currentChar) renderCharDetailPcb(currentChar);
+}
+
 function renderCharDetail(c) {
   $("#char-detail-img").src = c.img;
   $("#char-detail-img").alt = c.name;
@@ -3275,6 +3495,21 @@ function renderCharDetail(c) {
   renderCharDup(c);
   // 関連キャラ表示
   renderCharRelations(c);
+  // タブを「ストーリー」 既定に戻す + click handler を 現在のキャラ参照付きで再設定
+  // (キャラ切替時に PCB タブが残ったままにならないように)
+  _switchCharDetailTab('story', c);
+  const tabBar = document.getElementById('char-detail-tabs');
+  if (tabBar && !tabBar._handlerBound) {
+    tabBar._handlerBound = true;
+    tabBar.addEventListener('click', e => {
+      const btn = e.target.closest('.char-detail-tab');
+      if (!btn || !btn.dataset.tab) return;
+      // 現在表示中のキャラを参照 (detailUnlockedList[detailIdx])
+      const cur = (Array.isArray(detailUnlockedList) && detailIdx >= 0)
+        ? detailUnlockedList[detailIdx] : null;
+      _switchCharDetailTab(btn.dataset.tab, cur);
+    });
+  }
   // 詳細画面を開いたら拡大は解除
   $("#char-img-zoom").classList.remove("active");
   // 閲覧マーク(NEWを消す)
@@ -3694,7 +3929,7 @@ const RELATIONS = [
 
   // ===== S1C5 黒月の予兆 (2026-05-03 反映) =====
   { a: '仮面騎士 シオン',             b: 'シ・ロエン',                 type: 'blood', label: '分離した自分' },
-  { a: '仮面騎士 シオン',             b: 'イザベル',                   type: 'childhood', label: '幼馴染' },
+  // (シオン↔イザベル は line 3813 「銀霜」 セクションで既出につき重複削除)
   { a: '仮面騎士 シオン',             b: '銀霜剣聖 オリエル',         type: 'master', aRole: '弟子', bRole: '師' },
   { a: '仮面騎士 シオン',             b: '銀霜王 ノヴァ',             type: 'admire', aRole: '盾', bRole: '主君' },
   { a: '銀霜近衛 セレン',             b: '仮面騎士 シオン',           type: 'admire', aRole: '後輩', bRole: '先輩' },
@@ -3707,6 +3942,18 @@ const RELATIONS = [
   { a: 'ルミナ',                       b: 'イザベル',                   type: 'fellow', label: '治療の情報交換 (文通)' },
   // 2026-05-03 全章 desc + LORE 通読で発見した S1C5 漏れ
   { a: '地底市の母 リオラエル',       b: '仮面騎士 シオン',           type: 'master', aRole: '導く', bRole: '影と共に生きる選択' },  // UR_リオラエル POOL desc
+  // 2026-05-06 desc + LORE 包括チェックで 発見した s1c5 関連 重要漏れ (野沢さん指摘「全キャラチェック」)
+  { a: '仮面騎士 シオン',             b: 'セラフィエル',              type: 'admire', aRole: '素顔を知らせた', bRole: '見守る' },         // SSR_シオン desc「素顔を知る三人——王族、 イザベル、 そしてセラフィエル」
+  { a: '仮面騎士 シオン',             b: '堕者剣聖 ガルヴィン',       type: 'fellow', label: '教会の盾の旧兄弟弟子' },                   // SSR_シオン+ガルヴィン desc「同じ系譜の旧友」
+  { a: '仮面騎士 シオン',             b: '黒月の盟主 ノクトリア',     type: 'rival',  label: '取引を交わした影の盟主' },                 // 2-1 月喰いの森で 取引対峙
+  { a: 'シ・ロエン',                   b: '堕者剣聖 ガルヴィン',       type: 'fellow', label: '黒月衆の同志' },                            // UR_シ・ロエン LORE「ガルヴィンは『同じ系譜だな』 と」
+  // 2026-05-06 自動チェック (ルール7-30) で発見した相関漏れキャラ 4体 を追加
+  { a: '地底市の語り部 オルフェ',     b: '地底市の母 リオラエル',     type: 'admire', aRole: '語り部', bRole: '千年の主' },              // 地底市の歴史を歌で伝える
+  { a: '地底市の語り部 オルフェ',     b: '影織りの導師 ルナリア',     type: 'fellow', label: '地底市の文化継承者' },                     // 同郷、 歴史と織物の両輪
+  { a: '黒月の刺客',                   b: '黒月の盟主 ノクトリア',     type: 'admire', aRole: '刺客', bRole: '盟主' },                    // 王族暗殺の手駒、 主従
+  { a: '銀霜の工房娘',                 b: '仮面騎士 シオン',           type: 'admire', aRole: '街娘', bRole: '沈黙の盾' },                // 1-3 祭夜で手を振る街娘
+  { a: '銀霜の歌姫',                   b: '銀霜の工房娘',              type: 'fellow', label: '祭夜の街娘たち' },                          // 1-3 祭夜の灯と歌
+  { a: '銀霜の歌姫',                   b: '詠聖 ベル',                 type: 'fellow', label: '同じ調べを歌う者' },                        // 1-3 シオンが「ベルの歌に似ている」 と聞く
 ];
 
 const REL_STYLE = {
@@ -4548,8 +4795,8 @@ function updatePickupChapterLabels() {
   const subEl = document.getElementById('pickup-chapter-sub');
   const noteEl = document.getElementById('pickup-note');
   if (labelEl) labelEl.textContent = label;
-  if (subEl) subEl.textContent = `${label}キャラ ×2倍`;
-  if (noteEl) noteEl.textContent = `+ ${label} ×2`;
+  if (subEl) subEl.textContent = `${label}キャラ ×${PICKUP_WEIGHT}倍`;
+  if (noteEl) noteEl.textContent = `+ ${label} ×${PICKUP_WEIGHT}`;
 }
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', updatePickupChapterLabels);
@@ -4703,9 +4950,14 @@ const FACTION_WORLD_COORDS = {
 function renderWorldMap() {
   const canvas = document.getElementById('world-map-canvas');
   if (!canvas || typeof FACTIONS === 'undefined') return;
-  // 派閥ごとのメンバー数を集計
+  // 派閥ごとのメンバー数を集計 (公開前章のキャラは除外、 12:00 前リーク防止)
   const memberCount = {};
   for (const name in (typeof CHAR_FACTION !== 'undefined' ? CHAR_FACTION : {})) {
+    // POOL から chapter を取得 → _isChapterReleased で フィルタ
+    const c = (typeof getCharByName === 'function') ? getCharByName(name) : null;
+    if (c && c.chapter && typeof _isChapterReleased === 'function' && !_isChapterReleased(c.chapter)) {
+      continue;
+    }
     const f = CHAR_FACTION[name].f;
     memberCount[f] = (memberCount[f] || 0) + 1;
   }
@@ -4772,6 +5024,9 @@ function renderWorldMap() {
   // 各派閥ノード (ワールド配置)
   factionsForMap.forEach(f => {
     const cnt = memberCount[f.id] || 0;
+    // 公開済章のメンバーが 0 = 全員 公開前章 → 派閥ノード描画スキップ (12:00 前リーク防止)
+    // (既存派閥で 既存メンバーがいる場合は cnt > 0 なので 表示維持)
+    if (cnt === 0) return;
     const r = 92 + Math.min(cnt * 5, 35);  // 92〜127
     const icon = FACTION_ICONS[f.id] || '⚐';
     svg += `<g class="world-faction-node" data-faction="${f.id}" transform="translate(${f.x},${f.y})">
@@ -4793,7 +5048,9 @@ function renderWorldMap() {
   });
   // Phase 2: 章マーカー (主舞台に📖ホットスポット、 公開済はopenStory、 未公開はComing Soon)
   STORY_CHAPTER_MARKERS.forEach(m => {
-    const isPublished = (typeof STORY_FILES !== 'undefined') && !!STORY_FILES[m.storyId];
+    // 公開済 = STORY_FILES 登録 + releaseDate 経過 (両方 必須、 12:00 前 リーク防止)
+    const isPublished = (typeof STORY_FILES !== 'undefined') && !!STORY_FILES[m.storyId]
+                        && (typeof _isChapterReleased !== 'function' || _isChapterReleased(m.storyId));
     const cls = isPublished ? 'world-chapter-marker' : 'world-chapter-marker coming-soon';
     const cap = isPublished ? m.label : `${m.label} 近日`;
     svg += `<g class="${cls}" data-story="${m.storyId}" transform="translate(${m.x},${m.y})">
@@ -4877,7 +5134,11 @@ function _showFactionSide(fid) {
   // BGM 有無
   const factionBgmIds = ['church', 'aquasis', 'crimson'];
   const hasBgm = factionBgmIds.includes(fid);
-  let html = `<h3>${escapeHtml(fac.label)}</h3>`;
+  // ヘッダ: タイトル + ×閉じるボタン (野沢さん要望 2026-05-06、 派閥詳細閉じてWMだけに戻す)
+  let html = `<div class="world-map-side-head">
+    <h3>${escapeHtml(fac.label)}</h3>
+    <button class="world-map-side-close" type="button" aria-label="派閥詳細を閉じる" title="閉じる">×</button>
+  </div>`;
   html += `<div class="faction-yomi-side">${escapeHtml(fac.yomi)}</div>`;
   html += `<div class="world-map-side-meta">`;
   html += `<span>👥 ${chars.length}人</span>`;
@@ -4893,12 +5154,29 @@ function _showFactionSide(fid) {
   });
   html += `</div>`;
   side.innerHTML = html;
+  // ×閉じる: 派閥選択をリセット + side panel を default 状態に戻す + canvas の active class 解除
+  side.querySelector('.world-map-side-close')?.addEventListener('click', () => {
+    _worldMapActiveFaction = null;
+    side.innerHTML = '<div class="world-map-side-empty">📍 派閥をタップして詳細表示</div>';
+    const canvas = document.getElementById('world-map-canvas');
+    if (canvas) {
+      canvas.querySelectorAll('.world-faction-node.active').forEach(n => n.classList.remove('active'));
+      canvas.querySelectorAll('.world-chapter-marker.active').forEach(n => n.classList.remove('active'));
+    }
+  });
   // メンバークリックでキャラ詳細
+  // 派閥フィルタリスト = 解放済みメンバーのみで構築、 ←→ ナビが派閥内だけを循環
+  const factionUnlocked = chars
+    .map(({ char }) => char)
+    .filter(c => c && (typeof isUnlocked === 'function' ? isUnlocked(c) : false));
   side.querySelectorAll('.world-map-side-member:not(.locked)').forEach(el => {
     el.addEventListener('click', () => {
       const name = el.dataset.name;
       const c = getCharByName ? getCharByName(name) : null;
-      if (c && typeof showCharDetail === 'function') showCharDetail(c);
+      if (c && typeof showCharDetail === 'function') {
+        detailUnlockedList = factionUnlocked;
+        showCharDetail(c);
+      }
     });
   });
 }
@@ -4942,8 +5220,11 @@ function _showChapterGallery(storyId) {
       });
     }
   }
-  // HTML 組み立て
-  let html = `<h3>${escapeHtml(outline.icon || '📖')} ${escapeHtml(outline.title)}</h3>`;
+  // HTML 組み立て (野沢さん要望 2026-05-06、 章詳細閉じてWMだけに戻す × ボタン)
+  let html = `<div class="world-map-side-head">
+    <h3>${escapeHtml(outline.icon || '📖')} ${escapeHtml(outline.title)}</h3>
+    <button class="world-map-side-close" type="button" aria-label="章詳細を閉じる" title="閉じる">×</button>
+  </div>`;
   html += `<div class="faction-yomi-side">${escapeHtml(outline.meta)}</div>`;
   // タブフィルター: すべて / 場所 / キャラ
   html += `<div class="chapter-gallery-tabs">`;
@@ -4993,6 +5274,16 @@ function _showChapterGallery(storyId) {
     html += `</div>`;
   }
   side.innerHTML = html;
+  // ×閉じる: 章選択をリセット + side panel を default 状態に戻す + canvas の active class 解除
+  side.querySelector('.world-map-side-close')?.addEventListener('click', () => {
+    _worldMapActiveFaction = null;
+    side.innerHTML = '<div class="world-map-side-empty">📍 派閥をタップして詳細表示</div>';
+    const canvas = document.getElementById('world-map-canvas');
+    if (canvas) {
+      canvas.querySelectorAll('.world-faction-node.active').forEach(n => n.classList.remove('active'));
+      canvas.querySelectorAll('.world-chapter-marker.active').forEach(n => n.classList.remove('active'));
+    }
+  });
   // タブ click → section フィルター
   const applyTab = (tab) => {
     side.querySelectorAll('.chapter-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
@@ -5023,12 +5314,17 @@ function _showChapterGallery(storyId) {
       _openLocImageZoom(fullUrl, { list: visibleLocs, index: visIdx });
     });
   });
-  // キャラ click → キャラ詳細 (既存)
+  // キャラ click → キャラ詳細
+  // 章ギャラリーフィルタリスト = 該当章の解放済みキャラのみで構築、 ←→ ナビが章内だけを循環
+  const chapterUnlocked = chars.filter(c => (typeof isUnlocked === 'function') ? isUnlocked(c) : false);
   side.querySelectorAll('.world-map-side-member:not(.locked)').forEach(el => {
     el.addEventListener('click', () => {
       const name = el.dataset.name;
       const c = (typeof getCharByName === 'function') ? getCharByName(name) : null;
-      if (c && typeof showCharDetail === 'function') showCharDetail(c);
+      if (c && typeof showCharDetail === 'function') {
+        detailUnlockedList = chapterUnlocked;
+        showCharDetail(c);
+      }
     });
   });
 }
@@ -5450,8 +5746,8 @@ const FURIGANA = {
   '異界の塔ザナド': 'いかいのとうざなど',
   '黒月衆': 'こくげつしゅう',
   '黒月': 'こくげつ',
-  '月喰いの森': 'つきはみのもり',
-  '月喰い': 'つきはみ',
+  '月喰いの森': 'つきくいのもり',
+  '月喰い': 'つきくい',
   '雪月神殿': 'せつげつしんでん',
   '影織り': 'かげおり',
   '沈黙の盾': 'ちんもくのたて',
@@ -5492,6 +5788,89 @@ const FURIGANA = {
   '銀霜の歌姫': 'ぎんそうのうたひめ',
   '虚': 'こ',
   '虚境': 'きょきょう',
+  // ===== 2026-05-06 既存負債解消 (ふりがな 78件 一括追加、 ルール7-12 警告解消) =====
+  // s1c1 既存キャラ + 地名
+  '星海のノクス': 'せいかいのノクス',
+  '森の射手': 'もりのいて',
+  '朱音': 'あかね',
+  '薫音': 'かおね',
+  '学院': 'がくいん',
+  '朝練': 'あされん',
+  '屋上': 'おくじょう',
+  '昼休': 'ひるやす',
+  '覚醒': 'かくせい',
+  '虹色': 'にじいろ',
+  '食堂': 'しょくどう',
+  '合流': 'ごうりゅう',
+  '黄昏': 'たそがれ',
+  // s1c2 海連合
+  '深海女王': 'しんかいじょおう',
+  '波紋の聖女': 'はもんのせいじょ',
+  '紅玉海賊団船長': 'こうぎょくかいぞくだんせんちょう',
+  '白焔教会見習い巫女': 'はくえんきょうかいみならいみこ',
+  'アクアシス筆頭魔術師': 'あくあしすひっとうまじゅつし',
+  '海獣使い': 'かいじゅうつかい',
+  '珊瑚鎧の海騎士': 'さんごよろいのうみきし',
+  '深海巫女': 'しんかいみこ',
+  '紅玉海賊団副長': 'こうぎょくかいぞくだんふくちょう',
+  '白焔教会騎士': 'はくえんきょうかいきし',
+  '深海の少女': 'しんかいのしょうじょ',
+  '海賊見習い': 'かいぞくみならい',
+  '珊瑚漁師': 'さんごりょうし',
+  '海賊団船医': 'かいぞくだんせんい',
+  '白焔教会従士': 'はくえんきょうかいじゅうし',
+  '冒頭': 'ぼうとう',
+  '専用': 'せんよう',
+  '後半': 'こうはん',
+  '教会': 'きょうかい',
+  '港町': 'みなとまち',
+  '第一幕': 'だいいちまく',
+  '海賊船': 'かいぞくせん',
+  '影喰': 'かげくい',
+  '波紋': 'はもん',
+  '聖女覚醒': 'せいじょかくせい',
+  '朝焼': 'あさやけ',
+  // s1c3 砂漠
+  '砂海王女': 'さかいおうじょ',
+  '古龍の語り部': 'ころうのかたりべ',
+  '隊商長': 'たいしょうちょう',
+  '砂牙の剣聖': 'さがのけんせい',
+  '紫竜の侍従': 'しりゅうのじじゅう',
+  '祭舞のサフィラ': 'さいぶのサフィラ',
+  '古龍鍛冶': 'ころうかじ',
+  '砂風の戦士': 'さふうのせんし',
+  '砂塵の子': 'さじんのこ',
+  '砂風の語り部': 'さふうのかたりべ',
+  // s1c4 凍土・空挺
+  '空挺女皇': 'くうていじょこう',
+  '氷塔の聖騎士': 'ひょうとうのせいきし',
+  '空挺城総監': 'くうていじょうそうかん',
+  '氷霜の巫女': 'ひょうそうのみこ',
+  '空挺城首席学者': 'くうていじょうしゅせきがくしゃ',
+  '真鍮の女将': 'しんちゅうのおかみ',
+  '氷牙の戦士': 'ひょうがのせんし',
+  '空挺整備士': 'くうていせいびし',
+  '凍土の狩人': 'とうどのかりうど',
+  '氷塔の見習い騎士': 'ひょうとうのみならいきし',
+  '凍土の祭司': 'とうどのさいし',
+  '蒸気砲手': 'じょうきほうしゅ',
+  '空挺機関士': 'くうていきかんし',
+  '凍土の少年': 'とうどのしょうねん',
+  '雪原の少女': 'せつげんのしょうじょ',
+  '空の少女': 'そらのしょうじょ',
+  '空の少年': 'そらのしょうねん',
+  // s1c5 黒月衆+地底市+銀霜補強
+  '黒月の盟主': 'こくげつのめいしゅ',
+  '地底市の母': 'ちていしのはは',
+  '堕者剣聖': 'だしゃけんせい',
+  '影織りの導師': 'かげおりのどうし',
+  '銀霜剣聖': 'ぎんそうけんせい',
+  '銀霜王': 'ぎんそうおう',
+  '月夜祭司': 'つきよさいし',
+  '地底市の語り部': 'ちていしのかたりべ',
+  '銀霜近衛': 'ぎんそうこのえ',
+  '雪月神殿見習い': 'せつげつしんでんみならい',
+  '地底市の少女': 'ちていしのしょうじょ',
 };
 
 // ============ ID-based キャラリンク (2026-05-03 導入) ============
@@ -5880,9 +6259,12 @@ function renderScene() {
   setupCutinBlinks();
   $("#story-bg").className = 'story-bg bg-' + (scene.bg || 'default');
   // 場所画像レイヤー: scene.label (例: '2-7') から LOCATION_CONFIG を引き、 あれば画像をフェードイン
+  // label 空 (プロローグ/エピローグ等の h2 直接本文 シーン) は title で lookup
+  // (野沢さん指摘 2026-05-06 「s1c5 で背景・挿絵が反映されない」 修正)
   const locationImgEl = $("#story-location-img");
   if (locationImgEl) {
-    const locConf = (LOCATION_CONFIG[currentStoryId] || {})[scene.label];
+    const sceneKey = scene.label || scene.title;
+    const locConf = (LOCATION_CONFIG[currentStoryId] || {})[sceneKey];
     if (locConf && locConf.img) {
       locationImgEl.style.backgroundImage = `url('${locConf.img}')`;
       locationImgEl.classList.add('active');
@@ -6091,8 +6473,8 @@ function renderSceneChars(scene) {
         const isFinalScene = /^第[\d一二三四五六七八九十]+章\s*終$/.test(scene.title || '');
         const tokens = _povTokens(povName);
         const hasName = tokens.some(t => t && contentMd.includes(t));
-        // first-person pronoun 検出 (POVが narrator として「私 / わたし」 を使う場合)
-        const hasPronoun = /[「『（\s。、]?(?:私|わたし|わたくし)(?:[はがにのを、。\s「『])/m.test(contentMd);
+        // first-person pronoun 検出 (POVが narrator として「私 / わたし / 俺」 を使う場合、 s1c5 シオンの「俺」 も含む)
+        const hasPronoun = /[「『（\s。、]?(?:私|わたし|わたくし|俺)(?:[はがにのを、。\s「『])/m.test(contentMd);
         if (isFinalScene || hasName || hasPronoun) {
           const povChar = _findPovChar(povName);
           if (povChar) top.unshift(povChar);
@@ -6192,7 +6574,7 @@ const STORY_OUTLINE = [
   { id: 's1c3', meta: 'Season 1 — 第3章', title: '砂塵の隊商',         icon: '🐉', tagline: '血ではなく、 共に過ごした時間が家族を作る',                          povCharName: '竜爵 ヴィル' },
   { id: 's1c4', meta: 'Season 1 — 第4章', title: '凍土と空',           icon: '❄️', tagline: '強者の頂は、 孤独を共に分かち合うことで初めて温かい', releaseDate: '2026-05-02', povCharName: '龍帝 アルテミス' },
   { id: 's1c5', meta: 'Season 1 — 第5章', title: '黒月の予兆',         icon: '🌑', tagline: '銀霜の月が黒く欠ける夜、 仮面の下のもう一人の自分が、 静かに立ち上がる ─ 光と影、 二つの私の境界で', releaseDate: '2026-05-06T12:00:00+09:00', povCharName: '仮面騎士 シオン' },
-  { id: 's1c6', meta: 'Season 1 — 第6章', title: '七座満つる',         icon: '🌈', tagline: '違っていても、 同じ目的を持つ仲間でいられる',                       povCharName: 'セラフィエル' },
+  { id: 's1c6', meta: 'Season 1 — 第6章', title: '七座満つる',         icon: '🌈', tagline: '違っていても、 同じ目的を持つ仲間でいられる', releaseDate: '2026-05-10T12:00:00+09:00', povCharName: 'セラフィエル' },
   { id: 's1c7', meta: 'Season 1 — 第7章', title: '黒月決戦',           icon: '☄️', tagline: '影を消すのではなく、 共に在ると認める',                              povCharName: '虹意 プリズマ' },
 ];
 
@@ -6385,6 +6767,7 @@ const LOCATION_CONFIG = {
   },
   's1c5': {
     // 第5章「黒月の予兆」 背景 (3:4縦長 全 8枚)
+    // h2 直接本文 (プロローグ / エピローグ) は scene.title で lookup されるため key 完全一致が必要
     'プロローグ': { img: '/images/locations/s1c5/thumb/observer_west_realm_thumb.webp' },        // プロローグ 観測者三柱・西の月の異変観測
     '1-1':         { img: '/images/locations/s1c5/thumb/silver_throne_hall_thumb.webp' },        // 1-1 銀霜王宮の月光謁見の間
     '1-2':         { img: '/images/locations/s1c5/thumb/sion_chamber_thumb.webp' },              // 1-2 シオンの私室 (仮面の置かれた机)
@@ -6392,7 +6775,7 @@ const LOCATION_CONFIG = {
     '2-1':         { img: '/images/locations/s1c5/thumb/black_moon_grove_thumb.webp' },          // 2-1 月喰いの森 (黒月衆の祭壇)
     '3-1':         { img: '/images/locations/s1c5/thumb/underworld_liora_full_thumb.webp' },     // 3-1 地底市リオラ全景
     '3-3':         { img: '/images/locations/s1c5/thumb/moon_shrine_altar_thumb.webp' },         // 3-3 雪月神殿の祭壇
-    'エピローグ': { img: '/images/locations/s1c5/thumb/observer_west_close_thumb.webp' },        // エピローグ 観測者三柱・東への引き
+    'エピローグ — 観測者三柱、 七座を仰ぐ': { img: '/images/locations/s1c5/thumb/observer_west_close_thumb.webp' },  // エピローグ scene.title 完全一致
   },
   's1c3': {
     // 各シーンの「印象深い1場面」 を 3:4 縦長背景画像として配置
@@ -6427,7 +6810,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
     // 3-4 戦いの終わり: 大人6人連携で裂け目縫合 (戦闘クライマックス締め)
     { scene: '3-4',  marker: '裂け目が閉じる音だった',           position: 'after',  img: '/images/locations/s1c1/thumb/rift_seal_thumb.webp' },
     // エピローグ プリズマの黄昏: 章の最終 (label 無いので title 比較で hit)
-    { scene: 'プリズマの黄昏', marker: '結晶のように、 虹色の塵となって舞い上がる', position: 'after', img: '/images/locations/s1c1/thumb/prisma_twilight_thumb.webp' },
+    { scene: 'プリズマの黄昏', marker: '結晶のように', position: 'after', img: '/images/locations/s1c1/thumb/prisma_twilight_thumb.webp' },
   ],
   's1c2': [
     // 2026-05-01 4幕統合: 出航/海淵/覚醒の波紋/帰路 に再mapping
@@ -6466,15 +6849,23 @@ const STORY_LOCATION_INLINE_CONFIG = {
     { scene: '4-1',  marker: '氷の小さな神殿の中央に、 ユーリスは立っていた',     position: 'after',  img: '/images/locations/s1c4/thumb/frost_oracle_prophecy_thumb.webp' },
   ],
   's1c5': [
-    // 第5章「黒月の予兆」 挿絵 (16:9横長、 全 5枚)
+    // 第5章「黒月の予兆」 挿絵 (16:9横長、 全 9枚 = 既存5 + 新規4)
+    // 第一幕 1-1: 銀霜王宮 月光謁見 (シオン+ノヴァ、 仮面騎士の古い作法)
+    { scene: '1-1',  marker: '俺は立ち上がり、 仮面の縁に指を一度添えて',           position: 'after',  img: '/images/locations/s1c5/thumb/silver_throne_oath_thumb.webp' },
+    // 第二幕 2-1: 月喰いの森・取引 (シオン+ノクトリア+ガルヴィン、 三者対峙)
+    { scene: '2-1',  marker: 'ガルヴィンが静かに言った',                              position: 'after',  img: '/images/locations/s1c5/thumb/black_moon_grove_meeting_thumb.webp' },
     // 第二幕 2-2: 王族暗殺未遂 (シオン+刺客、 五つ目の誓いの動機)
-    { scene: '2-2',  marker: '俺のメイスが、 刺客の胴を、 横から薙ぎ払った',         position: 'after',  img: '/images/locations/s1c5/thumb/royal_assassination_flashback_thumb.webp' },
+    { scene: '2-2',  marker: '俺のメイスが',                                          position: 'after',  img: '/images/locations/s1c5/thumb/royal_assassination_flashback_thumb.webp' },
     // 第二幕 2-3: 教会の塔・シオンとラナス兄弟弟子の沈黙の対話
     { scene: '2-3',  marker: '銀霜の街の灯火を、 見下ろしていた',                    position: 'after',  img: '/images/locations/s1c5/thumb/church_tower_reunion_thumb.webp' },
     // 第三幕 3-2: 影織りの工房 (リオラエル+ルナリア+シオン、 章テーマ視覚化)
     { scene: '3-2',  marker: '銀の糸と、 黒の糸が、 完全に等価に、 交差していた',     position: 'after',  img: '/images/locations/s1c5/thumb/shadow_loom_workshop_thumb.webp' },
+    // 第四幕 4-1: 仮面を外す瞬間 (シオン素顔露出、 立会人三人沈黙)
+    { scene: '4-1',  marker: '月鏡に、 俺の素顔が映った',                            position: 'after',  img: '/images/locations/s1c5/thumb/mask_unveil_moment_thumb.webp' },
     // 第四幕 4-1: 山場 分離の儀式 (シオン+シ・ロエン+ラナス+ルミナ+アスター、 二重月夜)
-    { scene: '4-1',  marker: '月鏡の表面が、 静かに、 揺らいだ',                       position: 'before', img: '/images/locations/s1c5/thumb/mask_separation_ritual_thumb.webp' },
+    { scene: '4-1',  marker: '月鏡の表面が',                                          position: 'before', img: '/images/locations/s1c5/thumb/mask_separation_ritual_thumb.webp' },
+    // 第四幕 4-1: 山場ピーク 手のひらを合わせる瞬間 (シ・ロエン左/シオン右、 七色の原虹)
+    { scene: '4-1',  marker: '銀の手のひらと、 黒の手のひらが',                       position: 'after',  img: '/images/locations/s1c5/thumb/twin_palms_rainbow_thumb.webp' },
     // 第四幕 4-2: 別れの朝 (シオン+シ・ロエン、 雪原の二筋の足跡)
     { scene: '4-2',  marker: '雪原の遠く、 朝霧の向こうに、 シ・ロエンと',             position: 'after',  img: '/images/locations/s1c5/thumb/shi_loen_departure_thumb.webp' },
   ],
@@ -6495,8 +6886,9 @@ const STORY_LOCATION_INLINE_CONFIG = {
 };
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
-// SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260504o';
+// version 完全同期 (野沢さん指示 2026-05-06): bump_version.py が自動で更新する。
+// 旧 date-suffix '20260504o' を 5/6 で見つけた事故を契機に version-based に統一。
+const IMG_CACHE_VERSION = '1.4.4az';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -6929,6 +7321,11 @@ const STORY_POV_EXCLUDE_SCENES = {
   's1c4': [
     // 観測者三柱 (カグヤ + ノクス + セラフィエル) — POV (アルテミス) ではないので除外
     '銀霜の月に呼ばれる者',
+  ],
+  's1c5': [
+    // プロローグ + エピローグ は観測者三柱 POV — POV (シオン) ではないので除外
+    'プロローグ',
+    'エピローグ — 観測者三柱、 七座を仰ぐ',
   ],
 };
 
@@ -7552,22 +7949,24 @@ $("#story-stage").addEventListener('click', e => {
 // ============ v1.1.3: Master Mute + BGM プレイヤー (拡張版) ============
 // BGM_LIST: labelは「メインテーマ」「第1章テーマ」など使用場面を表記、descは原曲名
 // duration はffprobeで実測した固定値 (新曲追加時は scripts/measure_bgm.sh で取得→更新)
+// category: 'chapter' (メイン+各章) / 'faction' (派閥) / 'other' (戦闘等)
+// 野沢さん指示 2026-05-06: BGM panel ポップアップで タブ分け表示するため category 明示
 const BGM_LIST = [
-  { id: 'dawn',    label: 'メインテーマ',     desc: 'Prism Dawn (夜明けの希望)',          duration: '2:49', file: '/assets/bgm/home.mp3' },
-  { id: 'watch',   label: '第1章テーマ',      desc: 'Prism Watch (三柱の夜警)',           duration: '2:17', file: '/assets/bgm/prism-watch.mp3' },
-  { id: 'tide',    label: '第2章テーマ',      desc: 'Prism Tide (虹の潮)',                 duration: '2:44', file: '/assets/bgm/prism-tide.mp3' },
-  { id: 'sands',   label: '第3章テーマ',      desc: 'Prism Sands (砂塵の鼓動)',           duration: '3:02', file: '/assets/bgm/prism-sands.mp3' },
-  { id: 'rift',    label: '戦闘テーマ',        desc: 'Prismatic Rift Overture (虹裂の序曲)', duration: '3:08', file: '/assets/bgm/Prismatic Rift Overture.mp3' },
-  { id: 'church',  label: '白焔教会テーマ',    desc: 'Prism Sanctus (白焔の祈り)',         duration: '3:09', file: '/assets/bgm/prism-church.mp3' },
-  { id: 'aquasis', label: 'アクアシステーマ',  desc: 'Prism Abyss (深海の宮)',             duration: '2:59', file: '/assets/bgm/prism-aquasis.mp3' },
-  { id: 'crimson', label: '紅玉海賊団テーマ',  desc: 'Prism Sailborn (紅潮の風)',          duration: '2:51', file: '/assets/bgm/prism-crimson.mp3' },
-  { id: 'sahar',   label: 'サハールテーマ',    desc: 'Prism Sahar (古龍の風)',             duration: '2:48', file: '/assets/bgm/prism-sahar.mp3' },
+  { id: 'dawn',    label: 'メインテーマ',     desc: 'Prism Dawn (夜明けの希望)',          category: 'chapter', duration: '2:49', file: '/assets/bgm/home.mp3' },
+  { id: 'watch',   label: '第1章テーマ',      desc: 'Prism Watch (三柱の夜警)',           category: 'chapter', duration: '2:17', file: '/assets/bgm/prism-watch.mp3' },
+  { id: 'tide',    label: '第2章テーマ',      desc: 'Prism Tide (虹の潮)',                 category: 'chapter', duration: '2:44', file: '/assets/bgm/prism-tide.mp3' },
+  { id: 'sands',   label: '第3章テーマ',      desc: 'Prism Sands (砂塵の鼓動)',           category: 'chapter', duration: '3:02', file: '/assets/bgm/prism-sands.mp3' },
+  { id: 'rift',    label: '戦闘テーマ',        desc: 'Prismatic Rift Overture (虹裂の序曲)', category: 'other',   duration: '3:08', file: '/assets/bgm/Prismatic Rift Overture.mp3' },
+  { id: 'church',  label: '白焔教会テーマ',    desc: 'Prism Sanctus (白焔の祈り)',         category: 'faction', duration: '3:09', file: '/assets/bgm/prism-church.mp3' },
+  { id: 'aquasis', label: 'アクアシステーマ',  desc: 'Prism Abyss (深海の宮)',             category: 'faction', duration: '2:59', file: '/assets/bgm/prism-aquasis.mp3' },
+  { id: 'crimson', label: '紅玉海賊団テーマ',  desc: 'Prism Sailborn (紅潮の風)',          category: 'faction', duration: '2:51', file: '/assets/bgm/prism-crimson.mp3' },
+  { id: 'sahar',   label: 'サハールテーマ',    desc: 'Prism Sahar (古龍の風)',             category: 'faction', duration: '2:48', file: '/assets/bgm/prism-sahar.mp3' },
   // ===== S1C4 追加 (3曲: 章テーマ + 派閥BGM x2) =====
-  { id: 'frost',    label: '第4章テーマ',      desc: 'Prism Frost (凍空の鼓動)',           duration: '2:53', file: '/assets/bgm/prism-frost.mp3' },
-  { id: 'niflheim', label: 'ニーヴルテーマ',   desc: 'Prism Niflheim (氷霊の歌)',          duration: '3:09', file: '/assets/bgm/prism-niflheim.mp3' },
-  { id: 'aether',   label: 'ゼノニアテーマ',   desc: 'Prism Aether (蒸気の鼓動)',          duration: '3:08', file: '/assets/bgm/prism-aether.mp3' },
+  { id: 'frost',    label: '第4章テーマ',      desc: 'Prism Frost (凍空の鼓動)',           category: 'chapter', duration: '2:53', file: '/assets/bgm/prism-frost.mp3' },
+  { id: 'niflheim', label: 'ニーヴルテーマ',   desc: 'Prism Niflheim (氷霊の歌)',          category: 'faction', duration: '3:09', file: '/assets/bgm/prism-niflheim.mp3' },
+  { id: 'aether',   label: 'ゼノニアテーマ',   desc: 'Prism Aether (蒸気の鼓動)',          category: 'faction', duration: '3:08', file: '/assets/bgm/prism-aether.mp3' },
   // ===== S1C5 追加 (1曲: 章テーマ、 派閥 BGM は 5キャラ閾値到達後に追加予定) =====
-  { id: 'blackmoon', label: '第5章テーマ',     desc: 'Prism Blackmoon (黒月の予兆)',       duration: '3:07', file: '/assets/bgm/prism-blackmoon.mp3' },
+  { id: 'blackmoon', label: '第5章テーマ',     desc: 'Prism Blackmoon (黒月の予兆)',       category: 'chapter', duration: '3:07', file: '/assets/bgm/prism-blackmoon.mp3' },
 ];
 const bgmAudio = document.getElementById("bgm-home");
 
@@ -7712,7 +8111,9 @@ function loadBgmSrc(id) {
   // タイトル表示形式: "Prismaera -[曲名]-"
   if ('mediaSession' in navigator) {
     try {
-      const songName = (track.desc || '').replace(/\s*\([^)]*\)\s*$/, '').trim() || track.label;
+      // 野沢さん指示 2026-05-06: スマホ ロック画面の曲名を 日本語タイトル (label) メインに変更
+      // 旧: 英題ベース (Prism Dawn 等) / 新: 日本語ベース (メインテーマ / 第1章テーマ / サハールテーマ 等)
+      const songName = track.label || track.desc || '';
       navigator.mediaSession.metadata = new MediaMetadata({
         title: `Prismaera -${songName}-`,
         artist: 'Prismaera',
@@ -8152,11 +8553,18 @@ function renderBgmPanel() {
     }
   }
 
-  // 曲リスト
+  // カテゴリタブ active 反映
+  document.querySelectorAll('#bgm-cat-tabs .bgm-cat-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.cat === _bgmCatFilter);
+  });
+  // 曲リスト (野沢さん指示 2026-05-06、 カテゴリタブで filter)
   const list = $("#bgm-list");
   if (!list) return;
   list.innerHTML = '';
-  BGM_LIST.forEach(b => {
+  const filtered = _bgmCatFilter === 'all'
+    ? BGM_LIST
+    : BGM_LIST.filter(b => (b.category || 'other') === _bgmCatFilter);
+  filtered.forEach(b => {
     const row = document.createElement('div');
     row.className = 'bgm-row' + (b.id === bgmCurrentId ? ' now' : '');
     const checked = bgmPlaylist[b.id] ? 'checked' : '';
@@ -8184,6 +8592,20 @@ function renderBgmPanel() {
     });
   });
 }
+
+// BGM カテゴリ filter state (all / chapter / faction / other)
+let _bgmCatFilter = 'all';
+document.addEventListener('DOMContentLoaded', () => {
+  const tabBar = document.getElementById('bgm-cat-tabs');
+  if (tabBar) {
+    tabBar.addEventListener('click', e => {
+      const t = e.target.closest('.bgm-cat-tab');
+      if (!t) return;
+      _bgmCatFilter = t.dataset.cat;
+      renderBgmPanel();
+    });
+  }
+});
 
 // ───── ヘッダーボタンと panel 内コントロール配線 ─────
 $("#btn-bgm").addEventListener("click", openBgmPanel);
@@ -9073,8 +9495,10 @@ function showAccountModal() {
       else if (k.startsWith('LR_')) lrCount++;
     }
     // 分母は POOL から動的に取得 (キャラ追加時に分母を更新し忘れる事故を防ぐ)
-    const urMax = (POOL && POOL.UR) ? POOL.UR.length : 0;
-    const lrMax = (POOL && POOL.LR) ? POOL.LR.length : 0;
+    // + 公開済章のキャラのみ (12:00 前リーク防止、 野沢さん指示 2026-05-06)
+    const _released = (c) => !c.chapter || (typeof _isChapterReleased === 'function' && _isChapterReleased(c.chapter));
+    const urMax = (POOL && POOL.UR) ? POOL.UR.filter(_released).length : 0;
+    const lrMax = (POOL && POOL.LR) ? POOL.LR.filter(_released).length : 0;
     $('#account-info-ur').textContent = `${urCount}/${urMax}`;
     $('#account-info-lr').textContent = `${lrCount}/${lrMax}`;
     $('#account-info-sync').textContent = authUser.metadata && authUser.metadata.lastSignInTime
@@ -9412,6 +9836,14 @@ function _skipAutoPrecache() {
 function _isChapterReleased(chapterId) {
   if (typeof STORY_FILES === 'undefined' || !STORY_FILES[chapterId]) return false;
   if (typeof STORY_OUTLINE === 'undefined') return true;
+  // dev preview (dev.prismaera.pages.dev) では releaseDate を bypass、 全章押下可能。
+  // main 本番 (prismaera.pages.dev) は releaseDate filter で公開時刻まで Coming Soon。
+  // 野沢さん要望 2026-05-06: dev で実物確認しながら FB 送るため、 dev は事前解放。
+  if (typeof location !== 'undefined' && location.hostname &&
+      (location.hostname.startsWith('dev.') || location.hostname === 'localhost' ||
+       location.hostname === '127.0.0.1')) {
+    return true;
+  }
   const o = STORY_OUTLINE.find(x => x && x.id === chapterId);
   if (o && o.releaseDate) {
     const ts = new Date(o.releaseDate).getTime();
@@ -9555,14 +9987,65 @@ const PRISMAERA_VERSION_LS_KEY = 'prismaera-last-seen-version';
 let _prismaeraChangelogCache = null;
 let _prismaeraTargetVersion = null;
 
+// ============================================================
+// scheduledRelease (野沢さん指示 2026-05-06、 12:00 ジャストで Ver + リリースノート 同時切替):
+// version.json の scheduledRelease = { version, at, title? } と changelog entry の scheduled:true で
+// 「事前 main push + 公開時刻自動切替」 を実現。
+// 5/6 11:00 等の早めに main push しても client 側で 11:59 までは「v1.4.4 + 章ロック」、
+// 12:00:00 ジャストで「v1.5.0 + 章公開 + リリースノート 表示 + update-modal pop up」 が同期発表。
+// ============================================================
+function _getEffectiveVersion(data) {
+  // data: version.json の object。 scheduledRelease.at 経過済なら scheduledRelease.version、
+  // それ以前 (or scheduledRelease 不在) なら data.version。
+  if (data && data.scheduledRelease && data.scheduledRelease.version && data.scheduledRelease.at) {
+    const ts = new Date(data.scheduledRelease.at).getTime();
+    if (!isNaN(ts) && Date.now() >= ts) {
+      return data.scheduledRelease.version;
+    }
+  }
+  return data ? data.version : '';
+}
+
+function _isScheduledFutureChangelogEntry(entry) {
+  // entry.scheduled:true && date > now なら 「12:00 まで非表示」
+  if (!entry || !entry.scheduled) return false;
+  const ts = _parseChangelogDate(entry.date);
+  return ts > 0 && ts > Date.now();
+}
+
+function _filterChangelogForDisplay(changelog) {
+  return (changelog || []).filter(e => !_isScheduledFutureChangelogEntry(e));
+}
+
+// 12:00 直前 ジャスト切替トリガ (起動時に scheduledRelease.at までの ms を計算 → 24h 以内なら setTimeout)
+let _scheduledReleaseFireTimer = null;
+function _scheduleVersionRefresh(data) {
+  if (_scheduledReleaseFireTimer) {
+    clearTimeout(_scheduledReleaseFireTimer);
+    _scheduledReleaseFireTimer = null;
+  }
+  if (!data || !data.scheduledRelease || !data.scheduledRelease.at) return;
+  const ts = new Date(data.scheduledRelease.at).getTime();
+  if (isNaN(ts)) return;
+  const wait = ts - Date.now();
+  if (wait <= 0 || wait > 24 * 60 * 60 * 1000) return;  // 過去 or 24h 超先
+  // 切替時刻の +1 秒で 再 check (waiting で精度確保)
+  _scheduledReleaseFireTimer = setTimeout(() => {
+    checkPrismaeraVersion();
+    if (typeof loadNotifications === 'function') loadNotifications();
+  }, wait + 1000);
+  console.log('[scheduled] firing in', Math.round(wait / 1000), 'sec for v' + data.scheduledRelease.version);
+}
+
 async function checkPrismaeraVersion() {
   try {
     const res = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
     if (!res.ok) return;
     const data = await res.json();
-    const currentVer = data.version;
-    const changelog = Array.isArray(data.changelog) ? data.changelog : [];
+    const currentVer = _getEffectiveVersion(data);
+    const changelog = _filterChangelogForDisplay(data.changelog);
     _prismaeraChangelogCache = changelog;
+    _scheduleVersionRefresh(data);
 
     // ヘッダーのバージョン表記を version.json で上書き
     // 【単一 source 統一 2026-05-04】 旧仕様 (cache buster suffix を末尾連結) は version.json の dev suffix と
@@ -9882,6 +10365,12 @@ function openSettingsModal() {
         <div class="settings-section">
           <button type="button" class="settings-feedback-link" onclick="closeSettingsModal();openFeedbackModal()">📨 ご意見・ご要望を送る</button>
         </div>
+        <!-- 強制リフレッシュ (野沢さん指示 2026-05-06、 dev preview / admin のみ表示、 通常ユーザーには非表示) -->
+        <div class="settings-section settings-force-refresh" id="settings-force-refresh-section" style="display:none">
+          <div class="settings-label">🔄 強制リフレッシュ (dev/admin only)</div>
+          <div class="settings-power-saver-desc">端末のキャッシュ + Service Worker を 全削除して 最新版で再起動します。 ガチャ履歴・凸数・所持キャラはアカウント情報なので残ります。 ※ dev preview / admin のみ表示。</div>
+          <button type="button" class="settings-feedback-link" id="settings-force-refresh" style="background:rgba(255,140,80,0.18);border-color:rgba(255,140,80,0.45);">🔄 強制リフレッシュ</button>
+        </div>
         <div class="settings-note">設定はこの端末に保存されます (アカウント連携対象外)</div>
       </div>
     `;
@@ -9928,6 +10417,43 @@ function openSettingsModal() {
       }
       // C-3: BGM progress timer も interval を切り替え (500ms <-> 1500ms)
       try { if (typeof _restartBgmProgressTimer === 'function') _restartBgmProgressTimer(); } catch {}
+    });
+    // 強制リフレッシュ section: dev preview / admin のみ表示 (一般ユーザーには非表示)
+    const forceSection = m.querySelector('#settings-force-refresh-section');
+    if (forceSection) {
+      const isDev = typeof location !== 'undefined' && location.hostname &&
+                    (location.hostname.startsWith('dev.') || location.hostname === 'localhost' ||
+                     location.hostname === '127.0.0.1');
+      // admin 判定は isPrismAdmin (グローバル、 checkPrismAdmin で Firebase _meta/admins から取得)
+      const isAdmin = (typeof isPrismAdmin !== 'undefined' && isPrismAdmin === true);
+      if (isDev || isAdmin) forceSection.style.display = '';
+    }
+    // 強制リフレッシュ click handler (野沢さん指示 2026-05-06)
+    const forceRefreshBtn = m.querySelector('#settings-force-refresh');
+    if (forceRefreshBtn) forceRefreshBtn.addEventListener('click', async () => {
+      if (!confirm('Cache + Service Worker を 全削除して 最新版で再起動します。 続けますか?')) return;
+      forceRefreshBtn.disabled = true;
+      forceRefreshBtn.textContent = '🔄 リフレッシュ中…';
+      try {
+        // 1. Service Worker 全 unregister
+        if ('serviceWorker' in navigator) {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs.map(r => r.unregister().catch(() => {})));
+        }
+        // 2. caches 全削除 (BGM_CACHE / LOC_CACHE / STATIC_CACHE / OFFLINE_SAVED / IMG_PERSIST 含む)
+        if ('caches' in window) {
+          const keys = await caches.keys();
+          await Promise.all(keys.map(k => caches.delete(k).catch(() => {})));
+        }
+        // 3. PRISMAERA_VERSION_LS_KEY を 削除 (新版で update-modal を 出すため)
+        try { localStorage.removeItem(PRISMAERA_VERSION_LS_KEY); } catch {}
+        // 4. 強制リロード (browser cache も bypass)
+        location.reload(true);
+      } catch (e) {
+        forceRefreshBtn.disabled = false;
+        forceRefreshBtn.textContent = '🔄 強制リフレッシュ';
+        alert('リフレッシュ失敗: ' + (e && e.message ? e.message : e));
+      }
     });
     // M4: 全アセットDL — 状態管理 (未DL数 > 0 の時だけボタン表示)
     const dlBtn = m.querySelector('#settings-offline-dl');
@@ -10168,12 +10694,66 @@ let _notifFilter = 'all';
 const NOTIF_READ_KEY = 'prism-notif-read';   // localStorage: 個別+broadcast+release の既読 id Set
 const NOTIF_RELEASE_SEEN_KEY = 'prism-changelog-seen-versions';  // 既読 release version の Set
 
-function _getNotifReadSet() {
+// アカウント依存の既読管理 (野沢さん指示 2026-05-06):
+// 端末跨ぎ同期 — Firebase /prism-gacha/users/{uid}/notifReadIds に Set 同期。
+// ログイン中: localStorage + Firebase の union を採用、 mark read で 両方更新。
+// ログアウト中: localStorage のみ (従来挙動)。
+let _notifReadSetFirebase = new Set();  // Firebase fetch 結果 cache (uid 紐付き)
+let _notifReadFirebaseUid = null;       // どの uid の cache か (auth 切替時に invalidate)
+
+function _getLocalNotifReadSet() {
   try { return new Set(JSON.parse(localStorage.getItem(NOTIF_READ_KEY) || '[]')); }
   catch { return new Set(); }
 }
-function _saveNotifReadSet(set) {
+function _saveLocalNotifReadSet(set) {
   try { localStorage.setItem(NOTIF_READ_KEY, JSON.stringify([...set])); } catch {}
+}
+function _getNotifReadSet() {
+  // ログイン中: Firebase cache + localStorage の union を返す (端末跨ぎ反映)
+  // ログアウト: localStorage のみ
+  const local = _getLocalNotifReadSet();
+  if (typeof authUser !== 'undefined' && authUser && _notifReadFirebaseUid === authUser.uid) {
+    return new Set([...local, ..._notifReadSetFirebase]);
+  }
+  return local;
+}
+function _saveNotifReadSet(set) {
+  // localStorage は常時書き込み (offline 時のバックアップ)
+  _saveLocalNotifReadSet(set);
+  // ログイン中なら Firebase にも同期 (fire-and-forget、 失敗時は localStorage が残るので次回 merge で復活)
+  if (typeof authUser !== 'undefined' && authUser && typeof fbDb !== 'undefined' && fbDb) {
+    const arr = [...set];
+    fbDb.ref('prism-gacha/users/' + authUser.uid + '/notifReadIds').set(arr).catch(e => {
+      console.warn('[notif] firebase write failed (localStorage は保存済):', e);
+    });
+    _notifReadSetFirebase = new Set(arr);
+    _notifReadFirebaseUid = authUser.uid;
+  }
+}
+async function _loadFirebaseNotifReadSet() {
+  // 起動時 + auth 確定時に Firebase fetch、 cache 更新
+  if (typeof authUser === 'undefined' || !authUser || typeof fbDb === 'undefined' || !fbDb) {
+    _notifReadSetFirebase = new Set();
+    _notifReadFirebaseUid = null;
+    return;
+  }
+  try {
+    const snap = await fbDb.ref('prism-gacha/users/' + authUser.uid + '/notifReadIds').once('value');
+    const arr = snap.val() || [];
+    _notifReadSetFirebase = new Set(Array.isArray(arr) ? arr : Object.values(arr));
+    _notifReadFirebaseUid = authUser.uid;
+    // localStorage と Firebase の union を Firebase に書き戻す (初回ログイン時の マージ)
+    const local = _getLocalNotifReadSet();
+    if ([...local].some(id => !_notifReadSetFirebase.has(id))) {
+      const merged = new Set([...local, ..._notifReadSetFirebase]);
+      const arrM = [...merged];
+      fbDb.ref('prism-gacha/users/' + authUser.uid + '/notifReadIds').set(arrM).catch(() => {});
+      _notifReadSetFirebase = merged;
+      _saveLocalNotifReadSet(merged);
+    }
+  } catch (e) {
+    console.warn('[notif] firebase read failed:', e);
+  }
 }
 
 // changelog の date field を 両形式 (旧 "2026-05-05" / 新 ISO 8601 "2026-05-05T21:30:00+09:00") から
@@ -10205,6 +10785,15 @@ function _fmtChangelogDate(d) {
 }
 
 async function loadNotifications() {
+  // ログイン中なら Firebase 既読 set を 先に取得 (端末跨ぎ既読、 野沢さん指示 2026-05-06)
+  if (typeof authUser !== 'undefined' && authUser) {
+    if (_notifReadFirebaseUid !== authUser.uid) {
+      await _loadFirebaseNotifReadSet();
+    }
+  } else {
+    _notifReadSetFirebase = new Set();
+    _notifReadFirebaseUid = null;
+  }
   const items = [];
   // (1) リリースノート: version.json から changelog を取得 → release 通知化
   try {
@@ -10212,7 +10801,10 @@ async function loadNotifications() {
     if (res.ok) {
       const j = await res.json();
       const changelog = Array.isArray(j && j.changelog) ? j.changelog : [];
-      changelog.forEach(entry => {
+      // scheduled:true で date 未到来の entry は 「お知らせ」 一覧から filter (野沢さん指示 2026-05-06、
+      // 12:00 ジャストで Ver + リリースノート 同時切替)。 12:00 経過後は 通常 entry として表示。
+      const visibleChangelog = _filterChangelogForDisplay(changelog);
+      visibleChangelog.forEach(entry => {
         if (!entry || !entry.version) return;
         const at = _parseChangelogDate(entry.date);
         const body = (entry.notes || []).map(n => '・' + n).join('\n');
@@ -10225,6 +10817,8 @@ async function loadNotifications() {
           _src: 'changelog',
         });
       });
+      // scheduledRelease を 起動時に loadNotifications でも捕捉 (お知らせモーダル open 中の 12:00 切替対応)
+      if (typeof _scheduleVersionRefresh === 'function') _scheduleVersionRefresh(j);
     }
   } catch (e) { console.warn('changelog fetch failed:', e); }
 

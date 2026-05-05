@@ -127,8 +127,8 @@
   },
 
   "深海女王 ネプテア": {
-    "effectText": "海溝の祈り: 全レーン +1 (千年の祈り)",
-    "effect": { "trigger": "onPlay", "target": "all_lanes", "power": 1 }
+    "effectText": "青の祈り: 💴手札 最高Costを -2、 自レーン +1",
+    "effect": { "trigger": "onPlay", "target": "cost_reduce_hand", "power": 2 }
   },
   "波紋の聖女 イザベル": {
     "effectText": "七色の祈り: 自レーン アクアシス +1、 自レーン +1",
@@ -136,8 +136,8 @@
   },
 
   "紅玉海賊団船長 シャンティ": {
-    "effectText": "船長の采配: 自レーン 紅玉海賊団 +1、 自身 +1",
-    "effect": { "trigger": "onPlay", "target": "buff_faction_lane", "faction": "紅玉海賊団", "power": 1, "selfBonus": 1 }
+    "effectText": "紅玉の采配: 💴手札 最高Costを -2、 自レーン +1",
+    "effect": { "trigger": "onPlay", "target": "cost_reduce_hand", "power": 2 }
   },
   "白焔教会見習い巫女 ルーナ": {
     "effectText": "見習いの覚醒: 自レーン +1、 自身 🌱成長",

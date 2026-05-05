@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4h — 演出スタイル (Season 1 第1章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4az — 演出スタイル (Season 1 第1章) / dev は cache buster suffix で進行
    ============================================================ */
 :root {
   --bg: #05060d;
@@ -1568,30 +1568,44 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   padding: 18px 22px;
   color: #e8ecff;
   box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+  position: relative;  /* close を absolute で 右上固定するため */
 }
 .rate-detail-head {
   display: flex; justify-content: space-between; align-items: center;
   margin-bottom: 14px;
   border-bottom: 1px solid rgba(200,180,255,0.15);
   padding-bottom: 10px;
-  position: sticky; top: 0; z-index: 1;
-  background: linear-gradient(180deg, #1a1f3a 80%, transparent 100%);
+  /* 旧: head 全体 sticky → タイトルもスクロール追従していて視認性悪化 (野沢さん指摘 2026-05-06)
+     新: head は通常 flow、 ✕ ボタンだけ sticky で右上固定 (タイトルはスクロールで流れる) */
 }
 .rate-detail-title {
   font-size: 16px; font-weight: 700;
   background: linear-gradient(90deg, #ffd84d, #5fffd4, #c87dff);
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
+/* 排出率モーダル ✕: scroll 非追従 右上固定 (野沢さん指示 2026-05-06)
+   row(height:0+sticky top:0) で card top に貼り付き、 close は row 内 flex 右端配置。
+   absolute は scroll content と一緒に動く CSS 仕様だったため sticky に切替。 */
+.rate-detail-close-row {
+  position: sticky; top: 0;
+  height: 0;
+  display: flex; justify-content: flex-end;
+  z-index: 3;
+  pointer-events: none;
+}
 .rate-detail-close {
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.3);
   color: #fff;
   width: 32px; height: 32px;
   border-radius: 50%;
   font-size: 20px; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
+  pointer-events: auto;
+  backdrop-filter: blur(4px);
+  transform: translateY(4px);  /* height:0 row なので 上端から少し下げて視認性確保 */
 }
-.rate-detail-close:hover { background: rgba(255,255,255,0.15); }
+.rate-detail-close:hover { background: rgba(255,255,255,0.28); }
 .rate-detail-body { display: flex; flex-direction: column; gap: 18px; }
 .rate-detail-section h3 {
   font-size: 13px; font-weight: 700;
@@ -2248,6 +2262,193 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   font-size: 14px; line-height: 1.9;
   color: rgba(255,255,255,0.85);
   letter-spacing: 0.03em;
+}
+/* キャラ詳細 タブ UI (Tier 横配置、 スマホでスクロール不要、 野沢さん指示 2026-05-06) */
+.char-detail-header-row {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+.char-detail-header-row .char-detail-tier { flex: 0 0 auto; margin: 0; }
+.char-detail-tabs {
+  display: flex; gap: 4px;
+  margin-left: auto;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 999px;
+  padding: 3px;
+}
+.char-detail-tab {
+  background: transparent;
+  border: none;
+  padding: 6px 14px;
+  color: rgba(255,255,255,0.6);
+  font-size: 12px; font-weight: 500;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  border-radius: 999px;
+  transition: color 0.15s ease, background 0.15s ease;
+  min-height: 32px;
+}
+.char-detail-tab:hover { color: rgba(255,255,255,0.85); }
+.char-detail-tab.active {
+  color: #1a1d2e;
+  background: rgba(251, 191, 36, 0.85);
+  font-weight: 600;
+}
+.char-detail-tab-pane[hidden] { display: none !important; }
+/* 凸毎の効果 表 (PCB タブ内) */
+.pcb-pane-stages-block {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+}
+.pcb-pane-stages-label {
+  font-size: 12px; color: rgba(255,255,255,0.7);
+  letter-spacing: 0.06em; margin-bottom: 8px;
+}
+.pcb-pane-stages-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  table-layout: fixed;
+}
+.pcb-pane-stages-table th, .pcb-pane-stages-table td {
+  padding: 6px 8px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.pcb-pane-stages-table th {
+  font-size: 10px;
+  color: rgba(255,255,255,0.5);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+.pcb-pane-stages-table td:nth-child(2),
+.pcb-pane-stages-table td:nth-child(3),
+.pcb-pane-stages-table th:nth-child(2),
+.pcb-pane-stages-table th:nth-child(3) {
+  width: 70px;
+  text-align: center;
+}
+.pcb-pane-stages-table tr.pcb-stage-cur {
+  background: rgba(251, 191, 36, 0.08);
+}
+.pcb-pane-stages-table tr.pcb-stage-cur td { color: #fff; }
+.pcb-stage-cur-mark {
+  font-size: 10px;
+  color: rgba(251, 191, 36, 0.95);
+  margin-left: 4px;
+}
+.pcb-cost-orig {
+  color: rgba(255,255,255,0.4);
+  text-decoration: line-through;
+  margin-right: 4px;
+  font-size: 10px;
+}
+.pcb-pane-stages-note {
+  font-size: 10px;
+  color: rgba(255,255,255,0.5);
+  margin-top: 6px;
+  letter-spacing: 0.04em;
+}
+/* PCB 性能 ペイン */
+.char-detail-pcb { padding: 4px 0 8px; }
+.pcb-pane-empty {
+  text-align: center;
+  padding: 30px 20px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+  line-height: 1.7;
+}
+.pcb-pane-stats {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
+.pcb-pane-stat-row {
+  display: flex; gap: 8px; align-items: center;
+  margin-bottom: 10px;
+}
+.pcb-pane-tier {
+  display: inline-block; padding: 3px 10px; border-radius: 999px;
+  font-size: 12px; font-weight: 700; letter-spacing: 0.08em;
+  background: rgba(255,255,255,0.1); color: #fff;
+}
+.pcb-pane-tier.tier-lr  { background: linear-gradient(135deg,#ffe07a,#ff8a3a); color:#1a1d2e; }
+.pcb-pane-tier.tier-ur  { background: linear-gradient(135deg,#ff8ddc,#a06eff); }
+.pcb-pane-tier.tier-ssr { background: linear-gradient(135deg,#ffd56b,#ffa84a); color:#1a1d2e; }
+.pcb-pane-tier.tier-sr  { background: linear-gradient(135deg,#a3a3a3,#7a9bff); }
+.pcb-pane-tier.tier-r   { background: rgba(255,255,255,0.16); color: rgba(255,255,255,0.85); }
+.pcb-pane-faction {
+  display: inline-block; padding: 3px 10px; border-radius: 999px;
+  font-size: 11px; font-weight: 600;
+  color: rgba(0,0,0,0.7);
+}
+.pcb-pane-stat-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
+.pcb-pane-stat-grid > div {
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.pcb-pane-label { font-size: 10px; color: rgba(255,255,255,0.5); letter-spacing: 0.06em; }
+.pcb-pane-val { font-size: 18px; font-weight: 700; color: #fff; }
+.pcb-pane-effect-block {
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+}
+.pcb-pane-effect-label {
+  font-size: 11px; color: rgba(251, 191, 36, 0.85);
+  letter-spacing: 0.08em; margin-bottom: 4px;
+}
+.pcb-pane-effect-text {
+  font-size: 13px; line-height: 1.7;
+  color: rgba(255,255,255,0.9);
+}
+.pcb-pane-combo-block { margin-bottom: 8px; }
+.pcb-pane-combo-label {
+  font-size: 12px; color: rgba(255,255,255,0.7);
+  letter-spacing: 0.06em; margin-bottom: 8px;
+  display: flex; gap: 8px; align-items: center;
+}
+.pcb-pane-combo-count {
+  font-size: 10px; padding: 2px 8px; border-radius: 999px;
+  background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6);
+}
+.pcb-pane-combo-empty {
+  font-size: 12px; color: rgba(255,255,255,0.5);
+  padding: 12px 0; text-align: center;
+}
+.pcb-pane-combo-item {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+}
+.pcb-pane-combo-name {
+  font-size: 13px; font-weight: 600; color: #fff;
+  margin-bottom: 3px;
+}
+.pcb-pane-combo-cond {
+  font-size: 11px; color: rgba(255,255,255,0.65); margin-bottom: 2px;
+}
+.pcb-pane-combo-effect {
+  font-size: 12px; color: rgba(122, 255, 138, 0.95);
+}
+.pcb-pane-combo-flavor {
+  font-size: 10px; color: rgba(255,255,255,0.45);
+  font-style: italic; margin-top: 4px;
 }
 .close-detail {
   /* iOS Safari 対応 (野沢さん指摘 2026-05-03 「閉じる ボタンが押せない、 特にキャラ詳細から戻れない」):
@@ -5083,6 +5284,8 @@ body.has-offline-banner .topbar { margin-top: 30px; }
   line-height: 1.6;
   color: rgba(255, 255, 255, 0.75);
 }
+/* リリースノート 階層化対応 (野沢さん指示 2026-05-06): notes 内 \n を 改行扱いで 「主項目 + 　・子項目」 形式表示 */
+#update-notes li, .update-history ul li { white-space: pre-line; }
 
 /* ───── Migration Notice Modal (旧URL→新URL 案内) ───── */
 .migration-modal {
@@ -5638,6 +5841,37 @@ body.gasshuku-modal-open {
   margin: 0 0 4px;
   font-size: 18px;
   letter-spacing: 0.04em;
+}
+/* 派閥/章詳細パネル ヘッダ: タイトル + ×閉じるボタンを 同じ row に配置 (野沢さん要望 2026-05-06) */
+.world-map-side-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.world-map-side-head h3 { margin: 0; flex: 1 1 auto; min-width: 0; }
+.world-map-side-close {
+  flex: 0 0 auto;
+  width: 44px; height: 44px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 999px;
+  color: rgba(255,255,255,0.85);
+  font-size: 20px; line-height: 1;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  padding: 0;
+}
+.world-map-side-close:hover {
+  background: rgba(251, 191, 36, 0.18);
+  border-color: rgba(251, 191, 36, 0.45);
+  color: #fff;
+}
+.world-map-side-close:focus-visible {
+  outline: 2px solid rgba(251, 191, 36, 0.7);
+  outline-offset: 2px;
 }
 .world-map-side .faction-yomi-side {
   font-size: 11px;
@@ -8844,4 +9078,33 @@ body.lightmode .result * {
   animation-iteration-count: revert !important;
 }
 /* ===== END LIGHTMODE ===== */
+
+/* BGM カテゴリタブ (野沢さん指示 2026-05-06、 章テーマ/派閥テーマ/その他) */
+.bgm-cat-tabs {
+  display: flex; gap: 4px;
+  margin: 8px 0 10px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 999px;
+  padding: 3px;
+}
+.bgm-cat-tab {
+  flex: 1 1 0;
+  background: transparent;
+  border: none;
+  padding: 7px 8px;
+  color: rgba(255,255,255,0.6);
+  font-size: 12px; font-weight: 500;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  border-radius: 999px;
+  transition: color 0.15s ease, background 0.15s ease;
+  min-height: 32px;
+}
+.bgm-cat-tab:hover { color: rgba(255,255,255,0.85); }
+.bgm-cat-tab.active {
+  color: #1a1d2e;
+  background: rgba(251, 191, 36, 0.85);
+  font-weight: 600;
+}
 

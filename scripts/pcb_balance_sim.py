@@ -116,16 +116,17 @@ def _by_name(*names):
     return out
 
 def make_north_artemis_deck():
-    """北方 + 龍帝アルテミス (千年の戦友/北方の盟約 コンボ狙い)"""
+    """北方 + 龍帝アルテミス + LRプリズマ (千年の戦友/北方の盟約 コンボ狙い、 全デッキ プリズマ統一 2026-05-06)"""
     return _by_name(
+        '虹意 プリズマ',  # LR x1
         # UR x3 (上限)
         '龍帝 アルテミス', '焔帝 ヒノオウ', '氷帝 グレイル',
         # SSR x3 (北方核)
         '北方剣聖 ハグル', '空挺城総監 ガリオン', '氷塔の聖騎士 リオネ',
         # SR x3 (北方サポート)
-        '北方剣聖 ハグル' if False else '凍土の祭司 イル', '氷塔の見習い騎士 アスラ', '空挺整備士 ベル',
-        # R x3 (派閥外含むテンポ補強)
-        '凍土の少年 アルク', '雪原の少女 ミウ', 'ちさと',
+        '凍土の祭司 イル', '氷塔の見習い騎士 アスラ', '空挺整備士 ベル',
+        # R x2 (派閥外含むテンポ補強、 LR追加で 1枠減)
+        '凍土の少年 アルク', '雪原の少女 ミウ',
     )
 
 def make_aquasis_prism_deck():
@@ -168,6 +169,36 @@ def make_academy_observer_deck():
         'ちさと', 'カイ',  # R x2
     )
 
+def make_silver_shrine_deck():
+    """銀霜+雪月神殿 (s1c5 銀霜系 + 既存 s1c1 ルミナ、 沈黙の盾 + 雪月神殿の祭司灯番 コンボ)"""
+    return _by_name(
+        '虹意 プリズマ',                                                          # LR x1
+        '黒月の盟主 ノクトリア', 'シ・ロエン', '地底市の母 リオラエル',           # UR x3
+        '仮面騎士 シオン', '銀霜剣聖 オリエル', '銀霜王 ノヴァ',                  # SSR x3
+        '月夜祭司 アスター', 'ルミナ', '雪月神殿見習い ラピス',                   # SR x3 (s1c5 + s1c1)
+        '銀霜近衛 セレン', '銀霜の工房娘',                                         # R x2
+    )
+
+def make_zenonia_silver_deck():
+    """ゼノニア+銀霜 (s1c4 機械工房 + s1c5 銀霜、 ヴァーレ女皇 + 北方の盟約)"""
+    return _by_name(
+        '虹意 プリズマ',                                                          # LR x1
+        '空挺女皇 ヴァーレ', '氷帝 グレイル', 'シ・ロエン',                       # UR x3
+        '空挺城総監 ガリオン', '真鍮の女将 ハーニア', '銀霜剣聖 オリエル',         # SSR x3
+        '空挺整備士 ベル', '月夜祭司 アスター', '銀霜近衛 セレン',                 # SR x3
+        '空の少年 ピット', '雪月神殿見習い ラピス',                               # R x2
+    )
+
+def make_church_alliance_deck():
+    """白焔教会連合 (church + 樹海 + 学院、 始まりの五人 + 教会次世代)"""
+    return _by_name(
+        '虹意 プリズマ',                                                          # LR x1
+        'セラフィエル', '波紋の聖女 イザベル', '森の射手 リナエ',                 # UR x3
+        'イザベル', '白焔教会見習い巫女 ルーナ', '紅玉海賊団船長 シャンティ',     # SSR x3
+        'メイリ', '詠聖 ベル', 'セラフィ',                                         # SR x3
+        '白焔教会従士 リッカ', 'ちさと',                                           # R x2
+    )
+
 DECK_PATTERNS = {
     'デフォルト': make_default_deck,  # 比較基準
     '海+プリズマ': make_aquasis_prism_deck,
@@ -175,6 +206,20 @@ DECK_PATTERNS = {
     '砂漠+紫竜+プリズマ': make_sahar_dragon_vil_deck,
     'S1C5+観測者': make_s1c5_observer_deck,
     '聖学+観測者三柱': make_academy_observer_deck,
+    '銀霜+雪月神殿': make_silver_shrine_deck,
+    'ゼノニア+銀霜': make_zenonia_silver_deck,
+    '教会連合': make_church_alliance_deck,
+}
+
+MAX_DUPS = { 'R': 1, 'SR': 2, 'SSR': 3, 'UR': 4, 'LR': 4 }
+# 凸完凸 sim flag (野沢さん指示 2026-05-06、 完凸状態でのバランス確認)
+# True にすると Card init 時に 各凸 +1 ﾎﾟﾜｰ + cost-1 + onPlay 効果値 +1 + 効果範囲拡大 を反映
+# CLI: py scripts/pcb_balance_sim.py --maxed で MAXED_DUPES=True
+MAXED_DUPES = '--maxed' in sys.argv
+_EFFECT_RANGE_EXPAND = {
+    'self_lane': 'adjacent_lanes',
+    'adjacent_lanes': 'all_lanes',
+    'opp_self_lane': 'all_opp_lanes',
 }
 
 # ===== ゲームエンジン (簡易版) =====
@@ -191,6 +236,20 @@ class Card:
         self.faction = src.get('faction', '?')
         self.effect = src.get('effect', {})
         self.effectText = src.get('effectText', '')
+        self._isToken = src.get('_isToken', False)
+        # 完凸 sim: 凸 MAX 状態を反映 (各凸 +1 ﾎﾟﾜｰ + cost-1 + onPlay 効果値 +1 + 範囲拡大)
+        if MAXED_DUPES and not self._isToken:
+            max_d = MAX_DUPS.get(self.tier, 0)
+            if max_d > 0:
+                self.basePower += max_d
+                self.cost = max(1, self.cost - 1)
+                if self.effect:
+                    self.effect = dict(self.effect)
+                    if 'power' in self.effect and isinstance(self.effect['power'], (int, float)):
+                        self.effect['power'] += 1
+                    t = self.effect.get('target')
+                    if t in _EFFECT_RANGE_EXPAND:
+                        self.effect['target'] = _EFFECT_RANGE_EXPAND[t]
         self._currentPower = None
         self._appliedTo = []
         self._frozen = 0
@@ -200,7 +259,6 @@ class Card:
         self._growthEnabled = False
         self._golden = 0
         self._costReduced = 0
-        self._isToken = src.get('_isToken', False)
 
     @classmethod
     def from_dict(cls, d):
@@ -538,7 +596,8 @@ def show_deck_compositions():
 show_deck_compositions()
 print()
 print("=" * 90)
-print("📊 PCB バランス sim — 各デッキ vs 各 AI 段階 (各 50戦、 Master AI)")
+mode_label = "完凸 (各凸 +1 + ｺｽﾄ-1 + 効果値+1 + 範囲拡大)" if MAXED_DUPES else "基礎ﾊﾟﾜｰ (dupes=0)"
+print(f"📊 PCB バランス sim [{mode_label}] — 各デッキ vs 各 AI 段階 (各 50戦、 Master AI)")
 print("=" * 90)
 print()
 deck_names = list(DECK_PATTERNS.keys())

@@ -45,6 +45,13 @@ const CHAPTER_RELEASE = {
 };
 function isChapterReleased(ch) {
   if (!ch || !CHAPTER_RELEASE.hasOwnProperty(ch)) return true;
+  // dev preview (dev.prismaera.pages.dev) では releaseDate を bypass、 全章キャラ + コンボ + レーン効果 解放
+  // 野沢さん要望 2026-05-06: dev で実物見ながら s1c5 PCB のフィードバックを送れるように
+  if (typeof location !== 'undefined' && location.hostname &&
+      (location.hostname.startsWith('dev.') || location.hostname === 'localhost' ||
+       location.hostname === '127.0.0.1')) {
+    return true;
+  }
   return Date.now() >= CHAPTER_RELEASE[ch];
 }
 
@@ -74,9 +81,181 @@ const FACTION_COLORS = {
 };
 function factionColor(f) { return FACTION_COLORS[f] || '#aaa'; }
 
-// ===== BGM (1曲ループ、 ミュート localStorage 保存) =====
+// ============================================================
+// Firebase Cloud Sync (PCB データを アカウント依存化、 野沢さん指示 2026-05-06
+// 「PCBでアカウント依存で良いものは1つもありません」)
+// 全 PCB データ (stats / decks / activeSlot / history / paused / bo3Toggle / bgmMute)
+// を Firebase RTDB の pcbData/{uid}/ に保存。 localStorage は migration + offline fallback のみ。
+// ============================================================
+const PCB_FB_CONFIG = {
+  apiKey: "AIzaSyBFSjOheMb_epwOXCjviAA_FLQFPNiED6g",
+  authDomain: "task-board-fbf1e.firebaseapp.com",
+  databaseURL: "https://task-board-fbf1e-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "task-board-fbf1e",
+  storageBucket: "task-board-fbf1e.firebasestorage.app",
+  messagingSenderId: "174442724697",
+  appId: "1:174442724697:web:06ac83b275780717c06048"
+};
+let cgFbApp = null, cgFbAuth = null, cgFbDb = null, cgUid = null;
+const pcbCloud = {
+  loaded: false,
+  stats: {},
+  decks: {},          // { 1: [ids], 2: [ids], 3: [ids] }
+  activeSlot: 1,
+  history: [],
+  paused: null,
+  bo3Toggle: false,
+  bgmMute: false,
+};
+
+function pcbInitFirebase() {
+  try {
+    if (typeof firebase === 'undefined') return;
+    // 本体 (script.js) と同じ instance 名 'prism-gacha' を 使用、 同 origin で
+    // Firebase Auth state を共有 (indexedDB persistence は apiKey 単位だが 念のため統一)
+    cgFbApp = firebase.initializeApp(PCB_FB_CONFIG, 'prism-gacha');
+    cgFbAuth = cgFbApp.auth();
+    cgFbDb = cgFbApp.database();
+    cgFbAuth.onAuthStateChanged(user => {
+      cgUid = user ? user.uid : null;
+      if (cgUid) {
+        pcbCloudInit();
+      } else {
+        pcbCloud.loaded = false;
+      }
+      _refreshAccountGate();
+    });
+  } catch (e) { console.warn('PCB Firebase init failed:', e); }
+}
+
+async function _pcbGet(path) {
+  if (!cgUid || !cgFbDb) return null;
+  try {
+    const snap = await cgFbDb.ref(`pcbData/${cgUid}/${path}`).once('value');
+    return snap.val();
+  } catch (e) { return null; }
+}
+function _pcbSet(path, value) {
+  if (!cgUid || !cgFbDb) return;
+  try { cgFbDb.ref(`pcbData/${cgUid}/${path}`).set(value); } catch (e) {}
+}
+
+async function pcbCloudInit() {
+  // Cloud から全データロード
+  const [stats, decks, activeSlot, history, paused, bo3Toggle, bgmMute] = await Promise.all([
+    _pcbGet('stats'), _pcbGet('decks'), _pcbGet('activeSlot'),
+    _pcbGet('history'), _pcbGet('paused'), _pcbGet('bo3Toggle'), _pcbGet('bgmMute'),
+  ]);
+  pcbCloud.stats      = stats || {};
+  pcbCloud.decks      = decks || {};
+  pcbCloud.activeSlot = activeSlot || 1;
+  pcbCloud.history    = Array.isArray(history) ? history : [];
+  pcbCloud.paused     = paused || null;
+  pcbCloud.bo3Toggle  = bo3Toggle === true;
+  pcbCloud.bgmMute    = bgmMute === true;
+  pcbCloud.loaded     = true;
+  // localStorage の既存データ migration (Cloud が空 + localStorage に既存データ → Cloud に移行)
+  pcbMigrateFromLocalStorage();
+  // UI 再描画
+  if (cgBgm) cgBgm.muted = pcbCloud.bgmMute;
+  updateMuteUI();
+  if (typeof _renderHomeStats === 'function') _renderHomeStats();
+  if (typeof _renderHomeStreaks === 'function') _renderHomeStreaks();
+  if (typeof _renderHomeDeckPreview === 'function') _renderHomeDeckPreview();
+  // BO3 toggle UI
+  const bo3El = document.getElementById('bo3-toggle');
+  if (bo3El) bo3El.checked = pcbCloud.bo3Toggle;
+}
+
+function pcbMigrateFromLocalStorage() {
+  try {
+    // stats
+    const lsStatsRaw = localStorage.getItem('prism-pcb-stats');
+    if (lsStatsRaw && !pcbCloud.stats.totalMatches) {
+      const lsStats = JSON.parse(lsStatsRaw);
+      if (lsStats && lsStats.totalMatches) {
+        pcbCloud.stats = lsStats;
+        _pcbSet('stats', lsStats);
+      }
+    }
+    // history
+    const lsHistRaw = localStorage.getItem('prism-pcb-history');
+    if (lsHistRaw && pcbCloud.history.length === 0) {
+      const lsHist = JSON.parse(lsHistRaw);
+      if (Array.isArray(lsHist) && lsHist.length) {
+        pcbCloud.history = lsHist;
+        _pcbSet('history', lsHist);
+      }
+    }
+    // decks (3 slots)
+    for (const n of [1, 2, 3]) {
+      if (pcbCloud.decks[n]) continue;
+      const raw = localStorage.getItem(`cg_deck_v2_slot${n}`);
+      if (raw) {
+        try {
+          const ids = JSON.parse(raw);
+          if (Array.isArray(ids)) {
+            pcbCloud.decks[n] = ids;
+            _pcbSet(`decks/${n}`, ids);
+          }
+        } catch (e) {}
+      }
+    }
+    // activeSlot
+    const lsActive = parseInt(localStorage.getItem('cg_deck_active_slot') || '1', 10);
+    if (lsActive >= 1 && lsActive <= 3 && pcbCloud.activeSlot === 1 && lsActive !== 1) {
+      pcbCloud.activeSlot = lsActive;
+      _pcbSet('activeSlot', lsActive);
+    }
+    // paused
+    const lsPaused = localStorage.getItem('prism-pcb-paused');
+    if (lsPaused && !pcbCloud.paused) {
+      try { pcbCloud.paused = JSON.parse(lsPaused); _pcbSet('paused', pcbCloud.paused); } catch (e) {}
+    }
+    // bo3 toggle (旧 lsKey 'cg_bo3' or 'cg_bo3_mode')
+    const lsBo3 = localStorage.getItem('cg_bo3') || localStorage.getItem('cg_bo3_mode');
+    if (lsBo3 === '1' && !pcbCloud.bo3Toggle) {
+      pcbCloud.bo3Toggle = true;
+      _pcbSet('bo3Toggle', true);
+    }
+    // bgmMute
+    const lsMute = localStorage.getItem('cg_bgm_muted');
+    if (lsMute === '1' && !pcbCloud.bgmMute) {
+      pcbCloud.bgmMute = true;
+      _pcbSet('bgmMute', true);
+    }
+  } catch (e) {}
+}
+
+// アカウント未ログイン時のゲート (PCB はアカウント登録者限定 — 野沢さん方針)
+function _refreshAccountGate() {
+  const screen = document.getElementById('home-screen');
+  if (!screen) return;
+  // ログイン済みなら gate 表示なし、 未ログインなら 警告 + ボタン無効化
+  let gate = document.getElementById('cg-account-gate');
+  if (cgUid) {
+    if (gate) gate.hidden = true;
+    screen.querySelectorAll('.cg-mode-btn').forEach(b => b.disabled = false);
+    return;
+  }
+  if (!gate) {
+    gate = document.createElement('div');
+    gate.id = 'cg-account-gate';
+    gate.className = 'cg-account-gate';
+    gate.innerHTML = `
+      <div class="cg-gate-icon">🔒</div>
+      <div class="cg-gate-title">アカウント登録が必要です</div>
+      <div class="cg-gate-sub">PCB の戦績・デッキ編成は アカウント に紐づいて保存されます。<br>本体 (Prismaera) でアカウント登録 (nickname + 合言葉) してから プレイしてください。</div>
+      <a class="cg-gate-link" href="/">← 本体に戻ってログイン</a>
+    `;
+    screen.insertBefore(gate, screen.firstChild);
+  }
+  gate.hidden = false;
+  screen.querySelectorAll('.cg-mode-btn').forEach(b => b.disabled = true);
+}
+
+// ===== BGM (1曲ループ、 ミュート Cloud 保存) =====
 const BGM_URL = '/assets/bgm/prism-cards.mp3';
-const BGM_MUTE_KEY = 'cg_bgm_muted';
 let cgBgm = null;
 
 // スマホ電池対策: タブ非アクティブ時に BGM 停止 (visibilitychange)
@@ -97,8 +276,8 @@ function initBgm() {
   cgBgm.preload = 'auto';
   // 初回 load エラーは握り潰す (BGM ファイル未配備時のフォールバック)
   cgBgm.addEventListener('error', () => { /* BGM ファイル無し時の silent fail */ });
-  const muted = localStorage.getItem(BGM_MUTE_KEY) === '1';
-  cgBgm.muted = muted;
+  // mute 初期値: pcbCloud (ロード済なら) → デフォルト false
+  cgBgm.muted = pcbCloud.loaded ? pcbCloud.bgmMute : false;
   updateMuteUI();
   // ブラウザ自動再生規制対策: 最初のユーザー interact で play 試行
   const tryPlay = () => {
@@ -114,7 +293,8 @@ function initBgm() {
 function toggleBgmMute() {
   if (!cgBgm) return;
   cgBgm.muted = !cgBgm.muted;
-  localStorage.setItem(BGM_MUTE_KEY, cgBgm.muted ? '1' : '0');
+  pcbCloud.bgmMute = cgBgm.muted;
+  _pcbSet('bgmMute', cgBgm.muted);
   updateMuteUI();
   if (!cgBgm.muted && cgBgm.paused) {
     cgBgm.play().catch(() => {});
@@ -141,11 +321,11 @@ function updateMuteUI() {
 // 優先順位: cards.json (手書き完全override) > effects_override.json (effect+effectText のみ) > pool.json (default)
 async function loadMasters() {
   const [c, k, l, p, eo] = await Promise.all([
-    fetch('./cards.json?v=1.4.4').then(r => r.json()),
-    fetch('./combos.json?v=1.4.4').then(r => r.json()),
-    fetch('./lane_effects.json?v=1.4.4').then(r => r.json()),
-    fetch('./data/pool.json?v=1.4.4').then(r => r.json()).catch(() => []),
-    fetch('./effects_override.json?v=1.4.4').then(r => r.json()).catch(() => ({})),
+    fetch('./cards.json?v=1.4.4az').then(r => r.json()),
+    fetch('./combos.json?v=1.4.4az').then(r => r.json()),
+    fetch('./lane_effects.json?v=1.4.4az').then(r => r.json()),
+    fetch('./data/pool.json?v=1.4.4az').then(r => r.json()).catch(() => []),
+    fetch('./effects_override.json?v=1.4.4az').then(r => r.json()).catch(() => ({})),
   ]);
   // pool 全カード ← effects_override で effect/effectText を上書き ← cards.json で完全 override
   const cardsByName = new Map();
@@ -173,11 +353,9 @@ async function loadMasters() {
   applyUserDupes();
 }
 
-// ===== P-5: デッキ管理 (3スロット、 localStorage 永続化、 12枚) =====
+// ===== P-5: デッキ管理 (3スロット、 Firebase Cloud 永続化、 12枚) =====
 const DECK_SIZE = 12;
 const DECK_SLOT_COUNT = 3;
-const DECK_SLOT_KEY = (n) => `cg_deck_v2_slot${n}`;
-const ACTIVE_SLOT_KEY = 'cg_deck_active_slot';
 // 本体 Prismaera の MAX_DUPS と同期 (script.js 692)
 const MAX_DUPS = { R: 1, SR: 2, SSR: 3, UR: 4, LR: 4 };
 // 野沢さん指示 2026-05-05: LR/UR デッキ枚数制限 (高 tier 偏重を防ぐ)
@@ -194,22 +372,23 @@ function _countByTier(deckIds, targetTier) {
 }
 
 function getActiveSlot() {
-  const v = parseInt(localStorage.getItem(ACTIVE_SLOT_KEY) || '1', 10);
+  const v = pcbCloud.activeSlot || 1;
   return v >= 1 && v <= DECK_SLOT_COUNT ? v : 1;
 }
 function setActiveSlot(n) {
-  if (n >= 1 && n <= DECK_SLOT_COUNT) localStorage.setItem(ACTIVE_SLOT_KEY, String(n));
+  if (n >= 1 && n <= DECK_SLOT_COUNT) {
+    pcbCloud.activeSlot = n;
+    _pcbSet('activeSlot', n);
+  }
 }
 function loadDeckSlot(n) {
-  try {
-    const raw = localStorage.getItem(DECK_SLOT_KEY(n));
-    if (!raw) return null;
-    const ids = JSON.parse(raw);
-    return Array.isArray(ids) ? ids : null;
-  } catch (e) { return null; }
+  const ids = pcbCloud.decks ? pcbCloud.decks[n] : null;
+  return Array.isArray(ids) ? ids : null;
 }
 function saveDeckSlot(n, ids) {
-  localStorage.setItem(DECK_SLOT_KEY(n), JSON.stringify(ids));
+  if (!pcbCloud.decks) pcbCloud.decks = {};
+  pcbCloud.decks[n] = ids;
+  _pcbSet(`decks/${n}`, ids);
 }
 
 // 現在使用するデッキ (= active slot)
@@ -479,13 +658,13 @@ async function drawTurnStart() {
 }
 
 // ===== Power 計算 (派閥シナジー / レーン効果 / コンボ / 凸数 を毎回動的) =====
-// 凸 0 = +0、 凸 半分以上 = +1、 凸 MAX = +2 (DESIGN 4.3 段階パターン簡易版)
+// 凸数毎に +1 ﾊﾟﾜｰ加算 (野沢さん指示 2026-05-06、 各凸段階で +1 ずつ強化)
+// 高レアほど max 凸数が多い (R=1, SR=2, SSR=3, UR=4, LR=4) → MAX 凸時のボーナスも大きい:
+//   R MAX = +1 / SR MAX = +2 / SSR MAX = +3 / UR/LR MAX = +4
+// 旧仕様 (0凸/half/MAX = +0/+1/+2) では SSR 以上で 1凸/3凸 が 前段階と同じで段階雑だった事故対策
 function dupeBonusOf(card) {
   const max = MAX_DUPS[card.tier] || 0;
-  if (max === 0 || (card.dupes || 0) === 0) return 0;
-  if (card.dupes >= max) return 2;
-  if (card.dupes >= Math.ceil(max / 2)) return 1;
-  return 0;
+  return Math.min(card.dupes || 0, max);
 }
 function laneEffectFor(card, lane) {
   const e = state.laneEffects[lane];
@@ -977,6 +1156,97 @@ function showCardDetail(card, context, handIdx) {
 }
 function closeCharDetail() { $('#char-detail-modal').hidden = true; _setBodyModalOpen(); }
 
+// ===== 📗 ルールブック (野沢さん指示 2026-05-06、 ホーム/バトル両方からアクセス) =====
+let _rulebookTab = 'basic';
+function openRulebook() {
+  const m = document.getElementById('rulebook-modal');
+  if (!m) return;
+  m.hidden = false;
+  _setBodyModalOpen();
+  _rulebookTab = 'basic';
+  _renderRulebook();
+}
+function closeRulebook() {
+  const m = document.getElementById('rulebook-modal');
+  if (!m) return;
+  m.hidden = true;
+  _setBodyModalOpen();
+}
+function _renderRulebook() {
+  const tabs = document.querySelectorAll('#rulebook-modal .cg-rulebook-tab');
+  tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === _rulebookTab));
+  tabs.forEach(t => t.addEventListener('click', () => {
+    _rulebookTab = t.dataset.tab; _renderRulebook();
+  }, { once: true }));  // 1度だけ bind (再呼出で再 register)
+  const body = document.getElementById('rulebook-body');
+  if (!body) return;
+  if (_rulebookTab === 'basic') {
+    body.innerHTML = `
+      <div class="cg-rb-section">
+        <h3>📜 基本ルール</h3>
+        <ul class="cg-rb-list">
+          <li><b>盤面</b>: 3レーン × 各最大4枠、 自陣 / 敵陣 の 2段</li>
+          <li><b>ターン</b>: 全 6 ターン、 各ターン コスト=ターン数 (T1=1, T6=6) を消費して カードを配置</li>
+          <li><b>勝敗</b>: ターン6 終了時、 各レーンの power 合計を比較 → 勝ったレーン数で勝敗を決定</li>
+          <li><b>引分</b>: 勝ちレーン数が同じ場合は引分</li>
+          <li><b>マリガン</b>: T1 で 1度だけ手札を引き直し可能</li>
+          <li><b>BO3</b>: 先攻 → 後攻 → ランダム の 3本勝負、 2本先取で勝利</li>
+          <li><b>デッキ</b>: 12枚、 LR 1枚 / UR 3枚まで、 同名禁止</li>
+        </ul>
+      </div>`;
+  } else if (_rulebookTab === 'lane') {
+    const lanes = (state && state.laneEffectsAll) || [];
+    const allLanes = lanes.length > 0 ? lanes : [];
+    body.innerHTML = `
+      <div class="cg-rb-section">
+        <h3>🌟 フィールド効果一覧 (${allLanes.length}種)</h3>
+        <div class="cg-rb-detail">毎試合、 3レーン に ランダムで 1つずつ配置されます。 配置中のフィールドはバトル画面の レーン上部に表示。</div>
+        <ul class="cg-rb-list">
+          ${allLanes.map(e => `<li><span class="cg-rb-lane-icon">${e.icon}</span> <b>${e.name}</b> — ${e.description}</li>`).join('')}
+        </ul>
+      </div>`;
+  } else if (_rulebookTab === 'buff') {
+    body.innerHTML = `
+      <div class="cg-rb-section">
+        <h3>🔮 バフ・デバフ効果一覧</h3>
+        <div class="cg-rb-detail">カード固有効果で 自軍/敵軍 の状態を変える。 効果は 各カードの 効果文 に明記。</div>
+        <ul class="cg-rb-list">
+          <li><span class="cg-rb-tag tag-buff">+1〜N</span> <b>パワー強化</b>: 対象レーンの power を 一定値 加算 (永続)</li>
+          <li><span class="cg-rb-tag tag-buff">🌱 成長</span> <b>毎T +1</b>: 自身の power が 毎ターン +1 累積、 退場まで持続</li>
+          <li><span class="cg-rb-tag tag-buff">✨ 黄金化</span> <b>パワー倍化</b>: 自レーンの自軍 power 1.5倍 に強化</li>
+          <li><span class="cg-rb-tag tag-buff">🌀 常時オーラ</span> <b>レーン全体に効果</b>: 自レーン全員 +N (例: ヒノオウ「焔王の威光」)</li>
+          <li><span class="cg-rb-tag tag-buff">💴 コスト減</span> <b>手札の最高 Cost を -N</b>: 1試合 1回限定 (例: ネプテア「青の祈り」)</li>
+          <li><span class="cg-rb-tag tag-buff">📞 トークン召喚</span> <b>使い捨ての小型ユニット</b>: 自レーンに 基礎パワーのみのトークン1枚生成</li>
+          <li><span class="cg-rb-tag tag-debuff">-1〜N</span> <b>パワー減衰</b>: 対象レーンの power を 一定値 減算 (永続)</li>
+          <li><span class="cg-rb-tag tag-debuff">❄️ 凍結</span> <b>1Tパワー0</b>: 1ターン パワー0 で 固定、 効果も無効</li>
+          <li><span class="cg-rb-tag tag-debuff">🔇 沈黙</span> <b>効果無効</b>: 対象カードの onPlay 効果 / オーラ / 成長を 完全無効化 (永続)</li>
+          <li><span class="cg-rb-tag tag-debuff">🌫 ステルス</span> <b>1T 指定不可</b>: 1ターン 相手のデバフ対象に選ばれない (自身付与)</li>
+          <li><span class="cg-rb-tag tag-debuff">🌑 威圧オーラ</span> <b>相手レーンに -N</b>: 相手 同レーン全員 -N (例: グレイル「凍土の威圧」)</li>
+        </ul>
+      </div>`;
+  } else if (_rulebookTab === 'dupe') {
+    body.innerHTML = `
+      <div class="cg-rb-section">
+        <h3>🃏 凸システム (各凸 +1 ﾊﾟﾜｰ)</h3>
+        <div class="cg-rb-detail">同名キャラを ガチャで重複入手すると 凸数が 1ずつ増える。 高レアほど MAX 凸数が多く、 ﾎﾞｰﾅｽも大きい。</div>
+        <table class="cg-rb-dupe-table">
+          <thead><tr><th>レア度</th><th>0凸</th><th>1凸</th><th>2凸</th><th>3凸</th><th>4凸 (MAX)</th></tr></thead>
+          <tbody>
+            <tr><td><b>R</b></td><td>+0</td><td>+1 (MAX)</td><td>—</td><td>—</td><td>—</td></tr>
+            <tr><td><b>SR</b></td><td>+0</td><td>+1</td><td>+2 (MAX)</td><td>—</td><td>—</td></tr>
+            <tr><td><b>SSR</b></td><td>+0</td><td>+1</td><td>+2</td><td>+3 (MAX)</td><td>—</td></tr>
+            <tr><td><b>UR</b></td><td>+0</td><td>+1</td><td>+2</td><td>+3</td><td>+4 (MAX)</td></tr>
+            <tr><td><b>LR</b></td><td>+0</td><td>+1</td><td>+2</td><td>+3</td><td>+4 (MAX)</td></tr>
+          </tbody>
+        </table>
+        <ul class="cg-rb-list" style="margin-top:14px">
+          <li><b>半分凸以上</b>: onPlay 効果値 +1 (例: 元 +2 → +3)</li>
+          <li><b>MAX 凸</b>: コスト -1 + 効果範囲拡大 (self_lane → adjacent_lanes 等)</li>
+        </ul>
+      </div>`;
+  }
+}
+
 // B-1.B: 状態 badge レンダラ (スマホでも見えるよう カード右側に縦積み、 タップで詳細)
 function _renderStatusBadges(card) {
   const badges = [];
@@ -1011,11 +1281,16 @@ function _renderDupeStageTable(card) {
     return;
   }
   wrap.style.display = '';
-  const half = Math.ceil(max / 2);
-  // 段階定義: 0 / half / max。 R は max=1 なので half=max=1 → 2段階に集約
-  const stages = max === 1
-    ? [{ label: '凸 0', dupes: 0 }, { label: 'MAX 凸 (+1)', dupes: 1 }]
-    : [{ label: '凸 0', dupes: 0 }, { label: `+${half} 凸 (半分)`, dupes: half }, { label: `MAX 凸 (+${max})`, dupes: max }];
+  // 全段階表示 (野沢さん指示 2026-05-06、 0凸〜MAX 凸の各段階で ﾊﾟﾜｰ +1 を見やすく)
+  const stages = [];
+  for (let d = 0; d <= max; d++) {
+    const isMax = d === max;
+    const isHalf = !isMax && d >= Math.ceil(max / 2);
+    let suffix = '';
+    if (isMax) suffix = ' (MAX)';
+    else if (isHalf) suffix = ' (効果+1)';
+    stages.push({ label: `${d}凸${suffix}`, dupes: d });
+  }
   const curDupes = card.dupes || 0;
   const fakeCardAt = (d) => ({ ...card, dupes: d });
   wrap.innerHTML = `<h3 class="cg-dupe-stage-title">📊 凸毎の効果</h3>
@@ -1031,7 +1306,7 @@ function _renderDupeStageTable(card) {
           const tp = card.basePower + bonus;
           const ec = effectiveCost(fc);
           const effDesc = _describeEffect(fc);
-          const isCur = curDupes === s.dupes || (s.dupes === max && curDupes >= max) || (s.dupes === half && curDupes >= half && curDupes < max);
+          const isCur = curDupes === s.dupes;
           return `<tr class="${isCur ? 'cg-dupe-stage-current' : ''}">
             <td>${s.label}${isCur ? ' <span class="cg-dupe-stage-cur-mark">◀現在</span>' : ''}</td>
             <td>${bonus > 0 ? `${card.basePower}+${bonus}=<b>${tp}</b>` : `<b>${tp}</b>`}</td>
@@ -1723,36 +1998,156 @@ function placeAICard(handIdx, lane) {
   }, 10);
 }
 
-// ===== PCB プレイ履歴 (localStorage 蓄積、 本体側で Firebase 同期、 admin で表示) =====
-const PCB_STATS_KEY = 'prism-pcb-stats';
-const PCB_HISTORY_KEY = 'prism-pcb-history';
+// ===== PCB プレイ履歴 (Firebase Cloud 蓄積、 アカウント依存) =====
 const PCB_HISTORY_MAX = 50;
+
+// AI レベル別 連勝数 (ホームの各 AI モードボタンに表示)
+function _streakForDiff(diff) {
+  const hist = pcbCloud.history || [];
+  let streak = 0;
+  for (const h of hist) {
+    if (h.difficulty !== diff) continue;
+    if (h.result === 'win') streak++;
+    else break;
+  }
+  return streak;
+}
+function _renderHomeStreaks() {
+  const screen = document.getElementById('home-screen');
+  if (!screen) return;
+  ['easy', 'normal', 'hard', 'master'].forEach(diff => {
+    const el = screen.querySelector(`[data-streak="${diff}"]`);
+    if (!el) return;
+    const n = _streakForDiff(diff);
+    if (n >= 2) {
+      el.textContent = `🔥 ${n}連勝中`;
+      el.hidden = false;
+    } else {
+      el.hidden = true;
+    }
+  });
+}
+
+// ホーム 使用中デッキプレビュー + 性能ヒント (野沢さん指示 2026-05-06、 案2 + 案4)
+function _renderHomeDeckPreview() {
+  const previewEl = document.getElementById('cg-deck-preview');
+  const hintEl = document.getElementById('cg-deck-hint');
+  if (!previewEl || !hintEl) return;
+  if (!state || !state.allCards || state.allCards.length === 0) {
+    hintEl.textContent = '読込中…';
+    previewEl.innerHTML = '';
+    return;
+  }
+  let deck;
+  try { deck = getCurrentDeck(); } catch (e) { deck = []; }
+  if (!deck || deck.length === 0) {
+    hintEl.textContent = 'デッキ未設定';
+    previewEl.innerHTML = '';
+    return;
+  }
+  // 12 サムネ表示 (tier クラス + 凸マーク)
+  const dups = (typeof getUserDupCounts === 'function') ? getUserDupCounts() : {};
+  previewEl.innerHTML = deck.map(c => {
+    const dup = dups[c.name] || 0;
+    const dupBadge = dup > 0 ? `<span class="cg-preview-dup">+${dup}</span>` : '';
+    const img = c.img ? `..${c.img}` : '';
+    return `<div class="cg-preview-card cg-tier-${(c.tier || '').toLowerCase()}" title="${c.name} (${c.tier} ${c.cost}/${c.basePower})">
+      <img src="${img}" alt="${c.name}" loading="lazy">
+      ${dupBadge}
+    </div>`;
+  }).join('');
+  // 性能ヒント計算
+  const facCount = {};
+  deck.forEach(c => {
+    const f = c.faction || '無所属';
+    facCount[f] = (facCount[f] || 0) + 1;
+  });
+  const sortedFac = Object.entries(facCount).sort((a, b) => b[1] - a[1]);
+  const topFac = sortedFac[0];
+  const topFacName = topFac ? topFac[0] : '無所属';
+  const topFacCount = topFac ? topFac[1] : 0;
+  // コンボ数 (デッキ12枚で揃うコンボ)
+  const deckNames = new Set(deck.map(c => c.name));
+  const combos = (state && state.combos) || [];
+  const matchedCombos = combos.filter(co =>
+    Array.isArray(co.chars) && co.chars.every(n => deckNames.has(n))
+  ).length;
+  // 派閥数
+  const facCountTotal = Object.keys(facCount).length;
+  // ヒント文 組み立て
+  let typeLabel;
+  if (topFacCount >= 6) typeLabel = `${topFacName} 特化型`;
+  else if (topFacCount >= 4) typeLabel = `${topFacName} 主軸型`;
+  else if (facCountTotal >= 5) typeLabel = `多派閥バランス型`;
+  else typeLabel = `${topFacName} 寄り混合型`;
+  hintEl.textContent = `🎯 ${typeLabel} / コンボ ${matchedCombos}個 / 派閥 ${facCountTotal}種`;
+}
+
+// ホーム 戦績ダッシュボード + 🏆 ポイント (Cloud)
+function _renderHomeStats() {
+  const stats = pcbCloud.stats || {};
+  const m = document.getElementById('cg-stat-matches');
+  const w = document.getElementById('cg-stat-winrate');
+  const p = document.getElementById('cg-stat-points');
+  const total = stats.totalMatches || 0;
+  const wins = stats.wins || 0;
+  const wr = total > 0 ? Math.round(wins / total * 100) : 0;
+  if (m) m.textContent = String(total);
+  if (w) w.textContent = total > 0 ? `${wr}%` : '-%';
+  if (p) p.textContent = String(stats.pcbPoints || 0);
+}
+
+// ショップ modal (Phase 1 = 近日公開、 Phase 2 で 実装予定、 野沢さん指示 2026-05-06)
+function openShop() {
+  const m = document.getElementById('shop-modal');
+  if (!m) return;
+  m.hidden = false;
+  _setBodyModalOpen();
+  // 所持ポイント反映 (Cloud)
+  const stats = pcbCloud.stats || {};
+  const el = document.getElementById('shop-points');
+  if (el) el.textContent = String(stats.pcbPoints || 0);
+}
+function closeShop() {
+  const m = document.getElementById('shop-modal');
+  if (!m) return;
+  m.hidden = true;
+  _setBodyModalOpen();
+}
+
+// AI レベル別 ポイント (野沢さん指示 2026-05-06、 アカウント単位累積、 ショップで使用)
+const PCB_POINTS_BY_DIFF = { easy: 1, normal: 2, hard: 4, master: 8 };
+const PCB_POINTS_BO3_BONUS = 5;
+
 function _logPcbMatch(result, difficulty, isBO3, scoreMe, scoreOpp) {
   // result: 'win' | 'loss' | 'draw' | 'pause' (PvE 中断は記録しない)
   if (result === 'pause') return;
-  try {
-    const stats = JSON.parse(localStorage.getItem(PCB_STATS_KEY) || '{}');
-    stats.totalMatches = (stats.totalMatches || 0) + 1;
-    stats.wins = (stats.wins || 0) + (result === 'win' ? 1 : 0);
-    stats.losses = (stats.losses || 0) + (result === 'loss' ? 1 : 0);
-    stats.draws = (stats.draws || 0) + (result === 'draw' ? 1 : 0);
-    stats.byDifficulty = stats.byDifficulty || {};
-    stats.byDifficulty[difficulty] = stats.byDifficulty[difficulty] || { matches: 0, wins: 0, losses: 0, draws: 0 };
-    stats.byDifficulty[difficulty].matches += 1;
-    stats.byDifficulty[difficulty][result === 'win' ? 'wins' : (result === 'loss' ? 'losses' : 'draws')] += 1;
-    if (isBO3) stats.bo3Matches = (stats.bo3Matches || 0) + 1;
-    stats.lastPlayedAt = Date.now();
-    localStorage.setItem(PCB_STATS_KEY, JSON.stringify(stats));
-    // 直近 50 試合の履歴
-    const history = JSON.parse(localStorage.getItem(PCB_HISTORY_KEY) || '[]');
-    history.unshift({
-      ts: Date.now(), result, difficulty, isBO3,
-      scoreMe, scoreOpp,
-      firstMover: state.firstMover,
-    });
-    if (history.length > PCB_HISTORY_MAX) history.length = PCB_HISTORY_MAX;
-    localStorage.setItem(PCB_HISTORY_KEY, JSON.stringify(history));
-  } catch (e) { /* localStorage 失敗時は silent */ }
+  const stats = pcbCloud.stats || (pcbCloud.stats = {});
+  stats.totalMatches = (stats.totalMatches || 0) + 1;
+  stats.wins = (stats.wins || 0) + (result === 'win' ? 1 : 0);
+  stats.losses = (stats.losses || 0) + (result === 'loss' ? 1 : 0);
+  stats.draws = (stats.draws || 0) + (result === 'draw' ? 1 : 0);
+  stats.byDifficulty = stats.byDifficulty || {};
+  stats.byDifficulty[difficulty] = stats.byDifficulty[difficulty] || { matches: 0, wins: 0, losses: 0, draws: 0 };
+  stats.byDifficulty[difficulty].matches += 1;
+  stats.byDifficulty[difficulty][result === 'win' ? 'wins' : (result === 'loss' ? 'losses' : 'draws')] += 1;
+  if (isBO3) stats.bo3Matches = (stats.bo3Matches || 0) + 1;
+  stats.lastPlayedAt = Date.now();
+  if (result === 'win') {
+    const baseFor = PCB_POINTS_BY_DIFF[difficulty] || 0;
+    const bonus = isBO3 ? PCB_POINTS_BO3_BONUS : 0;
+    stats.pcbPoints = (stats.pcbPoints || 0) + baseFor + bonus;
+  }
+  _pcbSet('stats', stats);
+  // 直近 50 試合の履歴
+  const history = pcbCloud.history || (pcbCloud.history = []);
+  history.unshift({
+    ts: Date.now(), result, difficulty, isBO3,
+    scoreMe, scoreOpp,
+    firstMover: state.firstMover,
+  });
+  if (history.length > PCB_HISTORY_MAX) history.length = PCB_HISTORY_MAX;
+  _pcbSet('history', history);
 }
 
 // ===== 試合終了 (BO3 series 累積 / 単発リザルト) =====
@@ -1877,6 +2272,10 @@ function backToCardgameHome() {
   $('#match-screen').classList.remove('active');
   $('#home-screen').classList.add('active');
   _setBodyModalOpen();
+  // AI レベル別 連勝数 + 戦績ダッシュボード (野沢さん指示 2026-05-06)
+  if (typeof _renderHomeStreaks === 'function') _renderHomeStreaks();
+  if (typeof _renderHomeStats === 'function') _renderHomeStats();
+  if (typeof _renderHomeDeckPreview === 'function') _renderHomeDeckPreview();
 }
 
 function backToPrismaeraHome() {
@@ -1896,8 +2295,7 @@ function reopenResult() {
   _setBodyModalOpen();
 }
 
-// C-4: PvE 中断 → 復帰 機能 (野沢さん指示 2026-05-05 「中断した後の復帰は?」)
-const PCB_PAUSED_KEY = 'prism-pcb-paused-match';
+// C-4: PvE 中断 → 復帰 機能 (Cloud 保存)
 
 // _appliedTo は循環参照 (target が card refs) なので id-based に変換して serialize 可能化
 function _serializeBoardState() {
@@ -2014,7 +2412,8 @@ function pauseMatch() {
   try {
     const snap = _serializeBoardState();
     snap.savedAt = Date.now();
-    localStorage.setItem(PCB_PAUSED_KEY, JSON.stringify(snap));
+    pcbCloud.paused = snap;
+    _pcbSet('paused', snap);
   } catch (e) {
     console.warn('[pcb] pause save failed', e);
     if (!confirm('保存に失敗しました。 中断データなしで戻りますか?')) return;
@@ -2026,44 +2425,38 @@ function pauseMatch() {
 }
 
 function _hasPausedMatch() {
-  try {
-    const raw = localStorage.getItem(PCB_PAUSED_KEY);
-    if (!raw) return false;
-    const snap = JSON.parse(raw);
-    if (Date.now() - (snap.savedAt || 0) > 24 * 60 * 60 * 1000) {
-      localStorage.removeItem(PCB_PAUSED_KEY);
-      return false;
-    }
-    return true;
-  } catch (e) { return false; }
+  const snap = pcbCloud.paused;
+  if (!snap) return false;
+  if (Date.now() - (snap.savedAt || 0) > 24 * 60 * 60 * 1000) {
+    pcbCloud.paused = null;
+    _pcbSet('paused', null);
+    return false;
+  }
+  return true;
 }
 
 function _getPausedMatchInfo() {
-  try {
-    const snap = JSON.parse(localStorage.getItem(PCB_PAUSED_KEY) || 'null');
-    if (!snap) return null;
-    return {
-      turn: snap.turn, maxTurn: 6,
-      difficulty: snap.difficulty,
-      isBO3: snap.series && snap.series.isBO3,
-      matchNo: snap.series && snap.series.matchNo,
-      savedAt: snap.savedAt,
-    };
-  } catch (e) { return null; }
+  const snap = pcbCloud.paused;
+  if (!snap) return null;
+  return {
+    turn: snap.turn, maxTurn: 6,
+    difficulty: snap.difficulty,
+    isBO3: snap.series && snap.series.isBO3,
+    matchNo: snap.series && snap.series.matchNo,
+    savedAt: snap.savedAt,
+  };
 }
 
 async function resumePausedMatch() {
-  let snap;
-  try {
-    snap = JSON.parse(localStorage.getItem(PCB_PAUSED_KEY) || 'null');
-  } catch (e) { return; }
+  const snap = pcbCloud.paused;
   if (!snap) return;
   if (!state.allCards || state.allCards.length === 0) await loadMasters();
   if (!_deserializeBoardState(snap)) {
     setMessage('中断データの復元に失敗しました', 'alert');
     return;
   }
-  localStorage.removeItem(PCB_PAUSED_KEY);
+  pcbCloud.paused = null;
+  _pcbSet('paused', null);
   $('#home-screen').classList.remove('active');
   $('#match-screen').classList.add('active');
   $('#result-modal').hidden = true;
@@ -2111,7 +2504,8 @@ function _refreshHomeResumeButton() {
   document.getElementById('btn-resume-paused').addEventListener('click', resumePausedMatch);
   document.getElementById('btn-resume-discard').addEventListener('click', () => {
     if (!confirm('中断データを破棄しますか? (再開できなくなります)')) return;
-    localStorage.removeItem(PCB_PAUSED_KEY);
+    pcbCloud.paused = null;
+    _pcbSet('paused', null);
     _refreshHomeResumeButton();
   });
 }
@@ -2167,6 +2561,7 @@ function _renderDeckSlotPicker() {
 
 // 編集モードへ (slot 引数で対象スロット指定)
 function openDeckBuilder(slot) {
+  _deckBuilderState.browseMode = false;
   _deckBuilderState.editSlot = slot || getActiveSlot();
   _loadEditingSlot();
   _deckBuilderState.tierFilter = 'all';
@@ -2184,6 +2579,35 @@ function openDeckBuilder(slot) {
   _updateActiveToggleUI();
   renderDeckBuilderGrid();
   $('#deck-builder-modal').hidden = false;
+  document.body.classList.remove('cg-browse-mode');
+  _setBodyModalOpen();
+}
+
+// キャラ確認モード (野沢さん指示 2026-05-06): 既存 deck-builder-modal を 閲覧専用で開く。
+// +/-ボタン非表示、 「使用中に」 トグル非表示、 タイトル「キャラ一覧」、 カード tap で showCardDetail で能力詳細。
+function openCharBrowse() {
+  _deckBuilderState.browseMode = true;
+  _deckBuilderState.editSlot = 0;  // 0 = 閲覧モード sentinel
+  _deckBuilderState.selected = [];
+  _deckBuilderState.tierFilter = 'all';
+  _deckBuilderState.chapterFilter = 'all';
+  _deckBuilderState.factionFilter = 'all';
+  _deckBuilderState.search = '';
+  _deckBuilderState.ownedOnly = false;
+  $$('#deck-builder-tabs .cg-deck-tab').forEach(t => t.classList.toggle('active', t.dataset.tier === 'all'));
+  $$('#deck-builder-chapter-tabs .cg-deck-tab').forEach(t => t.classList.toggle('active', t.dataset.chapter === 'all'));
+  const search = $('#deck-search-input'); if (search) search.value = '';
+  const fac = $('#deck-faction-filter'); if (fac) fac.value = 'all';
+  const owned = $('#deck-owned-only'); if (owned) owned.checked = false;
+  _populateFactionFilter();
+  // タイトル/header を 閲覧モード表示に
+  const slotNum = $('#deck-builder-slot-num');
+  if (slotNum && slotNum.parentElement) slotNum.parentElement.firstChild.textContent = '📚 キャラ一覧 ';
+  if (slotNum) slotNum.textContent = '';
+  renderDeckBuilderGrid();
+  $('#deck-builder-modal').hidden = false;
+  // body class で +/- ボタン群 + 使用中トグル を CSS で 一括 hide
+  document.body.classList.add('cg-browse-mode');
   _setBodyModalOpen();
 }
 
@@ -2515,17 +2939,23 @@ function onBackClick(e) {
 
 // ===== Init =====
 document.addEventListener('DOMContentLoaded', async () => {
+  pcbInitFirebase();  // Firebase 初期化 (auth state 変化で pcbCloudInit が走る)
+  _refreshAccountGate();  // 未ログイン時の警告 (auth state 確定までは仮表示)
   initBgm();
   _initVisibilityHandler();
   _initLaneEffectPopover();
   await loadMasters();
   _refreshHomeResumeButton();  // 中断中の試合があれば「再開」 ボタンを home に表示
-  // BO3 toggle (localStorage 永続化)
+  if (typeof _renderHomeStreaks === 'function') _renderHomeStreaks();  // AI レベル別 連勝数
+  if (typeof _renderHomeStats === 'function') _renderHomeStats();
+  if (typeof _renderHomeDeckPreview === 'function') _renderHomeDeckPreview();  // 戦績ダッシュボード + ポイント (野沢さん指示 2026-05-06)
+  // BO3 toggle (Cloud 永続化、 アカウント依存)
   const bo3Toggle = document.getElementById('bo3-toggle');
   if (bo3Toggle) {
-    bo3Toggle.checked = localStorage.getItem('cg_bo3') === '1';
+    bo3Toggle.checked = pcbCloud.bo3Toggle === true;
     bo3Toggle.addEventListener('change', () => {
-      localStorage.setItem('cg_bo3', bo3Toggle.checked ? '1' : '0');
+      pcbCloud.bo3Toggle = bo3Toggle.checked;
+      _pcbSet('bo3Toggle', bo3Toggle.checked);
     });
   }
   const getBo3 = () => bo3Toggle && bo3Toggle.checked;
@@ -2535,6 +2965,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('#btn-start-master').addEventListener('click', () => startMatch('master', getBo3()));
   $('#btn-tutorial').addEventListener('click', openTutorial);
   $('#btn-help').addEventListener('click', openHelp);
+  // 📗 ルールブック (バトル中 ヘッダー + ホーム mode-btn の 両方からアクセス、 野沢さん指示 2026-05-06)
+  document.getElementById('btn-rulebook')?.addEventListener('click', openRulebook);
+  document.getElementById('btn-rulebook-home')?.addEventListener('click', openRulebook);
+  // 🛒 ショップ (野沢さん指示 2026-05-06、 Phase 1 = 近日公開 modal)
+  document.getElementById('btn-shop')?.addEventListener('click', openShop);
   $('#btn-undo').addEventListener('click', resetThisTurn);
   $('#btn-combos').addEventListener('click', openCombosModal);
   $('#btn-mulligan').addEventListener('click', mulligan);
@@ -2545,6 +2980,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   // P-5: デッキ編集 (ホームの「デッキ編集」 ボタン → スロット選択)
   const openDeckBtn = document.getElementById('btn-open-deck-builder');
   if (openDeckBtn) openDeckBtn.addEventListener('click', openDeckSlotPicker);
+  // キャラ確認 ボタン (slot-picker-modal の 一番上、 野沢さん指示 2026-05-06)
+  const browseBtn = document.getElementById('btn-open-char-browse');
+  if (browseBtn) browseBtn.addEventListener('click', () => {
+    closeDeckSlotPicker();
+    openCharBrowse();
+  });
   const tabsEl = document.getElementById('deck-builder-tabs');
   if (tabsEl) {
     tabsEl.addEventListener('click', (e) => {
@@ -2599,7 +3040,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-      closeResult(); closeHelp(); closeTutorial(); closeCombosModal(); closeCharDetail(); closeDeckFilter(); closeDeckBuilder();
+      // 最上位 modal を 1つだけ close (野沢さん指示 2026-05-06、 「char-detail Esc で deck-builder
+      // (キャラ一覧) に戻る、 ホームには戻らない」 仕様。 旧実装は全 modal 連鎖 close で バグだった)
+      const isOpen = (id) => {
+        const el = document.getElementById(id);
+        return el && !el.hidden && el.style.display !== 'none';
+      };
+      if (isOpen('result-modal'))         { closeResult(); return; }
+      if (isOpen('cg-help-modal'))        { closeHelp(); return; }
+      if (isOpen('tutorial-modal'))       { closeTutorial(); return; }
+      if (isOpen('rulebook-modal'))       { closeRulebook(); return; }
+      if (isOpen('shop-modal'))           { closeShop(); return; }
+      if (isOpen('combos-modal'))         { closeCombosModal(); return; }
+      if (isOpen('char-detail-modal'))    { closeCharDetail(); return; }
+      if (isOpen('deck-filter-modal'))    { closeDeckFilter(); return; }
+      if (isOpen('deck-builder-modal'))   { closeDeckBuilder(); return; }
+      if (isOpen('deck-slot-picker-modal')) { closeDeckSlotPicker(); return; }
     }
   });
 });
@@ -2616,6 +3072,10 @@ window.closeHelp = closeHelp;
 window.closeTutorial = closeTutorial;
 window.closeCombosModal = closeCombosModal;
 window.closeCharDetail = closeCharDetail;
+window.openRulebook = openRulebook;
+window.closeRulebook = closeRulebook;
+window.openShop = openShop;
+window.closeShop = closeShop;
 window.closeDeckBuilder = closeDeckBuilder;
 window.closeDeckFilter = closeDeckFilter;
 window.closeDeckSlotPicker = closeDeckSlotPicker;

@@ -7,7 +7,10 @@
 <title>PCB | Prismaera Cards Battle</title>
 <link rel="icon" href="/images/icons/icon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
-<link rel="stylesheet" href="./style.css?v=1.4.4">
+<link rel="stylesheet" href="./style.css?v=1.4.4az">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
@@ -19,7 +22,8 @@
   </div>
   <div class="cg-topbar-right">
     <button class="cg-iconbtn" id="btn-cg-mute" aria-label="BGMミュート切替" title="BGM 切替">🔊</button>
-    <button class="cg-iconbtn" id="btn-help" aria-label="ルール" title="ルール">?</button>
+    <button class="cg-iconbtn" id="btn-rulebook" aria-label="ルールブック" title="ルールブック">📗</button>
+    <button class="cg-iconbtn" id="btn-help" aria-label="ヘルプ" title="ヘルプ">?</button>
   </div>
 </header>
 
@@ -31,54 +35,70 @@
     <h1 class="cg-hero-title">PCB</h1>
     <p class="cg-hero-tagline">Prismaera Cards Battle — 虹霊界のキャラと共に、 3レーンの読み合い</p>
   </div>
+  <!-- 戦績ダッシュボード (野沢さん指示 2026-05-06、 累計戦数 + 勝率 + 🏆 ポイント バッジ) -->
+  <div class="cg-stats-row" id="cg-stats-row">
+    <div class="cg-stat-cell"><span class="cg-stat-label">累計</span><span class="cg-stat-val" id="cg-stat-matches">0</span><span class="cg-stat-unit">戦</span></div>
+    <div class="cg-stat-cell"><span class="cg-stat-label">勝率</span><span class="cg-stat-val" id="cg-stat-winrate">-%</span></div>
+    <div class="cg-stat-cell cg-stat-points"><span class="cg-stat-label">🏆 ポイント</span><span class="cg-stat-val" id="cg-stat-points">0</span><span class="cg-stat-unit">pts</span></div>
+  </div>
+
   <div class="cg-bo3-toggle">
     <label class="cg-bo3-label">
       <input type="checkbox" id="bo3-toggle">
       <div class="cg-bo3-text-wrap">
         <span class="cg-bo3-text">🏆 BO3モード</span>
-        <span class="cg-bo3-sub">先攻 → 後攻 → ランダム の3本、 2本先取で勝利</span>
+        <span class="cg-bo3-sub">先攻 → 後攻 → ランダム の3本、 2本先取で勝利 (BO3勝利で +5 ポイント)</span>
       </div>
     </label>
   </div>
 
+  <!-- 使用中デッキ プレビュー + 性能ヒント (野沢さん指示 2026-05-06、 案2 + 案4) -->
   <div class="cg-deck-row">
-    <button type="button" class="cg-deck-btn" id="btn-open-deck-builder">
-      <span class="cg-deck-icon">⚙️</span>
-      <span class="cg-deck-text">
-        <span class="cg-deck-title">デッキ編集</span>
-        <span class="cg-deck-sub" id="deck-builder-sub">12 枚 — デフォルト使用中</span>
-      </span>
-      <span class="cg-deck-arrow">→</span>
-    </button>
+    <div class="cg-deck-card">
+      <button type="button" class="cg-deck-btn" id="btn-open-deck-builder">
+        <span class="cg-deck-icon">⚙️</span>
+        <span class="cg-deck-text">
+          <span class="cg-deck-title">デッキ編集 / キャラ確認</span>
+          <span class="cg-deck-sub" id="deck-builder-sub">12 枚 — デフォルト使用中</span>
+        </span>
+        <span class="cg-deck-arrow">→</span>
+      </button>
+      <div class="cg-deck-hint" id="cg-deck-hint">読込中…</div>
+      <div class="cg-deck-preview" id="cg-deck-preview"></div>
+    </div>
   </div>
 
   <div class="cg-modes">
-    <button class="cg-mode-btn primary" id="btn-start-easy">
+    <button class="cg-mode-btn primary" id="btn-start-easy" data-diff="easy">
       <div class="cg-mode-icon">🌱</div>
       <div class="cg-mode-text">
         <div class="cg-mode-title">AIと対戦 (Easy)</div>
         <div class="cg-mode-sub">ルール体験 / 初心者向け</div>
+        <span class="cg-mode-streak" data-streak="easy" hidden>🔥 0連勝</span>
       </div>
     </button>
-    <button class="cg-mode-btn" id="btn-start-normal">
+    <button class="cg-mode-btn" id="btn-start-normal" data-diff="normal">
       <div class="cg-mode-icon">⚔️</div>
       <div class="cg-mode-text">
         <div class="cg-mode-title">AIと対戦 (Normal)</div>
         <div class="cg-mode-sub">コスト最大化 + 劣勢補強</div>
+        <span class="cg-mode-streak" data-streak="normal" hidden>🔥 0連勝</span>
       </div>
     </button>
-    <button class="cg-mode-btn" id="btn-start-hard">
+    <button class="cg-mode-btn" id="btn-start-hard" data-diff="hard">
       <div class="cg-mode-icon">🔥</div>
       <div class="cg-mode-text">
         <div class="cg-mode-title">AIと対戦 (Hard)</div>
         <div class="cg-mode-sub">派閥シナジー + レーン効果意識</div>
+        <span class="cg-mode-streak" data-streak="hard" hidden>🔥 0連勝</span>
       </div>
     </button>
-    <button class="cg-mode-btn" id="btn-start-master">
+    <button class="cg-mode-btn" id="btn-start-master" data-diff="master">
       <div class="cg-mode-icon">👑</div>
       <div class="cg-mode-text">
         <div class="cg-mode-title">AIと対戦 (Master)</div>
         <div class="cg-mode-sub">1手先まで読む + コンボ評価</div>
+        <span class="cg-mode-streak" data-streak="master" hidden>🔥 0連勝</span>
       </div>
     </button>
     <button class="cg-mode-btn disabled" disabled>
@@ -86,6 +106,20 @@
       <div class="cg-mode-text">
         <div class="cg-mode-title">オンラインPvP</div>
         <div class="cg-mode-sub">準備中</div>
+      </div>
+    </button>
+    <button class="cg-mode-btn secondary" id="btn-shop">
+      <div class="cg-mode-icon">🛒</div>
+      <div class="cg-mode-text">
+        <div class="cg-mode-title">ショップ <span class="cg-mode-badge-soon">近日公開</span></div>
+        <div class="cg-mode-sub">スリーブ / スキン / キャラ衣装 を ポイントで交換</div>
+      </div>
+    </button>
+    <button class="cg-mode-btn secondary" id="btn-rulebook-home">
+      <div class="cg-mode-icon">📗</div>
+      <div class="cg-mode-text">
+        <div class="cg-mode-title">ルールブック</div>
+        <div class="cg-mode-sub">フィールド / バフ・デバフ / 凸システム</div>
       </div>
     </button>
     <button class="cg-mode-btn secondary" id="btn-tutorial">
@@ -207,8 +241,19 @@
   <div class="cg-modal-backdrop" onclick="closeDeckSlotPicker()"></div>
   <div class="cg-modal-card cg-deck-slot-picker-card">
     <button class="cg-modal-close" onclick="closeDeckSlotPicker()" aria-label="閉じる">×</button>
-    <h2 class="cg-modal-title">⚙️ どのデッキを編集?</h2>
-    <p class="cg-modal-detail">3つのデッキスロットから選んで編集します。 「⭐使用中」 が現在対戦で使うデッキです。</p>
+    <h2 class="cg-modal-title">⚙️ デッキ編集 / キャラ確認</h2>
+    <p class="cg-modal-detail">「キャラ確認」 で 全キャラの能力を 閲覧、 「Slot 1〜3」 で デッキを 編集します。</p>
+    <!-- キャラ確認 (一覧) ボタン: 一番上、 デッキに追加せず能力閲覧専用 (野沢さん指示 2026-05-06) -->
+    <div class="cg-deck-slot-picker-browse">
+      <button type="button" class="cg-deck-slot-browse-btn" id="btn-open-char-browse">
+        <span class="cg-deck-slot-browse-icon">📚</span>
+        <div class="cg-deck-slot-browse-text">
+          <div class="cg-deck-slot-browse-title">キャラ確認</div>
+          <div class="cg-deck-slot-browse-sub">全キャラの能力 + コンボを 閲覧</div>
+        </div>
+        <span class="cg-deck-slot-browse-arrow">→</span>
+      </button>
+    </div>
     <div class="cg-deck-slot-picker-list" id="deck-slot-picker-list"></div>
     <div class="cg-modal-actions">
       <button class="cg-btn secondary" onclick="closeDeckSlotPicker()">キャンセル</button>
@@ -273,6 +318,7 @@
         <button type="button" class="cg-deck-tab" data-chapter="s1c2">第2章</button>
         <button type="button" class="cg-deck-tab" data-chapter="s1c3">第3章</button>
         <button type="button" class="cg-deck-tab" data-chapter="s1c4">第4章</button>
+        <button type="button" class="cg-deck-tab" data-chapter="s1c5">第5章</button>
       </div>
     </div>
     <div class="cg-deck-filter-section">
@@ -350,6 +396,46 @@
   </div>
 </div>
 
+<!-- 🛒 ショップ モーダル (野沢さん指示 2026-05-06、 Phase 1 = 近日公開、 Phase 2 で スリーブ販売予定) -->
+<div id="shop-modal" class="cg-modal" hidden>
+  <div class="cg-modal-backdrop" onclick="closeShop()"></div>
+  <div class="cg-modal-card cg-shop-card">
+    <button class="cg-modal-close" onclick="closeShop()" aria-label="閉じる">×</button>
+    <h2 class="cg-modal-title">🛒 ショップ</h2>
+    <div class="cg-shop-points-box">
+      <div class="cg-shop-points-label">🏆 所持ポイント</div>
+      <div class="cg-shop-points-val"><span id="shop-points">0</span> <span class="cg-shop-points-unit">pts</span></div>
+      <div class="cg-shop-points-detail">勝率に応じてポイント獲得 ─ Easy 1pt / Normal 2pt / Hard 4pt / Master 8pt / BO3勝利 +5pt</div>
+    </div>
+    <div class="cg-shop-coming-soon">
+      <div class="cg-shop-coming-icon">🚧</div>
+      <div class="cg-shop-coming-title">準備中 (近日公開)</div>
+      <div class="cg-shop-coming-detail">スリーブ / カード裏面装飾 を 1〜2日後に 販売開始予定。 引き続きポイントを 貯めてお待ちください。</div>
+      <div class="cg-shop-coming-list">
+        <div class="cg-shop-coming-item">🎨 カードスリーブ</div>
+        <div class="cg-shop-coming-item">✨ ホーム背景スキン</div>
+        <div class="cg-shop-coming-item">👗 キャラ衣装</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 📗 ルールブック モーダル (野沢さん指示 2026-05-06、 ホーム + バトル中の両方からアクセス) -->
+<div id="rulebook-modal" class="cg-modal" hidden>
+  <div class="cg-modal-backdrop" onclick="closeRulebook()"></div>
+  <div class="cg-modal-card cg-rulebook-card">
+    <button class="cg-modal-close" onclick="closeRulebook()" aria-label="閉じる">×</button>
+    <h2 class="cg-modal-title">📗 ルールブック</h2>
+    <div class="cg-rulebook-tabs">
+      <button type="button" class="cg-rulebook-tab active" data-tab="basic">📜 基本ルール</button>
+      <button type="button" class="cg-rulebook-tab" data-tab="lane">🌟 フィールド</button>
+      <button type="button" class="cg-rulebook-tab" data-tab="buff">🔮 バフ・デバフ</button>
+      <button type="button" class="cg-rulebook-tab" data-tab="dupe">🃏 凸システム</button>
+    </div>
+    <div class="cg-rulebook-body" id="rulebook-body"></div>
+  </div>
+</div>
+
 <!-- ルールモーダル -->
 <div id="help-modal" class="cg-modal" hidden>
   <div class="cg-modal-backdrop" onclick="closeHelp()"></div>
@@ -409,6 +495,6 @@
   </div>
 </div>
 
-<script src="./script.js?v=1.4.4"></script>
+<script src="./script.js?v=1.4.4az"></script>
 </body>
 </html>

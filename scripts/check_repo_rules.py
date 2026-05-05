@@ -1189,6 +1189,18 @@ def _read_version_at(ref):
     except Exception:
         return None
 
+
+def _read_last_dev_suffix_at(ref):
+    """指定 ref の version.json から lastDevSuffix を読む (案A 連続管理用)。 無ければ ''"""
+    r = subprocess.run(["git", "-C", str(ROOT), "show", f"{ref}:version.json"],
+                       capture_output=True, text=True, encoding="utf-8", errors="replace")
+    if r.returncode != 0 or not r.stdout:
+        return ""
+    try:
+        return json.loads(r.stdout).get("lastDevSuffix", "") or ""
+    except Exception:
+        return ""
+
 def check_dev_version_suffix():
     """ルール7-23 (BLOCKER 2026-05-04): dev branch では version は X.Y.Z または {X.Y.Z}{suffix(a-z+)} 形式必須。
     主バージョン (X.Y.Z) bump は main マージ時のみ、 dev では suffix a/b/c... で進行 (a→z→aa→ab→...)。
@@ -1273,6 +1285,22 @@ def check_dev_suffix_progression():
             )
             return 1
         return 0
+    # 案A 連続管理 (野沢さん指示 2026-05-05): parent commit の version が X.Y.Z で suffix 空、
+    # かつ lastDevSuffix が残っている場合 (緊急 hotfix sed strip 後の同 X.Y.Z 系列継続) は、
+    # lastDevSuffix を seed に increment 期待 (例: par='1.4.4' + lastDevSuffix='h' → cur='1.4.4i')
+    if not par_suffix:
+        parent_last_dev = _read_last_dev_suffix_at("HEAD")
+        if parent_last_dev:
+            expected = _increment_suffix(parent_last_dev)
+            if cur_suffix != expected:
+                violations.append(
+                    f"[ルール7-25 dev suffix 案A 不正増分 BLOCKER] {parent_ver} (lastDevSuffix='{parent_last_dev}') → {cur_ver} は不正。\n"
+                    f"      → 期待: {par_base}{expected} (lastDevSuffix '{parent_last_dev}' を 1段階 increment)\n"
+                    f"      → 案A 連続管理 (緊急 hotfix sed strip 後で 同 X.Y.Z 系列継続時) の挙動。\n"
+                    f"      → bump_version.py dev-suffix で自動進行可能"
+                )
+                return 1
+            return 0
     expected = _increment_suffix(par_suffix or "")
     if cur_suffix != expected:
         violations.append(
@@ -1324,9 +1352,207 @@ def check_cache_buster_format():
                 break  # 同ファイル内の他箇所も同じ問題なので 1 件だけ記録
     return found_violations
 
+def check_img_cache_version_sync():
+    """ルール7-28 (BLOCKER 2026-05-06 野沢さん指示): script.js の IMG_CACHE_VERSION は
+    version.json の version と完全同期 必須。
+    背景: 5/4 の 20260504o から 5/6 までの 5日間 bump 漏れで SW cache が 古版で 404 を キャッシュ → 場所画像/挿絵が反映されない 致命バグが 発生 (s1c5 公開直前)。
+    bump_version.py の update_img_cache_version で 自動同期するが、 念のため commit 時に
+    機械的に検証 (二度と起こさない物理防御)。
+    """
+    ver_path = ROOT / "version.json"
+    script_path = ROOT / "script.js"
+    if not (ver_path.exists() and script_path.exists()):
+        return 0
+    try:
+        ver = json.load(ver_path.open(encoding="utf-8"))["version"]
+    except Exception:
+        return 0
+    text = script_path.read_text(encoding="utf-8")
+    m = re.search(r"const\s+IMG_CACHE_VERSION\s*=\s*'([\w.]+)'", text)
+    if not m:
+        return 0
+    img_ver = m.group(1)
+    if img_ver != ver:
+        violations.append(
+            f"[ルール7-28 IMG_CACHE_VERSION 不一致 BLOCKER] script.js IMG_CACHE_VERSION='{img_ver}' "
+            f"が version.json version='{ver}' と 不一致。\n"
+            f"      → 場所画像/挿絵が SW cache で 古版 (?v={img_ver}) のまま固定化される事故 (5/4-5/6 5日間 bump 漏れ事故 再発防止)\n"
+            f"      → bump_version.py dev-suffix or chapter/patch/season で 自動同期 可能"
+        )
+        return 1
+    return 0
+
+
+def check_location_images_exist():
+    """ルール7-29 (BLOCKER 2026-05-06): script.js の LOCATION_CONFIG / STORY_LOCATION_INLINE_CONFIG で
+    指定された画像 path が repo 上に実在するか 検査。
+    背景: 章公開直前に「場所画像が反映されていない」 で気づくのは 手遅れ。 commit 時に検証して
+    img path 設定漏れ・タイポ・取込忘れ を 防御 (野沢さん指示 2026-05-06)。
+    `/images/...` 形式の path を repo root からの相対 file path に変換して 存在確認。
+    """
+    script_path = ROOT / "script.js"
+    if not script_path.exists():
+        return 0
+    text = script_path.read_text(encoding="utf-8")
+    # LOCATION_CONFIG / STORY_LOCATION_INLINE_CONFIG ブロックを抽出
+    # シンプルな正規表現で img: '/images/...' の path を全部 列挙
+    block_match = re.search(
+        r"const\s+LOCATION_CONFIG\s*=\s*\{[\s\S]*?\n\};",
+        text,
+    )
+    inline_match = re.search(
+        r"const\s+STORY_LOCATION_INLINE_CONFIG\s*=\s*\{[\s\S]*?\n\};",
+        text,
+    )
+    blocks = []
+    if block_match:
+        blocks.append(("LOCATION_CONFIG", block_match.group(0)))
+    if inline_match:
+        blocks.append(("STORY_LOCATION_INLINE_CONFIG", inline_match.group(0)))
+    found_violations = 0
+    for label, block in blocks:
+        for m in re.finditer(r"img:\s*'(/images/[^']+)'", block):
+            url = m.group(1)
+            # /images/... → ROOT/images/...
+            rel_path = url.lstrip("/")
+            full_path = ROOT / rel_path
+            if not full_path.exists():
+                violations.append(
+                    f"[ルール7-29 場所画像 不在 BLOCKER] {label} の img='{url}' が 実在しない。\n"
+                    f"      → 期待 path: {rel_path}\n"
+                    f"      → 章公開直前で「場所画像が反映されない」 事故対策。 取込忘れ / タイポ を 検出。\n"
+                    f"      → 該当 PNG/WebP を 配置するか、 LOCATION_CONFIG entry を 修正する。"
+                )
+                found_violations += 1
+    return found_violations
+
+
+def check_inline_location_markers():
+    """ルール7-32 (BLOCKER 2026-05-06): script.js STORY_LOCATION_INLINE_CONFIG['s1cN'] の各 entry の
+    marker が STORY/s1cN.md 内に 1回以上 hit するか検証。
+    背景: ID-based マークアップ {{char:slug}}名前{{/char}} で 本文を更新した時、
+    marker 文字列に同じ名前が含まれていると 機械的にマッチ失敗 → 挿絵が 該当シーンに表示されず
+    末尾に追いやられる事故 (s1c5 2-2 で 3回目の同じパターン、 野沢さん指摘 2026-05-06)。
+    """
+    script_path = ROOT / "script.js"
+    if not script_path.exists():
+        return 0
+    text = script_path.read_text(encoding="utf-8")
+    # STORY_LOCATION_INLINE_CONFIG ブロック
+    block = re.search(r"const STORY_LOCATION_INLINE_CONFIG\s*=\s*\{[\s\S]*?\n\};", text)
+    if not block:
+        return 0
+    entries = re.findall(
+        r"'(s1c\d+)':\s*\[([\s\S]*?)\],\s*\n",
+        block.group(0),
+    )
+    miss = []
+    for sid, body in entries:
+        story_path = ROOT / "STORY" / f"{sid}.md"
+        if not story_path.exists():
+            continue
+        story_text = story_path.read_text(encoding="utf-8")
+        for m in re.finditer(r"scene:\s*'([^']+)',\s*marker:\s*'([^']+)'", body):
+            scene_label, marker = m.group(1), m.group(2)
+            if marker not in story_text:
+                miss.append((sid, scene_label, marker[:40]))
+    if miss:
+        sample = "; ".join(f"{s}/{sc} '{mk}…'" for s, sc, mk in miss[:3])
+        more = f" 他 {len(miss)-3}件" if len(miss) > 3 else ""
+        violations.append(
+            f"[ルール7-32 inline location marker 不一致 BLOCKER] {len(miss)}件 marker が 本文 不在: {sample}{more}\n"
+            f"      → STORY_LOCATION_INLINE_CONFIG の marker は STORY/s1cN.md 内に 1回以上 含まれる必要\n"
+            f"      → ID-based マークアップ {{{{char:slug}}}}名前{{{{/char}}}} 適用時に marker が 機械的に\n"
+            f"        マッチ失敗 → 挿絵が 末尾配置されてしまう事故対策 (野沢さん 繰返叱責 2026-05-06)\n"
+            f"      → 解決: marker を ID-based マークアップを 含まない unique 文字列 (例: 「俺のメイスが」) に変更"
+        )
+        return len(miss)
+    return 0
+
+
+def check_char_desc_meta_words():
+    """ルール7-31 (BLOCKER 2026-05-06): POOL の キャラ desc / title / caption に メタ表現 を 入れない。
+    s1c5 公開直前で 7キャラに「再登場予定 / S1C7 / S2C1 / 伏線 / 章テーマ視覚化」 等 メタ表現が
+    残っていた事故対策。 ユーザーには「現在 の物語的役割」 だけを見せ、 将来章のネタバレは隠す。
+    """
+    script_path = ROOT / "script.js"
+    if not script_path.exists():
+        return 0
+    text = script_path.read_text(encoding="utf-8")
+    # POOL 各 entry の name + title + caption + desc を抽出
+    pattern = re.compile(
+        r'name:\s*"([^"]+)"\s*,\s*season:\s*\d+\s*,\s*chapter:\s*\'[^\']+\'\s*,\s*\n'
+        r'\s*title:\s*"([^"]*)"\s*,\s*\n'
+        r'\s*caption:\s*"([^"]*)"\s*,\s*\n'
+        r'\s*desc:\s*"([^"]*)"',
+        re.DOTALL,
+    )
+    # メタワード (将来章/伏線/開発者視点 等)
+    META_WORDS = [
+        "再登場予定", "再登場します", "への伏線", "の伏線。", "の伏線、",
+        "S1C7", "S1C6", "S2C1", "S2C2", "S2C3", "S2C4", "S2C5", "S2C6", "S2C7",
+        "S3C", "Season 2", "Season 3",
+        "章テーマ", "山場 ", "物語上重要",
+    ]
+    found_chars = []
+    for m in pattern.finditer(text):
+        name, title, cap, desc = m.group(1), m.group(2), m.group(3), m.group(4)
+        full = title + " " + cap + " " + desc
+        hits = [w for w in META_WORDS if w in full]
+        if hits:
+            found_chars.append((name, hits, desc[:80]))
+    if found_chars:
+        sample = "; ".join(f"「{n}」 ({', '.join(h)})" for n, h, _ in found_chars[:3])
+        more = f" 他 {len(found_chars) - 3}件" if len(found_chars) > 3 else ""
+        violations.append(
+            f"[ルール7-31 キャラ desc メタ表現 BLOCKER] {len(found_chars)}キャラの desc/title/caption に メタ表現: {sample}{more}\n"
+            f"      → 将来章 (S2C1 等) / 「再登場予定」 / 「伏線」 / 「章テーマ視覚化」 等 開発者視点の言葉を 削除\n"
+            f"      → ユーザーには「現在 の物語的役割」 だけを見せる、 ネタバレ防止 (野沢さん指摘 2026-05-06)"
+        )
+        return len(found_chars)
+    return 0
+
+
+def check_relations_coverage():
+    """ルール7-30 (BLOCKER 2026-05-06): POOL 全キャラが RELATIONS に 1つ以上含まれる必須。
+    s1c5 公開直前で 4キャラ (オルフェ/工房娘/歌姫/刺客) が 相関なしの状態で 発見 → 相関図に
+    孤立点として 表示される事故。 新キャラ追加時に必ず relation を 1+ 設定する仕組みで防御。
+    """
+    script_path = ROOT / "script.js"
+    if not script_path.exists():
+        return 0
+    text = script_path.read_text(encoding="utf-8")
+    pool_names = set()
+    for m in re.finditer(r'name:\s*"([^"]+)"\s*,\s*season:\s*\d+\s*,\s*chapter:', text):
+        pool_names.add(m.group(1))
+    rel_match = re.search(r"const RELATIONS\s*=\s*\[([\s\S]*?)\n\];", text)
+    rel_chars = set()
+    if rel_match:
+        for m in re.finditer(r"a:\s*'([^']+)'\s*,\s*b:\s*'([^']+)'", rel_match.group(1)):
+            rel_chars.add(m.group(1))
+            rel_chars.add(m.group(2))
+    missing = sorted(n for n in pool_names if n not in rel_chars)
+    if missing:
+        sample = ', '.join(f"「{n}」" for n in missing[:5])
+        more = f" 他 {len(missing) - 5}件" if len(missing) > 5 else ""
+        violations.append(
+            f"[ルール7-30 相関漏れ BLOCKER] POOL {len(missing)}キャラが RELATIONS に未登場: {sample}{more}\n"
+            f"      → script.js RELATIONS に それぞれ 1つ以上の relation を 追加 必須\n"
+            f"      → 相関図で 孤立点として 表示される事故対策 (野沢さん指摘 2026-05-06、 s1c5 で 4キャラ漏れ発覚)"
+        )
+        return 1
+    return 0
+
+
 def check_main_version_bumped():
     """ルール7-24 (BLOCKER 2026-05-04): main branch で commit する時、 version は HEAD (= 親 commit) より bump 必須。
     2026-05-03 朝のセッションで v1.4.1 を 7 回 main merge した事故の再発防止。
+
+    2026-05-06 拡張: scheduledRelease モード対応。 data.version は 旧 維持で
+    data.scheduledRelease.version が 新 ver (12:00 自動切替)。 比較対象を 切替:
+    - scheduledRelease あり: scheduledRelease.version で 親 と 比較
+    - scheduledRelease なし: data.version で 親 と 比較 (従来挙動)
+
     詳細: CLAUDE.md feedback_prismaera_version_suffix.md
     """
     if _current_branch() != "main":
@@ -1335,12 +1561,31 @@ def check_main_version_bumped():
     if not ver_path.exists():
         return 0
     try:
-        cur_ver = json.load(ver_path.open(encoding="utf-8"))["version"]
+        cur_data = json.load(ver_path.open(encoding="utf-8"))
+        cur_ver = cur_data.get("version", "")
+        cur_scheduled = (cur_data.get("scheduledRelease") or {}).get("version")
     except Exception:
         return 0
-    parent_ver = _read_version_at("HEAD")
-    if parent_ver is None:
+    # 親 commit の version.json を 取得
+    try:
+        head_text = subprocess.check_output(
+            ["git", "show", "HEAD:version.json"], stderr=subprocess.DEVNULL, cwd=str(ROOT)
+        ).decode("utf-8")
+        parent_data = json.loads(head_text)
+        parent_ver = parent_data.get("version", "")
+        parent_scheduled = (parent_data.get("scheduledRelease") or {}).get("version")
+    except Exception:
         return 0
+    # scheduledRelease モード: scheduledRelease.version で 比較
+    if cur_scheduled:
+        if cur_scheduled == parent_scheduled:
+            violations.append(
+                f"[ルール7-24 scheduledRelease.version 未 bump BLOCKER] main で commit する scheduledRelease.version='{cur_scheduled}' が前 commit と同一。\n"
+                f"      → 同じ scheduledRelease.version で main commit 連発は ルール違反\n"
+                f"      → 詳細: CLAUDE.md feedback_prismaera_version_suffix.md"
+            )
+        return 1
+    # 通常 mode: data.version で 比較 (parent 側 scheduledRelease 解除直後の場合 = 即時 release)
     if cur_ver == parent_ver:
         violations.append(
             f"[ルール7-24 main version 未 bump BLOCKER] main で commit する version='{cur_ver}' が前 commit と同一。\n"
@@ -1358,6 +1603,300 @@ n7_25 = check_dev_suffix_progression()
 print(f"  ルール7-25 (dev suffix 1段階 increment): {n7_25}件 検査 [BLOCKER]")
 n7_26 = check_cache_buster_format()
 print(f"  ルール7-26 (cache buster = version 完全同期): {n7_26}件 検査 [BLOCKER]")
+n7_28 = check_img_cache_version_sync()
+print(f"  ルール7-28 (IMG_CACHE_VERSION = version 完全同期): {n7_28}件 検査 [BLOCKER]")
+n7_29 = check_location_images_exist()
+print(f"  ルール7-29 (LOCATION_CONFIG 画像 実在): {n7_29}件 検査 [BLOCKER]")
+n7_30 = check_relations_coverage()
+print(f"  ルール7-30 (POOL 全キャラ RELATIONS 登録): {n7_30}件 検査 [BLOCKER]")
+n7_31 = check_char_desc_meta_words()
+print(f"  ルール7-31 (キャラ desc メタ表現禁止): {n7_31}件 検査 [BLOCKER]")
+n7_32 = check_inline_location_markers()
+print(f"  ルール7-32 (inline location marker 実在): {n7_32}件 検査 [BLOCKER]")
+
+
+def check_combo_pair_uniqueness():
+    """ルール7-33 (BLOCKER 2026-05-06): cardgame/combos.json で 同一キャラ集合 が 2件以上 登録 禁止。
+    2026-05-06 v1.4.4ai セッションで 銀霜の歌姫+工房娘 / オルフェ+ルナリア / セラフィエル+カグヤ+プリズマ で
+    重複コンボが残存し、 野沢さん指摘 「2種類のコンボ被ってる、 これだとこの2体で強すぎない?」。
+    再発防止のため 機械チェック化。
+    """
+    combos_path = ROOT / "cardgame" / "combos.json"
+    if not combos_path.exists():
+        return 0
+    try:
+        combos = json.loads(combos_path.read_text(encoding="utf-8"))
+    except Exception as e:
+        violations.append(f"[ルール7-33 combos.json 読込失敗 BLOCKER] {e}")
+        return 0
+    from collections import defaultdict
+    g = defaultdict(list)
+    for c in combos:
+        chars = tuple(sorted(c.get("chars", [])))
+        if not chars:
+            continue
+        g[chars].append(c.get("id", "?"))
+    dupes = {k: v for k, v in g.items() if len(v) >= 2}
+    if dupes:
+        sample_lines = []
+        for chars, ids in list(dupes.items())[:3]:
+            sample_lines.append(f"      ・{'+'.join(chars)} → {ids}")
+        more = "" if len(dupes) <= 3 else f"\n      ... 他 {len(dupes)-3} ペア"
+        violations.append(
+            f"[ルール7-33 combos 重複ペア BLOCKER] 同一キャラ集合 で {len(dupes)} ペアが 2件以上:\n"
+            + "\n".join(sample_lines) + more
+            + "\n      → cardgame/combos.json から 重複id を削除 (1ペア 1コンボ)\n"
+            + "      → 2026-05-06 銀霜歌姫+工房娘 等の事故 再発防止"
+        )
+    return len(combos)
+
+
+def check_illustration_position_consistency():
+    """ルール7-34 (WARNING 2026-05-06): 章別 prompt/locations_s1cN.md の同一シーン内 挿絵で
+    同じキャラの LEFT/RIGHT が プロンプト間で 揺れていないか チェック。
+    2026-05-06 17 (twin_palms_rainbow) で 12 (mask_separation_ritual) と 位置逆転 (シオン左右逆) が
+    発覚し 野沢さん 「整合性チェック漏れるなら自動チェック入れなさい」 指摘。 再発防止。
+
+    現状: 同じシーン (例 4-1) 内で 同じキャラ (例 シオン) が LEFT と RIGHT 両方で 検出されたら WARNING。
+    検出は キャラ slug を simple text match (英語キャラ slug 名 or 既知 alias)、 完全自動は難しいため
+    WARNING に留め、 開発者が 手動で 12 と 17 など 並び比較する 補助とする。
+    """
+    target_dir = ROOT / "prompt"
+    if not target_dir.exists():
+        return 0
+    # キャラ slug → 識別 alias (英語表記、 LEFT/RIGHT 文章で頻出する語)
+    KNOWN_ALIAS = {
+        "Sion": "シオン",
+        "Shi-Loen": "シ・ロエン",
+        "Lanas": "ラナス",
+        "Lumina": "ルミナ",
+        "Aster": "アスター",
+        "Seraphiel": "セラフィエル",
+        "Kaguya": "カグヤ",
+        "Nox": "ノクス",
+        "Nokutoria": "ノクトリア",
+        "Garvin": "ガルヴィン",
+        "Galvin": "ガルヴィン",
+        "Nova": "ノヴァ",
+        "Lunalia": "ルナリア",
+        "Riorael": "リオラエル",
+    }
+    checked = 0
+    issues = 0
+    for path in sorted(target_dir.glob("locations_s1c*.md")):
+        text = path.read_text(encoding="utf-8")
+        m = re.search(r'locations_(s1c\d+)\.md', path.name)
+        if not m:
+            continue
+        sections = re.split(r'^# 【\d+】', text, flags=re.M)[1:]
+        # scene_id -> { alias -> set(positions) } and -> { alias -> set(filenames) }
+        from collections import defaultdict
+        scene_pos = defaultdict(lambda: defaultdict(set))
+        scene_files = defaultdict(lambda: defaultdict(set))
+        for sec in sections:
+            scene_m = re.search(r'\*\*対応シーン\*\*[:：]\s*([^\s,。、（(]+)', sec)
+            if not scene_m:
+                continue
+            scene_id = scene_m.group(1).strip()
+            # filename 取得 (section 冒頭の [filename].png)
+            fn_m = re.search(r'([a-z0-9_]+\.png)', sec.split("\n", 1)[0])
+            filename = fn_m.group(1) if fn_m else "?"
+            prompt_m = re.search(r'```(.+?)```', sec, flags=re.S)
+            if not prompt_m:
+                continue
+            prompt = prompt_m.group(1)
+            # 「on the LEFT [...] <Alias> (SAME face as reference N」 のように
+            # 主体配置を示す パターンのみ抽出 (相対参照「standing as Shi-Loen's mirror」 等の偽陽性 除外)
+            for m2 in re.finditer(
+                r'\bon the (LEFT|RIGHT)\b([^.]*?)\b([A-Z][a-z]+(?:[- ][A-Z][a-z]+)*)\s*\(SAME (?:face|body)',
+                prompt):
+                pos = m2.group(1)
+                cand = m2.group(3)
+                # cand を KNOWN_ALIAS で 正規化 (alias は文字どおり一致 or 大文字小文字許容)
+                for alias in KNOWN_ALIAS:
+                    if cand == alias or cand.lower() == alias.lower():
+                        scene_pos[scene_id][alias].add(pos)
+                        scene_files[scene_id][alias].add(filename)
+                        break
+            checked += 1
+        # 同一シーン内で 同じ alias が LEFT と RIGHT 両方で検出されたら 違反
+        for scene_id, alias_pos in scene_pos.items():
+            for alias, positions in alias_pos.items():
+                if "LEFT" in positions and "RIGHT" in positions:
+                    files = sorted(scene_files[scene_id][alias])
+                    warnings_only.append(
+                        f"[ルール7-34 挿絵位置不整合 WARNING] {path.name} シーン {scene_id} の "
+                        f"キャラ「{KNOWN_ALIAS[alias]} ({alias})」 が LEFT/RIGHT 両方で検出: {files}\n"
+                        f"      → 同じシーン内で 同じキャラの 左右配置 が 揺れています、 再生成前に意図確認\n"
+                        f"      → 2026-05-06 17 vs 12 シオン左右逆事故 再発防止"
+                    )
+                    issues += 1
+    return checked
+
+
+def check_illustration_setting_reference():
+    """ルール7-35 (WARNING 2026-05-06): 章別 prompt/locations_s1cN.md で
+    同じシーン番号 (例 1-1, 4-1) に「背景」 + 「挿絵」 が並存する場合、 挿絵プロンプトに
+    背景画像 filename が 参照添付として 記載されているかチェック。
+    2026-05-06 「8 を生成する時に 1 を 添付すべき」 「1-1 王宮の挿絵 14 と 背景 2 で
+    建築が違って見える」 等の 整合性漏れ事故を 防ぐ。
+
+    判定:
+    - 各セクションから {filename, scene_id, 役割(背景/挿絵), prompt_body} を抽出
+    - scene_id が一致して 背景 + 挿絵 が両方ある場合
+    - 挿絵 prompt_body に 背景 filename が 含まれていなければ WARNING
+    """
+    target_dir = ROOT / "prompt"
+    if not target_dir.exists():
+        return 0
+    checked = 0
+    for path in sorted(target_dir.glob("locations_s1c*.md")):
+        text = path.read_text(encoding="utf-8")
+        sections = re.split(r'^# 【\d+】', text, flags=re.M)[1:]
+        # 各セクション: {filename, scene_id, role, prompt_body}
+        scene_data = []
+        for sec in sections:
+            head = sec.split("\n", 1)[0]
+            fn_m = re.search(r'([a-z0-9_]+\.png)', head)
+            if not fn_m:
+                continue
+            filename = fn_m.group(1)
+            scene_m = re.search(r'\*\*対応シーン\*\*[:：]\s*([^\s,。、(（]+)', sec)
+            if not scene_m:
+                continue
+            scene_id = scene_m.group(1).strip()
+            # 役割は 「役割」 セクションから または 冒頭の (背景|挿絵) から判定
+            if re.search(r'\(挿絵', head) or '挿絵' in (sec.split('\n', 1)[0]):
+                role = "挿絵"
+            elif re.search(r'\(背景', head) or '挿絵風背景' in head or '背景' in head.split('—',1)[-1][:30]:
+                role = "背景"
+            else:
+                role = "?"
+            prompt_m = re.search(r'```(.+?)```', sec, flags=re.S)
+            prompt_body = prompt_m.group(1) if prompt_m else ""
+            scene_data.append({
+                "filename": filename,
+                "scene_id": scene_id,
+                "role": role,
+                "prompt": prompt_body,
+            })
+            checked += 1
+        # scene_id でグループ化
+        from collections import defaultdict
+        by_scene = defaultdict(list)
+        for d in scene_data:
+            by_scene[d["scene_id"]].append(d)
+        for scene_id, items in by_scene.items():
+            bg_items = [i for i in items if i["role"] == "背景"]
+            ill_items = [i for i in items if i["role"] == "挿絵"]
+            if not bg_items or not ill_items:
+                continue
+            for ill in ill_items:
+                missing_bg = []
+                for bg in bg_items:
+                    # 挿絵 prompt + section 全体に 背景 filename が記載されているか check
+                    # (Attached リストや 「⚠️ 添付」 セクションは prompt 外なので、 セクション全体を検索)
+                    full_section = next(
+                        (s for s in sections if bg["filename"] not in s and ill["filename"] in s.split("\n", 1)[0]),
+                        None
+                    )
+                    # 簡易: filename が ill prompt 全文 もしくは ill section 全体 に含まれるか
+                    # ill section を再取得
+                    ill_section = next((s for s in sections if ill["filename"] in s.split("\n", 1)[0]), "")
+                    if bg["filename"] not in ill_section:
+                        missing_bg.append(bg["filename"])
+                if missing_bg:
+                    warnings_only.append(
+                        f"[ルール7-35 同一シーン背景未参照 WARNING] {path.name} シーン {scene_id} の "
+                        f"挿絵「{ill['filename']}」 に 同シーン背景「{', '.join(missing_bg)}」 への参照添付指示なし\n"
+                        f"      → 挿絵プロンプトに「先行画像 添付」 として 背景 filename を 明記\n"
+                        f"      → 2026-05-06 1番/8番レイアウト不整合 + 14番/2番建築不整合 等の事故 再発防止"
+                    )
+    return checked
+
+
+def check_prompt_body_meta_pollution():
+    """ルール7-36 (BLOCKER 2026-05-06): prompt/locations_*.md / prompt/s1c*_chars.md の
+    ``` ... ``` 本体 (= ChatGPT/DALL-E に コピペで送るプロンプト本体) に Claude 内部メモ
+    (野沢さん指摘 / 内部キー / コード参照 等) が 混入していないか チェック。
+
+    2026-05-06 17 (twin_palms_rainbow) のプロンプト本体内に 「**位置整合**: ... (野沢さん指摘
+    2026-05-06)」 メモを入れて 野沢さん 「コピーする予定の部分にメモ入れんなよ、 ナメてんのか」
+    叱責。 再発防止。
+
+    NG ワード: 野沢 / Claude 内部 / 位置整合メモ / 伏線視覚化 / 本文行 / コード参照 /
+              STORY/s1c / LOCATION_CONFIG / STORY_LOCATION_INLINE_CONFIG / CHAR_FACTION
+    """
+    target_dirs = [ROOT / "prompt"]
+    NG = ['野沢', 'Claude 内部', 'Claude内部', '位置整合メモ', '伏線視覚化',
+          '本文行', 'コード参照', 'STORY/s1c', 'LOCATION_CONFIG',
+          'STORY_LOCATION_INLINE_CONFIG', 'CHAR_FACTION']
+    checked = 0
+    for tdir in target_dirs:
+        if not tdir.exists():
+            continue
+        for path in sorted(list(tdir.glob("locations_*.md")) + list(tdir.glob("s1c*_chars.md"))):
+            text = path.read_text(encoding="utf-8")
+            # 厳密に行頭 ``` を fence と認識
+            for m in re.finditer(r'(?m)^```\s*\n(.*?)\n^```\s*$', text, flags=re.S):
+                body = m.group(1)
+                checked += 1
+                hits = [w for w in NG if w in body]
+                if hits:
+                    pre = text[:m.start()]
+                    hm = list(re.finditer(r'^#+ [^\n]+', pre, flags=re.M))
+                    header = hm[-1].group(0)[:60] if hm else "?"
+                    sample_line = next((ln.strip() for ln in body.split('\n')
+                                       if any(w in ln for w in hits)), '')[:120]
+                    violations.append(
+                        f"[ルール7-36 プロンプト本体メタ汚染 BLOCKER] {path.name} :: {header}\n"
+                        f"      → 検出ワード: {hits}\n"
+                        f"      → 該当行: {sample_line}\n"
+                        f"      → ``` ... ``` 内は ChatGPT/DALL-E に そのまま送る本体、 内部メモは ``` の外 (markdown 普通の本文) に書く\n"
+                        f"      → 2026-05-06 17 twin_palms 「**位置整合**: ... (野沢さん指摘)」 混入事故 再発防止"
+                    )
+    return checked
+
+
+def check_pool_length_leak():
+    """ルール7-37 (WARNING 2026-05-06): script.js 内で POOL.{Tier}.length / POOL[X].length が
+    _isChapterReleased でフィルタせずに 直接使われている箇所を検出。 公開前章キャラが
+    分母に含まれて 隠れキャラ数が ユーザーに 推測される リーク防止。
+
+    2026-05-06 アカウント情報の urMax/lrMax 分母に s1c5 UR3体 が含まれていた
+    リーク事故 (野沢さん指摘) の 再発防止。
+    """
+    target = ROOT / "script.js"
+    if not target.exists():
+        return 0
+    text = target.read_text(encoding="utf-8")
+    pat = re.compile(r'POOL(?:\.\w+|\[["\']\w+["\']\])\.length')
+    issues = 0
+    for i, line in enumerate(text.split("\n"), 1):
+        if pat.search(line):
+            # 同一行に filter / _isChapterReleased / _released が 含まれていれば OK
+            if any(k in line for k in ['filter(', '_isChapterReleased', '_released', '// CHAPTER_FILTER_OK']):
+                continue
+            warnings_only.append(
+                f"[ルール7-37 POOL length 直接 WARNING] script.js:{i} `{line.strip()[:120]}`\n"
+                f"      → 公開前章キャラが 分母に含まれ ユーザーに 隠れキャラ数を 推測される リスク\n"
+                f"      → POOL.X.filter(c => !c.chapter || _isChapterReleased(c.chapter)).length を使う\n"
+                f"      → 意図的なら 行末に `// CHAPTER_FILTER_OK` コメントで 抑制可"
+            )
+            issues += 1
+    return issues
+
+
+n7_33 = check_combo_pair_uniqueness()
+print(f"  ルール7-33 (combos 重複ペア 禁止): {n7_33}件 検査 [BLOCKER]")
+n7_36 = check_prompt_body_meta_pollution()
+print(f"  ルール7-36 (プロンプト本体 内部メモ汚染禁止): {n7_36}件 検査 [BLOCKER]")
+n7_34 = check_illustration_position_consistency()
+print(f"  ルール7-34 (挿絵 同一シーン内 LEFT/RIGHT 整合): {n7_34}件 検査 [WARNING]")
+n7_35 = check_illustration_setting_reference()
+print(f"  ルール7-35 (同一シーン 背景→挿絵 参照添付): {n7_35}件 検査 [WARNING]")
+n7_37 = check_pool_length_leak()
+print(f"  ルール7-37 (POOL length 公開前章リーク): {n7_37}件 検出 [WARNING]")
 
 def check_main_no_suffix():
     """ルール7-27 (BLOCKER 2026-05-05): main branch で commit する version は suffix なし (X.Y.Z 形式) 必須。
