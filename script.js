@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4c — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4d — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -2911,7 +2911,7 @@ function showResult(results, best, opts) {
   let title;
   if (isArchive) {
     const dt = archiveAt ? new Date(archiveAt) : null;
-    const dateStr = dt ? `${dt.getMonth()+1}/${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}` : '';
+    const dateStr = dt ? `${String(dt.getMonth()+1).padStart(2,'0')}/${String(dt.getDate()).padStart(2,'0')} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}` : '';
     title = `📊 過去のリザルト${dateStr ? ' (' + dateStr + ' 記録)' : ''}`;
   } else {
     title = hasLR ? `👑 LEGEND ×${nLR} 降臨!!!` :
@@ -9158,9 +9158,12 @@ function _formatTScoreDate(ts) {
   if (!ts) return '-';
   const d = new Date(ts);
   if (isNaN(d.getTime())) return '-';
-  const m = d.getMonth() + 1, dd = d.getDate();
-  const hh = String(d.getHours()).padStart(2, '0'), mm = String(d.getMinutes()).padStart(2, '0');
-  return `${m}/${dd} ${hh}:${mm}`;
+  // mm/dd hh:mm ゼロ埋め2桁 (memory feedback_datetime_format.md)
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mn = String(d.getMinutes()).padStart(2, '0');
+  return `${mm}/${dd} ${hh}:${mn}`;
 }
 
 // 「結果を見る」: 過去 best/worst の 10連 リザルトを再表示 (showResult を archive モードで呼出)
@@ -10181,13 +10184,16 @@ function _fmtChangelogDate(d) {
   if (d.includes('T')) {
     const dt = new Date(d);
     if (isNaN(dt.getTime())) return d;
-    const m = dt.getMonth() + 1, dd = dt.getDate();
-    const hh = String(dt.getHours()).padStart(2, '0'), mm = String(dt.getMinutes()).padStart(2, '0');
-    return `${m}/${dd} ${hh}:${mm}`;
+    // mm/dd hh:mm ゼロ埋め2桁 (memory feedback_datetime_format.md)
+    const mm = String(dt.getMonth() + 1).padStart(2, '0');
+    const dd = String(dt.getDate()).padStart(2, '0');
+    const hh = String(dt.getHours()).padStart(2, '0');
+    const mn = String(dt.getMinutes()).padStart(2, '0');
+    return `${mm}/${dd} ${hh}:${mn}`;
   }
-  // 旧 "YYYY-MM-DD" 互換
+  // 旧 "YYYY-MM-DD" 互換 (mm/dd ゼロ埋め維持)
   const m = d.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (m) return `${parseInt(m[2])}/${parseInt(m[3])}`;
+  if (m) return `${m[2]}/${m[3]}`;
   return d;
 }
 
@@ -10324,7 +10330,8 @@ function renderNotifications() {
   const KIND_LABEL = { reply: '✦ 公式返信', broadcast: '✦ 公式お知らせ', release: '🆕 更新', system: '⚙️ システム' };
   list.innerHTML = filtered.map(n => {
     const dt = n.createdAt ? new Date(n.createdAt) : null;
-    const dtStr = dt && !isNaN(dt) ? `${dt.getMonth()+1}/${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}` : '';
+    // mm/dd hh:mm ゼロ埋め2桁 (memory feedback_datetime_format.md)
+    const dtStr = dt && !isNaN(dt) ? `${String(dt.getMonth()+1).padStart(2,'0')}/${String(dt.getDate()).padStart(2,'0')} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}` : '';
     const kindLbl = KIND_LABEL[n.kind] || n.kind;
     return `
       <div class="notif-item ${n.read ? 'read' : 'unread'}" data-id="${escapeHtml(n.id)}" onclick="markNotificationRead('${escapeHtml(n.id)}')">

@@ -2179,7 +2179,8 @@ function openReplyHistoryModal(feedbackId) {
   } else {
     listEl.innerHTML = list.map(n => {
       const dt = n.createdAt ? new Date(n.createdAt) : null;
-      const dtStr = dt && !isNaN(dt) ? `${dt.getMonth()+1}/${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}` : '';
+      // mm/dd hh:mm ゼロ埋め2桁 (memory feedback_datetime_format.md)
+      const dtStr = dt && !isNaN(dt) ? `${String(dt.getMonth()+1).padStart(2,'0')}/${String(dt.getDate()).padStart(2,'0')} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}` : '';
       return `
         <div class="reply-history-item">
           <div class="reply-history-head">
