@@ -5,7 +5,7 @@
 
 ## バージョニング
 
-現在のバージョン: **v1.4.4ap**
+現在のバージョン: **v1.4.4aq**
 
 `v{Season}.{公開済み章数}.{patch}` — 詳細ルールは [`VERSIONING.md`](VERSIONING.md) を参照。
 
