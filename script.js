@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4ae — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4af — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -6824,7 +6824,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
     // 第三幕 3-2: 影織りの工房 (リオラエル+ルナリア+シオン、 章テーマ視覚化)
     { scene: '3-2',  marker: '銀の糸と、 黒の糸が、 完全に等価に、 交差していた',     position: 'after',  img: '/images/locations/s1c5/thumb/shadow_loom_workshop_thumb.webp' },
     // 第四幕 4-1: 山場 分離の儀式 (シオン+シ・ロエン+ラナス+ルミナ+アスター、 二重月夜)
-    { scene: '4-1',  marker: '月鏡の表面が、 静かに、 揺らいだ',                       position: 'before', img: '/images/locations/s1c5/thumb/mask_separation_ritual_thumb.webp' },
+    { scene: '4-1',  marker: '月鏡の表面が',                                          position: 'before', img: '/images/locations/s1c5/thumb/mask_separation_ritual_thumb.webp' },
     // 第四幕 4-2: 別れの朝 (シオン+シ・ロエン、 雪原の二筋の足跡)
     { scene: '4-2',  marker: '雪原の遠く、 朝霧の向こうに、 シ・ロエンと',             position: 'after',  img: '/images/locations/s1c5/thumb/shi_loen_departure_thumb.webp' },
   ],
@@ -6847,7 +6847,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // version 完全同期 (野沢さん指示 2026-05-06): bump_version.py が自動で更新する。
 // 旧 date-suffix '20260504o' を 5/6 で見つけた事故を契機に version-based に統一。
-const IMG_CACHE_VERSION = '1.4.4ae';
+const IMG_CACHE_VERSION = '1.4.4af';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
