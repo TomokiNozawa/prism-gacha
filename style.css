@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4a — 演出スタイル (Season 1 第1章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4b — 演出スタイル (Season 1 第1章) / dev は cache buster suffix で進行
    ============================================================ */
 :root {
   --bg: #05060d;
@@ -3859,7 +3859,9 @@ body.has-offline-banner .topbar { margin-top: 30px; }
 }
 
 @media (max-width: 720px) {
-  .relations-header { padding: 10px 12px 10px 12px; padding-top: 48px; gap: 6px; flex-direction: column; align-items: stretch; }  /* close は absolute 右上配置のため、 上に padding-top 48px で zoom 等を下にずらして被り回避 */
+  .relations-header,
+  .world-map-header { padding: 10px 12px 10px 12px; padding-top: 48px; gap: 6px; flex-direction: column; align-items: stretch; }  /* close は absolute 右上配置のため、 上に padding-top 48px で zoom 等を下にずらして被り回避 */
+  .world-map-header h2 { font-size: 16px; margin: 0; text-align: center; }
   .relations-header h2 { font-size: 16px; margin: 0; text-align: center; }
   .relations-legend { justify-content: center; gap: 6px; font-size: 10px; }
   .relations-legend .leg-line { width: 18px; height: 2px; margin-right: 2px; }
@@ -4145,7 +4147,8 @@ body.has-offline-banner .topbar { margin-top: 30px; }
   .account-close,
   .story-toc-close,
   .story-list-close,
-  .relations-header .close {
+  .relations-header .close,
+  .world-map-header .close {
     top: calc(env(safe-area-inset-top, 0px) + 8px) !important;
     min-width: 44px;
     min-height: 44px;
@@ -5509,22 +5512,39 @@ body.gasshuku-modal-open {
   display: flex; flex-direction: column;
 }
 .world-map-modal[hidden] { display: none; }
+/* 野沢さん指示 2026-05-05: ワールドマップ ヘッダ レイアウトを 相関図 (.relations-header) と
+   完全統一。 close ボタンを 右上 absolute 配置にして 「× 閉じる (Esc)」 が 2行になる現象を解消。 */
 .world-map-header {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 14px 22px;
-  background: rgba(10,14,29,0.85);
-  border-bottom: 1px solid rgba(200,180,255,0.15);
+  padding: 14px 140px 14px 22px;  /* 右の close ボタン分 余白確保 */
+  gap: 16px;
+  background: rgba(0,0,0,0.5);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(8px);
+  flex-wrap: wrap;
+  position: relative;  /* 子の close を absolute で右上配置するための基準 */
 }
 .world-map-header h2 {
-  margin: 0; font-size: 18px; letter-spacing: 0.05em;
+  margin: 0; font-size: 22px; letter-spacing: 0.2em;
   background: linear-gradient(90deg, #ffd84d, #5fffd4, #c87dff);
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
-.world-map-header .close {
-  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18);
-  color: #e8ecff; padding: 6px 14px; border-radius: 8px; cursor: pointer;
-  font-size: 13px;
+.world-map-header > .close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  z-index: 10;
+  font-family: inherit;
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  background: rgba(255,255,255,0.08);
+  color: var(--text);
+  border: 1px solid rgba(255,255,255,0.15);
+  white-space: nowrap;  /* 「× 閉じる (Esc)」 を 2行折り返し させない */
 }
+.world-map-header > .close:hover { background: rgba(255,255,255,0.15); }
 .world-map-body {
   flex: 1; display: grid; grid-template-columns: 1fr 320px;
   overflow: hidden;

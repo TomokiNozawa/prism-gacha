@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4a — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4b — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -3833,6 +3833,7 @@ function openRelations() {
 
   bindRelationsPan(canvas);
   bindRelationsZoomWheel(canvas);
+  bindRelationsZoomPinch(canvas);  // スマホ ピンチ拡縮 (野沢さん指示 2026-05-05)
   // タブ初期化 (スマホはリストをデフォルト)
   setupRelationsTabs();
   const isMobile = window.matchMedia('(max-width: 720px)').matches;
@@ -4025,6 +4026,8 @@ function bindRelationsPan(canvas) {
   const move = (e) => {
     if (!relationsPanActive) return;
     const isTouch = e.type === 'touchmove';
+    // ピンチ (2点タッチ) 中は pan しない (野沢さん指示 2026-05-05、 ピンチ拡大優先)
+    if (isTouch && e.touches.length >= 2) return;
     const x = isTouch ? e.touches[0].clientX : e.clientX;
     const y = isTouch ? e.touches[0].clientY : e.clientY;
     const dx = x - relPanStartX, dy = y - relPanStartY;
@@ -4048,6 +4051,44 @@ function bindRelationsPan(canvas) {
   document.addEventListener('touchmove', move, {passive: false});
   document.addEventListener('touchend', end);
   canvas.style.cursor = 'grab';
+}
+
+// 相関図 ピンチイン/アウト (野沢さん指示 2026-05-05、 スマホでも ワールドマップと同様に 2点指で
+//   拡縮できるように)。 _relationsZoom (CSS変数 経由) を 2点 distance 比 で 直接更新。
+let _relationsPinchBound = false;
+function bindRelationsZoomPinch(canvas) {
+  if (_relationsPinchBound) return;
+  _relationsPinchBound = true;
+  const pts = new Map();
+  let lastDist = null;
+  canvas.addEventListener('touchstart', (e) => {
+    for (const t of e.touches) pts.set(t.identifier, { x: t.clientX, y: t.clientY });
+    if (pts.size === 2) {
+      const arr = [...pts.values()];
+      lastDist = Math.hypot(arr[0].x - arr[1].x, arr[0].y - arr[1].y);
+      // ピンチ開始: pan を 強制終了 (pan の touchstart が 1点目で 既に始まっている場合の対策)
+      relationsPanActive = false;
+    }
+  }, { passive: true });
+  canvas.addEventListener('touchmove', (e) => {
+    if (e.touches.length < 2) return;
+    e.preventDefault();
+    for (const t of e.touches) pts.set(t.identifier, { x: t.clientX, y: t.clientY });
+    const arr = [...pts.values()].slice(0, 2);
+    if (arr.length < 2) return;
+    const dist = Math.hypot(arr[0].x - arr[1].x, arr[0].y - arr[1].y);
+    if (lastDist && lastDist > 0) {
+      const factor = dist / lastDist;
+      setRelationsZoom(_relationsZoom * factor);
+    }
+    lastDist = dist;
+  }, { passive: false });
+  const onEnd = (e) => {
+    for (const t of (e.changedTouches || [])) pts.delete(t.identifier);
+    if (pts.size < 2) lastDist = null;
+  };
+  canvas.addEventListener('touchend', onEnd);
+  canvas.addEventListener('touchcancel', (e) => { pts.clear(); lastDist = null; });
 }
 
 function closeRelations() {
