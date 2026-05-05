@@ -2035,6 +2035,16 @@ function closeReplyModal() {
   _replyTargetFeedbackId = null;
 }
 
+// Esc で 返信モーダルを 閉じる (野沢さん指摘 2026-05-05 「Escで閉じれない、 毎回言ってない?」)
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  const replyM = document.getElementById('reply-modal');
+  if (replyM && replyM.style.display === 'flex') {
+    e.preventDefault();
+    closeReplyModal();
+  }
+});
+
 async function sendReply() {
   if (!_replyTargetFeedbackId) return;
   const f = feedbackItems.find(x => x.id === _replyTargetFeedbackId);
@@ -2046,11 +2056,16 @@ async function sendReply() {
   const sendBtn = document.querySelector('.reply-send');
   if (sendBtn) sendBtn.disabled = true;
   try {
+    // createdAt は ServerValue.TIMESTAMP を使う (野沢さん指摘 2026-05-05 PERMISSION_DENIED 修正):
+    //   Date.now() は client clock で、 Firebase Rules `newData.val() <= now` の now は
+    //   server time → client が数 ms でも進んでいると弾かれていた
+    const TS = (typeof firebase !== 'undefined' && firebase.database && firebase.database.ServerValue)
+      ? firebase.database.ServerValue.TIMESTAMP : Date.now();
     await db.ref('prism-gacha/notifications/' + f.uid).push({
       kind: 'reply',
       title: title,
       body: body,
-      createdAt: Date.now(),
+      createdAt: TS,
       relatedFeedbackId: _replyTargetFeedbackId,
     });
     // feedback 側も「既読」 + 返信済 マーキング (今は read true で代用)
@@ -2078,10 +2093,13 @@ async function sendBroadcast() {
   const sendBtn = document.querySelector('.broadcast-send');
   if (sendBtn) sendBtn.disabled = true;
   try {
+    const TS_BC = (typeof firebase !== 'undefined' && firebase.database && firebase.database.ServerValue)
+      ? firebase.database.ServerValue.TIMESTAMP : Date.now();
     await db.ref('prism-gacha/notifications/_broadcast').push({
+      kind: 'broadcast',
       title: title,
       body: body,
-      createdAt: Date.now(),
+      createdAt: TS_BC,
     });
     document.getElementById('bc-title').value = '';
     document.getElementById('bc-body').value = '';

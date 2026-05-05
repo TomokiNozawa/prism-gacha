@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.3l — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.3m — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -8187,6 +8187,12 @@ document.addEventListener("keydown", e => {
     if (e.key === "Escape") { e.preventDefault(); if (typeof dismissAccountPrompt === 'function') dismissAccountPrompt(); }
     return;
   }
+  // 🔔 お知らせモーダル (Esc 対応、 野沢さん指摘 2026-05-05 「Esc で閉じれない」)
+  const _nm = document.getElementById('notifications-modal');
+  if (_nm && _nm.classList.contains('active')) {
+    if (e.key === "Escape") { e.preventDefault(); if (typeof closeNotificationsModal === 'function') closeNotificationsModal(); }
+    return;
+  }
   // アカウントモーダル (signup/login フォーム)
   const _am = document.getElementById('account-modal');
   if (_am && _am.classList.contains('active')) {
@@ -10146,10 +10152,12 @@ function setNotificationFilter(filter) {
 function renderNotifications() {
   const list = document.getElementById('notif-list');
   if (!list) return;
-  // カウント更新
-  const cntAll = _notifications.length;
-  const cntUnread = _notifications.filter(n => !n.read).length;
-  const cntReply = _notifications.filter(n => n.kind === 'reply').length;
+  // 「すべて」 / 「未読」 タブからも release は除外 (野沢さん指示 2026-05-05、 update-modal で
+  //   告知済の changelog を 通知一覧に 並べると ノイズ、 「更新履歴」 タブ専用に隔離)。
+  const nonRelease = _notifications.filter(n => n.kind !== 'release');
+  const cntAll = nonRelease.length;
+  const cntUnread = nonRelease.filter(n => !n.read).length;
+  const cntReply = nonRelease.filter(n => n.kind === 'reply').length;
   const cntRelease = _notifications.filter(n => n.kind === 'release').length;
   const setCnt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = String(v); };
   setCnt('notif-cnt-all', cntAll);
@@ -10157,9 +10165,11 @@ function renderNotifications() {
   setCnt('notif-cnt-reply', cntReply);
   setCnt('notif-cnt-release', cntRelease);
 
-  let filtered = _notifications;
-  if (_notifFilter === 'unread') filtered = _notifications.filter(n => !n.read);
-  else if (_notifFilter !== 'all') filtered = _notifications.filter(n => n.kind === _notifFilter);
+  let filtered;
+  if (_notifFilter === 'all')        filtered = nonRelease;
+  else if (_notifFilter === 'unread') filtered = nonRelease.filter(n => !n.read);
+  else if (_notifFilter === 'release') filtered = _notifications.filter(n => n.kind === 'release');
+  else                                filtered = nonRelease.filter(n => n.kind === _notifFilter);
 
   if (filtered.length === 0) {
     list.innerHTML = '<div class="notif-empty">' + (_notifFilter === 'unread' ? '未読のお知らせはありません' : 'お知らせはまだありません') + '</div>';
