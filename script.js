@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.3a — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.3b — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -1060,7 +1060,8 @@ function loadState() {
       worstAt: raw.worstAt || 0,
       bestResults: Array.isArray(raw.bestResults) ? raw.bestResults : [],
       worstResults: Array.isArray(raw.worstResults) ? raw.worstResults : [],
-      tScoreBackfilled: !!raw.tScoreBackfilled,  // 過去 history からの後計算完了フラグ
+      tScoreBackfilled: !!raw.tScoreBackfilled,                     // 互換: 旧 v1 backfill 完了 flag
+      tScoreBackfilledVersion: raw.tScoreBackfilledVersion || 0,    // backfill ロジック version (v2 = at連続性 chunking)
     };
     // マイグレーション: 既存 history からunlockedSetを補完 (旧セーブデータ救済)
     for (const h of s.history) {
@@ -1070,7 +1071,7 @@ function loadState() {
     return s;
   } catch {
     return { total:0, ur:0, pity:0, history:[], galleryViewed:{}, unlockedSet:{}, dupCounts:{}, storyProgress:{},
-      bestTScore: -1, worstTScore: -1, bestAt: 0, worstAt: 0, bestResults: [], worstResults: [], tScoreBackfilled: false };
+      bestTScore: -1, worstTScore: -1, bestAt: 0, worstAt: 0, bestResults: [], worstResults: [], tScoreBackfilled: false, tScoreBackfilledVersion: 0 };
   }
 }
 function saveState() {
@@ -2971,31 +2972,62 @@ function _updateTScoreHistory(results, tScore) {
   }
 }
 
-// 偏差値ヒストリー: 過去 history (Firebase 同期 直近120件) を 10件 chunk して 後計算
-// 起動時に1回だけ実行 (state.tScoreBackfilled で多重実行防止)
+// 偏差値ヒストリー: 過去 history (Firebase 同期 直近120件) を 10連 単位で 後計算
+// 起動時に1回だけ実行 (tScoreBackfilledVersion で多重実行防止)
+//
+// v2 (2026-05-05 修正): at 差で 10連 group を検出 → 連続性 chunking
+//   旧 v1 は 単純に 10件ずつ chunk していたため、 単発+10連 混在 history で chunk が
+//   実際の 10連と ズレて 偽の tScore を計算していた (野沢さん指摘 2026-05-05 v1.4.3a)。
+//   v2 起動時は best/worst を リセットして 全 history から 再計算 (v1 不正値 を 上書き)。
+const TSCORE_BACKFILL_VERSION = 2;
 function backfillTScoreFromHistory() {
-  if (state.tScoreBackfilled) return;
+  if (state.tScoreBackfilledVersion === TSCORE_BACKFILL_VERSION) return;
   if (!Array.isArray(state.history) || state.history.length < 10) {
+    state.tScoreBackfilledVersion = TSCORE_BACKFILL_VERSION;
     state.tScoreBackfilled = true;
     saveState();
     return;
   }
-  // at 降順で並べて 10件 chunk (単発混在の場合は その10件で計算する近似)
+  // history は unshift で追加 = 新しい順、 at 降順 を期待。 念のため sort。
   const sorted = [...state.history].sort((a, b) => (b.at || 0) - (a.at || 0));
-  for (let i = 0; i + 10 <= sorted.length; i += 10) {
-    const chunk = sorted.slice(i, i + 10);
-    if (chunk.length !== 10) continue;
-    const rar = computeTenRollRarity(chunk);
-    const at = chunk[0].at || Date.now();
+  // at 差で「10連」 group を検出: 同一 10連の 10件は ms 差で連続 (50-100ms 程度)、
+  //   単発 と 10連 の境目は通常 数秒以上離れる。 threshold 1000ms で 安全に切り分け。
+  const GROUP_GAP_MS = 1000;
+  const groups = [];
+  let cur = [];
+  for (const entry of sorted) {
+    if (cur.length === 0) { cur.push(entry); continue; }
+    const prevAt = cur[cur.length - 1].at || 0;
+    const at = entry.at || 0;
+    if (Math.abs(prevAt - at) <= GROUP_GAP_MS) {
+      cur.push(entry);
+    } else {
+      groups.push(cur);
+      cur = [entry];
+    }
+  }
+  if (cur.length > 0) groups.push(cur);
+
+  // v2 起動時: 旧 v1 で書き込まれた 不正値 を 上書きするため リセット
+  state.bestTScore = -1; state.worstTScore = -1;
+  state.bestAt = 0; state.worstAt = 0;
+  state.bestResults = []; state.worstResults = [];
+
+  // 各 group を確認、 size === 10 のものだけ tScore 計算 (単発 group や 端数 group は除外)
+  for (const group of groups) {
+    if (group.length !== 10) continue;
+    const rar = computeTenRollRarity(group);
+    const at = group[0].at || Date.now();
     if (state.bestTScore < 0 || rar.tScore > state.bestTScore) {
       state.bestTScore = rar.tScore; state.bestAt = at;
-      state.bestResults = chunk.map(_sanitizeResultEntryForCloud);
+      state.bestResults = group.map(_sanitizeResultEntryForCloud);
     }
     if (state.worstTScore < 0 || rar.tScore < state.worstTScore) {
       state.worstTScore = rar.tScore; state.worstAt = at;
-      state.worstResults = chunk.map(_sanitizeResultEntryForCloud);
+      state.worstResults = group.map(_sanitizeResultEntryForCloud);
     }
   }
+  state.tScoreBackfilledVersion = TSCORE_BACKFILL_VERSION;
   state.tScoreBackfilled = true;
   saveState();
 }
@@ -7252,8 +7284,10 @@ function _initTeaserHeightSync() {
 document.addEventListener('DOMContentLoaded', _initTeaserHeightSync);
 document.addEventListener('DOMContentLoaded', () => { _refreshPickupChapter(); _refreshChapterReleaseLocks(); _renderHomeNextTeaser(); });
 // 偏差値ヒストリー 後計算: ゲスト時も含めて localStorage の history があれば 1度だけ backfill
+//   v2 ロジック (at連続性 chunking) に移行済の場合のみ skip。 旧 v1 backfill 済 user は v2 で再計算。
 document.addEventListener('DOMContentLoaded', () => {
-  if (typeof backfillTScoreFromHistory === 'function' && !state.tScoreBackfilled) {
+  if (typeof backfillTScoreFromHistory === 'function'
+      && state.tScoreBackfilledVersion !== TSCORE_BACKFILL_VERSION) {
     try { backfillTScoreFromHistory(); } catch (e) { console.error('tScore backfill error:', e); }
   }
 });
@@ -8683,6 +8717,7 @@ function sanitizeStateForCloud(s) {
     bestResults: Array.isArray(s.bestResults) ? s.bestResults.slice(0, 10).map(_sanitizeResultEntryForCloud) : [],
     worstResults: Array.isArray(s.worstResults) ? s.worstResults.slice(0, 10).map(_sanitizeResultEntryForCloud) : [],
     tScoreBackfilled: !!s.tScoreBackfilled,
+    tScoreBackfilledVersion: s.tScoreBackfilledVersion || 0,
     updatedAt: Date.now(),
   };
 }
@@ -8756,8 +8791,9 @@ async function onAuthReady(user) {
 
     try { await fbDb.ref('prism-gacha/users/' + user.uid + '/lastLoginAt').set(Date.now()); } catch (e) {}
 
-    // 偏差値ヒストリー 後計算 (cloud 同期完了後の history を 10件 chunk で計算、 1度だけ)
-    if (typeof backfillTScoreFromHistory === 'function' && !state.tScoreBackfilled) {
+    // 偏差値ヒストリー 後計算 (cloud 同期完了後の history を at連続性 chunking で 10連 group 化 → 1度だけ)
+    if (typeof backfillTScoreFromHistory === 'function'
+        && state.tScoreBackfilledVersion !== TSCORE_BACKFILL_VERSION) {
       backfillTScoreFromHistory();
     }
   } catch (e) {
@@ -8787,6 +8823,7 @@ function applyCloudState(cs) {
   state.bestResults = Array.isArray(cs.bestResults) ? cs.bestResults : [];
   state.worstResults = Array.isArray(cs.worstResults) ? cs.worstResults : [];
   state.tScoreBackfilled = !!cs.tScoreBackfilled;
+  state.tScoreBackfilledVersion = cs.tScoreBackfilledVersion || 0;
   localStorage.setItem("prism-gacha", JSON.stringify(state));
   updateHUD();
   if (typeof renderHistory === 'function') renderHistory();
@@ -8833,6 +8870,8 @@ function mergeStates(local, cloud) {
     merged.worstTScore = -1; merged.worstAt = 0; merged.worstResults = [];
   }
   merged.tScoreBackfilled = !!(local.tScoreBackfilled || cloud.tScoreBackfilled);
+  // backfill version は max を採用 (新 version で再計算した方を 優先 = 「より正しい」 計算結果)
+  merged.tScoreBackfilledVersion = Math.max(local.tScoreBackfilledVersion || 0, cloud.tScoreBackfilledVersion || 0);
   const spKeys = new Set([...Object.keys(local.storyProgress || {}), ...Object.keys(cloud.storyProgress || {})]);
   for (const k of spKeys) {
     const l = (local.storyProgress && local.storyProgress[k]) || {};
