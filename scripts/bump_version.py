@@ -139,30 +139,61 @@ def update_sw_version(new_ver: str) -> None:
         print(f"  SW_VERSION: sw.js")
 
 
-def update_version_json(data: dict, new_ver: str, mode: str, notes: list[str] | None) -> None:
+def update_version_json(data: dict, new_ver: str, mode: str, notes: list[str] | None,
+                        scheduled_at: str | None = None, scheduled_title: str | None = None) -> None:
     # 野沢さん指示 2026-05-05: releasedAt + changelog.date を 日時 (ISO 8601 + JST) に 変更
     # 同日に複数 release (緊急 hotfix 第1弾/第2弾 等) があった場合 区別可能、 データ量増は微々
+    #
+    # 野沢さん指示 2026-05-06: --scheduled で「事前 main push + 公開時刻自動切替」 対応。
+    # scheduled_at 指定時:
+    #   - data.version は 旧 version 維持 (= bump せず)
+    #   - data.scheduledRelease = { version: new_ver, at: scheduled_at, title? } 設定
+    #   - changelog entry に scheduled:true 追加、 date = scheduled_at
+    #   - 12:00 経過後は client が _getEffectiveVersion で自動切替 (再 push 不要)
     JST = timezone(timedelta(hours=9))
     now_iso = datetime.now(JST).isoformat(timespec="seconds")
-    data["version"] = new_ver
-    # 案A: lastDevSuffix を 連続管理 (野沢さん指示 2026-05-05)
-    # dev-suffix → 新 suffix を 記録 (= 同 X.Y.Z 系列で 二度使わないため)
-    # main release (patch/chapter/season) → 主バージョン bump で 新 namespace、 "" にリセット
-    _, new_suffix = parse_version(new_ver)
-    if mode == "dev-suffix":
-        data["lastDevSuffix"] = new_suffix
-    else:
+    is_scheduled_release = bool(scheduled_at) and mode in ("patch", "chapter", "season")
+    if is_scheduled_release:
+        # data.version は 維持 (旧 version)、 scheduledRelease のみ設定
+        data["scheduledRelease"] = {
+            "version": new_ver,
+            "at": scheduled_at,
+        }
+        if scheduled_title:
+            data["scheduledRelease"]["title"] = scheduled_title
+        # main release ではあるが 12:00 まで「待機」 状態。 lastDevSuffix もリセット (新 namespace)。
         data["lastDevSuffix"] = ""
-    if mode != "dev-suffix":
-        data["releasedAt"] = now_iso
         if notes:
             entry = {
                 "version": new_ver,
-                "date": now_iso,
+                "date": scheduled_at,
                 "type": "patch" if mode == "patch" else "major",
+                "scheduled": True,
                 "notes": notes,
             }
             data.setdefault("changelog", []).insert(0, entry)
+    else:
+        data["version"] = new_ver
+        # 案A: lastDevSuffix を 連続管理 (野沢さん指示 2026-05-05)
+        # dev-suffix → 新 suffix を 記録 (= 同 X.Y.Z 系列で 二度使わないため)
+        # main release (patch/chapter/season) → 主バージョン bump で 新 namespace、 "" にリセット
+        _, new_suffix = parse_version(new_ver)
+        if mode == "dev-suffix":
+            data["lastDevSuffix"] = new_suffix
+        else:
+            data["lastDevSuffix"] = ""
+            # 即時 release: scheduledRelease を消して 通常 changelog entry に
+            data.pop("scheduledRelease", None)
+        if mode != "dev-suffix":
+            data["releasedAt"] = now_iso
+            if notes:
+                entry = {
+                    "version": new_ver,
+                    "date": now_iso,
+                    "type": "patch" if mode == "patch" else "major",
+                    "notes": notes,
+                }
+                data.setdefault("changelog", []).insert(0, entry)
     with VERSION_JSON.open("w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
         f.write("\n")
@@ -215,6 +246,23 @@ def update_code_comments(new_ver: str) -> None:
         path.write_text(text, encoding="utf-8")
 
 
+def update_img_cache_version(new_ver: str) -> None:
+    """script.js の IMG_CACHE_VERSION を version 同期 (野沢さん指示 2026-05-06、
+    旧 date-suffix で 5/6 まで bump 漏れ → 場所画像 SW cache が古版で 404 をキャッシュ
+    して反映されない事故対策)。"""
+    if not SCRIPT_JS.exists():
+        return
+    text = SCRIPT_JS.read_text(encoding="utf-8")
+    text2 = re.sub(
+        r"const\s+IMG_CACHE_VERSION\s*=\s*'[\w.]+';",
+        f"const IMG_CACHE_VERSION = '{new_ver}';",
+        text,
+    )
+    if text != text2:
+        SCRIPT_JS.write_text(text2, encoding="utf-8")
+        print(f"  IMG_CACHE_VERSION: script.js")
+
+
 def git_branch() -> str:
     res = subprocess.run(
         ["git", "-C", str(ROOT), "rev-parse", "--abbrev-ref", "HEAD"],
@@ -242,6 +290,13 @@ def main() -> int:
     parser.add_argument("--auto-commit", action="store_true")
     parser.add_argument("--force", action="store_true",
                         help="branch 安全装置を override (緊急時のみ、 通常使わない)")
+    parser.add_argument("--scheduled", default=None,
+                        help="ISO 8601 公開時刻 (例: 2026-05-06T12:00:00+09:00)。 "
+                             "指定時: data.version は 維持、 scheduledRelease のみ設定 = "
+                             "事前 main push + 公開時刻自動切替 仕様 (野沢さん指示 2026-05-06)。 "
+                             "patch/chapter/season モードでのみ有効。")
+    parser.add_argument("--scheduled-title", default=None,
+                        help="--scheduled と併用、 scheduledRelease.title (オプション)。")
     args = parser.parse_args()
 
     branch = git_branch()
@@ -277,15 +332,31 @@ def main() -> int:
         print("[dry-run] ファイルは変更しません")
         return 0
 
-    update_version_json(data, new_ver, args.mode, args.note)
-    update_manifest(new_ver)
-    update_index_header_ver(new_ver)
-    update_readme(new_ver)
-    update_code_comments(new_ver)
-    print("=== cache buster 統一 (?v={new_ver}) ===".format(new_ver=new_ver))
-    update_all_cache_busters(new_ver)
-    update_sw_version(new_ver)
-    print("ファイル更新完了")
+    is_scheduled = bool(args.scheduled) and args.mode in ("patch", "chapter", "season")
+    update_version_json(data, new_ver, args.mode, args.note, args.scheduled, args.scheduled_title)
+    if not is_scheduled:
+        # 通常 release: 全ファイルの version 表記 + cache buster を 即時 更新
+        update_manifest(new_ver)
+        update_index_header_ver(new_ver)
+        update_readme(new_ver)
+        update_code_comments(new_ver)
+        print("=== cache buster 統一 (?v={new_ver}) ===".format(new_ver=new_ver))
+        update_all_cache_busters(new_ver)
+        update_sw_version(new_ver)
+        update_img_cache_version(new_ver)
+        print("ファイル更新完了")
+    else:
+        # scheduled release: data.version 維持、 manifest/header ver 表示は 旧 version のまま、
+        # cache buster + SW_VERSION + IMG_CACHE_VERSION も 旧 version のまま (= 12:00 まで 古版相当)。
+        # ただし 場所画像 等 新アセットは 新 cache buster で fetch すべき → 新 version の cache buster
+        # も 同時 適用。 こうすることで「事前に新アセットだけ DL 可、 ver 表示は 12:00 まで 旧」 の挙動。
+        print(f"=== scheduled release (ver 表示は data.version='{data['version']}' のまま、 cache buster は新 v{new_ver}) ===")
+        update_all_cache_busters(new_ver)
+        update_sw_version(new_ver)
+        update_img_cache_version(new_ver)
+        # manifest / header / README は 旧 version のまま (12:00 経過後は client side 切替で 自動表示変更)
+        print(f"scheduled at: {args.scheduled}")
+        print("ファイル更新完了 (ver 表示は client side で 12:00 ジャストに 自動切替)")
 
     if args.auto_commit:
         git_commit(new_ver, args.mode)

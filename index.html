@@ -24,8 +24,8 @@
 <link rel="icon" href="/images/icons/icon-32.png" type="image/png" sizes="32x32">
 <link rel="icon" href="/images/icons/icon-16.png" type="image/png" sizes="16x16">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
-<link rel="manifest" href="/manifest.json?v=1.4.4k">
-<link rel="stylesheet" href="/style.css?v=1.4.4k">
+<link rel="manifest" href="/manifest.json?v=1.4.4l">
+<link rel="stylesheet" href="/style.css?v=1.4.4l">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -67,7 +67,7 @@ if ('serviceWorker' in navigator) {
 </div>
 
 <header class="topbar">
-  <div class="title">✦ Prismaera <span class="title-kana">-プリズマエラ-</span> <span class="ver" id="app-version">v1.4.4k</span></div>
+  <div class="title">✦ Prismaera <span class="title-kana">-プリズマエラ-</span> <span class="ver" id="app-version">v1.4.4l</span></div>
   <div class="stats">
     <button id="btn-gallery" class="gallery-btn" title="図鑑 (Gキー)">📖 図鑑</button>
     <button id="btn-relations" class="gallery-btn" title="相関図">🌐 相関図</button>
@@ -396,7 +396,7 @@ if ('serviceWorker' in navigator) {
       <div class="story-header-controls">
         <span class="story-progress" id="story-progress">- / -</span>
         <button class="story-toc-btn" onclick="toggleStoryToc()" title="目次 (T)">📑</button>
-        <button class="story-close" onclick="closeStory()" title="閉じる (Esc)" aria-label="閉じる">×</button>
+        <button class="story-close" onclick="closeStory();openStoryList()" title="ストーリー一覧へ (Esc)" aria-label="ストーリー一覧へ">×</button>
       </div>
     </header>
     <div id="story-toc" class="story-toc">
@@ -683,7 +683,7 @@ if ('serviceWorker' in navigator) {
 <audio id="bgm-home" preload="auto"></audio>
 
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
-<script src="/script.js?v=1.4.4k"></script>
-<script src="/gasshuku.js?v=1.4.4k"></script>
+<script src="/script.js?v=1.4.4l"></script>
+<script src="/gasshuku.js?v=1.4.4l"></script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4k — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4l — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -6534,8 +6534,9 @@ const STORY_LOCATION_INLINE_CONFIG = {
 };
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
-// SW_VERSION や cache buster bump と合わせて IMG_CACHE_VERSION も bump すること
-const IMG_CACHE_VERSION = '20260504o';
+// version 完全同期 (野沢さん指示 2026-05-06): bump_version.py が自動で更新する。
+// 旧 date-suffix '20260504o' を 5/6 で見つけた事故を契機に version-based に統一。
+const IMG_CACHE_VERSION = '1.4.4l';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -9607,14 +9608,65 @@ const PRISMAERA_VERSION_LS_KEY = 'prismaera-last-seen-version';
 let _prismaeraChangelogCache = null;
 let _prismaeraTargetVersion = null;
 
+// ============================================================
+// scheduledRelease (野沢さん指示 2026-05-06、 12:00 ジャストで Ver + リリースノート 同時切替):
+// version.json の scheduledRelease = { version, at, title? } と changelog entry の scheduled:true で
+// 「事前 main push + 公開時刻自動切替」 を実現。
+// 5/6 11:00 等の早めに main push しても client 側で 11:59 までは「v1.4.4 + 章ロック」、
+// 12:00:00 ジャストで「v1.5.0 + 章公開 + リリースノート 表示 + update-modal pop up」 が同期発表。
+// ============================================================
+function _getEffectiveVersion(data) {
+  // data: version.json の object。 scheduledRelease.at 経過済なら scheduledRelease.version、
+  // それ以前 (or scheduledRelease 不在) なら data.version。
+  if (data && data.scheduledRelease && data.scheduledRelease.version && data.scheduledRelease.at) {
+    const ts = new Date(data.scheduledRelease.at).getTime();
+    if (!isNaN(ts) && Date.now() >= ts) {
+      return data.scheduledRelease.version;
+    }
+  }
+  return data ? data.version : '';
+}
+
+function _isScheduledFutureChangelogEntry(entry) {
+  // entry.scheduled:true && date > now なら 「12:00 まで非表示」
+  if (!entry || !entry.scheduled) return false;
+  const ts = _parseChangelogDate(entry.date);
+  return ts > 0 && ts > Date.now();
+}
+
+function _filterChangelogForDisplay(changelog) {
+  return (changelog || []).filter(e => !_isScheduledFutureChangelogEntry(e));
+}
+
+// 12:00 直前 ジャスト切替トリガ (起動時に scheduledRelease.at までの ms を計算 → 24h 以内なら setTimeout)
+let _scheduledReleaseFireTimer = null;
+function _scheduleVersionRefresh(data) {
+  if (_scheduledReleaseFireTimer) {
+    clearTimeout(_scheduledReleaseFireTimer);
+    _scheduledReleaseFireTimer = null;
+  }
+  if (!data || !data.scheduledRelease || !data.scheduledRelease.at) return;
+  const ts = new Date(data.scheduledRelease.at).getTime();
+  if (isNaN(ts)) return;
+  const wait = ts - Date.now();
+  if (wait <= 0 || wait > 24 * 60 * 60 * 1000) return;  // 過去 or 24h 超先
+  // 切替時刻の +1 秒で 再 check (waiting で精度確保)
+  _scheduledReleaseFireTimer = setTimeout(() => {
+    checkPrismaeraVersion();
+    if (typeof loadNotifications === 'function') loadNotifications();
+  }, wait + 1000);
+  console.log('[scheduled] firing in', Math.round(wait / 1000), 'sec for v' + data.scheduledRelease.version);
+}
+
 async function checkPrismaeraVersion() {
   try {
     const res = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
     if (!res.ok) return;
     const data = await res.json();
-    const currentVer = data.version;
-    const changelog = Array.isArray(data.changelog) ? data.changelog : [];
+    const currentVer = _getEffectiveVersion(data);
+    const changelog = _filterChangelogForDisplay(data.changelog);
     _prismaeraChangelogCache = changelog;
+    _scheduleVersionRefresh(data);
 
     // ヘッダーのバージョン表記を version.json で上書き
     // 【単一 source 統一 2026-05-04】 旧仕様 (cache buster suffix を末尾連結) は version.json の dev suffix と
@@ -10327,7 +10379,10 @@ async function loadNotifications() {
     if (res.ok) {
       const j = await res.json();
       const changelog = Array.isArray(j && j.changelog) ? j.changelog : [];
-      changelog.forEach(entry => {
+      // scheduled:true で date 未到来の entry は 「お知らせ」 一覧から filter (野沢さん指示 2026-05-06、
+      // 12:00 ジャストで Ver + リリースノート 同時切替)。 12:00 経過後は 通常 entry として表示。
+      const visibleChangelog = _filterChangelogForDisplay(changelog);
+      visibleChangelog.forEach(entry => {
         if (!entry || !entry.version) return;
         const at = _parseChangelogDate(entry.date);
         const body = (entry.notes || []).map(n => '・' + n).join('\n');
@@ -10340,6 +10395,8 @@ async function loadNotifications() {
           _src: 'changelog',
         });
       });
+      // scheduledRelease を 起動時に loadNotifications でも捕捉 (お知らせモーダル open 中の 12:00 切替対応)
+      if (typeof _scheduleVersionRefresh === 'function') _scheduleVersionRefresh(j);
     }
   } catch (e) { console.warn('changelog fetch failed:', e); }
 
