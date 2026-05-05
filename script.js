@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4p — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4q — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -3287,37 +3287,37 @@ async function _loadPcbCardData() {
 }
 
 function _renderPcbPaneDupeStages(card, c) {
-  // 凸効果 簡易表 (cardgame の dupeBonusOf 仕様: 0/half→+1/MAX→+2 + cost-1 + 効果範囲拡大)
+  // 凸毎の効果 全段階表示 (野沢さん指示 2026-05-06、 各凸で ﾊﾟﾜｰ +1 ずつ)
+  // 仕様: dupes 数 = ﾊﾟﾜｰﾎﾞｰﾅｽ値、 半分凸以上で onPlay 効果値 +1、 MAX 凸で ｺｽﾄ-1 + 効果範囲拡大
   const max = (typeof MAX_DUPS !== 'undefined' && MAX_DUPS[c.tier]) || 0;
   if (max === 0) return '';
   const half = Math.ceil(max / 2);
-  const stages = max === 1
-    ? [{ label: '凸 0', d: 0 }, { label: 'MAX 凸', d: 1 }]
-    : [{ label: '凸 0', d: 0 }, { label: `半分凸 (${half}凸)`, d: half }, { label: `MAX 凸 (${max}凸)`, d: max }];
   const cur = (state && state.dupCounts) ? (state.dupCounts[c.tier + '_' + c.name] || 0) : 0;
-  const rowsHtml = stages.map((s, i) => {
-    let bonus = 0;
-    if (s.d >= max) bonus = 2;
-    else if (s.d >= half) bonus = 1;
-    const cost = (s.d >= max && (card.cost || 0) > 0) ? (card.cost - 1) : card.cost;
-    // 現在凸数が この段階に該当するか (次段階より下なら ココ)
-    const nextD = stages[i + 1] ? stages[i + 1].d : Infinity;
-    const isCur = cur >= s.d && cur < nextD;
+  const rows = [];
+  for (let d = 0; d <= max; d++) {
+    const isMax = d === max;
+    const isHalf = !isMax && d >= half;
+    const bonus = d;  // 各凸で +1
+    const cost = (isMax && (card.cost || 0) > 0) ? (card.cost - 1) : card.cost;
+    const isCur = cur === d;
     const powerStr = bonus > 0 ? `${card.basePower}+${bonus}=<b>${card.basePower + bonus}</b>` : `<b>${card.basePower}</b>`;
-    const costStr = (s.d >= max && (card.cost || 0) > 0) ? `<s class="pcb-cost-orig">${card.cost}</s><b>${cost}</b>` : `<b>${cost}</b>`;
-    return `<tr class="${isCur ? 'pcb-stage-cur' : ''}">
-      <td>${s.label}${isCur ? ' <span class="pcb-stage-cur-mark">◀現在</span>' : ''}</td>
+    const costStr = isMax && (card.cost || 0) > 0 ? `<s class="pcb-cost-orig">${card.cost}</s><b>${cost}</b>` : `<b>${cost}</b>`;
+    let stageLabel = `${d}凸`;
+    if (isMax) stageLabel += ' <span class="pcb-stage-tag pcb-stage-tag-max">MAX</span>';
+    else if (isHalf) stageLabel += ' <span class="pcb-stage-tag pcb-stage-tag-half">効果+1</span>';
+    rows.push(`<tr class="${isCur ? 'pcb-stage-cur' : ''}">
+      <td>${stageLabel}${isCur ? ' <span class="pcb-stage-cur-mark">◀現在</span>' : ''}</td>
       <td>${powerStr}</td>
       <td>${costStr}</td>
-    </tr>`;
-  }).join('');
+    </tr>`);
+  }
   return `<div class="pcb-pane-stages-block">
     <div class="pcb-pane-stages-label">📊 凸毎の効果</div>
     <table class="pcb-pane-stages-table">
       <thead><tr><th>段階</th><th>ﾊﾟﾜｰ</th><th>ｺｽﾄ</th></tr></thead>
-      <tbody>${rowsHtml}</tbody>
+      <tbody>${rows.join('')}</tbody>
     </table>
-    <div class="pcb-pane-stages-note">※ MAX 凸: コスト-1 + 効果範囲が拡大</div>
+    <div class="pcb-pane-stages-note">※ ﾊﾟﾜｰは各凸で +1、 半分凸以上で 効果値+1、 MAX 凸で ｺｽﾄ-1 + 効果範囲拡大</div>
   </div>`;
 }
 
@@ -6698,7 +6698,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // version 完全同期 (野沢さん指示 2026-05-06): bump_version.py が自動で更新する。
 // 旧 date-suffix '20260504o' を 5/6 で見つけた事故を契機に version-based に統一。
-const IMG_CACHE_VERSION = '1.4.4p';
+const IMG_CACHE_VERSION = '1.4.4q';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる

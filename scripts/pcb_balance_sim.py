@@ -168,6 +168,36 @@ def make_academy_observer_deck():
         'ちさと', 'カイ',  # R x2
     )
 
+def make_silver_shrine_deck():
+    """銀霜+雪月神殿 (s1c5 銀霜系 + 既存 s1c1 ルミナ、 沈黙の盾 + 雪月神殿の祭司灯番 コンボ)"""
+    return _by_name(
+        '虹意 プリズマ',                                                          # LR x1
+        '黒月の盟主 ノクトリア', 'シ・ロエン', '地底市の母 リオラエル',           # UR x3
+        '仮面騎士 シオン', '銀霜剣聖 オリエル', '銀霜王 ノヴァ',                  # SSR x3
+        '月夜祭司 アスター', 'ルミナ', '雪月神殿見習い ラピス',                   # SR x3 (s1c5 + s1c1)
+        '銀霜近衛 セレン', '銀霜の工房娘',                                         # R x2
+    )
+
+def make_zenonia_silver_deck():
+    """ゼノニア+銀霜 (s1c4 機械工房 + s1c5 銀霜、 ヴァーレ女皇 + 北方の盟約)"""
+    return _by_name(
+        '虹意 プリズマ',                                                          # LR x1
+        '空挺女皇 ヴァーレ', '氷帝 グレイル', 'シ・ロエン',                       # UR x3
+        '空挺城総監 ガリオン', '真鍮の女将 ハーニア', '銀霜剣聖 オリエル',         # SSR x3
+        '空挺整備士 ベル', '月夜祭司 アスター', '銀霜近衛 セレン',                 # SR x3
+        '空の少年 ピット', '雪月神殿見習い ラピス',                               # R x2
+    )
+
+def make_church_alliance_deck():
+    """白焔教会連合 (church + 樹海 + 学院、 始まりの五人 + 教会次世代)"""
+    return _by_name(
+        '虹意 プリズマ',                                                          # LR x1
+        'セラフィエル', '波紋の聖女 イザベル', '森の射手 リナエ',                 # UR x3
+        'イザベル', '白焔教会見習い巫女 ルーナ', '紅玉海賊団船長 シャンティ',     # SSR x3
+        'メイリ', '詠聖 ベル', 'セラフィ',                                         # SR x3
+        '白焔教会従士 リッカ', 'ちさと',                                           # R x2
+    )
+
 DECK_PATTERNS = {
     'デフォルト': make_default_deck,  # 比較基準
     '海+プリズマ': make_aquasis_prism_deck,
@@ -175,6 +205,9 @@ DECK_PATTERNS = {
     '砂漠+紫竜+プリズマ': make_sahar_dragon_vil_deck,
     'S1C5+観測者': make_s1c5_observer_deck,
     '聖学+観測者三柱': make_academy_observer_deck,
+    '銀霜+雪月神殿': make_silver_shrine_deck,
+    'ゼノニア+銀霜': make_zenonia_silver_deck,
+    '教会連合': make_church_alliance_deck,
 }
 
 # ===== ゲームエンジン (簡易版) =====

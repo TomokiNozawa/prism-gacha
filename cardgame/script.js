@@ -148,11 +148,11 @@ function updateMuteUI() {
 // 優先順位: cards.json (手書き完全override) > effects_override.json (effect+effectText のみ) > pool.json (default)
 async function loadMasters() {
   const [c, k, l, p, eo] = await Promise.all([
-    fetch('./cards.json?v=1.4.4p').then(r => r.json()),
-    fetch('./combos.json?v=1.4.4p').then(r => r.json()),
-    fetch('./lane_effects.json?v=1.4.4p').then(r => r.json()),
-    fetch('./data/pool.json?v=1.4.4p').then(r => r.json()).catch(() => []),
-    fetch('./effects_override.json?v=1.4.4p').then(r => r.json()).catch(() => ({})),
+    fetch('./cards.json?v=1.4.4q').then(r => r.json()),
+    fetch('./combos.json?v=1.4.4q').then(r => r.json()),
+    fetch('./lane_effects.json?v=1.4.4q').then(r => r.json()),
+    fetch('./data/pool.json?v=1.4.4q').then(r => r.json()).catch(() => []),
+    fetch('./effects_override.json?v=1.4.4q').then(r => r.json()).catch(() => ({})),
   ]);
   // pool 全カード ← effects_override で effect/effectText を上書き ← cards.json で完全 override
   const cardsByName = new Map();
@@ -486,13 +486,13 @@ async function drawTurnStart() {
 }
 
 // ===== Power 計算 (派閥シナジー / レーン効果 / コンボ / 凸数 を毎回動的) =====
-// 凸 0 = +0、 凸 半分以上 = +1、 凸 MAX = +2 (DESIGN 4.3 段階パターン簡易版)
+// 凸数毎に +1 ﾊﾟﾜｰ加算 (野沢さん指示 2026-05-06、 各凸段階で +1 ずつ強化)
+// 高レアほど max 凸数が多い (R=1, SR=2, SSR=3, UR=4, LR=4) → MAX 凸時のボーナスも大きい:
+//   R MAX = +1 / SR MAX = +2 / SSR MAX = +3 / UR/LR MAX = +4
+// 旧仕様 (0凸/half/MAX = +0/+1/+2) では SSR 以上で 1凸/3凸 が 前段階と同じで段階雑だった事故対策
 function dupeBonusOf(card) {
   const max = MAX_DUPS[card.tier] || 0;
-  if (max === 0 || (card.dupes || 0) === 0) return 0;
-  if (card.dupes >= max) return 2;
-  if (card.dupes >= Math.ceil(max / 2)) return 1;
-  return 0;
+  return Math.min(card.dupes || 0, max);
 }
 function laneEffectFor(card, lane) {
   const e = state.laneEffects[lane];
@@ -1018,11 +1018,16 @@ function _renderDupeStageTable(card) {
     return;
   }
   wrap.style.display = '';
-  const half = Math.ceil(max / 2);
-  // 段階定義: 0 / half / max。 R は max=1 なので half=max=1 → 2段階に集約
-  const stages = max === 1
-    ? [{ label: '凸 0', dupes: 0 }, { label: 'MAX 凸 (+1)', dupes: 1 }]
-    : [{ label: '凸 0', dupes: 0 }, { label: `+${half} 凸 (半分)`, dupes: half }, { label: `MAX 凸 (+${max})`, dupes: max }];
+  // 全段階表示 (野沢さん指示 2026-05-06、 0凸〜MAX 凸の各段階で ﾊﾟﾜｰ +1 を見やすく)
+  const stages = [];
+  for (let d = 0; d <= max; d++) {
+    const isMax = d === max;
+    const isHalf = !isMax && d >= Math.ceil(max / 2);
+    let suffix = '';
+    if (isMax) suffix = ' (MAX)';
+    else if (isHalf) suffix = ' (効果+1)';
+    stages.push({ label: `${d}凸${suffix}`, dupes: d });
+  }
   const curDupes = card.dupes || 0;
   const fakeCardAt = (d) => ({ ...card, dupes: d });
   wrap.innerHTML = `<h3 class="cg-dupe-stage-title">📊 凸毎の効果</h3>
@@ -1038,7 +1043,7 @@ function _renderDupeStageTable(card) {
           const tp = card.basePower + bonus;
           const ec = effectiveCost(fc);
           const effDesc = _describeEffect(fc);
-          const isCur = curDupes === s.dupes || (s.dupes === max && curDupes >= max) || (s.dupes === half && curDupes >= half && curDupes < max);
+          const isCur = curDupes === s.dupes;
           return `<tr class="${isCur ? 'cg-dupe-stage-current' : ''}">
             <td>${s.label}${isCur ? ' <span class="cg-dupe-stage-cur-mark">◀現在</span>' : ''}</td>
             <td>${bonus > 0 ? `${card.basePower}+${bonus}=<b>${tp}</b>` : `<b>${tp}</b>`}</td>
