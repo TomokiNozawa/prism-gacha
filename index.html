@@ -24,8 +24,8 @@
 <link rel="icon" href="/images/icons/icon-32.png" type="image/png" sizes="32x32">
 <link rel="icon" href="/images/icons/icon-16.png" type="image/png" sizes="16x16">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
-<link rel="manifest" href="/manifest.json?v=1.4.3">
-<link rel="stylesheet" href="/style.css?v=1.4.3">
+<link rel="manifest" href="/manifest.json?v=1.4.3a">
+<link rel="stylesheet" href="/style.css?v=1.4.3a">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -67,7 +67,7 @@ if ('serviceWorker' in navigator) {
 </div>
 
 <header class="topbar">
-  <div class="title">✦ Prismaera <span class="title-kana">-プリズマエラ-</span> <span class="ver" id="app-version">v1.4.3</span></div>
+  <div class="title">✦ Prismaera <span class="title-kana">-プリズマエラ-</span> <span class="ver" id="app-version">v1.4.3a</span></div>
   <div class="stats">
     <button id="btn-gallery" class="gallery-btn" title="図鑑 (Gキー)">📖 図鑑</button>
     <button id="btn-relations" class="gallery-btn" title="相関図">🌐 相関図</button>
@@ -143,6 +143,26 @@ if ('serviceWorker' in navigator) {
       </div>
     </div>
 
+    <!-- カードバトル 主役行 (アカウント登録者限定、 hero 直下に full-width で格上げ表示) -->
+    <a class="home-cardgame-row" id="home-cardgame-row" href="/cardgame/" style="display:none" aria-label="カードバトル β">
+      <div class="home-cardgame-row-aurora"></div>
+      <div class="home-cardgame-row-icon">🎴</div>
+      <div class="home-cardgame-row-text">
+        <div class="home-cardgame-row-title">
+          <span class="home-cardgame-row-headline">カードバトル</span>
+          <span class="home-cardgame-badge">β</span>
+          <span class="home-cardgame-badge home-cardgame-new" id="home-cardgame-new" style="display:none">NEW!</span>
+        </div>
+        <div class="home-cardgame-row-tagline">虹霊たちが、 場に降りる ─ 派閥シナジー & 章コンボの戦略バトル</div>
+        <div class="home-cardgame-row-meta">
+          <span class="home-cardgame-row-meta-tag">vs AI 4段階</span>
+          <span class="home-cardgame-row-meta-sep">ー</span>
+          <span class="home-cardgame-row-meta-tag">3デッキ × 3レーン × 6ターン</span>
+        </div>
+      </div>
+      <div class="home-cardgame-row-arrow">▶</div>
+    </a>
+
     <div class="home-actions-row">
       <!-- 左カラム (主役): Story Entry + 次章ティザー -->
       <div class="story-stack">
@@ -173,18 +193,8 @@ if ('serviceWorker' in navigator) {
         <div class="story-next-teaser" aria-label="次章準備中"></div>
       </div>
 
-      <!-- 右カラム: ご意見・ご要望 + (ログイン者限定) カードゲームβ -->
+      <!-- 右カラム: ご意見・ご要望 -->
       <div class="home-right-col">
-        <!-- カードゲーム (Phase 0 PoC) — アカウント登録者限定で表示 -->
-        <a class="home-cardgame-card" id="home-cardgame-card" href="/cardgame/" style="display:none" aria-label="カードゲームPoC">
-          <div class="home-cardgame-aurora"></div>
-          <div class="home-cardgame-icon">🎴</div>
-          <div class="home-cardgame-text">
-            <div class="home-cardgame-title">カードゲーム <span class="home-cardgame-badge">β</span></div>
-            <div class="home-cardgame-sub">Phase 0 PoC 公開中 — vs AI で試遊</div>
-          </div>
-          <div class="home-cardgame-arrow">→</div>
-        </a>
         <!-- ご意見・ご要望 -->
         <div class="home-feedback">
           <button type="button" class="home-feedback-card" onclick="openFeedbackModal()">
@@ -460,6 +470,31 @@ if ('serviceWorker' in navigator) {
         <div class="account-info-row"><span>所持LR</span><b id="account-info-lr">0</b></div>
         <div class="account-info-row"><span>最終同期</span><b id="account-info-sync">-</b></div>
       </div>
+
+      <!-- 偏差値ヒストリー (10連 自己ベスト/ワースト、 「結果を見る」 で過去リザルト 再表示) -->
+      <div class="account-tscore-section">
+        <div class="account-tscore-title">📊 偏差値ヒストリー</div>
+        <div class="account-tscore-rows">
+          <div class="account-tscore-row" id="account-tscore-best" style="display:none">
+            <div class="ts-label ts-label-best">最高</div>
+            <div class="ts-main">
+              <div class="ts-value" id="account-tscore-best-value">-</div>
+              <div class="ts-date" id="account-tscore-best-date">-</div>
+            </div>
+            <button type="button" class="ts-view" onclick="showTScoreArchive('best')">結果を見る</button>
+          </div>
+          <div class="account-tscore-row" id="account-tscore-worst" style="display:none">
+            <div class="ts-label ts-label-worst">最低</div>
+            <div class="ts-main">
+              <div class="ts-value" id="account-tscore-worst-value">-</div>
+              <div class="ts-date" id="account-tscore-worst-date">-</div>
+            </div>
+            <button type="button" class="ts-view" onclick="showTScoreArchive('worst')">結果を見る</button>
+          </div>
+        </div>
+        <div class="account-tscore-empty" id="account-tscore-empty">10連を引くとここに記録されます</div>
+      </div>
+
       <button class="account-logout" onclick="doAccountLogout()">ログアウト (ゲストに戻る)</button>
     </div>
   </div>
@@ -620,7 +655,7 @@ if ('serviceWorker' in navigator) {
 <audio id="bgm-home" preload="auto"></audio>
 
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
-<script src="/script.js?v=1.4.3"></script>
-<script src="/gasshuku.js?v=1.4.3"></script>
+<script src="/script.js?v=1.4.3a"></script>
+<script src="/gasshuku.js?v=1.4.3a"></script>
 </body>
 </html>

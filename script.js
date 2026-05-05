@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.3 — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.3a — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -1053,6 +1053,14 @@ function loadState() {
       unlockedSet: raw.unlockedSet || {},  // "UR_セラフィエル": true （永続）
       dupCounts: raw.dupCounts || {},       // "UR_セラフィエル": 凸数 (初回0)
       storyProgress: raw.storyProgress || {}, // {s1c1: {lastSceneIndex, totalScenes, lastReadAt, completed}}
+      // 偏差値ヒストリー (野沢さん指示 2026-05-05): 10連 偏差値の自己ベスト/ワーストを記録
+      bestTScore: typeof raw.bestTScore === 'number' ? raw.bestTScore : -1,
+      worstTScore: typeof raw.worstTScore === 'number' ? raw.worstTScore : -1,
+      bestAt: raw.bestAt || 0,
+      worstAt: raw.worstAt || 0,
+      bestResults: Array.isArray(raw.bestResults) ? raw.bestResults : [],
+      worstResults: Array.isArray(raw.worstResults) ? raw.worstResults : [],
+      tScoreBackfilled: !!raw.tScoreBackfilled,  // 過去 history からの後計算完了フラグ
     };
     // マイグレーション: 既存 history からunlockedSetを補完 (旧セーブデータ救済)
     for (const h of s.history) {
@@ -1061,7 +1069,8 @@ function loadState() {
     }
     return s;
   } catch {
-    return { total:0, ur:0, pity:0, history:[], galleryViewed:{}, unlockedSet:{}, dupCounts:{}, storyProgress:{} };
+    return { total:0, ur:0, pity:0, history:[], galleryViewed:{}, unlockedSet:{}, dupCounts:{}, storyProgress:{},
+      bestTScore: -1, worstTScore: -1, bestAt: 0, worstAt: 0, bestResults: [], worstResults: [], tScoreBackfilled: false };
   }
 }
 function saveState() {
@@ -2848,7 +2857,10 @@ function hideHintTap() {
   if (h) h.remove();
 }
 
-function showResult(results, best) {
+function showResult(results, best, opts) {
+  // opts.archive: 過去ベスト/ワースト 再表示モード (best/worst 更新せず、 ヘッダ文言を変える)
+  const isArchive = !!(opts && opts.archive);
+  const archiveAt = opts && opts.archiveAt;
   const grid = $("#result-grid");
   grid.innerHTML = "";
   // 最高レアを最後にソート(結果確認しやすい)
@@ -2892,10 +2904,17 @@ function showResult(results, best) {
   const nUR = results.filter(r => r.tier === "UR").length;
   const nSSR = results.filter(r => r.tier === "SSR").length;
   const nNew = results.filter(r => r.isNew).length;
-  let title = hasLR ? `👑 LEGEND ×${nLR} 降臨!!!` :
-              hasUR ? `🌈 UR ×${nUR} 獲得!!` :
-              hasSSR ? `✨ SSR ×${nSSR} 獲得!` : "10連結果";
-  if (nNew > 0) title += `  /  NEW ×${nNew}`;
+  let title;
+  if (isArchive) {
+    const dt = archiveAt ? new Date(archiveAt) : null;
+    const dateStr = dt ? `${dt.getMonth()+1}/${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}` : '';
+    title = `📊 過去のリザルト${dateStr ? ' (' + dateStr + ' 記録)' : ''}`;
+  } else {
+    title = hasLR ? `👑 LEGEND ×${nLR} 降臨!!!` :
+            hasUR ? `🌈 UR ×${nUR} 獲得!!` :
+            hasSSR ? `✨ SSR ×${nSSR} 獲得!` : "10連結果";
+    if (nNew > 0) title += `  /  NEW ×${nNew}`;
+  }
   $("#result-title").textContent = title;
 
   // 希少度表示
@@ -2917,8 +2936,68 @@ function showResult(results, best) {
     `<button type="button" class="rank-help-btn" onclick="showRankTable()" title="ランク表を表示">ランク表 (?)</button>`;
   rarBox.appendChild(lineEl);
 
+  // 偏差値ヒストリー: 10連 (10件) のみ自己ベスト/ワーストを更新 (archive モード時はスキップ)
+  if (!isArchive && results.length === 10) {
+    _updateTScoreHistory(results, rar.tScore);
+  }
+
   $("#result").classList.add("active");
   resultOpenedAt = Date.now();
+}
+
+// 偏差値ヒストリー: 10連 結果と tScore で自己ベスト/ワーストを更新
+function _updateTScoreHistory(results, tScore) {
+  const now = Date.now();
+  const snap = results.map(_sanitizeResultEntryForCloud);
+  let bestUpdated = false, worstUpdated = false;
+  if (state.bestTScore < 0 || tScore > state.bestTScore) {
+    state.bestTScore = tScore;
+    state.bestAt = now;
+    state.bestResults = snap;
+    bestUpdated = true;
+  }
+  if (state.worstTScore < 0 || tScore < state.worstTScore) {
+    state.worstTScore = tScore;
+    state.worstAt = now;
+    state.worstResults = snap;
+    worstUpdated = true;
+  }
+  if (bestUpdated || worstUpdated) {
+    saveState();
+    if (bestUpdated && state.bestTScore >= 50 && typeof showToast === 'function') {
+      // 控えめな更新通知 (派手なエフェクト無し、 電池配慮)
+      showToast(`📊 自己ベスト更新! 偏差値 ${tScore}`);
+    }
+  }
+}
+
+// 偏差値ヒストリー: 過去 history (Firebase 同期 直近120件) を 10件 chunk して 後計算
+// 起動時に1回だけ実行 (state.tScoreBackfilled で多重実行防止)
+function backfillTScoreFromHistory() {
+  if (state.tScoreBackfilled) return;
+  if (!Array.isArray(state.history) || state.history.length < 10) {
+    state.tScoreBackfilled = true;
+    saveState();
+    return;
+  }
+  // at 降順で並べて 10件 chunk (単発混在の場合は その10件で計算する近似)
+  const sorted = [...state.history].sort((a, b) => (b.at || 0) - (a.at || 0));
+  for (let i = 0; i + 10 <= sorted.length; i += 10) {
+    const chunk = sorted.slice(i, i + 10);
+    if (chunk.length !== 10) continue;
+    const rar = computeTenRollRarity(chunk);
+    const at = chunk[0].at || Date.now();
+    if (state.bestTScore < 0 || rar.tScore > state.bestTScore) {
+      state.bestTScore = rar.tScore; state.bestAt = at;
+      state.bestResults = chunk.map(_sanitizeResultEntryForCloud);
+    }
+    if (state.worstTScore < 0 || rar.tScore < state.worstTScore) {
+      state.worstTScore = rar.tScore; state.worstAt = at;
+      state.worstResults = chunk.map(_sanitizeResultEntryForCloud);
+    }
+  }
+  state.tScoreBackfilled = true;
+  saveState();
 }
 
 function closeResult() {
@@ -7172,6 +7251,12 @@ function _initTeaserHeightSync() {
 }
 document.addEventListener('DOMContentLoaded', _initTeaserHeightSync);
 document.addEventListener('DOMContentLoaded', () => { _refreshPickupChapter(); _refreshChapterReleaseLocks(); _renderHomeNextTeaser(); });
+// 偏差値ヒストリー 後計算: ゲスト時も含めて localStorage の history があれば 1度だけ backfill
+document.addEventListener('DOMContentLoaded', () => {
+  if (typeof backfillTScoreFromHistory === 'function' && !state.tScoreBackfilled) {
+    try { backfillTScoreFromHistory(); } catch (e) { console.error('tScore backfill error:', e); }
+  }
+});
 // 2分毎に再判定 (リリース時刻を跨いだ瞬間に自動 unlock + ピックアップ章 自動切替 + ティザー切替)
 // 野沢さん指摘 2026-05-03 「スマホ電池の減りが凄い」: 60秒→120秒に緩和 + Page Visibility API で hidden 時はスキップ
 setInterval(() => {
@@ -8591,7 +8676,25 @@ function sanitizeStateForCloud(s) {
     dupCounts: s.dupCounts || {},
     galleryViewed: s.galleryViewed || {},
     storyProgress: s.storyProgress || {},
+    bestTScore: typeof s.bestTScore === 'number' ? s.bestTScore : -1,
+    worstTScore: typeof s.worstTScore === 'number' ? s.worstTScore : -1,
+    bestAt: s.bestAt || 0,
+    worstAt: s.worstAt || 0,
+    bestResults: Array.isArray(s.bestResults) ? s.bestResults.slice(0, 10).map(_sanitizeResultEntryForCloud) : [],
+    worstResults: Array.isArray(s.worstResults) ? s.worstResults.slice(0, 10).map(_sanitizeResultEntryForCloud) : [],
+    tScoreBackfilled: !!s.tScoreBackfilled,
     updatedAt: Date.now(),
+  };
+}
+
+// 偏差値ヒストリー: 10連 results を Firebase 保存用に圧縮 (容量節約 + 必要 field のみ)
+function _sanitizeResultEntryForCloud(r) {
+  return {
+    name: r && r.name ? String(r.name) : '',
+    tier: r && r.tier ? String(r.tier) : 'R',
+    img: r && r.img ? String(r.img) : '',
+    season: r && r.season ? r.season : 1,
+    chapter: r && r.chapter ? String(r.chapter) : '',
   };
 }
 
@@ -8652,6 +8755,11 @@ async function onAuthReady(user) {
     }
 
     try { await fbDb.ref('prism-gacha/users/' + user.uid + '/lastLoginAt').set(Date.now()); } catch (e) {}
+
+    // 偏差値ヒストリー 後計算 (cloud 同期完了後の history を 10件 chunk で計算、 1度だけ)
+    if (typeof backfillTScoreFromHistory === 'function' && !state.tScoreBackfilled) {
+      backfillTScoreFromHistory();
+    }
   } catch (e) {
     console.error('onAuthReady error:', e);
   }
@@ -8671,6 +8779,14 @@ function applyCloudState(cs) {
   state.unlockedSet = cs.unlockedSet || {};
   state.dupCounts = cs.dupCounts || {};
   state.storyProgress = cs.storyProgress || {};
+  // 偏差値ヒストリー (cloud → local)
+  state.bestTScore = typeof cs.bestTScore === 'number' ? cs.bestTScore : -1;
+  state.worstTScore = typeof cs.worstTScore === 'number' ? cs.worstTScore : -1;
+  state.bestAt = cs.bestAt || 0;
+  state.worstAt = cs.worstAt || 0;
+  state.bestResults = Array.isArray(cs.bestResults) ? cs.bestResults : [];
+  state.worstResults = Array.isArray(cs.worstResults) ? cs.worstResults : [];
+  state.tScoreBackfilled = !!cs.tScoreBackfilled;
   localStorage.setItem("prism-gacha", JSON.stringify(state));
   updateHUD();
   if (typeof renderHistory === 'function') renderHistory();
@@ -8693,6 +8809,30 @@ function mergeStates(local, cloud) {
   }
   const combined = [...(cloud.history || []), ...(local.history || [])];
   merged.history = combined.slice(-120);
+  // 偏差値ヒストリー: 高い方/低い方を採用 (記録 -1 は未記録扱いで除外)
+  const localBest = (typeof local.bestTScore === 'number' && local.bestTScore >= 0) ? local.bestTScore : -1;
+  const cloudBest = (typeof cloud.bestTScore === 'number' && cloud.bestTScore >= 0) ? cloud.bestTScore : -1;
+  if (localBest >= 0 && (cloudBest < 0 || localBest >= cloudBest)) {
+    merged.bestTScore = localBest; merged.bestAt = local.bestAt || 0;
+    merged.bestResults = Array.isArray(local.bestResults) ? local.bestResults : [];
+  } else if (cloudBest >= 0) {
+    merged.bestTScore = cloudBest; merged.bestAt = cloud.bestAt || 0;
+    merged.bestResults = Array.isArray(cloud.bestResults) ? cloud.bestResults : [];
+  } else {
+    merged.bestTScore = -1; merged.bestAt = 0; merged.bestResults = [];
+  }
+  const localWorst = (typeof local.worstTScore === 'number' && local.worstTScore >= 0) ? local.worstTScore : -1;
+  const cloudWorst = (typeof cloud.worstTScore === 'number' && cloud.worstTScore >= 0) ? cloud.worstTScore : -1;
+  if (localWorst >= 0 && (cloudWorst < 0 || localWorst <= cloudWorst)) {
+    merged.worstTScore = localWorst; merged.worstAt = local.worstAt || 0;
+    merged.worstResults = Array.isArray(local.worstResults) ? local.worstResults : [];
+  } else if (cloudWorst >= 0) {
+    merged.worstTScore = cloudWorst; merged.worstAt = cloud.worstAt || 0;
+    merged.worstResults = Array.isArray(cloud.worstResults) ? cloud.worstResults : [];
+  } else {
+    merged.worstTScore = -1; merged.worstAt = 0; merged.worstResults = [];
+  }
+  merged.tScoreBackfilled = !!(local.tScoreBackfilled || cloud.tScoreBackfilled);
   const spKeys = new Set([...Object.keys(local.storyProgress || {}), ...Object.keys(cloud.storyProgress || {})]);
   for (const k of spKeys) {
     const l = (local.storyProgress && local.storyProgress[k]) || {};
@@ -8731,6 +8871,8 @@ function showAccountModal() {
     $('#account-info-sync').textContent = authUser.metadata && authUser.metadata.lastSignInTime
       ? new Date(authUser.metadata.lastSignInTime).toLocaleString('ja-JP')
       : '-';
+    // 偏差値ヒストリー rendering
+    _renderTScoreHistorySection();
   } else {
     $('#account-guest-view').style.display = '';
     $('#account-logged-view').style.display = 'none';
@@ -8738,6 +8880,59 @@ function showAccountModal() {
     setTimeout(() => { const el = $('#login-nickname'); if (el) el.focus(); }, 50);
   }
   modal.classList.add('active');
+}
+
+// 偏差値ヒストリー UI: best/worst を レンダリング、 未記録なら empty メッセージのみ
+function _renderTScoreHistorySection() {
+  const bestRow = document.getElementById('account-tscore-best');
+  const worstRow = document.getElementById('account-tscore-worst');
+  const emptyEl = document.getElementById('account-tscore-empty');
+  if (!bestRow || !worstRow || !emptyEl) return;
+  const hasBest = typeof state.bestTScore === 'number' && state.bestTScore >= 0;
+  const hasWorst = typeof state.worstTScore === 'number' && state.worstTScore >= 0;
+  if (hasBest) {
+    bestRow.style.display = '';
+    document.getElementById('account-tscore-best-value').textContent = `偏差値 ${state.bestTScore}`;
+    document.getElementById('account-tscore-best-date').textContent = _formatTScoreDate(state.bestAt);
+  } else {
+    bestRow.style.display = 'none';
+  }
+  if (hasWorst) {
+    worstRow.style.display = '';
+    document.getElementById('account-tscore-worst-value').textContent = `偏差値 ${state.worstTScore}`;
+    document.getElementById('account-tscore-worst-date').textContent = _formatTScoreDate(state.worstAt);
+  } else {
+    worstRow.style.display = 'none';
+  }
+  emptyEl.style.display = (hasBest || hasWorst) ? 'none' : '';
+}
+
+function _formatTScoreDate(ts) {
+  if (!ts) return '-';
+  const d = new Date(ts);
+  if (isNaN(d.getTime())) return '-';
+  const m = d.getMonth() + 1, dd = d.getDate();
+  const hh = String(d.getHours()).padStart(2, '0'), mm = String(d.getMinutes()).padStart(2, '0');
+  return `${m}/${dd} ${hh}:${mm}`;
+}
+
+// 「結果を見る」: 過去 best/worst の 10連 リザルトを再表示 (showResult を archive モードで呼出)
+function showTScoreArchive(type) {
+  const results = (type === 'best') ? state.bestResults : state.worstResults;
+  const at = (type === 'best') ? state.bestAt : state.worstAt;
+  if (!Array.isArray(results) || results.length !== 10) return;
+  // showResult が要求する 最低限の field を補完 (img/name/tier はあるはず)
+  const filled = results.map(r => ({
+    name: r.name || '',
+    tier: r.tier || 'R',
+    img: r.img || '',
+    season: r.season || 1,
+    chapter: r.chapter || '',
+    isNew: false,
+    dupGained: null,
+  }));
+  closeAccountModal();
+  showResult(filled, null, { archive: true, archiveAt: at });
 }
 
 function closeAccountModal() {
@@ -8780,10 +8975,18 @@ function updateAccountButton() {
   const envDevBtn = document.getElementById('btn-env-dev');
   if (envProdBtn) envProdBtn.style.display = isDevEnv ? '' : 'none';
   if (envDevBtn) envDevBtn.style.display = (isProdEnv && authUser && isPrismAdmin) ? '' : 'none';
-  // Home カードゲーム入口 (Phase 0 PoC) はアカウント登録者限定
-  const cardgameEntry = document.getElementById('home-cardgame-card');
+  // Home カードバトル 主役行 はアカウント登録者限定
+  const cardgameEntry = document.getElementById('home-cardgame-row');
   if (cardgameEntry) {
     cardgameEntry.style.display = authUser ? 'flex' : 'none';
+  }
+  // NEW! バッジ: PCB β リリース日 (2026-05-05 12:00 JST) から 14日間表示
+  const newBadge = document.getElementById('home-cardgame-new');
+  if (newBadge) {
+    const PCB_RELEASE_AT = Date.parse('2026-05-05T12:00:00+09:00');
+    const NEW_BADGE_DURATION_MS = 14 * 24 * 60 * 60 * 1000;  // 14日
+    const elapsed = Date.now() - PCB_RELEASE_AT;
+    newBadge.style.display = (elapsed >= 0 && elapsed < NEW_BADGE_DURATION_MS) ? '' : 'none';
   }
 }
 

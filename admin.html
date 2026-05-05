@@ -286,7 +286,7 @@ body {
 }
 .users-row {
   display: grid;
-  grid-template-columns: minmax(140px, 1.6fr) 0.7fr 0.8fr 0.6fr 0.6fr 0.85fr 1.0fr 0.65fr 1.15fr 1.15fr;
+  grid-template-columns: minmax(140px, 1.6fr) 0.7fr 0.8fr 0.6fr 0.6fr 0.55fr 0.55fr 0.85fr 1.0fr 0.65fr 1.15fr 1.15fr;
   gap: 8px;
   padding: 14px 18px;
   border-bottom: 1px solid rgba(200, 180, 255, 0.08);
@@ -346,8 +346,8 @@ body {
     -webkit-overflow-scrolling: touch;
   }
   .users-row {
-    grid-template-columns: 140px 60px 75px 55px 55px 80px 95px 60px 100px 110px;
-    min-width: 920px;
+    grid-template-columns: 140px 60px 75px 55px 55px 50px 50px 80px 95px 60px 100px 110px;
+    min-width: 1000px;
   }
   .users-head { position: relative; }
   .admin-tab { padding: 8px 12px; font-size: 12px; }
@@ -459,7 +459,7 @@ body {
     font-size: 12px;
     gap: 6px;
   }
-  .users-row .col-lr, .users-row .col-dup, .users-row .col-lastlogin { display: none; }
+  .users-row .col-lr, .users-row .col-dup, .users-row .col-tscore-best, .users-row .col-tscore-worst, .users-row .col-lastlogin { display: none; }
   .users-head .col-ur::after { content: '/ログイン'; display: block; font-size: 9px; color: rgba(200,180,255,0.4); }
 }
 
@@ -638,6 +638,8 @@ body {
         <div class="col-ur" data-sort="ur">UR</div>
         <div class="col-lr" data-sort="lr">LR</div>
         <div class="col-dup" data-sort="dup">凸</div>
+        <div class="col-tscore-best" data-sort="best-tscore">📊最高</div>
+        <div class="col-tscore-worst" data-sort="worst-tscore">最低</div>
         <div class="col-gasshuku" data-sort="gasshuku">🎌召喚数</div>
         <div class="col-story" data-sort="story">📖物語</div>
         <div class="col-streak" data-sort="streak">🔥連続</div>
@@ -997,9 +999,12 @@ function renderUsers(users, uidToNickname, guestDevices) {
     const story = storyProgressText(s.storyProgress);
     const gasshukuCnt = gasshukuByUid[u.uid] || 0;
 
+    const bestTScore = (typeof s.bestTScore === 'number' && s.bestTScore >= 0) ? s.bestTScore : -1;
+    const worstTScore = (typeof s.worstTScore === 'number' && s.worstTScore >= 0) ? s.worstTScore : -1;
     userRowData.push({
       uid: u.uid, nickname, nicknameDim, isMe: u.uid === currentUid,
       total, ur, lr, dup, gasshukuCnt, story,
+      bestTScore, worstTScore,
       lastAt, lastAtTs: u.lastLoginAt || 0,
       registeredAt, registeredAtTs: u.createdAt || 0,
       streakCur: u.streakCurrent || 0,
@@ -1043,6 +1048,8 @@ function renderUsers(users, uidToNickname, guestDevices) {
       case 'ur': av = a.ur; bv = b.ur; break;
       case 'lr': av = a.lr; bv = b.lr; break;
       case 'dup': av = a.dup; bv = b.dup; break;
+      case 'best-tscore': av = a.bestTScore !== undefined ? a.bestTScore : -1; bv = b.bestTScore !== undefined ? b.bestTScore : -1; break;
+      case 'worst-tscore': av = a.worstTScore !== undefined ? a.worstTScore : -1; bv = b.worstTScore !== undefined ? b.worstTScore : -1; break;
       case 'gasshuku': av = a.gasshukuCnt; bv = b.gasshukuCnt; break;
       case 'story': av = a.story.sortKey; bv = b.story.sortKey; break;
       case 'streak': av = a.streakCur || 0; bv = b.streakCur || 0; break;
@@ -1068,6 +1075,8 @@ function renderUsers(users, uidToNickname, guestDevices) {
         <div class="u-count col-ur dim">—</div>
         <div class="u-count col-lr dim">—</div>
         <div class="u-count col-dup dim">—</div>
+        <div class="u-count col-tscore-best dim">—</div>
+        <div class="u-count col-tscore-worst dim">—</div>
         <div class="u-count col-gasshuku ${d.gasshukuCnt === 0 ? 'dim' : ''}">${d.gasshukuCnt > 0 ? d.gasshukuCnt : '—'}</div>
         <div class="u-story dim">—</div>
         <div class="u-streak dim col-streak">—</div>
@@ -1100,12 +1109,20 @@ function renderUsers(users, uidToNickname, guestDevices) {
         detail.classList.toggle('active');
       });
     } else {
+      const bestCell = (typeof d.bestTScore === 'number' && d.bestTScore >= 0)
+        ? `<div class="u-count col-tscore-best">${d.bestTScore}</div>`
+        : `<div class="u-count col-tscore-best dim">—</div>`;
+      const worstCell = (typeof d.worstTScore === 'number' && d.worstTScore >= 0)
+        ? `<div class="u-count col-tscore-worst">${d.worstTScore}</div>`
+        : `<div class="u-count col-tscore-worst dim">—</div>`;
       row.innerHTML = `
         <div class="u-nickname ${d.isMe ? 'me' : ''} ${d.nicknameDim ? 'u-uid-fallback' : ''}">${escapeHtml(d.nickname)}</div>
         <div class="u-count ${d.total === 0 ? 'dim' : ''}">${d.total}</div>
         <div class="u-count col-ur ${d.ur === 0 ? 'dim' : ''}">${d.ur}/${TIER_MAX.UR}</div>
         <div class="u-count col-lr ${d.lr === 0 ? 'dim' : ''}">${d.lr}/${TIER_MAX.LR}</div>
         <div class="u-count col-dup ${d.dup === 0 ? 'dim' : ''}">${d.dup}</div>
+        ${bestCell}
+        ${worstCell}
         <div class="u-count col-gasshuku ${d.gasshukuCnt === 0 ? 'dim' : ''}">${d.gasshukuCnt}</div>
         <div class="u-story ${d.story.dim ? 'dim' : ''}">${d.story.text}</div>
         <div class="u-streak col-streak ${d.streakCur === 0 ? 'dim' : ''}">${d.streakCur || 0}<span class="streak-max">/${d.streakMax || 0}</span></div>
