@@ -1709,10 +1709,93 @@ def check_illustration_position_consistency():
     return checked
 
 
+def check_illustration_setting_reference():
+    """ルール7-35 (WARNING 2026-05-06): 章別 prompt/locations_s1cN.md で
+    同じシーン番号 (例 1-1, 4-1) に「背景」 + 「挿絵」 が並存する場合、 挿絵プロンプトに
+    背景画像 filename が 参照添付として 記載されているかチェック。
+    2026-05-06 「8 を生成する時に 1 を 添付すべき」 「1-1 王宮の挿絵 14 と 背景 2 で
+    建築が違って見える」 等の 整合性漏れ事故を 防ぐ。
+
+    判定:
+    - 各セクションから {filename, scene_id, 役割(背景/挿絵), prompt_body} を抽出
+    - scene_id が一致して 背景 + 挿絵 が両方ある場合
+    - 挿絵 prompt_body に 背景 filename が 含まれていなければ WARNING
+    """
+    target_dir = ROOT / "prompt"
+    if not target_dir.exists():
+        return 0
+    checked = 0
+    for path in sorted(target_dir.glob("locations_s1c*.md")):
+        text = path.read_text(encoding="utf-8")
+        sections = re.split(r'^# 【\d+】', text, flags=re.M)[1:]
+        # 各セクション: {filename, scene_id, role, prompt_body}
+        scene_data = []
+        for sec in sections:
+            head = sec.split("\n", 1)[0]
+            fn_m = re.search(r'([a-z0-9_]+\.png)', head)
+            if not fn_m:
+                continue
+            filename = fn_m.group(1)
+            scene_m = re.search(r'\*\*対応シーン\*\*[:：]\s*([^\s,。、(（]+)', sec)
+            if not scene_m:
+                continue
+            scene_id = scene_m.group(1).strip()
+            # 役割は 「役割」 セクションから または 冒頭の (背景|挿絵) から判定
+            if re.search(r'\(挿絵', head) or '挿絵' in (sec.split('\n', 1)[0]):
+                role = "挿絵"
+            elif re.search(r'\(背景', head) or '挿絵風背景' in head or '背景' in head.split('—',1)[-1][:30]:
+                role = "背景"
+            else:
+                role = "?"
+            prompt_m = re.search(r'```(.+?)```', sec, flags=re.S)
+            prompt_body = prompt_m.group(1) if prompt_m else ""
+            scene_data.append({
+                "filename": filename,
+                "scene_id": scene_id,
+                "role": role,
+                "prompt": prompt_body,
+            })
+            checked += 1
+        # scene_id でグループ化
+        from collections import defaultdict
+        by_scene = defaultdict(list)
+        for d in scene_data:
+            by_scene[d["scene_id"]].append(d)
+        for scene_id, items in by_scene.items():
+            bg_items = [i for i in items if i["role"] == "背景"]
+            ill_items = [i for i in items if i["role"] == "挿絵"]
+            if not bg_items or not ill_items:
+                continue
+            for ill in ill_items:
+                missing_bg = []
+                for bg in bg_items:
+                    # 挿絵 prompt + section 全体に 背景 filename が記載されているか check
+                    # (Attached リストや 「⚠️ 添付」 セクションは prompt 外なので、 セクション全体を検索)
+                    full_section = next(
+                        (s for s in sections if bg["filename"] not in s and ill["filename"] in s.split("\n", 1)[0]),
+                        None
+                    )
+                    # 簡易: filename が ill prompt 全文 もしくは ill section 全体 に含まれるか
+                    # ill section を再取得
+                    ill_section = next((s for s in sections if ill["filename"] in s.split("\n", 1)[0]), "")
+                    if bg["filename"] not in ill_section:
+                        missing_bg.append(bg["filename"])
+                if missing_bg:
+                    warnings_only.append(
+                        f"[ルール7-35 同一シーン背景未参照 WARNING] {path.name} シーン {scene_id} の "
+                        f"挿絵「{ill['filename']}」 に 同シーン背景「{', '.join(missing_bg)}」 への参照添付指示なし\n"
+                        f"      → 挿絵プロンプトに「先行画像 添付」 として 背景 filename を 明記\n"
+                        f"      → 2026-05-06 1番/8番レイアウト不整合 + 14番/2番建築不整合 等の事故 再発防止"
+                    )
+    return checked
+
+
 n7_33 = check_combo_pair_uniqueness()
 print(f"  ルール7-33 (combos 重複ペア 禁止): {n7_33}件 検査 [BLOCKER]")
 n7_34 = check_illustration_position_consistency()
 print(f"  ルール7-34 (挿絵 同一シーン内 LEFT/RIGHT 整合): {n7_34}件 検査 [WARNING]")
+n7_35 = check_illustration_setting_reference()
+print(f"  ルール7-35 (同一シーン 背景→挿絵 参照添付): {n7_35}件 検査 [WARNING]")
 
 def check_main_no_suffix():
     """ルール7-27 (BLOCKER 2026-05-05): main branch で commit する version は suffix なし (X.Y.Z 形式) 必須。

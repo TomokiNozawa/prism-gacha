@@ -208,12 +208,15 @@ original character setting, no logos, no text, no watermark
 
 ---
 
-# 【8】observer_west_close.png — 観測者三柱・東への引き (挿絵風背景、 3:4、 観測者三柱 添付3枚)
+# 【8】observer_west_close.png — 観測者三柱・東への引き (挿絵風背景、 3:4、 観測者三柱 添付3枚 + 構図参照1枚)
 
-**⚠️ 生成前に必ず添付してください** (3枚):
+**⚠️ 生成前に必ず添付してください** (4枚 — 三柱3枚 + 1番の生成済画像で構図継承):
+- `images/locations/s1c5/observer_west_realm.png` (1番の画像 — 構図/天空界の建築/玉座配置を継承するため、 1番を 8番より先に生成して 完成画像を 添付してから 8番を生成)
 - `images/characters/season1/ur/seraph_paladin.png` (既存 UR セラフィエル)
 - `images/characters/season1/ur/ancient_sage.png` (既存 UR 千夜姫 カグヤ)
 - `images/characters/season1/ur/cosmic_witch.png` (既存 UR 星海のノクス)
+
+**⚠️ 生成順厳守**: 1番 (observer_west_realm) を **先に生成完了** してから、 その完成画像を 1枚目の参照として 添付して 8番を生成。 これで 1と8で「天空界の建築 / 玉座配置 / 構図」 が一致し、 章の冒頭と章末で同じ場所だと ユーザーに伝わる (野沢さん指示 2026-05-06「1と8はレイアウト変わらないほうが良い」)。
 
 - **対応シーン**: エピローグ (観測者三柱「次は東、 七座満つる」 と s1c6 への引き)
 - **本文行**: `STORY/s1c5.md` エピローグ — 観測者三柱、 七座を仰ぐ
@@ -223,9 +226,9 @@ original character setting, no logos, no text, no watermark
 - **コード参照**: `LOCATION_CONFIG['s1c5']['エピローグ']`
 
 ```
-[Attached: reference image 1 = "Seraphiel" (UR、 六枚翼の至天天使), reference image 2 = "Chiyo Kaguya" (UR、 千夜姫、 月影の杖を持つ), reference image 3 = "Nox" (UR、 星海のノクス、 銀河の髪を持つ)]
+[Attached: reference image 1 = "Layout reference" (1番 observer_west_realm の完成画像、 同じ天空界・同じ建築・同じ玉座配置を 継承), reference image 2 = "Seraphiel" (UR、 六枚翼の至天天使), reference image 3 = "Chiyo Kaguya" (UR、 千夜姫、 月影の杖を持つ), reference image 4 = "Nox" (UR、 星海のノクス、 銀河の髪を持つ)]
 
-Please create a celestial scene illustration of these three divine observers from the attached references in their seven-seat realm at the dawn after the silver moon has been restored, all three now turning their gaze from the west to the east where four new prismatic lights are awakening. Keep the facial features and identities EXACTLY as in the references. Optimize for a hopeful prophetic composition with the eastern awakening lights as the visual focus.
+Please create a celestial scene illustration of these three divine observers from references 2-4 in the SAME celestial realm depicted in reference 1 (same architecture, same throne arrangement, same seven-seat hall layout), at the dawn after the silver moon has been restored, all three now turning their gaze from the west to the east where four new prismatic lights are awakening. Keep the layout/architecture EXACTLY as in reference 1, and the facial features and identities EXACTLY as in references 2-4. Optimize for a hopeful prophetic composition with the eastern awakening lights as the visual focus.
 
 anime-style celestial observation hall illustration of three divine observers from the references in an ethereal realm of the seven seats, on the LEFT seraphiel the six-winged celestial angel (SAME face as reference 1 unchanged) standing in front of her throne with her six white feathered wings gently half-spread, her right hand placed lightly on her chest, gazing toward the eastern sky with serene resolve, in the CENTER chiyo kaguya the eternal moon-princess (SAME face as reference 2 unchanged) standing with her moon-shadow staff held diagonally as she taps its tip lightly toward the eastern direction, a faint smile on her face, her long dark hair flowing with traces of starlight, on the RIGHT nox the cosmic-star observer (SAME face as reference 3 unchanged) standing quietly with her flowing galaxy-hair drifting in the void toward the east, her starlit eyes calmly turned toward the eastern lights, all three observers looking toward the upper-RIGHT portion of the sky (EAST direction) where four small lantern-like prismatic lights are gently flickering into existence one by one (representing the gradually filling four-of-seven seats — foreshadowing s1c6), in the upper-LEFT portion of the sky (WEST direction) the silver full moon now restored to its complete radiance with no eclipse visible, four other thrones in the BACKGROUND visible as faint luminous outlines (representing the still-unfilled four seats of the seven, three of which are about to be filled), the seven prismatic streams of the genso flowing softly across the infinite navy violet void backdrop, scattered floating star fragments drifting peacefully through the void, atmospheric perspective with the eastern awakening lights as the secondary focal point and the three observers as the primary subjects, hopeful prophetic atmosphere of dawn-after-storm, anime fantasy painting style, high detail, Aspect ratio 3:4, vertical orientation 1024x1536, original character, no logos, no text, no watermark.
 
@@ -414,11 +417,14 @@ CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand for both c
 
 ---
 
-# 【14】silver_throne_oath.png — 銀霜王宮・誓いの作法 (挿絵、 16:9、 シオン+ノヴァ 添付2枚)
+# 【14】silver_throne_oath.png — 銀霜王宮・誓いの作法 (挿絵、 16:9、 シオン+ノヴァ 添付2枚 + 構図参照1枚)
 
-**⚠️ 生成前に必ず添付してください**:
+**⚠️ 生成前に必ず添付してください** (3枚 — キャラ2枚 + 構図参照1枚):
+- `images/locations/s1c5/silver_throne_hall.png` (2番の生成済画像 — 同じ 1-1 銀霜王宮 月光謁見の間 の 建築 / 玉座 / 柱 / 月光 を 継承するため、 2番を 14番より先に生成して 完成画像を 添付してから 14番を生成)
 - `images/characters/season1/ssr/masked_knight.png` (既存 SSR シオン)
 - `images/characters/season1/ssr/silver_king.png` (新規 SSR 銀霜王 ノヴァ)
+
+**⚠️ 生成順厳守**: 2番 (silver_throne_hall) を **先に生成完了** してから、 その完成画像を 1枚目の参照として 添付して 14番を生成。 これで 2と14で 同じ王宮謁見の間が描かれていると ユーザーに伝わる (野沢さん指示 2026-05-06「整合性チェック漏れ防止」)。
 
 - **対応シーン**: 1-1 銀霜王宮 月光謁見の間 (シオンが片膝から立ち上がり、 仮面の縁に指を添える「銀霜国仮面騎士の古い作法」)
 - **本文行**: `STORY/s1c5.md` 1-1 末尾「俺は、 立ち上がり、 仮面の縁に指を一度添えて、 礼の代わりとした。 銀霜国の仮面騎士の、 古い作法だった。」 (野沢さん指示 2026-05-06)
@@ -428,9 +434,9 @@ CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand for both c
 - **コード参照**: `STORY_LOCATION_INLINE_CONFIG['s1c5']` (scene='1-1', position='after')
 
 ```
-[Attached: reference image 1 = "Sion" / 銀霜王国の仮面騎士シオン (SSR), reference image 2 = "Nova" / 銀霜王 ノヴァ (SSR)]
+[Attached: reference image 1 = "Layout reference" (2番 silver_throne_hall の完成画像、 同じ王宮謁見の間の 建築・玉座配置・柱・月光 を継承), reference image 2 = "Sion" / 銀霜王国の仮面騎士シオン (SSR), reference image 3 = "Nova" / 銀霜王 ノヴァ (SSR)]
 
-Please create a quiet ceremonial illustration of these two characters from the attached references at the moment of the silver-frost knight's old salute. Keep the facial features and identities EXACTLY as in the references. Optimize for a moonlit throne hall with the ritual gesture as the visual focus.
+Please create a quiet ceremonial illustration of these two characters from references 2-3 in the SAME throne hall depicted in reference 1 (same architecture, same throne, same column layout, same moonlight direction), at the moment of the silver-frost knight's old salute. Keep the layout/architecture EXACTLY as in reference 1, and the facial features and identities EXACTLY as in references 2-3. Optimize for a moonlit throne hall with the ritual gesture as the visual focus.
 
 anime-style ceremonial illustration of two characters from the references in a vast silver-frost throne hall at midnight, in the FOREGROUND CENTER the silver-frost masked knight Sion (SAME face as reference 1 unchanged) standing upright having JUST risen from a half-kneeling salute, his right hand index finger gently touching the rim of his silver mask in the traditional silent gesture of the masked knights, his white cape flowing behind him with quiet dignity, his silver mace and shield slung at his hip, looking toward the throne with respectful silence, in the BACKGROUND on a raised dais of three steps the young silver-frost king Nova (SAME face as reference 2 unchanged) seated on an ornate silver throne, his hand gripping the armrest with quiet emotion as he watches the masked knight rise, his silver and white royal robe flowing, his ceremonial silver scepter resting beside the throne, between them tall silver columns lining both sides of the hall with pale-blue moonlight streaming through tall arched windows casting long crescent moon shadows across the polished silver floor, twin silver royal banners with crescent moon emblems flanking the throne, silver chandeliers with floating pale-blue spirit lanterns gently illuminating the scene, the seven prismatic streams of the genso flowing softly visible through the high windows, atmospheric perspective with cold pale-blue mist drifting between the columns, dignified solemn moonlit atmosphere of unspoken loyalty between king and shield, dramatic rim lighting with soft silver-blue glow, detailed linework, high-quality illustration, Aspect ratio 16:9, horizontal orientation 1672x941, original character, no logos, no text, no watermark.
 
@@ -445,12 +451,15 @@ CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand for both c
 
 ---
 
-# 【15】black_moon_grove_meeting.png — 月喰いの森・取引 (挿絵、 16:9、 シオン+ノクトリア+ガルヴィン 添付3枚)
+# 【15】black_moon_grove_meeting.png — 月喰いの森・取引 (挿絵、 16:9、 シオン+ノクトリア+ガルヴィン 添付3枚 + 構図参照1枚)
 
-**⚠️ 生成前に必ず添付してください**:
+**⚠️ 生成前に必ず添付してください** (4枚 — キャラ3枚 + 構図参照1枚):
+- `images/locations/s1c5/black_moon_grove.png` (5番の生成済画像 — 同じ 2-1 月喰いの森 の 枯木配置 / 黒月 / 祭壇周辺 を 継承するため、 5番を 15番より先に生成して 完成画像を 添付してから 15番を生成)
 - `images/characters/season1/ssr/masked_knight.png` (既存 SSR シオン)
 - `images/characters/season1/ur/black_moon_lord.png` (新規 UR ノクトリア)
 - `images/characters/season1/ssr/fallen_paladin.png` (新規 SSR ガルヴィン)
+
+**⚠️ 生成順厳守**: 5番 (black_moon_grove) を **先に生成完了** してから、 その完成画像を 1枚目の参照として 添付して 15番を生成。 これで 5と15で 同じ月喰いの森が描かれていると ユーザーに伝わる。
 
 - **対応シーン**: 2-1 月喰いの森の祭壇 (シオンが ノクトリアと初対峙、 ガルヴィンが「お前の道の先に何があるか — 俺は、 知っている」 と告げる山場の出会い)
 - **本文行**: `STORY/s1c5.md` 2-1 「ガルヴィンが、 静かに言った。 彼の声には、 怒りも、 悔しさも、 なかった。 ただ、 道が違っただけの、 旧友の声だった。」 (野沢さん指示 2026-05-06)
@@ -460,9 +469,9 @@ CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand for both c
 - **コード参照**: `STORY_LOCATION_INLINE_CONFIG['s1c5']` (scene='2-1', position='before' or 'after')
 
 ```
-[Attached: reference image 1 = "Sion" / 銀霜王国の仮面騎士シオン (SSR), reference image 2 = "Noctoria" / 黒月の盟主 ノクトリア (UR), reference image 3 = "Galvin" / 堕者剣聖 ガルヴィン (SSR)]
+[Attached: reference image 1 = "Layout reference" (5番 black_moon_grove の完成画像、 同じ月喰いの森の 枯木配置・祭壇位置・黒月・霧 を継承), reference image 2 = "Sion" / 銀霜王国の仮面騎士シオン (SSR), reference image 3 = "Noctoria" / 黒月の盟主 ノクトリア (UR), reference image 4 = "Galvin" / 堕者剣聖 ガルヴィン (SSR)]
 
-Please create a tense confrontation illustration of these three characters from the attached references at the moment of their first meeting at the dead grove altar. Keep the facial features and identities EXACTLY as in the references. Optimize for a black-moon ritual stage composition with the three figures spaced across the scene.
+Please create a tense confrontation illustration of these three characters from references 2-4 in the SAME dead grove altar depicted in reference 1 (same withered tree placement, same black moon position, same altar location, same misty atmosphere), at the moment of their first meeting. Keep the layout/setting EXACTLY as in reference 1, and the facial features and identities EXACTLY as in references 2-4. Optimize for a black-moon ritual stage composition with the three figures spaced across the scene.
 
 anime-style tense confrontation illustration of three characters from the references gathered at a circular cracked stone altar in a withered forest at midnight, on the LEFT in the FOREGROUND the silver-frost masked knight Sion (SAME face as reference 1 unchanged) standing his ground with his silver mace held forward in defensive readiness, his white cape flowing behind him with quiet dignity, his silver mask catching the moonlight, on the CENTER-BACK rising slightly above the altar the dark moon empress Noctoria (SAME face as reference 2 unchanged) standing tall on the cracked stone altar with her tall ornate dark staff held vertically beside her, her translucent black-violet wing-cape rising behind her like void petals, the floating black crescent moon orb on her staff radiating violet shadows, her gentle yet威厳 smile facing Sion, on the RIGHT slightly behind Noctoria the fallen paladin Galvin (SAME face as reference 3 unchanged) standing in his tarnished dark-grey holy plate armor with his half-corrupted silver-and-black greatsword resting at his side (point-down), his hand on the pommel, his ash-grey eyes fixed quietly on Sion with the look of a former brother-in-arms, between Sion and the altar a dim violet-black mist drifts low, ancient dead trees with twisted branches surround the clearing reaching up toward a black crescent moon hanging in the upper sky with violet void cracks spreading outward like webs, hanging banners of the Black Moon Sect (Nokutosu) with their crescent emblems strung between the dead trees, scattered floating broken star-fragments drifting through the air, dramatic motion drape on Sion's cape and Noctoria's wing-cape, atmospheric perspective with dying forest extending into a misty distance, ominous yet beautiful sacred-corruption confrontation atmosphere, dramatic rim lighting with violet-black glow on Noctoria/Galvin and silver-blue glow on Sion creating visual tension, detailed linework, high-quality illustration, Aspect ratio 16:9, horizontal orientation 1672x941, original character, no logos, no text, no watermark.
 
@@ -477,13 +486,17 @@ CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand for all th
 
 ---
 
-# 【16】mask_unveil_moment.png — 仮面を外す瞬間 (挿絵、 16:9、 シオン+ラナス+ルミナ+アスター 添付4枚)
+# 【16】mask_unveil_moment.png — 仮面を外す瞬間 (挿絵、 16:9、 シオン+ラナス+ルミナ+アスター 添付4枚 + 構図参照2枚)
 
-**⚠️ 生成前に必ず添付してください**:
+**⚠️ 生成前に必ず添付してください** (6枚 — キャラ4枚 + 構図参照2枚):
+- `images/locations/s1c5/moon_shrine_altar.png` (7番の生成済画像 — 同じ 雪月神殿の祭壇 の 月鏡 / 銀柱 / 灯篭 を 継承)
+- `images/locations/s1c5/mask_separation_ritual.png` (12番の生成済画像 — 同じ 4-1 儀式 の 立会人配置 / シオン CENTER / 月鏡 / 二重月 を 継承、 16 は 12 の直前シーンとして 構図整合)
 - `images/characters/season1/ssr/masked_knight.png` (既存 SSR シオン、 仮面ありの参照画像)
 - `images/characters/season1/sr/holy_guardian.png` (既存 SR ラナス)
 - `images/characters/season1/sr/silver_girl.png` (既存 SR ルミナ)
 - `images/characters/season1/sr/moon_priest.png` (新規 SR アスター)
+
+**⚠️ 生成順厳守**: 7 + 12 (両方とも生成済) を 構図参照として 添付してから 16番を生成。 これで 7→16→12→17 の 4-1 シーン群で 同じ祭壇/月鏡/立会人配置で 連続性が出る。
 
 - **対応シーン**: 4-1 雪月神殿の祭壇、 シオンが ゆっくりと 銀の仮面を外し、 月鏡に 素顔が映る初の瞬間 (儀式の冒頭、 山場の入口)
 - **本文行**: `STORY/s1c5.md` 4-1 「仮面を、 ゆっくりと、 外した。 月鏡に俺の素顔が映った。」 (野沢さん指示 2026-05-06、 山場演出強化)
@@ -493,9 +506,9 @@ CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand for all th
 - **コード参照**: `STORY_LOCATION_INLINE_CONFIG['s1c5']` (scene='4-1', position='before' で 儀式本格描写の前)
 
 ```
-[Attached: reference image 1 = "Sion" (SSR、 仮面ありの参照、 顔の輪郭把握用), reference image 2 = "Lanas" (SR), reference image 3 = "Lumina" (SR), reference image 4 = "Aster" (SR)]
+[Attached: reference image 1 = "Setting reference" (7番 moon_shrine_altar の完成画像、 同じ雪月神殿祭壇の 月鏡・銀柱・灯篭 を継承), reference image 2 = "Witness layout reference" (12番 mask_separation_ritual の完成画像、 同じ立会人配置・月鏡・二重月 を継承、 16 は 12 の直前シーン), reference image 3 = "Sion" (SSR、 仮面ありの参照、 顔の輪郭把握用), reference image 4 = "Lanas" (SR), reference image 5 = "Lumina" (SR), reference image 6 = "Aster" (SR)]
 
-Please create the moment-of-unveil illustration in a sacred shrine. Keep the facial features and identities EXACTLY as in the references. Sion's face is being revealed for the first time — design a serene young man's profile (mid-twenties, silver-blue hair, calm resolved gaze) that fits the masked knight's body and physique from reference 1.
+Please create the moment-of-unveil illustration in the SAME sacred shrine depicted in references 1-2 (same altar, same mirror, same lantern circle, same column layout, same witness placement as in reference 2). Keep the layout/setting EXACTLY as in references 1-2, and the facial features and identities EXACTLY as in references 3-6. Sion's face is being revealed for the first time — design a serene young man's profile (mid-twenties, silver-blue hair, calm resolved gaze) that fits the masked knight's body and physique from reference 3.
 
 anime-style sacred ceremony illustration in a vast circular silver shrine at midnight under dual moons, in the FOREGROUND CENTER the silver-frost knight Sion (SAME body and physique as reference 1) standing upright at a great circular silver mirror altar, having JUST removed his silver mask which is now held in his right hand at his side (the mask matching reference 1's exact design — silver metallic with forehead cross sigil, two eye openings, cheek guards), his face EXPOSED for the first time showing a serene resolved young man in his mid-twenties with silver-blue hair flowing slightly past his ears, calm pale-blue eyes catching the moonlight with the look of a man finally free of a long burden, his profile-three-quarter pose with face turned slightly toward the mirror altar in the floor, the mirror altar reflecting both his exposed face and the dual moons above (silver crescent + black crescent visible through the open skylight), in the BACKGROUND on either side three witnesses standing in respectful silent vigil — Lanas the holy knight (SAME face as reference 2 unchanged) on the far left with both hands clasped in front of his white-silver plate armor, the silver-frost shrine maiden Lumina (SAME face as reference 3 unchanged) holding a small silver lantern as the snow-moon shrine lamp-keeper, the moon-priest Aster (SAME face as reference 4 unchanged) holding his ceremonial staff vertically, all three with eyes lowered in reverent witness, twelve tall silver shrine lanterns surrounding the altar in a circle each emanating soft pale-blue flames, the seven prismatic streams of the genso visible swirling softly through the high vaulted ceiling above, atmospheric perspective with cold pale-blue mist drifting between the silver columns, weighty emotional atmosphere of a man finally allowing himself to be seen, dramatic rim lighting with silver-blue glow centered on Sion's exposed face, detailed linework, high-quality illustration, Aspect ratio 16:9, horizontal orientation 1672x941, original character, no logos, no text, no watermark.
 
@@ -508,11 +521,14 @@ CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand for all fo
 
 ---
 
-# 【17】twin_palms_rainbow.png — 手のひらを合わせる瞬間 (挿絵、 16:9、 シオン+シ・ロエン 添付2枚)
+# 【17】twin_palms_rainbow.png — 手のひらを合わせる瞬間 (挿絵、 16:9、 シオン+シ・ロエン 添付2枚 + 構図参照1枚)
 
-**⚠️ 生成前に必ず添付してください**:
+**⚠️ 生成前に必ず添付してください** (3枚 — キャラ2枚 + 構図参照1枚):
+- `images/locations/s1c5/mask_separation_ritual.png` (12番の生成済画像 — 同じ 4-1 雪月神殿祭壇の 月鏡 / 二重月 / 灯篭 配置 + シ・ロエン LEFT / シオン RIGHT の 位置整合 を 継承)
 - `images/characters/season1/ssr/masked_knight.png` (既存 SSR シオン、 仮面戻した姿)
 - `images/characters/season1/ur/shadow_apostle.png` (新規 UR シ・ロエン)
+
+**⚠️ 生成順厳守**: 12 (生成済) を 構図参照として 添付してから 17番を生成。 これで 12 → 16 → 17 の 4-1 山場群で 同じ祭壇/月鏡で シ・ロエン LEFT / シオン RIGHT の 一貫した立ち位置が 維持される。
 
 - **対応シーン**: 4-1 山場ピーク、 シオン (仮面再装着) と シ・ロエン (黒の半仮面) が 月鏡の上で 銀の手と黒の手を 等価に合わせ、 七色の原虹が立ち上がる瞬間
 - **本文行**: `STORY/s1c5.md` 4-1 「銀の手のひらと黒の手のひらが、 月鏡の蒼白い表面の上で、 完全に等価に重なった。 七色の原虹が、 もう一度、 月鏡の上に立ち上がった。」 (野沢さん指示 2026-05-06、 山場ピーク強化)
@@ -522,11 +538,11 @@ CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand for all fo
 - **コード参照**: `STORY_LOCATION_INLINE_CONFIG['s1c5']` (scene='4-1', position='after' で「七色の原虹」 marker の後)
 
 ```
-[Attached: reference image 1 = "Sion" (SSR、 仮面再装着), reference image 2 = "Shi-Loen" (UR)]
+[Attached: reference image 1 = "Setting + position reference" (12番 mask_separation_ritual の完成画像、 同じ祭壇/月鏡/二重月/灯篭 + シ・ロエン LEFT / シオン RIGHT の 位置を継承), reference image 2 = "Sion" (SSR、 仮面再装着), reference image 3 = "Shi-Loen" (UR)]
 
-Please create the climactic palm-touch illustration. Keep the facial features and identities EXACTLY as in the references. Optimize for a sacred convergence composition with the rainbow rising between them.
+Please create the climactic palm-touch illustration in the SAME shrine altar depicted in reference 1 (same mirror altar, same dual moon arrangement, same lantern circle), with Shi-Loen on the LEFT and Sion on the RIGHT matching reference 1's positioning. Keep the layout/setting EXACTLY as in reference 1, and the facial features and identities EXACTLY as in references 2-3. Optimize for a sacred convergence composition with the rainbow rising between them.
 
-anime-style climactic ceremony illustration of two characters from the references at the apex of the mask separation ritual, on the LEFT the shadow apostle Shi-Loen (SAME face as reference 2 unchanged, with his half-broken black mask covering the left side of his face) standing upright with his right hand extended forward palm-open at chest level, his torn black cloak flowing behind him with shadow-light particles, on the RIGHT the silver-frost masked knight Sion (SAME face/mask as reference 1 unchanged) standing as Shi-Loen's mirror image with his left hand extended forward palm-open at chest level meeting Shi-Loen's, his white cape flowing behind him, his silver mask back on his face catching the moonlight, BETWEEN their two palms meeting in the exact CENTER of the composition right above a great circular silver mirror altar in the floor, at the moment of contact a brilliant SEVEN-COLOR PRISMATIC RAINBOW (red orange yellow green blue indigo violet) RISING from the meeting point of their palms upward like a translucent column of light, the mirror altar reflecting both moons (silver crescent + black crescent) and the rainbow column, both characters in three-quarter facing inward looking at their joined hands with serene resolve, twelve tall silver shrine lanterns surrounding the altar in a circle each emanating soft pale-blue flames as backdrop, the seven prismatic streams of the genso swirling intensely around the rainbow column above, dawn-after-storm atmosphere with the rainbow as the visual focal point, dramatic rim lighting with twin-tone silver-and-violet glow on each character creating mirror-image symmetry, detailed linework, high-quality illustration, Aspect ratio 16:9, horizontal orientation 1672x941, original character, no logos, no text, no watermark.
+anime-style climactic ceremony illustration of two characters from the references at the apex of the mask separation ritual, on the LEFT the shadow apostle Shi-Loen (SAME face as reference 3 unchanged, with his half-broken black mask covering the left side of his face) standing upright with his right hand extended forward palm-open at chest level, his torn black cloak flowing behind him with shadow-light particles, on the RIGHT the silver-frost masked knight Sion (SAME face/mask as reference 2 unchanged) standing as Shi-Loen's mirror image with his left hand extended forward palm-open at chest level meeting Shi-Loen's, his white cape flowing behind him, his silver mask back on his face catching the moonlight, BETWEEN their two palms meeting in the exact CENTER of the composition right above a great circular silver mirror altar in the floor, at the moment of contact a brilliant SEVEN-COLOR PRISMATIC RAINBOW (red orange yellow green blue indigo violet) RISING from the meeting point of their palms upward like a translucent column of light, the mirror altar reflecting both moons (silver crescent + black crescent) and the rainbow column, both characters in three-quarter facing inward looking at their joined hands with serene resolve, twelve tall silver shrine lanterns surrounding the altar in a circle each emanating soft pale-blue flames as backdrop, the seven prismatic streams of the genso swirling intensely around the rainbow column above, dawn-after-storm atmosphere with the rainbow as the visual focal point, dramatic rim lighting with twin-tone silver-and-violet glow on each character creating mirror-image symmetry, detailed linework, high-quality illustration, Aspect ratio 16:9, horizontal orientation 1672x941, original character, no logos, no text, no watermark.
 
 **位置整合**: 12 (mask_separation_ritual.png) で シ・ロエン左 / シオン右 になっている画像と整合させるため、 17 も シ・ロエン LEFT / シオン RIGHT で 統一 (野沢さん指摘 2026-05-06)。
 
