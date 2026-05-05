@@ -384,6 +384,8 @@ CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand for both c
 | 13 | shi_loen_departure.png | 16:9 | 4-2 別れ | シオン + シ・ロエン |
 | 14 | silver_throne_oath.png | 16:9 | 1-1 王宮謁見・誓いの作法 | シオン + ノヴァ (添付2枚) |
 | 15 | black_moon_grove_meeting.png | 16:9 | 2-1 月喰いの森・取引 | シオン + ノクトリア + ガルヴィン (添付3枚) |
+| 16 | mask_unveil_moment.png | 16:9 | 4-1 仮面を外す瞬間 | シオン + ラナス + ルミナ + アスター (添付4枚) |
+| 17 | twin_palms_rainbow.png | 16:9 | 4-1 手のひらを合わせる瞬間 | シオン + シ・ロエン (添付2枚) |
 
 生成結果は `images/locations/s1c5/<filename>` にそのまま保存。
 完了時に thumb 版 `images/locations/s1c5/thumb/<basename>_thumb.webp` を作成 (Phase 1-B 完了後の規約)。
@@ -448,6 +450,68 @@ CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand for all th
 ```
 
 **伏線視覚化**: 3者の立ち位置 (シオン正面 / ノクトリア祭壇上 / ガルヴィン後衛) で 力関係を 視覚化、 「同じ系譜の旧友」 ガルヴィンの構図位置 (シオンを正面で見つめる位置) は 兄弟弟子の系譜共有を 暗示。 シオンが正面切る覚悟 と ノクトリアの 取引提示の威厳が 同フレームで対峙。
+
+---
+
+---
+
+# 【16】mask_unveil_moment.png — 仮面を外す瞬間 (挿絵、 16:9、 シオン+ラナス+ルミナ+アスター 添付4枚)
+
+**⚠️ 生成前に必ず添付してください**:
+- `images/characters/season1/ssr/masked_knight.png` (既存 SSR シオン、 仮面ありの参照画像)
+- `images/characters/season1/sr/holy_guardian.png` (既存 SR ラナス)
+- `images/characters/season1/sr/silver_girl.png` (既存 SR ルミナ)
+- `images/characters/season1/sr/moon_priest.png` (新規 SR アスター)
+
+- **対応シーン**: 4-1 雪月神殿の祭壇、 シオンが ゆっくりと 銀の仮面を外し、 月鏡に 素顔が映る初の瞬間 (儀式の冒頭、 山場の入口)
+- **本文行**: `STORY/s1c5.md` 4-1 「仮面を、 ゆっくりと、 外した。 月鏡に俺の素顔が映った。」 (野沢さん指示 2026-05-06、 山場演出強化)
+- **役割**: 4-1 山場の前段、 「素顔露出」 の 緊張感 + 立会人三人の沈黙の見守りを視覚化
+- **被写体**: 月鏡の前のシオン (仮面を外し終え 月鏡を見つめる横顔半分)、 立会人三人が祭壇周辺で 静かに礼の姿勢
+- **ストーリー使用**: ✅ s1c5 4-1 挿絵 (儀式冒頭)
+- **コード参照**: `STORY_LOCATION_INLINE_CONFIG['s1c5']` (scene='4-1', position='before' で 儀式本格描写の前)
+
+```
+[Attached: reference image 1 = "Sion" (SSR、 仮面ありの参照、 顔の輪郭把握用), reference image 2 = "Lanas" (SR), reference image 3 = "Lumina" (SR), reference image 4 = "Aster" (SR)]
+
+Please create the moment-of-unveil illustration in a sacred shrine. Keep the facial features and identities EXACTLY as in the references. Sion's face is being revealed for the first time — design a serene young man's profile (mid-twenties, silver-blue hair, calm resolved gaze) that fits the masked knight's body and physique from reference 1.
+
+anime-style sacred ceremony illustration in a vast circular silver shrine at midnight under dual moons, in the FOREGROUND CENTER the silver-frost knight Sion (SAME body and physique as reference 1) standing upright at a great circular silver mirror altar, having JUST removed his silver mask which is now held in his right hand at his side (the mask matching reference 1's exact design — silver metallic with forehead cross sigil, two eye openings, cheek guards), his face EXPOSED for the first time showing a serene resolved young man in his mid-twenties with silver-blue hair flowing slightly past his ears, calm pale-blue eyes catching the moonlight with the look of a man finally free of a long burden, his profile-three-quarter pose with face turned slightly toward the mirror altar in the floor, the mirror altar reflecting both his exposed face and the dual moons above (silver crescent + black crescent visible through the open skylight), in the BACKGROUND on either side three witnesses standing in respectful silent vigil — Lanas the holy knight (SAME face as reference 2 unchanged) on the far left with both hands clasped in front of his white-silver plate armor, the silver-frost shrine maiden Lumina (SAME face as reference 3 unchanged) holding a small silver lantern as the snow-moon shrine lamp-keeper, the moon-priest Aster (SAME face as reference 4 unchanged) holding his ceremonial staff vertically, all three with eyes lowered in reverent witness, twelve tall silver shrine lanterns surrounding the altar in a circle each emanating soft pale-blue flames, the seven prismatic streams of the genso visible swirling softly through the high vaulted ceiling above, atmospheric perspective with cold pale-blue mist drifting between the silver columns, weighty emotional atmosphere of a man finally allowing himself to be seen, dramatic rim lighting with silver-blue glow centered on Sion's exposed face, detailed linework, high-quality illustration, Aspect ratio 16:9, horizontal orientation 1672x941, original character, no logos, no text, no watermark.
+
+CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand for all four characters, anatomically correct joints, realistic grips on the mask (Sion right hand), lantern (Lumina), staff (Aster).
+
+元画像から表情や姿勢は変わってOKです
+```
+
+**伏線視覚化**: シオンの素顔を 公式画として 初めて描く瞬間。 立会人 3人 (ラナス/ルミナ/アスター) が「素顔を知る側」 に加わる重要な転換点を 視覚化。
+
+---
+
+# 【17】twin_palms_rainbow.png — 手のひらを合わせる瞬間 (挿絵、 16:9、 シオン+シ・ロエン 添付2枚)
+
+**⚠️ 生成前に必ず添付してください**:
+- `images/characters/season1/ssr/masked_knight.png` (既存 SSR シオン、 仮面戻した姿)
+- `images/characters/season1/ur/shadow_apostle.png` (新規 UR シ・ロエン)
+
+- **対応シーン**: 4-1 山場ピーク、 シオン (仮面再装着) と シ・ロエン (黒の半仮面) が 月鏡の上で 銀の手と黒の手を 等価に合わせ、 七色の原虹が立ち上がる瞬間
+- **本文行**: `STORY/s1c5.md` 4-1 「銀の手のひらと黒の手のひらが、 月鏡の蒼白い表面の上で、 完全に等価に重なった。 七色の原虹が、 もう一度、 月鏡の上に立ち上がった。」 (野沢さん指示 2026-05-06、 山場ピーク強化)
+- **役割**: 4-1 儀式の クライマックス、 「抱きしめてから手放す」 章テーマの 視覚的頂点
+- **被写体**: 月鏡の上で 二人の手のひらが 中央で交差、 七色の原虹が立ち上がる、 二人の正面像 (横顔半分)
+- **ストーリー使用**: ✅ s1c5 4-1 挿絵 (山場ピーク)
+- **コード参照**: `STORY_LOCATION_INLINE_CONFIG['s1c5']` (scene='4-1', position='after' で「七色の原虹」 marker の後)
+
+```
+[Attached: reference image 1 = "Sion" (SSR、 仮面再装着), reference image 2 = "Shi-Loen" (UR)]
+
+Please create the climactic palm-touch illustration. Keep the facial features and identities EXACTLY as in the references. Optimize for a sacred convergence composition with the rainbow rising between them.
+
+anime-style climactic ceremony illustration of two characters from the references at the apex of the mask separation ritual, on the LEFT the silver-frost masked knight Sion (SAME face/mask as reference 1 unchanged) standing upright with his right hand extended forward palm-open at chest level, his white cape flowing behind him, his silver mask back on his face catching the moonlight, on the RIGHT the shadow apostle Shi-Loen (SAME face as reference 2 unchanged, with his half-broken black mask covering the left side of his face) standing as Sion's mirror image with his left hand extended forward palm-open at chest level meeting Sion's, the BETWEEN their two palms meeting in the exact CENTER of the composition right above a great circular silver mirror altar in the floor, at the moment of contact a brilliant SEVEN-COLOR PRISMATIC RAINBOW (red orange yellow green blue indigo violet) RISING from the meeting point of their palms upward like a translucent column of light, the mirror altar reflecting both moons (silver crescent + black crescent) and the rainbow column, both characters in three-quarter facing inward looking at their joined hands with serene resolve, twelve tall silver shrine lanterns surrounding the altar in a circle each emanating soft pale-blue flames as backdrop, the seven prismatic streams of the genso swirling intensely around the rainbow column above, dawn-after-storm atmosphere with the rainbow as the visual focal point, dramatic rim lighting with twin-tone silver-and-violet glow on each character creating mirror-image symmetry, detailed linework, high-quality illustration, Aspect ratio 16:9, horizontal orientation 1672x941, original character, no logos, no text, no watermark.
+
+CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand for both characters, anatomically correct joints, realistic palm-meeting hand pose with fingers slightly spread.
+
+元画像から表情や姿勢は変わってOKです
+```
+
+**伏線視覚化**: 章テーマ「影を抱きしめてから手放す」 の 視覚的頂点。 銀と黒の手のひらが 等価に交差 → ルナリアの織機 (3-2 silver and black thread) と同じ 七色の光が 立ち上がる構図で 章全体の 縦糸を 締めくくる。
 
 ---
 
