@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4a — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4b — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -10183,7 +10183,9 @@ function renderNotifications() {
     return;
   }
 
-  const KIND_LABEL = { reply: '💬 返信', broadcast: '📢 お知らせ', release: '🆕 更新', system: '⚙️ システム' };
+  // 野沢さん指示 2026-05-05: 公式 (admin) 発信は 「公式」 と明示してユーザー側で 区別可能に。
+  // 個別返信 = 公式返信、 broadcast = 公式お知らせ。 release/system は 中立 ラベル。
+  const KIND_LABEL = { reply: '✦ 公式返信', broadcast: '✦ 公式お知らせ', release: '🆕 更新', system: '⚙️ システム' };
   list.innerHTML = filtered.map(n => {
     const dt = n.createdAt ? new Date(n.createdAt) : null;
     const dtStr = dt && !isNaN(dt) ? `${dt.getMonth()+1}/${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}` : '';
