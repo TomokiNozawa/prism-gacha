@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.3b — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.3c — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -2879,8 +2879,11 @@ function showResult(results, best, opts) {
     imgEl.decoding = "async";
     imgEl.draggable = false;
     c.appendChild(imgEl);
-    c.style.cursor = 'pointer';
-    c.addEventListener('click', () => showCharDetail(r));
+    if (!isArchive) {
+      // archive モードでは sanitized オブジェクト渡しで showCharDetail 動作不安定 → click 無効化
+      c.style.cursor = 'pointer';
+      c.addEventListener('click', () => showCharDetail(r));
+    }
     if (r.isNew) {
       const nb = document.createElement("div");
       nb.className = "rcard-new";
@@ -8970,8 +8973,16 @@ function showTScoreArchive(type) {
     isNew: false,
     dupGained: null,
   }));
+  // safety net: 残骸 stage / 他 modal を 全部 閉じてから result 単独で開く
+  // (アカウントモーダル 閉じた直後の DOM 状態で stage が active 残存していると result-grid に重なる懸念)
   closeAccountModal();
-  showResult(filled, null, { archive: true, archiveAt: at });
+  if (typeof closeStage === 'function') {
+    try { closeStage(); } catch (e) {}
+  }
+  // 念のため次フレームで result 開く (close 系の DOM 反映を確実に終わらせてから)
+  requestAnimationFrame(() => {
+    showResult(filled, null, { archive: true, archiveAt: at });
+  });
 }
 
 function closeAccountModal() {
