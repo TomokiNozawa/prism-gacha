@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4t — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4u — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -6764,7 +6764,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // version 完全同期 (野沢さん指示 2026-05-06): bump_version.py が自動で更新する。
 // 旧 date-suffix '20260504o' を 5/6 で見つけた事故を契機に version-based に統一。
-const IMG_CACHE_VERSION = '1.4.4t';
+const IMG_CACHE_VERSION = '1.4.4u';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -10239,6 +10239,12 @@ function openSettingsModal() {
         <div class="settings-section">
           <button type="button" class="settings-feedback-link" onclick="closeSettingsModal();openFeedbackModal()">📨 ご意見・ご要望を送る</button>
         </div>
+        <!-- 強制リフレッシュ (野沢さん指示 2026-05-06、 スマホで SW 古版固定化 → 新版が反映されない事故対策) -->
+        <div class="settings-section settings-force-refresh">
+          <div class="settings-label">🔄 強制リフレッシュ (Cache + SW 全削除)</div>
+          <div class="settings-power-saver-desc">アプリの動作が古いままに見える時 (画像が反映されない / 新機能が出ない 等) に押してください。 端末のキャッシュ + Service Worker を 全削除して 最新版で再起動します。 ガチャ履歴・凸数・所持キャラはアカウント情報なので残ります。</div>
+          <button type="button" class="settings-feedback-link" id="settings-force-refresh" style="background:rgba(255,140,80,0.18);border-color:rgba(255,140,80,0.45);">🔄 強制リフレッシュ</button>
+        </div>
         <div class="settings-note">設定はこの端末に保存されます (アカウント連携対象外)</div>
       </div>
     `;
@@ -10285,6 +10291,33 @@ function openSettingsModal() {
       }
       // C-3: BGM progress timer も interval を切り替え (500ms <-> 1500ms)
       try { if (typeof _restartBgmProgressTimer === 'function') _restartBgmProgressTimer(); } catch {}
+    });
+    // 強制リフレッシュ (野沢さん指示 2026-05-06、 スマホ SW 古版固定化対策)
+    const forceRefreshBtn = m.querySelector('#settings-force-refresh');
+    if (forceRefreshBtn) forceRefreshBtn.addEventListener('click', async () => {
+      if (!confirm('Cache + Service Worker を 全削除して 最新版で再起動します。 続けますか?')) return;
+      forceRefreshBtn.disabled = true;
+      forceRefreshBtn.textContent = '🔄 リフレッシュ中…';
+      try {
+        // 1. Service Worker 全 unregister
+        if ('serviceWorker' in navigator) {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs.map(r => r.unregister().catch(() => {})));
+        }
+        // 2. caches 全削除 (BGM_CACHE / LOC_CACHE / STATIC_CACHE / OFFLINE_SAVED / IMG_PERSIST 含む)
+        if ('caches' in window) {
+          const keys = await caches.keys();
+          await Promise.all(keys.map(k => caches.delete(k).catch(() => {})));
+        }
+        // 3. PRISMAERA_VERSION_LS_KEY を 削除 (新版で update-modal を 出すため)
+        try { localStorage.removeItem(PRISMAERA_VERSION_LS_KEY); } catch {}
+        // 4. 強制リロード (browser cache も bypass)
+        location.reload(true);
+      } catch (e) {
+        forceRefreshBtn.disabled = false;
+        forceRefreshBtn.textContent = '🔄 強制リフレッシュ';
+        alert('リフレッシュ失敗: ' + (e && e.message ? e.message : e));
+      }
     });
     // M4: 全アセットDL — 状態管理 (未DL数 > 0 の時だけボタン表示)
     const dlBtn = m.querySelector('#settings-offline-dl');
