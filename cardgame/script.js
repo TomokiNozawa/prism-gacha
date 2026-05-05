@@ -148,11 +148,11 @@ function updateMuteUI() {
 // 優先順位: cards.json (手書き完全override) > effects_override.json (effect+effectText のみ) > pool.json (default)
 async function loadMasters() {
   const [c, k, l, p, eo] = await Promise.all([
-    fetch('./cards.json?v=1.4.4w').then(r => r.json()),
-    fetch('./combos.json?v=1.4.4w').then(r => r.json()),
-    fetch('./lane_effects.json?v=1.4.4w').then(r => r.json()),
-    fetch('./data/pool.json?v=1.4.4w').then(r => r.json()).catch(() => []),
-    fetch('./effects_override.json?v=1.4.4w').then(r => r.json()).catch(() => ({})),
+    fetch('./cards.json?v=1.4.4x').then(r => r.json()),
+    fetch('./combos.json?v=1.4.4x').then(r => r.json()),
+    fetch('./lane_effects.json?v=1.4.4x').then(r => r.json()),
+    fetch('./data/pool.json?v=1.4.4x').then(r => r.json()).catch(() => []),
+    fetch('./effects_override.json?v=1.4.4x').then(r => r.json()).catch(() => ({})),
   ]);
   // pool 全カード ← effects_override で effect/effectText を上書き ← cards.json で完全 override
   const cardsByName = new Map();
@@ -984,6 +984,97 @@ function showCardDetail(card, context, handIdx) {
 }
 function closeCharDetail() { $('#char-detail-modal').hidden = true; _setBodyModalOpen(); }
 
+// ===== 📗 ルールブック (野沢さん指示 2026-05-06、 ホーム/バトル両方からアクセス) =====
+let _rulebookTab = 'basic';
+function openRulebook() {
+  const m = document.getElementById('rulebook-modal');
+  if (!m) return;
+  m.hidden = false;
+  _setBodyModalOpen();
+  _rulebookTab = 'basic';
+  _renderRulebook();
+}
+function closeRulebook() {
+  const m = document.getElementById('rulebook-modal');
+  if (!m) return;
+  m.hidden = true;
+  _setBodyModalOpen();
+}
+function _renderRulebook() {
+  const tabs = document.querySelectorAll('#rulebook-modal .cg-rulebook-tab');
+  tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === _rulebookTab));
+  tabs.forEach(t => t.addEventListener('click', () => {
+    _rulebookTab = t.dataset.tab; _renderRulebook();
+  }, { once: true }));  // 1度だけ bind (再呼出で再 register)
+  const body = document.getElementById('rulebook-body');
+  if (!body) return;
+  if (_rulebookTab === 'basic') {
+    body.innerHTML = `
+      <div class="cg-rb-section">
+        <h3>📜 基本ルール</h3>
+        <ul class="cg-rb-list">
+          <li><b>盤面</b>: 3レーン × 各最大4枠、 自陣 / 敵陣 の 2段</li>
+          <li><b>ターン</b>: 全 6 ターン、 各ターン コスト=ターン数 (T1=1, T6=6) を消費して カードを配置</li>
+          <li><b>勝敗</b>: ターン6 終了時、 各レーンの power 合計を比較 → 勝ったレーン数で勝敗を決定</li>
+          <li><b>引分</b>: 勝ちレーン数が同じ場合は引分</li>
+          <li><b>マリガン</b>: T1 で 1度だけ手札を引き直し可能</li>
+          <li><b>BO3</b>: 先攻 → 後攻 → ランダム の 3本勝負、 2本先取で勝利</li>
+          <li><b>デッキ</b>: 12枚、 LR 1枚 / UR 3枚まで、 同名禁止</li>
+        </ul>
+      </div>`;
+  } else if (_rulebookTab === 'lane') {
+    const lanes = (state && state.laneEffectsAll) || [];
+    const allLanes = lanes.length > 0 ? lanes : [];
+    body.innerHTML = `
+      <div class="cg-rb-section">
+        <h3>🌟 フィールド効果一覧 (${allLanes.length}種)</h3>
+        <div class="cg-rb-detail">毎試合、 3レーン に ランダムで 1つずつ配置されます。 配置中のフィールドはバトル画面の レーン上部に表示。</div>
+        <ul class="cg-rb-list">
+          ${allLanes.map(e => `<li><span class="cg-rb-lane-icon">${e.icon}</span> <b>${e.name}</b> — ${e.description}</li>`).join('')}
+        </ul>
+      </div>`;
+  } else if (_rulebookTab === 'buff') {
+    body.innerHTML = `
+      <div class="cg-rb-section">
+        <h3>🔮 バフ・デバフ効果一覧</h3>
+        <div class="cg-rb-detail">カード固有効果で 自軍/敵軍 の状態を変える。 効果は 各カードの 効果文 に明記。</div>
+        <ul class="cg-rb-list">
+          <li><span class="cg-rb-tag tag-buff">+1〜N</span> <b>パワー強化</b>: 対象レーンの power を 一定値 加算 (永続)</li>
+          <li><span class="cg-rb-tag tag-buff">🌱 成長</span> <b>毎T +1</b>: 自身の power が 毎ターン +1 累積、 退場まで持続</li>
+          <li><span class="cg-rb-tag tag-buff">✨ 黄金化</span> <b>パワー倍化</b>: 自レーンの自軍 power 1.5倍 に強化</li>
+          <li><span class="cg-rb-tag tag-buff">🌀 常時オーラ</span> <b>レーン全体に効果</b>: 自レーン全員 +N (例: ヒノオウ「焔王の威光」)</li>
+          <li><span class="cg-rb-tag tag-buff">💴 コスト減</span> <b>手札の最高 Cost を -N</b>: 1試合 1回限定 (例: ネプテア「青の祈り」)</li>
+          <li><span class="cg-rb-tag tag-buff">📞 トークン召喚</span> <b>使い捨ての小型ユニット</b>: 自レーンに 基礎パワーのみのトークン1枚生成</li>
+          <li><span class="cg-rb-tag tag-debuff">-1〜N</span> <b>パワー減衰</b>: 対象レーンの power を 一定値 減算 (永続)</li>
+          <li><span class="cg-rb-tag tag-debuff">❄️ 凍結</span> <b>1Tパワー0</b>: 1ターン パワー0 で 固定、 効果も無効</li>
+          <li><span class="cg-rb-tag tag-debuff">🔇 沈黙</span> <b>効果無効</b>: 対象カードの onPlay 効果 / オーラ / 成長を 完全無効化 (永続)</li>
+          <li><span class="cg-rb-tag tag-debuff">🌫 ステルス</span> <b>1T 指定不可</b>: 1ターン 相手のデバフ対象に選ばれない (自身付与)</li>
+          <li><span class="cg-rb-tag tag-debuff">🌑 威圧オーラ</span> <b>相手レーンに -N</b>: 相手 同レーン全員 -N (例: グレイル「凍土の威圧」)</li>
+        </ul>
+      </div>`;
+  } else if (_rulebookTab === 'dupe') {
+    body.innerHTML = `
+      <div class="cg-rb-section">
+        <h3>🃏 凸システム (各凸 +1 ﾊﾟﾜｰ)</h3>
+        <div class="cg-rb-detail">同名キャラを ガチャで重複入手すると 凸数が 1ずつ増える。 高レアほど MAX 凸数が多く、 ﾎﾞｰﾅｽも大きい。</div>
+        <table class="cg-rb-dupe-table">
+          <thead><tr><th>レア度</th><th>0凸</th><th>1凸</th><th>2凸</th><th>3凸</th><th>4凸 (MAX)</th></tr></thead>
+          <tbody>
+            <tr><td><b>R</b></td><td>+0</td><td>+1 (MAX)</td><td>—</td><td>—</td><td>—</td></tr>
+            <tr><td><b>SR</b></td><td>+0</td><td>+1</td><td>+2 (MAX)</td><td>—</td><td>—</td></tr>
+            <tr><td><b>SSR</b></td><td>+0</td><td>+1</td><td>+2</td><td>+3 (MAX)</td><td>—</td></tr>
+            <tr><td><b>UR</b></td><td>+0</td><td>+1</td><td>+2</td><td>+3</td><td>+4 (MAX)</td></tr>
+            <tr><td><b>LR</b></td><td>+0</td><td>+1</td><td>+2</td><td>+3</td><td>+4 (MAX)</td></tr>
+          </tbody>
+        </table>
+        <ul class="cg-rb-list" style="margin-top:14px">
+          <li><b>半分凸以上</b>: onPlay 効果値 +1 (例: 元 +2 → +3)</li>
+          <li><b>MAX 凸</b>: コスト -1 + 効果範囲拡大 (self_lane → adjacent_lanes 等)</li>
+        </ul>
+      </div>`;
+  }
+}
+
 // B-1.B: 状態 badge レンダラ (スマホでも見えるよう カード右側に縦積み、 タップで詳細)
 function _renderStatusBadges(card) {
   const badges = [];
@@ -1739,6 +1830,36 @@ function placeAICard(handIdx, lane) {
 const PCB_STATS_KEY = 'prism-pcb-stats';
 const PCB_HISTORY_KEY = 'prism-pcb-history';
 const PCB_HISTORY_MAX = 50;
+
+// AI レベル別 連勝数 (野沢さん指示 2026-05-06、 ホームの各 AI モードボタンに表示)
+function _streakForDiff(diff) {
+  try {
+    const hist = JSON.parse(localStorage.getItem(PCB_HISTORY_KEY) || '[]');
+    let streak = 0;
+    for (const h of hist) {
+      if (h.difficulty !== diff) continue;  // 別 difficulty は skip
+      if (h.result === 'win') streak++;
+      else break;  // 負け/引分 で 連勝終了
+    }
+    return streak;
+  } catch (e) { return 0; }
+}
+function _renderHomeStreaks() {
+  const screen = document.getElementById('home-screen');
+  if (!screen) return;
+  ['easy', 'normal', 'hard', 'master'].forEach(diff => {
+    const el = screen.querySelector(`[data-streak="${diff}"]`);
+    if (!el) return;
+    const n = _streakForDiff(diff);
+    if (n >= 2) {
+      el.textContent = `🔥 ${n}連勝中`;
+      el.hidden = false;
+    } else {
+      el.hidden = true;
+    }
+  });
+}
+
 function _logPcbMatch(result, difficulty, isBO3, scoreMe, scoreOpp) {
   // result: 'win' | 'loss' | 'draw' | 'pause' (PvE 中断は記録しない)
   if (result === 'pause') return;
@@ -1889,6 +2010,8 @@ function backToCardgameHome() {
   $('#match-screen').classList.remove('active');
   $('#home-screen').classList.add('active');
   _setBodyModalOpen();
+  // AI レベル別 連勝数 を 各ボタンに反映 (野沢さん指示 2026-05-06)
+  if (typeof _renderHomeStreaks === 'function') _renderHomeStreaks();
 }
 
 function backToPrismaeraHome() {
@@ -2562,6 +2685,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   _initLaneEffectPopover();
   await loadMasters();
   _refreshHomeResumeButton();  // 中断中の試合があれば「再開」 ボタンを home に表示
+  if (typeof _renderHomeStreaks === 'function') _renderHomeStreaks();  // AI レベル別 連勝数 (野沢さん指示 2026-05-06)
   // BO3 toggle (localStorage 永続化)
   const bo3Toggle = document.getElementById('bo3-toggle');
   if (bo3Toggle) {
@@ -2577,6 +2701,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('#btn-start-master').addEventListener('click', () => startMatch('master', getBo3()));
   $('#btn-tutorial').addEventListener('click', openTutorial);
   $('#btn-help').addEventListener('click', openHelp);
+  // 📗 ルールブック (バトル中 ヘッダー + ホーム mode-btn の 両方からアクセス、 野沢さん指示 2026-05-06)
+  document.getElementById('btn-rulebook')?.addEventListener('click', openRulebook);
+  document.getElementById('btn-rulebook-home')?.addEventListener('click', openRulebook);
   $('#btn-undo').addEventListener('click', resetThisTurn);
   $('#btn-combos').addEventListener('click', openCombosModal);
   $('#btn-mulligan').addEventListener('click', mulligan);
@@ -2656,8 +2783,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (isOpen('result-modal'))         { closeResult(); return; }
       if (isOpen('cg-help-modal'))        { closeHelp(); return; }
       if (isOpen('tutorial-modal'))       { closeTutorial(); return; }
+      if (isOpen('rulebook-modal'))       { closeRulebook(); return; }
       if (isOpen('combos-modal'))         { closeCombosModal(); return; }
-      if (isOpen('char-detail-modal'))    { closeCharDetail(); return; }   // ← deck-builder の上に重ねて開いた時、 ここで stop
+      if (isOpen('char-detail-modal'))    { closeCharDetail(); return; }
       if (isOpen('deck-filter-modal'))    { closeDeckFilter(); return; }
       if (isOpen('deck-builder-modal'))   { closeDeckBuilder(); return; }
       if (isOpen('deck-slot-picker-modal')) { closeDeckSlotPicker(); return; }
@@ -2677,6 +2805,8 @@ window.closeHelp = closeHelp;
 window.closeTutorial = closeTutorial;
 window.closeCombosModal = closeCombosModal;
 window.closeCharDetail = closeCharDetail;
+window.openRulebook = openRulebook;
+window.closeRulebook = closeRulebook;
 window.closeDeckBuilder = closeDeckBuilder;
 window.closeDeckFilter = closeDeckFilter;
 window.closeDeckSlotPicker = closeDeckSlotPicker;

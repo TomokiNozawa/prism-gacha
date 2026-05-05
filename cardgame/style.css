@@ -2142,3 +2142,126 @@ body.cg-browse-mode .cg-deck-list-add,
 body.cg-browse-mode .cg-deck-list-remove {
   display: none !important;
 }
+
+/* ホーム mode-btn 連勝バッジ (野沢さん指示 2026-05-06) */
+.cg-mode-btn { position: relative; }
+.cg-mode-streak {
+  position: absolute;
+  top: 8px; right: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #ff8a3a;
+  background: rgba(255, 138, 58, 0.14);
+  border: 1px solid rgba(255, 138, 58, 0.45);
+  padding: 3px 9px;
+  border-radius: 999px;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+}
+.cg-mode-streak[hidden] { display: none; }
+
+/* 📗 ルールブック モーダル (野沢さん指示 2026-05-06) */
+.cg-rulebook-card { max-width: 720px; max-height: 85vh; overflow: hidden; display: flex; flex-direction: column; }
+.cg-rulebook-tabs {
+  display: flex; gap: 4px;
+  margin: 14px 0 10px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 999px;
+  padding: 3px;
+  flex-wrap: wrap;
+}
+.cg-rulebook-tab {
+  flex: 1 1 0;
+  background: transparent;
+  border: none;
+  padding: 7px 10px;
+  color: rgba(255,255,255,0.6);
+  font-size: 12px; font-weight: 500;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  border-radius: 999px;
+  transition: color 0.15s ease, background 0.15s ease;
+  min-height: 32px;
+  white-space: nowrap;
+}
+.cg-rulebook-tab:hover { color: rgba(255,255,255,0.85); }
+.cg-rulebook-tab.active {
+  color: #1a1d2e;
+  background: rgba(251, 191, 36, 0.85);
+  font-weight: 600;
+}
+.cg-rulebook-body {
+  overflow-y: auto;
+  padding: 4px 8px 12px;
+  flex: 1 1 auto;
+  -webkit-overflow-scrolling: touch;
+}
+.cg-rb-section h3 {
+  font-size: 16px; margin: 0 0 8px;
+  color: #fff; letter-spacing: 0.04em;
+}
+.cg-rb-detail {
+  font-size: 12px; color: rgba(255,255,255,0.7);
+  margin-bottom: 12px; line-height: 1.7;
+}
+.cg-rb-list {
+  list-style: none; padding: 0; margin: 0;
+}
+.cg-rb-list li {
+  font-size: 13px; color: rgba(255,255,255,0.88);
+  line-height: 1.7;
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 8px;
+  border-left: 3px solid rgba(124, 93, 255, 0.5);
+}
+.cg-rb-list li b { color: #fff; }
+.cg-rb-lane-icon {
+  display: inline-block;
+  width: 28px; text-align: center;
+  font-size: 16px;
+  margin-right: 6px;
+}
+.cg-rb-tag {
+  display: inline-block;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  margin-right: 6px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.cg-rb-tag.tag-buff {
+  background: rgba(122, 255, 138, 0.15);
+  color: #7aff8a;
+  border: 1px solid rgba(122, 255, 138, 0.4);
+}
+.cg-rb-tag.tag-debuff {
+  background: rgba(255, 141, 141, 0.15);
+  color: #ff8d8d;
+  border: 1px solid rgba(255, 141, 141, 0.4);
+}
+.cg-rb-dupe-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-top: 8px;
+}
+.cg-rb-dupe-table th, .cg-rb-dupe-table td {
+  padding: 8px 10px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.cg-rb-dupe-table th {
+  font-size: 11px;
+  color: rgba(255,255,255,0.55);
+  letter-spacing: 0.06em;
+  background: rgba(255,255,255,0.04);
+}
+.cg-rb-dupe-table td:first-child {
+  text-align: left;
+  font-weight: 700;
+}
+.cg-rb-dupe-table tr:hover td { background: rgba(255,255,255,0.03); }

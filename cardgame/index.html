@@ -7,7 +7,7 @@
 <title>PCB | Prismaera Cards Battle</title>
 <link rel="icon" href="/images/icons/icon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
-<link rel="stylesheet" href="./style.css?v=1.4.4w">
+<link rel="stylesheet" href="./style.css?v=1.4.4x">
 </head>
 <body>
 
@@ -19,7 +19,8 @@
   </div>
   <div class="cg-topbar-right">
     <button class="cg-iconbtn" id="btn-cg-mute" aria-label="BGMミュート切替" title="BGM 切替">🔊</button>
-    <button class="cg-iconbtn" id="btn-help" aria-label="ルール" title="ルール">?</button>
+    <button class="cg-iconbtn" id="btn-rulebook" aria-label="ルールブック" title="ルールブック">📗</button>
+    <button class="cg-iconbtn" id="btn-help" aria-label="ヘルプ" title="ヘルプ">?</button>
   </div>
 </header>
 
@@ -53,39 +54,50 @@
   </div>
 
   <div class="cg-modes">
-    <button class="cg-mode-btn primary" id="btn-start-easy">
+    <button class="cg-mode-btn primary" id="btn-start-easy" data-diff="easy">
       <div class="cg-mode-icon">🌱</div>
       <div class="cg-mode-text">
         <div class="cg-mode-title">AIと対戦 (Easy)</div>
         <div class="cg-mode-sub">ルール体験 / 初心者向け</div>
       </div>
+      <span class="cg-mode-streak" data-streak="easy" hidden>🔥 0連勝</span>
     </button>
-    <button class="cg-mode-btn" id="btn-start-normal">
+    <button class="cg-mode-btn" id="btn-start-normal" data-diff="normal">
       <div class="cg-mode-icon">⚔️</div>
       <div class="cg-mode-text">
         <div class="cg-mode-title">AIと対戦 (Normal)</div>
         <div class="cg-mode-sub">コスト最大化 + 劣勢補強</div>
       </div>
+      <span class="cg-mode-streak" data-streak="normal" hidden>🔥 0連勝</span>
     </button>
-    <button class="cg-mode-btn" id="btn-start-hard">
+    <button class="cg-mode-btn" id="btn-start-hard" data-diff="hard">
       <div class="cg-mode-icon">🔥</div>
       <div class="cg-mode-text">
         <div class="cg-mode-title">AIと対戦 (Hard)</div>
         <div class="cg-mode-sub">派閥シナジー + レーン効果意識</div>
       </div>
+      <span class="cg-mode-streak" data-streak="hard" hidden>🔥 0連勝</span>
     </button>
-    <button class="cg-mode-btn" id="btn-start-master">
+    <button class="cg-mode-btn" id="btn-start-master" data-diff="master">
       <div class="cg-mode-icon">👑</div>
       <div class="cg-mode-text">
         <div class="cg-mode-title">AIと対戦 (Master)</div>
         <div class="cg-mode-sub">1手先まで読む + コンボ評価</div>
       </div>
+      <span class="cg-mode-streak" data-streak="master" hidden>🔥 0連勝</span>
     </button>
     <button class="cg-mode-btn disabled" disabled>
       <div class="cg-mode-icon">🌐</div>
       <div class="cg-mode-text">
         <div class="cg-mode-title">オンラインPvP</div>
         <div class="cg-mode-sub">準備中</div>
+      </div>
+    </button>
+    <button class="cg-mode-btn secondary" id="btn-rulebook-home">
+      <div class="cg-mode-icon">📗</div>
+      <div class="cg-mode-text">
+        <div class="cg-mode-title">ルールブック</div>
+        <div class="cg-mode-sub">フィールド / バフ・デバフ / 凸システム</div>
       </div>
     </button>
     <button class="cg-mode-btn secondary" id="btn-tutorial">
@@ -362,6 +374,22 @@
   </div>
 </div>
 
+<!-- 📗 ルールブック モーダル (野沢さん指示 2026-05-06、 ホーム + バトル中の両方からアクセス) -->
+<div id="rulebook-modal" class="cg-modal" hidden>
+  <div class="cg-modal-backdrop" onclick="closeRulebook()"></div>
+  <div class="cg-modal-card cg-rulebook-card">
+    <button class="cg-modal-close" onclick="closeRulebook()" aria-label="閉じる">×</button>
+    <h2 class="cg-modal-title">📗 ルールブック</h2>
+    <div class="cg-rulebook-tabs">
+      <button type="button" class="cg-rulebook-tab active" data-tab="basic">📜 基本ルール</button>
+      <button type="button" class="cg-rulebook-tab" data-tab="lane">🌟 フィールド</button>
+      <button type="button" class="cg-rulebook-tab" data-tab="buff">🔮 バフ・デバフ</button>
+      <button type="button" class="cg-rulebook-tab" data-tab="dupe">🃏 凸システム</button>
+    </div>
+    <div class="cg-rulebook-body" id="rulebook-body"></div>
+  </div>
+</div>
+
 <!-- ルールモーダル -->
 <div id="help-modal" class="cg-modal" hidden>
   <div class="cg-modal-backdrop" onclick="closeHelp()"></div>
@@ -421,6 +449,6 @@
   </div>
 </div>
 
-<script src="./script.js?v=1.4.4w"></script>
+<script src="./script.js?v=1.4.4x"></script>
 </body>
 </html>
