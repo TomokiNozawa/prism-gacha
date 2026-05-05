@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4i — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4j — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -4877,7 +4877,11 @@ function _showFactionSide(fid) {
   // BGM 有無
   const factionBgmIds = ['church', 'aquasis', 'crimson'];
   const hasBgm = factionBgmIds.includes(fid);
-  let html = `<h3>${escapeHtml(fac.label)}</h3>`;
+  // ヘッダ: タイトル + ×閉じるボタン (野沢さん要望 2026-05-06、 派閥詳細閉じてWMだけに戻す)
+  let html = `<div class="world-map-side-head">
+    <h3>${escapeHtml(fac.label)}</h3>
+    <button class="world-map-side-close" type="button" aria-label="派閥詳細を閉じる" title="閉じる">×</button>
+  </div>`;
   html += `<div class="faction-yomi-side">${escapeHtml(fac.yomi)}</div>`;
   html += `<div class="world-map-side-meta">`;
   html += `<span>👥 ${chars.length}人</span>`;
@@ -4893,6 +4897,16 @@ function _showFactionSide(fid) {
   });
   html += `</div>`;
   side.innerHTML = html;
+  // ×閉じる: 派閥選択をリセット + side panel を default 状態に戻す + canvas の active class 解除
+  side.querySelector('.world-map-side-close')?.addEventListener('click', () => {
+    _worldMapActiveFaction = null;
+    side.innerHTML = '<div class="world-map-side-empty">📍 派閥をタップして詳細表示</div>';
+    const canvas = document.getElementById('world-map-canvas');
+    if (canvas) {
+      canvas.querySelectorAll('.world-faction-node.active').forEach(n => n.classList.remove('active'));
+      canvas.querySelectorAll('.world-chapter-marker.active').forEach(n => n.classList.remove('active'));
+    }
+  });
   // メンバークリックでキャラ詳細
   // 派閥フィルタリスト = 解放済みメンバーのみで構築、 ←→ ナビが派閥内だけを循環
   const factionUnlocked = chars
@@ -4949,8 +4963,11 @@ function _showChapterGallery(storyId) {
       });
     }
   }
-  // HTML 組み立て
-  let html = `<h3>${escapeHtml(outline.icon || '📖')} ${escapeHtml(outline.title)}</h3>`;
+  // HTML 組み立て (野沢さん要望 2026-05-06、 章詳細閉じてWMだけに戻す × ボタン)
+  let html = `<div class="world-map-side-head">
+    <h3>${escapeHtml(outline.icon || '📖')} ${escapeHtml(outline.title)}</h3>
+    <button class="world-map-side-close" type="button" aria-label="章詳細を閉じる" title="閉じる">×</button>
+  </div>`;
   html += `<div class="faction-yomi-side">${escapeHtml(outline.meta)}</div>`;
   // タブフィルター: すべて / 場所 / キャラ
   html += `<div class="chapter-gallery-tabs">`;
@@ -5000,6 +5017,16 @@ function _showChapterGallery(storyId) {
     html += `</div>`;
   }
   side.innerHTML = html;
+  // ×閉じる: 章選択をリセット + side panel を default 状態に戻す + canvas の active class 解除
+  side.querySelector('.world-map-side-close')?.addEventListener('click', () => {
+    _worldMapActiveFaction = null;
+    side.innerHTML = '<div class="world-map-side-empty">📍 派閥をタップして詳細表示</div>';
+    const canvas = document.getElementById('world-map-canvas');
+    if (canvas) {
+      canvas.querySelectorAll('.world-faction-node.active').forEach(n => n.classList.remove('active'));
+      canvas.querySelectorAll('.world-chapter-marker.active').forEach(n => n.classList.remove('active'));
+    }
+  });
   // タブ click → section フィルター
   const applyTab = (tab) => {
     side.querySelectorAll('.chapter-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
@@ -9429,6 +9456,14 @@ function _skipAutoPrecache() {
 function _isChapterReleased(chapterId) {
   if (typeof STORY_FILES === 'undefined' || !STORY_FILES[chapterId]) return false;
   if (typeof STORY_OUTLINE === 'undefined') return true;
+  // dev preview (dev.prismaera.pages.dev) では releaseDate を bypass、 全章押下可能。
+  // main 本番 (prismaera.pages.dev) は releaseDate filter で公開時刻まで Coming Soon。
+  // 野沢さん要望 2026-05-06: dev で実物確認しながら FB 送るため、 dev は事前解放。
+  if (typeof location !== 'undefined' && location.hostname &&
+      (location.hostname.startsWith('dev.') || location.hostname === 'localhost' ||
+       location.hostname === '127.0.0.1')) {
+    return true;
+  }
   const o = STORY_OUTLINE.find(x => x && x.id === chapterId);
   if (o && o.releaseDate) {
     const ts = new Date(o.releaseDate).getTime();
