@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4au — 演出スタイル (Season 1 第1章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4av — 演出スタイル (Season 1 第1章) / dev は cache buster suffix で進行
    ============================================================ */
 :root {
   --bg: #05060d;
@@ -5270,6 +5270,8 @@ body.has-offline-banner .topbar { margin-top: 30px; }
   line-height: 1.6;
   color: rgba(255, 255, 255, 0.75);
 }
+/* リリースノート 階層化対応 (野沢さん指示 2026-05-06): notes 内 \n を 改行扱いで 「主項目 + 　・子項目」 形式表示 */
+#update-notes li, .update-history ul li { white-space: pre-line; }
 
 /* ───── Migration Notice Modal (旧URL→新URL 案内) ───── */
 .migration-modal {
