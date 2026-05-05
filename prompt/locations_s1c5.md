@@ -544,12 +544,12 @@ Please create the climactic palm-touch illustration in the SAME shrine altar dep
 
 anime-style climactic ceremony illustration of two characters from the references at the apex of the mask separation ritual, on the LEFT the shadow apostle Shi-Loen (SAME face as reference 3 unchanged, with his half-broken black mask covering the left side of his face) standing upright with his right hand extended forward palm-open at chest level, his torn black cloak flowing behind him with shadow-light particles, on the RIGHT the silver-frost masked knight Sion (SAME face/mask as reference 2 unchanged) standing as Shi-Loen's mirror image with his left hand extended forward palm-open at chest level meeting Shi-Loen's, his white cape flowing behind him, his silver mask back on his face catching the moonlight, BETWEEN their two palms meeting in the exact CENTER of the composition right above a great circular silver mirror altar in the floor, at the moment of contact a brilliant SEVEN-COLOR PRISMATIC RAINBOW (red orange yellow green blue indigo violet) RISING from the meeting point of their palms upward like a translucent column of light, the mirror altar reflecting both moons (silver crescent + black crescent) and the rainbow column, both characters in three-quarter facing inward looking at their joined hands with serene resolve, twelve tall silver shrine lanterns surrounding the altar in a circle each emanating soft pale-blue flames as backdrop, the seven prismatic streams of the genso swirling intensely around the rainbow column above, dawn-after-storm atmosphere with the rainbow as the visual focal point, dramatic rim lighting with twin-tone silver-and-violet glow on each character creating mirror-image symmetry, detailed linework, high-quality illustration, Aspect ratio 16:9, horizontal orientation 1672x941, original character, no logos, no text, no watermark.
 
-**位置整合**: 12 (mask_separation_ritual.png) で シ・ロエン左 / シオン右 になっている画像と整合させるため、 17 も シ・ロエン LEFT / シオン RIGHT で 統一 (野沢さん指摘 2026-05-06)。
-
 CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand for both characters, anatomically correct joints, realistic palm-meeting hand pose with fingers slightly spread.
 
 元画像から表情や姿勢は変わってOKです
 ```
+
+**位置整合メモ (Claude 内部メモ、 プロンプト送信時には不要)**: 12 (mask_separation_ritual.png) で シ・ロエン左 / シオン右 になっている画像と整合させるため、 17 も シ・ロエン LEFT / シオン RIGHT で 統一 (2026-05-06)。
 
 **伏線視覚化**: 章テーマ「影を抱きしめてから手放す」 の 視覚的頂点。 銀と黒の手のひらが 等価に交差 → ルナリアの織機 (3-2 silver and black thread) と同じ 七色の光が 立ち上がる構図で 章全体の 縦糸を 締めくくる。
 

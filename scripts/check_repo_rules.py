@@ -1790,8 +1790,53 @@ def check_illustration_setting_reference():
     return checked
 
 
+def check_prompt_body_meta_pollution():
+    """ルール7-36 (BLOCKER 2026-05-06): prompt/locations_*.md / prompt/s1c*_chars.md の
+    ``` ... ``` 本体 (= ChatGPT/DALL-E に コピペで送るプロンプト本体) に Claude 内部メモ
+    (野沢さん指摘 / 内部キー / コード参照 等) が 混入していないか チェック。
+
+    2026-05-06 17 (twin_palms_rainbow) のプロンプト本体内に 「**位置整合**: ... (野沢さん指摘
+    2026-05-06)」 メモを入れて 野沢さん 「コピーする予定の部分にメモ入れんなよ、 ナメてんのか」
+    叱責。 再発防止。
+
+    NG ワード: 野沢 / Claude 内部 / 位置整合メモ / 伏線視覚化 / 本文行 / コード参照 /
+              STORY/s1c / LOCATION_CONFIG / STORY_LOCATION_INLINE_CONFIG / CHAR_FACTION
+    """
+    target_dirs = [ROOT / "prompt"]
+    NG = ['野沢', 'Claude 内部', 'Claude内部', '位置整合メモ', '伏線視覚化',
+          '本文行', 'コード参照', 'STORY/s1c', 'LOCATION_CONFIG',
+          'STORY_LOCATION_INLINE_CONFIG', 'CHAR_FACTION']
+    checked = 0
+    for tdir in target_dirs:
+        if not tdir.exists():
+            continue
+        for path in sorted(list(tdir.glob("locations_*.md")) + list(tdir.glob("s1c*_chars.md"))):
+            text = path.read_text(encoding="utf-8")
+            # 厳密に行頭 ``` を fence と認識
+            for m in re.finditer(r'(?m)^```\s*\n(.*?)\n^```\s*$', text, flags=re.S):
+                body = m.group(1)
+                checked += 1
+                hits = [w for w in NG if w in body]
+                if hits:
+                    pre = text[:m.start()]
+                    hm = list(re.finditer(r'^#+ [^\n]+', pre, flags=re.M))
+                    header = hm[-1].group(0)[:60] if hm else "?"
+                    sample_line = next((ln.strip() for ln in body.split('\n')
+                                       if any(w in ln for w in hits)), '')[:120]
+                    violations.append(
+                        f"[ルール7-36 プロンプト本体メタ汚染 BLOCKER] {path.name} :: {header}\n"
+                        f"      → 検出ワード: {hits}\n"
+                        f"      → 該当行: {sample_line}\n"
+                        f"      → ``` ... ``` 内は ChatGPT/DALL-E に そのまま送る本体、 内部メモは ``` の外 (markdown 普通の本文) に書く\n"
+                        f"      → 2026-05-06 17 twin_palms 「**位置整合**: ... (野沢さん指摘)」 混入事故 再発防止"
+                    )
+    return checked
+
+
 n7_33 = check_combo_pair_uniqueness()
 print(f"  ルール7-33 (combos 重複ペア 禁止): {n7_33}件 検査 [BLOCKER]")
+n7_36 = check_prompt_body_meta_pollution()
+print(f"  ルール7-36 (プロンプト本体 内部メモ汚染禁止): {n7_36}件 検査 [BLOCKER]")
 n7_34 = check_illustration_position_consistency()
 print(f"  ルール7-34 (挿絵 同一シーン内 LEFT/RIGHT 整合): {n7_34}件 検査 [WARNING]")
 n7_35 = check_illustration_setting_reference()
