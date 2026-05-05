@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4b — 演出スタイル (Season 1 第1章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4c — 演出スタイル (Season 1 第1章) / dev は cache buster suffix で進行
    ============================================================ */
 :root {
   --bg: #05060d;
@@ -3859,9 +3859,12 @@ body.has-offline-banner .topbar { margin-top: 30px; }
 }
 
 @media (max-width: 720px) {
-  .relations-header,
-  .world-map-header { padding: 10px 12px 10px 12px; padding-top: 48px; gap: 6px; flex-direction: column; align-items: stretch; }  /* close は absolute 右上配置のため、 上に padding-top 48px で zoom 等を下にずらして被り回避 */
-  .world-map-header h2 { font-size: 16px; margin: 0; text-align: center; }
+  .relations-header { padding: 10px 12px 10px 12px; padding-top: 48px; gap: 6px; flex-direction: column; align-items: stretch; }  /* close は absolute 右上配置のため、 上に padding-top 48px で zoom 等を下にずらして被り回避 */
+  /* ワールドマップは シンプル 1行 layout 維持 (野沢さん指示 2026-05-05、 column 化撤回) */
+  .world-map-header { padding: 10px 14px; padding-top: calc(env(safe-area-inset-top, 0px) + 10px); gap: 8px; }
+  .world-map-header h2 { font-size: 14px; margin: 0; }
+  .world-map-header > .close { font-size: 11px; padding: 5px 10px; min-height: 32px; }
+  .world-map-header > .wm-zoom { margin: 4px auto 0; padding: 2px 4px; }
   .relations-header h2 { font-size: 16px; margin: 0; text-align: center; }
   .relations-legend { justify-content: center; gap: 6px; font-size: 10px; }
   .relations-legend .leg-line { width: 18px; height: 2px; margin-right: 2px; }
@@ -4147,8 +4150,7 @@ body.has-offline-banner .topbar { margin-top: 30px; }
   .account-close,
   .story-toc-close,
   .story-list-close,
-  .relations-header .close,
-  .world-map-header .close {
+  .relations-header .close {
     top: calc(env(safe-area-inset-top, 0px) + 8px) !important;
     min-width: 44px;
     min-height: 44px;
@@ -4156,6 +4158,7 @@ body.has-offline-banner .topbar { margin-top: 30px; }
     align-items: center;
     justify-content: center;
   }
+  /* world-map-header .close は 1行 layout 内 inline ボタンなので 44×44 強制しない (野沢さん指示 2026-05-05) */
   /* モーダル全体に safe-area-inset-top の padding を入れて、 ヘッダや上部要素が status bar に被らないように */
   .world-map-header,
   .relations-header,
@@ -5512,28 +5515,27 @@ body.gasshuku-modal-open {
   display: flex; flex-direction: column;
 }
 .world-map-modal[hidden] { display: none; }
-/* 野沢さん指示 2026-05-05: ワールドマップ ヘッダ レイアウトを 相関図 (.relations-header) と
-   完全統一。 close ボタンを 右上 absolute 配置にして 「× 閉じる (Esc)」 が 2行になる現象を解消。 */
+/* 野沢さん指示 2026-05-05: ワールドマップ ヘッダは シンプル 1行 layout
+   (タイトル + close を 1行、 zoom controls は 別行)。 相関図と統一する案は 撤回 (キモい)。 */
 .world-map-header {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 14px 140px 14px 22px;  /* 右の close ボタン分 余白確保 */
-  gap: 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 18px;
+  gap: 12px;
   background: rgba(0,0,0,0.5);
   border-bottom: 1px solid rgba(255,255,255,0.1);
   backdrop-filter: blur(8px);
-  flex-wrap: wrap;
-  position: relative;  /* 子の close を absolute で右上配置するための基準 */
+  flex-wrap: wrap;  /* zoom controls だけ 別行に折り返し */
 }
 .world-map-header h2 {
-  margin: 0; font-size: 22px; letter-spacing: 0.2em;
+  margin: 0; font-size: 18px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  flex: 1 1 auto;
   background: linear-gradient(90deg, #ffd84d, #5fffd4, #c87dff);
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
 .world-map-header > .close {
-  position: absolute;
-  top: 10px;
-  right: 12px;
-  z-index: 10;
+  flex: 0 0 auto;
   font-family: inherit;
   font-size: 12px;
   padding: 6px 12px;
@@ -5542,9 +5544,14 @@ body.gasshuku-modal-open {
   background: rgba(255,255,255,0.08);
   color: var(--text);
   border: 1px solid rgba(255,255,255,0.15);
-  white-space: nowrap;  /* 「× 閉じる (Esc)」 を 2行折り返し させない */
+  white-space: nowrap;
 }
 .world-map-header > .close:hover { background: rgba(255,255,255,0.15); }
+.world-map-header > .wm-zoom {
+  flex: 0 0 100%;  /* zoom controls は 別行 (full width)、 中央寄せ */
+  justify-content: center;
+  margin: 4px auto 0;
+}
 .world-map-body {
   flex: 1; display: grid; grid-template-columns: 1fr 320px;
   overflow: hidden;

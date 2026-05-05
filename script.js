@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4b — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4c — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -4079,7 +4079,24 @@ function bindRelationsZoomPinch(canvas) {
     const dist = Math.hypot(arr[0].x - arr[1].x, arr[0].y - arr[1].y);
     if (lastDist && lastDist > 0) {
       const factor = dist / lastDist;
-      setRelationsZoom(_relationsZoom * factor);
+      // anchor zoom (野沢さん指示 2026-05-05、 ピンチ操作位置を中心に拡大):
+      //   旧実装は setRelationsZoom 呼ぶだけで svg 左上 (0,0) anchor で 拡大されていた。
+      //   修正: ピンチ中心 (2点の中間) の svg 内座標が 拡大前/後で 同じ viewport 位置に
+      //   留まるよう scrollLeft/Top を 補正。
+      const rect = canvas.getBoundingClientRect();
+      const cx = (arr[0].x + arr[1].x) / 2;  // viewport client x
+      const cy = (arr[0].y + arr[1].y) / 2;
+      const offsetX = cx - rect.left;          // canvas 左端からのピンチ中心距離
+      const offsetY = cy - rect.top;
+      const svgX_before = canvas.scrollLeft + offsetX;  // 拡大前 svg 内座標
+      const svgY_before = canvas.scrollTop + offsetY;
+      const oldZoom = _relationsZoom;
+      setRelationsZoom(oldZoom * factor);
+      const realFactor = _relationsZoom / oldZoom;     // clamp 後の実効 factor
+      if (realFactor !== 1) {
+        canvas.scrollLeft = svgX_before * realFactor - offsetX;
+        canvas.scrollTop  = svgY_before * realFactor - offsetY;
+      }
     }
     lastDist = dist;
   }, { passive: false });
