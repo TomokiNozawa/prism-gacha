@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.3m — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.3n — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -2968,6 +2968,13 @@ function _updateTScoreHistory(results, tScore) {
   }
   if (bestUpdated || worstUpdated) {
     saveState();
+    // 即時 cloud sync (野沢さん指示 2026-05-05 「端末ごとじゃなくてアカウントごとにしてね」):
+    //   通常の saveStateCloud は scheduleCloudSync で 800ms debounce → ブラウザ閉じ等で
+    //   sync 漏れ → 端末間で best/worst が ズレる事故。 best/worst 更新時のみ debounce skip
+    //   して 即座に saveStateCloud で push、 アカウント単位 整合性を 確実化。
+    if (typeof saveStateCloud === 'function' && typeof authUser !== 'undefined' && authUser) {
+      saveStateCloud();
+    }
     if (bestUpdated && state.bestTScore >= 50 && typeof showToast === 'function') {
       // 控えめな更新通知 (派手なエフェクト無し、 電池配慮)
       showToast(`📊 自己ベスト更新! 偏差値 ${tScore}`);

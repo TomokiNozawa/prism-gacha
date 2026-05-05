@@ -40,6 +40,13 @@ body {
   color: #d4b5ff;
   letter-spacing: 0.05em;
 }
+.header h1 .admin-ver {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: 0.04em;
+  margin-left: 6px;
+  font-weight: normal;
+}
 .header-actions { display: flex; gap: 8px; }
 .header-btn {
   padding: 8px 14px; font-size: 13px;
@@ -676,7 +683,7 @@ body {
 <body>
 
 <div class="header">
-  <h1>✦ Prismaera <span class="tag">ADMIN</span></h1>
+  <h1>✦ Prismaera <span class="tag">ADMIN</span> <span class="admin-ver" id="admin-ver">v?.?.?</span></h1>
   <div class="header-actions">
     <a href="index.html" class="header-btn">← ガチャに戻る</a>
     <button class="header-btn" id="toggle-show-owners" title="自分のデバイス (admin uid または 手動マーク済) を一覧/集計に含めるか切替"></button>
@@ -1997,17 +2004,33 @@ function copyFeedbackItem(id) {
   const text = `[${catLbl}] ${f.name || '(名前なし)'} — ${date}\n${f.text || ''}\nuid: ${(f.uid || '').slice(0, 12)}…\norigin: ${f.origin || '-'}\nver: ${f.ver || '-'}`;
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(text).then(() => {
-      const noticeEl = document.getElementById('notice');
-      if (noticeEl) {
-        noticeEl.textContent = '📋 1件コピーしました';
-        setTimeout(() => { if (noticeEl.textContent === '📋 1件コピーしました') noticeEl.textContent = ''; }, 2000);
-      }
+      _showAdminNotice('📋 1件コピーしました');
     }).catch(() => {
       prompt('Clipboard 失敗 — 下記をコピー', text);
     });
   } else {
     prompt('Clipboard API なし — 下記をコピー', text);
   }
+}
+
+// admin notice ヘルパー: .notice デフォルト display:none なので inline で 制御 + auto clear
+function _showAdminNotice(msg, ms) {
+  const noticeEl = document.getElementById('notice');
+  if (!noticeEl) return;
+  noticeEl.textContent = msg;
+  noticeEl.style.display = 'block';
+  noticeEl.style.background = 'rgba(95,255,212,0.12)';
+  noticeEl.style.border = '1px solid rgba(95,255,212,0.4)';
+  noticeEl.style.color = '#b8ffe5';
+  setTimeout(() => {
+    if (noticeEl.textContent === msg) {
+      noticeEl.textContent = '';
+      noticeEl.style.display = '';
+      noticeEl.style.background = '';
+      noticeEl.style.border = '';
+      noticeEl.style.color = '';
+    }
+  }, ms || 2500);
 }
 
 // ───── 💬 個別返信 + 📢 broadcast 一斉送信 (野沢さん指示 2026-05-05) ─────
@@ -2070,11 +2093,7 @@ async function sendReply() {
     });
     // feedback 側も「既読」 + 返信済 マーキング (今は read true で代用)
     if (!f.read) await toggleFeedbackRead(_replyTargetFeedbackId, false);
-    const noticeEl = document.getElementById('notice');
-    if (noticeEl) {
-      noticeEl.textContent = '💬 ' + (f.name || 'ユーザー') + ' さんに返信を送信しました';
-      setTimeout(() => { if (noticeEl.textContent.startsWith('💬')) noticeEl.textContent = ''; }, 2500);
-    }
+    _showAdminNotice('💬 ' + (f.name || 'ユーザー') + ' さんに返信を送信しました');
     closeReplyModal();
   } catch (e) {
     console.error('[reply] send failed:', e);
@@ -2103,11 +2122,7 @@ async function sendBroadcast() {
     });
     document.getElementById('bc-title').value = '';
     document.getElementById('bc-body').value = '';
-    const noticeEl = document.getElementById('notice');
-    if (noticeEl) {
-      noticeEl.textContent = '📢 broadcast を送信しました';
-      setTimeout(() => { if (noticeEl.textContent.startsWith('📢')) noticeEl.textContent = ''; }, 2500);
-    }
+    _showAdminNotice('📢 broadcast を全ユーザーに送信しました');
   } catch (e) {
     console.error('[broadcast] send failed:', e);
     alert('送信失敗: ' + (e.message || e));
@@ -2211,6 +2226,17 @@ loadAll = async function() {
   // フォールバック: 1クリック/キー操作で再生
   document.addEventListener('click', tryPlay, { once: true });
   document.addEventListener('keydown', tryPlay, { once: true });
+})();
+
+// admin header の version 表示 (野沢さん指示 2026-05-05)
+(async function _initAdminVersion() {
+  try {
+    const res = await fetch('/version.json?_t=' + Date.now());
+    if (!res.ok) return;
+    const j = await res.json();
+    const verEl = document.getElementById('admin-ver');
+    if (verEl && j && j.version) verEl.textContent = 'v' + j.version;
+  } catch (e) { /* 失敗してもUI動作には影響しない */ }
 })();
 
 </script>
