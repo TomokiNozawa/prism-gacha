@@ -1427,6 +1427,49 @@ def check_location_images_exist():
     return found_violations
 
 
+def check_inline_location_markers():
+    """ルール7-32 (BLOCKER 2026-05-06): script.js STORY_LOCATION_INLINE_CONFIG['s1cN'] の各 entry の
+    marker が STORY/s1cN.md 内に 1回以上 hit するか検証。
+    背景: ID-based マークアップ {{char:slug}}名前{{/char}} で 本文を更新した時、
+    marker 文字列に同じ名前が含まれていると 機械的にマッチ失敗 → 挿絵が 該当シーンに表示されず
+    末尾に追いやられる事故 (s1c5 2-2 で 3回目の同じパターン、 野沢さん指摘 2026-05-06)。
+    """
+    script_path = ROOT / "script.js"
+    if not script_path.exists():
+        return 0
+    text = script_path.read_text(encoding="utf-8")
+    # STORY_LOCATION_INLINE_CONFIG ブロック
+    block = re.search(r"const STORY_LOCATION_INLINE_CONFIG\s*=\s*\{[\s\S]*?\n\};", text)
+    if not block:
+        return 0
+    entries = re.findall(
+        r"'(s1c\d+)':\s*\[([\s\S]*?)\],\s*\n",
+        block.group(0),
+    )
+    miss = []
+    for sid, body in entries:
+        story_path = ROOT / "STORY" / f"{sid}.md"
+        if not story_path.exists():
+            continue
+        story_text = story_path.read_text(encoding="utf-8")
+        for m in re.finditer(r"scene:\s*'([^']+)',\s*marker:\s*'([^']+)'", body):
+            scene_label, marker = m.group(1), m.group(2)
+            if marker not in story_text:
+                miss.append((sid, scene_label, marker[:40]))
+    if miss:
+        sample = "; ".join(f"{s}/{sc} '{mk}…'" for s, sc, mk in miss[:3])
+        more = f" 他 {len(miss)-3}件" if len(miss) > 3 else ""
+        violations.append(
+            f"[ルール7-32 inline location marker 不一致 BLOCKER] {len(miss)}件 marker が 本文 不在: {sample}{more}\n"
+            f"      → STORY_LOCATION_INLINE_CONFIG の marker は STORY/s1cN.md 内に 1回以上 含まれる必要\n"
+            f"      → ID-based マークアップ {{{{char:slug}}}}名前{{{{/char}}}} 適用時に marker が 機械的に\n"
+            f"        マッチ失敗 → 挿絵が 末尾配置されてしまう事故対策 (野沢さん 繰返叱責 2026-05-06)\n"
+            f"      → 解決: marker を ID-based マークアップを 含まない unique 文字列 (例: 「俺のメイスが」) に変更"
+        )
+        return len(miss)
+    return 0
+
+
 def check_char_desc_meta_words():
     """ルール7-31 (BLOCKER 2026-05-06): POOL の キャラ desc / title / caption に メタ表現 を 入れない。
     s1c5 公開直前で 7キャラに「再登場予定 / S1C7 / S2C1 / 伏線 / 章テーマ視覚化」 等 メタ表現が
@@ -1543,6 +1586,8 @@ n7_30 = check_relations_coverage()
 print(f"  ルール7-30 (POOL 全キャラ RELATIONS 登録): {n7_30}件 検査 [BLOCKER]")
 n7_31 = check_char_desc_meta_words()
 print(f"  ルール7-31 (キャラ desc メタ表現禁止): {n7_31}件 検査 [BLOCKER]")
+n7_32 = check_inline_location_markers()
+print(f"  ルール7-32 (inline location marker 実在): {n7_32}件 検査 [BLOCKER]")
 
 def check_main_no_suffix():
     """ルール7-27 (BLOCKER 2026-05-05): main branch で commit する version は suffix なし (X.Y.Z 形式) 必須。
