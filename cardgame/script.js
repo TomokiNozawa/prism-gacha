@@ -148,11 +148,11 @@ function updateMuteUI() {
 // 優先順位: cards.json (手書き完全override) > effects_override.json (effect+effectText のみ) > pool.json (default)
 async function loadMasters() {
   const [c, k, l, p, eo] = await Promise.all([
-    fetch('./cards.json?v=1.4.4v').then(r => r.json()),
-    fetch('./combos.json?v=1.4.4v').then(r => r.json()),
-    fetch('./lane_effects.json?v=1.4.4v').then(r => r.json()),
-    fetch('./data/pool.json?v=1.4.4v').then(r => r.json()).catch(() => []),
-    fetch('./effects_override.json?v=1.4.4v').then(r => r.json()).catch(() => ({})),
+    fetch('./cards.json?v=1.4.4w').then(r => r.json()),
+    fetch('./combos.json?v=1.4.4w').then(r => r.json()),
+    fetch('./lane_effects.json?v=1.4.4w').then(r => r.json()),
+    fetch('./data/pool.json?v=1.4.4w').then(r => r.json()).catch(() => []),
+    fetch('./effects_override.json?v=1.4.4w').then(r => r.json()).catch(() => ({})),
   ]);
   // pool 全カード ← effects_override で effect/effectText を上書き ← cards.json で完全 override
   const cardsByName = new Map();
@@ -2647,7 +2647,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-      closeResult(); closeHelp(); closeTutorial(); closeCombosModal(); closeCharDetail(); closeDeckFilter(); closeDeckBuilder();
+      // 最上位 modal を 1つだけ close (野沢さん指示 2026-05-06、 「char-detail Esc で deck-builder
+      // (キャラ一覧) に戻る、 ホームには戻らない」 仕様。 旧実装は全 modal 連鎖 close で バグだった)
+      const isOpen = (id) => {
+        const el = document.getElementById(id);
+        return el && !el.hidden && el.style.display !== 'none';
+      };
+      if (isOpen('result-modal'))         { closeResult(); return; }
+      if (isOpen('cg-help-modal'))        { closeHelp(); return; }
+      if (isOpen('tutorial-modal'))       { closeTutorial(); return; }
+      if (isOpen('combos-modal'))         { closeCombosModal(); return; }
+      if (isOpen('char-detail-modal'))    { closeCharDetail(); return; }   // ← deck-builder の上に重ねて開いた時、 ここで stop
+      if (isOpen('deck-filter-modal'))    { closeDeckFilter(); return; }
+      if (isOpen('deck-builder-modal'))   { closeDeckBuilder(); return; }
+      if (isOpen('deck-slot-picker-modal')) { closeDeckSlotPicker(); return; }
     }
   });
 });

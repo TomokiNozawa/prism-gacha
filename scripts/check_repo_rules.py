@@ -1427,6 +1427,49 @@ def check_location_images_exist():
     return found_violations
 
 
+def check_char_desc_meta_words():
+    """ルール7-31 (BLOCKER 2026-05-06): POOL の キャラ desc / title / caption に メタ表現 を 入れない。
+    s1c5 公開直前で 7キャラに「再登場予定 / S1C7 / S2C1 / 伏線 / 章テーマ視覚化」 等 メタ表現が
+    残っていた事故対策。 ユーザーには「現在 の物語的役割」 だけを見せ、 将来章のネタバレは隠す。
+    """
+    script_path = ROOT / "script.js"
+    if not script_path.exists():
+        return 0
+    text = script_path.read_text(encoding="utf-8")
+    # POOL 各 entry の name + title + caption + desc を抽出
+    pattern = re.compile(
+        r'name:\s*"([^"]+)"\s*,\s*season:\s*\d+\s*,\s*chapter:\s*\'[^\']+\'\s*,\s*\n'
+        r'\s*title:\s*"([^"]*)"\s*,\s*\n'
+        r'\s*caption:\s*"([^"]*)"\s*,\s*\n'
+        r'\s*desc:\s*"([^"]*)"',
+        re.DOTALL,
+    )
+    # メタワード (将来章/伏線/開発者視点 等)
+    META_WORDS = [
+        "再登場予定", "再登場します", "への伏線", "の伏線。", "の伏線、",
+        "S1C7", "S1C6", "S2C1", "S2C2", "S2C3", "S2C4", "S2C5", "S2C6", "S2C7",
+        "S3C", "Season 2", "Season 3",
+        "章テーマ", "山場 ", "物語上重要",
+    ]
+    found_chars = []
+    for m in pattern.finditer(text):
+        name, title, cap, desc = m.group(1), m.group(2), m.group(3), m.group(4)
+        full = title + " " + cap + " " + desc
+        hits = [w for w in META_WORDS if w in full]
+        if hits:
+            found_chars.append((name, hits, desc[:80]))
+    if found_chars:
+        sample = "; ".join(f"「{n}」 ({', '.join(h)})" for n, h, _ in found_chars[:3])
+        more = f" 他 {len(found_chars) - 3}件" if len(found_chars) > 3 else ""
+        violations.append(
+            f"[ルール7-31 キャラ desc メタ表現 BLOCKER] {len(found_chars)}キャラの desc/title/caption に メタ表現: {sample}{more}\n"
+            f"      → 将来章 (S2C1 等) / 「再登場予定」 / 「伏線」 / 「章テーマ視覚化」 等 開発者視点の言葉を 削除\n"
+            f"      → ユーザーには「現在 の物語的役割」 だけを見せる、 ネタバレ防止 (野沢さん指摘 2026-05-06)"
+        )
+        return len(found_chars)
+    return 0
+
+
 def check_relations_coverage():
     """ルール7-30 (BLOCKER 2026-05-06): POOL 全キャラが RELATIONS に 1つ以上含まれる必須。
     s1c5 公開直前で 4キャラ (オルフェ/工房娘/歌姫/刺客) が 相関なしの状態で 発見 → 相関図に
@@ -1498,6 +1541,8 @@ n7_29 = check_location_images_exist()
 print(f"  ルール7-29 (LOCATION_CONFIG 画像 実在): {n7_29}件 検査 [BLOCKER]")
 n7_30 = check_relations_coverage()
 print(f"  ルール7-30 (POOL 全キャラ RELATIONS 登録): {n7_30}件 検査 [BLOCKER]")
+n7_31 = check_char_desc_meta_words()
+print(f"  ルール7-31 (キャラ desc メタ表現禁止): {n7_31}件 検査 [BLOCKER]")
 
 def check_main_no_suffix():
     """ルール7-27 (BLOCKER 2026-05-05): main branch で commit する version は suffix なし (X.Y.Z 形式) 必須。

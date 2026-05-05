@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4v — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4w — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -621,7 +621,7 @@ const POOL = {
       name: "雪月神殿見習い ラピス", season: 1, chapter: 's1c5',
       title: "雪月神殿の見習い少年、 灯火を運ぶ",
       caption: "(灯篭を両手で慎重に持ち、 静かに礼)",
-      desc: "雪月神殿の若き見習い少年、 十四歳ほど。 銀青の短髪、 銀の三日月の髪飾り。 銀青の見習い衣、 銀の腕輪。 ルミナ姉の後輩として灯火を運ぶ。 山場 4-1 分離儀式で月鏡周辺の灯篭を担当。",
+      desc: "雪月神殿の若き見習い少年、 十四歳ほど。 銀青の短髪、 銀の三日月の髪飾り。 銀青の見習い衣、 銀の腕輪。 ルミナ姉の後輩として灯火を運ぶ。 父は前代の月夜祭司で、 ラピスは父の遺志を継いで神殿に身を寄せた。",
       img: `${S1}/r/moon_acolyte.png`,
     },
     {
@@ -6764,7 +6764,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // version 完全同期 (野沢さん指示 2026-05-06): bump_version.py が自動で更新する。
 // 旧 date-suffix '20260504o' を 5/6 で見つけた事故を契機に version-based に統一。
-const IMG_CACHE_VERSION = '1.4.4v';
+const IMG_CACHE_VERSION = '1.4.4w';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -10239,10 +10239,10 @@ function openSettingsModal() {
         <div class="settings-section">
           <button type="button" class="settings-feedback-link" onclick="closeSettingsModal();openFeedbackModal()">📨 ご意見・ご要望を送る</button>
         </div>
-        <!-- 強制リフレッシュ (野沢さん指示 2026-05-06、 スマホで SW 古版固定化 → 新版が反映されない事故対策) -->
-        <div class="settings-section settings-force-refresh">
-          <div class="settings-label">🔄 強制リフレッシュ (Cache + SW 全削除)</div>
-          <div class="settings-power-saver-desc">アプリの動作が古いままに見える時 (画像が反映されない / 新機能が出ない 等) に押してください。 端末のキャッシュ + Service Worker を 全削除して 最新版で再起動します。 ガチャ履歴・凸数・所持キャラはアカウント情報なので残ります。</div>
+        <!-- 強制リフレッシュ (野沢さん指示 2026-05-06、 dev preview / admin のみ表示、 通常ユーザーには非表示) -->
+        <div class="settings-section settings-force-refresh" id="settings-force-refresh-section" style="display:none">
+          <div class="settings-label">🔄 強制リフレッシュ (dev/admin only)</div>
+          <div class="settings-power-saver-desc">端末のキャッシュ + Service Worker を 全削除して 最新版で再起動します。 ガチャ履歴・凸数・所持キャラはアカウント情報なので残ります。 ※ dev preview / admin のみ表示。</div>
           <button type="button" class="settings-feedback-link" id="settings-force-refresh" style="background:rgba(255,140,80,0.18);border-color:rgba(255,140,80,0.45);">🔄 強制リフレッシュ</button>
         </div>
         <div class="settings-note">設定はこの端末に保存されます (アカウント連携対象外)</div>
@@ -10292,7 +10292,17 @@ function openSettingsModal() {
       // C-3: BGM progress timer も interval を切り替え (500ms <-> 1500ms)
       try { if (typeof _restartBgmProgressTimer === 'function') _restartBgmProgressTimer(); } catch {}
     });
-    // 強制リフレッシュ (野沢さん指示 2026-05-06、 スマホ SW 古版固定化対策)
+    // 強制リフレッシュ section: dev preview / admin のみ表示 (一般ユーザーには非表示)
+    const forceSection = m.querySelector('#settings-force-refresh-section');
+    if (forceSection) {
+      const isDev = typeof location !== 'undefined' && location.hostname &&
+                    (location.hostname.startsWith('dev.') || location.hostname === 'localhost' ||
+                     location.hostname === '127.0.0.1');
+      // admin 判定は isPrismAdmin (グローバル、 checkPrismAdmin で Firebase _meta/admins から取得)
+      const isAdmin = (typeof isPrismAdmin !== 'undefined' && isPrismAdmin === true);
+      if (isDev || isAdmin) forceSection.style.display = '';
+    }
+    // 強制リフレッシュ click handler (野沢さん指示 2026-05-06)
     const forceRefreshBtn = m.querySelector('#settings-force-refresh');
     if (forceRefreshBtn) forceRefreshBtn.addEventListener('click', async () => {
       if (!confirm('Cache + Service Worker を 全削除して 最新版で再起動します。 続けますか?')) return;
