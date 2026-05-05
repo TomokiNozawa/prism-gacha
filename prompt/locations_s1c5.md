@@ -383,6 +383,7 @@ CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand for both c
 | 12 | mask_separation_ritual.png | 16:9 | **4-1 山場** | シオン + シ・ロエン + ラナス + ルミナ + アスター |
 | 13 | shi_loen_departure.png | 16:9 | 4-2 別れ | シオン + シ・ロエン |
 | 14 | silver_throne_oath.png | 16:9 | 1-1 王宮謁見・誓いの作法 | シオン + ノヴァ (添付2枚) |
+| 15 | black_moon_grove_meeting.png | 16:9 | 2-1 月喰いの森・取引 | シオン + ノクトリア + ガルヴィン (添付3枚) |
 
 生成結果は `images/locations/s1c5/<filename>` にそのまま保存。
 完了時に thumb 版 `images/locations/s1c5/thumb/<basename>_thumb.webp` を作成 (Phase 1-B 完了後の規約)。
@@ -415,6 +416,38 @@ CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand for both c
 ```
 
 **伏線視覚化**: シオンの「仮面の縁に指を添える作法」 を 公式画化、 これは銀霜国の伝統で 言葉を持たぬ騎士の沈黙の表現。 王と盾の関係 (ノヴァ依存) を視覚化、 ノヴァが玉座から見守る姿で「弟が兄に縋る」 描写 (本文 desc と整合)。
+
+---
+
+---
+
+# 【15】black_moon_grove_meeting.png — 月喰いの森・取引 (挿絵、 16:9、 シオン+ノクトリア+ガルヴィン 添付3枚)
+
+**⚠️ 生成前に必ず添付してください**:
+- `images/characters/season1/ssr/masked_knight.png` (既存 SSR シオン)
+- `images/characters/season1/ur/black_moon_lord.png` (新規 UR ノクトリア)
+- `images/characters/season1/ssr/fallen_paladin.png` (新規 SSR ガルヴィン)
+
+- **対応シーン**: 2-1 月喰いの森の祭壇 (シオンが ノクトリアと初対峙、 ガルヴィンが「お前の道の先に何があるか — 俺は、 知っている」 と告げる山場の出会い)
+- **本文行**: `STORY/s1c5.md` 2-1 「ガルヴィンが、 静かに言った。 彼の声には、 怒りも、 悔しさも、 なかった。 ただ、 道が違っただけの、 旧友の声だった。」 (野沢さん指示 2026-05-06)
+- **役割**: 黒月衆との初対峙の盛り上がりシーン、 ノクトリア/ガルヴィン の正体披露 + シオンの覚悟を視覚化
+- **被写体**: 月喰いの森の中央 石の祭壇、 シオンが正面 (左)、 ノクトリアが祭壇上 (中央)、 ガルヴィンが その隣 (右)
+- **ストーリー使用**: ✅ s1c5 2-1 挿絵
+- **コード参照**: `STORY_LOCATION_INLINE_CONFIG['s1c5']` (scene='2-1', position='before' or 'after')
+
+```
+[Attached: reference image 1 = "Sion" / 銀霜王国の仮面騎士シオン (SSR), reference image 2 = "Noctoria" / 黒月の盟主 ノクトリア (UR), reference image 3 = "Galvin" / 堕者剣聖 ガルヴィン (SSR)]
+
+Please create a tense confrontation illustration of these three characters from the attached references at the moment of their first meeting at the dead grove altar. Keep the facial features and identities EXACTLY as in the references. Optimize for a black-moon ritual stage composition with the three figures spaced across the scene.
+
+anime-style tense confrontation illustration of three characters from the references gathered at a circular cracked stone altar in a withered forest at midnight, on the LEFT in the FOREGROUND the silver-frost masked knight Sion (SAME face as reference 1 unchanged) standing his ground with his silver mace held forward in defensive readiness, his white cape flowing behind him with quiet dignity, his silver mask catching the moonlight, on the CENTER-BACK rising slightly above the altar the dark moon empress Noctoria (SAME face as reference 2 unchanged) standing tall on the cracked stone altar with her tall ornate dark staff held vertically beside her, her translucent black-violet wing-cape rising behind her like void petals, the floating black crescent moon orb on her staff radiating violet shadows, her gentle yet威厳 smile facing Sion, on the RIGHT slightly behind Noctoria the fallen paladin Galvin (SAME face as reference 3 unchanged) standing in his tarnished dark-grey holy plate armor with his half-corrupted silver-and-black greatsword resting at his side (point-down), his hand on the pommel, his ash-grey eyes fixed quietly on Sion with the look of a former brother-in-arms, between Sion and the altar a dim violet-black mist drifts low, ancient dead trees with twisted branches surround the clearing reaching up toward a black crescent moon hanging in the upper sky with violet void cracks spreading outward like webs, hanging banners of the Black Moon Sect (Nokutosu) with their crescent emblems strung between the dead trees, scattered floating broken star-fragments drifting through the air, dramatic motion drape on Sion's cape and Noctoria's wing-cape, atmospheric perspective with dying forest extending into a misty distance, ominous yet beautiful sacred-corruption confrontation atmosphere, dramatic rim lighting with violet-black glow on Noctoria/Galvin and silver-blue glow on Sion creating visual tension, detailed linework, high-quality illustration, Aspect ratio 16:9, horizontal orientation 1672x941, original character, no logos, no text, no watermark.
+
+CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand for all three characters, anatomically correct joints, realistic weapon grips (Sion両手 mace, Noctoria 両手で staff vertical, Galvin 片手 greatsword pommel).
+
+元画像から表情や姿勢は変わってOKです
+```
+
+**伏線視覚化**: 3者の立ち位置 (シオン正面 / ノクトリア祭壇上 / ガルヴィン後衛) で 力関係を 視覚化、 「同じ系譜の旧友」 ガルヴィンの構図位置 (シオンを正面で見つめる位置) は 兄弟弟子の系譜共有を 暗示。 シオンが正面切る覚悟 と ノクトリアの 取引提示の威厳が 同フレームで対峙。
 
 ---
 
