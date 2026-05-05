@@ -141,14 +141,19 @@ body.cg-modal-open .cg-deck-builder-grid {
 }
 
 .cg-modes {
-  display: flex; flex-direction: column; gap: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;  /* 2段組 (野沢さん指示 2026-05-06、 横長間延びを解消) */
+  gap: 10px;
   padding: 0 16px 20px;
-  max-width: 480px; margin: 0 auto;
+  max-width: 560px; margin: 0 auto;
+}
+@media (max-width: 360px) {
+  .cg-modes { grid-template-columns: 1fr; }  /* 極狭画面のみ 1列 */
 }
 .cg-mode-btn {
   position: relative;
-  display: flex; align-items: center; gap: 12px;
-  padding: 14px 16px;
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 14px;
@@ -157,6 +162,7 @@ body.cg-modal-open .cg-deck-builder-grid {
   cursor: pointer;
   transition: transform .12s, border-color .12s, box-shadow .12s;
   overflow: hidden;
+  min-height: 64px;
 }
 .cg-mode-btn::before {
   content: '';
@@ -180,9 +186,18 @@ body.cg-modal-open .cg-deck-builder-grid {
 .cg-mode-btn.primary::before { opacity: 0.8; }
 .cg-mode-btn.secondary { background: rgba(20, 22, 51, 0.6); }
 .cg-mode-btn.disabled { opacity: .4; cursor: not-allowed; }
-.cg-mode-icon { font-size: 28px; }
-.cg-mode-title { font-size: 15px; font-weight: 600; }
-.cg-mode-sub { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+.cg-mode-icon { font-size: 24px; flex-shrink: 0; }
+.cg-mode-text { flex: 1 1 auto; min-width: 0; }
+.cg-mode-title {
+  font-size: 13px; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.cg-mode-sub {
+  font-size: 11px; color: var(--text-dim); margin-top: 2px;
+  line-height: 1.3;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 
 .cg-foot-note {
   text-align: center; font-size: 11px; color: var(--text-dim);

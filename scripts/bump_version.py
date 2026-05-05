@@ -364,6 +364,27 @@ def main() -> int:
     else:
         print("git commit はスキップ (--auto-commit で自動化可能)")
 
+    # Box sync 自動実行 (野沢さん指示 2026-05-06、 sync 漏れ繰返叱責対策)
+    # bump 毎に Box の prismaera フォルダを 自動同期 (CLAUDE.md feedback_prism_box_sync.md)
+    sync_script = ROOT / "scripts" / "sync_to_box.sh"
+    if sync_script.exists():
+        print()
+        print("=== Box sync (自動実行) ===")
+        try:
+            r = subprocess.run(
+                ["bash", str(sync_script)],
+                cwd=str(ROOT), capture_output=True, text=True, encoding="utf-8",
+                errors="replace", timeout=120,
+            )
+            if r.returncode == 0:
+                # 末尾 3 行だけ表示 (詳細は省略)
+                for line in r.stdout.strip().splitlines()[-3:]:
+                    print(f"  {line}")
+            else:
+                print(f"  ⚠️ Box sync 失敗 (exit {r.returncode}): {r.stderr.strip()[:200]}")
+        except Exception as e:
+            print(f"  ⚠️ Box sync 例外: {e}")
+
     return 0
 
 
