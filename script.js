@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.3j — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.3k — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -1473,7 +1473,7 @@ function _unlockBodyScroll() {
   }
 }
 function _isAllModalsHidden() {
-  const checkActive = ['#char-detail', '#story-modal', '#bgm-panel', '#feedback-modal', '#history-modal', '#migration-modal', '#update-modal', '#account-modal', '#welcome-modal', '#settings-modal', '#account-prompt', '#story-list-modal', '#world-map', '#char-img-zoom', '#relations', '#gallery', '#result', '#rank-table-modal', '#rate-detail-modal'];
+  const checkActive = ['#char-detail', '#story-modal', '#bgm-panel', '#feedback-modal', '#history-modal', '#migration-modal', '#update-modal', '#account-modal', '#welcome-modal', '#settings-modal', '#account-prompt', '#story-list-modal', '#world-map', '#char-img-zoom', '#relations', '#gallery', '#result', '#rank-table-modal', '#rate-detail-modal', '#notifications-modal'];
   for (const sel of checkActive) {
     const el = document.querySelector(sel);
     if (!el) continue;
@@ -10191,10 +10191,21 @@ function markNotificationRead(id) {
 }
 
 function openNotificationsModal() {
+  // モバイル: トップバー ≡ メニューの <dialog> が showModal で top-layer に居ると、
+  //   通常の z-index 12000 の通知モーダルが その下に隠れて 「何も出てこない」 ように見える。
+  //   → ≡ dialog を 先に close してから 通知モーダルを 表示。
+  try {
+    const secondary = document.getElementById('topbar-secondary');
+    if (secondary && typeof secondary.close === 'function' && secondary.open) {
+      secondary.close();
+    }
+  } catch (e) {}
   const modal = document.getElementById('notifications-modal');
   if (!modal) return;
   modal.classList.add('active');
-  document.body.classList.add('modal-open');
+  // body scroll lock: 既存ヘルパー _lockBodyScroll を使う (top inline 設定で iOS PWA 対応、
+  //   modal-open class 単純付与だと top 不在で body 表示が壊れる事故対策、 野沢さん 2026-05-05 「何も出てこない」)
+  if (typeof _lockBodyScroll === 'function') _lockBodyScroll();
   // 開いた時 最新を fetch (起動時の cache が古いケース対策)
   loadNotifications().then(() => renderNotifications());
   renderNotifications();
@@ -10204,7 +10215,7 @@ function closeNotificationsModal() {
   const modal = document.getElementById('notifications-modal');
   if (!modal) return;
   modal.classList.remove('active');
-  document.body.classList.remove('modal-open');
+  if (typeof _unlockBodyScroll === 'function') _unlockBodyScroll();
 }
 
 // HTML escape util (お知らせ rendering 用、 既存 escapeHtml が無ければ 定義)
