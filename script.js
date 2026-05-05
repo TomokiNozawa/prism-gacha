@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4g — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4h — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -3855,20 +3855,21 @@ const REL_ZOOM_DEFAULT = 1.5;
 let _relationsZoom = REL_ZOOM_DEFAULT;
 let _relationsTx = 0;
 let _relationsTy = 0;
-// min 75% / max 300% (野沢さん指示 2026-05-05、 表示 % は (zoom / DEFAULT) × 100)
-const REL_ZOOM_MIN = REL_ZOOM_DEFAULT * 0.75, REL_ZOOM_MAX = REL_ZOOM_DEFAULT * 3.0, REL_ZOOM_STEP = 0.3;
+// min 75% / max 350% (野沢さん指示 2026-05-05、 表示 % は (zoom / DEFAULT) × 100)
+const REL_ZOOM_MIN = REL_ZOOM_DEFAULT * 0.75, REL_ZOOM_MAX = REL_ZOOM_DEFAULT * 3.5, REL_ZOOM_STEP = 0.3;
 // SVG viewBox 座標系のサイズ (W=2000*1.5+200pad×2=3400、 H=1600*1.5+200pad×2=2800)
 const REL_VBX_W = 3400, REL_VBX_H = 2800;
 
 function _applyRelationsTransform() {
   const layer = document.querySelector('.rel-pan-layer');
   if (!layer) return;
-  // pan 範囲: scale が大きいほど 動かせる量も増える (端まで届く)、 範囲外は clamp
-  // 余裕 0.5W (野沢さん指示 2026-05-05 「zoom時 右側にスクロールできない」 対策、 0.3 → 0.5 緩和)
+  // pan 範囲: ワールドマップ式 (野沢さん指摘 2026-05-05 「途中で止まり奥まで行けない」 対応):
+  //   旧 (cw - REL_VBX_W) / 2 は 半分量で 不足 → ワールドマップと同じ (cw - REL_VBX_W) に修正
+  //   + 余裕 0.3W で zoom=1 でも 多少 pan 可能。 layer の右端が viewport 右端と一致する まで pan 可能。
   const cw = REL_VBX_W * _relationsZoom;
   const ch = REL_VBX_H * _relationsZoom;
-  const maxOffX = (cw - REL_VBX_W) / 2 + REL_VBX_W * 0.5;
-  const maxOffY = (ch - REL_VBX_H) / 2 + REL_VBX_H * 0.5;
+  const maxOffX = Math.max(0, cw - REL_VBX_W) + REL_VBX_W * 0.3;
+  const maxOffY = Math.max(0, ch - REL_VBX_H) + REL_VBX_H * 0.3;
   _relationsTx = Math.max(-maxOffX, Math.min(maxOffX, _relationsTx));
   _relationsTy = Math.max(-maxOffY, Math.min(maxOffY, _relationsTy));
   layer.setAttribute('transform', `translate(${_relationsTx},${_relationsTy}) scale(${_relationsZoom})`);
