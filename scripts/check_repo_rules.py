@@ -75,11 +75,11 @@ violations = []
 def check_prompt_charref_suffix():
     """ルール1: prompt/locations_*.md 末尾文言"""
     SUFFIX = "元画像から表情や姿勢は変わってOKです"
-    target_dir = ROOT / "prompt"
+    target_dir = ROOT / "content" / "prompt"
     if not target_dir.exists():
         return 0
     checked = 0
-    for path in sorted(target_dir.glob("locations_*.md")):
+    for path in sorted(target_dir.glob("locations/*.md")):
         text = path.read_text(encoding="utf-8")
         parts = re.split(r'(?=^## )', text, flags=re.M)
         for sec in parts:
@@ -544,7 +544,7 @@ def check_furigana_dictionary(sf_ids, script_text):
                 missing_terms.append(('キャラ名', sid, token, name))
                 checked += 1
         # prompt/locations_sid.md から地名抽出 (## 【N】 タイトル)
-        loc_path = ROOT / 'prompt' / f'locations_{sid}.md'
+        loc_path = ROOT / 'content' / 'prompt' / 'locations' / f'{sid}.md'
         if loc_path.exists():
             loc_text = loc_path.read_text(encoding='utf-8')
             # ## 【N】 タイトル 形式
@@ -582,7 +582,7 @@ def check_chapter_bgm(sf_ids):
     checked = 0
     for sid in sf_ids:
         # prompt/bgm/chapter_s1cN.md 存在確認
-        prompt_path = ROOT / 'prompt' / 'bgm' / f'chapter_{sid}.md'
+        prompt_path = ROOT / 'content' / 'prompt' / 'bgm' / f'chapter_{sid}.md'
         if not prompt_path.exists():
             warnings_only.append(
                 f"[ルール7-13 章 BGM プロンプト不在 WARNING] prompt/bgm/chapter_{sid}.md が存在しない\n"
@@ -648,10 +648,10 @@ def check_faction_bgm(pool_chars_by_chap):
             continue
         checked += 1
         # 派閥テーマ BGM プロンプト存在確認: prompt/bgm/faction_{fid}.md or {label}.md
-        prompt_path = ROOT / 'prompt' / 'bgm' / f'faction_{fid}.md'
+        prompt_path = ROOT / 'content' / 'prompt' / 'bgm' / f'faction_{fid}.md'
         if not prompt_path.exists():
             # label 短縮版でも探す
-            alt = ROOT / 'prompt' / 'bgm' / 'factions' / f'{fid}.md'
+            alt = ROOT / 'content' / 'prompt' / 'bgm' / 'factions' / f'{fid}.md'
             if not alt.exists():
                 warnings_only.append(
                     f"[ルール7-14 派閥 BGM プロンプト不在 WARNING] prompt/bgm/faction_{fid}.md (or factions/{fid}.md) が無い\n"
@@ -735,7 +735,7 @@ def check_tier_consistency(pool_chars_by_chap):
 def check_prompt_metadata(sf_ids):
     """ルール7-16 (BLOCKER): prompt/locations_*.md の各画像セクション内に「対応シーン」 等のメタ記載必須
     feedback_asset_scene_mapping.md (2026-04-30 強い叱責 「別PC・別セッションで作業遂行できる引き継ぎじゃないと意味ない」)"""
-    target_dir = ROOT / 'prompt'
+    target_dir = ROOT / 'content' / 'prompt'
     if not target_dir.exists() or not sf_ids:
         return 0
     REQUIRED_META = ['対応シーン', 'ストーリー使用']  # どちらか1つあれば OK (一部は world_map 等 純風景で不要だが、 章別 locations_s1cN.md は必須)
@@ -981,7 +981,7 @@ def check_age_excess(sf_ids):
 def check_char_age_keywords(sf_ids):
     """ルール7-17 (WARNING): prompt/s1cN_chars.md の各キャラセクションで「老/中年/30代以上」 等の年齢ワード警告
     feedback_char_age_youth_first.md (2026-05-01) ガチャキャラ画像は若め (10-20代) を既定、 老人キャラ最小化"""
-    target_dir = ROOT / 'prompt'
+    target_dir = ROOT / 'content' / 'prompt'
     if not target_dir.exists() or not sf_ids:
         return 0
     AGE_WORDS = ['老人', '老戦士', '老師', '老兵', '年老', '中年', '初老', '熟年', '老',
@@ -1720,7 +1720,7 @@ def check_illustration_position_consistency():
     検出は キャラ slug を simple text match (英語キャラ slug 名 or 既知 alias)、 完全自動は難しいため
     WARNING に留め、 開発者が 手動で 12 と 17 など 並び比較する 補助とする。
     """
-    target_dir = ROOT / "prompt"
+    target_dir = ROOT / "content" / "prompt"
     if not target_dir.exists():
         return 0
     # キャラ slug → 識別 alias (英語表記、 LEFT/RIGHT 文章で頻出する語)
@@ -1742,7 +1742,7 @@ def check_illustration_position_consistency():
     }
     checked = 0
     issues = 0
-    for path in sorted(target_dir.glob("locations_s1c*.md")):
+    for path in sorted(target_dir.glob("locations/s1c*.md")):
         text = path.read_text(encoding="utf-8")
         m = re.search(r'locations_(s1c\d+)\.md', path.name)
         if not m:
@@ -1805,11 +1805,11 @@ def check_illustration_setting_reference():
     - scene_id が一致して 背景 + 挿絵 が両方ある場合
     - 挿絵 prompt_body に 背景 filename が 含まれていなければ WARNING
     """
-    target_dir = ROOT / "prompt"
+    target_dir = ROOT / "content" / "prompt"
     if not target_dir.exists():
         return 0
     checked = 0
-    for path in sorted(target_dir.glob("locations_s1c*.md")):
+    for path in sorted(target_dir.glob("locations/s1c*.md")):
         text = path.read_text(encoding="utf-8")
         sections = re.split(r'^# 【\d+】', text, flags=re.M)[1:]
         # 各セクション: {filename, scene_id, role, prompt_body}
@@ -1894,7 +1894,7 @@ def check_prompt_body_meta_pollution():
     for tdir in target_dirs:
         if not tdir.exists():
             continue
-        for path in sorted(list(tdir.glob("locations_*.md")) + list(tdir.glob("s1c*_chars.md"))):
+        for path in sorted(list(tdir.glob("locations/*.md")) + list(tdir.glob("characters/s1c*.md"))):
             text = path.read_text(encoding="utf-8")
             # 厳密に行頭 ``` を fence と認識
             for m in re.finditer(r'(?m)^```\s*\n(.*?)\n^```\s*$', text, flags=re.S):
@@ -2086,7 +2086,7 @@ def check_paired_char_ref_attach():
         "like " "the reference", "as in the reference", "as shown in the reference",
     ]
     found_violations = 0
-    for prompt_path in sorted((ROOT / "prompt").glob("s1c*_chars.md")):
+    for prompt_path in sorted((ROOT / "prompt").glob("characters/s1c*.md")):
         text = prompt_path.read_text(encoding="utf-8")
         # `### N.` でセクション分割
         sections = re.split(r'(?=^### \d+\. )', text, flags=re.M)
