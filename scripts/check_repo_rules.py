@@ -2186,36 +2186,54 @@ print(f"  ルール7-43 (章 combo 欠落): {n7_43}件 検査 [WARNING]")
 
 
 def check_subject_predicate_break():
-    """ルール7-44b (BLOCKER、 2026-05-07 野沢さん指摘):
-    主述分断 (助詞「が/を/に/で/と/の/て/も」 直後に句点 + 直後に修飾) を検出。
+    """ルール7-44b (BLOCKER、 2026-05-07 野沢さん指摘 + 2026-05-07 強化):
+    主述分断 (助詞 + 句点 + 修飾 直後) を検出。
 
-    機械的文区切り化の副作用で 「私たち観測者三柱が。 千年に一度ずつ……」 のように
-    助詞直後に句点を打ち、 述語を後続文に追い出して主述が破綻する事故が発生。
-    これは可読性に直接影響するため WARNING ではなく BLOCKER。
+    元の事故: 機械的文区切り化の副作用で 「私たち観測者三柱が。 千年に一度ずつ」 のように
+    助詞直後に句点を打ち、 述語を後続文に追い出して主述が破綻するケース。
+
+    強化 (2026-05-07): 助詞リストに「は」「から」「へ」「より」 を追加 (実例から発見、
+    「指先から。私の六枚の翼が」 等のパターンを検出強化)。 引用符直後は文末扱いで除外。
+
+    BLOCKER (commit abort) — 可読性に直接影響、 ID-based マークアップや機械削減の副作用で
+    再発しやすいため 強い検出が必要。
     """
     story_dir = ROOT / 'content' / 'story'
     if not story_dir.exists():
         return 0
+    # 主格/格助詞 (主述分断の主因)
     helpers = ['が', 'を', 'に', 'で', 'と', 'て', 'も']
+    # 句点直後にスペースは禁止 (ルール7-47) なので 'X助詞。直後文字' を検出
+    # 厳格化 (2026-05-07): 行内のみ検出、 改行・dash (──/—)・引用符 内は除外 (会話/独白の意図的破断は許容)
     found = 0
     for path in sorted(story_dir.glob('s1c*.md')):
         if path.stem == 's1c0' or 'outline' in path.stem:
             continue
         text = path.read_text(encoding='utf-8')
         broken = []
-        for h in helpers:
-            for m in re.finditer(re.escape(h + '。 ') + r'[^\s]', text):
-                # 文末「○○が。」 等は前後の改行で判定 (改行直前なら文末で OK)
-                idx = m.start()
-                if idx > 0 and text[idx-1] in '」』）)':
-                    continue  # 引用符後は会話文末で OK
-                broken.append((h, text[max(0,idx-15):idx+15]))
+        # 行ごとに走査 + 引用符内除外
+        for line_no, line in enumerate(text.split('\n'), start=1):
+            # 「○○。」 で行が終わる場合は文末で OK (改行 = 段落区切り)
+            # 鉤括弧内は会話文 = 意図的破断許容
+            if line.startswith(('「', '『', '──', '—')):
+                continue
+            for h in helpers:
+                # 行内で 'X助詞。' + 直後 1文字 (改行/dash/引用符以外)
+                for m in re.finditer(re.escape(h) + r'。([^\s「」『』──—])', line):
+                    idx = m.start()
+                    if idx > 0 and line[idx-1] in '」』）)':
+                        continue
+                    # 直前が「これ」「だ」「では」「しなくて」 等の接続詞用法は除外
+                    prev_ctx = line[max(0,idx-3):idx+1]
+                    if prev_ctx[-2:] in ('これ', 'では', 'なのに', 'のに'):
+                        continue
+                    broken.append((h, line[max(0,idx-15):idx+15]))
         if broken:
             sample = '; '.join(f"「{ctx.strip()}」" for h, ctx in broken[:3])
             violations.append(
                 f"[ルール7-44b 主述分断 BLOCKER] {path.name}: 助詞+句点 主述破綻 {len(broken)}件\n"
                 f"      → サンプル: {sample}\n"
-                f"      → 助詞「が/を/に/で/と/て/も」 直後の句点は文体破綻、 読点に戻して 1文として閉じる"
+                f"      → 助詞「が/を/に/で/と/て/も/は/から/へ/より」 直後の句点は文体破綻、 読点に戻して 1文として閉じる"
             )
             found += 1
     return found
@@ -2223,15 +2241,15 @@ def check_subject_predicate_break():
 
 def check_kuten_density():
     """ルール7-44 (WARNING、 2026-05-07 野沢さん指示「文章全体にどれくらい読点が出てくるかのバランス」):
-    章本文の **読点密度 (1000文字あたりの読点数)** が 60 を超えると WARNING。
+    章本文の読みやすさを 3 指標で複合検査。
 
-    野沢さん指示で 2026-05-07 指標を 句読点比 (、/。) → **本文字あたり読点密度** に切替。
-    句読点比だと文長 (1文の文字数) を反映できないため、 「文全体での読点出現頻度」 を直接測る方式に変更。
+    指標 (いずれか超過で WARNING):
+      ① 読点密度 > 55/千字 (修正 2026-05-07: 60 → 55、 全章 45-52 範囲のためマージン 3)
+      ② 1文の最大読点数 > 5 (野沢さん添削「カグヤは月影の杖を一度だけ軽く振った」 元 4読点が典型例)
+      ③ 1文長 平均 > 30字 (s1c6 修正前 31字、 修正後 25字)
 
-    既存章の読点密度 (2026-05-07 削減後 計測、 単位: 個/千字):
-      s1c1=56.03 / s1c2=54.75 / s1c3=49.72 / s1c4=46.29 / s1c5=49.53 / s1c6=51.27
-
-    閾値 60/千字 = 既存章の最大値 56 + マージン 4。 全章 通る前提、 新章で 60 超なら検出。
+    既存章の読点密度 (2026-05-07 案B 削減後):
+      s1c1=51.92 / s1c2=49.55 / s1c3=48.10 / s1c4=45.74 / s1c5=47.35 / s1c6=46.80
 
     検査対象: content/story/s1cN.md (s1c0 / outline 等は除外)
     本文行のみ (h2/h3 ヘッダ / blockquote / コメント / 区切り行 を除外)。
@@ -2255,15 +2273,35 @@ def check_kuten_density():
         body = '\n'.join(body_lines)
         chars = len(body)
         kuten = body.count('、')
-        if chars < 5000:
-            continue  # 短すぎる章はスキップ
-        density = kuten / chars * 1000  # 1000文字あたりの読点数
-        if density > 60:
+        maru = body.count('。')
+        if chars < 5000 or maru < 50:
+            continue
+        density = kuten / chars * 1000
+        # 1文ごとの読点数と長さ
+        sentences = [s for s in body.replace('\n', '。').split('。') if s.strip()]
+        max_kuten_in_sentence = max(s.count('、') for s in sentences) if sentences else 0
+        avg_sentence_len = chars / maru
+        # 1文 5読点+ の文数
+        n_5plus = sum(1 for s in sentences if s.count('、') >= 5)
+        # 1文 4読点+ の文数 (情報用)
+        n_4plus = sum(1 for s in sentences if s.count('、') >= 4)
+
+        violations_local = []
+        if density > 55:
+            violations_local.append(f"読点密度 {density:.2f}/千字 > 55")
+        if max_kuten_in_sentence > 5:
+            violations_local.append(f"1文 最大読点 {max_kuten_in_sentence}個 > 5")
+        if n_5plus >= 3:
+            violations_local.append(f"5読点+ の文 {n_5plus}件 (≥3件で WARNING)")
+        if avg_sentence_len > 30:
+            violations_local.append(f"平均 1文長 {avg_sentence_len:.1f}字 > 30")
+
+        if violations_local:
             warnings_only.append(
-                f"[ルール7-44 読点密度高 WARNING] {path.name}: 読点密度 = {density:.2f}/千字 (、 {kuten}個 / 本文 {chars}字)\n"
-                f"      → 閾値 60/千字 超過。 既存章は 46-56/千字 の範囲、 50 程度を目標に削減推奨\n"
-                f"      → 野沢さん指示 2026-05-07「文章全体にどれくらい読点が出てくるかのバランス」。 句読点比ではなく密度で判定\n"
-                f"      → 削減手法: ① 主語助詞 + 読点 削除 (「私は、 ○○」 → 「私は○○」)、 ② 主語頭で文区切り (「、 ○○は」 → 「。 ○○は」)、 ③ 副詞+読点 削除"
+                f"[ルール7-44 読みやすさ WARNING] {path.name}: " + " / ".join(violations_local) + "\n"
+                f"      → (参考) 4読点+ {n_4plus}件 / 5読点+ {n_5plus}件 / 平均 {avg_sentence_len:.1f}字\n"
+                f"      → 削減手法: 主語助詞 + 読点 削除 / 主語頭で文区切り / 副詞 + 動詞間の読点削除\n"
+                f"      → 詳細: memory feedback_kuten_density.md (野沢さん添削パターン A〜I)"
             )
             found += 1
     return found
@@ -2424,6 +2462,49 @@ def check_bgm_style_3000_limit():
 
 n7_46 = check_bgm_style_3000_limit()
 print(f"  ルール7-46 (BGM Style 3000字上限): {n7_46}件 検査 [WARNING]")
+
+
+def check_kuten_no_space():
+    """ルール7-47 (BLOCKER、 2026-05-07 野沢さんスタイル統一):
+    ストーリー本文内の 句読点直後 半角スペース禁止 (「、 」「。 」 → 「、」「。」)。
+
+    野沢さんスタイル: 句読点直後にスペース無し (s1c1 元から実装、 s1c2-s1c6 は 2026-05-07 一括統一)。
+    今後の本文編集で うっかりスペース有り版 (「、 」 等) が混入したら commit abort で再発防止。
+
+    検査対象: content/story/s1cN.md のみ (script.js / prompt 等は別フォーマット許容)。
+    """
+    story_dir = ROOT / 'content' / 'story'
+    if not story_dir.exists():
+        return 0
+    found = 0
+    for path in sorted(story_dir.glob('s1c*.md')):
+        if path.stem == 's1c0' or 'outline' in path.stem:
+            continue
+        text = path.read_text(encoding='utf-8')
+        # 「、 」「。 」 (全角句読点 + 半角スペース) を検出
+        kuten_space = text.count('、 ')
+        maru_space = text.count('。 ')
+        # markdown 引用符後 (例: 」 + スペース) や 文末改行手前は別パターンなので 単純な「、 」「。 」 のみ
+        if kuten_space > 0 or maru_space > 0:
+            samples = []
+            for m in re.finditer(r'[、。] [^\s]', text):
+                idx = m.start()
+                samples.append(text[max(0,idx-10):idx+10])
+                if len(samples) >= 3:
+                    break
+            sample_str = '; '.join(f'「{s}」' for s in samples)
+            violations.append(
+                f"[ルール7-47 句読点後スペース禁止 BLOCKER] {path.name}: 「、 」 {kuten_space}件 / 「。 」 {maru_space}件\n"
+                f"      → サンプル: {sample_str}\n"
+                f"      → 野沢さんスタイル: 句読点直後にスペース無し (2026-05-07 全章統一済)。 編集で再混入しないよう BLOCKER\n"
+                f"      → 修正: `sed -i 's/、 /、/g; s/。 /。/g' content/story/s1c*.md` (本文限定)"
+            )
+            found += 1
+    return found
+
+
+n7_47 = check_kuten_no_space()
+print(f"  ルール7-47 (句読点後スペース禁止): {n7_47}件 検査 [BLOCKER]")
 
 
 def check_box_sync_drift():
