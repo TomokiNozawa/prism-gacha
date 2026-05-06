@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.5.0d — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.5.0e — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -6924,7 +6924,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // version 完全同期 (野沢さん指示 2026-05-06): bump_version.py が自動で更新する。
 // 旧 date-suffix '20260504o' を 5/6 で見つけた事故を契機に version-based に統一。
-const IMG_CACHE_VERSION = '1.5.0d';
+const IMG_CACHE_VERSION = '1.5.0e';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -10111,7 +10111,7 @@ let _prismaeraTargetVersion = null;
 function _getEffectiveVersion(data) {
   // data: version.json の object。 scheduledRelease.at 経過済なら scheduledRelease.version + lastDevSuffix、
   // それ以前 (or scheduledRelease 不在) なら data.version。
-  // lastDevSuffix 結合の理由: scheduled モードで dev が 1.5.0d (suffix 進行中) の時、
+  // lastDevSuffix 結合の理由: scheduled モードで dev が 1.5.0e (suffix 進行中) の時、
   // ヘッダ表示が「v1.5.0」 になって main と 区別がつかなくなる事故を防ぐ
   // (CLAUDE.md ルール「Dev は vX.Y.Zsuffix 並列明示」 順守)。
   // main は flush 後 lastDevSuffix='' となり 1.5.0 表示で 影響なし。
@@ -10733,69 +10733,19 @@ document.addEventListener('input', e => {
   }
 });
 
-// ====== ようこそモーダル (初回アクセス時のアカウント登録案内) ======
-const WELCOME_KEY = 'prism-welcome-shown';
+// ====== 初回アクセス時のアカウント登録案内 (v1.5.0e〜 account-prompt に統一) ======
+// 旧 welcome-modal は account-prompt と内容が重複していたため廃止、 同モーダルに一本化。
+// ログイン済 or 過去に dismiss 済 (ACCOUNT_PROMPT_KEY 立っている) ならスキップ。
 function maybeShowWelcomeModal() {
-  // ログイン済はスキップ
   if (typeof authUser !== 'undefined' && authUser) return;
   try {
-    if (localStorage.getItem(WELCOME_KEY) === '1') return;
+    if (localStorage.getItem(ACCOUNT_PROMPT_KEY) === 'true') return;
   } catch (e) {}
-  ensureWelcomeModal();
-}
-function ensureWelcomeModal() {
-  let m = document.getElementById('welcome-modal');
-  if (m) { m.classList.add('active'); return m; }
-  // F3: Welcome表示時刻を localStorage に記録 (24h以内のsignupなら welcome経由扱い)
+  const modal = document.getElementById('account-prompt');
+  if (!modal) return;
+  modal.classList.add('active');
+  // F3: 表示時刻を localStorage に記録 (24h以内のsignupなら welcome経由扱い)
   try { localStorage.setItem('prism-welcome-shown-ts', String(Date.now())); } catch (e) {}
-  m = document.createElement('div');
-  m.id = 'welcome-modal';
-  m.className = 'welcome-modal active';
-  m.innerHTML = `
-    <div class="welcome-backdrop"></div>
-    <div class="welcome-card">
-      <div class="welcome-aurora"></div>
-      <div class="welcome-stars">
-        <span></span><span></span><span></span><span></span><span></span><span></span>
-      </div>
-      <div class="welcome-sparkle">✦</div>
-      <div class="welcome-title">ようこそ、Prismaera へ</div>
-      <div class="welcome-subtitle">虹霊界の物語と、君だけのガチャの旅</div>
-      <div class="welcome-body">
-        <p>このサイトは <strong>ニックネーム + 合言葉</strong> だけで遊べる、 虹霊界の物語ガチャです。</p>
-        <ul class="welcome-features">
-          <li>📖 7章構成のオリジナルストーリー</li>
-          <li>🌈 LR/UR/SSR キャラ + 凸秘話</li>
-          <li>🌐 派閥相関図 + キャラ詳細</li>
-        </ul>
-        <p class="welcome-cta-line">👉 <strong>アカウントを作ると…</strong></p>
-        <ul class="welcome-features">
-          <li>📱 別端末からも進捗を引き継げます</li>
-          <li>💾 ブラウザを消しても記録が残ります</li>
-          <li>📨 ご意見・ご要望を運営に送れます</li>
-          <li>⚡ 30秒で完了・無料・課金なし</li>
-        </ul>
-      </div>
-      <div class="welcome-actions">
-        <button class="welcome-btn primary" onclick="dismissWelcomeModal(true)">✨ アカウントを作る</button>
-        <button class="welcome-btn ghost" onclick="dismissWelcomeModal(false)">まずはゲストで遊ぶ</button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(m);
-  m.querySelector('.welcome-backdrop')?.addEventListener('click', () => dismissWelcomeModal(false));
-  return m;
-}
-function dismissWelcomeModal(openSignup) {
-  try { localStorage.setItem(WELCOME_KEY, '1'); } catch (e) {}
-  const m = document.getElementById('welcome-modal');
-  if (m) m.classList.remove('active');
-  setTimeout(() => { if (m && m.parentNode) m.parentNode.removeChild(m); }, 300);
-  if (openSignup) {
-    if (typeof showAccountModal === 'function') showAccountModal();
-    if (typeof switchAccountTab === 'function') switchAccountTab('signup');
-    setTimeout(() => { const el = document.getElementById('signup-nickname'); if (el) el.focus(); }, 100);
-  }
 }
 
 // 起動時の表示は Firebase auth 確定後 (initialAuthCheckDone) に呼ばれる。
