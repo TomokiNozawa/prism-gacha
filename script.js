@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.5.1u — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.5.1v — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -7207,7 +7207,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
     // 第一幕 1-2: セラフィエル単独地上降臨、 イリスとの対面
     { scene: '1-2',  marker: '街路の石畳に、 静かに降り立った',                       position: 'after',  img: '/images/locations/s1c6/thumb/seraph_descent_to_iris_thumb.webp' },
     // 第二幕 2-1: 千年ぶりの再会 (セラフィエル+ヴィオレナ、 中央神殿聖堂)
-    { scene: '2-1',  marker: 'ヴィオレナの声は、 千年前と、 全く同じだった',           position: 'after',  img: '/images/locations/s1c6/thumb/shrine_oracle_reunion_thumb.webp' },
+    { scene: '2-1',  marker: 'ヴィオレナの声は、 千年前と全く同じだった',             position: 'after',  img: '/images/locations/s1c6/thumb/shrine_oracle_reunion_thumb.webp' },
     // 第三幕 3-2: 「最初の羽」 回想 (プリズマがセラフィエルを生んだ古代の場面)
     { scene: '3-2',  marker: '私の六枚の翼が、 一つずつ、 ほどけていった',             position: 'after',  img: '/images/locations/s1c6/thumb/seraph_first_wing_memory_thumb.webp' },
     // 第四幕 4-1: 山場 七座満つる儀式宣言 (4人初集合、 第四席着座)
@@ -7234,7 +7234,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // version 完全同期 (野沢さん指示 2026-05-06): bump_version.py が自動で更新する。
 // 旧 date-suffix '20260504o' を 5/6 で見つけた事故を契機に version-based に統一。
-const IMG_CACHE_VERSION = '1.5.1u';
+const IMG_CACHE_VERSION = '1.5.1v';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
