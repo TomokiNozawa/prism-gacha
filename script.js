@@ -507,7 +507,7 @@ const POOL = {
       title: "巫女連邦の天文・暦の祭司",
       caption: "次は、 紫——『沈黙』 の候補が、 動き始める。",
       desc: "巫女連邦リーリエの天文祭司、 三十五歳。 紺青の短髪に銀の筋、 落ち着いた藍の瞳。 七色の星座輪が回転する天球儀杖を持ち、 七座の予兆を読む。 ノクスの予知を地上で先取りすることもある巫女連邦の知の継承者。",
-      img: `${S1}/sr/moon_priest.png`,
+      img: `${S1}/sr/moon_reader.png`,
     },
     {
       name: "神殿護衛戦士 ガレフ", season: 1, chapter: 's1c6',
@@ -7210,7 +7210,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // version 完全同期 (野沢さん指示 2026-05-06): bump_version.py が自動で更新する。
 // 旧 date-suffix '20260504o' を 5/6 で見つけた事故を契機に version-based に統一。
-const IMG_CACHE_VERSION = '1.5.1m';
+const IMG_CACHE_VERSION = '1.5.1n';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
