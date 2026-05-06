@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.5.1ac — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.5.1ad — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -7161,8 +7161,8 @@ const STORY_LOCATION_INLINE_CONFIG = {
   ],
   's1c4': [
     // 第4章 挿絵 (16:9横、 全 8枚)
-    // 第一幕 1-1: 翡翠の玉座 — 章開幕、 アルテミス + 双大剣『陰陽』
-    { scene: '1-1',  marker: '玉座の脇に、双大剣『陰陽』が静かに立てかけられていた', position: 'after',  img: '/images/locations/s1c4/thumb/jade_throne_thumb.webp' },
+    // プロローグ: 翡翠の玉座 + 双大剣『陰陽』 (本文 L21、 章開幕の玉座描写)
+    { scene: 'プロローグ',  marker: '玉座の脇に、双大剣『陰陽』が静かに立てかけられていた', position: 'after',  img: '/images/locations/s1c4/thumb/jade_throne_thumb.webp' },
     // 第一幕 1-3: 雪原村でアルク&ミウ (R2人 デビュー) が龍帝隊列に駆け寄る
     { scene: '1-3',  marker: '銀髪の少年が二人、雪玉を投げ合って遊んでいた',    position: 'after',  img: '/images/locations/s1c4/thumb/snowfield_villagers_thumb.webp' },
     // 第二幕 2-1 出会い: アルテミスとグレイルが胸前で手を組み合わせる「覇者同士の挨拶」 (章テーマの入口)
@@ -7234,7 +7234,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // version 完全同期 (野沢さん指示 2026-05-06): bump_version.py が自動で更新する。
 // 旧 date-suffix '20260504o' を 5/6 で見つけた事故を契機に version-based に統一。
-const IMG_CACHE_VERSION = '1.5.1ac';
+const IMG_CACHE_VERSION = '1.5.1ad';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる

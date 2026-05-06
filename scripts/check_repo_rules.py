@@ -1504,6 +1504,7 @@ def check_inline_location_markers():
         block.group(0),
     )
     miss = []
+    scene_mismatch = []  # marker は本文にあるが、 指定シーンの境界外にあるケース (2026-05-07 追加)
     for sid, body in entries:
         story_path = ROOT / "content" / "story" / f"{sid}.md"
         if not story_path.exists():
@@ -1513,6 +1514,27 @@ def check_inline_location_markers():
             scene_label, marker = m.group(1), m.group(2)
             if marker not in story_text:
                 miss.append((sid, scene_label, marker[:40]))
+                continue
+            # シーン境界内かチェック (h2 プロローグ/エピローグ + h3 N-K + h3 任意 タイトル を許容)
+            scene_start = scene_end = None
+            esc = re.escape(scene_label)
+            # h3 ### scene_label 形式 (例: 1-1, プリズマの黄昏)
+            h3_m = re.search(r'^### ' + esc + r'[: \n]', story_text, re.MULTILINE)
+            if h3_m:
+                scene_start = h3_m.end()
+            else:
+                # h2 ## scene_label 形式 (例: プロローグ, エピローグ — ...)
+                h2_m = re.search(r'^## ' + esc, story_text, re.MULTILINE)
+                if h2_m:
+                    scene_start = h2_m.end()
+            if scene_start is None:
+                continue  # シーンヘッダ未検出はスキップ (regex 限界、 marker 存在チェックは pass)
+            # 次のシーンヘッダ位置 (h2 or h3 で次の境界)
+            next_m = re.search(r'^##+ ', story_text[scene_start:], re.MULTILINE)
+            scene_end = scene_start + next_m.start() if next_m else len(story_text)
+            marker_pos = story_text.find(marker)
+            if not (scene_start <= marker_pos < scene_end):
+                scene_mismatch.append((sid, scene_label, marker[:40]))
     if miss:
         sample = "; ".join(f"{s}/{sc} '{mk}…'" for s, sc, mk in miss[:3])
         more = f" 他 {len(miss)-3}件" if len(miss) > 3 else ""
@@ -1523,8 +1545,15 @@ def check_inline_location_markers():
             f"        マッチ失敗 → 挿絵が 末尾配置されてしまう事故対策 (野沢さん 繰返叱責 2026-05-06)\n"
             f"      → 解決: marker を ID-based マークアップを 含まない unique 文字列 (例: 「俺のメイスが」) に変更"
         )
-        return len(miss)
-    return 0
+    if scene_mismatch:
+        sample = "; ".join(f"{s}/{sc} '{mk}…'" for s, sc, mk in scene_mismatch[:3])
+        more = f" 他 {len(scene_mismatch)-3}件" if len(scene_mismatch) > 3 else ""
+        violations.append(
+            f"[ルール7-32b 挿絵シーン外配置 BLOCKER] {len(scene_mismatch)}件 marker が 指定シーン境界外: {sample}{more}\n"
+            f"      → 挿絵が 期待シーン内に表示されず、 本文修正で marker フレーズが 別シーンに出現した可能性\n"
+            f"      → 解決: scene を marker の実際の出現シーンに変更、 もしくは marker を 期待シーン内のフレーズに変更"
+        )
+    return len(miss) + len(scene_mismatch)
 
 
 def check_char_desc_meta_words():
