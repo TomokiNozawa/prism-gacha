@@ -2000,6 +2000,38 @@ n7_38 = check_home_teaser_next2_date_hidden()
 print(f"  ルール7-38 (ホームティザー翌翌章日時非公表): {n7_38}件 検査 [BLOCKER]")
 
 
+def check_pool_img_slug_duplicates():
+    """ルール7-41 (BLOCKER 2026-05-06): script.js POOL の img filename (slug) が
+    全キャラで重複しないこと。 重複すると 既存画像を 上書き してしまう物理事故 (野沢さん指示
+    2026-05-06「すでに生成済みで格納しようとして気づいた」 moon_priest 衝突未遂事故対策)。
+    """
+    script_path = ROOT / "script.js"
+    if not script_path.exists():
+        return 0
+    text = script_path.read_text(encoding="utf-8")
+    # img: `${S1}/{tier}/{name}.png` パターン抽出
+    imgs = re.findall(r'S1\}/(\w+)/(\w+)\.png', text)
+    seen = {}
+    for tier, name in imgs:
+        key = f'{tier}/{name}.png'
+        seen.setdefault(key, []).append(tier)
+    dups = {k: v for k, v in seen.items() if len(v) > 1}
+    if not dups:
+        return 0
+    for key, tiers in dups.items():
+        violations.append(
+            f"[ルール7-41 POOL img slug 重複 BLOCKER] script.js で {key} が {len(tiers)} 件重複\n"
+            f"      → 同一 img path を異なるキャラで参照 = 既存画像を上書きする物理事故\n"
+            f"      → 章追加時 / 新キャラ追加時に slug を必ず別名にする (例: moon_priest → moon_reader)\n"
+            f"      → 詳細: 2026-05-06 s1c5 月夜祭司アスター + s1c6 月読み祭司オリオン の moon_priest.png 衝突事故"
+        )
+    return len(dups)
+
+
+n7_41 = check_pool_img_slug_duplicates()
+print(f"  ルール7-41 (POOL img slug 重複): {n7_41}件 検査 [BLOCKER]")
+
+
 def check_box_sync_drift():
     """ルール7-39 (WARNING 2026-05-06 野沢さん指示「必要な自動チェックに追加してください」): prism-gacha-work の
     主要ファイル (prompt/ STORY/ script.js sw.js index.html) と Box 内 (~/Box/.../claude/prismaera/) との
