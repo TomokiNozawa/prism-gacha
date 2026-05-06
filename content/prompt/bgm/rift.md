@@ -18,8 +18,10 @@ Epic cinematic orchestral battle theme with fast 150-160 BPM minor-key drive, JR
 ### Lyrics 欄
 
 ```
-[Instrumental + syllabic mixed choir vocalize, no spoken lyrics]
+[Instrumental]
 ```
+
+> ⚠️ Suno AI の Lyrics 欄は `[Instrumental]` しか機能しない仕様 (野沢さん指示 2026-05-06)。 vocalize 指示 (`syllabic mixed choir`) は Style 側に既に明記済。 野沢さん原本では `[Instrumental + syllabic mixed choir vocalize]` と記録されていたが、 実際の生成時は `[Instrumental]` で投入された (Style 側の指示のみ有効)。
 
 ---
 

@@ -64,8 +64,10 @@ only, fantasy game music aesthetic, energetic cheerful cinematic.
 ### Suno AI プロンプト (Lyrics 欄)
 
 ```
-[Instrumental + bright female priestess chorus vocalize "la-la-la" "ah-ha-ah", no spoken lyrics]
+[Instrumental]
 ```
+
+> ⚠️ Suno AI の Lyrics 欄は `[Instrumental]` しか機能しない仕様 (野沢さん指示 2026-05-06)。 vocalize 指示は Style 側に既に明記済 (`bright cheerful female choir vocalize "la-la-la" "ah-ha-ah"`) ので、 そちら経由で反映される。
 
 ---
 
@@ -91,7 +93,7 @@ only, fantasy game music aesthetic, energetic cheerful cinematic.
 
 ## 生成手順
 
-1. 上記 v1 Style プロンプトを Suno AI に貼付 → Lyrics 欄に `[Instrumental + bright female priestess chorus vocalize]` → 生成 (2:30 instrumental)
+1. 上記 v1 Style プロンプトを Suno AI に貼付 → Lyrics 欄に `[Instrumental]` → 生成 (2:30 instrumental、 vocalize は Style 側で指示済)
 2. 気に入ったテイクを採用版に
 3. mp3 ダウンロード → `~/Box/.../prismaera/media/audio/bgm/prism-shrine.mp3` に保存
 4. Claude:

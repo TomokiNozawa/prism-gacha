@@ -44,7 +44,7 @@ Lydian dominant at climax for "ancient dragon mystic" lift,
 ### Suno AI プロンプト (Lyrics 欄)
 
 ```
-[Instrumental with stylized male battle calls "Hai!" in distant background]
+[Instrumental]
 ```
 
 ---
@@ -81,7 +81,7 @@ Lydian dominant at climax for "ancient dragon mystic" lift,
 ### Suno AI プロンプト (Lyrics 欄)
 
 ```
-[Instrumental with stylized male battle calls "Hai!" in distant background]
+[Instrumental]
 ```
 
 ---

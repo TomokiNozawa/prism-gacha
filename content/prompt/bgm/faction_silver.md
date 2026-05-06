@@ -72,8 +72,10 @@ aesthetic, dynamic proud-cinematic royal.
 ### Suno AI プロンプト (Lyrics 欄)
 
 ```
-[Instrumental + martial mixed choir vocalize "ah-ah-ah" "ho-ho-ho" rhythmic only, no spoken lyrics]
+[Instrumental]
 ```
+
+> ⚠️ Suno AI の Lyrics 欄は `[Instrumental]` しか機能しない仕様 (野沢さん指示 2026-05-06)。 vocalize 指示は Style 側に既に明記済 (`martial mixed choir "ah-ah-ah" "ho-ho-ho" rhythmic vocalize`) ので、 そちら経由で反映される。
 
 ---
 
@@ -104,7 +106,7 @@ aesthetic, dynamic proud-cinematic royal.
 
 ## 生成手順
 
-1. 上記 v1 Style プロンプトを Suno AI に貼付 → Lyrics 欄に `[Instrumental + martial mixed choir vocalize]` → 生成 (2:30 instrumental)
+1. 上記 v1 Style プロンプトを Suno AI に貼付 → Lyrics 欄に `[Instrumental]` → 生成 (2:30 instrumental、 vocalize は Style 側で指示済)
 2. 気に入ったテイクを採用版に
 3. mp3 ダウンロード → `~/Box/.../prismaera/media/audio/bgm/prism-frostcrown.mp3` に保存
 4. Claude:
