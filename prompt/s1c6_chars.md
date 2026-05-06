@@ -113,7 +113,7 @@ CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand, anatomica
 
 ---
 
-### 7. `twin_priestess_elder.png` — 双子巫女姉アスラ (リーリエの幼馴染、 双子の姉)
+### 7. `twin_priestess_elder_noera.png` — 双子巫女姉ノエラ (リーリエの幼馴染、 双子の姉)
 
 ```
 anime-style full-body portrait of a graceful twin priestess elder sister in her early twenties around age 21 (same age as Iris), long pale lavender hair with silver streaks reaching her waist tied with green ribbons in a single elegant side braid, gentle violet eyes with calm protective wisdom (the elder twin's quiet strength), fair luminous skin, wearing an elegant ceremonial twin priestess robe of layered pale lavender and white with subtle green embroidery of paired lanterns and intertwined ribbons, wide silver sash with green tassels, long flowing pale-violet outer robe with twin-paired ribbons, silver headdress with a single small lavender crescent flanking a green leaf motif (mirror to her younger twin's), holding a tall slender ceremonial staff topped with a small lavender lantern-orb glowing softly, dignified protective stance with one arm slightly extended as if shielding her younger twin sister, natural elegant standing, soft lavender-green light, jade shrine garden background with paired flowering trees and floating green-and-lavender lanterns, soft daylight, detailed linework, high-quality illustration, original character, no logos, no text, no watermark.
@@ -132,7 +132,7 @@ CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand, anatomica
 ### 8. `twin_priestess_younger.png` — 双子巫女妹アシナ (リーリエの幼馴染、 双子の妹)
 
 ```
-anime-style full-body portrait of a cheerful twin priestess younger sister in her early twenties around age 21 (same age as Iris and her elder twin Asura), long pale mint-green hair with silver streaks reaching her waist tied with lavender ribbons in a single playful low ponytail (mirror to her elder twin's side braid), bright green eyes with cheerful curious warmth (the younger twin's lively energy), fair luminous skin, wearing a ceremonial twin priestess robe of layered pale mint-green and white with subtle lavender embroidery of paired lanterns (mirror palette to her elder twin), wide silver sash with lavender tassels, ornate silver headdress with a single small green crescent flanking a lavender leaf motif (mirror to elder twin), holding a tall slender ceremonial staff topped with a small green lantern-orb glowing softly, mid-tier composed stance with a slight playful smile, natural standing, soft mint-green light, jade shrine garden background with paired flowering trees and floating lavender-and-green lanterns, soft daylight, detailed linework, high-quality illustration, original character, no logos, no text, no watermark.
+anime-style full-body portrait of a cheerful twin priestess younger sister in her early twenties around age 21 (same age as Iris and her elder twin Noera), long pale mint-green hair with silver streaks reaching her waist tied with lavender ribbons in a single playful low ponytail (mirror to her elder twin's side braid), bright green eyes with cheerful curious warmth (the younger twin's lively energy), fair luminous skin, wearing a ceremonial twin priestess robe of layered pale mint-green and white with subtle lavender embroidery of paired lanterns (mirror palette to her elder twin), wide silver sash with lavender tassels, ornate silver headdress with a single small green crescent flanking a lavender leaf motif (mirror to elder twin), holding a tall slender ceremonial staff topped with a small green lantern-orb glowing softly, mid-tier composed stance with a slight playful smile, natural standing, soft mint-green light, jade shrine garden background with paired flowering trees and floating lavender-and-green lanterns, soft daylight, detailed linework, high-quality illustration, original character, no logos, no text, no watermark.
 
 CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand, anatomically correct joints, staff grip realistic.
 ```
@@ -274,7 +274,7 @@ CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand, anatomica
 
 ---
 
-### 19. `musician_novice.png` — 楽人見習いシン (16歳)
+### 19. `musician_novice_hajime.png` — 楽人見習いシン (16歳)
 
 ```
 anime-style full-body portrait of an ordinary young musician apprentice boy around age 16, short pale silver hair, gentle silver-gray eyes with shy musical focus, fair young skin, wearing a simple musician apprentice robe of pale silver-and-white with no elaborate embroidery, simple gray sash, holding a small wooden flute in both hands, ordinary standing pose with the flute raised toward his lips, soft daylight, shrine music pavilion porch with simple lanterns background, detailed linework, high-quality illustration, original character, no logos, no text, no watermark.
@@ -311,7 +311,7 @@ CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand, anatomica
 4. `shrine_elder.png` (大巫女ヴィーナ)
 5. `moon_chief_priestess.png` (主祭リアラ)
 6. `shrine_musician.png` (楽巫女イオナ)
-7. `twin_priestess_elder.png` (双子姉アスラ)
+7. `twin_priestess_elder_noera.png` (双子姉アスラ)
 
 **Phase 3 (SR7)**:
 8-14. 各 SR キャラ (双子妹は姉と対で見るため 7 → 8 順序、 残りは独立)
