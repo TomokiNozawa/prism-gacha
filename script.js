@@ -3057,7 +3057,10 @@ function _updateTScoreHistory(results, tScore) {
 //   backfill (history からの一括 再計算) は **未記録時の初期化のみ** 実行 (= 新規 user
 //   が history を持つが best/worst 未記録の場合)。 既に記録済の値は 二度と上書きしない
 //   (= cap 外データが 失われる事故 を 防ぐ)。
-const TSCORE_BACKFILL_VERSION = 3;
+// v4 (2026-05-06): 既存 user の bestTScore=-1 永久 skip 解除のため再走必須
+// (旧 v3 で history<10 件時に version=3 を 設定してしまい、 後から history 復元されても backfill skip
+//  で bestTScore=-1 で 固定された user が複数 — admin で偏差値ヒストリー 反映欠如、 jonny さん事例)
+const TSCORE_BACKFILL_VERSION = 4;
 function backfillTScoreFromHistory() {
   // 永続保持: 既に best/worst 両方 記録済なら 触らない (forward update のみで運用)
   const hasBest = typeof state.bestTScore === 'number' && state.bestTScore >= 0;
