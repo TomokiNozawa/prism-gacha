@@ -43,13 +43,21 @@ CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand, anatomica
 
 ### 2. `shrine_oracle.png` — 千年語りのヴィオレナ (イリスの実母、 千年級伝説巫女)
 
+**⚠️ 生成前に必ず添付してください** (1枚):
+- `images/characters/season1/ur/underworld_matriarch.png` (既存 UR リオラエル、 s1c5)
+→ プロンプト本文「similar to Lioraelle of Liora」 = リオラエル殿との「同系譜千年級存在」 視覚整合 (rune-tattoos の雰囲気・千年級の眼差し・配色は別だが格は同等) のためリファ添付
+
 ```
-anime-style full-body portrait of a graceful timeless mother priestess with ageless youthful beauty appearing in her late twenties despite her thousand-year existence, long flowing pale violet-silver hair with seven-color undertones reaching her ankles, deep amethyst eyes with ancient gentle wisdom and quiet sorrow of a thousand years, fair luminous skin with faint glowing prismatic rune-tattoos along her arms and collarbone (similar to Lioraelle of Liora but with the lantern motif), wearing a flowing midnight-violet and silver ceremonial robe of layered woven shadows and starlight threads with seven-color embroidery cascading down her sleeves, intricate silver embroidery of seven lantern-flames merged with a single great central lantern across her bodice, long flowing silver-violet cape with subtle living seven-color tendrils trailing behind her, silver crown of crescent and lantern combined, holding a tall slender staff of polished obsidian topped with a paired seven-color and white-gold double-orb glowing softly with the memory of a thousand years, dignified maternal stance with arms gently lowered as if offering blessing, divine heavenly aura with millennium-deep seven-color glow, divine presence floating gently above polished jade temple floor, ancient shrine inner sanctum background with rows of fading and renewing seven-color lanterns and a tall central pillar carved with the names of past Promise candidates, dramatic rim light with violet-and-gold twin-tone glow, detailed linework, high-quality illustration, original character, no logos, no text, no watermark.
+[Attached: reference image of Lioraelle of Liora (underworld_matriarch.png) — same millennium-class lineage, different palette but matching rune-tattoo aesthetic and ageless gravitas]
+
+anime-style full-body portrait of a graceful timeless mother priestess with ageless youthful beauty appearing in her late twenties despite her thousand-year existence, long flowing pale violet-silver hair with seven-color undertones reaching her ankles, deep amethyst eyes with ancient gentle wisdom and quiet sorrow of a thousand years, fair luminous skin with faint glowing prismatic rune-tattoos along her arms and collarbone (similar in aesthetic to Lioraelle of Liora in the reference image but with the lantern motif instead of light-shadow weave, and pale violet-silver palette instead of silver-violet), wearing a flowing midnight-violet and silver ceremonial robe of layered woven shadows and starlight threads with seven-color embroidery cascading down her sleeves, intricate silver embroidery of seven lantern-flames merged with a single great central lantern across her bodice, long flowing silver-violet cape with subtle living seven-color tendrils trailing behind her, silver crown of crescent and lantern combined, holding a tall slender staff of polished obsidian topped with a paired seven-color and white-gold double-orb glowing softly with the memory of a thousand years, dignified maternal stance with arms gently lowered as if offering blessing, divine heavenly aura with millennium-deep seven-color glow, divine presence floating gently above polished jade temple floor, ancient shrine inner sanctum background with rows of fading and renewing seven-color lanterns and a tall central pillar carved with the names of past Promise candidates, dramatic rim light with violet-and-gold twin-tone glow, detailed linework, high-quality illustration, original character, no logos, no text, no watermark.
 
 CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand, anatomically correct joints, staff grip realistic.
+
+元画像から表情や姿勢は変わってOKです
 ```
 
-**伏線視覚化**: 「prismatic rune-tattoos」 + 「ancient gentle wisdom」 でリオラエル殿 (s1c5 UR) と同系譜の千年級存在を視覚化、 S2C4 記憶の海への直接伏線。 「paired seven-color and white-gold double-orb」 = カグヤの千年日記と対をなす「千年の記憶」 のもう一つの結晶。 ロリババア型ではなく**長命種族型** (見た目20代後半、 千年生きた血脈、 feedback_char_age_youth_first.md 準拠)。
+**伏線視覚化**: 「prismatic rune-tattoos」 + 「ancient gentle wisdom」 でリオラエル殿 (s1c5 UR) と同系譜の千年級存在を視覚化、 S2C4 記憶の海への直接伏線。 「paired seven-color and white-gold double-orb」 = カグヤの千年日記と対をなす「千年の記憶」 のもう一つの結晶。 ロリババア型ではなく**長命種族型** (見た目20代後半、 千年生きた血脈、 feedback_char_age_youth_first.md 準拠)。 リファ添付は同系譜千年級巫女の格と rune-tattoo の雰囲気整合のため (配色はあえて変える)。
 **対応シーン**: s1c6 2-1 神殿の聖堂でセラフィエルと再会 / s1c6 2-2 巫女連邦千年伝承を語る / s1c6 4-2 別れの朝「千年待った」
 **ストーリー使用**: ✅ (本編母 + S2C4・S2C5 への伏線)
 
@@ -115,6 +123,9 @@ CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand, anatomica
 
 ### 7. `twin_priestess_elder_noera.png` — 双子巫女姉ノエラ (イリスの幼馴染、 双子の姉)
 
+**⚠️ 生成順序**: 姉ノエラを**先に**単独生成 (リファ添付不要) → 妹アシナ (SR #8) を生成する時に**この画像を添付**して対の構図 (mirror palette / mirror crescent / mirror braid) を整合する。
+
+
 ```
 anime-style full-body portrait of a graceful twin priestess elder sister in her early twenties around age 21 (same age as Iris), long pale lavender hair with silver streaks reaching her waist tied with green ribbons in a single elegant side braid, gentle violet eyes with calm protective wisdom (the elder twin's quiet strength), fair luminous skin, wearing an elegant ceremonial twin priestess robe of layered pale lavender and white with subtle green embroidery of paired lanterns and intertwined ribbons, wide silver sash with green tassels, long flowing pale-violet outer robe with twin-paired ribbons, silver headdress with a single small lavender crescent flanking a green leaf motif (mirror to her younger twin's), holding a tall slender ceremonial staff topped with a small lavender lantern-orb glowing softly, dignified protective stance with one arm slightly extended as if shielding her younger twin sister, natural elegant standing, soft lavender-green light, jade shrine garden background with paired flowering trees and floating green-and-lavender lanterns, soft daylight, detailed linework, high-quality illustration, original character, no logos, no text, no watermark.
 
@@ -131,12 +142,26 @@ CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand, anatomica
 
 ### 8. `twin_priestess_younger.png` — 双子巫女妹アシナ (イリスの幼馴染、 双子の妹)
 
+**⚠️ 生成前に必ず添付してください** (1枚):
+- `images/characters/season1/ssr/twin_priestess_elder_noera.png` (姉ノエラ、 SSR で先に生成済の前提)
+→ 双子は**顔・骨格を姉に似せる** (mirror facial features) + 配色は対 (mirror palette) で整合させるため、 姉画像を必ず添付
+
+**⚠️ レア度差の整合 (野沢さん指示 2026-05-06)**: 妹アシナは **SR 級の華やかさ** に控えめ調整 (姉ノエラは SSR で『elegant + layered + intricate + outer robe』 = 一段華やか / 妹は SR で『simple + single layer + subtle + no outer robe』)。 同じ華やかさでレア度違うと違和感が出るため、 装飾密度・素材感・余白で差別化。
+
 ```
-anime-style full-body portrait of a cheerful twin priestess younger sister in her early twenties around age 21 (same age as Iris and her elder twin Noera), long pale mint-green hair with silver streaks reaching her waist tied with lavender ribbons in a single playful low ponytail (mirror to her elder twin's side braid), bright green eyes with cheerful curious warmth (the younger twin's lively energy), fair luminous skin, wearing a ceremonial twin priestess robe of layered pale mint-green and white with subtle lavender embroidery of paired lanterns (mirror palette to her elder twin), wide silver sash with lavender tassels, ornate silver headdress with a single small green crescent flanking a lavender leaf motif (mirror to elder twin), holding a tall slender ceremonial staff topped with a small green lantern-orb glowing softly, mid-tier composed stance with a slight playful smile, natural standing, soft mint-green light, jade shrine garden background with paired flowering trees and floating lavender-and-green lanterns, soft daylight, detailed linework, high-quality illustration, original character, no logos, no text, no watermark.
+[Attached: reference image of her elder twin Noera (twin_priestess_elder_noera.png) — SAME face structure and bone structure as the reference (twins), only invert palette and lower decoration density for SR-tier]
+
+anime-style full-body portrait of a cheerful twin priestess younger sister in her early twenties around age 21 (same age as Iris and her elder twin Noera, with the SAME facial features and bone structure as the reference image since they are twins — only the expression is different from the reference's calm look to a slight playful smile here), long pale mint-green hair with silver streaks reaching her waist tied with lavender ribbons in a single playful low ponytail (mirror to her elder twin's side braid as shown in the reference), bright green eyes with cheerful curious warmth (the younger twin's lively energy, contrasting with the elder twin's calm protective wisdom), fair luminous skin, wearing a SIMPLE ceremonial twin priestess robe of pale mint-green and white with subtle lavender embroidery of paired lanterns (mirror palette to her elder twin in reference: pale lavender + green inverted to pale mint-green + lavender, but DECORATION DENSITY ONE STEP SIMPLER than the reference's intricate version — single layer instead of multi-layered, no flowing outer robe), simple silver sash with lavender tassels (NOT the wide ornate sash of the elder twin), small silver headdress with a single small green crescent flanking a lavender leaf motif (mirror to elder twin's lavender crescent + green leaf, but smaller and less elaborate), holding a tall slender ceremonial staff topped with a small green lantern-orb glowing softly, mid-tier composed stance with a slight playful smile, natural standing (no divine aura, no heavenly glow — SR-tier ordinary composed presence), soft mint-green light from the lantern-orb only, jade shrine garden background with paired flowering trees and floating lavender-and-green lanterns, soft daylight, detailed linework, high-quality illustration, original character, no logos, no text, no watermark.
 
 CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand, anatomically correct joints, staff grip realistic.
+
+元画像から表情や姿勢は変わってOKです
 ```
 
+**ポイント**:
+- **顔・骨格は姉に similar** (双子なので、 同じ顔立ち) — 表情だけ違う (姉=calm protective / 妹=playful)
+- **配色反転** (姉=ラベンダー本体+緑アクセント / 妹=ミントグリーン本体+ラベンダーアクセント)
+- **SR 級調整** (姉 SSR より一段控えめ): single layer / simple sash / smaller headdress / no outer robe / no divine aura — 装飾密度で tier 階層を表現 (野沢さん指示「同じ華やかさでレア度違うと違和感」 への対応)
 **対応シーン**: s1c6 1-3 灯篭祭で姉と並ぶ / s1c6 2-3 イリスとの幼馴染回想
 **ストーリー使用**: ✅ (本編 SR)
 

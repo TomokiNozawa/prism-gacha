@@ -2048,6 +2048,55 @@ n7_39 = check_box_sync_drift()
 print(f"  ルール7-39 (Box sync 漏れ): {n7_39}件 検査 [WARNING]")
 
 
+def check_paired_char_ref_attach():
+    """ルール7-40 (WARNING 2026-05-06 野沢さん指示「双子とか姉弟とかにするのにもう一方のキャラを添付しないでいいの? 整合性は保てるの?」):
+    prompt/sNcN_chars.md の各キャラセクションで対構図キーワード (mirror to / mirror palette / similar to / matching /
+    same face structure / same as elder twin 等) が含まれる場合、 「⚠️ 生成前に必ず添付してください」 指示が
+    そのセクションに含まれているかチェック。 含まれていなければ「リファ添付指示漏れ」 = WARNING。
+
+    検出フローセクション = `### N. \`slug.png\` — name` の見出しから次の `### N+1.` までを 1セクションとして扱う。
+
+    野沢さん指示 2026-05-06: 双子姉妹・親子・師弟・類似系譜の対構図キャラを生成する時、 もう一方のキャラ画像をリファ
+    添付指示に明記しないと、 DALL-E 3 / gpt-image-1 が「対の構図」 を確実に再現できない。
+    """
+    PAIRED_KEYWORDS = [
+        "mirror to ", "mirror palette", "mirror motif", "mirror crescent", "mirror braid",
+        "similar to ", "matching ",
+        "same face structure", "same as elder twin", "same as her elder", "same age as Iris and her elder",
+        "like " "the reference", "as in the reference", "as shown in the reference",
+    ]
+    found_violations = 0
+    for prompt_path in sorted((ROOT / "prompt").glob("s1c*_chars.md")):
+        text = prompt_path.read_text(encoding="utf-8")
+        # `### N.` でセクション分割
+        sections = re.split(r'(?=^### \d+\. )', text, flags=re.M)
+        for sec in sections:
+            if not sec.startswith("### "):
+                continue
+            # セクションタイトル
+            first_line = sec.split("\n", 1)[0].strip()
+            # 対構図キーワード検出
+            has_paired_keyword = any(kw in sec for kw in PAIRED_KEYWORDS)
+            if not has_paired_keyword:
+                continue
+            # 添付指示「⚠️ 生成前に必ず添付してください」 or 「Attached: reference image」 検出
+            # 例外: 「⚠️ 生成順序」 で 添付不要の理由 (相手キャラがまだ生成されていない先発キャラ等) が明記されている場合は OK
+            has_ref_attach = ("⚠️ 生成前に必ず添付してください" in sec) or ("[Attached: reference image" in sec) or ("[Attached:" in sec and "reference" in sec) or ("⚠️ 生成順序" in sec)
+            if not has_ref_attach:
+                violations.append(
+                    f"[ルール7-40 対構図リファ添付漏れ WARNING] {prompt_path.name} :: {first_line[:60]}\n"
+                    f"      → mirror/similar/same/matching 等の対構図キーワードあり、 リファ添付指示なし\n"
+                    f"      → 「⚠️ 生成前に必ず添付してください」 で 相手キャラ画像を明記する\n"
+                    f"      → 詳細: memory feedback_paired_char_ref_attach.md / CLAUDE.md"
+                )
+                found_violations += 1
+    return found_violations
+
+
+n7_40 = check_paired_char_ref_attach()
+print(f"  ルール7-40 (対構図リファ添付): {n7_40}件 検査 [WARNING]")
+
+
 def check_main_no_suffix():
     """ルール7-27 (BLOCKER 2026-05-05): main branch で commit する version は suffix なし (X.Y.Z 形式) 必須。
     2026-05-05 v1.4.4 main reach 後の 緊急 hotfix で dev → main merge --no-ff した時、 dev の cache buster
