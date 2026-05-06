@@ -2110,6 +2110,52 @@ n7_42 = check_bgm_tempo_uptempo()
 print(f"  ルール7-42 (BGM テンポ低速): {n7_42}件 検査 [WARNING]")
 
 
+def check_chapter_combos_coverage():
+    """ルール7-43 (WARNING → 既存負債解消後 BLOCKER 化、 2026-05-06 野沢さん指示「P-7 はあなたの方でまわるようにして」):
+    公開済の章 (POOL に chapter='s1cN' のキャラがある) で combos.json に該当章の combo が
+    最低 1件 (duo or trio or faction synergy) あるか検査。
+
+    既定の自動運用フロー (Claude 章公開時セルフ実行):
+      1. 新章キャラ POOL 追加 → POOL.chapter='s1cN' のキャラが ≥1 名
+      2. `py scripts/propose_combos_for_chapter.py --chapter s1cN --apply` を Claude が実行
+      3. 結果 combos.json に s1cN の combo が ≥1 件 → 本ルールで OK
+      4. 漏れたら本ルール WARNING で commit 前に Claude 自身が気づく → --apply 実行 → 解消
+
+    野沢さんは手動実行しない方針 (2026-05-06)、 Claude が章公開時に必ず実行することで自動運用化。
+    """
+    text = (ROOT / "script.js").read_text(encoding='utf-8')
+    # POOL から chapter 一覧を抽出
+    chapters_in_pool: set[str] = set()
+    for m in re.finditer(r"chapter:\s*'(s1c\d+)'", text):
+        chapters_in_pool.add(m.group(1))
+    if not chapters_in_pool:
+        return 0
+    # combos.json の chapter 一覧
+    combos_path = ROOT / "cardgame" / "combos.json"
+    if not combos_path.exists():
+        return 0
+    try:
+        combos = json.loads(combos_path.read_text(encoding='utf-8'))
+    except Exception:
+        return 0
+    chapters_in_combos: set[str] = set(c.get('chapter', '') for c in combos if c.get('chapter'))
+    # POOL にあって combos に無い章を検出
+    missing = sorted(chapters_in_pool - chapters_in_combos)
+    found = 0
+    for chap in missing:
+        warnings_only.append(
+            f"[ルール7-43 章 combo 欠落 WARNING] {chap}: POOL にキャラあり、 combos.json に該当章の combo なし\n"
+            f"      → 自動運用: `py scripts/propose_combos_for_chapter.py --chapter {chap} --apply` を Claude が実行\n"
+            f"      → 章公開チェックリスト ⑯ (野沢さん指示 2026-05-06「P-7 はあなたの方でまわるように」)"
+        )
+        found += 1
+    return found
+
+
+n7_43 = check_chapter_combos_coverage()
+print(f"  ルール7-43 (章 combo 欠落): {n7_43}件 検査 [WARNING]")
+
+
 def check_box_sync_drift():
     """ルール7-39 (WARNING 2026-05-06 野沢さん指示「必要な自動チェックに追加してください」): prism-gacha-work の
     主要ファイル (prompt/ STORY/ script.js sw.js index.html) と Box 内 (~/Box/.../claude/prismaera/) との

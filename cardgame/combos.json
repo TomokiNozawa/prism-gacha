@@ -1686,5 +1686,411 @@
     },
     "flavor": "盟主の手の中で、 影は刃となる。",
     "chapter": "s1c5"
+  },
+  {
+    "id": "duo_jp48ca70_jpf03588",
+    "name": "実母と娘 (千年血脈)",
+    "chars": [
+      "千年語りのヴィオレナ",
+      "イリス"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "実母と娘 (千年血脈)。",
+    "chapter": "s1c6"
+  },
+  {
+    "id": "duo_jpf03588_jp089515",
+    "name": "七座の同胞 (第四席着座)",
+    "chars": [
+      "イリス",
+      "セラフィエル"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "七座の同胞 (第四席着座)。",
+    "chapter": "s1c6"
+  },
+  {
+    "id": "duo_jpf03588_jpa5f65c",
+    "name": "七座の同胞",
+    "chars": [
+      "イリス",
+      "千夜姫 カグヤ"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "七座の同胞。",
+    "chapter": "s1c6"
+  },
+  {
+    "id": "duo_jpf03588_jp665b24",
+    "name": "七座の同胞",
+    "chars": [
+      "イリス",
+      "星海のノクス"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "七座の同胞。",
+    "chapter": "s1c6"
+  },
+  {
+    "id": "duo_jpb3d42c_jpf03588",
+    "name": "鳳神巫女 ホムラとイリスの絆",
+    "chars": [
+      "鳳神巫女 ホムラ",
+      "イリス"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "a-b 関係。",
+    "chapter": "s1c6"
+  },
+  {
+    "id": "duo_jp48ca70_jp089515",
+    "name": "千年前の旧縁 (月影宮で共祈)",
+    "chars": [
+      "千年語りのヴィオレナ",
+      "セラフィエル"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "千年前の旧縁 (月影宮で共祈)。",
+    "chapter": "s1c6"
+  },
+  {
+    "id": "duo_jp48ca70_jpadfeb4",
+    "name": "千年前同期 (観測者の前から在る同世代)",
+    "chars": [
+      "千年語りのヴィオレナ",
+      "地底市の母 リオラエル"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "千年前同期 (観測者の前から在る同世代)。",
+    "chapter": "s1c6"
+  },
+  {
+    "id": "duo_jp48ca70_jpa5f65c",
+    "name": "千年前 月影宮で共祈の証人",
+    "chars": [
+      "千年語りのヴィオレナ",
+      "千夜姫 カグヤ"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "千年前 月影宮で共祈の証人。",
+    "chapter": "s1c6"
+  },
+  {
+    "id": "duo_jpb3d42c_jp1a6cf5",
+    "name": "朱の鳳凰の系譜 (千年職能)",
+    "chars": [
+      "鳳神巫女 ホムラ",
+      "焔帝 ヒノオウ"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "朱の鳳凰の系譜 (千年職能)。",
+    "chapter": "s1c6"
+  },
+  {
+    "id": "duo_jp26a0c8_jpf03588",
+    "name": "大巫女 ヴィーナとイリスの絆",
+    "chars": [
+      "大巫女 ヴィーナ",
+      "イリス"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "a-b 関係。",
+    "chapter": "s1c6"
+  },
+  {
+    "id": "duo_jp26a0c8_jp1108da",
+    "name": "大巫女 ヴィーナと高巫女見習い カヤの絆",
+    "chars": [
+      "大巫女 ヴィーナ",
+      "高巫女見習い カヤ"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "a-b 関係。",
+    "chapter": "s1c6"
+  },
+  {
+    "id": "duo_jp69a62e_jpf03588",
+    "name": "七座儀式の儀典官",
+    "chars": [
+      "主祭 リアラ",
+      "イリス"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "七座儀式の儀典官。",
+    "chapter": "s1c6"
+  },
+  {
+    "id": "duo_jp69a62e_jp0d8a65",
+    "name": "天文・暦の祭司同士",
+    "chars": [
+      "主祭 リアラ",
+      "月読み祭司 オリオン"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "天文・暦の祭司同士。",
+    "chapter": "s1c6"
+  },
+  {
+    "id": "duo_jp12c8b6_jp813bbc",
+    "name": "七座祭楽の同胞",
+    "chars": [
+      "楽巫女 イオナ",
+      "七座楽人 ハルナ"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "七座祭楽の同胞。",
+    "chapter": "s1c6"
+  },
+  {
+    "id": "duo_jp12c8b6_jpd4f429",
+    "name": "楽巫女 イオナと楽人見習い ハジメの絆",
+    "chars": [
+      "楽巫女 イオナ",
+      "楽人見習い ハジメ"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "a-b 関係。",
+    "chapter": "s1c6"
+  },
+  {
+    "id": "duo_jp9d150a_jp6c446b",
+    "name": "双子の姉妹",
+    "chars": [
+      "双子巫女姉 ノエラ",
+      "双子巫女妹 アシナ"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "双子の姉妹。",
+    "chapter": "s1c6"
+  },
+  {
+    "id": "duo_jp9d150a_jpf03588",
+    "name": "幼馴染 (同21歳)",
+    "chars": [
+      "双子巫女姉 ノエラ",
+      "イリス"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "幼馴染 (同21歳)。",
+    "chapter": "s1c6"
+  },
+  {
+    "id": "duo_jp6c446b_jpf03588",
+    "name": "幼馴染 (同21歳)",
+    "chars": [
+      "双子巫女妹 アシナ",
+      "イリス"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "幼馴染 (同21歳)。",
+    "chapter": "s1c6"
+  },
+  {
+    "id": "duo_jpb2bd4e_jpb3d42c",
+    "name": "神殿護衛戦士 ガレフと鳳神巫女 ホムラの絆",
+    "chars": [
+      "神殿護衛戦士 ガレフ",
+      "鳳神巫女 ホムラ"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "a-b 関係。",
+    "chapter": "s1c6"
+  },
+  {
+    "id": "duo_jp3fd3ca_jpaa1ef2",
+    "name": "灯篭職人長 コノエと灯篭職人見習い リルの絆",
+    "chars": [
+      "灯篭職人長 コノエ",
+      "灯篭職人見習い リル"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "a-b 関係。",
+    "chapter": "s1c6"
+  },
+  {
+    "id": "duo_jp52d770_jpb3d42c",
+    "name": "戦士たちの怪我を預かる癒し手",
+    "chars": [
+      "医療巫女 メア",
+      "鳳神巫女 ホムラ"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "戦士たちの怪我を預かる癒し手。",
+    "chapter": "s1c6"
+  },
+  {
+    "id": "duo_jp999a13_jp1108da",
+    "name": "見習い同期",
+    "chars": [
+      "巫女見習い アヤメ",
+      "高巫女見習い カヤ"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "見習い同期。",
+    "chapter": "s1c6"
+  },
+  {
+    "id": "duo_jp9fcb64_jp1108da",
+    "name": "見習い同期",
+    "chars": [
+      "巫女見習い スズ",
+      "高巫女見習い カヤ"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "見習い同期。",
+    "chapter": "s1c6"
+  },
+  {
+    "id": "duo_jpc67d18_jp1108da",
+    "name": "見習い同期",
+    "chars": [
+      "巫女見習い ハナ",
+      "高巫女見習い カヤ"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "見習い同期。",
+    "chapter": "s1c6"
+  },
+  {
+    "id": "duo_jp4e55d6_jp1108da",
+    "name": "見習い同期",
+    "chars": [
+      "巫女見習い ユウ",
+      "高巫女見習い カヤ"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "見習い同期。",
+    "chapter": "s1c6"
+  },
+  {
+    "id": "duo_jp0d8a65_jp665b24",
+    "name": "月読み祭司 オリオンと星海のノクスの絆",
+    "chars": [
+      "月読み祭司 オリオン",
+      "星海のノクス"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "a-b 関係。",
+    "chapter": "s1c6"
+  },
+  {
+    "id": "trio_shrines_s1c6",
+    "name": "巫女連邦リーリエの結束",
+    "chars": [
+      "イリス",
+      "七座楽人 ハルナ",
+      "主祭 リアラ"
+    ],
+    "condition": "any_lane",
+    "effect": {
+      "target": "all_lanes",
+      "power": 1
+    },
+    "flavor": "巫女連邦リーリエに属する者が場に三名揃う時、 派閥の力が場に流れる。",
+    "chapter": "s1c6"
   }
 ]
