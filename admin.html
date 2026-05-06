@@ -62,6 +62,21 @@ body {
   background: rgba(200, 125, 255, 0.15);
   border-color: rgba(200, 125, 255, 0.4);
 }
+.header-select {
+  padding: 8px 10px; font-size: 13px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff; border-radius: 8px;
+  cursor: pointer; font-family: inherit;
+  transition: all 0.15s;
+}
+.header-select:hover {
+  background: rgba(200, 125, 255, 0.15);
+  border-color: rgba(200, 125, 255, 0.4);
+}
+.header-select option {
+  background: #1a1426; color: #fff;
+}
 
 /* サマリーカード 2階層化 (重要4枚 大 + 補助4枚 小) */
 .summary-main {
@@ -733,6 +748,14 @@ body {
   <div class="header-actions">
     <a href="index.html" class="header-btn">← ガチャに戻る</a>
     <button class="header-btn" id="toggle-show-owners" title="自分のデバイス (admin uid または 手動マーク済) を一覧/集計に含めるか切替"></button>
+    <select class="header-select" id="bulk-mark-period" aria-label="一括マーク期間" title="一括マーク対象の最終アクセス期間">
+      <option value="1">直近1時間</option>
+      <option value="6">直近6時間</option>
+      <option value="24" selected>直近24時間</option>
+      <option value="72">直近72時間</option>
+      <option value="168">直近1週間</option>
+    </select>
+    <button class="header-btn" id="bulk-mark-guests" title="指定期間内に最終アクセスのあるゲスト (= uid なしの匿名アクセス) を一括 自分マーク。 マーク済は「自分除外」 トグル ON で一覧から非表示化されます">🏠 ゲスト一括マーク</button>
     <button class="header-btn" id="refresh-btn">🔄 更新</button>
   </div>
 </div>
@@ -2042,6 +2065,54 @@ $('#toggle-show-owners').addEventListener('click', () => {
   localStorage.setItem('prism-admin-show-owners', cur ? 'off' : 'on');
   if (window._lastRenderArgs) renderUsers(...window._lastRenderArgs);
   _updateOwnerToggleLabel();
+});
+
+// 🏠 ゲスト一括マーク (野沢さん指示 2026-05-06、 テスト用プライベートウィンドウで生成された複数ゲスト行を一発で hide)
+// 直近 N時間以内に lastAt があるゲスト (= uid なし or admin uid 紐づき なし) を bulk write で _meta/ownerDevices に true 設定
+document.addEventListener('click', async (ev) => {
+  if (ev.target.id !== 'bulk-mark-guests') return;
+  if (!isAdmin) { alert('admin認証が必要です'); return; }
+  const periodSel = document.getElementById('bulk-mark-period');
+  const hours = parseInt(periodSel?.value || '24', 10);
+  const cutoff = Date.now() - hours * 3600 * 1000;
+  // window._lastRenderArgs = [users, uidToNickname, guestDevices]
+  const lastArgs = window._lastRenderArgs;
+  const guestDevices = (lastArgs && lastArgs[2]) || {};
+  const ownerDeviceIds = window._ownerDeviceIds || new Set();
+  const adminUids = window._adminUids || new Set();
+  const central = window._centralDevices || {};
+  const targets = [];
+  for (const [devId, g] of Object.entries(guestDevices)) {
+    // 既に admin uid に紐づくデバイスは自動 owner なので除外 (二重マーク不要)
+    const dev = central[devId] || {};
+    if (dev.lastUid && adminUids.has(dev.lastUid)) continue;
+    if (g.uid && adminUids.has(g.uid)) continue;
+    if (ownerDeviceIds.has(devId)) continue; // 既マーク
+    // 期間判定: lastAt or central.lastVisitAt のどちらかが cutoff 以降
+    const lastAt = Math.max(g.lastAt || 0, dev.lastVisitAt || 0, dev.lastGasshukuRollAt || 0);
+    if (lastAt < cutoff) continue;
+    targets.push(devId);
+  }
+  if (targets.length === 0) {
+    alert(`直近${hours}時間以内に該当するゲストはありません (既にマーク済 or 期間外)`);
+    return;
+  }
+  if (!confirm(`直近${hours}時間以内のゲスト ${targets.length}件 を一括「自分マーク」 します。\n(マーク済は「🏠 自分除外」 トグル ON で一覧から非表示化)\n続行しますか？`)) return;
+  const btn = document.getElementById('bulk-mark-guests');
+  if (btn) { btn.disabled = true; btn.textContent = `マーク中… (0/${targets.length})`; }
+  try {
+    const updates = {};
+    for (const devId of targets) updates['prism-gacha/_meta/ownerDevices/' + devId] = true;
+    await db.ref().update(updates);
+    for (const devId of targets) window._ownerDeviceIds.add(devId);
+    if (window._lastRenderArgs) renderUsers(...window._lastRenderArgs);
+    _updateOwnerToggleLabel();
+    alert(`${targets.length}件 マーク完了`);
+  } catch (e) {
+    alert('一括マーク失敗: ' + (e.message || e) + '\nFirebase Rules で _meta/ownerDevices の admin write 権限を確認してください。');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '🏠 ゲスト一括マーク'; }
+  }
 });
 
 // 🏠 マーク/解除 ボタン (event delegation): _meta/ownerDevices/{deviceId} 書込 → 再描画
