@@ -1,57 +1,59 @@
 # 派閥 BGM プロンプト — Prism Shrine (巫女連邦リーリエ)
 
-巫女連邦リーリエ派閥の派閥テーマBGM。 Suno AI 向け。 ルール7-14 (派閥キャラ ≥5 で BGM プロンプト必須) BLOCKER 防御。
+巫女連邦リーリエ派閥の派閥テーマ BGM。 Suno AI 向け。 ルール7-14 (派閥キャラ ≥5 で BGM プロンプト必須) BLOCKER 防御。
 
 > **🎯 引き継ぎ規約**
-> - 出力ファイル: `media/audio/bgm/prism-shrine.mp3` (Box B-2 で path 移行済 = `media/audio/bgm/`)
-> - **基調**: 中速 (BPM 90-110、 章テーマ prism-promise BPM 118 より控えめ、 日常的な祭祀音楽)
-> - 派閥 BGM は「派閥のキャラを図鑑/相関図で見る時に流れる」 ため、 章テーマよりも背景音楽寄りで OK
+> - 出力ファイル: `media/audio/bgm/prism-shrine.mp3`
+> - **基調**: アップテンポ (BPM 120-135、 野沢さん指示 2026-05-06「派閥 BGM もなるべく速めのテンポが望ましい」 対応、 灯篭祭の躍動感重視)
+> - 章テーマ prism-promise (BPM 118 神聖儀式) と区別: 派閥 BGM は灯篭祭の祭祀躍動 + 七色合唱の祝祭感
 > - script.js BGM_LIST 追加時に duration 計測 → mm:ss 固定値で埋める
 
 ---
 
 ## 楽曲コンセプト
 
-巫女連邦リーリエ派閥の日常的な祭祀音楽。 千年祭祀の継承、 灯篭祭の温度、 翡翠の神殿の静謐。 章テーマ prism-promise (七座満つる神聖儀式) の上昇感とは異なり、 派閥 BGM は「巫女連邦の日常の温度」 を表現。 七色の灯篭が街路に揺らぎ、 巫女たちが祈祷を続ける、 平和な千年血脈の継続。
+巫女連邦リーリエ派閥の祭祀音楽。 灯篭祭の夜、 七色の紙灯篭が街路に揺れる中、 巫女たちが神楽を舞い、 七弦の琴と尺八が躍動するアップテンポ祭祀。 千年祭祀の継承を「日常の静謐」 ではなく「祝祭の躍動感」 で表現。 派閥のキャラを図鑑で開いた瞬間に、 灯篭祭の活気が立ち上がる構成。
 
 ---
 
-## 🎵 v1 — Mid-tempo 千年祭祀 (BPM 95、 推奨基準)
+## 🎵 v1 — Up-tempo 灯篭祭の躍動 (BPM 125、 推奨基準)
 
-- **基調**: 東方楽器中心 (尺八/笛/鈴/木魚/琴) + 軽い弦楽 + 七色合唱 (控えめ)
-- **ムード**: 千年祭祀の継承 + 灯篭祭の暖かさ + 神殿の静謐 + 母から娘への祈りの伝承
-- **テンポ**: 中速 (BPM 90-110、 日常的)
-- **構成**: 早朝の祈祷の静寂 → 灯篭祭の街並みの温度 → 神殿の祭祀 → 夕暮れの灯篭灯し → 夜の祈祷の塔
+- **基調**: 東方楽器 (尺八/笛/七弦琴/biwa) + 太鼓 + 七色合唱 + driving 弦楽
+- **ムード**: 灯篭祭の祝祭 + 神楽の躍動 + 千年祭祀の伝承を 動的に
+- **テンポ**: アップテンポ (BPM 120-135、 派閥 BGM 推奨 110-160 範囲、 野沢さん 2026-05-06 指示準拠)
+- **構成**: 七弦琴イントロの呼びかけ → 太鼓の祭祀リズム導入 → 神楽の主題 → 七色合唱のリフト → 駆け抜ける祭祀の頂点 → 余韻の鈴
 
 ### Suno AI プロンプト (Style)
 
 ```
-Sacred-eastern instrumental ambient with shrine-festival warmth, mid-tempo daily-life
-ceremonial theme, gracefully flowing with peaceful millennium-deep continuity. Featured
-instruments: eastern shakuhachi flute as the primary melodic voice (gentle warm tone),
-koto for harmonic accompaniment with seven-color rolling arpeggios, biwa for occasional
-plucked accents like ceremonial punctuations, wooden temple bells (mokugyo) and brass
-small bells (rin) keeping a soft heartbeat rhythm, light woodblock percussion, faint
-strings ensemble providing warm pad foundation, soft female angelic choir vocalize used
-sparingly only at ceremonial moments, harp prismatic arpeggios cascading softly like
-seven-color paper lanterns gently swaying in night air.
-Atmosphere: eastern shrine federation Lirie at peaceful daytime and twilight, the jade
-shrine corridor with rows of seven-color paper lanterns, the lantern festival cityscape
-with vendors and pilgrims walking peacefully, the central temple inner sanctuary in
-afternoon golden light, mountain mist drifting through wooden roofs, the prayer tower
-under the full moon at dusk, the chronicle hall with thousand-year scrolls glowing
-faintly. Daily life of priestesses tending lanterns, chanting morning prayers, weaving
-seven-color silk ribbons, lighting evening candles.
-Emotional arc: peaceful dawn awakening → festival warmth and life → ceremonial reverence
-→ twilight golden hour → quiet night prayer.
-BPM 95, key D major with Lydian and Dorian color (sacred warm flavor), 2:30 duration
-target, instrumental only, fantasy game music aesthetic, ambient cinematic.
+Sacred-eastern festival orchestral with up-tempo ceremonial energy and seven-prism
+luminous joy, vibrantly uplifting Lirie shrine-festival theme driven by ancient
+Japanese-flavored instrumentation. Featured instruments: eastern shakuhachi flute as
+soaring primary melodic voice (energetic and bright tone, NOT contemplative), seven-string
+koto with rapid driving arpeggios cascading like seven-color lantern light, biwa with
+sharp plucked accents like festival drumbeat punctuations, taiko drums (medium-large)
+keeping a strong driving 4/4 festival pulse, brass small bells (rin) chiming on every
+beat, light woodblock percussion in active staccato, full strings ensemble (cello +
+viola + violin) with driving forward motion, energetic female choir vocalize ("ah-ah-ah"
+on rhythmic accents) lifting at chorus moments, harp prismatic arpeggios cascading
+rapidly like seven-color paper lanterns flying skyward.
+Atmosphere: eastern shrine federation Lirie during full lantern festival night, hundreds
+of seven-color paper lanterns floating skyward in choreographed waves, priestesses
+dancing the sacred kagura with seven-color silk ribbons swirling, the central temple
+courtyard alive with festival drums and flute calls, cherry-blossom-like seven-color
+petals scattering through the air, the lively sacred energy of millennium tradition
+reborn each night.
+Emotional arc: festive dawn drum call → kagura dance opening → choir lift → driving
+festival climax → lingering seven-color resonance.
+BPM 125, key D major with Lydian and Mixolydian color (sacred bright joyful flavor),
+2:30 duration target, instrumental only with female choir vocalize, fantasy game music
+aesthetic, energetic cinematic.
 ```
 
 ### Suno AI プロンプト (Lyrics 欄)
 
 ```
-[Instrumental]
+[Instrumental + female angelic choir vocalize, no spoken lyrics]
 ```
 
 ---
@@ -60,28 +62,29 @@ target, instrumental only, fantasy game music aesthetic, ambient cinematic.
 
 - **対応シーン**: 巫女連邦リーリエ派閥のキャラを図鑑/相関図/キャラ詳細で表示する時の BGM
 - **ストーリー使用**: 派閥 BGM (図鑑タブ/相関図/キャラ詳細モーダルで再生)、 章ストーリー再生中は章テーマ prism-promise が優先
-- **コード参照**: `script.js` `BGM_LIST` の `category: 'faction'` セクション (s1c6 公開時に新エントリ追加)
-- **保存先**: `~/Box/.../prismaera/media/audio/bgm/prism-shrine.mp3` → `cp ~/prism-gacha-work/media/audio/bgm/prism-shrine.mp3`
+- **コード参照**: `script.js` `BGM_LIST` の `id: 'shrine'` (BGM_LIST 既登録、 duration は アセット完成後 実値更新)
+- **保存先**: `~/Box/.../prismaera/media/audio/bgm/prism-shrine.mp3`
 
-## 整合性 (outline 準拠)
+## 整合性 (outline + テンポ規約準拠)
 
-- 派閥のテーマ: 巫女連邦の千年祭祀の継承、 「次の代に灯る」 系譜の継続性
-- 章テーマ prism-promise との差別化: prism-promise は 七座満つる神聖儀式の高揚感 (BPM 118、 オーケストラ+七色合唱)、 一方 prism-shrine は 日常的な祭祀の暖かさ (BPM 95、 東方楽器中心)
-- 既存派閥 BGM との整合: prism-aether (ゼノニア機械工房、 BPM 105) や prism-niflheim (ニーヴル氷霊王国、 中速) と並べた時、 各派閥の文化的個性が音楽でも区別できるように、 巫女連邦は「東方楽器」 で明確に差別化
+- 派閥のテーマ: 巫女連邦の祭祀の躍動感、 灯篭祭の活気
+- 章テーマ prism-promise との差別化:
+  - prism-promise (BPM 118): 七座満つる神聖儀式の上昇感、 オーケストラ + 七色合唱の格調
+  - prism-shrine (BPM 125): 灯篭祭の祭祀躍動、 東方楽器 + 太鼓 + 駆動的弦楽
+- 既存派閥 BGM との整合: prism-aether (ゼノニア BPM 105) や prism-niflheim (ニーヴル BPM 95) より速め、 アップテンポ路線で野沢さん指示「派閥 BGM もなるべく速めが望ましい」 に対応
+- 例外として 教会 (BPM 70 processional) / アクアシス (BPM 60 underwater current) は世界観必然で維持、 巫女連邦は 祭祀躍動 = 速めデフォルトが整合
 
 ## 生成手順
 
-1. 上記 v1 Style プロンプトを Suno AI に貼付 → Lyrics 欄に `[Instrumental]` → 生成 (2:30 instrumental)
+1. 上記 v1 Style プロンプトを Suno AI に貼付 → Lyrics 欄に `[Instrumental + female angelic choir vocalize]` → 生成 (2:30 instrumental)
 2. 気に入ったテイクを採用版に
 3. mp3 ダウンロード → `~/Box/.../prismaera/media/audio/bgm/prism-shrine.mp3` に保存
-4. Claude (notebook or desktop):
-   - `cp ~/Box/.../prismaera/media/audio/bgm/prism-shrine.mp3 ~/prism-gacha-work/media/audio/bgm/prism-shrine.mp3`
-   - `bash scripts/measure_bgm.sh` で duration 計測
-   - `script.js` `BGM_LIST` に新エントリ追加: `{ id: 'shrine', label: '巫女連邦テーマ', desc: 'Prism Shrine (千年祭祀の温度)', category: 'faction', duration: '2:30', file: '/media/audio/bgm/prism-shrine.mp3' }`
-   - `sw.js` の `PRECACHE_BGM` 配列にも `'/media/audio/bgm/prism-shrine.mp3'` を追加 (ルール7-13 BLOCKER 防御)
-   - cache buster bump → dev push
+4. Claude:
+   - work へ cp + duration 計測 (`bash scripts/measure_bgm.sh`)
+   - `script.js` BGM_LIST の `id: 'shrine'` entry duration を実値に更新
+   - cache buster bump → dev push (pre-push hook で Box auto-sync)
 
 ## 関連 memory
 
-- `feedback_bgm_uptempo.md`: BGM テンポは世界観優先、 派閥 BGM は中速で OK
+- `feedback_bgm_uptempo.md`: 派閥 BGM もなるべく速めのテンポ (野沢さん指示 2026-05-06)
 - ルール7-14 (派閥 BGM ≥5キャラ): 巫女連邦は s1c6 で 20体追加 = ≥5 BLOCKER 化対象、 本ファイルで防御済
