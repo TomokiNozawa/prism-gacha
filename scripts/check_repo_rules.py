@@ -2032,6 +2032,76 @@ n7_41 = check_pool_img_slug_duplicates()
 print(f"  ルール7-41 (POOL img slug 重複): {n7_41}件 検査 [BLOCKER]")
 
 
+def check_bgm_tempo_uptempo():
+    """ルール7-42 (WARNING 2026-05-06 野沢さん指示「BGM テンポの話も自動チェックに入れて」):
+    BGM プロンプト (content/prompt/bgm/*.md) の BPM が 推奨範囲外なら WARNING。
+    - 派閥 BGM (faction_*.md): BPM 110 以上 推奨 (野沢さん 2026-05-06「派閥 BGM もなるべく速めが望ましい」)
+    - 章 BGM (chapter_*.md): BPM 100 以上 推奨 (世界観必然なら例外、 序章 60 BPM 等は OK)
+    - 戦闘 BGM (rift.md 等): BPM 130 以上 推奨
+
+    例外検出 (warningスキップ): プロンプト本文に世界観必然キーワード
+    (processional / underwater / contemplative / minimalist piano reverie / rubato 等) があれば OK 扱い。
+
+    BPM 抽出: プロンプト本文の `BPM (\d+)` または `(\d+)\s*BPM` パターンで取得。 範囲記載 (150-160) なら 下限値で判定。
+    """
+    bgm_dir = ROOT / 'content' / 'prompt' / 'bgm'
+    if not bgm_dir.exists():
+        return 0
+    EXCEPT_KEYWORDS = [
+        'processional', 'underwater', 'contemplative', 'minimalist piano reverie',
+        'rubato', 'meditative', 'ambient drone',
+    ]
+    found = 0
+    for path in sorted(bgm_dir.glob('*.md')):
+        text = path.read_text(encoding='utf-8')
+        # BPM 抽出 (プロンプト本文の最初の BPM 値)
+        # 優先順: ① BPM (X) → ② X BPM → ③ X-Y BPM (範囲記載は上限を採用、 推奨判定は緩く)
+        bpm = None
+        m1 = re.search(r'BPM\s+(\d{2,3})\b', text)
+        if m1:
+            bpm = int(m1.group(1))
+        else:
+            m2 = re.search(r'(\d{2,3})\s*-\s*(\d{2,3})\s*[bB][pP][mM]', text)
+            if m2:
+                # 範囲記載 (例: 150-160 BPM) → 上限値を採用
+                bpm = int(m2.group(2))
+            else:
+                m3 = re.search(r'(\d{2,3})\s*[bB][pP][mM]', text)
+                if m3:
+                    bpm = int(m3.group(1))
+        if bpm is None:
+            continue
+        fname = path.name
+        if fname.startswith('faction_'):
+            recommended = 110
+            kind = '派閥'
+        elif fname.startswith('chapter_'):
+            recommended = 100
+            kind = '章'
+        elif fname == 'rift.md':
+            recommended = 130
+            kind = '戦闘'
+        else:
+            continue
+        if bpm >= recommended:
+            continue
+        # 例外キーワード検出
+        if any(kw in text.lower() for kw in EXCEPT_KEYWORDS):
+            continue
+        warnings_only.append(
+            f"[ルール7-42 BGM テンポ低速 WARNING] {fname} BPM={bpm} ({kind} BGM 推奨 {recommended}+)\n"
+            f"      → 野沢さん指示 2026-05-06「派閥 BGM もなるべく速めのテンポが望ましい」\n"
+            f"      → 世界観必然なら 本文に processional / underwater / contemplative 等を明記、 そうでなければ BPM 引上げ検討\n"
+            f"      → 詳細: memory feedback_bgm_uptempo.md"
+        )
+        found += 1
+    return found
+
+
+n7_42 = check_bgm_tempo_uptempo()
+print(f"  ルール7-42 (BGM テンポ低速): {n7_42}件 検査 [WARNING]")
+
+
 def check_box_sync_drift():
     """ルール7-39 (WARNING 2026-05-06 野沢さん指示「必要な自動チェックに追加してください」): prism-gacha-work の
     主要ファイル (prompt/ STORY/ script.js sw.js index.html) と Box 内 (~/Box/.../claude/prismaera/) との
