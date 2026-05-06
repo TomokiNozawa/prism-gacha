@@ -7,7 +7,7 @@
 <title>PCB | Prismaera Cards Battle</title>
 <link rel="icon" href="/images/icons/icon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
-<link rel="stylesheet" href="./style.css?v=1.5.1ad">
+<link rel="stylesheet" href="./style.css?v=1.5.1ae">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -396,6 +396,27 @@
   </div>
 </div>
 
+<!-- コンボ詳細 sub-modal (P-2、 combo-item タップで flavor 全文 + 関連キャラ詳細) -->
+<div id="combo-detail-modal" class="cg-modal" hidden>
+  <div class="cg-modal-backdrop" onclick="closeComboDetailModal()"></div>
+  <div class="cg-modal-card cg-combo-detail-card">
+    <button class="cg-modal-close" onclick="closeComboDetailModal()" aria-label="閉じる">×</button>
+    <h2 class="cg-modal-title" id="combo-detail-name">コンボ名</h2>
+    <div class="cg-combo-detail-meta">
+      <span class="cg-combo-detail-cond" id="combo-detail-cond">同レーンに揃える</span>
+      <span class="cg-combo-detail-effect" id="combo-detail-effect">→ 自レーン +5 power</span>
+    </div>
+    <div class="cg-combo-detail-flavor" id="combo-detail-flavor"></div>
+    <div class="cg-combo-detail-chars-section">
+      <h3 class="cg-combo-detail-chars-title">関連キャラ <span class="cg-combo-detail-chars-hint">タップでキャラ詳細</span></h3>
+      <div class="cg-combo-detail-chars" id="combo-detail-chars"></div>
+    </div>
+    <div class="cg-modal-actions">
+      <button class="cg-btn secondary" onclick="closeComboDetailModal()">閉じる</button>
+    </div>
+  </div>
+</div>
+
 <!-- 🛒 ショップ モーダル (野沢さん指示 2026-05-06、 Phase 1 = 近日公開、 Phase 2 で スリーブ販売予定) -->
 <div id="shop-modal" class="cg-modal" hidden>
   <div class="cg-modal-backdrop" onclick="closeShop()"></div>
@@ -495,6 +516,6 @@
   </div>
 </div>
 
-<script src="./script.js?v=1.5.1ad"></script>
+<script src="./script.js?v=1.5.1ae"></script>
 </body>
 </html>

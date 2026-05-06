@@ -321,11 +321,11 @@ function updateMuteUI() {
 // 優先順位: cards.json (手書き完全override) > effects_override.json (effect+effectText のみ) > pool.json (default)
 async function loadMasters() {
   const [c, k, l, p, eo] = await Promise.all([
-    fetch('./cards.json?v=1.5.1ad').then(r => r.json()),
-    fetch('./combos.json?v=1.5.1ad').then(r => r.json()),
-    fetch('./lane_effects.json?v=1.5.1ad').then(r => r.json()),
-    fetch('./data/pool.json?v=1.5.1ad').then(r => r.json()).catch(() => []),
-    fetch('./effects_override.json?v=1.5.1ad').then(r => r.json()).catch(() => ({})),
+    fetch('./cards.json?v=1.5.1ae').then(r => r.json()),
+    fetch('./combos.json?v=1.5.1ae').then(r => r.json()),
+    fetch('./lane_effects.json?v=1.5.1ae').then(r => r.json()),
+    fetch('./data/pool.json?v=1.5.1ae').then(r => r.json()).catch(() => []),
+    fetch('./effects_override.json?v=1.5.1ae').then(r => r.json()).catch(() => ({})),
   ]);
   // pool 全カード ← effects_override で effect/effectText を上書き ← cards.json で完全 override
   const cardsByName = new Map();
@@ -2872,7 +2872,7 @@ function openCombosModal() {
     body.innerHTML = '<p style="color:var(--text-dim);text-align:center;padding:20px">現在の手札+場で発動可能なコンボなし。<br>手札にコンボパーツが揃っていない、 または条件未達。</p>';
   } else {
     body.innerHTML = list.map(c => `
-      <div class="cg-combo-item ${c.triggered ? 'triggered' : 'pending'}">
+      <button type="button" class="cg-combo-item ${c.triggered ? 'triggered' : 'pending'}" data-combo-name="${escapeAttr(c.name)}">
         <div class="cg-combo-head">
           <span class="cg-combo-icon">${c.triggered ? '✨' : '🔍'}</span>
           <span class="cg-combo-name">${c.name}</span>
@@ -2887,13 +2887,81 @@ function openCombosModal() {
         </div>
         <div class="cg-combo-flavor">${c.flavor}</div>
         <div class="cg-combo-effect">効果: 自レーン +${c.power} power</div>
-      </div>
+        <div class="cg-combo-tap-hint">タップで詳細 →</div>
+      </button>
     `).join('');
+    body.querySelectorAll('.cg-combo-item').forEach(el => {
+      el.addEventListener('click', () => openComboDetailModal(el.dataset.comboName));
+    });
   }
   $('#combos-modal').hidden = false;
   _setBodyModalOpen();
 }
 function closeCombosModal() { $('#combos-modal').hidden = true; _setBodyModalOpen(); }
+
+// ===== P-2 コンボ詳細 sub-modal =====
+function escapeAttr(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function openComboDetailModal(comboName) {
+  const combo = (state.combos || []).find(c => c.name === comboName);
+  if (!combo) return;
+  const myBoardAll = [].concat(...(state.board?.me || [[],[],[]]));
+  const myAll = myBoardAll.concat(state.hand || []);
+  const myAllNames = myAll.map(c => c.name);
+  $('#combo-detail-name').textContent = `✨ ${combo.name}`;
+  const condLabel = combo.condition === 'same_lane' ? '同レーンに揃える' : 'いずれかの場に揃える';
+  $('#combo-detail-cond').textContent = condLabel;
+  const tgt = combo.effect.target === 'all_lanes' ? '全レーン' : '自レーン';
+  $('#combo-detail-effect').textContent = `→ ${tgt} +${combo.effect.power} power`;
+  $('#combo-detail-flavor').textContent = combo.flavor || '';
+  // 関連キャラ chips
+  const charsEl = $('#combo-detail-chars');
+  charsEl.innerHTML = combo.chars.map(name => {
+    const card = (state.allCards || []).find(c => c.name === name);
+    if (!card) {
+      // 未公開章 / pool 未登録: 名前のみ
+      return `<div class="cg-combo-detail-char missing">
+        <div class="cg-combo-detail-char-name">${escapeAttr(name)}</div>
+        <div class="cg-combo-detail-char-meta">未取得</div>
+      </div>`;
+    }
+    const has = myAllNames.includes(name);
+    const dupes = (typeof getUserDupCounts === 'function') ? (getUserDupCounts()[card.tier + '_' + card.name] || 0) : 0;
+    const factionLabel = card.faction || '';
+    const role = card.role || '';
+    const effShort = (card.effectText || '').slice(0, 36);
+    const imgUrl = card.img || '';
+    const imgStyle = imgUrl ? `background-image:url('${escapeAttr(imgUrl)}')` : '';
+    return `<button type="button" class="cg-combo-detail-char ${has ? 'collected' : ''}" data-char-id="${escapeAttr(card.id || '')}">
+      <div class="cg-combo-detail-char-img" style="${imgStyle}"></div>
+      <div class="cg-combo-detail-char-info">
+        <div class="cg-combo-detail-char-tier-row">
+          <span class="cg-combo-detail-char-tier tier-${card.tier}">${card.tier}</span>
+          ${factionLabel ? `<span class="cg-combo-detail-char-faction">${escapeAttr(factionLabel)}</span>` : ''}
+          ${dupes > 0 ? `<span class="cg-combo-detail-char-dupes">+${dupes}凸</span>` : ''}
+          ${has ? `<span class="cg-combo-detail-char-flag">✓ 場にある</span>` : ''}
+        </div>
+        <div class="cg-combo-detail-char-name">${escapeAttr(card.name)}</div>
+        ${role ? `<div class="cg-combo-detail-char-role">${escapeAttr(role)}</div>` : ''}
+        <div class="cg-combo-detail-char-stats">⚡${card.cost} ⚔${card.basePower}</div>
+        ${effShort ? `<div class="cg-combo-detail-char-effect">${escapeAttr(effShort)}${card.effectText && card.effectText.length > 36 ? '…' : ''}</div>` : ''}
+      </div>
+    </button>`;
+  }).join('');
+  charsEl.querySelectorAll('.cg-combo-detail-char[data-char-id]').forEach(el => {
+    el.addEventListener('click', () => {
+      const id = el.dataset.charId;
+      const card = (state.allCards || []).find(c => c.id === id);
+      if (card && typeof openCharDetail === 'function') {
+        // sub-sub-modal: combo-detail を閉じずに char-detail を上に開く
+        openCharDetail(card, 'combo-detail');
+      }
+    });
+  });
+  $('#combo-detail-modal').hidden = false;
+  _setBodyModalOpen();
+}
+function closeComboDetailModal() { $('#combo-detail-modal').hidden = true; _setBodyModalOpen(); }
 
 function collectAvailableCombos() {
   const myBoardAll = [].concat(...state.board.me);
@@ -3051,6 +3119,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (isOpen('tutorial-modal'))       { closeTutorial(); return; }
       if (isOpen('rulebook-modal'))       { closeRulebook(); return; }
       if (isOpen('shop-modal'))           { closeShop(); return; }
+      if (isOpen('combo-detail-modal'))   { closeComboDetailModal(); return; }
       if (isOpen('combos-modal'))         { closeCombosModal(); return; }
       if (isOpen('char-detail-modal'))    { closeCharDetail(); return; }
       if (isOpen('deck-filter-modal'))    { closeDeckFilter(); return; }
@@ -3072,6 +3141,8 @@ window.closeHelp = closeHelp;
 window.closeTutorial = closeTutorial;
 window.closeCombosModal = closeCombosModal;
 window.closeCharDetail = closeCharDetail;
+window.openComboDetailModal = openComboDetailModal;
+window.closeComboDetailModal = closeComboDetailModal;
 window.openRulebook = openRulebook;
 window.closeRulebook = closeRulebook;
 window.openShop = openShop;
