@@ -2156,6 +2156,42 @@ n7_43 = check_chapter_combos_coverage()
 print(f"  ルール7-43 (章 combo 欠落): {n7_43}件 検査 [WARNING]")
 
 
+def check_subject_predicate_break():
+    """ルール7-44b (BLOCKER、 2026-05-07 野沢さん指摘):
+    主述分断 (助詞「が/を/に/で/と/の/て/も」 直後に句点 + 直後に修飾) を検出。
+
+    機械的文区切り化の副作用で 「私たち観測者三柱が。 千年に一度ずつ……」 のように
+    助詞直後に句点を打ち、 述語を後続文に追い出して主述が破綻する事故が発生。
+    これは可読性に直接影響するため WARNING ではなく BLOCKER。
+    """
+    story_dir = ROOT / 'content' / 'story'
+    if not story_dir.exists():
+        return 0
+    helpers = ['が', 'を', 'に', 'で', 'と', 'て', 'も']
+    found = 0
+    for path in sorted(story_dir.glob('s1c*.md')):
+        if path.stem == 's1c0' or 'outline' in path.stem:
+            continue
+        text = path.read_text(encoding='utf-8')
+        broken = []
+        for h in helpers:
+            for m in re.finditer(re.escape(h + '。 ') + r'[^\s]', text):
+                # 文末「○○が。」 等は前後の改行で判定 (改行直前なら文末で OK)
+                idx = m.start()
+                if idx > 0 and text[idx-1] in '」』）)':
+                    continue  # 引用符後は会話文末で OK
+                broken.append((h, text[max(0,idx-15):idx+15]))
+        if broken:
+            sample = '; '.join(f"「{ctx.strip()}」" for h, ctx in broken[:3])
+            violations.append(
+                f"[ルール7-44b 主述分断 BLOCKER] {path.name}: 助詞+句点 主述破綻 {len(broken)}件\n"
+                f"      → サンプル: {sample}\n"
+                f"      → 助詞「が/を/に/で/と/て/も」 直後の句点は文体破綻、 読点に戻して 1文として閉じる"
+            )
+            found += 1
+    return found
+
+
 def check_kuten_density():
     """ルール7-44 (WARNING、 2026-05-07 野沢さん指示「文章全体にどれくらい読点が出てくるかのバランス」):
     章本文の **読点密度 (1000文字あたりの読点数)** が 60 を超えると WARNING。
@@ -2204,6 +2240,8 @@ def check_kuten_density():
     return found
 
 
+n7_44b = check_subject_predicate_break()
+print(f"  ルール7-44b (主述分断): {n7_44b}件 検査 [BLOCKER]")
 n7_44 = check_kuten_density()
 print(f"  ルール7-44 (読点密度高): {n7_44}件 検査 [WARNING]")
 
