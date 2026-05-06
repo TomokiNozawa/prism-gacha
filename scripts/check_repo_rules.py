@@ -2054,23 +2054,23 @@ def check_bgm_tempo_uptempo():
     found = 0
     for path in sorted(bgm_dir.glob('*.md')):
         text = path.read_text(encoding='utf-8')
-        # BPM 抽出 (プロンプト本文の最初の BPM 値)
-        # 優先順: ① BPM (X) → ② X BPM → ③ X-Y BPM (範囲記載は上限を採用、 推奨判定は緩く)
-        bpm = None
-        m1 = re.search(r'BPM\s+(\d{2,3})\b', text)
-        if m1:
-            bpm = int(m1.group(1))
-        else:
-            m2 = re.search(r'(\d{2,3})\s*-\s*(\d{2,3})\s*[bB][pP][mM]', text)
-            if m2:
-                # 範囲記載 (例: 150-160 BPM) → 上限値を採用
-                bpm = int(m2.group(2))
-            else:
-                m3 = re.search(r'(\d{2,3})\s*[bB][pP][mM]', text)
-                if m3:
-                    bpm = int(m3.group(1))
-        if bpm is None:
+        # BPM 抽出: Suno AI プロンプトコードブロック (``` ``` で囲まれた最初の block) があればそこを優先
+        # (本文の比較記述「派閥 BGM (BPM 60-130) より速め」 等を除外するため)
+        prompt_block_match = re.search(r'```[^\n]*\n(.+?)\n```', text, flags=re.DOTALL)
+        scan_text = prompt_block_match.group(1) if prompt_block_match else text
+        # 候補を全部集めて 最大値 = 楽曲 BPM とみなす (比較記述の小さい値を避ける)
+        candidates = []
+        for m in re.finditer(r'(\d{2,3})\s*-\s*(\d{2,3})\s*[bB][pP][mM]', scan_text):
+            candidates.append((int(m.group(2)), m))  # X-Y BPM 範囲は上限値
+        for m in re.finditer(r'BPM\s+(\d{2,3})\s*-\s*\d{2,3}', scan_text):
+            candidates.append((int(m.group(1)), m))  # BPM X-Y は X (下限値)
+        for m in re.finditer(r'BPM\s+(\d{2,3})\b', scan_text):
+            candidates.append((int(m.group(1)), m))
+        for m in re.finditer(r'(\d{2,3})\s*[bB][pP][mM]\b', scan_text):
+            candidates.append((int(m.group(1)), m))
+        if not candidates:
             continue
+        bpm, m_used = max(candidates, key=lambda x: x[0])
         fname = path.name
         if fname.startswith('faction_'):
             recommended = 110
@@ -2085,8 +2085,11 @@ def check_bgm_tempo_uptempo():
             continue
         if bpm >= recommended:
             continue
-        # 例外キーワード検出
-        if any(kw in text.lower() for kw in EXCEPT_KEYWORDS):
+        # 例外キーワード検出 (BPM 値出現位置の周辺 ±200 文字に限定、 別文脈で出る単語の誤 hit 回避)
+        e_start = max(0, m_used.start() - 200)
+        e_end = min(len(scan_text), m_used.end() + 200)
+        local_text = scan_text[e_start:e_end].lower()
+        if any(kw in local_text for kw in EXCEPT_KEYWORDS):
             continue
         warnings_only.append(
             f"[ルール7-42 BGM テンポ低速 WARNING] {fname} BPM={bpm} ({kind} BGM 推奨 {recommended}+)\n"
