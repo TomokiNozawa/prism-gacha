@@ -5933,12 +5933,12 @@ function _setupWorldMapZoomPan(svg, layer) {
 
 // ───── ストーリービューワー (紙芝居風) ─────
 const STORY_FILES = {
-  s1c1: { title: '序: 七座の使命', meta: 'Season 1 — 第1章', file: 'STORY/s1c1.md' },
-  s1c2: { title: '南方海域の異変', meta: 'Season 1 — 第2章', file: 'STORY/s1c2.md' },
-  s1c3: { title: '砂塵の隊商', meta: 'Season 1 — 第3章', file: 'STORY/s1c3.md' },
-  s1c4: { title: '凍土と空',     meta: 'Season 1 — 第4章', file: 'STORY/s1c4.md' },
-  s1c5: { title: '黒月の予兆',   meta: 'Season 1 — 第5章', file: 'STORY/s1c5.md' },
-  s1c6: { title: '七座満つる',   meta: 'Season 1 — 第6章', file: 'STORY/s1c6.md' },
+  s1c1: { title: '序: 七座の使命', meta: 'Season 1 — 第1章', file: 'content/story/s1c1.md' },
+  s1c2: { title: '南方海域の異変', meta: 'Season 1 — 第2章', file: 'content/story/s1c2.md' },
+  s1c3: { title: '砂塵の隊商', meta: 'Season 1 — 第3章', file: 'content/story/s1c3.md' },
+  s1c4: { title: '凍土と空',     meta: 'Season 1 — 第4章', file: 'content/story/s1c4.md' },
+  s1c5: { title: '黒月の予兆',   meta: 'Season 1 — 第5章', file: 'content/story/s1c5.md' },
+  s1c6: { title: '七座満つる',   meta: 'Season 1 — 第6章', file: 'content/story/s1c6.md' },
 };
 
 function escapeHtml(s) {

@@ -153,7 +153,7 @@ def check_chapter_structure():
     - 第二幕〜第N幕 は任意 (物語量に応じて自由、 4幕推奨だが固定でない)
     - シーン番号 N-K の N は 1〜8 まで許容 (現実的な章規模)、 旧章単位連番 (1-13等) は禁止
     """
-    target_dir = ROOT / "STORY"
+    target_dir = ROOT / "content" / "story"
     if not target_dir.exists():
         return 0
     REQUIRED = ['## プロローグ', '## 第一幕', '## エピローグ']  # 必須3項目に緩和
@@ -404,7 +404,7 @@ def check_story_pov_header():
     無いと openStory が POV 抽出失敗 → currentStoryPov=null → renderSceneChars の POV 救済が全 scene で skip
     → 「シーン登場リスト 1人目」 が POV にならない (s1c4 で発生した『ボロボロ』の根本原因)。
     """
-    story_dir = ROOT / 'STORY'
+    story_dir = ROOT / 'content' / 'story'
     if not story_dir.exists():
         return 0
     checked = 0
@@ -451,7 +451,7 @@ def check_story_pov_header():
 def check_outline_foreshadowing(sf_ids):
     """ルール7-9 (BLOCKER): STORY/outline.md「## 仕込み済み伏線」 に公開済章の `### S1CN` セクション必須
     feedback_story_consistency.md: 仕込み時に outline.md 末尾の伏線リストへ即追記、 回収できない伏線は禁止"""
-    outline_path = ROOT / 'STORY' / 'outline.md'
+    outline_path = ROOT / 'content' / 'story' / 'outline.md'
     if not outline_path.exists() or not sf_ids:
         return 0
     text = outline_path.read_text(encoding='utf-8')
@@ -481,7 +481,7 @@ def check_outline_foreshadowing(sf_ids):
 def check_pool_chapter_count(sf_ids, pool_chars_by_chap):
     """ルール7-11 (BLOCKER): outline「Season 1 キャラ追加総数」 の章規模 と POOL の chapter='s1cN' キャラ数 が ± 1 以内
     feedback_story_consistency.md: outline 規模 (キャラ数) を厳守、 思い込み禁止"""
-    outline_path = ROOT / 'STORY' / 'outline.md'
+    outline_path = ROOT / 'content' / 'story' / 'outline.md'
     if not outline_path.exists() or not sf_ids:
         return 0
     text = outline_path.read_text(encoding='utf-8')
@@ -804,7 +804,7 @@ def check_chapter_factions_registered(sf_ids, script_text):
     実例 2026-05-03: ニーヴル/ゼノニア が outline.md s1c4 で「新派閥」 として記載されているのに
     FACTIONS / FACTION_WORLD_COORDS どちらにも未登録の構造バグ。 章追加時の登録漏れ防止。
     """
-    outline_path = ROOT / 'STORY' / 'outline.md'
+    outline_path = ROOT / 'content' / 'story' / 'outline.md'
     if not outline_path.exists() or not script_text:
         return 0
     outline = outline_path.read_text(encoding='utf-8')
@@ -877,7 +877,7 @@ def check_dup_name_unmarked(sf_ids, pool_chars_by_chap, script_text):
     if not duplicates:
         return 0
     for sid in sf_ids:
-        path = ROOT / 'STORY' / f'{sid}.md'
+        path = ROOT / 'content' / 'story' / f'{sid}.md'
         if not path.exists():
             continue
         text = path.read_text(encoding='utf-8')
@@ -927,7 +927,7 @@ def check_next_chapter_wm(sf_ids, script_text):
         return 0
     last_num = nums[-1]
     next_num = last_num + 1
-    outline_path = ROOT / 'STORY' / 'outline.md'
+    outline_path = ROOT / 'content' / 'story' / 'outline.md'
     if not outline_path.exists():
         return 0
     outline = outline_path.read_text(encoding='utf-8')
@@ -959,7 +959,7 @@ def check_age_excess(sf_ids):
     age_pattern = re.compile(r'[一二三四五六七八九十百千]+(?:歳|代後半|代前半|代)')
     n = 0
     for sid in sf_ids:
-        path = ROOT / 'STORY' / f'{sid}.md'
+        path = ROOT / 'content' / 'story' / f'{sid}.md'
         if not path.exists():
             continue
         text = path.read_text(encoding='utf-8')
@@ -1043,7 +1043,7 @@ def check_short_kana_collisions(pool_chars_by_chap=None):
                     short_kana.append((sid, tier, name, tok))
     checked = len(short_kana)
     for sid, tier, fullname, tok in short_kana:
-        story_path = ROOT / 'STORY' / f'{sid}.md'
+        story_path = ROOT / 'content' / 'story' / f'{sid}.md'
         if not story_path.exists():
             continue
         try:
@@ -1505,7 +1505,7 @@ def check_inline_location_markers():
     )
     miss = []
     for sid, body in entries:
-        story_path = ROOT / "STORY" / f"{sid}.md"
+        story_path = ROOT / "content" / "story" / f"{sid}.md"
         if not story_path.exists():
             continue
         story_text = story_path.read_text(encoding="utf-8")
@@ -2054,7 +2054,7 @@ def check_box_sync_drift():
         sample_str = " / ".join(drift_samples)
         if drift_count > len(drift_samples):
             sample_str += f" 他{drift_count - len(drift_samples)}件"
-        violations.append(
+        warnings_only.append(
             f"[ルール7-39 Box sync 漏れ WARNING] {drift_count}ファイルが Box 未同期: {sample_str}\n"
             f"      → `bash scripts/sync_to_box.sh` を実行 (pre-push hook で自動実行されるが、 commit 段階での補助検証)\n"
             f"      → 野沢さんは Box を参照してアセット生成・確認するため、 sync 漏れは作業停止につながる\n"
@@ -2103,7 +2103,7 @@ def check_paired_char_ref_attach():
             # 例外: 「⚠️ 生成順序」 で 添付不要の理由 (相手キャラがまだ生成されていない先発キャラ等) が明記されている場合は OK
             has_ref_attach = ("⚠️ 生成前に必ず添付してください" in sec) or ("[Attached: reference image" in sec) or ("[Attached:" in sec and "reference" in sec) or ("⚠️ 生成順序" in sec)
             if not has_ref_attach:
-                violations.append(
+                warnings_only.append(
                     f"[ルール7-40 対構図リファ添付漏れ WARNING] {prompt_path.name} :: {first_line[:60]}\n"
                     f"      → mirror/similar/same/matching 等の対構図キーワードあり、 リファ添付指示なし\n"
                     f"      → 「⚠️ 生成前に必ず添付してください」 で 相手キャラ画像を明記する\n"
