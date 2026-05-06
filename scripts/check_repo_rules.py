@@ -14,10 +14,22 @@ Prismaera repo の自動ルールチェック (CLAUDE.md / memory の機械チ�
    (CLAUDE.md / user_profile.md)
 
 Usage:
-  PYTHONIOENCODING=utf-8 py scripts/check_repo_rules.py
+  PYTHONIOENCODING=utf-8 py scripts/check_repo_rules.py [scope]
+  scope: all (default) / story / char / prompt / deploy / release
 Exit: 0 (全合格) / 1 (違反あり)
 
-pre-commit フック (.githooks/pre-commit) から自動呼出。
+scope 別 (野沢さん指示 2026-05-06、 場面別自動チェック分割):
+  - all (default):   全ルール実行 (月次総点検 / リファクタ後)
+  - story:    新章本文・凸秘話作成時 (章構造 / シーン / POV / ふりがな / 部分一致 / outline配分)
+  - char:     POOL追加時 (派閥/種族 / Tier / 名前重複 / LORE形式 / ID-basedマークアップ)
+  - prompt:   画像/BGMプロンプト作成時 (末尾文言 / ANATOMY / 形式統一 / メタ記載 / 背景参照)
+  - deploy:   commit前 軽量 (cache buster / SW_VERSION / IMG_CACHE_VERSION / dev/main version)
+  - release:  章公開直前 (ホームティザー / 派閥BGM / 公開前リーク / WM派閥座標 / 章末予告)
+
+pre-commit フック (.githooks/pre-commit) から自動呼出 (デフォルト deploy モード推奨)。
+
+【段階的実装】 2026-05-06 初版は scope 引数受付 + 分類コメント付与のみ。 個別 scope は all と等価動作。
+段階的に各ルールに scope tag を付与して、 deploy mode で軽量実行可能にしていく。
 """
 import re
 import sys
@@ -31,6 +43,15 @@ except Exception:
     pass
 
 ROOT = Path(__file__).resolve().parents[1]
+
+# scope 引数 (野沢さん指示 2026-05-06)
+SCOPE = (sys.argv[1] if len(sys.argv) > 1 else 'all').lower().strip()
+VALID_SCOPES = {'all', 'story', 'char', 'prompt', 'deploy', 'release'}
+if SCOPE not in VALID_SCOPES:
+    print(f"⚠️ 不正な scope: '{SCOPE}'  (有効: {', '.join(sorted(VALID_SCOPES))})  → all で続行")
+    SCOPE = 'all'
+print(f"🔍 check_repo_rules.py scope='{SCOPE}'")
+print()
 
 violations = []
 
