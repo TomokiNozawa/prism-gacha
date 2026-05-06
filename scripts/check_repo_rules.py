@@ -2305,6 +2305,58 @@ n7_45 = check_bgm_category_segregation()
 print(f"  ルール7-45 (BGM カテゴリ棲み分け): {n7_45}件 検査 [WARNING]")
 
 
+def check_bgm_style_3000_limit():
+    """ルール7-46 (WARNING、 2026-05-07 野沢さん指示「Suno Style プロンプトは 3000 文字上限」):
+    BGM プロンプト md 内の Style コードブロック (`### Suno AI プロンプト (Style)` 配下の
+    ` ``` ` ブロック) が 3000 字を超えると WARNING、 2900 字超で予兆 WARNING。
+
+    Suno AI 仕様: Style 欄は 3000 文字までしか受け付けない。 超過分は切り捨てられて生成品質低下。
+
+    検査ロジック:
+      - content/prompt/bgm/*.md を全件スキャン
+      - 「### Suno AI プロンプト (Style)」 直後の 最初の `` ``` `` ブロックを抽出
+      - 文字数が 2900 超で WARNING (上限到達まで余裕 100 字)、 3000 超で「上限超過」 強警告
+    """
+    bgm_dir = ROOT / 'content' / 'prompt' / 'bgm'
+    if not bgm_dir.exists():
+        return 0
+    found = 0
+    for path in sorted(bgm_dir.glob('*.md')):
+        text = path.read_text(encoding='utf-8')
+        # 「### Suno AI プロンプト (Style)」 配下の最初の ``` ブロック
+        m = re.search(
+            r'###\s*Suno AI プロンプト\s*\(Style\)\s*\n\s*```[^\n]*\n(.+?)\n```',
+            text, re.DOTALL,
+        )
+        if not m:
+            # ヘッダ無しの場合は最初の長いコードブロックを試す
+            m2 = re.search(r'```[^\n]*\n(.{500,}?)\n```', text, re.DOTALL)
+            if not m2:
+                continue
+            style = m2.group(1).strip()
+        else:
+            style = m.group(1).strip()
+        n = len(style)
+        if n > 3000:
+            warnings_only.append(
+                f"[ルール7-46 BGM Style 上限超過 WARNING] {path.name}: Style {n}文字 > 3000字 上限\n"
+                f"      → Suno AI Style 欄は 3000 字までしか受け付けない。 超過分は切り捨てで生成品質低下\n"
+                f"      → 冗長表現を整理 (重複修飾統合、 NOT X NOT Y を 1行に圧縮、 atmosphere 短縮等)"
+            )
+            found += 1
+        elif n > 2900:
+            warnings_only.append(
+                f"[ルール7-46 BGM Style 上限近接 WARNING] {path.name}: Style {n}文字 (上限 3000 まで残 {3000-n}字)\n"
+                f"      → 余裕 100 字以下、 追加修飾で上限超過リスク。 整理推奨"
+            )
+            found += 1
+    return found
+
+
+n7_46 = check_bgm_style_3000_limit()
+print(f"  ルール7-46 (BGM Style 3000字上限): {n7_46}件 検査 [WARNING]")
+
+
 def check_box_sync_drift():
     """ルール7-39 (WARNING 2026-05-06 野沢さん指示「必要な自動チェックに追加してください」): prism-gacha-work の
     主要ファイル (prompt/ STORY/ script.js sw.js index.html) と Box 内 (~/Box/.../claude/prismaera/) との

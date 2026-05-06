@@ -29,50 +29,39 @@
 ```
 Sacred shrine federation kagura with up-tempo formal-ceremonial energy and
 millennium-deep priestess solemn warmth. Featured instruments:
-- shakuhachi flute as primary melodic voice (sacred-formal calling tone, NOT
-  mystical-windy like trance, NOT bright like festival — pure prayer-call tone
-  with breathy attacks for sacred summons)
-- seven-string koto with driving rhythmic ostinato (sacred plucked patterns,
-  millennium-tradition flow, NOT festival cascading sparkle — formal arpeggios
-  with steady pulse)
-- kagura-suzu (sacred shrine bells) sparkling in formal-sacred tone throughout
-  (NOT festival jingle bells — solemn ceremonial sparkle)
-- hyoshigi (wooden clappers) striking sharp accents on every formal beat
-  (priestess-step rhythm, NOT festival dance footwork — formal procession steps)
-- biwa with archaic accent strikes for ceremonial rhythm (millennium classical
-  gravitas)
-- light taiko drums (medium-small, ceremonial NOT festival-loud) keeping a
-  formal-driving 4/4 sacred pulse
-- pure female priestess choir vocalize (mid-low register, "ah-ha-ah" rhythmic
-  vocalize, EARTHY pure NOT angelic-distant high, NOT trance-whisper, NOT
-  bright festival "la-la-la" — sacred-prayer-chant solemn pure tone, like
-  priestesses chanting kagura-uta during morning ritual)
-- solo male voice singing wordless low-register norito-style chant (the head
-  priest's prayer voice, deep solemn formal, occasional throughout — adds
-  millennium-tradition gravitas)
+- shakuhachi flute primary melodic voice (sacred prayer-call tone, breathy
+  formal attacks, NOT mystical-trance, NOT festival-bright)
+- seven-string koto with driving formal arpeggios (millennium-tradition flow,
+  steady sacred pulse, NOT festival cascading)
+- kagura-suzu (shrine bells) sparkling in solemn ceremonial tone (NOT festival
+  jingle)
+- hyoshigi (wooden clappers) on every formal beat (priestess procession steps)
+- biwa archaic accent strikes (classical ceremonial gravitas)
+- light taiko drums (ceremonial NOT festival-loud) formal-driving 4/4 pulse
+- pure female priestess choir vocalize (mid-low "ah-ha-ah" earthy prayer-chant
+  tone, NOT angelic-distant, NOT trance-whisper, NOT festival "la-la-la" —
+  priestesses chanting kagura-uta at morning ritual)
+- solo male voice wordless low norito-style chant (head priest's deep solemn
+  prayer voice, occasional throughout — adds millennium gravitas)
 - distant temple bell low gong accents (sacred temple atmosphere)
-Atmosphere: the seven-color sacred tower of the shrine federation Lirie at the
-sacred dawn ritual, the inner sanctuary of the central temple where priestesses
-walk in formal ceremonial procession with seven-color silk vestments, the
-millennium-old kagura dance practiced daily by every priestess from apprentice
-to high-priestess, the sacred chronicle hall where Violena recites the
-thousand-year prayer, the prayer tower under the moon where Iris kneels in
-nightly devotion, the head priest reciting the ancient norito at the shrine's
-heart. NOT a festival, NOT a trance — the EVERYDAY sacred state of the shrine
-federation, the millennium tradition flowing through every formal step, the
-solemn proud-sacred routine that is the daily life of being a priestess of
-Lirie.
-Emotional arc: kagura-suzu sacred-bells opening (sacred space awakening) →
-shakuhachi solo prayer-call summon (priestess voice of Lirie) → koto-hyoshigi
-driving rhythm with formal ceremonial steps → priestess earthy chorus vocalize
-builds in formal-pure tone → male norito chant low gravitas adds → biwa-taiko
-formal climax of sacred kagura procession → mid-section pure formal ostinato
-→ fade with kagura-suzu sacred bells lingering and a single distant temple
-gong.
+Atmosphere: the seven-color sacred tower of shrine federation Lirie at dawn
+ritual, the inner sanctuary where priestesses walk in formal procession with
+seven-color silk vestments, the millennium kagura dance practiced daily by
+every priestess from apprentice to high-priestess, the sacred chronicle hall
+where Violena recites thousand-year prayers, the prayer tower under moonlight
+where Iris kneels in devotion, the head priest reciting ancient norito at the
+shrine's heart. NOT a festival, NOT a trance — the EVERYDAY sacred state of
+the shrine federation, the millennium tradition flowing through every formal
+step, the solemn proud-sacred routine of priestess daily life.
+Emotional arc: kagura-suzu opening (sacred space awakening) → shakuhachi solo
+prayer-call summon → koto-hyoshigi driving rhythm with formal procession steps
+→ priestess earthy chorus builds in formal-pure tone → male norito chant adds
+low gravitas → biwa-taiko formal climax of sacred kagura → mid-section pure
+formal ostinato → fade with kagura-suzu lingering and single distant gong.
 BPM 120, key D dorian shifting to D major Mixolydian (sacred-archaic flavor
-resolving to formal-bright), 2:30 duration target, instrumental with female
-priestess earthy chorus and male norito chant only, fantasy game music
-aesthetic, dynamic sacred-cinematic ceremonial.
+resolving to formal-bright), 2:30 duration, instrumental with female priestess
+earthy chorus and male norito chant only, fantasy game music aesthetic, dynamic
+sacred-cinematic ceremonial.
 ```
 
 ### Suno AI プロンプト (Lyrics 欄)
