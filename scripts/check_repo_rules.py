@@ -2206,6 +2206,105 @@ n7_44 = check_kuten_density()
 print(f"  ルール7-44 (読点密度高): {n7_44}件 検査 [WARNING]")
 
 
+def check_bgm_category_segregation():
+    """ルール7-45 (WARNING、 2026-05-07 野沢さん指示「BGM 棲み分け意識して、 自動チェックに入れといて」):
+    BGM プロンプト ファイル名 prefix と BGM_LIST の category 整合性をチェック。
+
+    棲み分け規約 (野沢さん指示 2026-05-07):
+      - 章 BGM (chapter_*.md): その章のストーリー全体に合う BGM → category: 'chapter'
+      - 派閥 BGM (faction_*.md): その派閥の特性を表現 (派閥全体を代表) → category: 'faction'
+      - その他 (scene_*.md / rift.md / その他名): イベント/シーン特化 BGM → category: 'other'
+
+    検査ロジック:
+      - content/prompt/bgm/*.md を全件スキャン
+      - prompt md 冒頭 (最初の 200 文字) から想定 category を抽出
+        (「派閥 BGM」「章 BGM」「シーン特化」「その他」 等のキーワード判定)
+      - prompt md の 「出力ファイル」 path から mp3 ファイル名を抽出
+      - script.js BGM_LIST 内 該当 mp3 の category と比較
+      - 不一致なら WARNING
+    """
+    bgm_dir = ROOT / 'content' / 'prompt' / 'bgm'
+    if not bgm_dir.exists():
+        return 0
+    script_text = (ROOT / 'script.js').read_text(encoding='utf-8')
+    # BGM_LIST から { mp3_name: category } を抽出
+    bgm_entries = {}
+    bgm_list_match = re.search(r'const BGM_LIST\s*=\s*\[', script_text)
+    if bgm_list_match:
+        start = bgm_list_match.end() - 1
+        depth = 0
+        for i in range(start, len(script_text)):
+            if script_text[i] == '[':
+                depth += 1
+            elif script_text[i] == ']':
+                depth -= 1
+                if depth == 0:
+                    body = script_text[start + 1:i]
+                    break
+        else:
+            body = ''
+        for entry_match in re.finditer(
+            r"category:\s*'([^']+)'[^}]*?file:\s*'([^']+\.mp3)'", body, re.DOTALL
+        ):
+            cat = entry_match.group(1)
+            mp3_name = entry_match.group(2).split('/')[-1]
+            bgm_entries[mp3_name] = cat
+        # file が先で category が後の順序にも対応
+        for entry_match in re.finditer(
+            r"file:\s*'([^']+\.mp3)'[^}]*?category:\s*'([^']+)'", body, re.DOTALL
+        ):
+            mp3_name = entry_match.group(1).split('/')[-1]
+            cat = entry_match.group(2)
+            if mp3_name not in bgm_entries:
+                bgm_entries[mp3_name] = cat
+
+    found = 0
+    for path in sorted(bgm_dir.glob('*.md')):
+        text = path.read_text(encoding='utf-8')
+        head = text[:500]
+        # ファイル名 prefix から想定 category を抽出
+        fname = path.name
+        if fname.startswith('chapter_'):
+            expected = 'chapter'
+        elif fname.startswith('faction_'):
+            expected = 'faction'
+        elif fname.startswith('scene_') or fname == 'rift.md':
+            expected = 'other'
+        else:
+            # 未分類 (cardgame.md 等は対象外)
+            continue
+        # md 冒頭の宣言と整合性確認
+        head_lower = head
+        body_decl_ok = (
+            (expected == 'chapter' and ('章BGM' in head_lower or '章 BGM' in head_lower or '章テーマ' in head_lower))
+            or (expected == 'faction' and ('派閥BGM' in head_lower or '派閥 BGM' in head_lower or '派閥テーマ' in head_lower))
+            or (expected == 'other' and ('シーン特化' in head_lower or 'その他' in head_lower or '戦闘テーマ' in head_lower))
+        )
+        if not body_decl_ok:
+            warnings_only.append(
+                f"[ルール7-45 BGM カテゴリ棲み分け WARNING] {fname}: ファイル名 prefix '{fname.split('_')[0] if '_' in fname else fname}' は category '{expected}' を示すが、 prompt md 冒頭に対応する宣言キーワードなし\n"
+                f"      → chapter = 「章 BGM」 / faction = 「派閥 BGM」 / other = 「シーン特化」「その他」「戦闘テーマ」 のいずれかを 冒頭に明記"
+            )
+            found += 1
+        # mp3 ファイル名を 引き継ぎ規約から抽出
+        mp3_match = re.search(r'`media/audio/bgm/([^`]+\.mp3)`', text)
+        if mp3_match:
+            mp3_name = mp3_match.group(1)
+            actual_cat = bgm_entries.get(mp3_name)
+            if actual_cat and actual_cat != expected:
+                warnings_only.append(
+                    f"[ルール7-45 BGM カテゴリ棲み分け WARNING] {fname}: prompt md は category '{expected}' (ファイル名 prefix) を示すが、 BGM_LIST の {mp3_name} は category '{actual_cat}'\n"
+                    f"      → 野沢さん指示 2026-05-07 棲み分け規約: 章=ストーリー全体 / 派閥=派閥特性 / その他=シーン特化\n"
+                    f"      → BGM_LIST entry を category '{expected}' に修正、 もしくは prompt md ファイル名を 適切な prefix に rename"
+                )
+                found += 1
+    return found
+
+
+n7_45 = check_bgm_category_segregation()
+print(f"  ルール7-45 (BGM カテゴリ棲み分け): {n7_45}件 検査 [WARNING]")
+
+
 def check_box_sync_drift():
     """ルール7-39 (WARNING 2026-05-06 野沢さん指示「必要な自動チェックに追加してください」): prism-gacha-work の
     主要ファイル (prompt/ STORY/ script.js sw.js index.html) と Box 内 (~/Box/.../claude/prismaera/) との
