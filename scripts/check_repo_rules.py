@@ -53,6 +53,22 @@ if SCOPE not in VALID_SCOPES:
 print(f"🔍 check_repo_rules.py scope='{SCOPE}'")
 print()
 
+
+# scope ヘルパー: 「all モード or 該当 scope に含まれる」 場合のみ True
+def scope_match(*target_scopes):
+    if SCOPE == 'all':
+        return True
+    return SCOPE in target_scopes
+
+# scope → ルール分類 (野沢さん指示 2026-05-06、 場面別自動チェック分割):
+#   story:   章本文 / outline / 既存設定齟齬 (ルール 2, 3, 4, 7, 7-1, 7-2, 7-9, 8, 9)
+#   char:    POOL 追加 / 派閥 / 凸秘話 (ルール 7-11, 7-12, 7-18, 7-21, 7-22, 7-30, 7-31, 7-33)
+#   prompt:  画像 / BGM プロンプト (ルール 1, 7-13, 7-14, 7-16, 7-34, 7-35, 7-36, 7-40)
+#   deploy:  cache buster / version / Box sync (ルール 7-23, 7-24, 7-25, 7-26, 7-27, 7-28, 7-37, 7-39)
+#   release: 章公開直前 (ルール 7-19, 7-29, 7-32, 7-38)
+#   all:     全ルール (デフォルト、 月次総点検)
+
+
 violations = []
 
 
@@ -1636,16 +1652,18 @@ def check_main_version_bumped():
         )
     return 1
 
-n7_23 = check_dev_version_suffix()
-print(f"  ルール7-23 (dev version suffix bump): {n7_23}件 検査 [BLOCKER]")
-n7_24 = check_main_version_bumped()
-print(f"  ルール7-24 (main version bump 必須): {n7_24}件 検査 [BLOCKER]")
-n7_25 = check_dev_suffix_progression()
-print(f"  ルール7-25 (dev suffix 1段階 increment): {n7_25}件 検査 [BLOCKER]")
-n7_26 = check_cache_buster_format()
-print(f"  ルール7-26 (cache buster = version 完全同期): {n7_26}件 検査 [BLOCKER]")
-n7_28 = check_img_cache_version_sync()
-print(f"  ルール7-28 (IMG_CACHE_VERSION = version 完全同期): {n7_28}件 検査 [BLOCKER]")
+# ====== deploy scope: cache buster + version + Box sync ======
+if scope_match('deploy'):
+    n7_23 = check_dev_version_suffix()
+    print(f"  ルール7-23 (dev version suffix bump): {n7_23}件 検査 [BLOCKER]")
+    n7_24 = check_main_version_bumped()
+    print(f"  ルール7-24 (main version bump 必須): {n7_24}件 検査 [BLOCKER]")
+    n7_25 = check_dev_suffix_progression()
+    print(f"  ルール7-25 (dev suffix 1段階 increment): {n7_25}件 検査 [BLOCKER]")
+    n7_26 = check_cache_buster_format()
+    print(f"  ルール7-26 (cache buster = version 完全同期): {n7_26}件 検査 [BLOCKER]")
+    n7_28 = check_img_cache_version_sync()
+    print(f"  ルール7-28 (IMG_CACHE_VERSION = version 完全同期): {n7_28}件 検査 [BLOCKER]")
 n7_29 = check_location_images_exist()
 print(f"  ルール7-29 (LOCATION_CONFIG 画像 実在): {n7_29}件 検査 [BLOCKER]")
 n7_30 = check_relations_coverage()
@@ -1936,8 +1954,9 @@ n7_34 = check_illustration_position_consistency()
 print(f"  ルール7-34 (挿絵 同一シーン内 LEFT/RIGHT 整合): {n7_34}件 検査 [WARNING]")
 n7_35 = check_illustration_setting_reference()
 print(f"  ルール7-35 (同一シーン 背景→挿絵 参照添付): {n7_35}件 検査 [WARNING]")
-n7_37 = check_pool_length_leak()
-print(f"  ルール7-37 (POOL length 公開前章リーク): {n7_37}件 検出 [WARNING]")
+if scope_match('deploy'):
+    n7_37 = check_pool_length_leak()
+    print(f"  ルール7-37 (POOL length 公開前章リーク): {n7_37}件 検出 [WARNING]")
 
 
 def check_home_teaser_next2_date_hidden():
@@ -2044,8 +2063,9 @@ def check_box_sync_drift():
     return drift_count
 
 
-n7_39 = check_box_sync_drift()
-print(f"  ルール7-39 (Box sync 漏れ): {n7_39}件 検査 [WARNING]")
+if scope_match('deploy'):
+    n7_39 = check_box_sync_drift()
+    print(f"  ルール7-39 (Box sync 漏れ): {n7_39}件 検査 [WARNING]")
 
 
 def check_paired_char_ref_attach():
@@ -2127,8 +2147,9 @@ def check_main_no_suffix():
         )
     return 1
 
-n7_27 = check_main_no_suffix()
-print(f"  ルール7-27 (main で suffix なし 必須): {n7_27}件 検査 [BLOCKER]")
+if scope_match('deploy'):
+    n7_27 = check_main_no_suffix()
+    print(f"  ルール7-27 (main で suffix なし 必須): {n7_27}件 検査 [BLOCKER]")
 
 
 def check_admin_tier_max():
