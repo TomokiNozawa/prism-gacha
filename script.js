@@ -6924,7 +6924,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // version 完全同期 (野沢さん指示 2026-05-06): bump_version.py が自動で更新する。
 // 旧 date-suffix '20260504o' を 5/6 で見つけた事故を契機に version-based に統一。
-const IMG_CACHE_VERSION = '1.5.1';
+const IMG_CACHE_VERSION = '1.5.1a';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -7991,21 +7991,21 @@ $("#story-stage").addEventListener('click', e => {
 // category: 'chapter' (メイン+各章) / 'faction' (派閥) / 'other' (戦闘等)
 // 野沢さん指示 2026-05-06: BGM panel ポップアップで タブ分け表示するため category 明示
 const BGM_LIST = [
-  { id: 'dawn',    label: 'メインテーマ',     desc: 'Prism Dawn (夜明けの希望)',          category: 'chapter', duration: '2:49', file: '/assets/bgm/home.mp3' },
-  { id: 'watch',   label: '第1章テーマ',      desc: 'Prism Watch (三柱の夜警)',           category: 'chapter', duration: '2:17', file: '/assets/bgm/prism-watch.mp3' },
-  { id: 'tide',    label: '第2章テーマ',      desc: 'Prism Tide (虹の潮)',                 category: 'chapter', duration: '2:44', file: '/assets/bgm/prism-tide.mp3' },
-  { id: 'sands',   label: '第3章テーマ',      desc: 'Prism Sands (砂塵の鼓動)',           category: 'chapter', duration: '3:02', file: '/assets/bgm/prism-sands.mp3' },
-  { id: 'rift',    label: '戦闘テーマ',        desc: 'Prismatic Rift Overture (虹裂の序曲)', category: 'other',   duration: '3:08', file: '/assets/bgm/Prismatic Rift Overture.mp3' },
-  { id: 'church',  label: '白焔教会テーマ',    desc: 'Prism Sanctus (白焔の祈り)',         category: 'faction', duration: '3:09', file: '/assets/bgm/prism-church.mp3' },
-  { id: 'aquasis', label: 'アクアシステーマ',  desc: 'Prism Abyss (深海の宮)',             category: 'faction', duration: '2:59', file: '/assets/bgm/prism-aquasis.mp3' },
-  { id: 'crimson', label: '紅玉海賊団テーマ',  desc: 'Prism Sailborn (紅潮の風)',          category: 'faction', duration: '2:51', file: '/assets/bgm/prism-crimson.mp3' },
-  { id: 'sahar',   label: 'サハールテーマ',    desc: 'Prism Sahar (古龍の風)',             category: 'faction', duration: '2:48', file: '/assets/bgm/prism-sahar.mp3' },
+  { id: 'dawn',    label: 'メインテーマ',     desc: 'Prism Dawn (夜明けの希望)',          category: 'chapter', duration: '2:49', file: '/media/audio/bgm/home.mp3' },
+  { id: 'watch',   label: '第1章テーマ',      desc: 'Prism Watch (三柱の夜警)',           category: 'chapter', duration: '2:17', file: '/media/audio/bgm/prism-watch.mp3' },
+  { id: 'tide',    label: '第2章テーマ',      desc: 'Prism Tide (虹の潮)',                 category: 'chapter', duration: '2:44', file: '/media/audio/bgm/prism-tide.mp3' },
+  { id: 'sands',   label: '第3章テーマ',      desc: 'Prism Sands (砂塵の鼓動)',           category: 'chapter', duration: '3:02', file: '/media/audio/bgm/prism-sands.mp3' },
+  { id: 'rift',    label: '戦闘テーマ',        desc: 'Prismatic Rift Overture (虹裂の序曲)', category: 'other',   duration: '3:08', file: '/media/audio/bgm/Prismatic Rift Overture.mp3' },
+  { id: 'church',  label: '白焔教会テーマ',    desc: 'Prism Sanctus (白焔の祈り)',         category: 'faction', duration: '3:09', file: '/media/audio/bgm/prism-church.mp3' },
+  { id: 'aquasis', label: 'アクアシステーマ',  desc: 'Prism Abyss (深海の宮)',             category: 'faction', duration: '2:59', file: '/media/audio/bgm/prism-aquasis.mp3' },
+  { id: 'crimson', label: '紅玉海賊団テーマ',  desc: 'Prism Sailborn (紅潮の風)',          category: 'faction', duration: '2:51', file: '/media/audio/bgm/prism-crimson.mp3' },
+  { id: 'sahar',   label: 'サハールテーマ',    desc: 'Prism Sahar (古龍の風)',             category: 'faction', duration: '2:48', file: '/media/audio/bgm/prism-sahar.mp3' },
   // ===== S1C4 追加 (3曲: 章テーマ + 派閥BGM x2) =====
-  { id: 'frost',    label: '第4章テーマ',      desc: 'Prism Frost (凍空の鼓動)',           category: 'chapter', duration: '2:53', file: '/assets/bgm/prism-frost.mp3' },
-  { id: 'niflheim', label: 'ニーヴルテーマ',   desc: 'Prism Niflheim (氷霊の歌)',          category: 'faction', duration: '3:09', file: '/assets/bgm/prism-niflheim.mp3' },
-  { id: 'aether',   label: 'ゼノニアテーマ',   desc: 'Prism Aether (蒸気の鼓動)',          category: 'faction', duration: '3:08', file: '/assets/bgm/prism-aether.mp3' },
+  { id: 'frost',    label: '第4章テーマ',      desc: 'Prism Frost (凍空の鼓動)',           category: 'chapter', duration: '2:53', file: '/media/audio/bgm/prism-frost.mp3' },
+  { id: 'niflheim', label: 'ニーヴルテーマ',   desc: 'Prism Niflheim (氷霊の歌)',          category: 'faction', duration: '3:09', file: '/media/audio/bgm/prism-niflheim.mp3' },
+  { id: 'aether',   label: 'ゼノニアテーマ',   desc: 'Prism Aether (蒸気の鼓動)',          category: 'faction', duration: '3:08', file: '/media/audio/bgm/prism-aether.mp3' },
   // ===== S1C5 追加 (1曲: 章テーマ、 派閥 BGM は 5キャラ閾値到達後に追加予定) =====
-  { id: 'blackmoon', label: '第5章テーマ',     desc: 'Prism Blackmoon (黒月の予兆)',       category: 'chapter', duration: '3:07', file: '/assets/bgm/prism-blackmoon.mp3' },
+  { id: 'blackmoon', label: '第5章テーマ',     desc: 'Prism Blackmoon (黒月の予兆)',       category: 'chapter', duration: '3:07', file: '/media/audio/bgm/prism-blackmoon.mp3' },
 ];
 const bgmAudio = document.getElementById("bgm-home");
 
