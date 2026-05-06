@@ -2156,6 +2156,56 @@ n7_43 = check_chapter_combos_coverage()
 print(f"  ルール7-43 (章 combo 欠落): {n7_43}件 検査 [WARNING]")
 
 
+def check_kuten_density():
+    """ルール7-44 (WARNING、 2026-05-07 野沢さん指示「読点が多い問題」):
+    章本文の **読点(、)/句点(。) 比率** が 1.9 を超えると WARNING。
+
+    既存章の読点比 (2026-05-07 計測):
+      s1c1=1.42 / s1c2=1.51 / s1c3=1.47 / s1c4=1.18 / s1c5=1.64 / s1c6=2.70 ★突出
+
+    閾値 1.9 = 既存章の最大値 1.64 + マージン 0.26 (s1c5 までなら通り、 s1c6 で 検出される)。
+    将来的に 1.7 以下に統一できれば閾値を下げる (BLOCKER 化検討)。
+
+    検査対象: content/story/s1cN.md (s1c0 / outline 等は除外)
+    本文行のみ (h2/h3 ヘッダ / blockquote / コメント / 区切り行 を除外)。
+    """
+    story_dir = ROOT / 'content' / 'story'
+    if not story_dir.exists():
+        return 0
+    found = 0
+    for path in sorted(story_dir.glob('s1c*.md')):
+        if path.stem == 's1c0' or 'outline' in path.stem:
+            continue
+        text = path.read_text(encoding='utf-8')
+        body_lines = [
+            l for l in text.split('\n')
+            if l.strip()
+            and not l.startswith('#')
+            and not l.startswith('>')
+            and not l.startswith('---')
+            and not l.startswith('[')
+        ]
+        body = '\n'.join(body_lines)
+        kuten = body.count('、')
+        maru = body.count('。')
+        if maru < 50:
+            continue  # 短すぎる章はスキップ
+        ratio = kuten / maru
+        if ratio > 1.9:
+            warnings_only.append(
+                f"[ルール7-44 読点密度高 WARNING] {path.name}: 読点/句点比 = {ratio:.2f} (、 {kuten}個 / 。 {maru}個)\n"
+                f"      → 閾値 1.9 超過。 既存章は 1.18-1.64 の範囲、 1.7 程度を目標に読点削減推奨\n"
+                f"      → 野沢さん指示 2026-05-07「読点が多い問題」。 可読性のため過剰な読点を削減\n"
+                f"      → 文体パターン例: 「私は、 ○○した」 → 「私は○○した」 (主語直後の不要な読点)"
+            )
+            found += 1
+    return found
+
+
+n7_44 = check_kuten_density()
+print(f"  ルール7-44 (読点密度高): {n7_44}件 検査 [WARNING]")
+
+
 def check_box_sync_drift():
     """ルール7-39 (WARNING 2026-05-06 野沢さん指示「必要な自動チェックに追加してください」): prism-gacha-work の
     主要ファイル (prompt/ STORY/ script.js sw.js index.html) と Box 内 (~/Box/.../claude/prismaera/) との
