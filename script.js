@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.5.1v — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.5.1w — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -7184,7 +7184,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
   's1c5': [
     // 第5章「黒月の予兆」 挿絵 (16:9横長、 全 9枚 = 既存5 + 新規4)
     // 第一幕 1-1: 銀霜王宮 月光謁見 (シオン+ノヴァ、 仮面騎士の古い作法)
-    { scene: '1-1',  marker: '俺は立ち上がり、 仮面の縁に指を一度添えて',           position: 'after',  img: '/images/locations/s1c5/thumb/silver_throne_oath_thumb.webp' },
+    { scene: '1-1',  marker: '俺は立ち上がり仮面の縁に指を一度添えて',             position: 'after',  img: '/images/locations/s1c5/thumb/silver_throne_oath_thumb.webp' },
     // 第二幕 2-1: 月喰いの森・取引 (シオン+ノクトリア+ガルヴィン、 三者対峙)
     { scene: '2-1',  marker: 'ガルヴィンが静かに言った',                              position: 'after',  img: '/images/locations/s1c5/thumb/black_moon_grove_meeting_thumb.webp' },
     // 第二幕 2-2: 王族暗殺未遂 (シオン+刺客、 五つ目の誓いの動機)
@@ -7200,7 +7200,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
     // 第四幕 4-1: 山場ピーク 手のひらを合わせる瞬間 (シ・ロエン左/シオン右、 七色の原虹)
     { scene: '4-1',  marker: '銀の手のひらと、 黒の手のひらが',                       position: 'after',  img: '/images/locations/s1c5/thumb/twin_palms_rainbow_thumb.webp' },
     // 第四幕 4-2: 別れの朝 (シオン+シ・ロエン、 雪原の二筋の足跡)
-    { scene: '4-2',  marker: '雪原の遠く、 朝霧の向こうに、 シ・ロエンと',             position: 'after',  img: '/images/locations/s1c5/thumb/shi_loen_departure_thumb.webp' },
+    { scene: '4-2',  marker: '雪原の遠く朝霧の向こうに、 シ・ロエンと',                 position: 'after',  img: '/images/locations/s1c5/thumb/shi_loen_departure_thumb.webp' },
   ],
   's1c6': [
     // 第6章「七座満つる」 挿絵 (16:9横長、 全 5枚 = 1-2/2-1/3-2/4-1/4-2)
@@ -7217,7 +7217,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
   ],
   's1c3': [
     // 1-2 リアム誓い、 三月の約束 (主従の絆 + 旅の制約成立)
-    { scene: '1-2',  marker: '不器用だけれど、 真っ直ぐな、 リアムらしい言葉だった', position: 'after',  img: '/images/locations/s1c3/thumb/liam_oath_thumb.webp' },
+    { scene: '1-2',  marker: '不器用だけれど真っ直ぐな、 リアムらしい言葉だった',   position: 'after',  img: '/images/locations/s1c3/thumb/liam_oath_thumb.webp' },
     // 2-1 ヴィル+アーシャ宿場町出会い (cutin から挿絵に格上げ)
     { scene: '2-1',  marker: 'アーシャと名乗ったその女',                  position: 'after',  img: '/images/locations/s1c3/thumb/asha_meeting_thumb.webp' },
     // 2-2 砂塵の襲撃: サハナ初登場、 双風刀シャマールで影喰いを斬る山場 (本文 bold削除に伴い marker 修正)
@@ -7234,7 +7234,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // version 完全同期 (野沢さん指示 2026-05-06): bump_version.py が自動で更新する。
 // 旧 date-suffix '20260504o' を 5/6 で見つけた事故を契機に version-based に統一。
-const IMG_CACHE_VERSION = '1.5.1v';
+const IMG_CACHE_VERSION = '1.5.1w';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
