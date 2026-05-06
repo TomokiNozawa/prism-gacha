@@ -7210,7 +7210,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // version 完全同期 (野沢さん指示 2026-05-06): bump_version.py が自動で更新する。
 // 旧 date-suffix '20260504o' を 5/6 で見つけた事故を契機に version-based に統一。
-const IMG_CACHE_VERSION = '1.5.1l';
+const IMG_CACHE_VERSION = '1.5.1m';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -8293,7 +8293,7 @@ const BGM_LIST = [
   // ===== S1C5 追加 (1曲: 章テーマ、 派閥 BGM は 5キャラ閾値到達後に追加予定) =====
   { id: 'blackmoon', label: '第5章テーマ',     desc: 'Prism Blackmoon (黒月の予兆)',       category: 'chapter', duration: '3:07', file: '/media/audio/bgm/prism-blackmoon.mp3' },
   // ===== S1C6 追加 (2曲: 章テーマ + 派閥 BGM、 巫女連邦リーリエ ≥5キャラで派閥 BGM 必須) =====
-  { id: 'promise',   label: '第6章テーマ',     desc: 'Prism Promise (七色の約束)',         category: 'chapter', duration: '3:00', file: '/media/audio/bgm/prism-promise.mp3' },
+  { id: 'promise',   label: '第6章テーマ',     desc: 'Prism Promise (七色の約束)',         category: 'chapter', duration: '3:19', file: '/media/audio/bgm/prism-promise.mp3' },
   { id: 'shrine',    label: '巫女連邦テーマ',  desc: 'Prism Shrine (千年祭祀の温度)',      category: 'faction', duration: '2:30', file: '/media/audio/bgm/prism-shrine.mp3' },
 ];
 const bgmAudio = document.getElementById("bgm-home");

@@ -169,9 +169,11 @@
       ] }
   ];
 
-  // ===== 期間限定: 2026-05-01 00:00 JST で終了 =====
+  // ===== 期間限定: 2026-05-01 00:00 JST で終了 (合宿ガチャ機能 完全撤廃 2026-05-06) =====
   const GASSHUKU_END_AT = new Date('2026-05-01T00:00:00+09:00').getTime();
-  function isGasshukuActive() { return Date.now() < GASSHUKU_END_AT; }
+  // 合宿ガチャ機能は 2026-05-06 完全撤廃。 isGasshukuActive() は強制 false で固定。
+  // 残置仕様: 4/30 23:59 までにアカウント作成済のアカウントだけ図鑑「期間限定」 タブで合宿キャラを確認可能
+  function isGasshukuActive() { return false; }
   function gasshukuTimeLeft() {
     const ms = GASSHUKU_END_AT - Date.now();
     if (ms <= 0) return null;
@@ -203,32 +205,27 @@
     }
   }
   function updateGasshukuLimitedUI() {
-    // visibility 判定を最初に: 非表示なら合宿エリアを完全に隠して終了
-    // 2026-05-01〜: 期限切れ (active=false) なら 04/30前アカでもホームから完全に消す
-    //   (ホーム = 合宿は終わったクリーンな表示、 図鑑モーダル「期間限定」 タブからのみ閲覧可)
+    // 合宿ガチャ機能 完全撤廃 (2026-05-06):
+    //   - isGasshukuActive() 強制 false = ホーム CTA 常に非表示 (ガチャ実行不可)
+    //   - isGasshukuVisible() (4/30 23:59 前作成アカ判定) のみで 図鑑タブ + ギャラリー表示判定
+    //   - 残置仕様: 既存アカウントの方への配慮、 図鑑「期間限定」 タブで 合宿キャラ確認のみ可能
     const visible = isGasshukuVisible();
-    const active = isGasshukuActive();
     const ctaBlock = document.querySelector('.gasshuku-cta-block');
     const galleryHead = document.querySelector('#gasshuku-gallery-head, .gasshuku-gallery-heading');
     const galleryGrid = document.getElementById('gasshuku-gallery-grid');
     const gallerySection = document.querySelector('.gasshuku-gallery-section');
-    if (!visible || !active) {
-      if (ctaBlock) ctaBlock.style.display = 'none';
-      if (galleryHead) galleryHead.style.display = 'none';
-      if (galleryGrid) galleryGrid.style.display = 'none';
-      if (gallerySection) gallerySection.style.display = 'none';
-      // 期間限定バッジも消す
+    // ホーム CTA は完全撤廃 (常に非表示)
+    if (ctaBlock) ctaBlock.style.display = 'none';
+    // 図鑑タブ + ギャラリーは visible (4/30前アカ) のみ表示
+    if (galleryHead) galleryHead.style.display = visible ? '' : 'none';
+    if (galleryGrid) galleryGrid.style.display = visible ? '' : 'none';
+    if (gallerySection) gallerySection.style.display = visible ? '' : 'none';
+    if (typeof window.updateGalleryTabsVisibility === 'function') window.updateGalleryTabsVisibility();
+    if (!visible) {
       const oldBadge = document.getElementById('gasshuku-period-badge');
       if (oldBadge) oldBadge.remove();
-      // 図鑑モーダル内の期間限定タブの可視性も更新 (script.js 側関数)
-      if (typeof window.updateGalleryTabsVisibility === 'function') window.updateGalleryTabsVisibility();
       return;
     }
-    // visible 復帰時: display を元に戻す (以前 hide していた場合)
-    if (ctaBlock) ctaBlock.style.display = '';
-    if (galleryHead) galleryHead.style.display = '';
-    if (galleryGrid) galleryGrid.style.display = '';
-    if (typeof window.updateGalleryTabsVisibility === 'function') window.updateGalleryTabsVisibility();
 
     const timeLeft = gasshukuTimeLeft();
     // CTAブロック サブ表示
