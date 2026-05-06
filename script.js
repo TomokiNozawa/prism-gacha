@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.5.1y — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.5.1z — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -7046,7 +7046,7 @@ const STORY_CUTIN_CONFIG = {
   's1c3': [
     // 2-1 アーシャ初登場 → asha_meeting.png 挿絵で代替 (cutin より絵が強い)、 cutin削除
     // 3-1 ファラー初登場: 「幼子が現れた」 の直後に幼子姿の千年級存在の印象を強調
-    { scene: '3-1', charName: '古龍の語り部 ファラー',   marker: '幼子が、 現れた' },
+    { scene: '3-1', charName: '古龍の語り部 ファラー',   marker: '幼子が、現れた' },
     // サハナ初登場 (2-2) は sand_shadeova_battle 挿絵で代替、 cutin不要
   ],
 };
@@ -7162,24 +7162,24 @@ const STORY_LOCATION_INLINE_CONFIG = {
   's1c4': [
     // 第4章 挿絵 (16:9横、 全 8枚)
     // 第一幕 1-1: 翡翠の玉座 — 章開幕、 アルテミス + 双大剣『陰陽』
-    { scene: '1-1',  marker: '玉座の脇に、 双大剣『陰陽』 が静かに立てかけられていた', position: 'after',  img: '/images/locations/s1c4/thumb/jade_throne_thumb.webp' },
+    { scene: '1-1',  marker: '玉座の脇に、双大剣『陰陽』が静かに立てかけられていた', position: 'after',  img: '/images/locations/s1c4/thumb/jade_throne_thumb.webp' },
     // 第一幕 1-3: 雪原村でアルク&ミウ (R2人 デビュー) が龍帝隊列に駆け寄る
-    { scene: '1-3',  marker: '銀髪の少年が二人、 雪玉を投げ合って遊んでいた',    position: 'after',  img: '/images/locations/s1c4/thumb/snowfield_villagers_thumb.webp' },
+    { scene: '1-3',  marker: '銀髪の少年が二人、雪玉を投げ合って遊んでいた',    position: 'after',  img: '/images/locations/s1c4/thumb/snowfield_villagers_thumb.webp' },
     // 第二幕 2-1 出会い: アルテミスとグレイルが胸前で手を組み合わせる「覇者同士の挨拶」 (章テーマの入口)
     { scene: '2-1',  marker: '互いの胸前で手を組み合わせた',                       position: 'after',  img: '/images/locations/s1c4/thumb/artemis_greyle_first_meeting_thumb.webp' },
     // 第二幕 2-2: 氷帝グレイル vs 龍帝アルテミス 一騎打ち
     // (frost_swordmaster_sparring 挿絵は意味不明として削除 — 野沢さん指摘 2026-05-03、 ファイル自体は将来再利用に備えて保持)
-    { scene: '2-2',  marker: '五合目で、 私は双剣を交差させた',                   position: 'before', img: '/images/locations/s1c4/thumb/duel_ice_vs_dragon_thumb.webp' },
+    { scene: '2-2',  marker: '五合目で、私は双剣を交差させた',                   position: 'before', img: '/images/locations/s1c4/thumb/duel_ice_vs_dragon_thumb.webp' },
     // 第二幕 2-3: アルテミス&ヒノオウ 千年前の回想 (戦友が並ぶ夜)
-    { scene: '2-3',  marker: 'ふと、 古い戦場の記憶が、 不意に蘇った',           position: 'after',  img: '/images/locations/s1c4/thumb/flashback_artemis_hinoo_thumb.webp' },
+    { scene: '2-3',  marker: 'ふと、古い戦場の記憶が、不意に蘇った',           position: 'after',  img: '/images/locations/s1c4/thumb/flashback_artemis_hinoo_thumb.webp' },
     // 第三幕 3-1: 空挺城ゼノニア 三国会談シーン (ヴァーレ女皇)
-    { scene: '3-1',  marker: 'ヴァーレが、 静かに口を開いた',                     position: 'before', img: '/images/locations/s1c4/thumb/vaire_diplomacy_thumb.webp' },
+    { scene: '3-1',  marker: 'ヴァーレが、静かに口を開いた',                     position: 'before', img: '/images/locations/s1c4/thumb/vaire_diplomacy_thumb.webp' },
     // 第三幕 3-1: ゼノニア整備工房の生活感 (ハーニア親方+ベル整備士+ピット見習い)
     { scene: '3-1',  marker: '整備工房から元気な声が響いた',                       position: 'after',  img: '/images/locations/s1c4/thumb/zenonia_workshop_thumb.webp' },
     // 第三幕 3-2: 凍り影喰い襲撃 大規模戦闘 (戦友の証明、 希少種ビジュアル定着)
-    { scene: '3-2',  marker: '私たちは、 何も言わずに背を合わせた',                position: 'after',  img: '/images/locations/s1c4/thumb/ice_shadeova_battle_thumb.webp' },
+    { scene: '3-2',  marker: '私たちは、何も言わずに背を合わせた',                position: 'after',  img: '/images/locations/s1c4/thumb/ice_shadeova_battle_thumb.webp' },
     // 第四幕 4-1: 観測者三柱 ユーリス予言シーン (氷の小神殿)
-    { scene: '4-1',  marker: '氷の小さな神殿の中央に、 ユーリスは立っていた',     position: 'after',  img: '/images/locations/s1c4/thumb/frost_oracle_prophecy_thumb.webp' },
+    { scene: '4-1',  marker: '氷の小さな神殿の中央に、ユーリスは立っていた',     position: 'after',  img: '/images/locations/s1c4/thumb/frost_oracle_prophecy_thumb.webp' },
   ],
   's1c5': [
     // 第5章「黒月の予兆」 挿絵 (16:9横長、 全 9枚 = 既存5 + 新規4)
@@ -7190,51 +7190,51 @@ const STORY_LOCATION_INLINE_CONFIG = {
     // 第二幕 2-2: 王族暗殺未遂 (シオン+刺客、 五つ目の誓いの動機)
     { scene: '2-2',  marker: '俺のメイスが',                                          position: 'after',  img: '/images/locations/s1c5/thumb/royal_assassination_flashback_thumb.webp' },
     // 第二幕 2-3: 教会の塔・シオンとラナス兄弟弟子の沈黙の対話
-    { scene: '2-3',  marker: '銀霜の街の灯火を、 見下ろしていた',                    position: 'after',  img: '/images/locations/s1c5/thumb/church_tower_reunion_thumb.webp' },
+    { scene: '2-3',  marker: '銀霜の街の灯火を、見下ろしていた',                    position: 'after',  img: '/images/locations/s1c5/thumb/church_tower_reunion_thumb.webp' },
     // 第三幕 3-2: 影織りの工房 (リオラエル+ルナリア+シオン、 章テーマ視覚化)
-    { scene: '3-2',  marker: '銀の糸と、 黒の糸が、 完全に等価に、 交差していた',     position: 'after',  img: '/images/locations/s1c5/thumb/shadow_loom_workshop_thumb.webp' },
+    { scene: '3-2',  marker: '銀の糸と、黒の糸が、完全に等価に、交差していた',     position: 'after',  img: '/images/locations/s1c5/thumb/shadow_loom_workshop_thumb.webp' },
     // 第四幕 4-1: 仮面を外す瞬間 (シオン素顔露出、 立会人三人沈黙)
-    { scene: '4-1',  marker: '月鏡に、 俺の素顔が映った',                            position: 'after',  img: '/images/locations/s1c5/thumb/mask_unveil_moment_thumb.webp' },
+    { scene: '4-1',  marker: '月鏡に、俺の素顔が映った',                            position: 'after',  img: '/images/locations/s1c5/thumb/mask_unveil_moment_thumb.webp' },
     // 第四幕 4-1: 山場 分離の儀式 (シオン+シ・ロエン+ラナス+ルミナ+アスター、 二重月夜)
     { scene: '4-1',  marker: '月鏡の表面が',                                          position: 'before', img: '/images/locations/s1c5/thumb/mask_separation_ritual_thumb.webp' },
     // 第四幕 4-1: 山場ピーク 手のひらを合わせる瞬間 (シ・ロエン左/シオン右、 七色の原虹)
-    { scene: '4-1',  marker: '銀の手のひらと、 黒の手のひらが',                       position: 'after',  img: '/images/locations/s1c5/thumb/twin_palms_rainbow_thumb.webp' },
+    { scene: '4-1',  marker: '銀の手のひらと、黒の手のひらが',                       position: 'after',  img: '/images/locations/s1c5/thumb/twin_palms_rainbow_thumb.webp' },
     // 第四幕 4-2: 別れの朝 (シオン+シ・ロエン、 雪原の二筋の足跡)
-    { scene: '4-2',  marker: '雪原の遠く朝霧の向こうに、 シ・ロエンと',                 position: 'after',  img: '/images/locations/s1c5/thumb/shi_loen_departure_thumb.webp' },
+    { scene: '4-2',  marker: '雪原の遠く朝霧の向こうに、シ・ロエンと',                 position: 'after',  img: '/images/locations/s1c5/thumb/shi_loen_departure_thumb.webp' },
   ],
   's1c6': [
     // 第6章「七座満つる」 挿絵 (16:9横長、 全 5枚 = 1-2/2-1/3-2/4-1/4-2)
     // 第一幕 1-2: セラフィエル単独地上降臨、 イリスとの対面
-    { scene: '1-2',  marker: '街路の石畳に、 静かに降り立った',                       position: 'after',  img: '/images/locations/s1c6/thumb/seraph_descent_to_iris_thumb.webp' },
+    { scene: '1-2',  marker: '街路の石畳に、静かに降り立った',                       position: 'after',  img: '/images/locations/s1c6/thumb/seraph_descent_to_iris_thumb.webp' },
     // 第二幕 2-1: 千年ぶりの再会 (セラフィエル+ヴィオレナ、 中央神殿聖堂)
-    { scene: '2-1',  marker: 'ヴィオレナの声は、 千年前と全く同じだった',             position: 'after',  img: '/images/locations/s1c6/thumb/shrine_oracle_reunion_thumb.webp' },
+    { scene: '2-1',  marker: 'ヴィオレナの声は、千年前と全く同じだった',             position: 'after',  img: '/images/locations/s1c6/thumb/shrine_oracle_reunion_thumb.webp' },
     // 第三幕 3-2: 「最初の羽」 回想 (プリズマがセラフィエルを生んだ古代の場面)
-    { scene: '3-2',  marker: '私の六枚の翼が、 一つずつ、 ほどけていった',             position: 'after',  img: '/images/locations/s1c6/thumb/seraph_first_wing_memory_thumb.webp' },
+    { scene: '3-2',  marker: '私の六枚の翼が、一つずつ、ほどけていった',             position: 'after',  img: '/images/locations/s1c6/thumb/seraph_first_wing_memory_thumb.webp' },
     // 第四幕 4-1: 山場 七座満つる儀式宣言 (4人初集合、 第四席着座)
-    { scene: '4-1',  marker: '観測者七座、 第四席『約束』 に、 巫女連邦のイリスが、 座します', position: 'after',  img: '/images/locations/s1c6/thumb/seven_seat_ritual_thumb.webp' },
+    { scene: '4-1',  marker: '観測者七座、第四席『約束』に、巫女連邦のイリスが、座します', position: 'after',  img: '/images/locations/s1c6/thumb/seven_seat_ritual_thumb.webp' },
     // 第四幕 4-2: 別れの朝 (千年待った母ヴィオレナの最も静かな別れの作法)
-    { scene: '4-2',  marker: 'イリスの肩に、 一度だけ、 手を置いた',                  position: 'after',  img: '/images/locations/s1c6/thumb/iris_departure_morning_thumb.webp' },
+    { scene: '4-2',  marker: 'イリスの肩に、一度だけ、手を置いた',                  position: 'after',  img: '/images/locations/s1c6/thumb/iris_departure_morning_thumb.webp' },
   ],
   's1c3': [
     // 1-2 リアム誓い、 三月の約束 (主従の絆 + 旅の制約成立)
-    { scene: '1-2',  marker: '不器用だけれど真っ直ぐな、 リアムらしい言葉だった',   position: 'after',  img: '/images/locations/s1c3/thumb/liam_oath_thumb.webp' },
+    { scene: '1-2',  marker: '不器用だけれど真っ直ぐな、リアムらしい言葉だった',   position: 'after',  img: '/images/locations/s1c3/thumb/liam_oath_thumb.webp' },
     // 2-1 ヴィル+アーシャ宿場町出会い (cutin から挿絵に格上げ)
     { scene: '2-1',  marker: 'アーシャと名乗ったその女',                  position: 'after',  img: '/images/locations/s1c3/thumb/asha_meeting_thumb.webp' },
     // 2-2 砂塵の襲撃: サハナ初登場、 双風刀シャマールで影喰いを斬る山場 (本文 bold削除に伴い marker 修正)
-    { scene: '2-2',  marker: '少女は、 風を纏って跳んだ',                position: 'after',  img: '/images/locations/s1c3/thumb/sand_shadeova_battle_thumb.webp' },
+    { scene: '2-2',  marker: '少女は、風を纏って跳んだ',                position: 'after',  img: '/images/locations/s1c3/thumb/sand_shadeova_battle_thumb.webp' },
     // 3-2 影喰いの大波: ヴィル+サハナ+グラン+部族戦士たちの共闘
-    { scene: '3-2',  marker: '部族の戦士たちが、 一斉に駆けた',         position: 'after',  img: '/images/locations/s1c3/thumb/tribe_battle_thumb.webp' },
+    { scene: '3-2',  marker: '部族の戦士たちが、一斉に駆けた',         position: 'after',  img: '/images/locations/s1c3/thumb/tribe_battle_thumb.webp' },
     // 4-1 古龍王の予兆: ファラーが砂を風に放ち、 巨大な古龍王のシルエットが揺らぐ (S2 伏線)
-    { scene: '4-1',  marker: 'ファラーは砂を一握り掬い、 風に放った',   position: 'after',  img: '/images/locations/s1c3/thumb/lost_dragon_king_omen_thumb.webp' },
+    { scene: '4-1',  marker: 'ファラーは砂を一握り掬い、風に放った',   position: 'after',  img: '/images/locations/s1c3/thumb/lost_dragon_king_omen_thumb.webp' },
     // 4-2 別れの朝: ヴィル+サハナが紫水晶を分け合う最強エモシーン (七色光、 七色絹紐、 「これで二人で一つ」)
-    { scene: '4-2',  marker: '朝日の中で、 紫水晶が、 七色に輝いた',     position: 'after',  img: '/images/locations/s1c3/thumb/farewell_thumb.webp' },
+    { scene: '4-2',  marker: '朝日の中で、紫水晶が、七色に輝いた',     position: 'after',  img: '/images/locations/s1c3/thumb/farewell_thumb.webp' },
   ],
 };
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // version 完全同期 (野沢さん指示 2026-05-06): bump_version.py が自動で更新する。
 // 旧 date-suffix '20260504o' を 5/6 で見つけた事故を契機に version-based に統一。
-const IMG_CACHE_VERSION = '1.5.1y';
+const IMG_CACHE_VERSION = '1.5.1z';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
