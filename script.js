@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.5.1s — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.5.1t — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -7099,6 +7099,17 @@ const LOCATION_CONFIG = {
     '3-3':         { img: '/images/locations/s1c5/thumb/moon_shrine_altar_thumb.webp' },         // 3-3 雪月神殿の祭壇
     'エピローグ — 観測者三柱、 七座を仰ぐ': { img: '/images/locations/s1c5/thumb/observer_west_close_thumb.webp' },  // エピローグ scene.title 完全一致
   },
+  's1c6': {
+    // 第6章「七座満つる」 背景 (3:4縦長 全 8枚 = プロローグ + 1-1 + 1-2 + 2-1〜2-4 + エピローグ)
+    'プロローグ':  { img: '/images/locations/s1c6/thumb/observer_east_realm_thumb.webp' },         // プロローグ 観測者三柱が東の四つ目の灯火を観測
+    '1-1':         { img: '/images/locations/s1c6/thumb/moonlight_palace_hall_thumb.webp' },       // 1-1 月影宮 常夜の卓 (天空界・三柱の集い)
+    '1-2':         { img: '/images/locations/s1c6/thumb/shrine_lantern_festival_thumb.webp' },     // 1-2 巫女連邦 灯篭祭の街並み (セラフィエル降臨)
+    '2-1':         { img: '/images/locations/s1c6/thumb/shrine_central_temple_thumb.webp' },       // 2-1 中央神殿の聖堂 (千年ぶりの再会)
+    '2-2':         { img: '/images/locations/s1c6/thumb/shrine_chronicle_hall_thumb.webp' },       // 2-2 千年伝承の間 (古文書+壁画)
+    '2-3':         { img: '/images/locations/s1c6/thumb/shrine_prayer_tower_thumb.webp' },         // 2-3 月夜の祈祷の塔 (イリス告白)
+    '2-4':         { img: '/images/locations/s1c6/thumb/shrine_extinguished_village_thumb.webp' }, // 2-4 灯篭が消えた村跡 (千年前の悲劇)
+    'エピローグ — 七座の四人と、 西の黒月': { img: '/images/locations/s1c6/thumb/observer_east_with_iris_thumb.webp' },  // エピローグ scene.title 完全一致
+  },
   's1c3': {
     // 各シーンの「印象深い1場面」 を 3:4 縦長背景画像として配置
     '1-1': { img: '/images/locations/s1c3/thumb/purple_dragon_palace_thumb.webp' },     // 玉座の間 (父王とヴィルの対話)
@@ -7191,6 +7202,19 @@ const STORY_LOCATION_INLINE_CONFIG = {
     // 第四幕 4-2: 別れの朝 (シオン+シ・ロエン、 雪原の二筋の足跡)
     { scene: '4-2',  marker: '雪原の遠く、 朝霧の向こうに、 シ・ロエンと',             position: 'after',  img: '/images/locations/s1c5/thumb/shi_loen_departure_thumb.webp' },
   ],
+  's1c6': [
+    // 第6章「七座満つる」 挿絵 (16:9横長、 全 5枚 = 1-2/2-1/3-2/4-1/4-2)
+    // 第一幕 1-2: セラフィエル単独地上降臨、 イリスとの対面
+    { scene: '1-2',  marker: '街路の石畳に、 静かに降り立った',                       position: 'after',  img: '/images/locations/s1c6/thumb/seraph_descent_to_iris_thumb.webp' },
+    // 第二幕 2-1: 千年ぶりの再会 (セラフィエル+ヴィオレナ、 中央神殿聖堂)
+    { scene: '2-1',  marker: 'ヴィオレナの声は、 千年前と、 全く同じだった',           position: 'after',  img: '/images/locations/s1c6/thumb/shrine_oracle_reunion_thumb.webp' },
+    // 第三幕 3-2: 「最初の羽」 回想 (プリズマがセラフィエルを生んだ古代の場面)
+    { scene: '3-2',  marker: '私の六枚の翼が、 一つずつ、 ほどけていった',             position: 'after',  img: '/images/locations/s1c6/thumb/seraph_first_wing_memory_thumb.webp' },
+    // 第四幕 4-1: 山場 七座満つる儀式宣言 (4人初集合、 第四席着座)
+    { scene: '4-1',  marker: '観測者七座、 第四席『約束』 に、 巫女連邦のイリスが、 座します', position: 'after',  img: '/images/locations/s1c6/thumb/seven_seat_ritual_thumb.webp' },
+    // 第四幕 4-2: 別れの朝 (千年待った母ヴィオレナの最も静かな別れの作法)
+    { scene: '4-2',  marker: 'イリスの肩に、 一度だけ、 手を、 置いた',                position: 'after',  img: '/images/locations/s1c6/thumb/iris_departure_morning_thumb.webp' },
+  ],
   's1c3': [
     // 1-2 リアム誓い、 三月の約束 (主従の絆 + 旅の制約成立)
     { scene: '1-2',  marker: '不器用だけれど、 真っ直ぐな、 リアムらしい言葉だった', position: 'after',  img: '/images/locations/s1c3/thumb/liam_oath_thumb.webp' },
@@ -7210,7 +7234,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // version 完全同期 (野沢さん指示 2026-05-06): bump_version.py が自動で更新する。
 // 旧 date-suffix '20260504o' を 5/6 で見つけた事故を契機に version-based に統一。
-const IMG_CACHE_VERSION = '1.5.1s';
+const IMG_CACHE_VERSION = '1.5.1t';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
