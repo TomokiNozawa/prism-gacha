@@ -499,7 +499,7 @@ const POOL = {
       name: "双子巫女妹 アシナ", season: 1, chapter: 's1c6',
       title: "イリスの幼馴染、 双子の妹",
       caption: "姉さま、 今日も笑ってますね。",
-      desc: "巫女連邦リーリエの双子巫女妹、 二十一歳 (姉アスラと双子)。 ミントグリーンの長髪、 緑の瞳、 ラベンダーのリボンを編み込んだ髪型 (姉と対の配色)。 明るく好奇心旺盛、 姉アスラの保護的な静けさを温める。 イリスの幼馴染、 灯篭祭の鈴鳴らし役を担当。",
+      desc: "巫女連邦リーリエの双子巫女妹、 二十一歳 (姉ノエラと双子)。 ミントグリーンの長髪、 緑の瞳、 ラベンダーのリボンを編み込んだ髪型 (姉と対の配色)。 明るく好奇心旺盛、 姉ノエラの保護的な静けさを温める。 イリスの幼馴染、 灯篭祭の鈴鳴らし役を担当。",
       img: `${S1}/sr/twin_priestess_younger.png`,
     },
     {
@@ -7210,7 +7210,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // version 完全同期 (野沢さん指示 2026-05-06): bump_version.py が自動で更新する。
 // 旧 date-suffix '20260504o' を 5/6 で見つけた事故を契機に version-based に統一。
-const IMG_CACHE_VERSION = '1.5.1f';
+const IMG_CACHE_VERSION = '1.5.1g';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる

@@ -64,14 +64,14 @@ CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand, anatomica
 ```
 
 **伏線視覚化**: 「phoenix-shaped flame-spirit silhouette」 = ヒノオウ (UR、 焔帝、 朱の鳳凰) と並ぶ千年職能の戦士格、 でも「七座警護」 として地上に残る選択を視覚化 (S2C6 第五席候補辞退の予兆)。 「twin-bladed naginata」 と「seven-color flame-aura」 で UR の格 + 戦巫女の機能美を両立。
-**対応シーン**: s1c6 1-3 灯篭祭の警護 / s1c6 3-1 儀式前夜の試練 (リーリエの剣の師として) / s1c6 4-1 七座儀式警護
+**対応シーン**: s1c6 1-3 灯篭祭の警護 / s1c6 3-1 儀式前夜の試練 (イリスの剣の師として) / s1c6 4-1 七座儀式警護
 **ストーリー使用**: ✅ (本編 UR + S2C6 系譜継承・S3C5 千年職能の継承への伏線)
 
 ---
 
 ## SSR (4体)
 
-### 4. `shrine_elder.png` — 大巫女ヴィーナ (リーリエの指導者、 巫女連邦長老格)
+### 4. `shrine_elder.png` — 大巫女ヴィーナ (イリスの指導者、 巫女連邦長老格)
 
 ```
 anime-style full-body portrait of a dignified senior matriarch priestess appearing in her early thirties with quiet grace, long pale silver hair with subtle jade-green tips reaching her waist tied in an elaborate ceremonial knot, calm deep jade-green eyes with gentle wisdom and patient strength, fair refined skin, wearing an elegant ceremonial elder priestess robe of layered cream-white and pale jade-green with intricate silver embroidery of crescent moons and lantern flames, wide silver sash with golden tassels, long trailing silver-white outer robe, ornate silver headdress with a single jade gem at the forehead, holding a long ceremonial staff topped with a small silver lantern-orb glowing softly, dignified composed stance with one hand raised in benediction, natural elegant standing, soft jade-and-silver light, jade shrine inner pillared corridor with rows of subtle jade-green paper lanterns and ancient stone steps background, soft daylight filtering through pillars, detailed linework, high-quality illustration, original character, no logos, no text, no watermark.
@@ -79,8 +79,8 @@ anime-style full-body portrait of a dignified senior matriarch priestess appeari
 CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand, anatomically correct joints, staff grip realistic.
 ```
 
-**ポイント**: SSR 級「natural composed elegance」 階層、 派手すぎず、 リーリエ (UR) の指導者として落ち着いた格を表現。
-**対応シーン**: s1c6 1-3 灯篭祭でリーリエの傍に立つ / s1c6 3-1 儀式前夜の試練の証人
+**ポイント**: SSR 級「natural composed elegance」 階層、 派手すぎず、 イリス (UR) の指導者として落ち着いた格を表現。
+**対応シーン**: s1c6 1-3 灯篭祭でイリスの傍に立つ / s1c6 3-1 儀式前夜の試練の証人
 **ストーリー使用**: ✅ (本編 SSR、 S2C6 後継候補相談役)
 
 ---
@@ -113,7 +113,7 @@ CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand, anatomica
 
 ---
 
-### 7. `twin_priestess_elder_noera.png` — 双子巫女姉ノエラ (リーリエの幼馴染、 双子の姉)
+### 7. `twin_priestess_elder_noera.png` — 双子巫女姉ノエラ (イリスの幼馴染、 双子の姉)
 
 ```
 anime-style full-body portrait of a graceful twin priestess elder sister in her early twenties around age 21 (same age as Iris), long pale lavender hair with silver streaks reaching her waist tied with green ribbons in a single elegant side braid, gentle violet eyes with calm protective wisdom (the elder twin's quiet strength), fair luminous skin, wearing an elegant ceremonial twin priestess robe of layered pale lavender and white with subtle green embroidery of paired lanterns and intertwined ribbons, wide silver sash with green tassels, long flowing pale-violet outer robe with twin-paired ribbons, silver headdress with a single small lavender crescent flanking a green leaf motif (mirror to her younger twin's), holding a tall slender ceremonial staff topped with a small lavender lantern-orb glowing softly, dignified protective stance with one arm slightly extended as if shielding her younger twin sister, natural elegant standing, soft lavender-green light, jade shrine garden background with paired flowering trees and floating green-and-lavender lanterns, soft daylight, detailed linework, high-quality illustration, original character, no logos, no text, no watermark.
@@ -121,15 +121,15 @@ anime-style full-body portrait of a graceful twin priestess elder sister in her 
 CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand, anatomically correct joints, staff grip realistic.
 ```
 
-**ポイント**: 「mirror to her younger twin's」 で双子妹アシナ (SR) と対の構図、 リーリエの幼馴染として補佐。
-**対応シーン**: s1c6 1-3 灯篭祭でリーリエの傍 / s1c6 4-1 七座儀式の妹分の補佐
+**ポイント**: 「mirror to her younger twin's」 で双子妹アシナ (SR) と対の構図、 イリスの幼馴染として補佐。
+**対応シーン**: s1c6 1-3 灯篭祭でイリスの傍 / s1c6 4-1 七座儀式の妹分の補佐
 **ストーリー使用**: ✅ (本編 SSR)
 
 ---
 
 ## SR (7体)
 
-### 8. `twin_priestess_younger.png` — 双子巫女妹アシナ (リーリエの幼馴染、 双子の妹)
+### 8. `twin_priestess_younger.png` — 双子巫女妹アシナ (イリスの幼馴染、 双子の妹)
 
 ```
 anime-style full-body portrait of a cheerful twin priestess younger sister in her early twenties around age 21 (same age as Iris and her elder twin Noera), long pale mint-green hair with silver streaks reaching her waist tied with lavender ribbons in a single playful low ponytail (mirror to her elder twin's side braid), bright green eyes with cheerful curious warmth (the younger twin's lively energy), fair luminous skin, wearing a ceremonial twin priestess robe of layered pale mint-green and white with subtle lavender embroidery of paired lanterns (mirror palette to her elder twin), wide silver sash with lavender tassels, ornate silver headdress with a single small green crescent flanking a lavender leaf motif (mirror to elder twin), holding a tall slender ceremonial staff topped with a small green lantern-orb glowing softly, mid-tier composed stance with a slight playful smile, natural standing, soft mint-green light, jade shrine garden background with paired flowering trees and floating lavender-and-green lanterns, soft daylight, detailed linework, high-quality illustration, original character, no logos, no text, no watermark.
@@ -137,7 +137,7 @@ anime-style full-body portrait of a cheerful twin priestess younger sister in he
 CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand, anatomically correct joints, staff grip realistic.
 ```
 
-**対応シーン**: s1c6 1-3 灯篭祭で姉と並ぶ / s1c6 2-3 リーリエとの幼馴染回想
+**対応シーン**: s1c6 1-3 灯篭祭で姉と並ぶ / s1c6 2-3 イリスとの幼馴染回想
 **ストーリー使用**: ✅ (本編 SR)
 
 ---
@@ -274,7 +274,7 @@ CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand, anatomica
 
 ---
 
-### 19. `musician_novice_hajime.png` — 楽人見習いシン (16歳)
+### 19. `musician_novice_hajime.png` — 楽人見習いハジメ (16歳)
 
 ```
 anime-style full-body portrait of an ordinary young musician apprentice boy around age 16, short pale silver hair, gentle silver-gray eyes with shy musical focus, fair young skin, wearing a simple musician apprentice robe of pale silver-and-white with no elaborate embroidery, simple gray sash, holding a small wooden flute in both hands, ordinary standing pose with the flute raised toward his lips, soft daylight, shrine music pavilion porch with simple lanterns background, detailed linework, high-quality illustration, original character, no logos, no text, no watermark.
@@ -311,7 +311,7 @@ CRITICAL ANATOMY REQUIREMENTS: clearly visible 5 fingers on each hand, anatomica
 4. `shrine_elder.png` (大巫女ヴィーナ)
 5. `moon_chief_priestess.png` (主祭リアラ)
 6. `shrine_musician.png` (楽巫女イオナ)
-7. `twin_priestess_elder_noera.png` (双子姉アスラ)
+7. `twin_priestess_elder_noera.png` (双子姉ノエラ)
 
 **Phase 3 (SR7)**:
 8-14. 各 SR キャラ (双子妹は姉と対で見るため 7 → 8 順序、 残りは独立)
