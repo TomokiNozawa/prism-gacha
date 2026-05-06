@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.5.0e — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.5.0f — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -6924,7 +6924,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // version 完全同期 (野沢さん指示 2026-05-06): bump_version.py が自動で更新する。
 // 旧 date-suffix '20260504o' を 5/6 で見つけた事故を契機に version-based に統一。
-const IMG_CACHE_VERSION = '1.5.0e';
+const IMG_CACHE_VERSION = '1.5.0f';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -10111,7 +10111,7 @@ let _prismaeraTargetVersion = null;
 function _getEffectiveVersion(data) {
   // data: version.json の object。 scheduledRelease.at 経過済なら scheduledRelease.version + lastDevSuffix、
   // それ以前 (or scheduledRelease 不在) なら data.version。
-  // lastDevSuffix 結合の理由: scheduled モードで dev が 1.5.0e (suffix 進行中) の時、
+  // lastDevSuffix 結合の理由: scheduled モードで dev が 1.5.0f (suffix 進行中) の時、
   // ヘッダ表示が「v1.5.0」 になって main と 区別がつかなくなる事故を防ぐ
   // (CLAUDE.md ルール「Dev は vX.Y.Zsuffix 並列明示」 順守)。
   // main は flush 後 lastDevSuffix='' となり 1.5.0 表示で 影響なし。
@@ -10733,7 +10733,7 @@ document.addEventListener('input', e => {
   }
 });
 
-// ====== 初回アクセス時のアカウント登録案内 (v1.5.0e〜 account-prompt に統一) ======
+// ====== 初回アクセス時のアカウント登録案内 (v1.5.0f〜 account-prompt に統一) ======
 // 旧 welcome-modal は account-prompt と内容が重複していたため廃止、 同モーダルに一本化。
 // ログイン済 or 過去に dismiss 済 (ACCOUNT_PROMPT_KEY 立っている) ならスキップ。
 function maybeShowWelcomeModal() {
