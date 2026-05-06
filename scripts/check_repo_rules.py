@@ -1351,6 +1351,11 @@ def check_cache_buster_format():
                 # 例外: manifest.json の cache buster は version + suffix (例: 1.4.2g1) も許容
                 if path.name == "index.html" and re.match(r"^" + re.escape(ver) + r"\d+$", cb):
                     continue
+                # 例外: scheduled モード中の修正用 suffix (例: 1.5.0a) も許容
+                # data.version != scheduled.version のため ver は scheduled.version (1.5.0) になっており、
+                # 修正 push で cache buster を 1.5.0a 等に bump して 強制 fetch する 運用パターン
+                if re.match(r"^" + re.escape(ver) + r"[a-z]+$", cb):
+                    continue
                 violations.append(
                     f"[ルール7-26 cache buster 不一致 BLOCKER] {path.relative_to(ROOT)} に '?v={cb}' (version='{ver}' と不一致)\n"
                     f"      → 全 cache buster は version.json の version と完全同期 必須\n"
@@ -1386,7 +1391,8 @@ def check_img_cache_version_sync():
     if not m:
         return 0
     img_ver = m.group(1)
-    if img_ver != ver:
+    # scheduled モード中の修正用 suffix (1.5.0a 等) も許容 (cache buster ルール7-26 と同条件)
+    if img_ver != ver and not re.match(r"^" + re.escape(ver) + r"[a-z]+$", img_ver):
         violations.append(
             f"[ルール7-28 IMG_CACHE_VERSION 不一致 BLOCKER] script.js IMG_CACHE_VERSION='{img_ver}' "
             f"が version.json version='{ver}' と 不一致。\n"
