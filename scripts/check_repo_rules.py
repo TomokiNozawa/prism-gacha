@@ -2054,6 +2054,11 @@ def check_bgm_tempo_uptempo():
     found = 0
     for path in sorted(bgm_dir.glob('*.md')):
         text = path.read_text(encoding='utf-8')
+        # 明示的な OK マーカー (`BGM_TEMPO_OK`) があればスキップ
+        # 野沢さん指示 2026-05-06「既存 BGM のテンポ遅い問題は『そういうもの』 として OK」
+        # → 既存負債 (s1c2 BPM 92 / s1c3 v1 BPM 78 等) を ファイル単位で 例外宣言
+        if 'BGM_TEMPO_OK' in text:
+            continue
         # BPM 抽出: Suno AI プロンプトコードブロック (``` ``` で囲まれた最初の block) があればそこを優先
         # (本文の比較記述「派閥 BGM (BPM 60-130) より速め」 等を除外するため)
         prompt_block_match = re.search(r'```[^\n]*\n(.+?)\n```', text, flags=re.DOTALL)
