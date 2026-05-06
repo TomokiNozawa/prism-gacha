@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.5.1aa — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.5.1ab — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -7173,7 +7173,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
     // 第二幕 2-3: アルテミス&ヒノオウ 千年前の回想 (戦友が並ぶ夜)
     { scene: '2-3',  marker: 'ふと、古い戦場の記憶が、不意に蘇った',           position: 'after',  img: '/images/locations/s1c4/thumb/flashback_artemis_hinoo_thumb.webp' },
     // 第三幕 3-1: 空挺城ゼノニア 三国会談シーン (ヴァーレ女皇)
-    { scene: '3-1',  marker: 'ヴァーレが、静かに口を開いた',                     position: 'before', img: '/images/locations/s1c4/thumb/vaire_diplomacy_thumb.webp' },
+    { scene: '3-1',  marker: 'ヴァーレが静かに口を開いた',                     position: 'before', img: '/images/locations/s1c4/thumb/vaire_diplomacy_thumb.webp' },
     // 第三幕 3-1: ゼノニア整備工房の生活感 (ハーニア親方+ベル整備士+ピット見習い)
     { scene: '3-1',  marker: '整備工房から元気な声が響いた',                       position: 'after',  img: '/images/locations/s1c4/thumb/zenonia_workshop_thumb.webp' },
     // 第三幕 3-2: 凍り影喰い襲撃 大規模戦闘 (戦友の証明、 希少種ビジュアル定着)
@@ -7205,7 +7205,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
   's1c6': [
     // 第6章「七座満つる」 挿絵 (16:9横長、 全 5枚 = 1-2/2-1/3-2/4-1/4-2)
     // 第一幕 1-2: セラフィエル単独地上降臨、 イリスとの対面
-    { scene: '1-2',  marker: '街路の石畳に、静かに降り立った',                       position: 'after',  img: '/images/locations/s1c6/thumb/seraph_descent_to_iris_thumb.webp' },
+    { scene: '1-2',  marker: '街路の石畳に静かに降り立った',                       position: 'after',  img: '/images/locations/s1c6/thumb/seraph_descent_to_iris_thumb.webp' },
     // 第二幕 2-1: 千年ぶりの再会 (セラフィエル+ヴィオレナ、 中央神殿聖堂)
     { scene: '2-1',  marker: 'ヴィオレナの声は、千年前と全く同じだった',             position: 'after',  img: '/images/locations/s1c6/thumb/shrine_oracle_reunion_thumb.webp' },
     // 第三幕 3-2: 「最初の羽」 回想 (プリズマがセラフィエルを生んだ古代の場面)
@@ -7213,7 +7213,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
     // 第四幕 4-1: 山場 七座満つる儀式宣言 (4人初集合、 第四席着座)
     { scene: '4-1',  marker: '観測者七座、第四席『約束』に、巫女連邦のイリスが、座します', position: 'after',  img: '/images/locations/s1c6/thumb/seven_seat_ritual_thumb.webp' },
     // 第四幕 4-2: 別れの朝 (千年待った母ヴィオレナの最も静かな別れの作法)
-    { scene: '4-2',  marker: 'イリスの肩に、一度だけ、手を置いた',                  position: 'after',  img: '/images/locations/s1c6/thumb/iris_departure_morning_thumb.webp' },
+    { scene: '4-2',  marker: 'イリスの肩に一度だけ、手を置いた',                  position: 'after',  img: '/images/locations/s1c6/thumb/iris_departure_morning_thumb.webp' },
   ],
   's1c3': [
     // 1-2 リアム誓い、 三月の約束 (主従の絆 + 旅の制約成立)
@@ -7234,7 +7234,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // version 完全同期 (野沢さん指示 2026-05-06): bump_version.py が自動で更新する。
 // 旧 date-suffix '20260504o' を 5/6 で見つけた事故を契機に version-based に統一。
-const IMG_CACHE_VERSION = '1.5.1aa';
+const IMG_CACHE_VERSION = '1.5.1ab';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -8319,6 +8319,9 @@ const BGM_LIST = [
   // ===== S1C6 追加 (2曲: 章テーマ + 派閥 BGM、 巫女連邦リーリエ ≥5キャラで派閥 BGM 必須) =====
   { id: 'promise',   label: '第6章テーマ',     desc: 'Prism Promise (七色の約束)',         category: 'chapter', duration: '3:19', file: '/media/audio/bgm/prism-promise.mp3' },
   { id: 'shrine',    label: '巫女連邦 灯篭祭',  desc: 'Prism Shrine (巫女連邦の灯篭祭)',    category: 'other',   duration: '2:47', file: '/media/audio/bgm/prism-shrine.mp3' },
+  // ===== s1c5 既存負債解消 (派閥 BGM 1曲 + シーン特化 BGM 1曲) =====
+  { id: 'frostcrown', label: '銀霜王国テーマ',  desc: 'Prism Frostcrown (銀霜王冠)',         category: 'faction', duration: '2:44', file: '/media/audio/bgm/prism-frostcrown.mp3' },
+  { id: 'lullaby',   label: '銀霜国 月夜祭',    desc: 'Prism Lullaby (銀霜の月夜祭)',        category: 'other',   duration: '3:29', file: '/media/audio/bgm/prism-lullaby.mp3' },
 ];
 const bgmAudio = document.getElementById("bgm-home");
 
