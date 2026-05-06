@@ -1981,6 +1981,73 @@ n7_38 = check_home_teaser_next2_date_hidden()
 print(f"  ルール7-38 (ホームティザー翌翌章日時非公表): {n7_38}件 検査 [BLOCKER]")
 
 
+def check_box_sync_drift():
+    """ルール7-39 (WARNING 2026-05-06 野沢さん指示「必要な自動チェックに追加してください」): prism-gacha-work の
+    主要ファイル (prompt/ STORY/ script.js sw.js index.html) と Box 内 (~/Box/.../claude/prismaera/) との
+    差分を検出。 Claude が sync_to_box.sh 実行を忘れる事故 (2026-05-06「これもいつも忘れるね、 何やってんだよ」)
+    の機械的防御。
+
+    検査対象 (大事なものだけ高速判定):
+      - prompt/*.md (キャラ/場所/BGM プロンプト)
+      - STORY/*.md (本文 + outline + lores)
+      - script.js / sw.js / index.html (主要コード)
+
+    判定: ファイルの mtime/size を比較、 work 側が新しい (= sync 漏れ) なら WARNING。 BLOCKER ではなく WARNING で
+    push を止めず警告のみ (pre-push hook で sync 自動実行されるため、 機械的には防御済、 念のための補助検証)。
+    """
+    box_root = Path.home() / "Box" / "DIK & Company" / "06_Other" / "野沢用" / "claude" / "prismaera"
+    if not box_root.exists():
+        # Box フォルダが存在しない環境 (CI 等) はスキップ
+        return 0
+    # 検査対象 (高速、 大事なもののみ)
+    rel_targets = []
+    for sub in ("prompt", "STORY"):
+        for p in (ROOT / sub).rglob("*.md"):
+            if p.is_file():
+                rel_targets.append(p.relative_to(ROOT))
+    for fname in ("script.js", "sw.js", "index.html"):
+        p = ROOT / fname
+        if p.exists():
+            rel_targets.append(p.relative_to(ROOT))
+    drift_count = 0
+    drift_samples = []
+    for rel in rel_targets:
+        work_path = ROOT / rel
+        box_path = box_root / rel
+        if not work_path.exists():
+            continue
+        if not box_path.exists():
+            drift_count += 1
+            if len(drift_samples) < 5:
+                drift_samples.append(f"{rel} (Box未存在)")
+            continue
+        # mtime 比較 (work 側が 5秒以上新しい = sync 漏れ)
+        try:
+            work_mtime = work_path.stat().st_mtime
+            box_mtime = box_path.stat().st_mtime
+            if work_mtime - box_mtime > 5:
+                drift_count += 1
+                if len(drift_samples) < 5:
+                    drift_samples.append(f"{rel} (work {int(work_mtime - box_mtime)}秒新しい)")
+        except Exception:
+            pass
+    if drift_count > 0:
+        sample_str = " / ".join(drift_samples)
+        if drift_count > len(drift_samples):
+            sample_str += f" 他{drift_count - len(drift_samples)}件"
+        violations.append(
+            f"[ルール7-39 Box sync 漏れ WARNING] {drift_count}ファイルが Box 未同期: {sample_str}\n"
+            f"      → `bash scripts/sync_to_box.sh` を実行 (pre-push hook で自動実行されるが、 commit 段階での補助検証)\n"
+            f"      → 野沢さんは Box を参照してアセット生成・確認するため、 sync 漏れは作業停止につながる\n"
+            f"      → 詳細: CLAUDE.md / memory feedback_prism_box_sync.md"
+        )
+    return drift_count
+
+
+n7_39 = check_box_sync_drift()
+print(f"  ルール7-39 (Box sync 漏れ): {n7_39}件 検査 [WARNING]")
+
+
 def check_main_no_suffix():
     """ルール7-27 (BLOCKER 2026-05-05): main branch で commit する version は suffix なし (X.Y.Z 形式) 必須。
     2026-05-05 v1.4.4 main reach 後の 緊急 hotfix で dev → main merge --no-ff した時、 dev の cache buster

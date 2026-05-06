@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Prismaera repo pre-push hook
+# - git push 前に scripts/sync_to_box.sh を強制実行
+# - 野沢さんは Box (~/Box/.../claude/prismaera/) を参照してアセット生成・確認するため、 git push だけでは届かない
+# - Claude が手動 sync を忘れる事故が複数回発生 (2026-05-06「これもいつも忘れるね、 何やってんだよ」)
+#   → pre-push hook で機械的に防御 (野沢さん指示「必要な自動チェックに追加してください」)
+#
+# Setup (一度だけ各PCで): git config core.hooksPath .githooks
+# 同期失敗時の挙動: ログを表示するが push は続行 (sync 失敗で push を止めない、 別のタイミングで sync 再実行可能)
+
+if [ -f scripts/sync_to_box.sh ]; then
+  echo "[pre-push] 🔄 Box sync 実行中 (sync_to_box.sh)..."
+  if bash scripts/sync_to_box.sh 2>&1 | tail -10; then
+    echo "[pre-push] ✅ Box sync 完了"
+  else
+    echo "[pre-push] ⚠️ Box sync 失敗 (push は続行)"
+    echo "[pre-push]    push 後に手動で 'bash scripts/sync_to_box.sh' を実行してください"
+  fi
+fi
+
+exit 0
