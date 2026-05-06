@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4az — 演出スタイル (Season 1 第1章) / dev は cache buster suffix で進行
+   Prismaera v1.4.4a — 演出スタイル (Season 1 第1章) / dev は cache buster suffix で進行
    ============================================================ */
 :root {
   --bg: #05060d;
@@ -3289,6 +3289,100 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   margin: 0; max-width: none; padding: 0;
 }
 
+/* ───── 初回限定 UR確定10連 バナー (アカウント登録特典、 v1.5.1〜) ───── */
+.first-login-banner {
+  position: relative;
+  display: flex; align-items: center; gap: 18px;
+  padding: 22px 26px;
+  margin: 16px 0 0;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(255,154,74,0.30), rgba(255,213,107,0.22) 40%, rgba(255,141,220,0.28) 70%, rgba(124,93,255,0.28));
+  border: 1px solid rgba(255,213,107,0.65);
+  color: var(--text);
+  text-decoration: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.15s ease;
+  overflow: hidden;
+  box-shadow: 0 4px 22px rgba(255,213,107,0.30), 0 2px 10px rgba(255,141,220,0.25);
+  grid-column: 1 / -1;
+  width: 100%;
+  animation: firstLoginBannerBounce 2.4s ease-in-out infinite;
+}
+.first-login-banner:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255,213,107,1.0);
+  box-shadow: 0 10px 38px rgba(255,213,107,0.55), 0 4px 18px rgba(255,141,220,0.42);
+}
+@keyframes firstLoginBannerBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+.first-login-banner-aurora {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 18% 50%, rgba(255,213,107,0.62), transparent 55%),
+    radial-gradient(ellipse at 55% 50%, rgba(255,141,220,0.50), transparent 50%),
+    radial-gradient(ellipse at 88% 50%, rgba(124,93,255,0.50), transparent 55%);
+  filter: blur(28px);
+  z-index: 0;
+  pointer-events: none;
+  animation: firstLoginAuroraFlow 5s ease-in-out infinite alternate;
+}
+@keyframes firstLoginAuroraFlow {
+  0%   { transform: translate(0,0) scale(1); }
+  100% { transform: translate(20px,-10px) scale(1.18); }
+}
+.first-login-banner-icon {
+  font-size: 44px; line-height: 1;
+  filter: drop-shadow(0 0 14px rgba(255, 213, 107, 0.85));
+  position: relative; z-index: 1;
+  flex: 0 0 auto;
+}
+.first-login-banner-text { flex: 1; min-width: 0; position: relative; z-index: 1; }
+.first-login-banner-title {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.first-login-banner-headline {
+  font-size: 22px; font-weight: 800; letter-spacing: 0.04em;
+  background: linear-gradient(120deg, #ff9a4a, #ffd56b, #ff8ddc, #c084fc);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.first-login-banner-badge {
+  font-size: 11px;
+  background: linear-gradient(120deg, rgba(255,213,107,0.55), rgba(255,141,220,0.55));
+  color: #fff;
+  -webkit-text-fill-color: #fff;
+  padding: 3px 10px;
+  border-radius: 7px;
+  border: 1px solid rgba(255,213,107,0.7);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  box-shadow: 0 0 10px rgba(255,213,107,0.45);
+}
+.first-login-banner-tagline {
+  font-size: 13.5px; color: rgba(255,255,255,0.92); line-height: 1.5;
+}
+.first-login-banner-arrow {
+  font-size: 22px; color: rgba(255,255,255,0.85);
+  transition: transform 0.15s ease;
+  position: relative; z-index: 1;
+  flex: 0 0 auto;
+}
+.first-login-banner:hover .first-login-banner-arrow {
+  transform: translateX(4px); color: #fff;
+}
+@media (max-width: 700px) {
+  .first-login-banner { padding: 16px 18px; gap: 14px; margin: 12px 0 0; }
+  .first-login-banner-icon { font-size: 34px; }
+  .first-login-banner-headline { font-size: 17px; }
+  .first-login-banner-tagline { font-size: 12px; }
+  .first-login-banner-badge { font-size: 10px; padding: 2px 7px; }
+  .first-login-banner-arrow { font-size: 18px; }
+}
+
 /* ───── ホーム カードバトル 主役行 (アカウント作成者限定、 hero 直下に full-width 格上げ) ───── */
 .home-cardgame-row {
   position: relative;
@@ -5049,10 +5143,10 @@ body.has-offline-banner .topbar { margin-top: 30px; }
   margin: 0 0 20px;
 }
 .account-prompt-actions {
-  display: flex; gap: 8px;
+  display: flex; flex-direction: column; gap: 10px; align-items: stretch;
 }
 .account-prompt-btn {
-  flex: 1; padding: 13px 16px;
+  padding: 13px 16px;
   font-size: 14px; font-weight: 600;
   border: none; border-radius: 10px;
   cursor: pointer; font-family: inherit;
@@ -5063,9 +5157,19 @@ body.has-offline-banner .topbar { margin-top: 30px; }
   color: #fff;
   box-shadow: 0 4px 16px rgba(139, 92, 246, 0.4);
 }
+.account-prompt-btn.primary.big {
+  padding: 16px 22px;
+  font-size: 17px; font-weight: 800; letter-spacing: 0.04em;
+  background: linear-gradient(120deg, #ff9a4a, #ffd56b 35%, #ff8ddc 65%, #8b5cf6);
+  box-shadow: 0 6px 24px rgba(255, 141, 220, 0.45), 0 0 0 1px rgba(255, 213, 107, 0.4) inset;
+}
 .account-prompt-btn.primary:hover {
   transform: translateY(-1px);
   box-shadow: 0 6px 22px rgba(139, 92, 246, 0.55);
+}
+.account-prompt-btn.primary.big:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 32px rgba(255, 141, 220, 0.60), 0 0 0 1px rgba(255, 213, 107, 0.6) inset;
 }
 .account-prompt-btn.secondary {
   background: rgba(255, 255, 255, 0.08);
@@ -5075,6 +5179,24 @@ body.has-offline-banner .topbar { margin-top: 30px; }
 .account-prompt-btn.secondary:hover {
   background: rgba(255, 255, 255, 0.14);
   border-color: rgba(255, 255, 255, 0.3);
+}
+.account-prompt-btn.close {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 12.5px; font-weight: 500;
+  padding: 8px 12px;
+  align-self: center;
+  width: auto;
+}
+.account-prompt-btn.close:hover {
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: underline;
+}
+.account-prompt-benefit-icon {
+  display: inline-block;
+  width: 22px; text-align: center;
+  margin-right: 6px;
 }
 
 /* ───── Update Notification Modal ───── */

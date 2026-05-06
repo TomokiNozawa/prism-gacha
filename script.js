@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.4.4az — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.5.0b — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -1128,6 +1128,7 @@ function loadState() {
       worstResults: Array.isArray(raw.worstResults) ? raw.worstResults : [],
       tScoreBackfilled: !!raw.tScoreBackfilled,                     // 互換: 旧 v1 backfill 完了 flag
       tScoreBackfilledVersion: raw.tScoreBackfilledVersion || 0,    // backfill ロジック version (v2 = at連続性 chunking)
+      firstLoginGachaConsumed: !!raw.firstLoginGachaConsumed,       // 初回限定 UR確定10連 消化フラグ (v1.5.1〜)
     };
     // マイグレーション: 既存 history からunlockedSetを補完 (旧セーブデータ救済)
     for (const h of s.history) {
@@ -1137,7 +1138,8 @@ function loadState() {
     return s;
   } catch {
     return { total:0, ur:0, pity:0, history:[], galleryViewed:{}, unlockedSet:{}, dupCounts:{}, storyProgress:{},
-      bestTScore: -1, worstTScore: -1, bestAt: 0, worstAt: 0, bestResults: [], worstResults: [], tScoreBackfilled: false, tScoreBackfilledVersion: 0 };
+      bestTScore: -1, worstTScore: -1, bestAt: 0, worstAt: 0, bestResults: [], worstResults: [], tScoreBackfilled: false, tScoreBackfilledVersion: 0,
+      firstLoginGachaConsumed: false };
   }
 }
 function saveState() {
@@ -1178,6 +1180,14 @@ function rollOne(opts = {}) {
   }
   return pickTier("R", opts);
 }
+// 初回限定 UR確定10連 の 10枚目 専用 抽選: UR pool 99.5% + LR pool 0.5% (公開済章フィルタ付き)
+// 通常 ガチャの確率テーブルとは別系統、 ピックアップ重み付けは 適用しない (LR/UR 等確率)
+function rollUrOrLrFinale() {
+  const r = Math.random();
+  if (r < 0.005) return pickTier("LR");
+  return pickTier("UR");
+}
+
 function pickTier(tier, opts = {}) {
   const fullPool = POOL[tier];
   if (!fullPool || fullPool.length === 0) return { tier };
@@ -2816,7 +2826,13 @@ async function doTen(opts = {}) {
   // Phase 1: roll + メタデータ計算 (state mutation のみ、 saveState/updateHUD は遅延)
   const results = [];
   for (let i = 0; i < 10; i++) {
-    const r = rollOne({ pickup: opts.pickup });
+    // 初回限定 UR確定10連: 10枚目だけ UR/LR pool (99.5% UR / 0.5% LR)、 1〜9枚目は通常ガチャ
+    let r;
+    if (opts.firstLogin && i === 9) {
+      r = rollUrOrLrFinale();
+    } else {
+      r = rollOne({ pickup: opts.pickup });
+    }
     applyPull(r, { deferSave: true });
     results.push(r);
   }
@@ -4784,6 +4800,23 @@ function closeCharDetail() {
 // 通常ガチャ
 $("#btn-single").addEventListener("click", () => doSingle());
 $("#btn-ten").addEventListener("click", () => doTen());
+
+// 初回限定 UR確定10連 バナー click
+const _firstLoginBtn = document.getElementById('btn-first-login-gacha');
+if (_firstLoginBtn) _firstLoginBtn.addEventListener('click', triggerFirstLoginGacha);
+
+// PCB 入口 (home-cardgame-row): 未登録者は タップで アカウント登録 prompt 表示 (v1.5.1〜)
+const _pcbEntry = document.getElementById('home-cardgame-row');
+if (_pcbEntry) {
+  _pcbEntry.addEventListener('click', (e) => {
+    if (!authUser) {
+      e.preventDefault();
+      // account-prompt が active なら 維持、 そうでなければ 表示
+      const ap = document.getElementById('account-prompt');
+      if (ap && !ap.classList.contains('active')) ap.classList.add('active');
+    }
+  });
+}
 // ピックアップガチャ
 $("#btn-single-pickup")?.addEventListener("click", () => doSingle({ pickup: PICKUP_CHAPTER }));
 $("#btn-ten-pickup")?.addEventListener("click", () => doTen({ pickup: PICKUP_CHAPTER }));
@@ -6891,7 +6924,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // version 完全同期 (野沢さん指示 2026-05-06): bump_version.py が自動で更新する。
 // 旧 date-suffix '20260504o' を 5/6 で見つけた事故を契機に version-based に統一。
-const IMG_CACHE_VERSION = '1.5.0a';
+const IMG_CACHE_VERSION = '1.5.0b';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -9288,6 +9321,7 @@ function sanitizeStateForCloud(s) {
     worstResults: Array.isArray(s.worstResults) ? s.worstResults.slice(0, 10).map(_sanitizeResultEntryForCloud) : [],
     tScoreBackfilled: !!s.tScoreBackfilled,
     tScoreBackfilledVersion: s.tScoreBackfilledVersion || 0,
+    firstLoginGachaConsumed: !!s.firstLoginGachaConsumed,
     updatedAt: Date.now(),
   };
 }
@@ -9410,6 +9444,7 @@ function applyCloudState(cs) {
   //   backfill 強制再走させない。 既に best/worst 記録済なら 二度と history から 上書きしない
   //   (= cap 外データが 失われる事故 を 防ぐ)。 未記録時のみ backfill が 初期推定する。
   state.tScoreBackfilledVersion = cs.tScoreBackfilledVersion || 0;
+  state.firstLoginGachaConsumed = !!cs.firstLoginGachaConsumed;
   localStorage.setItem("prism-gacha", JSON.stringify(state));
   updateHUD();
   if (typeof renderHistory === 'function') renderHistory();
@@ -9470,6 +9505,8 @@ function mergeStates(local, cloud) {
   merged.tScoreBackfilled = !!(local.tScoreBackfilled || cloud.tScoreBackfilled);
   // backfill version は max を採用 (新 version で再計算した方を 優先 = 「より正しい」 計算結果)
   merged.tScoreBackfilledVersion = Math.max(local.tScoreBackfilledVersion || 0, cloud.tScoreBackfilledVersion || 0);
+  // 初回限定 UR確定10連 消化フラグ: 一度 true なら以後永続 (どちらかで消化済なら未引き再付与しない)
+  merged.firstLoginGachaConsumed = !!(local.firstLoginGachaConsumed || cloud.firstLoginGachaConsumed);
   const spKeys = new Set([...Object.keys(local.storyProgress || {}), ...Object.keys(cloud.storyProgress || {})]);
   for (const k of spKeys) {
     const l = (local.storyProgress && local.storyProgress[k]) || {};
@@ -9670,10 +9707,10 @@ function updateAccountButton() {
   const envDevBtn = document.getElementById('btn-env-dev');
   if (envProdBtn) envProdBtn.style.display = isDevEnv ? '' : 'none';
   if (envDevBtn) envDevBtn.style.display = (isProdEnv && authUser && isPrismAdmin) ? '' : 'none';
-  // Home カードバトル 主役行 はアカウント登録者限定
+  // Home カードバトル 主役行 は 全ユーザー表示 (未登録者は タップで アカウント登録 prompt、 v1.5.1〜)
   const cardgameEntry = document.getElementById('home-cardgame-row');
   if (cardgameEntry) {
-    cardgameEntry.style.display = authUser ? 'flex' : 'none';
+    cardgameEntry.style.display = 'flex';
   }
   // NEW! バッジ: PCB β リリース日 (2026-05-05 12:00 JST) から 14日間表示
   const newBadge = document.getElementById('home-cardgame-new');
@@ -9682,6 +9719,77 @@ function updateAccountButton() {
     const NEW_BADGE_DURATION_MS = 14 * 24 * 60 * 60 * 1000;  // 14日
     const elapsed = Date.now() - PCB_RELEASE_AT;
     newBadge.style.display = (elapsed >= 0 && elapsed < NEW_BADGE_DURATION_MS) ? '' : 'none';
+  }
+  // 初回限定 UR確定10連 バナー: アカウント登録済 + 未消化 で表示
+  updateFirstLoginBannerVisibility();
+}
+
+// ────────────── 初回限定 UR確定10連 (v1.5.1〜) ──────────────
+// アカウント登録特典: 1回限り UR以上1枚確定の10連を引ける。
+// - 1〜9枚目: 通常確率 (rollOne)、 ピックアップなし
+// - 10枚目: UR pool 99.5% + LR pool 0.5% (rollUrOrLrFinale)
+// - 既存ユーザーも (firstLoginGachaConsumed=false なら) 1回引ける = v1.5.1 リリース時点で未消化扱い
+// - race防止: Firebase RTDB transaction で atomic に false → true write、 別端末 同時実行を1回のみ保証
+
+function updateFirstLoginBannerVisibility() {
+  const banner = document.getElementById('first-login-banner');
+  if (!banner) return;
+  // 表示条件: ログイン済 ＆ 未消化 ＆ 通常ガチャ画面 (hero 表示中)
+  const shouldShow = !!authUser && !state.firstLoginGachaConsumed;
+  banner.style.display = shouldShow ? '' : 'none';
+}
+
+let _firstLoginGachaInFlight = false;
+
+async function triggerFirstLoginGacha() {
+  if (_firstLoginGachaInFlight) return;
+  if (busy) return;
+  if (!authUser) {
+    // 通常 バナーは未登録時に出ないが、 防御
+    showAccountModal();
+    return;
+  }
+  if (state.firstLoginGachaConsumed) {
+    showToast('初回限定ガチャは消化済みです');
+    updateFirstLoginBannerVisibility();
+    return;
+  }
+  _firstLoginGachaInFlight = true;
+  let acquiredOk = false;
+  try {
+    if (fbDb) {
+      // Firebase RTDB transaction で flag を atomic に false → true 反転
+      // 別端末で 同時に 引いた場合、 後勝ちの transaction が abort される
+      const ref = fbDb.ref('prism-gacha/users/' + authUser.uid + '/state/firstLoginGachaConsumed');
+      const result = await ref.transaction(cur => {
+        if (cur === true) return; // 既に消化済 → abort
+        return true;
+      });
+      if (!result.committed || result.snapshot.val() !== true) {
+        showToast('初回限定ガチャは消化済みです');
+        state.firstLoginGachaConsumed = true;
+        saveState();
+        updateFirstLoginBannerVisibility();
+        return;
+      }
+      // transaction 成功 → 自端末でも反映
+      acquiredOk = true;
+    } else {
+      // Firebase 未初期化 (極稀): localStorage 単独で進める
+      acquiredOk = true;
+    }
+    if (acquiredOk) {
+      state.firstLoginGachaConsumed = true;
+      saveState();
+      updateFirstLoginBannerVisibility();
+      // 演出 + 抽選 (通常10連と同じ flow、 最後の1枚だけ UR/LR pool)
+      await doTen({ firstLogin: true });
+    }
+  } catch (e) {
+    console.error('triggerFirstLoginGacha error:', e);
+    showToast('ガチャの実行に失敗しました');
+  } finally {
+    _firstLoginGachaInFlight = false;
   }
 }
 
