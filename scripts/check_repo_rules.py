@@ -2619,6 +2619,328 @@ n7_48 = check_char_voice_caption_consistency()
 print(f"  ルール7-48 (キャラ語り口 caption整合): {n7_48}キャラ 検査 [WARNING]")
 
 
+def check_age_consistency():
+    """ルール7-49 (WARNING、 2026-05-08 野沢さん指示「数字整合は機械化必須」):
+    POOL.desc の年齢表記 vs LORE 凸秘話の年齢表記が 一致するか。
+
+    過去事故 (2026-05-08): s1c4 6キャラ (ヴァーレ/ガリオン/ハーニア/ゼピル/イズン/ベル) で
+    POOL「26-27」 vs LORE「22歳」 等 数歳〜14歳のズレ → 修正14件。
+
+    検出ロジック:
+      1. POOL から各キャラ name + desc を抽出
+      2. desc から年齢表記抽出 (「二十六-二十七」「二十二歳」「26歳」 等)
+      3. LORE_BY_KEY 各キャラ凸秘話 body から年齢表記抽出
+      4. 両者の年齢が 数値で 2歳以上ズレたら WARNING
+    """
+    script_path = ROOT / 'script.js'
+    if not script_path.exists():
+        return 0
+    text = script_path.read_text(encoding='utf-8')
+
+    # 漢数字 → アラビア数字 変換 (二十六 → 26)
+    KANJI_DIGITS = {'〇':0,'零':0,'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9}
+    def kanji_to_int(s):
+        if not s: return None
+        s = s.replace('十', 'X')
+        # 「二X六」 → 26、 「X九」 → 19、 「四X二」 → 42
+        if 'X' in s:
+            parts = s.split('X')
+            if len(parts) != 2: return None
+            tens = KANJI_DIGITS.get(parts[0], 1) if parts[0] else 1  # 「X六」 = 16
+            ones = KANJI_DIGITS.get(parts[1], 0) if parts[1] else 0
+            return tens * 10 + ones
+        # 1桁
+        if len(s) == 1 and s in KANJI_DIGITS:
+            return KANJI_DIGITS[s]
+        return None
+
+    def extract_age(s):
+        """文字列から年齢を抽出 (漢数字 + アラビア数字、 範囲は最小値返す)"""
+        # アラビア数字 「22歳」 「20-21」
+        m = re.search(r'(\d{1,2})\s*[-〜~]?\s*(\d{1,2})?\s*歳', s)
+        if m:
+            return int(m.group(1))
+        # 漢数字 「二十六-二十七」 「二十二歳」 「十九」
+        m = re.search(r'([〇零一二三四五六七八九十]{1,4})\s*[-〜~]?\s*([〇零一二三四五六七八九十]{1,4})?\s*歳', s)
+        if m:
+            return kanji_to_int(m.group(1))
+        # 「二十二」 単独 (歳なし)、 「-」 区切り
+        m = re.search(r'([二三四五六七八九][十][〇零一二三四五六七八九]?)\s*-\s*([二三四五六七八九][十][〇零一二三四五六七八九]?)', s)
+        if m:
+            return kanji_to_int(m.group(1))
+        return None
+
+    # POOL から name + desc 抽出
+    pool_chars = {}
+    for ent in re.finditer(
+        r'name:\s*"([^"]+)"\s*,[^}]*?desc:\s*"([^"]+)"',
+        text
+    ):
+        pool_chars[ent.group(1)] = ent.group(2)
+
+    # LORE_BY_KEY 各キャラ凸秘話 body 集約
+    lore_bodies = {}
+    for ent in re.finditer(r'"([^"]+)"\s*:\s*\[([\s\S]*?)\]\s*,\s*"', text):
+        name = ent.group(1)
+        block = ent.group(2)
+        if name in pool_chars:
+            bodies = re.findall(r'body:\s*"([^"]+)"', block)
+            lore_bodies[name] = ' '.join(bodies)
+
+    violations_found = []
+    checked = 0
+    for name, desc in pool_chars.items():
+        pool_age = extract_age(desc)
+        if pool_age is None:
+            continue
+        checked += 1
+        lore_text = lore_bodies.get(name, '')
+        if not lore_text:
+            continue
+        # LORE 内の 各「○○歳」「○十○歳」 等を 全部チェック
+        all_lore_ages = []
+        for m in re.finditer(r'(\d{1,2})\s*歳', lore_text):
+            all_lore_ages.append(int(m.group(1)))
+        for m in re.finditer(r'([〇零一二三四五六七八九十]{1,4})\s*歳', lore_text):
+            v = kanji_to_int(m.group(1))
+            if v: all_lore_ages.append(v)
+        # キャラ自身の年齢として識別される age (不一致 ≥2歳)
+        for lore_age in all_lore_ages:
+            if abs(pool_age - lore_age) >= 2:
+                violations_found.append(
+                    f"  「{name}」 POOL.desc {pool_age}歳 vs LORE 凸秘話 {lore_age}歳 ({abs(pool_age-lore_age)}歳ズレ)"
+                )
+                break  # 1キャラ1件まで
+
+    if violations_found:
+        unique = list(dict.fromkeys(violations_found))[:15]
+        warnings_only.append(
+            f"[ルール7-49 年齢整合 WARNING] POOL.desc vs LORE 凸秘話 で 年齢ズレ {len(violations_found)}件\n"
+            + '\n'.join(unique) +
+            f"\n      → 同キャラの 同じ年齢が 2箇所で 違うのは キャラ設定不整合 (野沢さん指摘 2026-05-08)\n"
+            f"      → POOL/LORE どちらかを 統一、 「若き○○」 等 本文表現と整合する方向で 修正"
+        )
+    return checked
+
+
+n7_49 = check_age_consistency()
+print(f"  ルール7-49 (年齢整合): {n7_49}キャラ 検査 [WARNING]")
+
+
+def check_pov_pronoun_consistency():
+    """ルール7-50 (WARNING、 2026-05-08 野沢さん指示「整合性重視で全修正」):
+    POV キャラの一人称が 章内/章間で ブレないか。
+
+    過去事故: ヴィル s1c3「わたし」 ⇆ s1c7「私」、 イザベル s1c2「わたし/私」 混在 (修正済)。
+
+    検出: STORY_OUTLINE の povCharName 各章で 本文の「わたし」/「私」 出現数を 比較、
+    比率が 9:1 を超えなければ 「混在」 として WARNING。
+    """
+    script_path = ROOT / 'script.js'
+    story_dir = ROOT / 'content' / 'story'
+    if not (script_path.exists() and story_dir.exists()):
+        return 0
+    text = script_path.read_text(encoding='utf-8')
+
+    # STORY_OUTLINE から各章の povCharName 抽出 (形式: { id: 's1c1', ..., povCharName: 'ちさと' })
+    pov_by_chap = {}
+    for m in re.finditer(r"id:\s*'(s1c\d+)'[^}]*?povCharName:\s*'([^']+)'", text):
+        pov_by_chap[m.group(1)] = m.group(2)
+
+    violations_found = []
+    checked = 0
+    for chap, pov_name in pov_by_chap.items():
+        path = story_dir / f'{chap}.md'
+        if not path.exists():
+            continue
+        body = path.read_text(encoding='utf-8')
+        # 本文中の「わたし」 + 「私」 (鉤括弧外、 地の文中心)、 ただし他キャラ台詞 (鉤括弧内) は 各キャラ一人称
+        # シンプル: 全文での出現数で 比較 (鉤括弧内の他キャラ台詞 含むが 概算)
+        n_wata = body.count('わたし')
+        n_watashi = len(re.findall(r'(?<![\w])私(?![\w])', body))  # 漢字「私」 単独 (連語除外)
+        if n_wata + n_watashi == 0:
+            continue
+        checked += 1
+        ratio = n_wata / (n_wata + n_watashi)
+        # 9:1 = 0.9 超え or 0.1 未満で 統一、 それ以外は 混在
+        if 0.1 < ratio < 0.9:
+            violations_found.append(
+                f"  [{chap}.md] POV「{pov_name}」 一人称ブレ: わたし {n_wata}回 / 私 {n_watashi}回 (比率 {ratio:.0%})"
+            )
+
+    if violations_found:
+        warnings_only.append(
+            f"[ルール7-50 一人称統一 WARNING] POV章で 「わたし/私」 混在 {len(violations_found)}件\n"
+            + '\n'.join(violations_found) +
+            f"\n      → 同一POVキャラの一人称は 章内/章間で 統一すべき (どちらかに 9:1 以上偏らせる)\n"
+            f"      → 章単独で混在しても 章間で「わたし」 ⇆ 「私」 ズレは キャラ性逸脱"
+        )
+    return checked
+
+
+n7_50 = check_pov_pronoun_consistency()
+print(f"  ルール7-50 (POV 一人称統一): {n7_50}章 検査 [WARNING]")
+
+
+def check_thousand_year_frequency():
+    """ルール7-51 (WARNING、 2026-05-08 野沢さん指示「自動チェックで漏れないように」):
+    「千年に一度」 「千年で初めて」 等の高頻度表現が 本文の 三柱集結シーン頻度 と矛盾しないか。
+
+    過去事故: s1c6 で「観測者三柱が千年に一度同じ卓を囲む場」 と本文 — 一方 s1c1〜s1c5 各章エピローグで
+    三柱は ちょこちょこ集結 → 矛盾、 「節目ごとに」 で修正済 (commit 44b641f)。
+
+    検出: 本文中で「千年に一度.{0,15}三柱|三柱.{0,15}千年に一度|観測者.{0,15}千年に一度」 等
+    集結頻度ニュアンスを含むパターンを WARNING。
+    """
+    story_dir = ROOT / 'content' / 'story'
+    if not story_dir.exists():
+        return 0
+    found = 0
+    samples = []
+    # 集結頻度を直接 言うパターンに限定 (false positive 削減)
+    # 「観測者の歴史にとって千年に一度の出来事」 等 = 出来事の歴史的稀少性で 集結頻度ではない、 除外
+    PATS = [
+        r'三柱[^。]{0,15}千年に一度[^。]{0,15}(集まる|語り合う|卓|顔を合わせ|会う|集結)',
+        r'観測者三柱[^。]{0,15}千年に一度[^。]{0,15}(集まる|語り合う|卓|集結)',
+        r'千年に一度[^。]{0,15}(三柱|観測者三柱)[^。]{0,15}(集まる|語り合う|卓|集結)',
+        r'千年に一度[^。]{0,5}(同じ卓|顔を合わせ)',
+    ]
+    PAT_RE = re.compile('|'.join(PATS))
+    for path in sorted(story_dir.glob('s1c*.md')):
+        body = path.read_text(encoding='utf-8')
+        for m in PAT_RE.finditer(body):
+            line_no = body[:m.start()].count('\n') + 1
+            samples.append(f"  [{path.name} L{line_no}] {body[max(0,m.start()-10):m.end()+10]}")
+            found += 1
+    if found:
+        warnings_only.append(
+            f"[ルール7-51 千年に一度 集結頻度矛盾 WARNING] {found}件\n"
+            + '\n'.join(samples[:10]) +
+            f"\n      → 観測者三柱は s1c1〜s1c5 各章エピローグで 集結している。 「千年に一度」 表現は 集結頻度では 矛盾\n"
+            f"      → 「節目ごとに」 「ことあるごとに」 等で 表現変更を 検討"
+        )
+    return found
+
+
+n7_51 = check_thousand_year_frequency()
+print(f"  ルール7-51 (千年に一度 集結頻度矛盾): {n7_51}件 検査 [WARNING]")
+
+
+def check_faction_full_short_consistency():
+    """ルール7-52 (WARNING、 2026-05-08 野沢さん指示「整合性重視」):
+    派閥名のフル名 (例: 「黒月衆ノクトス」) と短縮名 (「黒月衆」) が 本文中で 整合するか。
+    初出時のみフル名、 以降は 短縮名で 統一。
+
+    検出: 各章で 同派閥のフル名と短縮名の出現を カウント、
+    フル名が **2回以上** 登場 (初出+リフレイン演出 1回まで OK、 3回以上は不自然) なら WARNING。
+    """
+    story_dir = ROOT / 'content' / 'story'
+    if not story_dir.exists():
+        return 0
+    # フル名 / 短縮名 ペア (派閥のみ)
+    PAIRS = [
+        ('黒月衆ノクトス', '黒月衆'),
+        ('地底市リオラ', '地底市'),
+        ('巫女連邦リーリエ', '巫女連邦'),
+        ('銀霜王国', None),  # 単独で OK
+        ('紅玉海賊団', None),
+    ]
+    violations_found = []
+    for path in sorted(story_dir.glob('s1c*.md')):
+        body = path.read_text(encoding='utf-8')
+        for full, short in PAIRS:
+            if not short: continue
+            n_full = body.count(full)
+            if n_full > 2:  # 初出 + リフレイン1回 まで OK、 3回以上は冗長
+                violations_found.append(
+                    f"  [{path.name}] フル名「{full}」 が {n_full}回登場 (初出+リフレイン以外は短縮名「{short}」 推奨)"
+                )
+    if violations_found:
+        warnings_only.append(
+            f"[ルール7-52 派閥名フル/短縮整合 WARNING] {len(violations_found)}件\n"
+            + '\n'.join(violations_found[:10]) +
+            f"\n      → 派閥名は 初出時のみフル名 (例: 黒月衆ノクトス)、 以降は 短縮名 (黒月衆) で 統一\n"
+            f"      → 3回以上のフル名登場は リフレイン演出を 超えて冗長"
+        )
+    return len(violations_found)
+
+
+n7_52 = check_faction_full_short_consistency()
+print(f"  ルール7-52 (派閥名 フル/短縮 整合): {n7_52}件 検査 [WARNING]")
+
+
+def check_outline_canon_name_consistency():
+    """ルール7-53 (BLOCKER、 2026-05-08 野沢さん指示「自動チェックで漏れないように」):
+    outline.md のキャラ名と script.js POOL のキャラ名が 一致するか。
+
+    過去事故: outline.md「アシュラ」 vs POOL「ホムラ」 (3箇所、 修正済 commit 5028fd8)。
+    """
+    outline = ROOT / 'content' / 'story' / 'outline.md'
+    script_path = ROOT / 'script.js'
+    if not (outline.exists() and script_path.exists()):
+        return 0
+    outline_text = outline.read_text(encoding='utf-8')
+    js_text = script_path.read_text(encoding='utf-8')
+
+    # POOL の name list を 取得
+    pool_names = set()
+    for m in re.finditer(r'name:\s*"([^"]+)"', js_text):
+        pool_names.add(m.group(1))
+        # 短縮名 (姓だけ + 名だけ) も pool に含める
+        parts = m.group(1).split()
+        for p in parts:
+            if len(p) >= 2:
+                pool_names.add(p)
+
+    # outline 内の カタカナ固有名詞 (3-6文字) を抽出
+    outline_names = set()
+    for m in re.finditer(r'[ァ-ヴー]{3,6}', outline_text):
+        outline_names.add(m.group(0))
+
+    # outline にあって POOL にない カタカナ名 (キャラ名候補)
+    # ただし 一般語彙 (リーリエ/ノクトス 等の派閥名 + ヴォイドラ/プリズマ 等の 既存) は除外
+    KNOWN = {'リーリエ', 'ノクトス', 'リオラ', 'ヴォイドラ', 'プリズマ', 'ザナド',
+             'シーズン', 'シーン', 'ストーリー', 'プロローグ', 'エピローグ',
+             'タイトル', 'リファレンス', 'メイン', 'オウル', 'ビギナー',
+             'ティザー', 'リセット', 'コラム', 'カグヤ', 'ノクス', 'セラフィエル',
+             'プリズマエラ', 'パートナー', 'ストア', 'マーカー', 'ロット',
+             'シリーズ', 'シーズン', 'コスト', 'ジン', 'メイス', 'ベル', 'カメラ',
+             'プレビュー', 'タップ', 'ロード', 'ゲスト', 'パス', 'モード',
+             'インストラクター', 'ラスト', 'シャラ', 'バランス', 'クライマックス',
+             'チャプター', 'メリット', 'デメリット', 'タイミング', 'パッセージ',
+             'エントリ', 'テーマ', 'サハール', 'キャラ', 'ロエン', 'ゼノニア',
+             'ニーヴル', 'アクアシス', 'シオン', 'イザベル', 'アルテミス',
+             'ヒノオウ', 'ノヴァ', 'ホムラ', 'イリス', 'ヴィオレナ',
+             'ガルヴィン', 'ノクトリア', 'リオラエル', 'ファラー', 'グレイル',
+             'グラン', 'サハナ', 'シャンティ', 'ヴァーレ', 'リアラ',
+             'ザナディア', 'ウンブリス', 'テネブラ', 'ジュンクトス', 'ミューティス',
+             'ルナリア', 'ガリオン', 'ハーニア', 'ピット', 'ベル', 'ピピ',
+             'コラリア', 'ネプテア', 'ヴィル', 'リアム', 'カグヤさん',
+             'シ・ロエン', 'シエル', 'ルミナ', 'ラナス', 'メイリ',
+             'デフォルト', 'ノート', 'プレイヤー', 'ライバル'}
+    suspect = []
+    for n in outline_names:
+        if n in pool_names: continue
+        if n in KNOWN: continue
+        # 本当にキャラ名らしい (前後に「凸秘話」 「が」「は」 等が続く) か簡易判定
+        ctx = re.search(rf'.{{0,30}}{re.escape(n)}(凸秘話|が|は|を|の|と|『)', outline_text)
+        if ctx:
+            suspect.append(n)
+
+    if suspect:
+        violations.append(
+            f"[ルール7-53 outline キャラ名 vs POOL 整合 BLOCKER] {len(suspect)}件\n"
+            f"  outline.md にある {set(suspect[:10])} が POOL に未登録\n"
+            f"      → 設定書類と実装で キャラ名統一必須 (過去事故 アシュラ vs ホムラ commit 5028fd8 で修正)"
+        )
+        return len(suspect)
+    return 0
+
+
+n7_53 = check_outline_canon_name_consistency()
+print(f"  ルール7-53 (outline キャラ名 vs POOL 整合): {n7_53}件 検査 [BLOCKER]")
+
+
 def check_box_sync_drift():
     """ルール7-39 (WARNING 2026-05-06 野沢さん指示「必要な自動チェックに追加してください」): prism-gacha-work の
     主要ファイル (prompt/ STORY/ script.js sw.js index.html) と Box 内 (~/Box/.../claude/prismaera/) との
