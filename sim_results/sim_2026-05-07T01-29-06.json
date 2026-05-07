@@ -1,0 +1,52 @@
+{
+  "generatedAt": "2026-05-07T01:29:06.039Z",
+  "N": 30,
+  "combos": [
+    "hard-vs-easy",
+    "hard-vs-normal",
+    "hard-vs-hard",
+    "hard-vs-master"
+  ],
+  "results": {
+    "hard-vs-easy": {
+      "winRate": "100%",
+      "wins": 30,
+      "losses": 0,
+      "draws": 0,
+      "avgScoreMe": 2.43,
+      "avgScoreOpp": 0.3,
+      "avgScoreDiff": 2.13,
+      "elapsed": "114.9s"
+    },
+    "hard-vs-normal": {
+      "winRate": "66.7%",
+      "wins": 20,
+      "losses": 3,
+      "draws": 7,
+      "avgScoreMe": 1.77,
+      "avgScoreOpp": 0.57,
+      "avgScoreDiff": 1.2,
+      "elapsed": "121.9s"
+    },
+    "hard-vs-hard": {
+      "winRate": "33.3%",
+      "wins": 10,
+      "losses": 4,
+      "draws": 16,
+      "avgScoreMe": 1.27,
+      "avgScoreOpp": 1.07,
+      "avgScoreDiff": 0.2,
+      "elapsed": "121.8s"
+    },
+    "hard-vs-master": {
+      "winRate": "16.7%",
+      "wins": 5,
+      "losses": 21,
+      "draws": 4,
+      "avgScoreMe": 1.03,
+      "avgScoreOpp": 1.67,
+      "avgScoreDiff": -0.63,
+      "elapsed": "123.8s"
+    }
+  }
+}

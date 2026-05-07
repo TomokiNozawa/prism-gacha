@@ -2092,5 +2092,37 @@
     },
     "flavor": "巫女連邦リーリエに属する者が場に三名揃う時、 派閥の力が場に流れる。",
     "chapter": "s1c6"
+  },
+  {
+    "id": "trio_voidtower_s1c7",
+    "name": "voidtowerの結束",
+    "chars": [
+      "共観の使徒 ジュンクトス",
+      "共観の補佐 ニュトラル",
+      "塔主 ザナディア"
+    ],
+    "condition": "any_lane",
+    "effect": {
+      "target": "all_lanes",
+      "power": 1
+    },
+    "flavor": "voidtowerに属する者が場に三名揃う時、 派閥の力が場に流れる。",
+    "chapter": "s1c7"
+  },
+  {
+    "id": "trio_church_s1c7",
+    "name": "白焔教会の結束",
+    "chars": [
+      "戦場の救護 リサ",
+      "教会の盾 リーラ",
+      "白焔聖騎士団長 オーレン"
+    ],
+    "condition": "any_lane",
+    "effect": {
+      "target": "all_lanes",
+      "power": 1
+    },
+    "flavor": "白焔教会に属する者が場に三名揃う時、 派閥の力が場に流れる。",
+    "chapter": "s1c7"
   }
 ]
