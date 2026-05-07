@@ -2941,6 +2941,111 @@ n7_53 = check_outline_canon_name_consistency()
 print(f"  ルール7-53 (outline キャラ名 vs POOL 整合): {n7_53}件 検査 [BLOCKER]")
 
 
+def check_persist_time_word_char_setting():
+    """ルール7-54 (BLOCKER、 2026-05-08 シオン千年ぶり事故 後追加):
+    本文中で 長期時間表現 (「千年ぶり」「千年前に」「百年経って」等 キャラ自身の経験を示す表現) が 出る段落に、
+    POOL.desc 永続性キーワード (千年/古代/古龍/長命/不老/始祖) を 持たない 一般キャラの 名前が 同居する場合
+    → 設定逸脱 BLOCKER。
+
+    過去事故: s1c7「千年ぶりに、 シオンの声が...」 私が追記、 シオンは 24歳銀霜騎士で 分離は s1c5 (約半年前)、
+    完全な設定逸脱。 同日 5回目の同種事故 (ノクス古文調 / 千年に一度頻度 / 両手挿絵 / 年齢不整合 / 今回千年ぶり)。
+
+    判定:
+      Step 1: POOL の name + desc + caption から 永続性キーワード持ちキャラを 自動抽出 (= 千年級 allowlist)
+      Step 2: 本文を 段落 (連続非空行 or 句点区切り) に分割
+      Step 3: 段落内に 千年系時間表現フレーズ + 一般キャラ名 が 同居 → BLOCKER
+    """
+    story_dir = ROOT / 'content' / 'story'
+    script_path = ROOT / 'script.js'
+    if not (story_dir.exists() and script_path.exists()):
+        return 0
+    js_text = script_path.read_text(encoding='utf-8')
+
+    # POOL の name と desc を ペアで 取得
+    PERSIST_KW = re.compile(
+        r'千年|百年|数千年|古代|古龍|長命|不老|始祖|代々|永遠|始まり|始原|太古|龍王|不朽'
+        r'|観測者|七座|神霊|天使|降臨|顕現|原虹|三姉妹|三柱|原初|始原'
+    )
+    persist_chars = set()
+    all_chars = set()
+    for m in re.finditer(r'\{\s*name:\s*"([^"]+)"[^{}]*?desc:\s*"([^"]*)"', js_text, re.DOTALL):
+        name, desc = m.group(1), m.group(2)
+        all_chars.add(name)
+        # caption も探す
+        cap_m = re.search(r'caption:\s*"([^"]*)"', m.group(0))
+        cap = cap_m.group(1) if cap_m else ''
+        if PERSIST_KW.search(desc) or PERSIST_KW.search(cap) or PERSIST_KW.search(name):
+            persist_chars.add(name)
+            # 短縮名 (姓 / 名) も persist 扱い
+            for p in name.split():
+                if len(p) >= 2:
+                    persist_chars.add(p)
+
+    # 一般キャラ名 list (persist でないもの)
+    general_chars = set()
+    for n in all_chars:
+        if n in persist_chars: continue
+        # 短縮名も生成
+        general_chars.add(n)
+        for p in n.split():
+            if len(p) >= 2 and p not in persist_chars:
+                general_chars.add(p)
+
+    # 千年系時間表現 (キャラ自身の経験を示す = 集結頻度や 神話的稀少性は除外)
+    PERSIST_PHRASE = re.compile(
+        r'千年(?:ぶりに|前(?:に|から|の)|経って|越し|生き(?:て|た)|渡(?:り|って)|の眠り)'
+        r'|百年(?:ぶりに|前(?:に|から)|経って|生き(?:て|た))'
+        r'|(?:千年|百年)(?:という|の歳月|の月日|を経|を越え)'
+    )
+
+    # 一般キャラ名 を 長い順に並べる (部分一致衝突回避)
+    sorted_general = sorted(general_chars, key=lambda x: -len(x))
+    if not sorted_general:
+        return 0
+    GENERAL_NAME_RE = re.compile('|'.join(re.escape(n) for n in sorted_general))
+
+    found = []
+    for path in sorted(story_dir.glob('s1c*.md')):
+        body = path.read_text(encoding='utf-8')
+        # 編集メモ/メタ block を 本文から除外 (公開本文ではない)
+        body = re.split(r'\n##\s*(?:編集メモ|メタ情報|内部メモ|執筆メモ)', body)[0]
+        # 段落分割: 句点 or 連続改行
+        paragraphs = re.split(r'(?<=[。」])\s*\n|\n\n+', body)
+        offset = 0
+        for para in paragraphs:
+            para_start = body.find(para, offset)
+            if para_start < 0: para_start = offset
+            offset = para_start + len(para)
+            if not PERSIST_PHRASE.search(para): continue
+            # 段落内に 一般キャラ名が 出るか
+            for nm in GENERAL_NAME_RE.finditer(para):
+                cname = nm.group(0)
+                # persist キャラの 部分一致は除外 (例: 「シオン」 を含む 「シオンナ」 等)
+                if any(cname in pc and cname != pc for pc in persist_chars):
+                    continue
+                line_no = body[:para_start].count('\n') + 1
+                phrase_m = PERSIST_PHRASE.search(para)
+                snippet = para[:80].replace('\n', ' ')
+                found.append(
+                    f"  [{path.name} L{line_no}] 一般キャラ「{cname}」+ 「{phrase_m.group(0)}」: {snippet}..."
+                )
+                break  # 段落単位で 1件報告
+
+    if found:
+        violations.append(
+            f"[ルール7-54 永続時間表現 vs キャラ設定 BLOCKER] {len(found)}件\n"
+            + '\n'.join(found[:15]) +
+            f"\n      → 一般キャラ (POOL.desc に 千年/古代/古龍/長命/不老/始祖 含まない) に 「千年ぶり」「百年経って」 等の\n"
+            f"        長期時間表現を 適用するのは 設定逸脱。 「久しぶりに」「あの夜以来」「半年余り前に」 等で 表現変更を\n"
+            f"      → 千年級キャラ判定: POOL.desc/caption に 永続性キーワードを含む キャラ {sorted(list(persist_chars))[:8]}..."
+        )
+    return len(found)
+
+
+n7_54 = check_persist_time_word_char_setting()
+print(f"  ルール7-54 (永続時間表現 vs キャラ設定): {n7_54}件 検査 [BLOCKER]")
+
+
 def check_box_sync_drift():
     """ルール7-39 (WARNING 2026-05-06 野沢さん指示「必要な自動チェックに追加してください」): prism-gacha-work の
     主要ファイル (prompt/ STORY/ script.js sw.js index.html) と Box 内 (~/Box/.../claude/prismaera/) との
