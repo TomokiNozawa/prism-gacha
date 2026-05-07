@@ -2507,6 +2507,118 @@ n7_47 = check_kuten_no_space()
 print(f"  ルール7-47 (句読点後スペース禁止): {n7_47}件 検査 [BLOCKER]")
 
 
+def check_char_voice_caption_consistency():
+    """ルール7-48 (WARNING、 2026-05-08 野沢さん指示「ノクスは古文調キャラじゃないのに古文調化していた」 事故対策):
+    POOL の caption + desc が 標準語キャラ (古文調マーカーなし) なのに、 本文台詞で 古文調マーカー (じゃ/お主/おる/のう/ぬ。 等) を使っていたら WARNING。
+
+    検出ロジック:
+      1. POOL から各キャラの name + caption + desc を取得
+      2. caption + desc に 「じゃ/お主/おる/のじゃろう/のう/わし/ござる/ぬ。」 が 一切なければ → 標準語キャラ判定
+      3. 本文 (s1c*.md) で「<キャラ名>が/は ... ○○○○」 「<キャラ名>。 ○○○○」 等の 動作描写 直後の 鉤括弧 を キャラ台詞として抽出
+      4. 標準語キャラの台詞に 古文調マーカー (じゃ/お主/おる/のう/わし/ござる) が 1個でも あれば WARNING
+
+    過去事故:
+      - 2026-05-08 ノクス (caption「貴方も、 この瞬間も」 = 標準語) を 古文調化 14件 修正 → revert で対応
+    """
+    script_path = ROOT / 'script.js'
+    if not script_path.exists():
+        return 0
+    text = script_path.read_text(encoding='utf-8')
+
+    # POOL から name + caption + desc を抽出
+    chars_info = {}  # name -> (caption, desc)
+    for ent in re.finditer(
+        r'name:\s*"([^"]+)"\s*,[^}]*?caption:\s*"([^"]*)"[^}]*?desc:\s*"([^"]*)"',
+        text
+    ):
+        name, caption, desc = ent.group(1), ent.group(2), ent.group(3)
+        chars_info[name] = (caption, desc)
+
+    # 標準語キャラ判定 (古文調マーカーなし)
+    # 古文調の検出は **記号直前の文末形** に限定 (false positive 削減):
+    #   「じゃない」 (標準語否定) と「じゃ。」「じゃろう」 (古文調) を区別
+    #   「と思う」 (標準語) と「のう。」「のう、」 (古文調感嘆) を区別
+    KOBUN_PATTERNS = [
+        r'じゃ[。!?]',              # じゃ。 じゃ! じゃ? (文末のみ catch、 「じゃ、」 は「では、」 口語短縮で除外)
+        r'じゃろう',                # じゃろう / じゃろうか
+        r'のじゃ',                  # のじゃ単独 / のじゃろう
+        r'のう[。!?]',              # のう。 のう! (文末)
+        r'のう、[一-龯ァ-ヴ]',       # のう、 + 名詞 (千年姫的感嘆: 「のう、 プリズマ」)
+        r'おる[。!?]',              # おる。 おる! (文末)
+        r'おるな[。!?]',
+        r'おらぬ',                  # おらぬ
+        r'お主[はがを、 ]',
+        r'わし[はがを、 ]',
+        r'ござる',
+        r'なされ[。、ま]',
+    ]
+    KOBUN_MARKER_RE = re.compile('|'.join(KOBUN_PATTERNS))
+    std_chars = set()
+    for name, (caption, desc) in chars_info.items():
+        combined = caption + ' ' + desc
+        if not KOBUN_MARKER_RE.search(combined):
+            std_chars.add(name)
+
+    # 本文から各キャラの台詞抽出 + 古文調マーカー検出
+    story_dir = ROOT / 'content' / 'story'
+    if not story_dir.exists():
+        return 0
+
+    violations_found = []
+    for path in sorted(story_dir.glob('s1c*.md')):
+        if path.stem == 's1c0' or 'outline' in path.stem:
+            continue
+        body = path.read_text(encoding='utf-8')
+        lines = body.split('\n')
+        # 鉤括弧台詞 ベースで 発話者判定:
+        #   方式: 鉤括弧の **直後 1-3行内** に「<name>が/は」 等の動作描写があれば その name が発話者
+        #   (鉤括弧の直前にある「<name>は既にいなかった」 等の 説明文を 発話者と誤判定するのを 防ぐ)
+        for i, line in enumerate(lines):
+            quote_match = re.match(r'^「([^」]+)」\s*$', line.strip())
+            if not quote_match:
+                continue
+            quote = quote_match.group(1)
+            # 古文調マーカー検出
+            m = KOBUN_MARKER_RE.search(quote)
+            if not m:
+                continue
+            # 発話者判定: 直後 1-3行内の キャラ名動作描写
+            speaker = None
+            for j in range(i+1, min(i+4, len(lines))):
+                line_after = lines[j].strip()
+                if not line_after:
+                    continue
+                if line_after.startswith('「'):
+                    break  # 別の台詞、 発話者判定終了
+                # キャラ名が 動作主体として 出現
+                for name in chars_info.keys():
+                    if re.search(rf'(^|\W){re.escape(name)}(が|は|の|を|に)', line_after):
+                        speaker = name
+                        break
+                if speaker:
+                    break
+            # 発話者が標準語キャラなら 古文調混入 WARNING
+            if speaker and speaker in std_chars:
+                violations_found.append(
+                    f"  [{path.name} L{i+1}] 標準語キャラ「{speaker}」 の台詞に 古文調マーカー「{m.group(0)}」: 「{quote[:40]}{'...' if len(quote)>40 else ''}」"
+                )
+
+    if violations_found:
+        # 重複削除 + 最大10件表示
+        unique_violations = list(dict.fromkeys(violations_found))[:10]
+        warnings_only.append(
+            f"[ルール7-48 キャラ語り口 caption整合 WARNING] 標準語キャラの台詞に 古文調マーカー混入 {len(violations_found)}件\n"
+            + '\n'.join(unique_violations) +
+            f"\n      → POOL の caption/desc が 標準語ベースのキャラに 古文調 (じゃ/おる/お主/のう/わし) は 不整合\n"
+            f"      → memory feedback_char_voice_verify_caption_desc.md 参照、 caption verify せず一括修正は 禁止"
+        )
+    return len(chars_info)
+
+
+n7_48 = check_char_voice_caption_consistency()
+print(f"  ルール7-48 (キャラ語り口 caption整合): {n7_48}キャラ 検査 [WARNING]")
+
+
 def check_box_sync_drift():
     """ルール7-39 (WARNING 2026-05-06 野沢さん指示「必要な自動チェックに追加してください」): prism-gacha-work の
     主要ファイル (prompt/ STORY/ script.js sw.js index.html) と Box 内 (~/Box/.../claude/prismaera/) との
