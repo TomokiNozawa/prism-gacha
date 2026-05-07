@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.5.1an — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.5.1ao — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -7760,7 +7760,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
     // 第二幕 2-3: 教会の塔・シオンとラナス兄弟弟子の沈黙の対話
     { scene: '2-3',  marker: '銀霜の街の灯火を見下ろしていた',                    position: 'after',  img: '/images/locations/s1c5/thumb/church_tower_reunion_thumb.webp' },
     // 第三幕 3-2: 影織りの工房 (リオラエル+ルナリア+シオン、 章テーマ視覚化)
-    { scene: '3-2',  marker: '銀の糸と黒の糸が、完全に等価に交差していた',     position: 'after',  img: '/images/locations/s1c5/thumb/shadow_loom_workshop_thumb.webp' },
+    { scene: '3-2',  marker: '銀の糸と黒の糸が完全に等価に交差していた',     position: 'after',  img: '/images/locations/s1c5/thumb/shadow_loom_workshop_thumb.webp' },
     // 第四幕 4-1: 仮面を外す瞬間 (シオン素顔露出、 立会人三人沈黙)
     { scene: '4-1',  marker: '月鏡に、俺の素顔が映った',                            position: 'after',  img: '/images/locations/s1c5/thumb/mask_unveil_moment_thumb.webp' },
     // 第四幕 4-1: 山場 分離の儀式 (シオン+シ・ロエン+ラナス+ルミナ+アスター、 二重月夜)
@@ -7802,7 +7802,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // version 完全同期 (野沢さん指示 2026-05-06): bump_version.py が自動で更新する。
 // 旧 date-suffix '20260504o' を 5/6 で見つけた事故を契機に version-based に統一。
-const IMG_CACHE_VERSION = '1.5.1an';
+const IMG_CACHE_VERSION = '1.5.1ao';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
