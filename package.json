@@ -1,0 +1,24 @@
+{
+  "name": "prism-gacha-work",
+  "version": "1.0.0",
+  "description": "課金なし・ブラウザ完結のガチャ+物語シミュ(旧称: Prism Gacha)。\r + タワーディフェンスゲーム **Prism Defense** も同梱。",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TomokiNozawa/prism-gacha.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/TomokiNozawa/prism-gacha/issues"
+  },
+  "homepage": "https://github.com/TomokiNozawa/prism-gacha#readme",
+  "devDependencies": {
+    "playwright": "^1.59.1"
+  }
+}

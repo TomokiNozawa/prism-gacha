@@ -321,11 +321,11 @@ function updateMuteUI() {
 // 優先順位: cards.json (手書き完全override) > effects_override.json (effect+effectText のみ) > pool.json (default)
 async function loadMasters() {
   const [c, k, l, p, eo] = await Promise.all([
-    fetch('./cards.json?v=1.5.1ae').then(r => r.json()),
-    fetch('./combos.json?v=1.5.1ae').then(r => r.json()),
-    fetch('./lane_effects.json?v=1.5.1ae').then(r => r.json()),
-    fetch('./data/pool.json?v=1.5.1ae').then(r => r.json()).catch(() => []),
-    fetch('./effects_override.json?v=1.5.1ae').then(r => r.json()).catch(() => ({})),
+    fetch('./cards.json?v=1.5.1af').then(r => r.json()),
+    fetch('./combos.json?v=1.5.1af').then(r => r.json()),
+    fetch('./lane_effects.json?v=1.5.1af').then(r => r.json()),
+    fetch('./data/pool.json?v=1.5.1af').then(r => r.json()).catch(() => []),
+    fetch('./effects_override.json?v=1.5.1af').then(r => r.json()).catch(() => ({})),
   ]);
   // pool 全カード ← effects_override で effect/effectText を上書き ← cards.json で完全 override
   const cardsByName = new Map();
@@ -3128,6 +3128,214 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 });
+
+// ============================================================
+// P-11: AI vs AI sim mode (URL params で起動、 PCB バランス測定用)
+// ?simAuto=<diffMe>-vs-<diffOpp>&n=<count>  例: ?simAuto=hard-vs-master&n=100
+// player 側を Easy/Normal/Hard AI logic で自動操作、 opp 側は既存 aiTurn 動作
+// 結果を <pre id="sim-result"> + localStorage に出力 (Playwright wrapper で取得)
+// ============================================================
+
+async function simulatePlayerTurn(diff) {
+  // aiTurn の me 側版、 既存 aiTurn ロジックを mirror (state.hand → state.board.me)
+  let costRemain = state.turn;
+  let attempts = 0;
+  const aiEffCost = (c) => Math.max(1, effectiveCost(c) - (c._costReduced || 0));
+
+  while (costRemain > 0 && attempts < 8) {
+    attempts++;
+    const playable = state.hand.map((c, i) => ({ c, i })).filter(x => aiEffCost(x.c) <= costRemain);
+    if (playable.length === 0) break;
+    const openLanes = [0, 1, 2].filter(L => state.board.me[L].length < 4);
+    if (openLanes.length === 0) break;
+
+    let pickIdx, lane;
+
+    if (diff === 'easy') {
+      const p = playable[Math.floor(Math.random() * playable.length)];
+      pickIdx = p.i;
+      lane = openLanes[Math.floor(Math.random() * openLanes.length)];
+      if (Math.random() < 0.4) break;
+    } else if (diff === 'normal') {
+      playable.sort((a, b) => b.c.cost - a.c.cost);
+      pickIdx = playable[0].i;
+      const lanes = openLanes.map(L => ({ L, d: getLanePower('me', L) - getLanePower('opp', L) }));
+      lanes.sort((a, b) => a.d - b.d);
+      lane = lanes[0].L;
+    } else if (diff === 'hard' || diff === 'master') {
+      // hard 評価ロジック (master 1-ply lookahead は Phase 2 で実装、 今は hard 同等で代替)
+      let best = null;
+      for (const p of playable) {
+        for (const L of openLanes) {
+          let score = p.c.cost * 1.5;
+          const sameFac = state.board.me[L].filter(c => c.faction === p.c.faction).length;
+          score += sameFac * 2;
+          const oppDiff = getLanePower('opp', L) - getLanePower('me', L);
+          if (oppDiff > 0) score += oppDiff * 0.6;
+          const e = state.laneEffects[L];
+          if (e) {
+            if (e.rule === 'cost_ge' && p.c.cost >= e.threshold) score += e.value * 1.5;
+            if (e.rule === 'cost_le' && p.c.cost <= e.threshold) score += e.value * 1.5;
+            if (e.rule === 'faction' && p.c.faction === e.faction) score += e.value * 2;
+          }
+          const eff = effectiveEffect(p.c) || {};
+          const power = eff.power || 0;
+          switch (eff.target) {
+            case 'freeze_opp_lane_top': score += 4 + power; break;
+            case 'freeze_opp_lane_all': score += state.board.opp[L].length * 2 + power; break;
+            case 'silence_opp_lane_top': score += 3 + power; break;
+            case 'summon_token': score += 2 + power; break;
+            case 'chain_lane_self': score += state.board.me[L].length * (eff.multiplier || 1); break;
+            case 'buff_faction_lane': score += sameFac * (power || 1); break;
+            case 'growth_self': score += (state.maxTurn - state.turn + 1) * 1; break;
+            case 'immediate_self': score += power; break;
+            case 'cost_reduce_hand': score += 1.5; break;
+            case 'golden_self_lane': score += 3; break;
+            case 'all_lanes': score += power * 3; break;
+            case 'all_opp_lanes': score += Math.abs(power) * 2; break;
+            case 'self_lane_attack': score += power + Math.abs(eff.oppPower || 0); break;
+          }
+          if (eff.comboBonus) score += 2;
+          const remainingTurns = state.maxTurn - state.turn + 1;
+          if (p.c.cost > remainingTurns * 1.5) score -= 1;
+          if (!best || score > best.score) best = { i: p.i, L, score };
+        }
+      }
+      if (!best) break;
+      pickIdx = best.i; lane = best.L;
+    } else {
+      break;
+    }
+
+    const pickedCard = playable.find(x => x.i === pickIdx)?.c;
+    const cardCost = pickedCard ? aiEffCost(pickedCard) : 0;
+
+    // 配置 (placeAICard の me 側 mirror、 アニメ無し)
+    const card = { ...state.hand[pickIdx] };
+    card._currentPower = card.basePower + dupeBonusOf(card);
+    card._appliedTo = [];
+    state.hand.splice(pickIdx, 1);
+    state.board.me[lane].push(card);
+    applyEffect(card, lane, 'me');
+
+    costRemain -= cardCost;
+  }
+}
+
+function _summarizeSimResults(results) {
+  const total = results.length;
+  const wins = results.filter(r => r.result === 'win').length;
+  const losses = results.filter(r => r.result === 'loss').length;
+  const draws = results.filter(r => r.result === 'draw').length;
+  const winRate = total > 0 ? Math.round(wins / total * 1000) / 10 : 0;
+  const avgScoreMe = total > 0 ? results.reduce((s, r) => s + r.scoreMe, 0) / total : 0;
+  const avgScoreOpp = total > 0 ? results.reduce((s, r) => s + r.scoreOpp, 0) / total : 0;
+  const avgScoreDiff = avgScoreMe - avgScoreOpp;
+  return {
+    total, wins, losses, draws,
+    winRate: winRate + '%',
+    avgScoreMe: Math.round(avgScoreMe * 100) / 100,
+    avgScoreOpp: Math.round(avgScoreOpp * 100) / 100,
+    avgScoreDiff: Math.round(avgScoreDiff * 100) / 100,
+  };
+}
+
+async function runSim(diffMe, diffOpp, n) {
+  const results = [];
+  console.log(`[sim] start ${diffMe} vs ${diffOpp}, n=${n}`);
+  const startTime = Date.now();
+
+  for (let i = 0; i < n; i++) {
+    // 既存の startMatch を呼ぶ (opp の difficulty)
+    startMatch(diffOpp, false);
+    // startMatch は内部で sleep + ターン開始を行う、 setTimeout 待ち
+    await new Promise(r => setTimeout(r, 50));
+
+    let safety = 50;
+    while (!state.ended && safety > 0) {
+      safety--;
+      // player 側を simulate
+      await simulatePlayerTurn(diffMe);
+      // 既存 endTurn を呼ぶ (内部で aiTurn + state.turn++ + finishMatch)
+      try {
+        await endTurn();
+      } catch (e) {
+        console.warn('[sim] endTurn error', e);
+        break;
+      }
+      // 再生成画面が出る (showMatchResultModal) ので強制スキップ
+      const resultModal = document.getElementById('result-modal');
+      if (resultModal && !resultModal.hidden) {
+        resultModal.hidden = true;
+      }
+    }
+
+    const result = state.scoreMe > state.scoreOpp ? 'win' :
+                   (state.scoreOpp > state.scoreMe ? 'loss' : 'draw');
+    results.push({
+      result,
+      scoreMe: state.scoreMe || 0,
+      scoreOpp: state.scoreOpp || 0,
+      turn: state.turn,
+    });
+
+    if ((i + 1) % 10 === 0) {
+      console.log(`[sim] progress ${i + 1}/${n}`);
+    }
+  }
+
+  const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+  const summary = _summarizeSimResults(results);
+  const output = {
+    diffMe, diffOpp, n,
+    elapsed: elapsed + 's',
+    ...summary,
+    rawResults: results,
+  };
+  console.log('[sim] done', output);
+
+  // 出力
+  let resultEl = document.getElementById('sim-result');
+  if (!resultEl) {
+    resultEl = document.createElement('pre');
+    resultEl.id = 'sim-result';
+    resultEl.style.cssText = 'position:fixed;top:10px;right:10px;background:#000;color:#0f0;padding:12px;font-size:11px;z-index:9999;max-height:80vh;overflow:auto;border:1px solid #0f0;';
+    document.body.appendChild(resultEl);
+  }
+  resultEl.textContent = JSON.stringify(output, null, 2);
+  try {
+    localStorage.setItem('pcb-sim-result', JSON.stringify(output));
+  } catch (e) {}
+  return output;
+}
+
+// URL params で sim 起動 (DOMContentLoaded 後に検出)
+function _initSimMode() {
+  const sp = new URLSearchParams(location.search);
+  const simAuto = sp.get('simAuto');
+  if (!simAuto) return;
+
+  const m = simAuto.match(/^(easy|normal|hard|master)-vs-(easy|normal|hard|master)$/);
+  if (!m) {
+    console.warn('[sim] invalid simAuto format, expected: easy-vs-master');
+    return;
+  }
+  const [, diffMe, diffOpp] = m;
+  const n = Math.max(1, Math.min(500, parseInt(sp.get('n') || '10')));
+
+  console.log(`[sim] auto-starting ${diffMe} vs ${diffOpp}, n=${n}`);
+  // loadMasters 完了を待つ (Cloud auth は未ログインでも sim 動作可なので外す)
+  const waitReady = setInterval(() => {
+    if (state.allCards && state.allCards.length > 0) {
+      clearInterval(waitReady);
+      runSim(diffMe, diffOpp, n).catch(e => console.error('[sim] error', e));
+    }
+  }, 200);
+}
+window.addEventListener('load', () => setTimeout(_initSimMode, 1500));
+
+window.runSim = runSim;
+window.simulatePlayerTurn = simulatePlayerTurn;
 
 // ===== Globals =====
 window.startMatch = startMatch;
