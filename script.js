@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.5.1aj — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.5.1ak — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -36,7 +36,7 @@ const POOL = {
       name: "虚意 ヴォイドラ", season: 1, chapter: 's1c7',
       title: "観測されない者、 影の王、 プリズマと対の世界格",
       caption: "私も、 観測されたかっただけ。",
-      desc: "異界塔ザナドに千年閉じ込められていた影の王。 観測されない者として、 プリズマの「迷い」 から零れ落ちた対の存在。 七色の宇宙の裂け目から漏れる漆黒の意志。 黒月決戦でプリズマと対話し「私の影として認める」 と告げられ、 「世界の影として留まる」 ことを受諾する。 共観の使徒ジュンクトスが千年見守り続けた相手。 S2C5 で POV として再登場、 影との和解の中心テーマを担う。",
+      desc: "異界塔ザナドに千年閉じ込められていた影の王。 観測されない者として、 プリズマの「迷い」 から零れ落ちた対の存在。 七色の宇宙の裂け目から漏れる漆黒の意志。 黒月決戦でプリズマと対話し「私の影として認める」 と告げられ、 「世界の影として留まる」 ことを受諾する。 共観の使徒ジュンクトスが千年見守り続けた相手。",
       img: `${S1}/lr/void_lord.png`,
     },
   ],
@@ -169,7 +169,7 @@ const POOL = {
       name: "塔主 ザナディア", season: 1, chapter: 's1c7',
       title: "異界塔ザナドの千年塔主、 ヴォイドラ召喚者",
       caption: "千年、 待っていました。 あなたとの再会を。",
-      desc: "千年前にヴォイドラを召喚し、 共に異界塔ザナドに閉じ込められた塔主。 千年級存在として、 リオラエル殿 (s1c5、 地底市) とヴィオレナ (s1c6、 巫女連邦) と同時代を生きた。 紫銀の長髪、 紫水晶の瞳、 七色の summoning-circle が刺繍された千年塔主の衣。 黒月決戦でプリズマとヴォイドラの対話を見届け、 千年の幽閉から解放される。 S2C4 記憶の海では千年記憶のキーとなる。",
+      desc: "千年前にヴォイドラを召喚し、 共に異界塔ザナドに閉じ込められた塔主。 千年級存在として、 リオラエル殿 (s1c5、 地底市) とヴィオレナ (s1c6、 巫女連邦) と同時代を生きた。 紫銀の長髪、 紫水晶の瞳、 七色の summoning-circle が刺繍された千年塔主の衣。 黒月決戦でプリズマとヴォイドラの対話を見届け、 千年の幽閉から解放される。",
       img: `${S1}/ur/void_tower_master.png`,
     },
     {
@@ -183,21 +183,21 @@ const POOL = {
       name: "黒月使徒 テネブラ", season: 1, chapter: 's1c7',
       title: "ヴォイドラ第二使徒、 ノクトリアと並ぶ千年盟友",
       caption: "千年待った夜が、 ようやく来た。",
-      desc: "ヴォイドラ陣営の千年級女性使徒。 黒月衆の盟主ノクトリア (s1c5) と千年前の盟友、 黒月衆と異界塔ザナドの繋がりを担う。 紫黒のロングヘア、 七つの inverted crescent 刺青、 双刃の void-halberd を構える。 千年閉じ込めの対価を覚悟しながらヴォイドラと共に閉じこもった同胞、 S2C5「影との和解」 でノクトリアと交渉役を務める。",
+      desc: "ヴォイドラ陣営の千年級女性使徒。 黒月衆の盟主ノクトリア (s1c5) と千年前の盟友、 黒月衆と異界塔ザナドの繋がりを担う。 紫黒のロングヘア、 七つの inverted crescent 刺青、 双刃の void-halberd を構える。 千年閉じ込めの対価を覚悟しながらヴォイドラと共に閉じこもった同胞。",
       img: `${S1}/ur/tenebrae_apostle.png`,
     },
     {
       name: "共観の使徒 ジュンクトス", season: 1, chapter: 's1c7',
       title: "中立勢力、 プリズマ×ヴォイドラ共観の見届け役",
       caption: "二つを同時に観る。 それが、 私の千年の務め。",
-      desc: "千年前から両方を観続けてきた中立の使徒。 半身が七色プリズマ、 半身が漆黒ヴォイドラの完全対称デザイン。 異界塔ザナドの周辺で、 プリズマとヴォイドラの両方を「共観」 してきた両性的な存在。 黒月決戦でプリズマの「私の影として認める」 を見届け、 ヴォイドラの「世界の影として留まる」 を世界に向けて宣言する。 S2C7「接続の儀」 主役級伏線。",
+      desc: "千年前から両方を観続けてきた中立の使徒。 半身が七色プリズマ、 半身が漆黒ヴォイドラの完全対称デザイン。 異界塔ザナドの周辺で、 プリズマとヴォイドラの両方を「共観」 してきた両性的な存在。 黒月決戦でプリズマの「私の影として認める」 を見届け、 ヴォイドラの「世界の影として留まる」 を世界に向けて宣言する。",
       img: `${S1}/ur/junctus_apostle.png`,
     },
     {
       name: "沈黙の候補 ミューティス", season: 1, chapter: 's1c7',
       title: "観測者第七席「沈黙」 候補、 紫=沈黙",
       caption: "(沈黙、 言葉なし)",
-      desc: "観測者七座の第七席「沈黙」 (紫) 候補として黒月決戦に静かに顔を出す両性的な若き存在。 sealed-mouth motif の衣装、 unlit lanterns、 deliberately blank pillar、 「沈黙」 を象徴する装飾の意図的欠落。 s1c6 ノクス予知「これでも足りない」 の直接顔出し。 S2C3「沈黙の塔」 で正式着座、 主人公として再登場予定。 七座満つる時代の最後のピース。",
+      desc: "観測者七座の第七席「沈黙」 (紫) 候補として黒月決戦に静かに顔を出す両性的な若き存在。 sealed-mouth motif の衣装、 unlit lanterns、 deliberately blank pillar、 「沈黙」 を象徴する装飾の意図的欠落。 s1c6 ノクス予知「これでも足りない」 の直接顔出し。 七座満つる時代の最後のピース。",
       img: `${S1}/ur/silence_candidate.png`,
     },
   ],
@@ -435,7 +435,7 @@ const POOL = {
       name: "古龍王の使者 アグル", season: 1, chapter: 's1c7',
       title: "千年血脈直系、 ファラーの後継候補",
       caption: "古龍王の覚醒の刻が、 そろそろ近い。",
-      desc: "古龍砂漠サハールの千年血脈直系、 二十五-二十六。 ファラー (s1c3 UR 古龍の語り部) の後継候補として、 古龍王の使者の役を担う。 古龍鱗の刺青、 紫水晶を頂いた使者の杖、 古龍王覚醒の予兆を読む千年血脈の若者。 S2C1 古龍王覚醒への直接前奏。",
+      desc: "古龍砂漠サハールの千年血脈直系、 二十五-二十六。 ファラー (s1c3 UR 古龍の語り部) の後継候補として、 古龍王の使者の役を担う。 古龍鱗の刺青、 紫水晶を頂いた使者の杖、 古龍王覚醒の予兆を読む千年血脈の若者。",
       img: `${S1}/ssr/dragon_envoy.png`,
     },
     {
@@ -792,7 +792,7 @@ const POOL = {
       name: "共観の補佐 ニュトラル", season: 1, chapter: 's1c7',
       title: "ジュンクトス補佐、 共観の儀式進行役",
       caption: "(沈黙、 観察のみ)",
-      desc: "共観の使徒ジュンクトス (UR) の若き補佐、 二十-二十一。 半身がプリズマ (七色)、 半身がヴォイドラ (灰) の対称デザイン (UR ジュンクトスより簡素)。 共観の儀式進行役、 S2C7 接続の儀でも再登場予定。",
+      desc: "共観の使徒ジュンクトス (UR) の若き補佐、 二十-二十一。 半身がプリズマ (七色)、 半身がヴォイドラ (灰) の対称デザイン (UR ジュンクトスより簡素)。 共観の儀式進行役。",
       img: `${S1}/sr/junctus_aide.png`,
     },
   ],
@@ -4058,6 +4058,58 @@ async function renderCharDetailPcb(c) {
   }
   html += `</div>`;
   pane.innerHTML = html;
+  // 衣装ライブラリ表示 (該当キャラの衣装があれば)
+  _renderCharDetailCostumes(c);
+}
+
+let _SHOP_ITEMS_CACHE = null;
+async function _loadShopItemsForChar() {
+  if (_SHOP_ITEMS_CACHE) return _SHOP_ITEMS_CACHE;
+  try {
+    const res = await fetch('./cardgame/data/shop_items.json');
+    _SHOP_ITEMS_CACHE = await res.json();
+  } catch (e) { _SHOP_ITEMS_CACHE = { mats: [], costumes: [] }; }
+  return _SHOP_ITEMS_CACHE;
+}
+
+async function _renderCharDetailCostumes(c) {
+  const wrap = document.getElementById('char-detail-costumes');
+  const list = document.getElementById('char-detail-costumes-list');
+  if (!wrap || !list) return;
+  const items = await _loadShopItemsForChar();
+  const charCostumes = (items.costumes || []).filter(i => i.char === c.name);
+  if (charCostumes.length === 0) {
+    wrap.hidden = true;
+    return;
+  }
+  wrap.hidden = false;
+  // 所持データを Firebase から取得 (cardgame の pcbCloud と独立、 直接 RTDB read)
+  let owned = {};
+  let equipped = {};
+  try {
+    const auth = (firebase.apps || []).find(a => a.name === 'prism-gacha');
+    if (auth && auth.auth().currentUser) {
+      const uid = auth.auth().currentUser.uid;
+      const snap = await auth.database().ref(`pcbData/${uid}/shopData`).once('value');
+      const sd = snap.val() || {};
+      owned = sd.owned || {};
+      equipped = sd.equipped || { mat: null, costumes: {} };
+    }
+  } catch (e) { /* offline or no auth */ }
+  list.innerHTML = charCostumes.map(item => {
+    const isOwned = !!owned[item.id];
+    const isEquipped = (equipped.costumes || {})[c.name] === item.id;
+    const status = isEquipped ? '✓ 適用中' : isOwned ? '🎒 所持済' : `🔒 ${item.price} pts`;
+    const statusClass = isEquipped ? 'cd-cos-equipped' : isOwned ? 'cd-cos-owned' : 'cd-cos-locked';
+    return `<div class="cd-cos-item ${statusClass}">
+      <div class="cd-cos-icon">${item.icon || '👗'}</div>
+      <div class="cd-cos-body">
+        <div class="cd-cos-name">${escapeHtml(item.name)}</div>
+        <div class="cd-cos-desc">${escapeHtml(item.desc || '')}</div>
+      </div>
+      <div class="cd-cos-status">${status}</div>
+    </div>`;
+  }).join('');
 }
 
 function _switchCharDetailTab(tabName, currentChar) {
@@ -4640,6 +4692,50 @@ const RELATIONS = [
   { a: '巫女見習い ハナ',              b: '高巫女見習い カヤ',        type: 'fellow',    label: '見習い同期' },                                // 同期
   { a: '巫女見習い ユウ',              b: '高巫女見習い カヤ',        type: 'fellow',    label: '見習い同期' },                                // 同期
   { a: '月読み祭司 オリオン',          b: '星海のノクス',             type: 'admire',    aRole: '地上の天文祭司', bRole: '天上の予知者' },     // 月読み祭司は ノクスの予知を地上で先取り
+  // ===== S1C7 関係 (黒月決戦) — combos.json の duo を ベース =====
+  // ヴォイドラ陣営内部
+  { a: '虚意 ヴォイドラ',              b: '虹意 プリズマ',             type: 'rival',     label: '千年対峙、 共に在ると認め合う' },
+  { a: '虚意 ヴォイドラ',              b: '塔主 ザナディア',           type: 'fellow',    label: '千年閉じ込めの同胞 (召喚者)' },
+  { a: '塔主 ザナディア',              b: '異界塔執行官 オブスクル',   type: 'master',    aRole: '千年塔主', bRole: '執行官' },
+  { a: '塔主 ザナディア',              b: '異界塔の魔導兵 アビス',     type: 'master',    aRole: '千年塔主', bRole: '魔導兵' },
+  { a: '塔主 ザナディア',              b: '異界塔の闇衛 ノクサル',     type: 'master',    aRole: '千年塔主', bRole: '闇衛' },
+  { a: '影使徒 ウンブリス',            b: '黒月の盟主 ノクトリア',     type: 'fellow',    label: 'ヴォイドラ第一使徒と黒月衆盟主、 影の双柱' },
+  { a: '黒月使徒 テネブラ',            b: '黒月の盟主 ノクトリア',     type: 'fellow',    label: 'ヴォイドラ第二使徒と黒月衆千年盟友' },
+  // 異界塔の日常 (鍛冶・歌手・伝令・斥候)
+  { a: '異界塔の鍛冶 ザイ',            b: '異界塔の歌手 メル',         type: 'fellow',    label: '千年閉じ込めの塔の日常を支える' },
+  { a: '異界塔の斥候 グリム',          b: '異界塔の闇衛 ノクサル',     type: 'fellow',    label: '月のない夜に音もなく動く双影' },
+  { a: '異界塔の伝令 ヴィタ',          b: '戦場の伝令 タイ',           type: 'rival',     label: '敵味方の伝令、 同じ風を運ぶ' },
+  // 共観の使徒 (中立)
+  { a: '共観の使徒 ジュンクトス',      b: '虹意 プリズマ',             type: 'fellow',    label: 'プリズマとヴォイドラを千年共観' },
+  { a: '共観の使徒 ジュンクトス',      b: '虚意 ヴォイドラ',           type: 'fellow',    label: 'プリズマとヴォイドラを千年共観' },
+  { a: '共観の使徒 ジュンクトス',      b: '共観の補佐 ニュトラル',     type: 'master',    aRole: '使徒', bRole: '若き補佐' },
+  // 沈黙の候補 (第七席)
+  { a: '沈黙の候補 ミューティス',      b: '虹意 プリズマ',             type: 'fellow',    label: '原虹と沈黙、 紫の沈黙が静かに照応' },
+  { a: '沈黙の候補 ミューティス',      b: '星海のノクス',              type: 'admire',    aRole: '第七席候補', bRole: '予知者' },
+  // 七座級の戦力結集 (北の凍土)
+  { a: '氷帝 グレイル',                b: '氷霊魔導長 ノエル',         type: 'fellow',    label: '凍土の双柱' },
+  { a: '氷塔の魔導士 セレスタ',        b: '北方剣聖 ハグル',           type: 'fellow',    label: '凍土の魔と剣が並び立つ' },
+  // 古龍王陣営
+  { a: '古龍王の使者 アグル',          b: '古龍王 グラン',             type: 'master',    aRole: '使者', bRole: '古龍王' },
+  { a: '古龍鎧の戦士 ガロン',          b: '古龍鍛冶 オウル',           type: 'fellow',    label: '千年血脈の鎧と槌' },
+  // 海陣営
+  { a: '海淵射手 シャラ',              b: '珊瑚鎧の海騎士 コラリア',   type: 'fellow',    label: '同じ海の波紋' },
+  { a: '白焔聖騎士団長 オーレン',      b: '波紋の聖女 イザベル',       type: 'fellow',    label: '教会陣営の双柱' },
+  { a: 'アクアシス海神官 ナイアス',    b: '深海女王 ネプテア',         type: 'master',    aRole: '海神官', bRole: '女王' },
+  // 銀霜陣営
+  { a: '銀霜神官長 ヴィルニル',        b: '銀霜王 ノヴァ',             type: 'fellow',    label: '月光謁見の間で戦の祈り' },
+  { a: '銀霜の若騎士 ライオン',        b: '仮面騎士 シオン',           type: 'master',    aRole: '若騎士', bRole: '旧弟子の師' },
+  // 空挺城ゼノニア
+  { a: '空挺機械兵 リガン',            b: '空挺城総監 ガリオン',       type: 'master',    aRole: '機械兵', bRole: '総監' },
+  { a: '空挺艦隊長 メリディア',        b: '空挺女皇 ヴァーレ',         type: 'master',    aRole: '艦隊長', bRole: '女皇' },
+  // 紅玉海賊団
+  { a: '紅玉旗艦砲手長 マロン',        b: '紅玉海賊団船長 シャンティ', type: 'master',    aRole: '砲手長', bRole: '団長' },
+  // 巫女連邦の若き第四席
+  { a: '巫女連邦軍師 セイラン',        b: 'イリス',                    type: 'master',    aRole: '軍師', bRole: '若き第四席' },
+  // 戦場の救護・伝令と派閥
+  { a: '戦場の救護 リサ',              b: '戦場の伝令 タイ',           type: 'fellow',    label: '倒れた者を起こし、 生きる者へ言葉を運ぶ' },
+  { a: '戦場の救護 リサ',              b: '教会の盾 リーラ',           type: 'fellow',    label: '白焔教会陣営' },
+  { a: '教会の盾 リーラ',              b: '波紋の聖女 イザベル',       type: 'master',    aRole: '盾', bRole: '聖女' },
 ];
 
 const REL_STYLE = {
@@ -7347,6 +7443,15 @@ const STORY_ACT_INTROS = {
     '第三幕 — 翼を畳む者の決意':        '最初の羽だった頃の記憶。 そして、 翼を一枚返す日が、 近づいている。\n— セラフィエル',
     '第四幕 — 七座満つる':              '七座、 四つ満ちる。 違っていても、 同じ目的を持つ仲間でいられる夜。\n— セラフィエル',
   },
+  's1c7': {
+    'Season 1 第7章 — 黒月決戦':        '千年の対の存在と、 ようやく言葉を交わす夜。 影を消すのではなく、 共に在ると認める。\n— 虹意 プリズマ',
+    '第一幕 — 黒月昇る':                '西の空に、 黒い月が昇る。 千年閉じ込めていた者が、 今、 戻ってくる。\n— プリズマ',
+    '第二幕 — 七色の旗集う':            '北から、 南から、 砂漠から、 空から。 千年の友が、 同じ戦場に立ってくれる。\n— プリズマ',
+    '第三幕 — 異界塔の対話':            '塔の頂で、 私は千年の対の存在と、 初めて目を合わせる。\n— プリズマ',
+    '第四幕 — 共観の儀':                '影を消すのではなく、 共に在ると認める。 これが、 私の選んだ答え。\n— プリズマ',
+    '第五幕 — 眠りに入る者へ':          '光を次の世代に託す日。 私は、 静かに眠りに就く。\n— プリズマ',
+    'エピローグ — 黒月、 静かに沈む':   '黒月が静かに沈む朝、 世界は新しい均衡を迎える。 千年の旅の、 ひとつの結び。\n— プリズマ',
+  },
 };
 
 // 全章の outline (公開順、 公開済 + 将来予定)。 STORY_FILES (公開済) との差分で「Coming Soon teaser」 を出す
@@ -7697,7 +7802,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // version 完全同期 (野沢さん指示 2026-05-06): bump_version.py が自動で更新する。
 // 旧 date-suffix '20260504o' を 5/6 で見つけた事故を契機に version-based に統一。
-const IMG_CACHE_VERSION = '1.5.1aj';
+const IMG_CACHE_VERSION = '1.5.1ak';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる

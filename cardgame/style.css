@@ -2627,3 +2627,107 @@ body.cg-browse-mode .cg-deck-list-remove {
   .cg-deck-preview { grid-template-columns: repeat(6, 1fr); gap: 3px; }
   .cg-preview-dup { font-size: 8px; padding: 1px 3px; }
 }
+
+/* ===== ショップ Phase 2: 衣装+マット 販売 ===== */
+.cg-shop-tabs {
+  display: flex;
+  gap: 6px;
+  margin: 12px 0 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  padding-bottom: 8px;
+}
+.cg-shop-tab {
+  flex: 1;
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  color: rgba(255,255,255,0.7);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.cg-shop-tab:hover { background: rgba(255,255,255,0.1); }
+.cg-shop-tab.active {
+  background: rgba(252,211,77,0.18);
+  border-color: rgba(252,211,77,0.5);
+  color: #fcd34d;
+}
+.cg-shop-list {
+  display: flex; flex-direction: column; gap: 8px;
+  max-height: 50vh; overflow-y: auto;
+  padding: 4px 2px;
+}
+.cg-shop-empty {
+  text-align: center; padding: 30px 14px;
+  color: rgba(255,255,255,0.5); font-size: 13px;
+}
+.cg-shop-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+}
+.cg-shop-item-owned { background: rgba(252,211,77,0.06); border-color: rgba(252,211,77,0.2); }
+.cg-shop-item-icon {
+  flex: 0 0 56px;
+  width: 56px; height: 56px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 8px;
+}
+.cg-shop-item-body { flex: 1; min-width: 0; }
+.cg-shop-item-name { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 3px; }
+.cg-shop-item-char { font-size: 11px; color: rgba(255,255,255,0.6); font-weight: 400; }
+.cg-shop-item-desc { font-size: 11px; color: rgba(255,255,255,0.65); line-height: 1.5; }
+.cg-shop-item-actions { display: flex; flex-direction: column; gap: 4px; flex: 0 0 100px; }
+.cg-shop-btn, .cg-shop-btn-preview {
+  padding: 7px 8px;
+  border-radius: 5px;
+  border: 1px solid rgba(255,255,255,0.1);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.cg-shop-btn-preview { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.75); }
+.cg-shop-btn-preview:hover { background: rgba(255,255,255,0.12); }
+.cg-shop-btn-buy { background: linear-gradient(180deg, #fcd34d 0%, #f5a623 100%); color: #1a1a2e; border-color: rgba(252,211,77,0.5); }
+.cg-shop-btn-buy:hover { box-shadow: 0 0 6px rgba(252,211,77,0.5); }
+.cg-shop-btn-apply { background: rgba(99,179,237,0.3); color: #93c5fd; border-color: rgba(99,179,237,0.5); }
+.cg-shop-btn-equipped { background: rgba(34,197,94,0.3); color: #86efac; border-color: rgba(34,197,94,0.5); }
+.cg-shop-btn-disabled { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.3); cursor: not-allowed; }
+.cg-shop-preview-card { max-width: 380px; }
+.cg-shop-preview-char { font-size: 12px; color: rgba(255,255,255,0.7); margin: 4px 0 8px; }
+.cg-shop-preview-desc { font-size: 13px; color: rgba(255,255,255,0.85); line-height: 1.6; margin-bottom: 12px; }
+.cg-shop-preview-visual {
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.15);
+  margin: 12px 0;
+}
+.cg-shop-preview-note { font-size: 10px; color: rgba(255,255,255,0.45); text-align: center; }
+.cg-shop-preview-price {
+  margin-top: 12px; text-align: center;
+  font-size: 16px; font-weight: 700; color: #fcd34d;
+}
+
+/* マット適用: 対戦盤面 + ホーム の背景アクセント */
+body.cg-mat-active .cg-board::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: var(--cg-mat-color, transparent);
+  opacity: 0.18;
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 0;
+}
+
+@media (max-width: 480px) {
+  .cg-shop-item { flex-wrap: wrap; }
+  .cg-shop-item-body { flex: 1 1 100%; order: 2; margin: 6px 0 0; }
+  .cg-shop-item-actions { flex: 1 1 100%; order: 3; flex-direction: row; }
+  .cg-shop-btn, .cg-shop-btn-preview { flex: 1; }
+}

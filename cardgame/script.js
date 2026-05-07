@@ -142,9 +142,10 @@ function _pcbSet(path, value) {
 
 async function pcbCloudInit() {
   // Cloud から全データロード
-  const [stats, decks, activeSlot, history, paused, bo3Toggle, bgmMute] = await Promise.all([
+  const [stats, decks, activeSlot, history, paused, bo3Toggle, bgmMute, shopData] = await Promise.all([
     _pcbGet('stats'), _pcbGet('decks'), _pcbGet('activeSlot'),
     _pcbGet('history'), _pcbGet('paused'), _pcbGet('bo3Toggle'), _pcbGet('bgmMute'),
+    _pcbGet('shopData'),
   ]);
   pcbCloud.stats      = stats || {};
   pcbCloud.decks      = decks || {};
@@ -153,7 +154,12 @@ async function pcbCloudInit() {
   pcbCloud.paused     = paused || null;
   pcbCloud.bo3Toggle  = bo3Toggle === true;
   pcbCloud.bgmMute    = bgmMute === true;
+  pcbCloud.shopData   = shopData || { owned: {}, equipped: { mat: null, costumes: {} } };
   pcbCloud.loaded     = true;
+  // 衣装+マットを 起動時に適用
+  if (typeof _applyShopEquips === 'function') {
+    _loadShopItems().then(() => _applyShopEquips());
+  }
   // localStorage の既存データ migration (Cloud が空 + localStorage に既存データ → Cloud に移行)
   pcbMigrateFromLocalStorage();
   // UI 再描画
@@ -321,11 +327,11 @@ function updateMuteUI() {
 // 優先順位: cards.json (手書き完全override) > effects_override.json (effect+effectText のみ) > pool.json (default)
 async function loadMasters() {
   const [c, k, l, p, eo] = await Promise.all([
-    fetch('./cards.json?v=1.5.1aj').then(r => r.json()),
-    fetch('./combos.json?v=1.5.1aj').then(r => r.json()),
-    fetch('./lane_effects.json?v=1.5.1aj').then(r => r.json()),
-    fetch('./data/pool.json?v=1.5.1aj').then(r => r.json()).catch(() => []),
-    fetch('./effects_override.json?v=1.5.1aj').then(r => r.json()).catch(() => ({})),
+    fetch('./cards.json?v=1.5.1ak').then(r => r.json()),
+    fetch('./combos.json?v=1.5.1ak').then(r => r.json()),
+    fetch('./lane_effects.json?v=1.5.1ak').then(r => r.json()),
+    fetch('./data/pool.json?v=1.5.1ak').then(r => r.json()).catch(() => []),
+    fetch('./effects_override.json?v=1.5.1ak').then(r => r.json()).catch(() => ({})),
   ]);
   // pool 全カード ← effects_override で effect/effectText を上書き ← cards.json で完全 override
   const cardsByName = new Map();
@@ -2097,22 +2103,188 @@ function _renderHomeStats() {
   if (p) p.textContent = String(stats.pcbPoints || 0);
 }
 
-// ショップ modal (Phase 1 = 近日公開、 Phase 2 で 実装予定、 野沢さん指示 2026-05-06)
+// ショップ Phase 2: 衣装+マット販売、 アカウント保持 (Firebase /shopData/$uid/)
+let SHOP_ITEMS = { mats: [], costumes: [] };
+let _currentShopTab = 'mat';
+
+async function _loadShopItems() {
+  if (SHOP_ITEMS.mats.length > 0) return SHOP_ITEMS;
+  try {
+    const res = await fetch('./data/shop_items.json');
+    SHOP_ITEMS = await res.json();
+  } catch (e) {
+    console.error('shop items load failed', e);
+  }
+  return SHOP_ITEMS;
+}
+
 function openShop() {
   const m = document.getElementById('shop-modal');
   if (!m) return;
   m.hidden = false;
   _setBodyModalOpen();
-  // 所持ポイント反映 (Cloud)
   const stats = pcbCloud.stats || {};
   const el = document.getElementById('shop-points');
   if (el) el.textContent = String(stats.pcbPoints || 0);
+  _loadShopItems().then(() => _renderShopList());
 }
 function closeShop() {
   const m = document.getElementById('shop-modal');
   if (!m) return;
   m.hidden = true;
   _setBodyModalOpen();
+}
+
+function switchShopTab(tab) {
+  _currentShopTab = tab;
+  document.querySelectorAll('.cg-shop-tab').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === tab);
+  });
+  _renderShopList();
+}
+
+function _shopOwned() {
+  const sd = (pcbCloud.shopData || {});
+  return sd.owned || {};
+}
+function _shopEquipped() {
+  const sd = (pcbCloud.shopData || {});
+  return sd.equipped || { mat: null, costumes: {} };
+}
+
+function _renderShopList() {
+  const list = document.getElementById('shop-list');
+  if (!list) return;
+  const tab = _currentShopTab;
+  const owned = _shopOwned();
+  const equipped = _shopEquipped();
+  const points = (pcbCloud.stats || {}).pcbPoints || 0;
+  let items = [];
+  if (tab === 'mat') items = SHOP_ITEMS.mats || [];
+  else if (tab === 'costume') items = SHOP_ITEMS.costumes || [];
+  else if (tab === 'owned') {
+    items = [
+      ...((SHOP_ITEMS.mats || []).filter(i => owned[i.id])),
+      ...((SHOP_ITEMS.costumes || []).filter(i => owned[i.id])),
+    ];
+  }
+  if (items.length === 0) {
+    list.innerHTML = '<div class="cg-shop-empty">' + (tab === 'owned' ? '所持アイテムなし。 マット/衣装タブで購入してください。' : '商品がありません。') + '</div>';
+    return;
+  }
+  list.innerHTML = items.map(item => {
+    const isOwned = !!owned[item.id];
+    const isEquipped = (item.id.startsWith('mat_') && equipped.mat === item.id) ||
+                       (item.id.startsWith('cos_') && equipped.costumes && equipped.costumes[item.char] === item.id);
+    const canBuy = !isOwned && points >= item.price;
+    const btnLabel = isEquipped ? '✓ 適用中' : isOwned ? '🎯 適用' : `${item.price} pts で購入`;
+    const btnClass = isEquipped ? 'cg-shop-btn-equipped' : isOwned ? 'cg-shop-btn-apply' : (canBuy ? 'cg-shop-btn-buy' : 'cg-shop-btn-disabled');
+    const btnAction = isEquipped ? `unequipShopItem('${item.id}')` : isOwned ? `equipShopItem('${item.id}')` : `buyShopItem('${item.id}')`;
+    const previewBtn = `<button type="button" class="cg-shop-btn-preview" onclick="event.stopPropagation(); previewShopItem('${item.id}')">プレビュー</button>`;
+    return `
+      <div class="cg-shop-item ${isOwned ? 'cg-shop-item-owned' : ''}">
+        <div class="cg-shop-item-icon" style="${item.color ? `background:${item.color};` : ''}">${item.icon || '🎁'}</div>
+        <div class="cg-shop-item-body">
+          <div class="cg-shop-item-name">${item.name}${item.char ? ` <span class="cg-shop-item-char">(${item.char})</span>` : ''}</div>
+          <div class="cg-shop-item-desc">${item.desc || ''}</div>
+        </div>
+        <div class="cg-shop-item-actions">
+          ${previewBtn}
+          <button type="button" class="cg-shop-btn ${btnClass}" ${canBuy || isOwned ? '' : 'disabled'} onclick="${btnAction}">${btnLabel}</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function previewShopItem(itemId) {
+  const all = [...(SHOP_ITEMS.mats || []), ...(SHOP_ITEMS.costumes || [])];
+  const item = all.find(i => i.id === itemId);
+  if (!item) return;
+  const m = document.getElementById('shop-preview-modal');
+  const body = document.getElementById('shop-preview-body');
+  if (!m || !body) return;
+  const isMat = item.id.startsWith('mat_');
+  body.innerHTML = `
+    <h3 class="cg-modal-title">${item.icon || '🎁'} ${item.name}</h3>
+    ${item.char ? `<div class="cg-shop-preview-char">対象キャラ: ${item.char}</div>` : ''}
+    <div class="cg-shop-preview-desc">${item.desc || ''}</div>
+    <div class="cg-shop-preview-visual" style="${isMat ? `background:${item.color}; height:140px;` : 'height:140px; display:flex; align-items:center; justify-content:center; font-size:64px;'}">
+      ${isMat ? '' : (item.icon || '🎁')}
+    </div>
+    <div class="cg-shop-preview-note">※ 画像は順次差し替え予定 (野沢さん側生成中)</div>
+    <div class="cg-shop-preview-price">${item.price} pts</div>`;
+  m.hidden = false;
+  _setBodyModalOpen();
+}
+function closeShopPreview() {
+  const m = document.getElementById('shop-preview-modal');
+  if (!m) return;
+  m.hidden = true;
+  _setBodyModalOpen();
+}
+
+async function buyShopItem(itemId) {
+  const all = [...(SHOP_ITEMS.mats || []), ...(SHOP_ITEMS.costumes || [])];
+  const item = all.find(i => i.id === itemId);
+  if (!item) return;
+  const stats = pcbCloud.stats || {};
+  const points = stats.pcbPoints || 0;
+  if (points < item.price) {
+    alert(`ポイント不足です (所持 ${points} pts、 必要 ${item.price} pts)`);
+    return;
+  }
+  if (!confirm(`「${item.name}」 を ${item.price} pts で 購入しますか?`)) return;
+  // ポイント減算 + owned 追加 (Firebase 同期)
+  pcbCloud.stats.pcbPoints = points - item.price;
+  pcbCloud.shopData = pcbCloud.shopData || { owned: {}, equipped: { mat: null, costumes: {} } };
+  pcbCloud.shopData.owned = pcbCloud.shopData.owned || {};
+  pcbCloud.shopData.owned[itemId] = { boughtAt: Date.now() };
+  _pcbSet('stats', pcbCloud.stats);
+  _pcbSet('shopData', pcbCloud.shopData);
+  document.getElementById('shop-points').textContent = String(pcbCloud.stats.pcbPoints);
+  _renderHomeStats();
+  _renderShopList();
+}
+
+function equipShopItem(itemId) {
+  const all = [...(SHOP_ITEMS.mats || []), ...(SHOP_ITEMS.costumes || [])];
+  const item = all.find(i => i.id === itemId);
+  if (!item) return;
+  pcbCloud.shopData = pcbCloud.shopData || { owned: {}, equipped: { mat: null, costumes: {} } };
+  pcbCloud.shopData.equipped = pcbCloud.shopData.equipped || { mat: null, costumes: {} };
+  if (item.id.startsWith('mat_')) {
+    pcbCloud.shopData.equipped.mat = item.id;
+  } else if (item.id.startsWith('cos_')) {
+    pcbCloud.shopData.equipped.costumes = pcbCloud.shopData.equipped.costumes || {};
+    pcbCloud.shopData.equipped.costumes[item.char] = item.id;
+  }
+  _pcbSet('shopData', pcbCloud.shopData);
+  _applyShopEquips();
+  _renderShopList();
+}
+
+function unequipShopItem(itemId) {
+  const all = [...(SHOP_ITEMS.mats || []), ...(SHOP_ITEMS.costumes || [])];
+  const item = all.find(i => i.id === itemId);
+  if (!item) return;
+  pcbCloud.shopData = pcbCloud.shopData || { owned: {}, equipped: { mat: null, costumes: {} } };
+  if (item.id.startsWith('mat_')) {
+    pcbCloud.shopData.equipped.mat = null;
+  } else if (item.id.startsWith('cos_')) {
+    if (pcbCloud.shopData.equipped.costumes) delete pcbCloud.shopData.equipped.costumes[item.char];
+  }
+  _pcbSet('shopData', pcbCloud.shopData);
+  _applyShopEquips();
+  _renderShopList();
+}
+
+function _applyShopEquips() {
+  // マット適用 (盤面背景 CSS)
+  const equipped = _shopEquipped();
+  const mat = (SHOP_ITEMS.mats || []).find(m => m.id === equipped.mat);
+  document.documentElement.style.setProperty('--cg-mat-color', mat ? mat.color : '');
+  document.body.classList.toggle('cg-mat-active', !!mat);
+  // 衣装適用は キャラ image差替で _renderHand 等で 適用 (TODO Phase 2.1)
 }
 
 // AI レベル別 ポイント (野沢さん指示 2026-05-06、 アカウント単位累積、 ショップで使用)
