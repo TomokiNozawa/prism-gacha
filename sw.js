@@ -7,7 +7,7 @@
 //
 // HTML/JSON/Firebase API はキャッシュせず常にネットワーク優先 (更新即反映+認証/DBの鮮度維持)。
 
-const SW_VERSION = '1.5.1av';  // 画像永続cache 分離 (Ver bump 時の全DL し直し問題を解消、 野沢さん指摘 2026-05-03)
+const SW_VERSION = '1.5.1aw';  // 画像永続cache 分離 (Ver bump 時の全DL し直し問題を解消、 野沢さん指摘 2026-05-03)
 const STATIC_CACHE = `prismaera-static-${SW_VERSION}`;
 const BGM_CACHE    = `prismaera-bgm-${SW_VERSION}`;
 const LOC_CACHE    = `prismaera-loc-${SW_VERSION}`;
@@ -211,14 +211,14 @@ async function makeRangeResponse(cached, rangeHeader) {
 // OFFLINE_SAVED は手動DL なので revalidate 不要 (バージョン更新は SW_VERSION bump で全 cache 再構築)。
 async function staleWhileRevalidate(req, cacheName) {
   // 手動DL cache を最優先で返す (cache hit → 即返し、 ネットワーク不要)
-  // ignoreSearch:true で cache buster (?v=1.5.1av) の差異も許容 → 「DL したのに別 buster で読まれて遅い」 事故防止
+  // ignoreSearch:true で cache buster (?v=1.5.1aw) の差異も許容 → 「DL したのに別 buster で読まれて遅い」 事故防止
   try {
     const savedCached = await caches.match(req, { cacheName: OFFLINE_SAVED, ignoreSearch: true });
     if (savedCached) return savedCached;
   } catch (e) {}
   const cache = await caches.open(cacheName);
   // ignoreSearch:true で cache buster 差異許容 (野沢さん指摘 2026-05-03 「Ver変わるたび全DL害悪」 の根本対策)
-  // 同 path で cache hit すれば再DL不要、 query (?v=1.5.1av) は無視
+  // 同 path で cache hit すれば再DL不要、 query (?v=1.5.1aw) は無視
   const cached = await cache.match(req, { ignoreSearch: true });
   // cached あり: 即返し、 background で **条件付き** revalidate (ETag/Last-Modified 利用)
   // 2026-05-03: 「同名ファイル名で更新があった場合だけ更新」 対応 (野沢さん指摘)
