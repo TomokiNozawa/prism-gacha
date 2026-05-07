@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.5.1ap — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.5.1aq — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -7725,7 +7725,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
     { scene: '2-3',  marker: '巨大な珊瑚の都市が広がっていた',    position: 'after',  img: '/images/locations/s1c2/thumb/aquasis_entrance_thumb.webp' },
     { scene: '2-3',  marker: '宮殿の謁見の間',                    position: 'before', img: '/images/locations/s1c2/thumb/aquasis_throne_thumb.webp' },
     // 第三幕 3-3 波紋の聖女 (旧 5-3 → 3-3): 覚醒の絶頂を挿絵で (キャラカットイン削除)
-    { scene: '3-3',  marker: '光の中で、私の鎧が変容した',      position: 'after',  img: '/images/locations/s1c2/thumb/ripple_saint_awakening_thumb.webp' },
+    { scene: '3-3',  marker: '光の中で私の鎧が変容した',      position: 'after',  img: '/images/locations/s1c2/thumb/ripple_saint_awakening_thumb.webp' },
   ],
   's1c4': [
     // 第4章 挿絵 (16:9横、 全 8枚)
@@ -7737,7 +7737,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
     { scene: '2-1',  marker: '互いの胸前で手を組み合わせた',                       position: 'after',  img: '/images/locations/s1c4/thumb/artemis_greyle_first_meeting_thumb.webp' },
     // 第二幕 2-2: 氷帝グレイル vs 龍帝アルテミス 一騎打ち
     // (frost_swordmaster_sparring 挿絵は意味不明として削除 — 野沢さん指摘 2026-05-03、 ファイル自体は将来再利用に備えて保持)
-    { scene: '2-2',  marker: '五合目で、私は双剣を交差させた',                   position: 'before', img: '/images/locations/s1c4/thumb/duel_ice_vs_dragon_thumb.webp' },
+    { scene: '2-2',  marker: '五合目で私は双剣を交差させた',                   position: 'before', img: '/images/locations/s1c4/thumb/duel_ice_vs_dragon_thumb.webp' },
     // 第二幕 2-3: アルテミス&ヒノオウ 千年前の回想 (戦友が並ぶ夜)
     { scene: '2-3',  marker: 'ふと、古い戦場の記憶が不意に蘇った',           position: 'after',  img: '/images/locations/s1c4/thumb/flashback_artemis_hinoo_thumb.webp' },
     // 第三幕 3-1: 空挺城ゼノニア 三国会談シーン (ヴァーレ女皇)
@@ -7762,7 +7762,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
     // 第三幕 3-2: 影織りの工房 (リオラエル+ルナリア+シオン、 章テーマ視覚化)
     { scene: '3-2',  marker: '銀の糸と黒の糸が完全に等価に交差していた',     position: 'after',  img: '/images/locations/s1c5/thumb/shadow_loom_workshop_thumb.webp' },
     // 第四幕 4-1: 仮面を外す瞬間 (シオン素顔露出、 立会人三人沈黙)
-    { scene: '4-1',  marker: '月鏡に、俺の素顔が映った',                            position: 'after',  img: '/images/locations/s1c5/thumb/mask_unveil_moment_thumb.webp' },
+    { scene: '4-1',  marker: '月鏡に俺の素顔が映った',                            position: 'after',  img: '/images/locations/s1c5/thumb/mask_unveil_moment_thumb.webp' },
     // 第四幕 4-1: 山場 分離の儀式 (シオン+シ・ロエン+ラナス+ルミナ+アスター、 二重月夜)
     { scene: '4-1',  marker: '月鏡の表面が',                                          position: 'before', img: '/images/locations/s1c5/thumb/mask_separation_ritual_thumb.webp' },
     // 第四幕 4-1: 山場ピーク 手のひらを合わせる瞬間 (シ・ロエン左/シオン右、 七色の原虹)
@@ -7795,14 +7795,14 @@ const STORY_LOCATION_INLINE_CONFIG = {
     // 4-1 古龍王の予兆: ファラーが砂を風に放ち、 巨大な古龍王のシルエットが揺らぐ (S2 伏線)
     { scene: '4-1',  marker: 'ファラーは砂を一握り掬い、風に放った',   position: 'after',  img: '/images/locations/s1c3/thumb/lost_dragon_king_omen_thumb.webp' },
     // 4-2 別れの朝: ヴィル+サハナが紫水晶を分け合う最強エモシーン (七色光、 七色絹紐、 「これで二人で一つ」)
-    { scene: '4-2',  marker: '朝日の中で、紫水晶が七色に輝いた',     position: 'after',  img: '/images/locations/s1c3/thumb/farewell_thumb.webp' },
+    { scene: '4-2',  marker: '朝日の中で紫水晶が七色に輝いた',     position: 'after',  img: '/images/locations/s1c3/thumb/farewell_thumb.webp' },
   ],
 };
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // version 完全同期 (野沢さん指示 2026-05-06): bump_version.py が自動で更新する。
 // 旧 date-suffix '20260504o' を 5/6 で見つけた事故を契機に version-based に統一。
-const IMG_CACHE_VERSION = '1.5.1ap';
+const IMG_CACHE_VERSION = '1.5.1aq';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
