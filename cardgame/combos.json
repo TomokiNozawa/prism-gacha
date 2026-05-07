@@ -2679,21 +2679,6 @@
     "chapter": "s1c7"
   },
   {
-    "id": "duo_s1c7_384825ae_34614785",
-    "name": "古龍の使い",
-    "chars": [
-      "古龍王の使者 アグル",
-      "古龍王 グラン"
-    ],
-    "condition": "same_lane",
-    "effect": {
-      "target": "self_lane",
-      "power": 4
-    },
-    "flavor": "古龍王の使者と古龍王、 千年血脈が戦場に降臨する。",
-    "chapter": "s1c7"
-  },
-  {
     "id": "duo_s1c7_41f615a7_e02db677",
     "name": "凍空の鼓動",
     "chars": [
