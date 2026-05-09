@@ -2303,66 +2303,6 @@
     "chapter": "s1c6"
   },
   {
-    "id": "duo_jp48ca70_jp089515",
-    "name": "千年前の旧縁 (月影宮で共祈)",
-    "chars": [
-      "千年語り ヴィオレナ",
-      "セラフィエル"
-    ],
-    "condition": "same_lane",
-    "effect": {
-      "target": "self_lane",
-      "power": 3
-    },
-    "flavor": "千年前の旧縁 (月影宮で共祈)。",
-    "chapter": "s1c6"
-  },
-  {
-    "id": "duo_jp48ca70_jpa5f65c",
-    "name": "千年前 月影宮で共祈の証人",
-    "chars": [
-      "千年語り ヴィオレナ",
-      "千夜姫 カグヤ"
-    ],
-    "condition": "same_lane",
-    "effect": {
-      "target": "self_lane",
-      "power": 3
-    },
-    "flavor": "千年前 月影宮で共祈の証人。",
-    "chapter": "s1c6"
-  },
-  {
-    "id": "duo_jp48ca70_jpadfeb4",
-    "name": "千年前同期 (観測者の前から在る同世代)",
-    "chars": [
-      "千年語り ヴィオレナ",
-      "地底市の母 リオラエル"
-    ],
-    "condition": "same_lane",
-    "effect": {
-      "target": "self_lane",
-      "power": 3
-    },
-    "flavor": "千年前同期 (観測者の前から在る同世代)。",
-    "chapter": "s1c6"
-  },
-  {
-    "id": "duo_jp48ca70_jpf03588",
-    "name": "実母と娘 (千年血脈)",
-    "chars": [
-      "千年語り ヴィオレナ",
-      "イリス"
-    ],
-    "condition": "same_lane",
-    "effect": {
-      "target": "self_lane",
-      "power": 3
-    },
-    "flavor": "実母と娘 (千年血脈)。",
-    "chapter": "s1c6"
-  },
-  {
     "id": "duo_jp4e55d6_jp1108da",
     "name": "見習い同期",
     "chars": [
@@ -3009,5 +2949,65 @@
     },
     "flavor": "voidtowerに属する者が場に三名揃う時、 派閥の力が場に流れる。",
     "chapter": "s1c7"
+  },
+  {
+    "id": "duo_jp5262aa_jpf03588",
+    "name": "実母と娘 (千年血脈)",
+    "chars": [
+      "千年語り ヴィオレナ",
+      "イリス"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "実母と娘 (千年血脈)。",
+    "chapter": "s1c6"
+  },
+  {
+    "id": "duo_jp5262aa_jp089515",
+    "name": "千年前の旧縁 (月影宮で共祈)",
+    "chars": [
+      "千年語り ヴィオレナ",
+      "セラフィエル"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "千年前の旧縁 (月影宮で共祈)。",
+    "chapter": "s1c6"
+  },
+  {
+    "id": "duo_jp5262aa_jpadfeb4",
+    "name": "千年前同期 (観測者の前から在る同世代)",
+    "chars": [
+      "千年語り ヴィオレナ",
+      "地底市の母 リオラエル"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "千年前同期 (観測者の前から在る同世代)。",
+    "chapter": "s1c6"
+  },
+  {
+    "id": "duo_jp5262aa_jpa5f65c",
+    "name": "千年前 月影宮で共祈の証人",
+    "chars": [
+      "千年語り ヴィオレナ",
+      "千夜姫 カグヤ"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "千年前 月影宮で共祈の証人。",
+    "chapter": "s1c6"
   }
 ]
