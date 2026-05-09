@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.5.1bi — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.5.1bj — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -7773,7 +7773,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
     // 第一幕 1-2: セラフィエル単独地上降臨、 イリスとの対面
     { scene: '1-2',  marker: 'イリスは招待状を受け取った',                   position: 'after',  img: '/images/locations/s1c6/thumb/seraph_descent_to_iris_thumb.webp' },
     // 第二幕 2-1: 千年ぶりの再会 (セラフィエル+ヴィオレナ、 中央神殿聖堂)
-    { scene: '2-1',  marker: 'ヴィオレナの声は千年前と全く同じだった',             position: 'after',  img: '/images/locations/s1c6/thumb/shrine_oracle_reunion_thumb.webp' },
+    { scene: '2-1',  marker: 'ヴィオレナの声には半世紀分の歳月が重なり',             position: 'after',  img: '/images/locations/s1c6/thumb/shrine_oracle_reunion_thumb.webp' },
     // 第三幕 3-2: 「最初の羽」 回想 (プリズマがセラフィエルを生んだ古代の場面)
     { scene: '3-2',  marker: '私の六枚の翼が一つずつほどけていった',             position: 'after',  img: '/images/locations/s1c6/thumb/seraph_first_wing_memory_thumb.webp' },
     // 第四幕 4-1: 山場 七座満つる儀式宣言 (4人初集合、 第四席着座)
@@ -7800,7 +7800,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // version 完全同期 (野沢さん指示 2026-05-06): bump_version.py が自動で更新する。
 // 旧 date-suffix '20260504o' を 5/6 で見つけた事故を契機に version-based に統一。
-const IMG_CACHE_VERSION = '1.5.1bi';
+const IMG_CACHE_VERSION = '1.5.1bj';
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -10620,17 +10620,34 @@ function updateAccountButton() {
 // - 既存ユーザーも (firstLoginGachaConsumed=false なら) 1回引ける = v1.5.1 リリース時点で未消化扱い
 // - race防止: Firebase RTDB transaction で atomic に false → true write、 別端末 同時実行を1回のみ保証
 
-// ログイン直後 cloud state pull 完了前は バナー非表示固定
-// (別端末で 既消化なのに 一瞬 バナー出て クリックすると 「消化済」 toast 表示されるバグ対策、
-//  野沢さん指摘 2026-05-10「アカウント1回限定にしてほしい、 端末1回限定になっている」)
+// アカウント単位化の徹底 (野沢さん指摘 2026-05-10、 2回目 = 前回修正でも未解決):
+// localStorage の古い値を信じない、 必ず Firebase から **直接 fetch** して判定。
+// → 別端末で 既消化済なら バナーを 確実に 非表示。 cloudStateLoaded フラグだけでは
+//    onAuthReady の if 条件 (cloudTotal>0||localHasProgress) を 通らないと merge されず、
+//    ガチャ消化済 (cloud真) かつ 当該ユーザーで まだ何もしてない 別端末 (local空 + cloudTotal=10>0) の
+//    エッジケースで バナー出るリスクあり → fetch 直撃で 完全防止。
 let _cloudStateLoaded = false;
 
-function updateFirstLoginBannerVisibility() {
+async function updateFirstLoginBannerVisibility() {
   const banner = document.getElementById('first-login-banner');
   if (!banner) return;
-  // 表示条件: ログイン済 ＆ cloud state pull 完了 ＆ 未消化 で表示
-  const shouldShow = !!authUser && _cloudStateLoaded && !state.firstLoginGachaConsumed;
-  banner.style.display = shouldShow ? '' : 'none';
+  // 未ログインは 確実に非表示
+  if (!authUser) { banner.style.display = 'none'; return; }
+  // Firebase から 最新値を 必ず fetch (= 別端末で 既消化 でも 確実に 反映)
+  if (fbDb) {
+    try {
+      const snap = await fbDb.ref('prism-gacha/users/' + authUser.uid + '/state/firstLoginGachaConsumed').once('value');
+      if (snap.val() === true) {
+        // cloud で 既消化 → local も 同期して 永続化、 バナー非表示
+        state.firstLoginGachaConsumed = true;
+        try { saveState(); } catch (e) {}
+        banner.style.display = 'none';
+        return;
+      }
+    } catch (e) { console.warn('[first-login] cloud fetch error:', e); }
+  }
+  // cloud で 未消化 (or fetch 失敗) ＆ local も 未消化 のときのみ 表示
+  banner.style.display = state.firstLoginGachaConsumed ? 'none' : '';
 }
 
 let _firstLoginGachaInFlight = false;
@@ -10643,10 +10660,18 @@ async function triggerFirstLoginGacha() {
     showAccountModal();
     return;
   }
-  // cloud state pull 未完了なら 引かせない (アカウント単位 排他の 二重防御)
-  if (!_cloudStateLoaded) {
-    showToast('読み込み中... 少しお待ちください');
-    return;
+  // ボタン押下時に Firebase で 最新値を 直接 fetch (= 別端末で 既消化なら ここで弾く、 アカウント単位化の 三重防御)
+  if (fbDb) {
+    try {
+      const snap = await fbDb.ref('prism-gacha/users/' + authUser.uid + '/state/firstLoginGachaConsumed').once('value');
+      if (snap.val() === true) {
+        state.firstLoginGachaConsumed = true;
+        try { saveState(); } catch (e) {}
+        showToast('初回限定ガチャは消化済みです');
+        updateFirstLoginBannerVisibility();
+        return;
+      }
+    } catch (e) { console.warn('[first-login] pre-pull fetch error:', e); }
   }
   if (state.firstLoginGachaConsumed) {
     showToast('初回限定ガチャは消化済みです');
