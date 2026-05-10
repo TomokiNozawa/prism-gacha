@@ -1,7 +1,7 @@
 {
-  "version": "1.5.2a",
+  "version": "1.6.0a",
   "lastDevSuffix": "a",
-  "releasedAt": "2026-05-10T12:05:28+09:00",
+  "releasedAt": "2026-05-10T12:30:00+09:00",
   "pendingChangelog": [],
   "changelog": [
     {
@@ -16,7 +16,6 @@
       "version": "1.6.0",
       "date": "2026-05-10T12:00:00+09:00",
       "type": "major",
-      "scheduled": true,
       "notes": [
         "🌌 第6章「七座満つる」 を公開しました\n　・主人公: 天使聖騎士 セラフィエル\n　・新キャラ20体解放 + 凸秘話44本公開\n　・PCBにキャラ20体 + コンボ追加\n　・ワールドマップ・相関図を更新\n　・背景・挿絵13枚追加\n　・第6章テーマBGM「Prism Shrine」 を追加 + 派閥BGM「Prism Kagura」 三層分離",
         "🎰 第6章ピックアップガチャ開催中\n　・05/10(土)12:00 ~ 05/17(土)23:59",

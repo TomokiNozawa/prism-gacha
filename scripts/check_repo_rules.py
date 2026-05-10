@@ -3046,6 +3046,68 @@ n7_54 = check_persist_time_word_char_setting()
 print(f"  ルール7-54 (永続時間表現 vs キャラ設定): {n7_54}件 検査 [BLOCKER]")
 
 
+def check_pickup_chapter_target_sync():
+    """ルール7-55 (BLOCKER、 2026-05-10 v1.6.0 公開直前 漏れ事故 後追加):
+
+    main branch で commit する時、 `script.js` の `const PICKUP_CHAPTER_TARGET = 's1cN'` が
+    version.json の **公開対象章** と 一致するか 検査。
+
+    判定ロジック:
+    - 対象章 = scheduledRelease.version あれば そこから 抽出 / なければ data.version から 抽出
+    - v1.M.X → s1cM の 対応 (例: v1.6.0 → s1c6、 v1.5.0 → s1c5)
+    - PICKUP_CHAPTER_TARGET ≠ 対象章 なら BLOCKER
+
+    背景: 2026-05-10 v1.6.0 (s1c6) main release で PICKUP_CHAPTER_TARGET = 's1c5' のまま 漏れ →
+    野沢さん指摘「ピックアップの表記が第5章のままになってるけどチェックしたの?」 強い指摘。
+    PICKUP_CHAPTER_TARGET は 単独 const 変数で bump_version.py が 触らない領域、 章 bump で
+    必ず 1セットで 手動更新する必要、 機械化して 漏れ防止。
+
+    詳細: CLAUDE.md feedback_chapter_release_checklist.md ⑬-2
+    """
+    if _current_branch() != "main":
+        return 0
+    ver_path = ROOT / "version.json"
+    script_path = ROOT / "script.js"
+    if not ver_path.exists() or not script_path.exists():
+        return 0
+    try:
+        cur_data = json.load(ver_path.open(encoding="utf-8"))
+    except Exception:
+        return 0
+    # 対象 version 抽出 (scheduledRelease 優先、 なければ data.version)
+    target_ver = (cur_data.get("scheduledRelease") or {}).get("version") or cur_data.get("version", "")
+    m = re.match(r"^v?(\d+)\.(\d+)\.", target_ver)
+    if not m:
+        return 0
+    target_chapter = int(m.group(2))
+    if target_chapter < 1:
+        return 0
+    target_key = f"s{m.group(1)}c{target_chapter}"
+    # PICKUP_CHAPTER_TARGET 抽出
+    try:
+        script_text = script_path.read_text(encoding="utf-8")
+    except Exception:
+        return 0
+    m2 = re.search(r"const\s+PICKUP_CHAPTER_TARGET\s*=\s*['\"]([^'\"]+)['\"]", script_text)
+    if not m2:
+        return 0
+    actual = m2.group(1)
+    if actual != target_key:
+        violations.append(
+            f"[ルール7-55 PICKUP_CHAPTER_TARGET 同期漏れ BLOCKER] main で commit する PICKUP_CHAPTER_TARGET='{actual}' が\n"
+            f"      version.json の 対象章 '{target_key}' (= v{target_ver}) と 不一致。\n"
+            f"      → script.js L1738 付近 `const PICKUP_CHAPTER_TARGET = '{actual}'` を '{target_key}' に手動更新\n"
+            f"      → 章 release では bump_version.py が 触らない 単独 const、 1セットで 手動更新 必須\n"
+            f"      → 詳細: CLAUDE.md feedback_chapter_release_checklist.md ⑬-2"
+        )
+        return 1
+    return 0
+
+
+n7_55 = check_pickup_chapter_target_sync()
+print(f"  ルール7-55 (PICKUP_CHAPTER_TARGET 章同期): {n7_55}件 検査 [BLOCKER]")
+
+
 def check_box_sync_drift():
     """ルール7-39 (WARNING 2026-05-06 野沢さん指示「必要な自動チェックに追加してください」): prism-gacha-work の
     主要ファイル (prompt/ STORY/ script.js sw.js index.html) と Box 内 (~/Box/.../claude/prismaera/) との
