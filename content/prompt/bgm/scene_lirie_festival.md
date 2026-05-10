@@ -92,7 +92,7 @@ only, fantasy game music aesthetic, energetic cheerful cinematic.
   - 調性: 章 = D major + Lydian/Mixolydian (神聖な上昇)、 派閥 = D major + Lydian/Mixolydian (明るい祝祭) — 同じ key 系だが Mood の方向性が異なる (厳粛 vs 楽しい)
 - 既存派閥 BGM との整合: prism-aether (ゼノニア BPM 116) や prism-niflheim (ニーヴル BPM 112) と同等以上のアップテンポ、 巫女連邦は神楽舞ベースで「明るい祝祭」 が独自性
 - 例外として 教会 (BPM 70 processional) / アクアシス (BPM 60 underwater current) は世界観必然で維持、 巫女連邦は **明るい神楽舞 = 速めデフォルト** が整合
-- 千年血脈 (ヴィオレナ・イリス・S2C4 接続) は 「mother-to-daughter で受け継がれる温かい伝承の喜び」 として bright chorus + solo voice で表現
+- 継承血脈 (ヴィオレナ・イリス・S2C4 接続) は 「mother-to-daughter で受け継がれる温かい伝承の喜び」 として bright chorus + solo voice で表現
 
 ## 生成手順
 
