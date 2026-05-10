@@ -1,8 +1,9 @@
 {
-  "version": "1.5.1bo",
-  "lastDevSuffix": "bo",
+  "version": "1.5.1",
+  "lastDevSuffix": "",
   "releasedAt": "2026-05-06T18:04:05+09:00",
-  "pendingChangelog": [
+  "pendingChangelog": [],
+  "changelog": [
     {
       "version": "1.6.0",
       "date": "2026-05-10T12:00:00+09:00",
@@ -13,9 +14,7 @@
         "🎰 第6章ピックアップガチャ開催中\n　・05/10(土)12:00 ~ 05/17(土)23:59",
         "🐛 いくつかのバグを修正しました"
       ]
-    }
-  ],
-  "changelog": [
+    },
     {
       "version": "1.5.1",
       "date": "2026-05-06T18:04:05+09:00",
@@ -258,5 +257,10 @@
         "ガチャ音をキャラレア度別に刷新(R=単音〜LR=5音+choir pad)"
       ]
     }
-  ]
+  ],
+  "scheduledRelease": {
+    "version": "1.6.0",
+    "at": "2026-05-10T12:00:00+09:00",
+    "title": "第6章「七座満つる」 公開"
+  }
 }
