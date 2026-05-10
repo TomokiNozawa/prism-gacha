@@ -73,7 +73,7 @@ BPM 118, key D major with Lydian and Mixolydian color (sacred ascending flavor),
 
 - 章テーマ「違っていても、 同じ目的を持つ仲間でいられる」 を 「天上の観測者 (silver flute)」 + 「地上の巫女連邦 (shakuhachi+koto)」 + 「七色合唱の和 (聖+俗の融合)」 の三層構造で表現
 - LR_プリズマ凸秘話「セラフィエルという『羽』」 を music-box motif (記憶モチーフ) で 軽く差し込み (3-2 回想シーンとの BGM 整合)
-- ヴィオレナ千年血脈 (S2C4 / S2C6 への伏線) を solo violin lead (millennium-mother melody) で表現
+- ヴィオレナ継承血脈 (S2C4 / S2C6 への伏線) を solo violin lead (half-century mother melody) で表現
 - 4-1 山場の七座儀式は「七層合唱の上昇」 + taiko ceremonial beat の高揚で頂点
 - 章末の黒月予兆 (S1C7 引き) はあえて BGM では強調せず、 章末の余韻に留める (本曲は s1c6 の祝祭性を保つ)
 

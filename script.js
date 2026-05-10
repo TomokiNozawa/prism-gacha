@@ -4443,7 +4443,7 @@ const CHAR_FACTION = {
   '銀霜の歌姫':                  { f: 'silver',  dx:   55, dy:  170 },  // 最下右
   // S1C6 巫女連邦リーリエ (s1c6、 20体)
   'イリス':                       { f: 'shrines', dx:    0, dy: -180 },  // 最上中央 (第四席着座)
-  '千年語り ヴィオレナ':         { f: 'shrines', dx: -160, dy: -100 },  // 上左 (千年級母)
+  '千年語り ヴィオレナ':         { f: 'shrines', dx: -160, dy: -100 },  // 上左 (半世紀級長老)
   '鳳神巫女 ホムラ':              { f: 'shrines', dx:  160, dy: -100 },  // 上右 (戦巫女)
   '大巫女 ヴィーナ':              { f: 'shrines', dx: -200, dy:    0 },  // 中左 (長老)
   '主祭 リアラ':                  { f: 'shrines', dx:  200, dy:    0 },  // 中右 (儀典官)
@@ -4666,15 +4666,15 @@ const RELATIONS = [
   { a: '銀霜の歌姫',                   b: '銀霜の工房娘',              type: 'fellow', label: '祭夜の街娘たち' },                          // 1-3 祭夜の灯と歌
   { a: '銀霜の歌姫',                   b: '詠聖 ベル',                 type: 'fellow', label: '同じ調べを歌う者' },                        // 1-3 シオンが「ベルの歌に似ている」 と聞く
   // ===== S1C6 関係 (巫女連邦リーリエ — 七座満つる) =====
-  { a: '千年語り ヴィオレナ',         b: 'イリス',                   type: 'blood',     label: '実母と娘 (千年血脈)' },                       // 全章 母娘
+  { a: '千年語り ヴィオレナ',         b: 'イリス',                   type: 'blood',     label: '実母と娘 (継承血脈)' },                       // 全章 母娘
   { a: 'イリス',                       b: 'セラフィエル',             type: 'fellow',    label: '七座の同胞 (第四席着座)' },                   // 4-1 山場
   { a: 'イリス',                       b: '千夜姫 カグヤ',            type: 'fellow',    label: '七座の同胞' },                                // 4-1 山場
   { a: 'イリス',                       b: '星海のノクス',             type: 'fellow',    label: '七座の同胞' },                                // 4-1 山場
   { a: '鳳神巫女 ホムラ',              b: 'イリス',                   type: 'master',    aRole: '剣の師', bRole: '弟子・姉妹同然' },           // 3-1 試練の場
-  { a: '千年語り ヴィオレナ',         b: 'セラフィエル',             type: 'fellow',    label: '千年前の旧縁 (月影宮で共祈)' },               // 2-1 再会
-  { a: '千年語り ヴィオレナ',         b: '地底市の母 リオラエル',    type: 'fellow',    label: '千年前同期 (観測者の前から在る同世代)' },     // カグヤ千年日記の記録 (3-3)
-  { a: '千年語り ヴィオレナ',         b: '千夜姫 カグヤ',            type: 'fellow',    label: '千年前 月影宮で共祈の証人' },                 // 3-3 千年日記
-  { a: '鳳神巫女 ホムラ',              b: '焔帝 ヒノオウ',            type: 'fellow',    label: '朱の鳳凰の系譜 (千年職能)' },                 // 千年職能の並列
+  { a: '千年語り ヴィオレナ',         b: 'セラフィエル',             type: 'fellow',    label: '半世紀前の旧縁 (月影宮で共祈)' },             // 2-1 再会
+  { a: '千年語り ヴィオレナ',         b: '地底市の母 リオラエル',    type: 'fellow',    label: '別々の夜に月影宮を辞退した系譜の重なり' },    // カグヤ千年日記の記録 (3-3、 千年前リオラエル + 半世紀前ヴィオレナ)
+  { a: '千年語り ヴィオレナ',         b: '千夜姫 カグヤ',            type: 'fellow',    label: '半世紀前 月影宮で観測の証人' },               // 3-3 カグヤは古き観測者として 半世紀前のヴィオレナ辞退を観測
+  { a: '鳳神巫女 ホムラ',              b: '焔帝 ヒノオウ',            type: 'fellow',    label: '朱の鳳凰の系譜 (継承職能)' },                 // 朱の鳳凰の継承職能、 ホムラ自身は27歳通常人間
   { a: '大巫女 ヴィーナ',              b: 'イリス',                   type: 'master',    aRole: '指導者', bRole: '弟子・幼少からの教え子' },   // 2-2 千年伝承
   { a: '大巫女 ヴィーナ',              b: '高巫女見習い カヤ',        type: 'master',    aRole: '直接の師', bRole: '直弟子' },                 // SR カヤの直弟子
   { a: '主祭 リアラ',                  b: 'イリス',                   type: 'fellow',    label: '七座儀式の儀典官' },                          // 4-1 儀式
@@ -7800,7 +7800,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // version 完全同期 (野沢さん指示 2026-05-06): bump_version.py が自動で更新する。
 // 旧 date-suffix '20260504o' を 5/6 で見つけた事故を契機に version-based に統一。
-const IMG_CACHE_VERSION = '1.6.0';
+const IMG_CACHE_VERSION = "1.6.0";
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -11075,6 +11075,9 @@ function _scheduleVersionRefresh(data) {
   // 切替時刻の +1 秒で 再 check (waiting で精度確保)
   _scheduledReleaseFireTimer = setTimeout(() => {
     checkPrismaeraVersion();
+    if (typeof _refreshPickupChapter === 'function') _refreshPickupChapter();
+    if (typeof _refreshChapterReleaseLocks === 'function') _refreshChapterReleaseLocks();
+    if (typeof _renderHomeNextTeaser === 'function') _renderHomeNextTeaser();
     if (typeof loadNotifications === 'function') loadNotifications();
   }, wait + 1000);
   console.log('[scheduled] firing in', Math.round(wait / 1000), 'sec for v' + data.scheduledRelease.version);
