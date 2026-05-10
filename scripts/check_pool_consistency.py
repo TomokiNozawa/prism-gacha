@@ -38,7 +38,7 @@ SCRIPT_JS = ROOT / "script.js"
 ADMIN_HTML = ROOT / "admin.html"
 INDEX_HTML = ROOT / "index.html"
 VERSION_JSON = ROOT / "version.json"
-STORY_DIR = ROOT / "STORY"
+STORY_DIR = ROOT / "content" / "story"
 IMAGES_DIR = ROOT / "images"
 
 
@@ -81,7 +81,7 @@ def parse_char_factions(text: str) -> Counter[str]:
 
 
 def parse_story_files(text: str) -> dict[str, str]:
-    """const STORY_FILES = { s1c1: { ..., file: 'STORY/s1c1.md' }, ... } → {sid: path}"""
+    """const STORY_FILES = { s1c1: { ..., file: 'content/story/s1c1.md' }, ... } → {sid: path}"""
     m = re.search(r"const\s+STORY_FILES\s*=\s*\{(.*?)\n\}\s*;", text, re.DOTALL)
     if not m:
         return {}

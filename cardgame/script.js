@@ -142,9 +142,10 @@ function _pcbSet(path, value) {
 
 async function pcbCloudInit() {
   // Cloud から全データロード
-  const [stats, decks, activeSlot, history, paused, bo3Toggle, bgmMute] = await Promise.all([
+  const [stats, decks, activeSlot, history, paused, bo3Toggle, bgmMute, shopData] = await Promise.all([
     _pcbGet('stats'), _pcbGet('decks'), _pcbGet('activeSlot'),
     _pcbGet('history'), _pcbGet('paused'), _pcbGet('bo3Toggle'), _pcbGet('bgmMute'),
+    _pcbGet('shopData'),
   ]);
   pcbCloud.stats      = stats || {};
   pcbCloud.decks      = decks || {};
@@ -153,7 +154,12 @@ async function pcbCloudInit() {
   pcbCloud.paused     = paused || null;
   pcbCloud.bo3Toggle  = bo3Toggle === true;
   pcbCloud.bgmMute    = bgmMute === true;
+  pcbCloud.shopData   = shopData || { owned: {}, equipped: { mat: null, costumes: {} } };
   pcbCloud.loaded     = true;
+  // 衣装+マットを 起動時に適用
+  if (typeof _applyShopEquips === 'function') {
+    _loadShopItems().then(() => _applyShopEquips());
+  }
   // localStorage の既存データ migration (Cloud が空 + localStorage に既存データ → Cloud に移行)
   pcbMigrateFromLocalStorage();
   // UI 再描画
@@ -255,7 +261,7 @@ function _refreshAccountGate() {
 }
 
 // ===== BGM (1曲ループ、 ミュート Cloud 保存) =====
-const BGM_URL = '/assets/bgm/prism-cards.mp3';
+const BGM_URL = '/media/audio/bgm/prism-cards.mp3';
 let cgBgm = null;
 
 // スマホ電池対策: タブ非アクティブ時に BGM 停止 (visibilitychange)
@@ -321,11 +327,11 @@ function updateMuteUI() {
 // 優先順位: cards.json (手書き完全override) > effects_override.json (effect+effectText のみ) > pool.json (default)
 async function loadMasters() {
   const [c, k, l, p, eo] = await Promise.all([
-    fetch('./cards.json?v=1.5.1').then(r => r.json()),
-    fetch('./combos.json?v=1.5.1').then(r => r.json()),
-    fetch('./lane_effects.json?v=1.5.1').then(r => r.json()),
-    fetch('./data/pool.json?v=1.5.1').then(r => r.json()).catch(() => []),
-    fetch('./effects_override.json?v=1.5.1').then(r => r.json()).catch(() => ({})),
+    fetch('./cards.json?v=1.5.1bo').then(r => r.json()),
+    fetch('./combos.json?v=1.5.1bo').then(r => r.json()),
+    fetch('./lane_effects.json?v=1.5.1bo').then(r => r.json()),
+    fetch('./data/pool.json?v=1.5.1bo').then(r => r.json()).catch(() => []),
+    fetch('./effects_override.json?v=1.5.1bo').then(r => r.json()).catch(() => ({})),
   ]);
   // pool 全カード ← effects_override で effect/effectText を上書き ← cards.json で完全 override
   const cardsByName = new Map();
@@ -2097,22 +2103,188 @@ function _renderHomeStats() {
   if (p) p.textContent = String(stats.pcbPoints || 0);
 }
 
-// ショップ modal (Phase 1 = 近日公開、 Phase 2 で 実装予定、 野沢さん指示 2026-05-06)
+// ショップ Phase 2: 衣装+マット販売、 アカウント保持 (Firebase /shopData/$uid/)
+let SHOP_ITEMS = { mats: [], costumes: [] };
+let _currentShopTab = 'mat';
+
+async function _loadShopItems() {
+  if (SHOP_ITEMS.mats.length > 0) return SHOP_ITEMS;
+  try {
+    const res = await fetch('./data/shop_items.json');
+    SHOP_ITEMS = await res.json();
+  } catch (e) {
+    console.error('shop items load failed', e);
+  }
+  return SHOP_ITEMS;
+}
+
 function openShop() {
   const m = document.getElementById('shop-modal');
   if (!m) return;
   m.hidden = false;
   _setBodyModalOpen();
-  // 所持ポイント反映 (Cloud)
   const stats = pcbCloud.stats || {};
   const el = document.getElementById('shop-points');
   if (el) el.textContent = String(stats.pcbPoints || 0);
+  _loadShopItems().then(() => _renderShopList());
 }
 function closeShop() {
   const m = document.getElementById('shop-modal');
   if (!m) return;
   m.hidden = true;
   _setBodyModalOpen();
+}
+
+function switchShopTab(tab) {
+  _currentShopTab = tab;
+  document.querySelectorAll('.cg-shop-tab').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === tab);
+  });
+  _renderShopList();
+}
+
+function _shopOwned() {
+  const sd = (pcbCloud.shopData || {});
+  return sd.owned || {};
+}
+function _shopEquipped() {
+  const sd = (pcbCloud.shopData || {});
+  return sd.equipped || { mat: null, costumes: {} };
+}
+
+function _renderShopList() {
+  const list = document.getElementById('shop-list');
+  if (!list) return;
+  const tab = _currentShopTab;
+  const owned = _shopOwned();
+  const equipped = _shopEquipped();
+  const points = (pcbCloud.stats || {}).pcbPoints || 0;
+  let items = [];
+  if (tab === 'mat') items = SHOP_ITEMS.mats || [];
+  else if (tab === 'costume') items = SHOP_ITEMS.costumes || [];
+  else if (tab === 'owned') {
+    items = [
+      ...((SHOP_ITEMS.mats || []).filter(i => owned[i.id])),
+      ...((SHOP_ITEMS.costumes || []).filter(i => owned[i.id])),
+    ];
+  }
+  if (items.length === 0) {
+    list.innerHTML = '<div class="cg-shop-empty">' + (tab === 'owned' ? '所持アイテムなし。 マット/衣装タブで購入してください。' : '商品がありません。') + '</div>';
+    return;
+  }
+  list.innerHTML = items.map(item => {
+    const isOwned = !!owned[item.id];
+    const isEquipped = (item.id.startsWith('mat_') && equipped.mat === item.id) ||
+                       (item.id.startsWith('cos_') && equipped.costumes && equipped.costumes[item.char] === item.id);
+    const canBuy = !isOwned && points >= item.price;
+    const btnLabel = isEquipped ? '✓ 適用中' : isOwned ? '🎯 適用' : `${item.price} pts で購入`;
+    const btnClass = isEquipped ? 'cg-shop-btn-equipped' : isOwned ? 'cg-shop-btn-apply' : (canBuy ? 'cg-shop-btn-buy' : 'cg-shop-btn-disabled');
+    const btnAction = isEquipped ? `unequipShopItem('${item.id}')` : isOwned ? `equipShopItem('${item.id}')` : `buyShopItem('${item.id}')`;
+    const previewBtn = `<button type="button" class="cg-shop-btn-preview" onclick="event.stopPropagation(); previewShopItem('${item.id}')">プレビュー</button>`;
+    return `
+      <div class="cg-shop-item ${isOwned ? 'cg-shop-item-owned' : ''}">
+        <div class="cg-shop-item-icon" style="${item.color ? `background:${item.color};` : ''}">${item.icon || '🎁'}</div>
+        <div class="cg-shop-item-body">
+          <div class="cg-shop-item-name">${item.name}${item.char ? ` <span class="cg-shop-item-char">(${item.char})</span>` : ''}</div>
+          <div class="cg-shop-item-desc">${item.desc || ''}</div>
+        </div>
+        <div class="cg-shop-item-actions">
+          ${previewBtn}
+          <button type="button" class="cg-shop-btn ${btnClass}" ${canBuy || isOwned ? '' : 'disabled'} onclick="${btnAction}">${btnLabel}</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function previewShopItem(itemId) {
+  const all = [...(SHOP_ITEMS.mats || []), ...(SHOP_ITEMS.costumes || [])];
+  const item = all.find(i => i.id === itemId);
+  if (!item) return;
+  const m = document.getElementById('shop-preview-modal');
+  const body = document.getElementById('shop-preview-body');
+  if (!m || !body) return;
+  const isMat = item.id.startsWith('mat_');
+  body.innerHTML = `
+    <h3 class="cg-modal-title">${item.icon || '🎁'} ${item.name}</h3>
+    ${item.char ? `<div class="cg-shop-preview-char">対象キャラ: ${item.char}</div>` : ''}
+    <div class="cg-shop-preview-desc">${item.desc || ''}</div>
+    <div class="cg-shop-preview-visual" style="${isMat ? `background:${item.color}; height:140px;` : 'height:140px; display:flex; align-items:center; justify-content:center; font-size:64px;'}">
+      ${isMat ? '' : (item.icon || '🎁')}
+    </div>
+    <div class="cg-shop-preview-note">※ 画像は順次差し替え予定 (野沢さん側生成中)</div>
+    <div class="cg-shop-preview-price">${item.price} pts</div>`;
+  m.hidden = false;
+  _setBodyModalOpen();
+}
+function closeShopPreview() {
+  const m = document.getElementById('shop-preview-modal');
+  if (!m) return;
+  m.hidden = true;
+  _setBodyModalOpen();
+}
+
+async function buyShopItem(itemId) {
+  const all = [...(SHOP_ITEMS.mats || []), ...(SHOP_ITEMS.costumes || [])];
+  const item = all.find(i => i.id === itemId);
+  if (!item) return;
+  const stats = pcbCloud.stats || {};
+  const points = stats.pcbPoints || 0;
+  if (points < item.price) {
+    alert(`ポイント不足です (所持 ${points} pts、 必要 ${item.price} pts)`);
+    return;
+  }
+  if (!confirm(`「${item.name}」 を ${item.price} pts で 購入しますか?`)) return;
+  // ポイント減算 + owned 追加 (Firebase 同期)
+  pcbCloud.stats.pcbPoints = points - item.price;
+  pcbCloud.shopData = pcbCloud.shopData || { owned: {}, equipped: { mat: null, costumes: {} } };
+  pcbCloud.shopData.owned = pcbCloud.shopData.owned || {};
+  pcbCloud.shopData.owned[itemId] = { boughtAt: Date.now() };
+  _pcbSet('stats', pcbCloud.stats);
+  _pcbSet('shopData', pcbCloud.shopData);
+  document.getElementById('shop-points').textContent = String(pcbCloud.stats.pcbPoints);
+  _renderHomeStats();
+  _renderShopList();
+}
+
+function equipShopItem(itemId) {
+  const all = [...(SHOP_ITEMS.mats || []), ...(SHOP_ITEMS.costumes || [])];
+  const item = all.find(i => i.id === itemId);
+  if (!item) return;
+  pcbCloud.shopData = pcbCloud.shopData || { owned: {}, equipped: { mat: null, costumes: {} } };
+  pcbCloud.shopData.equipped = pcbCloud.shopData.equipped || { mat: null, costumes: {} };
+  if (item.id.startsWith('mat_')) {
+    pcbCloud.shopData.equipped.mat = item.id;
+  } else if (item.id.startsWith('cos_')) {
+    pcbCloud.shopData.equipped.costumes = pcbCloud.shopData.equipped.costumes || {};
+    pcbCloud.shopData.equipped.costumes[item.char] = item.id;
+  }
+  _pcbSet('shopData', pcbCloud.shopData);
+  _applyShopEquips();
+  _renderShopList();
+}
+
+function unequipShopItem(itemId) {
+  const all = [...(SHOP_ITEMS.mats || []), ...(SHOP_ITEMS.costumes || [])];
+  const item = all.find(i => i.id === itemId);
+  if (!item) return;
+  pcbCloud.shopData = pcbCloud.shopData || { owned: {}, equipped: { mat: null, costumes: {} } };
+  if (item.id.startsWith('mat_')) {
+    pcbCloud.shopData.equipped.mat = null;
+  } else if (item.id.startsWith('cos_')) {
+    if (pcbCloud.shopData.equipped.costumes) delete pcbCloud.shopData.equipped.costumes[item.char];
+  }
+  _pcbSet('shopData', pcbCloud.shopData);
+  _applyShopEquips();
+  _renderShopList();
+}
+
+function _applyShopEquips() {
+  // マット適用 (盤面背景 CSS)
+  const equipped = _shopEquipped();
+  const mat = (SHOP_ITEMS.mats || []).find(m => m.id === equipped.mat);
+  document.documentElement.style.setProperty('--cg-mat-color', mat ? mat.color : '');
+  document.body.classList.toggle('cg-mat-active', !!mat);
+  // 衣装適用は キャラ image差替で _renderHand 等で 適用 (TODO Phase 2.1)
 }
 
 // AI レベル別 ポイント (野沢さん指示 2026-05-06、 アカウント単位累積、 ショップで使用)
@@ -2872,7 +3044,7 @@ function openCombosModal() {
     body.innerHTML = '<p style="color:var(--text-dim);text-align:center;padding:20px">現在の手札+場で発動可能なコンボなし。<br>手札にコンボパーツが揃っていない、 または条件未達。</p>';
   } else {
     body.innerHTML = list.map(c => `
-      <div class="cg-combo-item ${c.triggered ? 'triggered' : 'pending'}">
+      <button type="button" class="cg-combo-item ${c.triggered ? 'triggered' : 'pending'}" data-combo-name="${escapeAttr(c.name)}">
         <div class="cg-combo-head">
           <span class="cg-combo-icon">${c.triggered ? '✨' : '🔍'}</span>
           <span class="cg-combo-name">${c.name}</span>
@@ -2887,13 +3059,81 @@ function openCombosModal() {
         </div>
         <div class="cg-combo-flavor">${c.flavor}</div>
         <div class="cg-combo-effect">効果: 自レーン +${c.power} power</div>
-      </div>
+        <div class="cg-combo-tap-hint">タップで詳細 →</div>
+      </button>
     `).join('');
+    body.querySelectorAll('.cg-combo-item').forEach(el => {
+      el.addEventListener('click', () => openComboDetailModal(el.dataset.comboName));
+    });
   }
   $('#combos-modal').hidden = false;
   _setBodyModalOpen();
 }
 function closeCombosModal() { $('#combos-modal').hidden = true; _setBodyModalOpen(); }
+
+// ===== P-2 コンボ詳細 sub-modal =====
+function escapeAttr(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function openComboDetailModal(comboName) {
+  const combo = (state.combos || []).find(c => c.name === comboName);
+  if (!combo) return;
+  const myBoardAll = [].concat(...(state.board?.me || [[],[],[]]));
+  const myAll = myBoardAll.concat(state.hand || []);
+  const myAllNames = myAll.map(c => c.name);
+  $('#combo-detail-name').textContent = `✨ ${combo.name}`;
+  const condLabel = combo.condition === 'same_lane' ? '同レーンに揃える' : 'いずれかの場に揃える';
+  $('#combo-detail-cond').textContent = condLabel;
+  const tgt = combo.effect.target === 'all_lanes' ? '全レーン' : '自レーン';
+  $('#combo-detail-effect').textContent = `→ ${tgt} +${combo.effect.power} power`;
+  $('#combo-detail-flavor').textContent = combo.flavor || '';
+  // 関連キャラ chips
+  const charsEl = $('#combo-detail-chars');
+  charsEl.innerHTML = combo.chars.map(name => {
+    const card = (state.allCards || []).find(c => c.name === name);
+    if (!card) {
+      // 未公開章 / pool 未登録: 名前のみ
+      return `<div class="cg-combo-detail-char missing">
+        <div class="cg-combo-detail-char-name">${escapeAttr(name)}</div>
+        <div class="cg-combo-detail-char-meta">未取得</div>
+      </div>`;
+    }
+    const has = myAllNames.includes(name);
+    const dupes = (typeof getUserDupCounts === 'function') ? (getUserDupCounts()[card.tier + '_' + card.name] || 0) : 0;
+    const factionLabel = card.faction || '';
+    const role = card.role || '';
+    const effShort = (card.effectText || '').slice(0, 36);
+    const imgUrl = card.img || '';
+    const imgStyle = imgUrl ? `background-image:url('${escapeAttr(imgUrl)}')` : '';
+    return `<button type="button" class="cg-combo-detail-char ${has ? 'collected' : ''}" data-char-id="${escapeAttr(card.id || '')}">
+      <div class="cg-combo-detail-char-img" style="${imgStyle}"></div>
+      <div class="cg-combo-detail-char-info">
+        <div class="cg-combo-detail-char-tier-row">
+          <span class="cg-combo-detail-char-tier tier-${card.tier}">${card.tier}</span>
+          ${factionLabel ? `<span class="cg-combo-detail-char-faction">${escapeAttr(factionLabel)}</span>` : ''}
+          ${dupes > 0 ? `<span class="cg-combo-detail-char-dupes">+${dupes}凸</span>` : ''}
+          ${has ? `<span class="cg-combo-detail-char-flag">✓ 場にある</span>` : ''}
+        </div>
+        <div class="cg-combo-detail-char-name">${escapeAttr(card.name)}</div>
+        ${role ? `<div class="cg-combo-detail-char-role">${escapeAttr(role)}</div>` : ''}
+        <div class="cg-combo-detail-char-stats">⚡${card.cost} ⚔${card.basePower}</div>
+        ${effShort ? `<div class="cg-combo-detail-char-effect">${escapeAttr(effShort)}${card.effectText && card.effectText.length > 36 ? '…' : ''}</div>` : ''}
+      </div>
+    </button>`;
+  }).join('');
+  charsEl.querySelectorAll('.cg-combo-detail-char[data-char-id]').forEach(el => {
+    el.addEventListener('click', () => {
+      const id = el.dataset.charId;
+      const card = (state.allCards || []).find(c => c.id === id);
+      if (card && typeof openCharDetail === 'function') {
+        // sub-sub-modal: combo-detail を閉じずに char-detail を上に開く
+        openCharDetail(card, 'combo-detail');
+      }
+    });
+  });
+  $('#combo-detail-modal').hidden = false;
+  _setBodyModalOpen();
+}
+function closeComboDetailModal() { $('#combo-detail-modal').hidden = true; _setBodyModalOpen(); }
 
 function collectAvailableCombos() {
   const myBoardAll = [].concat(...state.board.me);
@@ -3051,6 +3291,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (isOpen('tutorial-modal'))       { closeTutorial(); return; }
       if (isOpen('rulebook-modal'))       { closeRulebook(); return; }
       if (isOpen('shop-modal'))           { closeShop(); return; }
+      if (isOpen('combo-detail-modal'))   { closeComboDetailModal(); return; }
       if (isOpen('combos-modal'))         { closeCombosModal(); return; }
       if (isOpen('char-detail-modal'))    { closeCharDetail(); return; }
       if (isOpen('deck-filter-modal'))    { closeDeckFilter(); return; }
@@ -3059,6 +3300,214 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 });
+
+// ============================================================
+// P-11: AI vs AI sim mode (URL params で起動、 PCB バランス測定用)
+// ?simAuto=<diffMe>-vs-<diffOpp>&n=<count>  例: ?simAuto=hard-vs-master&n=100
+// player 側を Easy/Normal/Hard AI logic で自動操作、 opp 側は既存 aiTurn 動作
+// 結果を <pre id="sim-result"> + localStorage に出力 (Playwright wrapper で取得)
+// ============================================================
+
+async function simulatePlayerTurn(diff) {
+  // aiTurn の me 側版、 既存 aiTurn ロジックを mirror (state.hand → state.board.me)
+  let costRemain = state.turn;
+  let attempts = 0;
+  const aiEffCost = (c) => Math.max(1, effectiveCost(c) - (c._costReduced || 0));
+
+  while (costRemain > 0 && attempts < 8) {
+    attempts++;
+    const playable = state.hand.map((c, i) => ({ c, i })).filter(x => aiEffCost(x.c) <= costRemain);
+    if (playable.length === 0) break;
+    const openLanes = [0, 1, 2].filter(L => state.board.me[L].length < 4);
+    if (openLanes.length === 0) break;
+
+    let pickIdx, lane;
+
+    if (diff === 'easy') {
+      const p = playable[Math.floor(Math.random() * playable.length)];
+      pickIdx = p.i;
+      lane = openLanes[Math.floor(Math.random() * openLanes.length)];
+      if (Math.random() < 0.4) break;
+    } else if (diff === 'normal') {
+      playable.sort((a, b) => b.c.cost - a.c.cost);
+      pickIdx = playable[0].i;
+      const lanes = openLanes.map(L => ({ L, d: getLanePower('me', L) - getLanePower('opp', L) }));
+      lanes.sort((a, b) => a.d - b.d);
+      lane = lanes[0].L;
+    } else if (diff === 'hard' || diff === 'master') {
+      // hard 評価ロジック (master 1-ply lookahead は Phase 2 で実装、 今は hard 同等で代替)
+      let best = null;
+      for (const p of playable) {
+        for (const L of openLanes) {
+          let score = p.c.cost * 1.5;
+          const sameFac = state.board.me[L].filter(c => c.faction === p.c.faction).length;
+          score += sameFac * 2;
+          const oppDiff = getLanePower('opp', L) - getLanePower('me', L);
+          if (oppDiff > 0) score += oppDiff * 0.6;
+          const e = state.laneEffects[L];
+          if (e) {
+            if (e.rule === 'cost_ge' && p.c.cost >= e.threshold) score += e.value * 1.5;
+            if (e.rule === 'cost_le' && p.c.cost <= e.threshold) score += e.value * 1.5;
+            if (e.rule === 'faction' && p.c.faction === e.faction) score += e.value * 2;
+          }
+          const eff = effectiveEffect(p.c) || {};
+          const power = eff.power || 0;
+          switch (eff.target) {
+            case 'freeze_opp_lane_top': score += 4 + power; break;
+            case 'freeze_opp_lane_all': score += state.board.opp[L].length * 2 + power; break;
+            case 'silence_opp_lane_top': score += 3 + power; break;
+            case 'summon_token': score += 2 + power; break;
+            case 'chain_lane_self': score += state.board.me[L].length * (eff.multiplier || 1); break;
+            case 'buff_faction_lane': score += sameFac * (power || 1); break;
+            case 'growth_self': score += (state.maxTurn - state.turn + 1) * 1; break;
+            case 'immediate_self': score += power; break;
+            case 'cost_reduce_hand': score += 1.5; break;
+            case 'golden_self_lane': score += 3; break;
+            case 'all_lanes': score += power * 3; break;
+            case 'all_opp_lanes': score += Math.abs(power) * 2; break;
+            case 'self_lane_attack': score += power + Math.abs(eff.oppPower || 0); break;
+          }
+          if (eff.comboBonus) score += 2;
+          const remainingTurns = state.maxTurn - state.turn + 1;
+          if (p.c.cost > remainingTurns * 1.5) score -= 1;
+          if (!best || score > best.score) best = { i: p.i, L, score };
+        }
+      }
+      if (!best) break;
+      pickIdx = best.i; lane = best.L;
+    } else {
+      break;
+    }
+
+    const pickedCard = playable.find(x => x.i === pickIdx)?.c;
+    const cardCost = pickedCard ? aiEffCost(pickedCard) : 0;
+
+    // 配置 (placeAICard の me 側 mirror、 アニメ無し)
+    const card = { ...state.hand[pickIdx] };
+    card._currentPower = card.basePower + dupeBonusOf(card);
+    card._appliedTo = [];
+    state.hand.splice(pickIdx, 1);
+    state.board.me[lane].push(card);
+    applyEffect(card, lane, 'me');
+
+    costRemain -= cardCost;
+  }
+}
+
+function _summarizeSimResults(results) {
+  const total = results.length;
+  const wins = results.filter(r => r.result === 'win').length;
+  const losses = results.filter(r => r.result === 'loss').length;
+  const draws = results.filter(r => r.result === 'draw').length;
+  const winRate = total > 0 ? Math.round(wins / total * 1000) / 10 : 0;
+  const avgScoreMe = total > 0 ? results.reduce((s, r) => s + r.scoreMe, 0) / total : 0;
+  const avgScoreOpp = total > 0 ? results.reduce((s, r) => s + r.scoreOpp, 0) / total : 0;
+  const avgScoreDiff = avgScoreMe - avgScoreOpp;
+  return {
+    total, wins, losses, draws,
+    winRate: winRate + '%',
+    avgScoreMe: Math.round(avgScoreMe * 100) / 100,
+    avgScoreOpp: Math.round(avgScoreOpp * 100) / 100,
+    avgScoreDiff: Math.round(avgScoreDiff * 100) / 100,
+  };
+}
+
+async function runSim(diffMe, diffOpp, n) {
+  const results = [];
+  console.log(`[sim] start ${diffMe} vs ${diffOpp}, n=${n}`);
+  const startTime = Date.now();
+
+  for (let i = 0; i < n; i++) {
+    // 既存の startMatch を呼ぶ (opp の difficulty)
+    startMatch(diffOpp, false);
+    // startMatch は内部で sleep + ターン開始を行う、 setTimeout 待ち
+    await new Promise(r => setTimeout(r, 50));
+
+    let safety = 50;
+    while (!state.ended && safety > 0) {
+      safety--;
+      // player 側を simulate
+      await simulatePlayerTurn(diffMe);
+      // 既存 endTurn を呼ぶ (内部で aiTurn + state.turn++ + finishMatch)
+      try {
+        await endTurn();
+      } catch (e) {
+        console.warn('[sim] endTurn error', e);
+        break;
+      }
+      // 再生成画面が出る (showMatchResultModal) ので強制スキップ
+      const resultModal = document.getElementById('result-modal');
+      if (resultModal && !resultModal.hidden) {
+        resultModal.hidden = true;
+      }
+    }
+
+    const result = state.scoreMe > state.scoreOpp ? 'win' :
+                   (state.scoreOpp > state.scoreMe ? 'loss' : 'draw');
+    results.push({
+      result,
+      scoreMe: state.scoreMe || 0,
+      scoreOpp: state.scoreOpp || 0,
+      turn: state.turn,
+    });
+
+    if ((i + 1) % 10 === 0) {
+      console.log(`[sim] progress ${i + 1}/${n}`);
+    }
+  }
+
+  const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+  const summary = _summarizeSimResults(results);
+  const output = {
+    diffMe, diffOpp, n,
+    elapsed: elapsed + 's',
+    ...summary,
+    rawResults: results,
+  };
+  console.log('[sim] done', output);
+
+  // 出力
+  let resultEl = document.getElementById('sim-result');
+  if (!resultEl) {
+    resultEl = document.createElement('pre');
+    resultEl.id = 'sim-result';
+    resultEl.style.cssText = 'position:fixed;top:10px;right:10px;background:#000;color:#0f0;padding:12px;font-size:11px;z-index:9999;max-height:80vh;overflow:auto;border:1px solid #0f0;';
+    document.body.appendChild(resultEl);
+  }
+  resultEl.textContent = JSON.stringify(output, null, 2);
+  try {
+    localStorage.setItem('pcb-sim-result', JSON.stringify(output));
+  } catch (e) {}
+  return output;
+}
+
+// URL params で sim 起動 (DOMContentLoaded 後に検出)
+function _initSimMode() {
+  const sp = new URLSearchParams(location.search);
+  const simAuto = sp.get('simAuto');
+  if (!simAuto) return;
+
+  const m = simAuto.match(/^(easy|normal|hard|master)-vs-(easy|normal|hard|master)$/);
+  if (!m) {
+    console.warn('[sim] invalid simAuto format, expected: easy-vs-master');
+    return;
+  }
+  const [, diffMe, diffOpp] = m;
+  const n = Math.max(1, Math.min(500, parseInt(sp.get('n') || '10')));
+
+  console.log(`[sim] auto-starting ${diffMe} vs ${diffOpp}, n=${n}`);
+  // loadMasters 完了を待つ (Cloud auth は未ログインでも sim 動作可なので外す)
+  const waitReady = setInterval(() => {
+    if (state.allCards && state.allCards.length > 0) {
+      clearInterval(waitReady);
+      runSim(diffMe, diffOpp, n).catch(e => console.error('[sim] error', e));
+    }
+  }, 200);
+}
+window.addEventListener('load', () => setTimeout(_initSimMode, 1500));
+
+window.runSim = runSim;
+window.simulatePlayerTurn = simulatePlayerTurn;
 
 // ===== Globals =====
 window.startMatch = startMatch;
@@ -3072,6 +3521,8 @@ window.closeHelp = closeHelp;
 window.closeTutorial = closeTutorial;
 window.closeCombosModal = closeCombosModal;
 window.closeCharDetail = closeCharDetail;
+window.openComboDetailModal = openComboDetailModal;
+window.closeComboDetailModal = closeComboDetailModal;
 window.openRulebook = openRulebook;
 window.closeRulebook = closeRulebook;
 window.openShop = openShop;

@@ -7,7 +7,7 @@
 <title>PCB | Prismaera Cards Battle</title>
 <link rel="icon" href="/images/icons/icon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
-<link rel="stylesheet" href="./style.css?v=1.5.1">
+<link rel="stylesheet" href="./style.css?v=1.5.1bo">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -111,8 +111,8 @@
     <button class="cg-mode-btn secondary" id="btn-shop">
       <div class="cg-mode-icon">🛒</div>
       <div class="cg-mode-text">
-        <div class="cg-mode-title">ショップ <span class="cg-mode-badge-soon">近日公開</span></div>
-        <div class="cg-mode-sub">スリーブ / スキン / キャラ衣装 を ポイントで交換</div>
+        <div class="cg-mode-title">ショップ</div>
+        <div class="cg-mode-sub">衣装 / マット を ポイントで交換</div>
       </div>
     </button>
     <button class="cg-mode-btn secondary" id="btn-rulebook-home">
@@ -396,7 +396,28 @@
   </div>
 </div>
 
-<!-- 🛒 ショップ モーダル (野沢さん指示 2026-05-06、 Phase 1 = 近日公開、 Phase 2 で スリーブ販売予定) -->
+<!-- コンボ詳細 sub-modal (P-2、 combo-item タップで flavor 全文 + 関連キャラ詳細) -->
+<div id="combo-detail-modal" class="cg-modal" hidden>
+  <div class="cg-modal-backdrop" onclick="closeComboDetailModal()"></div>
+  <div class="cg-modal-card cg-combo-detail-card">
+    <button class="cg-modal-close" onclick="closeComboDetailModal()" aria-label="閉じる">×</button>
+    <h2 class="cg-modal-title" id="combo-detail-name">コンボ名</h2>
+    <div class="cg-combo-detail-meta">
+      <span class="cg-combo-detail-cond" id="combo-detail-cond">同レーンに揃える</span>
+      <span class="cg-combo-detail-effect" id="combo-detail-effect">→ 自レーン +5 power</span>
+    </div>
+    <div class="cg-combo-detail-flavor" id="combo-detail-flavor"></div>
+    <div class="cg-combo-detail-chars-section">
+      <h3 class="cg-combo-detail-chars-title">関連キャラ <span class="cg-combo-detail-chars-hint">タップでキャラ詳細</span></h3>
+      <div class="cg-combo-detail-chars" id="combo-detail-chars"></div>
+    </div>
+    <div class="cg-modal-actions">
+      <button class="cg-btn secondary" onclick="closeComboDetailModal()">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- 🛒 ショップ モーダル (Phase 2: 衣装+マット販売、 アカウント保持) -->
 <div id="shop-modal" class="cg-modal" hidden>
   <div class="cg-modal-backdrop" onclick="closeShop()"></div>
   <div class="cg-modal-card cg-shop-card">
@@ -407,16 +428,21 @@
       <div class="cg-shop-points-val"><span id="shop-points">0</span> <span class="cg-shop-points-unit">pts</span></div>
       <div class="cg-shop-points-detail">勝率に応じてポイント獲得 ─ Easy 1pt / Normal 2pt / Hard 4pt / Master 8pt / BO3勝利 +5pt</div>
     </div>
-    <div class="cg-shop-coming-soon">
-      <div class="cg-shop-coming-icon">🚧</div>
-      <div class="cg-shop-coming-title">準備中 (近日公開)</div>
-      <div class="cg-shop-coming-detail">スリーブ / カード裏面装飾 を 1〜2日後に 販売開始予定。 引き続きポイントを 貯めてお待ちください。</div>
-      <div class="cg-shop-coming-list">
-        <div class="cg-shop-coming-item">🎨 カードスリーブ</div>
-        <div class="cg-shop-coming-item">✨ ホーム背景スキン</div>
-        <div class="cg-shop-coming-item">👗 キャラ衣装</div>
-      </div>
+    <div class="cg-shop-tabs">
+      <button type="button" class="cg-shop-tab active" data-tab="mat" onclick="switchShopTab('mat')">🟫 マット</button>
+      <button type="button" class="cg-shop-tab" data-tab="costume" onclick="switchShopTab('costume')">👗 衣装</button>
+      <button type="button" class="cg-shop-tab" data-tab="owned" onclick="switchShopTab('owned')">🎒 所持品</button>
     </div>
+    <div class="cg-shop-list" id="shop-list"><!-- JS で 描画 --></div>
+  </div>
+</div>
+
+<!-- 🛍️ ショップ アイテム プレビュー サブモーダル -->
+<div id="shop-preview-modal" class="cg-modal" hidden>
+  <div class="cg-modal-backdrop" onclick="closeShopPreview()"></div>
+  <div class="cg-modal-card cg-shop-preview-card">
+    <button class="cg-modal-close" onclick="closeShopPreview()" aria-label="閉じる">×</button>
+    <div id="shop-preview-body"><!-- JS 描画 --></div>
   </div>
 </div>
 
@@ -495,6 +521,6 @@
   </div>
 </div>
 
-<script src="./script.js?v=1.5.1"></script>
+<script src="./script.js?v=1.5.1bo"></script>
 </body>
 </html>

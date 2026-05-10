@@ -1,0 +1,19 @@
+{
+  "generatedAt": "2026-05-07T01:20:09.523Z",
+  "N": 10,
+  "combos": [
+    "hard-vs-master"
+  ],
+  "results": {
+    "hard-vs-master": {
+      "winRate": "60%",
+      "wins": 6,
+      "losses": 4,
+      "draws": 0,
+      "avgScoreMe": 1.8,
+      "avgScoreOpp": 1.2,
+      "avgScoreDiff": 0.6,
+      "elapsed": "41.0s"
+    }
+  }
+}

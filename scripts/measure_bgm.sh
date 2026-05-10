@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # BGM MP3 長さ計測 → BGM_LIST 更新用
 # 使い方: bash scripts/measure_bgm.sh
-cd "$(dirname "$0")/../assets/bgm"
+cd "$(dirname "$0")/../media/audio/bgm"
 for f in *.mp3; do
   sec=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$f")
   [ -z "$sec" ] && continue

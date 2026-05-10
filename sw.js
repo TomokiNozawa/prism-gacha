@@ -7,7 +7,7 @@
 //
 // HTML/JSON/Firebase API はキャッシュせず常にネットワーク優先 (更新即反映+認証/DBの鮮度維持)。
 
-const SW_VERSION = '1.5.1';  // 画像永続cache 分離 (Ver bump 時の全DL し直し問題を解消、 野沢さん指摘 2026-05-03)
+const SW_VERSION = '1.5.1bo';  // 画像永続cache 分離 (Ver bump 時の全DL し直し問題を解消、 野沢さん指摘 2026-05-03)
 const STATIC_CACHE = `prismaera-static-${SW_VERSION}`;
 const BGM_CACHE    = `prismaera-bgm-${SW_VERSION}`;
 const LOC_CACHE    = `prismaera-loc-${SW_VERSION}`;
@@ -21,20 +21,26 @@ const IMG_PERSIST  = 'prismaera-img-persist';
 // プリキャッシュ対象 BGM — script.js BGM_LIST と同期 (新曲追加時はここも更新)
 // 配列順は BGM_LIST と完全同期 (dawn/watch/tide/sands/rift/church/aquasis/crimson/sahar = 9曲)
 const PRECACHE_BGM = [
-  '/assets/bgm/home.mp3',
-  '/assets/bgm/prism-watch.mp3',
-  '/assets/bgm/prism-tide.mp3',
-  '/assets/bgm/prism-sands.mp3',
-  '/assets/bgm/Prismatic Rift Overture.mp3',
-  '/assets/bgm/prism-church.mp3',
-  '/assets/bgm/prism-aquasis.mp3',
-  '/assets/bgm/prism-crimson.mp3',
-  '/assets/bgm/prism-sahar.mp3',
-  '/assets/bgm/prism-frost.mp3',
-  '/assets/bgm/prism-niflheim.mp3',
-  '/assets/bgm/prism-aether.mp3',
-  '/assets/bgm/prism-blackmoon.mp3',  // S1C5 章テーマ (野沢さん側 Suno 生成中)
-  '/assets/bgm/prism-cards.mp3',      // カードゲーム BGM (1曲ループ、 v1 神秘カードホール BPM 115)
+  '/media/audio/bgm/home.mp3',
+  '/media/audio/bgm/prism-watch.mp3',
+  '/media/audio/bgm/prism-tide.mp3',
+  '/media/audio/bgm/prism-sands.mp3',
+  '/media/audio/bgm/Prismatic Rift Overture.mp3',
+  '/media/audio/bgm/prism-church.mp3',
+  '/media/audio/bgm/prism-aquasis.mp3',
+  '/media/audio/bgm/prism-crimson.mp3',
+  '/media/audio/bgm/prism-sahar.mp3',
+  '/media/audio/bgm/prism-frost.mp3',
+  '/media/audio/bgm/prism-niflheim.mp3',
+  '/media/audio/bgm/prism-aether.mp3',
+  '/media/audio/bgm/prism-blackmoon.mp3',  // S1C5 章テーマ
+  '/media/audio/bgm/prism-cards.mp3',      // カードゲーム BGM (1曲ループ、 v1 神秘カードホール BPM 115)
+  '/media/audio/bgm/prism-promise.mp3',    // S1C6 章テーマ (野沢さん側 Suno 生成予定)
+  '/media/audio/bgm/prism-shrine.mp3',     // S1C6 灯篭祭シーン特化 (other)
+  '/media/audio/bgm/prism-frostcrown.mp3', // S1C5 既存負債 銀霜王国 派閥 BGM (faction)
+  '/media/audio/bgm/prism-lullaby.mp3',    // S1C5 銀霜の月夜祭シーン特化 (other)
+  '/media/audio/bgm/prism-voidrad.mp3',    // S1C7 章テーマ (野沢さん側 Suno 生成予定、 Prism Voidrad 三層構造)
+  '/media/audio/bgm/prism-zanado.mp3',     // S1C7 voidtower 派閥 BGM (faction、 Prism Zanado 千年幽閉)
 ];
 
 // LRU上限 (entry数ベース、 サイズベースではない理由: Cache APIは個別sizeを取れないため)
@@ -205,14 +211,14 @@ async function makeRangeResponse(cached, rangeHeader) {
 // OFFLINE_SAVED は手動DL なので revalidate 不要 (バージョン更新は SW_VERSION bump で全 cache 再構築)。
 async function staleWhileRevalidate(req, cacheName) {
   // 手動DL cache を最優先で返す (cache hit → 即返し、 ネットワーク不要)
-  // ignoreSearch:true で cache buster (?v=1.5.1) の差異も許容 → 「DL したのに別 buster で読まれて遅い」 事故防止
+  // ignoreSearch:true で cache buster (?v=1.5.1bo) の差異も許容 → 「DL したのに別 buster で読まれて遅い」 事故防止
   try {
     const savedCached = await caches.match(req, { cacheName: OFFLINE_SAVED, ignoreSearch: true });
     if (savedCached) return savedCached;
   } catch (e) {}
   const cache = await caches.open(cacheName);
   // ignoreSearch:true で cache buster 差異許容 (野沢さん指摘 2026-05-03 「Ver変わるたび全DL害悪」 の根本対策)
-  // 同 path で cache hit すれば再DL不要、 query (?v=1.5.1) は無視
+  // 同 path で cache hit すれば再DL不要、 query (?v=1.5.1bo) は無視
   const cached = await cache.match(req, { ignoreSearch: true });
   // cached あり: 即返し、 background で **条件付き** revalidate (ETag/Last-Modified 利用)
   // 2026-05-03: 「同名ファイル名で更新があった場合だけ更新」 対応 (野沢さん指摘)
