@@ -1,9 +1,17 @@
 {
-  "version": "1.5.1",
+  "version": "1.5.2",
   "lastDevSuffix": "",
-  "releasedAt": "2026-05-06T18:04:05+09:00",
+  "releasedAt": "2026-05-10T12:05:28+09:00",
   "pendingChangelog": [],
   "changelog": [
+    {
+      "version": "1.5.2",
+      "date": "2026-05-10T12:05:28+09:00",
+      "type": "patch",
+      "notes": [
+        "🐛 細かいバグ修正"
+      ]
+    },
     {
       "version": "1.6.0",
       "date": "2026-05-10T12:00:00+09:00",
@@ -257,10 +265,5 @@
         "ガチャ音をキャラレア度別に刷新(R=単音〜LR=5音+choir pad)"
       ]
     }
-  ],
-  "scheduledRelease": {
-    "version": "1.6.0",
-    "at": "2026-05-10T12:00:00+09:00",
-    "title": "第6章「七座満つる」 公開"
-  }
+  ]
 }
