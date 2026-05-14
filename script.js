@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.6.0 — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.6.0c — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -8573,6 +8573,17 @@ function saveStoryProgress(storyId, idx, totalScenes, curSceneLabel) {
   } catch (e) { console.warn('[story] saveStoryProgress state failed:', e); }
 }
 function restoreStoryProgress(storyId, total) {
+  // 別端末ログイン後は localStorage('prism-story-progress') が空でも、 Firebase pull 済の
+  // state.storyProgress[storyId].lastSceneIndex が正規進捗。 state を優先 → 無ければ LS フォールバック。
+  // 旧実装は LS のみ参照していたため、 別端末で章を開いた直後に saveStoryProgress(idx=0) で
+  // state.storyProgress.lastSceneIndex が 0 に上書きされ Firebase へ push → admin の「物語」 列が
+  // 「私以外 ほぼ未読」 に見える原因になっていた (野沢さん指摘 2026-05-14)。
+  try {
+    const sp = (typeof state === 'object' && state && state.storyProgress) ? state.storyProgress[storyId] : null;
+    if (sp && typeof sp.lastSceneIndex === 'number' && sp.lastSceneIndex >= 0 && sp.lastSceneIndex < total) {
+      return sp.lastSceneIndex;
+    }
+  } catch {}
   try {
     const all = JSON.parse(localStorage.getItem('prism-story-progress') || '{}');
     const idx = all[storyId];
@@ -10400,8 +10411,23 @@ function mergeStates(local, cloud) {
   for (const k of spKeys) {
     const l = (local.storyProgress && local.storyProgress[k]) || {};
     const c = (cloud.storyProgress && cloud.storyProgress[k]) || {};
+    // scenesReached は union (両端末で開いたシーンを合算)、 maxReachedSceneLabel は ord 比較で大きい方、
+    // lastSceneLabel は lastReadAt が新しい方を採用。 旧実装は これら 3 フィールドを 落としていたため、
+    // 別端末ログイン後に 章ギャラリーが 全ロック表示になる + admin の進捗が 不完全になる事故源だった
+    // (野沢さん指摘 2026-05-14)。
+    const reached = { ...(c.scenesReached || {}), ...(l.scenesReached || {}) };
+    const lOrd = (typeof _sceneLabelToOrd === 'function') ? _sceneLabelToOrd(l.maxReachedSceneLabel) : -1;
+    const cOrd = (typeof _sceneLabelToOrd === 'function') ? _sceneLabelToOrd(c.maxReachedSceneLabel) : -1;
+    const maxLbl = lOrd >= cOrd ? (l.maxReachedSceneLabel || c.maxReachedSceneLabel || null)
+                                : (c.maxReachedSceneLabel || l.maxReachedSceneLabel || null);
+    const lastLbl = (l.lastReadAt || 0) >= (c.lastReadAt || 0)
+      ? (l.lastSceneLabel || c.lastSceneLabel || null)
+      : (c.lastSceneLabel || l.lastSceneLabel || null);
     merged.storyProgress[k] = {
       lastSceneIndex: Math.max(l.lastSceneIndex || 0, c.lastSceneIndex || 0),
+      lastSceneLabel: lastLbl,
+      maxReachedSceneLabel: maxLbl,
+      scenesReached: reached,
       totalScenes: Math.max(l.totalScenes || 0, c.totalScenes || 0),
       lastReadAt: Math.max(l.lastReadAt || 0, c.lastReadAt || 0),
       completed: !!(l.completed || c.completed),
