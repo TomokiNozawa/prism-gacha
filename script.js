@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.6.0c — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.6.0d — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -5634,8 +5634,9 @@ const STORY_CHAPTER_MARKERS = [
 // S2/S3 派閥ティザー (霧表現): まだ実装されていない領域を「???」 で示す
 // 画像範囲外は viewBox bg で見えにくいため内側に配置
 const STORY_FACTION_TEASER = [
-  { id: 'season2', label: '???', subLabel: '— Season 2 領域 —', x:  150, y: 1500 },
-  { id: 'season3', label: '???', subLabel: '— 始原の地 —',     x: 1850, y: 1500 },
+  { id: 's1c7',    label: '???', subLabel: '— 異界塔ザナド (s1c7) —', x: 1000, y: 1580 },
+  { id: 'season2', label: '???', subLabel: '— Season 2 領域 —',         x:  150, y: 1500 },
+  { id: 'season3', label: '???', subLabel: '— 始原の地 —',               x: 1850, y: 1500 },
 ];
 
 // ワールドマップ open/close 状態管理 (hidden attribute ではなく内部フラグで lock pair を厳密管理)
