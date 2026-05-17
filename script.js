@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.6.0n — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.6.0o — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -1735,7 +1735,7 @@ function saveState() {
 // ────────────── Rolling ──────────────
 // ピックアップ章: 該当章のキャラだけ重み×2、 他は×1。 章全体のtier比率(R65/SR25/SSR7/UR3)は維持。
 // 最新章ターゲット (開発者が手動設定)。 公開前なら 1つ前の公開済章へ降格 (_refreshPickupChapter で動的判定)
-const PICKUP_CHAPTER_TARGET = 's1c6';
+const PICKUP_CHAPTER_TARGET = 's1c7';
 let PICKUP_CHAPTER = PICKUP_CHAPTER_TARGET;
 function _refreshPickupChapter() {
   let t = PICKUP_CHAPTER_TARGET;
