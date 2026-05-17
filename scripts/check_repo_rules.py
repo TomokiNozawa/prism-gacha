@@ -2313,6 +2313,114 @@ n7_44 = check_kuten_density()
 print(f"  ルール7-44 (読点密度高): {n7_44}件 検査 [WARNING]")
 
 
+def check_kuten_patterns():
+    """ルール7-44c (WARNING、 2026-05-18 野沢さん指示 + Phase 1-3 学習成果):
+    野沢さん添削から学習した パターン A/B/C/H/L/M/X (機械検出に強いもの) で
+    削除可候補が 1章で 30件以上 = WARNING (= 機械漏れ多)。
+
+    パターン (memory feedback_kuten_density.md A-AA 参照):
+      A 主部助詞 (は/とは) + 短文末断定
+      C 副詞 (静かに/そっと/ゆっくり 等) + 動詞 直結
+      H 主格「が」 + 短動詞・形容詞 直結
+      L として/について + 副詞 直結
+      M 場所句 (の中で/の上に/の前で 等) + 短語 直結
+      X 文頭接続詞 (そして/しかし/だから) + 主述
+    """
+    story_dir = ROOT / 'content' / 'story'
+    if not story_dir.exists():
+        return 0
+    PATTERNS = [
+        ('C 副詞+動詞', re.compile(r'(静かに|そっと|ゆっくり|ぽつりと|軽く|不意に|急に|やがて|ふと|思わず|深く|厳かに|淡々と|大切に|新たに)、')),
+        ('H 主格が+短動詞', re.compile(r'[ぁ-んァ-ヶ一-龯]{2,10}が、[ぁ-んァ-ヶ一-龯]{1,15}(た|だった|る|だ|です)[。」]')),
+        ('M 場所句+短語', re.compile(r'(の中で|の中に|の上に|の上で|の前で|の前に|の後で|の傍で|の傍に|の縁に|の縁で|の奥に|の側で|の側に|の下で|の方へ)、[ぁ-んァ-ヶ一-龯]')),
+        ('A 主部は短結', re.compile(r'[ぁ-んァ-ヶ一-龯]{1,12}は、[ぁ-んァ-ヶ一-龯]{1,10}(だった|である|なのです|なのだ|だ|です|だろう)。')),
+        ('X 文頭接続詞', re.compile(r'^(そして|しかし|だから|しかも|では)、', re.MULTILINE)),
+        ('L として副詞', re.compile(r'として、(静かに|そっと|深く|ゆっくり|厳かに|密かに|ひっそりと|淡々と|軽く|大切に|新たに)')),
+    ]
+    THRESHOLD = 30
+    found = 0
+    for path in sorted(story_dir.glob('s1c*.md')):
+        if path.stem == 's1c0' or 'outline' in path.stem:
+            continue
+        body_lines = [l for l in path.read_text(encoding='utf-8').split('\n')
+                      if l.strip() and not l.startswith('#') and not l.startswith('>')
+                      and not l.startswith('---') and not l.startswith('[')]
+        total = 0
+        per_pat = []
+        for label, pat in PATTERNS:
+            cnt = sum(len(pat.findall(l)) for l in body_lines)
+            if cnt > 0:
+                per_pat.append(f'{label}={cnt}')
+                total += cnt
+        if total >= THRESHOLD:
+            details = ' / '.join(per_pat)
+            warnings_only.append(
+                f"[ルール7-44c 削除可候補多 WARNING] {path.name}: 学習パターン削除候補 計{total}件 (≥{THRESHOLD}件で WARNING)\n"
+                f"      → 内訳: {details}\n"
+                f"      → 詳細: memory feedback_kuten_density.md パターン A-AA"
+            )
+            found += 1
+    return found
+
+
+def check_dash_overuse():
+    """ルール7-44d (BLOCKER + WARNING、 2026-05-18 野沢さん指示):
+    ダッシュ「——」 多用検査。
+    野沢さん明示「①ダッシュ挿入句 = 流れ止まる、 削除推奨」 + 「やりすぎは読みづらい」。
+
+    判定:
+      - 「——X——」 2回連続挿入句 が 1章で 1件以上 → BLOCKER (全削除済の維持、 新規追加禁止)
+      - 単独 ——/── が 1章で 30件以上 → WARNING (多用過剰)
+
+    残してOKなパターン: ②強調・余韻 ③サスペンス ④モノローグ
+    詳細: memory feedback_dash_usage.md
+    """
+    story_dir = ROOT / 'content' / 'story'
+    if not story_dir.exists():
+        return 0
+    found = 0
+    for path in sorted(story_dir.glob('s1c*.md')):
+        if path.stem == 's1c0' or 'outline' in path.stem:
+            continue
+        body_lines = [l for l in path.read_text(encoding='utf-8').split('\n')
+                      if l.strip() and not l.startswith('#') and not l.startswith('>') and not l.startswith('---')]
+        n_2x = 0
+        n_total = 0
+        sample_2x = []
+        for idx, l in enumerate(body_lines, 1):
+            n_total += l.count('——') + l.count('──')
+            if l.count('——') >= 2 or l.count('──') >= 2:
+                n_2x += 1
+                if len(sample_2x) < 2:
+                    sample_2x.append(l.strip()[:80])
+        violations = []
+        if n_2x >= 1:
+            violations.append(f"——X—— 2回連続挿入句 {n_2x}件 [BLOCKER]")
+        # 単独ダッシュは 文末未完結 (= 詩的余韻、 残す) も多く含むため 異常多用のみ警告 (s1c7 公開時 118件 = 山場演出 受容、 130超で 過剰判定)
+        if n_total >= 130:
+            violations.append(f"全ダッシュ数 {n_total}件 (≥130件で 多用過剰警告)")
+        if violations:
+            msg = (
+                f"[ルール7-44d ダッシュ多用] {path.name}: " + " / ".join(violations) + "\n"
+                f"      → ①挿入句 = 削除推奨 (流れ中断)、 ②強調 ③サスペンス ④モノローグ のみ残す\n"
+                f"      → 詳細: memory feedback_dash_usage.md"
+            )
+            if sample_2x:
+                msg += f"\n      → サンプル: {sample_2x[0]}"
+            if n_2x >= 1:
+                blockers.append(msg)
+            else:
+                warnings_only.append(msg)
+            found += 1
+    return found
+
+
+n7_44c = check_kuten_patterns()
+print(f"  ルール7-44c (削除可候補多): {n7_44c}件 検査 [WARNING]")
+n7_44d = check_dash_overuse()
+print(f"  ルール7-44d (ダッシュ多用): {n7_44d}件 検査 [BLOCKER/WARNING]")
+
+
 def check_bgm_category_segregation():
     """ルール7-45 (WARNING、 2026-05-07 野沢さん指示「BGM 棲み分け意識して、 自動チェックに入れといて」):
     BGM プロンプト ファイル名 prefix と BGM_LIST の category 整合性をチェック。
