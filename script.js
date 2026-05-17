@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.6.0l — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.6.0m — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -8929,9 +8929,13 @@ const BGM_LIST = [
   // ===== S1C6 追加 (2曲: 章テーマ + 派閥 BGM、 巫女連邦リーリエ ≥5キャラで派閥 BGM 必須) =====
   { id: 'promise',   label: '第6章テーマ',     desc: 'Prism Promise (七色の約束)',         category: 'chapter', duration: '3:19', file: '/media/audio/bgm/prism-promise.mp3' },
   { id: 'shrine',    label: '巫女連邦 灯篭祭',  desc: 'Prism Shrine (巫女連邦の灯篭祭)',    category: 'other',   duration: '2:47', file: '/media/audio/bgm/prism-shrine.mp3' },
+  { id: 'kagura',    label: '巫女連邦リーリエ派閥', desc: 'Prism Kagura (千年神楽の継承)',  category: 'faction', duration: '3:18', file: '/media/audio/bgm/prism-kagura.mp3' },
   // ===== s1c5 既存負債解消 (派閥 BGM 1曲 + シーン特化 BGM 1曲) =====
   { id: 'frostcrown', label: '銀霜王国テーマ',  desc: 'Prism Frostcrown (銀霜王冠)',         category: 'faction', duration: '2:44', file: '/media/audio/bgm/prism-frostcrown.mp3' },
   { id: 'lullaby',   label: '銀霜国 月夜祭',    desc: 'Prism Lullaby (銀霜の月夜祭)',        category: 'other',   duration: '3:29', file: '/media/audio/bgm/prism-lullaby.mp3' },
+  // ===== S1C7 追加 (2曲: 章テーマ + 派閥 BGM、 異界塔ザナド ≥5キャラで派閥 BGM 必須) =====
+  { id: 'voidrad',   label: '第7章テーマ',     desc: 'Prism Voidrad (異界の影、 三層構造)', category: 'chapter', duration: '4:01', file: '/media/audio/bgm/prism-voidrad.mp3' },
+  { id: 'zanado',    label: '異界塔ザナド派閥', desc: 'Prism Zanado (覚醒の威厳)',          category: 'faction', duration: '2:54', file: '/media/audio/bgm/prism-zanado.mp3' },
 ];
 const bgmAudio = document.getElementById("bgm-home");
 

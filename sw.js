@@ -37,6 +37,7 @@ const PRECACHE_BGM = [
   '/media/audio/bgm/prism-cards.mp3',      // カードゲーム BGM (1曲ループ、 v1 神秘カードホール BPM 115)
   '/media/audio/bgm/prism-promise.mp3',    // S1C6 章テーマ (野沢さん側 Suno 生成予定)
   '/media/audio/bgm/prism-shrine.mp3',     // S1C6 灯篭祭シーン特化 (other)
+  '/media/audio/bgm/prism-kagura.mp3',     // S1C6 巫女連邦リーリエ 派閥 BGM (faction、 Prism Kagura 千年神楽)
   '/media/audio/bgm/prism-frostcrown.mp3', // S1C5 既存負債 銀霜王国 派閥 BGM (faction)
   '/media/audio/bgm/prism-lullaby.mp3',    // S1C5 銀霜の月夜祭シーン特化 (other)
   '/media/audio/bgm/prism-voidrad.mp3',    // S1C7 章テーマ (野沢さん側 Suno 生成予定、 Prism Voidrad 三層構造)
@@ -211,14 +212,14 @@ async function makeRangeResponse(cached, rangeHeader) {
 // OFFLINE_SAVED は手動DL なので revalidate 不要 (バージョン更新は SW_VERSION bump で全 cache 再構築)。
 async function staleWhileRevalidate(req, cacheName) {
   // 手動DL cache を最優先で返す (cache hit → 即返し、 ネットワーク不要)
-  // ignoreSearch:true で cache buster (?v=1.6.0l) の差異も許容 → 「DL したのに別 buster で読まれて遅い」 事故防止
+  // ignoreSearch:true で cache buster (?v=1.6.0m) の差異も許容 → 「DL したのに別 buster で読まれて遅い」 事故防止
   try {
     const savedCached = await caches.match(req, { cacheName: OFFLINE_SAVED, ignoreSearch: true });
     if (savedCached) return savedCached;
   } catch (e) {}
   const cache = await caches.open(cacheName);
   // ignoreSearch:true で cache buster 差異許容 (野沢さん指摘 2026-05-03 「Ver変わるたび全DL害悪」 の根本対策)
-  // 同 path で cache hit すれば再DL不要、 query (?v=1.6.0l) は無視
+  // 同 path で cache hit すれば再DL不要、 query (?v=1.6.0m) は無視
   const cached = await cache.match(req, { ignoreSearch: true });
   // cached あり: 即返し、 background で **条件付き** revalidate (ETag/Last-Modified 利用)
   // 2026-05-03: 「同名ファイル名で更新があった場合だけ更新」 対応 (野沢さん指摘)
