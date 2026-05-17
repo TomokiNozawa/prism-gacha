@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.6.0f — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.6.0g — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -7692,6 +7692,14 @@ const LOCATION_CONFIG = {
     // 4-1 古龍王の予兆: lost_dragon_king_omen を挿絵化、 背景なし
     '4-2': { img: '/images/locations/s1c3/thumb/desert_dawn_thumb.webp' },              // 砂漠の朝、 別れ
   },
+  's1c7': {
+    // 第7章「黒月決戦」 背景 (3:4縦長 5枚 = プロローグ + 1-1 + 1-2 + 2-1〜2-4 共通 + エピローグ)
+    'プロローグ':                  { img: '/images/locations/s1c7/thumb/moonlight_palace_council_thumb.webp' },  // プロローグ 月影宮 常夜の卓 (4席着座)
+    '1-1':                         { img: '/images/locations/s1c7/thumb/void_tower_awakening_thumb.webp' },      // 1-1 異界塔ザナド覚醒
+    '1-2':                         { img: '/images/locations/s1c7/thumb/all_faction_assembly_thumb.webp' },      // 1-2 全派閥集結場
+    '2-1':                         { img: '/images/locations/s1c7/thumb/cracked_battlefield_sky_thumb.webp' },   // 2-1〜2-4 共通 全派閥総力戦の戦場全景
+    'エピローグ — 接続の時代へ':  { img: '/images/locations/s1c7/thumb/slumber_horizon_thumb.webp' },           // エピローグ Season 2 ティザー 夜明けの地平
+  },
 };
 
 // 本文中インライン挿絵 — シーン内に複数の場所/場面があるシーン、 または背景に向かない動的場面で使用。
@@ -7795,6 +7803,27 @@ const STORY_LOCATION_INLINE_CONFIG = {
     { scene: '4-1',  marker: 'ファラーは砂を一握り掬い、風に放った',   position: 'after',  img: '/images/locations/s1c3/thumb/lost_dragon_king_omen_thumb.webp' },
     // 4-2 別れの朝: ヴィル+サハナが紫水晶を分け合う最強エモシーン (七色光、 七色絹紐、 「これで二人で一つ」)
     { scene: '4-2',  marker: '朝日の中で紫水晶が七色に輝いた',     position: 'after',  img: '/images/locations/s1c3/thumb/farewell_thumb.webp' },
+  ],
+  's1c7': [
+    // 第7章「黒月決戦」 挿絵 (16:9横長、 全 9枚 = 1-3 + 2-1〜2-4 + 山場3つ)
+    // 第一幕 1-3: シオン+シ・ロエン戦場前夜の鏡像 (二つの月、 二人の自分が遠く同じ月を見上げる)
+    { scene: '1-3',  marker: '二つの月——銀と黒——が、戦場の上空で、静かに並んで輝いていた', position: 'after', img: '/images/locations/s1c7/thumb/sion_sci_roen_mirror_thumb.webp' },
+    // 第二幕 2-1: 教会陣営 vs ガルヴィン+背後ノクトリア (5人対峙、 既存伏線+ノクトリア再登場 同時回収)
+    { scene: '2-1',  marker: '四人の剣戟が朝の光の中で、始まった',                              position: 'after', img: '/images/locations/s1c7/thumb/church_vs_garvin_thumb.webp' },
+    // 第二幕 2-2: 砂漠陣営+古龍王予兆 (ヴィル+サハナ+ファラー+アグル、 S2C1 古龍王覚醒への前奏)
+    { scene: '2-2',  marker: 'アグルが千年血脈の宝玉を握りしめ、古龍王の影に向けて静かに祈った', position: 'after', img: '/images/locations/s1c7/thumb/dragon_sand_envoy_assembly_thumb.webp' },
+    // 第二幕 2-3: 凍土+空挺連合 vs 異界塔執行官オブスクル (アルテミス+グレイル+ヴァーレ 三覇者連合)
+    { scene: '2-3',  marker: '虚無黒の長剣が、朝の光に、静かに輝いていた',                       position: 'after', img: '/images/locations/s1c7/thumb/frost_sky_alliance_thumb.webp' },
+    // 第二幕 2-4: 観測者四席+ホムラ+ミューティス顔出し (S2C3 沈黙の塔への前奏)
+    { scene: '2-4',  marker: 'ミューティスは一言も発さず、ただ、微かに頭を下げた',               position: 'after', img: '/images/locations/s1c7/thumb/seven_seats_with_silence_thumb.webp' },
+    // 第三幕 3-1: 山場2 シオン×シ・ロエン無言の頷き (s1c5 分離の儀から半年余り、 最強の静寂)
+    { scene: '3-1',  marker: 'それが、千年の意味を全て共有した瞬間だった',                       position: 'after', img: '/images/locations/s1c7/thumb/sion_sci_roen_reunion_thumb.webp' },
+    // 第四幕 4-1: 山場1 プリズマ vs ヴォイドラ対話 (「私の影として認める」 = 章テーマの中核)
+    { scene: '4-1',  marker: 'あなたを、私の影として、認めます',                                  position: 'after', img: '/images/locations/s1c7/thumb/prisma_void_dialogue_thumb.webp' },
+    // 第四幕 4-2: ジュンクトス見届け + ヴォイドラ「世界の影として留まる」 受諾 (S2C7 接続の儀への直接前奏)
+    { scene: '4-2',  marker: 'これを私、共観の使徒ジュンクトスが世界に向けて見届けます',         position: 'after', img: '/images/locations/s1c7/thumb/junctus_witness_thumb.webp' },
+    // 第五幕 5-1: 山場3 プリズマ眠りに入る + 七座+全戦士見送り (Season 1 完結シーン、 千年の幕引き)
+    { scene: '5-1',  marker: '次の世代に、光が、届きますように',                                  position: 'after', img: '/images/locations/s1c7/thumb/prisma_slumber_thumb.webp' },
   ],
 };
 
