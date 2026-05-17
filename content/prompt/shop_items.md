@@ -293,48 +293,62 @@ no logos, no text, no watermark. Original artwork, portrait 3:4 ratio.
 元画像から表情や姿勢は変わってOKです、 衣装と装飾だけが別バージョンです。
 ```
 
-### cos_runa_night : ルーナ「夜祈り見習い装束」 (元: `images/characters/season1/ssr/apprentice_priestess.png`)
+### cos_runa_night : ルーナ「夜の街パーカースタイル」 (私服、 元: `images/characters/season1/ssr/apprentice_priestess.png`)
+
+野沢さん指示 2026-05-18: 「私服っぽく、 パーカーとか良いかも」 = 公式制服ではなく **オフの普段着**。 教会見習いの 別の一面 (= ルーナの「素」 を 引き出す カジュアル路線)。
 
 ```
 Same character as the reference image (白焔教会見習い巫女ルーナ, SSR, s1c2), exact same face, hairstyle,
 hair color, eye color, body type, height, and gender — only the costume changes.
 
-Costume: 'Night Prayer Novice Vestment' — White Flame Church's night-prayer novice attire.
-Pure white robe with silver embroidery of moon-phase and ripple motifs,
-silver-white novice veil draped softly over the head,
-silver rosary with a small crescent moon pendant,
-white-and-silver sash with subtle gold trim,
-plain silver bracers, holding a small silver candle (lit, soft warm glow).
+Costume: 'Night Stroll Hoodie Style' — Luna's casual off-duty private outfit,
+a soft pastel-white oversized pullover hoodie with subtle silver moon-phase print on the chest,
+gentle pale lavender accent on the sleeves and hood lining,
+relaxed-fit light blue denim jeans (cuffed at the ankles) OR cream cotton leggings,
+plain white sneakers with silver laces,
+silver rosary with a small crescent moon pendant worn over the hoodie (the only church-symbol kept, hinting at her novice life),
+a tiny silver crescent moon earring on one ear,
+a small leather shoulder bag in soft beige.
+
+The overall vibe: relaxed, slightly shy, like a young trainee enjoying her rare night-off in town.
 
 CRITICAL ANATOMY REQUIREMENTS: each hand has exactly five fingers, anatomically correct,
-joints bend naturally, candle grip is realistic, no extra limbs.
+joints bend naturally, no extra limbs.
 
-Background: White Flame Church night altar with silver candelabras, gentle moonlight through stained glass,
+Background: nighttime street near the White Flame Church district, soft warm streetlamp glow,
+faint silhouette of a cathedral spire in the distance, gentle bokeh of city lights,
 no logos, no text, no watermark. Original artwork, portrait 3:4 ratio.
 
-元画像から表情や姿勢は変わってOKです、 衣装と装飾だけが別バージョンです。
+元画像から表情や姿勢は変わってOKです、 衣装と装飾だけが別バージョンです (顔・髪型・体型・性別は元キャラと完全一致)。
 ```
 
-### cos_seresta_glacier : セレスタ「氷塔月夜礼装」 (元: `images/characters/season1/sr/frost_mage.png`)
+### cos_seresta_glacier : セレスタ「氷塔オフタイム読書スタイル」 (私服、 元: `images/characters/season1/sr/frost_mage.png`)
+
+野沢さん指示 2026-05-18: 「セレスタも私服が良いかな」 = 魔導士ローブではなく **オフタイムの知的私服**。 氷塔の窓辺で 魔導書を読む クール系 大人っぽい カジュアル (= フィオルン / ツバキ 系 涼やか 顔タイプとの 整合)。
 
 ```
 Same character as the reference image (氷塔の魔導士セレスタ, SR, s1c7), exact same face, hairstyle,
 hair color, eye color, body type, height, and gender — only the costume changes.
 
-Costume: 'Glacier-Tower Moonlit Ceremonial Robe' — Glacier Tower mage's moonlit ceremonial attire.
-Deep indigo mage robe with silver-thread constellation embroidery flowing down the sleeves and hem,
-silver-white mage hood draped loosely over the head,
-crystal staff with frozen-blue gem at the tip (the gem glows faintly),
-icy-blue silk sash with silver tassels,
-silver-white gauntlets with frosted patterns.
+Costume: 'Glacier-Tower Off-Day Reading Style' — Celesta's casual off-duty study outfit,
+an oversized soft-knit cardigan in pale ice-blue (#7fa8c8) over a white cotton long-sleeve shirt,
+relaxed-fit dark indigo skinny jeans OR a high-waist pleated navy-blue mini skirt with cream tights,
+beige ankle-high lace-up boots OR plain white canvas sneakers,
+silver-rimmed reading glasses pushed up to her forehead (intellectual accent),
+a single small silver snowflake pendant necklace,
+holding a thick leather-bound magic tome casually against her chest,
+a steaming porcelain tea cup on a nearby ledge (suggested in the scene).
+
+The overall vibe: quiet, scholarly, slightly cool, like a young mage enjoying her library off-day.
 
 CRITICAL ANATOMY REQUIREMENTS: each hand has exactly five fingers, anatomically correct,
-joints bend naturally, staff grip is realistic, no extra limbs.
+joints bend naturally, tome grip is realistic, no extra limbs.
 
-Background: Glacier Tower magic library at night, frost-light glow on ancient tomes,
+Background: Glacier Tower private library window seat at golden afternoon, soft frost patterns on the glass,
+ancient tomes stacked nearby, warm-cool light contrast,
 no logos, no text, no watermark. Original artwork, portrait 3:4 ratio.
 
-元画像から表情や姿勢は変わってOKです、 衣装と装飾だけが別バージョンです。
+元画像から表情や姿勢は変わってOKです、 衣装と装飾だけが別バージョンです (顔・髪型・体型・性別は元キャラと完全一致)。
 ```
 
 ### cos_noa_blackcat : ノア「黒猫祭装束」 (元: `images/characters/season1/ssr/cat_librarian.png`)
