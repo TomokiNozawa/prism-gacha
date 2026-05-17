@@ -301,11 +301,11 @@ no logos, no text, no watermark. Original artwork, portrait 3:4 ratio.
 Same character as the reference image (白焔教会見習い巫女ルーナ, SSR, s1c2), exact same face, hairstyle,
 hair color, eye color, body type, height, and gender — only the costume changes.
 
-Costume: 'Night Stroll Hoodie Style' — Luna's casual off-duty private outfit,
+Costume: 'Night Stroll Hoodie & Long Skirt Style' — Luna's casual off-duty private outfit,
 a soft pastel-white oversized pullover hoodie with subtle silver moon-phase print on the chest,
 gentle pale lavender accent on the sleeves and hood lining,
-relaxed-fit light blue denim jeans (cuffed at the ankles) OR cream cotton leggings,
-plain white sneakers with silver laces,
+**an elegant ankle-length pleated long skirt in cream-white or pale ivory** with subtle silver embroidery at the hem (上品なロングスカート、 野沢さん指示 2026-05-18),
+plain white sneakers OR cream-color loafers with silver buckles (= sneakers でも 上品な skirt と balance、 野沢さん 2026-05-18 生成画像で確認済 OK),
 silver rosary with a small crescent moon pendant worn over the hoodie (the only church-symbol kept, hinting at her novice life),
 a tiny silver crescent moon earring on one ear,
 a small leather shoulder bag in soft beige.
@@ -375,28 +375,66 @@ no logos, no text, no watermark. Original artwork, portrait 3:4 ratio.
 元画像から表情や姿勢は変わってOKです、 衣装と装飾だけが別バージョンです。
 ```
 
-### cos_shanty_crimson : シャンティ「紅玉旗装束」 (元: `images/characters/season1/ssr/pirate_captain.png`)
+### cos_shanty_crimson : シャンティ「南国オフタイム」 (A案 = リゾート、 採用版、 元: `images/characters/season1/ssr/pirate_captain.png`)
+
+野沢さん指示 2026-05-18: 「元の衣装からあまり変化がない」 = 海賊船長服 v1 廃止、 **私服リゾート路線で 新規** (ルーナ/セレスタと 同じ 私服シリーズ)。
 
 ```
 Same character as the reference image (紅玉海賊団船長シャンティ, SSR, s1c2), exact same face, hairstyle,
 hair color, eye color, body type, height, and gender — only the costume changes.
 
-Costume: 'Crimson Flag Captain's Festival Coat' — Crimson Pirates flagship captain's festival garb.
-Crimson and gold pirate captain's coat with gold-buttoned cuffs and embroidered ruby compass-rose motif on the back,
-tricorn hat with a single red feather,
-white silk shirt with loose lacing at the collar,
-twin daggers in lacquered sheaths at the hips (decorative, ceremonial),
-black leather boots with silver buckles,
-red sash with gold trim wrapped around the waist,
-energetic adventurous expression.
+Costume: 'Tropical Off-Day Style' — Shanty's casual off-duty private outfit at a southern port,
+a sun-bleached wide-brim straw hat with a single red ribbon band,
+a relaxed open-collar white linen shirt with sleeves rolled up to the elbows (top button undone),
+high-waist khaki cotton shorts OR pale denim cuffed shorts,
+worn brown leather pirate-style belt with a single gold-buckle (small nostalgic touch from ship-life),
+brown leather sandals with thin straps OR plain canvas espadrilles,
+a single seashell-and-gold-coin pendant necklace (souvenir from her voyages),
+a casual side-tied red bandana hanging from one hip (her crew flag color, kept as identity),
+slight sun-kissed skin tone from sailing,
+bright energetic expression, free spirit.
+
+The overall vibe: adventurous, free, sun-soaked, like a captain enjoying her rare shore-leave on a tropical port.
+
+CRITICAL ANATOMY REQUIREMENTS: each hand has exactly five fingers, anatomically correct,
+joints bend naturally, no extra limbs.
+
+Background: sun-soaked tropical port at golden hour, white sails of moored ships in the distance,
+palm trees with soft sea breeze, warm bokeh of port lights coming on,
+no logos, no text, no watermark. Original artwork, portrait 3:4 ratio.
+
+元画像から表情や姿勢は変わってOKです、 衣装と装飾だけが別バージョンです (顔・髪型・体型・性別は元キャラと完全一致)。
+```
+
+### cos_shanty_gala : シャンティ「夜会の女海賊」 (B案 = 夜会、 並列候補、 元: `images/characters/season1/ssr/pirate_captain.png`)
+
+野沢さん指示 2026-05-18: 「両方見てみたい」 = A案 (リゾート) と 並列で B案 (夜会) も 生成して 比較。 A 採用後 B を 追加候補 or A/B 切替 にするか 判断。
+
+```
+Same character as the reference image (紅玉海賊団船長シャンティ, SSR, s1c2), exact same face, hairstyle,
+hair color, eye color, body type, height, and gender — only the costume changes.
+
+Costume: 'Pirate's Gala Night' — Shanty's formal-attire pirate gala outfit,
+a deep black floor-length dressy gown with a deep V-neckline (modest yet elegant),
+crimson velvet corset cinching the waist (her crew color preserved as accent),
+black silk opera-length gloves (above the elbow),
+a stylized black-and-crimson tricorn hat with a single black ostrich feather (gala version of her captain's hat),
+a slim ceremonial rapier in a black-lacquered sheath at her hip (decorative, gala-formal — not a working blade),
+gold chain choker with a small ruby pendant,
+elegant black low-heel court shoes (or black ankle-strap heels),
+red lipstick, subtly mature makeup,
+dignified composed expression with a hint of her usual mischief.
+
+The overall vibe: dignified, mature, the captain's unexpected formal side — pirate identity retained through accents (tricorn + rapier + crew colors) but in gala formality.
 
 CRITICAL ANATOMY REQUIREMENTS: each hand has exactly five fingers, anatomically correct,
 joints bend naturally, weapon grip is realistic, no extra limbs.
 
-Background: Crimson Pirates flagship deck at sunset, red sky and golden sea spray,
+Background: a coastal city's grand gala hall at night, gold candelabras and crimson velvet curtains,
+chandeliers reflecting on polished marble floor, soft warm light bokeh,
 no logos, no text, no watermark. Original artwork, portrait 3:4 ratio.
 
-元画像から表情や姿勢は変わってOKです、 衣装と装飾だけが別バージョンです。
+元画像から表情や姿勢は変わってOKです、 衣装と装飾だけが別バージョンです (顔・髪型・体型・性別は元キャラと完全一致)。
 ```
 
 ## 関連
