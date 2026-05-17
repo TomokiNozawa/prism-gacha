@@ -1,9 +1,17 @@
 {
-  "version": "1.7.0",
+  "version": "1.7.1",
   "lastDevSuffix": "",
-  "releasedAt": "2026-05-18T00:09:32+09:00",
+  "releasedAt": "2026-05-18T00:23:11+09:00",
   "pendingChangelog": [],
   "changelog": [
+    {
+      "version": "1.7.1",
+      "date": "2026-05-18T00:23:11+09:00",
+      "type": "patch",
+      "notes": [
+        "🎴 PCB バランス調整: 第7章キャラ30体に effect/effectText 追加 (既存同レア帯と バランス揃え)"
+      ]
+    },
     {
       "version": "1.7.0",
       "date": "2026-05-18T00:09:32+09:00",
