@@ -27,53 +27,45 @@
 ### Suno AI プロンプト (Style)
 
 ```
-Ancient-fantasy awakened-shadow-civilization heroic-uptempo theme with high-tempo
+Ancient-fantasy awakened-shadow-civilization heroic-uptempo theme with
 millennium-liberation gravitas and driving void dignity. Featured instruments:
-- pipe organ (cathedral-scale, heroic ascending motifs of an awakening forgotten
-  civilization, primary motif — dignified-archaic-powerful, surging millennium pride)
-- driving low strings ensemble (cellos+violas in fast tremolo and bow-driven
-  rhythmic ostinatos, propulsive heartbeat of the awakened tower)
-- low brass section (trombones + tuba sustained heroic chords, rising heralding
-  calls of ancient liberation)
-- French horn section (mid-high heroic calls, fanfare-like millennium pride)
-- trumpets (bright heroic accents, awakening of the shadow civilization's pride)
-- void male choir vocalize (powerful "oom-aam-vah" baritone-bass, energetic-
-  dignified-awakened, millennium-thousand-year prayers finally moving)
-- taiko-style large drums (deep double-tempo battle pulse, ancient ritual drive,
-  awakened tower's beating heart)
-- obsidian percussion (heavy wooden-stone hits on strong beats, ceremonial
-  ancient pulse)
-- timpani rolls and accents (fast military rolls building tension, climactic
-  heroic punctuation)
-- crystal singing bowl (sustained high shimmer underlay, ancient meditation
-  thread that survived millennium imprisonment)
-- distant brass drone (occasional far-off French horn long sustains, memory of
-  the millennium past now answered)
+- pipe organ (cathedral-scale, heroic ascending motifs of awakening forgotten
+  civilization, primary — heroic-archaic, surging millennium pride)
+- driving low strings (cellos+violas fast tremolo + bow-driven ostinatos,
+  awakened tower heartbeat)
+- low brass (trombones + tuba sustained heroic chords, heralding ancient
+  liberation)
+- French horns (heroic mid-high calls, millennium fanfare)
+- trumpets (bright heroic accents, awakened civilization pride)
+- void male choir vocalize (baritone-bass "oom-aam-vah", energetic-dignified,
+  millennium prayers finally moving)
+- taiko-style drums (deep double-tempo battle pulse, awakened ritual drive)
+- obsidian percussion (heavy stone hits on strong beats, ancient ritual pulse)
+- timpani (fast military rolls, climactic heroic accents)
+- crystal singing bowl (high shimmer underlay, ancient meditation thread)
+- distant brass drone (occasional far-off horn sustains, millennium past answered)
 
-Atmosphere: awakened Zanado tower rising from the fractured cosmic rift after
-a thousand-year imprisonment, central hall where Zanadia (millennium tower
-master) finally stands and moves after her thousand-year vigil, void cathedral
-where shadow-priests once gathered now stirring with ceremonial sound again,
-obsidian-pillared throne hall where the dim violet eternal flame now burns
-bright and alive, broken-crescent banners snapping in the cosmic wind that
-finally flows, forges relit and ringing with hammer-strikes, music chambers
-where Mel's voice rises into proud old shadow-anthems. The heroic uptempo
-music of a shadow civilization that prayed a thousand years to be remembered
-and now answers itself — proud, powerful, but never villainous, because the
-moment "I just wanted to be observed" has finally arrived.
+Atmosphere: awakened Zanado tower rising from cosmic rift after millennium
+imprisonment, central hall where Zanadia finally moves after her millennium
+vigil, void cathedral stirring with ceremonial sound again, obsidian-pillared
+throne hall where the violet eternal flame burns bright again, broken-crescent
+banners snapping in the cosmic wind, forges relit ringing with hammer-strikes,
+Mel's voice rising into proud shadow-anthems. Heroic uptempo music of a
+shadow civilization that prayed millennium to be remembered and now answers
+itself — proud, powerful, never villainous; the moment "I just wanted to be
+observed" has finally arrived.
 
-Emotional arc: low pipe organ + obsidian pulse opening (tower's gestation
-stirs) → driving low strings tremolo + horns layer in (awakening building) →
-pipe organ ascending heroic motif (millennium prayer rises and takes shape) →
-taiko + timpani fast pulse + void choir energetic (ancient ceremony reawakens) →
-climax pipe organ + all brass + void choir + taiko + all layers (liberation
-zenith — tower fully alive) → tail-out still uptempo (the awakened tower's
-heartbeat continues into the next thousand years).
+Emotional arc: low pipe organ + obsidian pulse (tower's gestation) → driving
+strings tremolo + horns layer in (awakening builds) → pipe organ ascending
+heroic motif (millennium prayer rises) → taiko + timpani fast pulse + void
+choir energetic (ancient ceremony reawakens) → climax all layers (liberation
+zenith) → tail-out still uptempo (awakened heartbeat continues into next
+millennium).
 
 BPM 140, key D minor with Phrygian/Dorian color (sacred-archaic but proud,
-heroic A minor and F major brief modulations for ascension), 2:30 duration,
-instrumental with void male choir vocalize only, fantasy game cinematic,
-dignified-heroic-uptempo cosmic ancient awakening.
+heroic A minor and F major brief modulations), 2:30 duration, instrumental
+with void male choir vocalize only, fantasy game cinematic, heroic-uptempo
+cosmic ancient awakening.
 ```
 
 ### Suno AI プロンプト (Lyrics 欄)
