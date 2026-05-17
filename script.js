@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.6.0h — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.6.0i — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -7807,13 +7807,13 @@ const STORY_LOCATION_INLINE_CONFIG = {
   's1c7': [
     // 第7章「黒月決戦」 挿絵 (16:9横長、 全 9枚 = 1-3 + 2-1〜2-4 + 山場3つ)
     // 第一幕 1-3: シオン+シ・ロエン戦場前夜の鏡像 (二つの月、 二人の自分が遠く同じ月を見上げる)
-    { scene: '1-3',  marker: '二つの月——銀と黒——が、戦場の上空で、静かに並んで輝いていた', position: 'after', img: '/images/locations/s1c7/thumb/sion_sci_roen_mirror_thumb.webp' },
+    { scene: '1-3',  marker: '二つの月——銀と黒——が、戦場の上空で静かに並んで輝いていた', position: 'after', img: '/images/locations/s1c7/thumb/sion_sci_roen_mirror_thumb.webp' },
     // 第二幕 2-1: 教会陣営 vs ガルヴィン+背後ノクトリア (5人対峙、 既存伏線+ノクトリア再登場 同時回収)
     { scene: '2-1',  marker: '四人の剣戟が朝の光の中で、始まった',                              position: 'after', img: '/images/locations/s1c7/thumb/church_vs_garvin_thumb.webp' },
     // 第二幕 2-2: 砂漠陣営+古龍王予兆 (ヴィル+サハナ+ファラー+アグル、 S2C1 古龍王覚醒への前奏)
     { scene: '2-2',  marker: 'アグルが千年血脈の宝玉を握りしめ、古龍王の影に向けて静かに祈った', position: 'after', img: '/images/locations/s1c7/thumb/dragon_sand_envoy_assembly_thumb.webp' },
     // 第二幕 2-3: 凍土+空挺連合 vs 異界塔執行官オブスクル (アルテミス+グレイル+ヴァーレ 三覇者連合)
-    { scene: '2-3',  marker: '虚無黒の長剣が、朝の光に、静かに輝いていた',                       position: 'after', img: '/images/locations/s1c7/thumb/frost_sky_alliance_thumb.webp' },
+    { scene: '2-3',  marker: '虚無黒の長剣が、朝の光に静かに輝いていた',                       position: 'after', img: '/images/locations/s1c7/thumb/frost_sky_alliance_thumb.webp' },
     // 第二幕 2-4: 観測者四席+ホムラ+ミューティス顔出し (S2C3 沈黙の塔への前奏)
     { scene: '2-4',  marker: 'ミューティスは一言も発さず、ただ、微かに頭を下げた',               position: 'after', img: '/images/locations/s1c7/thumb/seven_seats_with_silence_thumb.webp' },
     // 第三幕 3-1: 山場2 シオン×シ・ロエン無言の頷き (s1c5 分離の儀から半年余り、 最強の静寂)
