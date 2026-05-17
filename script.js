@@ -10487,16 +10487,21 @@ function showAccountModal() {
     $('#account-logged-view').style.display = '';
     $('#account-info-nickname').textContent = authUser.displayName || '-';
     $('#account-info-total').textContent = state.total || 0;
-    let urCount = 0, lrCount = 0;
-    for (const k of Object.keys(state.unlockedSet || {})) {
-      if (k.startsWith('UR_')) urCount++;
-      else if (k.startsWith('LR_')) lrCount++;
-    }
     // 分母は POOL から動的に取得 (キャラ追加時に分母を更新し忘れる事故を防ぐ)
     // + 公開済章のキャラのみ (12:00 前リーク防止、 野沢さん指示 2026-05-06)
     const _released = (c) => !c.chapter || (typeof _isChapterReleased === 'function' && _isChapterReleased(c.chapter));
     const urMax = (POOL && POOL.UR) ? POOL.UR.filter(_released).length : 0;
     const lrMax = (POOL && POOL.LR) ? POOL.LR.filter(_released).length : 0;
+    // POOL に存在するキャラのキー集合 (旧キャラ・廃止キャラのキー除外、 野沢さん指示 2026-05-18 UR 23/22 事故修正)
+    const _validKeys = new Set();
+    for (const c of (POOL.UR || [])) if (_released(c)) _validKeys.add(`UR_${c.name}`);
+    for (const c of (POOL.LR || [])) if (_released(c)) _validKeys.add(`LR_${c.name}`);
+    let urCount = 0, lrCount = 0;
+    for (const k of Object.keys(state.unlockedSet || {})) {
+      if (!_validKeys.has(k)) continue;  // POOL に無い旧キャラキーはカウント除外
+      if (k.startsWith('UR_')) urCount++;
+      else if (k.startsWith('LR_')) lrCount++;
+    }
     $('#account-info-ur').textContent = `${urCount}/${urMax}`;
     $('#account-info-lr').textContent = `${lrCount}/${lrMax}`;
     $('#account-info-sync').textContent = authUser.metadata && authUser.metadata.lastSignInTime
