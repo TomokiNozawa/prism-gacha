@@ -327,11 +327,11 @@ function updateMuteUI() {
 // 優先順位: cards.json (手書き完全override) > effects_override.json (effect+effectText のみ) > pool.json (default)
 async function loadMasters() {
   const [c, k, l, p, eo] = await Promise.all([
-    fetch('./cards.json?v=1.6.0i').then(r => r.json()),
-    fetch('./combos.json?v=1.6.0i').then(r => r.json()),
-    fetch('./lane_effects.json?v=1.6.0i').then(r => r.json()),
-    fetch('./data/pool.json?v=1.6.0i').then(r => r.json()).catch(() => []),
-    fetch('./effects_override.json?v=1.6.0i').then(r => r.json()).catch(() => ({})),
+    fetch('./cards.json?v=1.6.0j').then(r => r.json()),
+    fetch('./combos.json?v=1.6.0j').then(r => r.json()),
+    fetch('./lane_effects.json?v=1.6.0j').then(r => r.json()),
+    fetch('./data/pool.json?v=1.6.0j').then(r => r.json()).catch(() => []),
+    fetch('./effects_override.json?v=1.6.0j').then(r => r.json()).catch(() => ({})),
   ]);
   // pool 全カード ← effects_override で effect/effectText を上書き ← cards.json で完全 override
   const cardsByName = new Map();
