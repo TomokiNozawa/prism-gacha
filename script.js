@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.6.0m — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.6.0n — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -8936,6 +8936,8 @@ const BGM_LIST = [
   // ===== S1C7 追加 (2曲: 章テーマ + 派閥 BGM、 異界塔ザナド ≥5キャラで派閥 BGM 必須) =====
   { id: 'voidrad',   label: '第7章テーマ',     desc: 'Prism Voidrad (異界の影、 三層構造)', category: 'chapter', duration: '4:01', file: '/media/audio/bgm/prism-voidrad.mp3' },
   { id: 'zanado',    label: '異界塔ザナド派閥', desc: 'Prism Zanado (覚醒の威厳)',          category: 'faction', duration: '2:54', file: '/media/audio/bgm/prism-zanado.mp3' },
+  // ===== genso 既存負債解消 (原虹・観測者派閥 5体到達でルール7-14 BLOCKER 解消) =====
+  { id: 'observatorium', label: '観測者・原虹派閥', desc: 'Prism Observatorium (月影宮の常夜)', category: 'faction', duration: '2:49', file: '/media/audio/bgm/prism-observatorium.mp3' },
 ];
 const bgmAudio = document.getElementById("bgm-home");
 
