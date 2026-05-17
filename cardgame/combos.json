@@ -3009,5 +3009,125 @@
     },
     "flavor": "千年前 月影宮で共祈の証人。",
     "chapter": "s1c6"
+  },
+  {
+    "id": "duo_jp889f2e_jpe009ae",
+    "name": "千年閉じ込めの同胞 (召喚者)",
+    "chars": [
+      "虚意 ヴォイドラ",
+      "塔主 ザナディア"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "千年閉じ込めの同胞 (召喚者)。",
+    "chapter": "s1c7"
+  },
+  {
+    "id": "duo_jp1a67e4_jp889f2e",
+    "name": "プリズマとヴォイドラを千年共観",
+    "chars": [
+      "共観の使徒 ジュンクトス",
+      "虚意 ヴォイドラ"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "プリズマとヴォイドラを千年共観。",
+    "chapter": "s1c7"
+  },
+  {
+    "id": "duo_jp1a67e4_jp9d1ef8",
+    "name": "共観の使徒 ジュンクトスと共観の補佐 ニュトラルの絆",
+    "chars": [
+      "共観の使徒 ジュンクトス",
+      "共観の補佐 ニュトラル"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "a-b 関係。",
+    "chapter": "s1c7"
+  },
+  {
+    "id": "duo_jpf7477e_jp665b24",
+    "name": "沈黙の候補 ミューティスと星海のノクスの絆",
+    "chars": [
+      "沈黙の候補 ミューティス",
+      "星海のノクス"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "a-b 関係。",
+    "chapter": "s1c7"
+  },
+  {
+    "id": "duo_jp384825_jp4d8094",
+    "name": "古龍王の使者 アグルと古龍の語り部 ファラーの絆",
+    "chars": [
+      "古龍王の使者 アグル",
+      "古龍の語り部 ファラー"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "a-b 関係。",
+    "chapter": "s1c7"
+  },
+  {
+    "id": "duo_jpbef06b_jpf9eb47",
+    "name": "紅玉旗艦砲手長 マロンと紅玉海賊団船長 シャンティの絆",
+    "chars": [
+      "紅玉旗艦砲手長 マロン",
+      "紅玉海賊団船長 シャンティ"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "a-b 関係。",
+    "chapter": "s1c7"
+  },
+  {
+    "id": "duo_jpc4b0d0_jp95392d",
+    "name": "白焔教会陣営",
+    "chars": [
+      "戦場の救護 リサ",
+      "教会の盾 リーラ"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "白焔教会陣営。",
+    "chapter": "s1c7"
+  },
+  {
+    "id": "duo_jp95392d_jp36041d",
+    "name": "教会の盾 リーラと波紋の聖女 イザベルの絆",
+    "chars": [
+      "教会の盾 リーラ",
+      "波紋の聖女 イザベル"
+    ],
+    "condition": "same_lane",
+    "effect": {
+      "target": "self_lane",
+      "power": 3
+    },
+    "flavor": "a-b 関係。",
+    "chapter": "s1c7"
   }
 ]

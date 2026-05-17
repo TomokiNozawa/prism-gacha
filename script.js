@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.6.0 — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.6.0o — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -1735,7 +1735,7 @@ function saveState() {
 // ────────────── Rolling ──────────────
 // ピックアップ章: 該当章のキャラだけ重み×2、 他は×1。 章全体のtier比率(R65/SR25/SSR7/UR3)は維持。
 // 最新章ターゲット (開発者が手動設定)。 公開前なら 1つ前の公開済章へ降格 (_refreshPickupChapter で動的判定)
-const PICKUP_CHAPTER_TARGET = 's1c6';
+const PICKUP_CHAPTER_TARGET = 's1c7';
 let PICKUP_CHAPTER = PICKUP_CHAPTER_TARGET;
 function _refreshPickupChapter() {
   let t = PICKUP_CHAPTER_TARGET;
@@ -5634,8 +5634,9 @@ const STORY_CHAPTER_MARKERS = [
 // S2/S3 派閥ティザー (霧表現): まだ実装されていない領域を「???」 で示す
 // 画像範囲外は viewBox bg で見えにくいため内側に配置
 const STORY_FACTION_TEASER = [
-  { id: 'season2', label: '???', subLabel: '— Season 2 領域 —', x:  150, y: 1500 },
-  { id: 'season3', label: '???', subLabel: '— 始原の地 —',     x: 1850, y: 1500 },
+  { id: 's1c7',    label: '???', subLabel: '— 異界塔ザナド (s1c7) —', x: 1000, y: 1580 },
+  { id: 'season2', label: '???', subLabel: '— Season 2 領域 —',         x:  150, y: 1500 },
+  { id: 'season3', label: '???', subLabel: '— 始原の地 —',               x: 1850, y: 1500 },
 ];
 
 // ワールドマップ open/close 状態管理 (hidden attribute ではなく内部フラグで lock pair を厳密管理)
@@ -7466,6 +7467,9 @@ const STORY_OUTLINE = [
   { id: 's1c5', meta: 'Season 1 — 第5章', title: '黒月の予兆',         icon: '🌑', tagline: '銀霜の月が黒く欠ける夜、 仮面の下のもう一人の自分が、 静かに立ち上がる ─ 光と影、 二つの私の境界で', releaseDate: '2026-05-06T12:00:00+09:00', povCharName: '仮面騎士 シオン' },
   { id: 's1c6', meta: 'Season 1 — 第6章', title: '七座満つる',         icon: '🌈', tagline: '違っていても、 同じ目的を持つ仲間でいられる', releaseDate: '2026-05-10T12:00:00+09:00', povCharName: 'セラフィエル' },
   { id: 's1c7', meta: 'Season 1 — 第7章', title: '黒月決戦',           icon: '☄️', tagline: '影を消すのではなく、 共に在ると認める',                              releaseDate: '2026-05-18T00:00:00+09:00', povCharName: '虹意 プリズマ' },
+  // Season 2 概要 (s1c7 公開後にホームティザーで Coming Soon 表示、 詳細は非公開)
+  // releaseDate なし = colHTML が「🔮 現在制作中」 表示、 povCharName なし = 「主人公:」 行非表示
+  { id: 's2intro', meta: 'Season 2', title: '接続の時代', icon: '🌌', tagline: '並行世界との接続が始まる新たな時代——詳細は近日公開' },
 ];
 
 // POOL から完全一致でキャラ取得 (章末「次章主人公1人だけ」 表示用、 token分解マッチを避けて Spoiler的UR覚醒後と区別)
@@ -7691,6 +7695,14 @@ const LOCATION_CONFIG = {
     // 4-1 古龍王の予兆: lost_dragon_king_omen を挿絵化、 背景なし
     '4-2': { img: '/images/locations/s1c3/thumb/desert_dawn_thumb.webp' },              // 砂漠の朝、 別れ
   },
+  's1c7': {
+    // 第7章「黒月決戦」 背景 (3:4縦長 5枚 = プロローグ + 1-1 + 1-2 + 2-1〜2-4 共通 + エピローグ)
+    'プロローグ':                  { img: '/images/locations/s1c7/thumb/moonlight_palace_council_thumb.webp' },  // プロローグ 月影宮 常夜の卓 (4席着座)
+    '1-1':                         { img: '/images/locations/s1c7/thumb/void_tower_awakening_thumb.webp' },      // 1-1 異界塔ザナド覚醒
+    '1-2':                         { img: '/images/locations/s1c7/thumb/all_faction_assembly_thumb.webp' },      // 1-2 全派閥集結場
+    '2-1':                         { img: '/images/locations/s1c7/thumb/cracked_battlefield_sky_thumb.webp' },   // 2-1〜2-4 共通 全派閥総力戦の戦場全景
+    'エピローグ — 接続の時代へ':  { img: '/images/locations/s1c7/thumb/slumber_horizon_thumb.webp' },           // エピローグ Season 2 ティザー 夜明けの地平
+  },
 };
 
 // 本文中インライン挿絵 — シーン内に複数の場所/場面があるシーン、 または背景に向かない動的場面で使用。
@@ -7795,12 +7807,33 @@ const STORY_LOCATION_INLINE_CONFIG = {
     // 4-2 別れの朝: ヴィル+サハナが紫水晶を分け合う最強エモシーン (七色光、 七色絹紐、 「これで二人で一つ」)
     { scene: '4-2',  marker: '朝日の中で紫水晶が七色に輝いた',     position: 'after',  img: '/images/locations/s1c3/thumb/farewell_thumb.webp' },
   ],
+  's1c7': [
+    // 第7章「黒月決戦」 挿絵 (16:9横長、 全 9枚 = 1-3 + 2-1〜2-4 + 山場3つ)
+    // 第一幕 1-3: シオン+シ・ロエン戦場前夜の鏡像 (二つの月、 二人の自分が遠く同じ月を見上げる)
+    { scene: '1-3',  marker: '二つの月——銀と黒——が、戦場の上空で静かに並んで輝いていた', position: 'after', img: '/images/locations/s1c7/thumb/sion_sci_roen_mirror_thumb.webp' },
+    // 第二幕 2-1: 教会陣営 vs ガルヴィン+背後ノクトリア (5人対峙、 既存伏線+ノクトリア再登場 同時回収)
+    { scene: '2-1',  marker: '四人の剣戟が朝の光の中で、始まった',                              position: 'after', img: '/images/locations/s1c7/thumb/church_vs_garvin_thumb.webp' },
+    // 第二幕 2-2: 砂漠陣営+古龍王予兆 (ヴィル+サハナ+ファラー+アグル、 S2C1 古龍王覚醒への前奏)
+    { scene: '2-2',  marker: 'アグルが千年血脈の宝玉を握りしめ、古龍王の影に向けて静かに祈った', position: 'after', img: '/images/locations/s1c7/thumb/dragon_sand_envoy_assembly_thumb.webp' },
+    // 第二幕 2-3: 凍土+空挺連合 vs 異界塔執行官オブスクル (アルテミス+グレイル+ヴァーレ 三覇者連合)
+    { scene: '2-3',  marker: '虚無黒の長剣が、朝の光に静かに輝いていた',                       position: 'after', img: '/images/locations/s1c7/thumb/frost_sky_alliance_thumb.webp' },
+    // 第二幕 2-4: 観測者四席+ホムラ+ミューティス顔出し (S2C3 沈黙の塔への前奏)
+    { scene: '2-4',  marker: 'ミューティスは一言も発さず、ただ、微かに頭を下げた',               position: 'after', img: '/images/locations/s1c7/thumb/seven_seats_with_silence_thumb.webp' },
+    // 第三幕 3-1: 山場2 シオン×シ・ロエン無言の頷き (s1c5 分離の儀から半年余り、 最強の静寂)
+    { scene: '3-1',  marker: 'それが、千年の意味を全て共有した瞬間だった',                       position: 'after', img: '/images/locations/s1c7/thumb/sion_sci_roen_reunion_thumb.webp' },
+    // 第四幕 4-1: 山場1 プリズマ vs ヴォイドラ対話 (「私の影として認める」 = 章テーマの中核)
+    { scene: '4-1',  marker: 'あなたを、私の影として、認めます',                                  position: 'after', img: '/images/locations/s1c7/thumb/prisma_void_dialogue_thumb.webp' },
+    // 第四幕 4-2: ジュンクトス見届け + ヴォイドラ「世界の影として留まる」 受諾 (S2C7 接続の儀への直接前奏)
+    { scene: '4-2',  marker: 'これを私、共観の使徒ジュンクトスが世界に向けて見届けます',         position: 'after', img: '/images/locations/s1c7/thumb/junctus_witness_thumb.webp' },
+    // 第五幕 5-1: 山場3 プリズマ眠りに入る + 七座+全戦士見送り (Season 1 完結シーン、 千年の幕引き)
+    { scene: '5-1',  marker: '次の世代に、光が、届きますように',                                  position: 'after', img: '/images/locations/s1c7/thumb/prisma_slumber_thumb.webp' },
+  ],
 };
 
 // 画像 cache-buster 自動付与: アセット差し替え時に SW + browser cache を確実に invalidate
 // version 完全同期 (野沢さん指示 2026-05-06): bump_version.py が自動で更新する。
 // 旧 date-suffix '20260504o' を 5/6 で見つけた事故を契機に version-based に統一。
-const IMG_CACHE_VERSION = "1.6.0";
+const IMG_CACHE_VERSION = "1.6.0b";
 function _appendImgCacheBuster(url) {
   if (!url || typeof url !== 'string') return url;
   if (url.includes('?v=' + IMG_CACHE_VERSION)) return url;  // 既に付いてる
@@ -8573,6 +8606,17 @@ function saveStoryProgress(storyId, idx, totalScenes, curSceneLabel) {
   } catch (e) { console.warn('[story] saveStoryProgress state failed:', e); }
 }
 function restoreStoryProgress(storyId, total) {
+  // 別端末ログイン後は localStorage('prism-story-progress') が空でも、 Firebase pull 済の
+  // state.storyProgress[storyId].lastSceneIndex が正規進捗。 state を優先 → 無ければ LS フォールバック。
+  // 旧実装は LS のみ参照していたため、 別端末で章を開いた直後に saveStoryProgress(idx=0) で
+  // state.storyProgress.lastSceneIndex が 0 に上書きされ Firebase へ push → admin の「物語」 列が
+  // 「私以外 ほぼ未読」 に見える原因になっていた (野沢さん指摘 2026-05-14)。
+  try {
+    const sp = (typeof state === 'object' && state && state.storyProgress) ? state.storyProgress[storyId] : null;
+    if (sp && typeof sp.lastSceneIndex === 'number' && sp.lastSceneIndex >= 0 && sp.lastSceneIndex < total) {
+      return sp.lastSceneIndex;
+    }
+  } catch {}
   try {
     const all = JSON.parse(localStorage.getItem('prism-story-progress') || '{}');
     const idx = all[storyId];
@@ -8885,9 +8929,15 @@ const BGM_LIST = [
   // ===== S1C6 追加 (2曲: 章テーマ + 派閥 BGM、 巫女連邦リーリエ ≥5キャラで派閥 BGM 必須) =====
   { id: 'promise',   label: '第6章テーマ',     desc: 'Prism Promise (七色の約束)',         category: 'chapter', duration: '3:19', file: '/media/audio/bgm/prism-promise.mp3' },
   { id: 'shrine',    label: '巫女連邦 灯篭祭',  desc: 'Prism Shrine (巫女連邦の灯篭祭)',    category: 'other',   duration: '2:47', file: '/media/audio/bgm/prism-shrine.mp3' },
+  { id: 'kagura',    label: '巫女連邦リーリエ派閥', desc: 'Prism Kagura (千年神楽の継承)',  category: 'faction', duration: '3:18', file: '/media/audio/bgm/prism-kagura.mp3' },
   // ===== s1c5 既存負債解消 (派閥 BGM 1曲 + シーン特化 BGM 1曲) =====
   { id: 'frostcrown', label: '銀霜王国テーマ',  desc: 'Prism Frostcrown (銀霜王冠)',         category: 'faction', duration: '2:44', file: '/media/audio/bgm/prism-frostcrown.mp3' },
   { id: 'lullaby',   label: '銀霜国 月夜祭',    desc: 'Prism Lullaby (銀霜の月夜祭)',        category: 'other',   duration: '3:29', file: '/media/audio/bgm/prism-lullaby.mp3' },
+  // ===== S1C7 追加 (2曲: 章テーマ + 派閥 BGM、 異界塔ザナド ≥5キャラで派閥 BGM 必須) =====
+  { id: 'voidrad',   label: '第7章テーマ',     desc: 'Prism Voidrad (異界の影、 三層構造)', category: 'chapter', duration: '4:01', file: '/media/audio/bgm/prism-voidrad.mp3' },
+  { id: 'zanado',    label: '異界塔ザナド派閥', desc: 'Prism Zanado (覚醒の威厳)',          category: 'faction', duration: '2:54', file: '/media/audio/bgm/prism-zanado.mp3' },
+  // ===== genso 既存負債解消 (原虹・観測者派閥 5体到達でルール7-14 BLOCKER 解消) =====
+  { id: 'observatorium', label: '観測者・原虹派閥', desc: 'Prism Observatorium (月影宮の常夜)', category: 'faction', duration: '2:49', file: '/media/audio/bgm/prism-observatorium.mp3' },
 ];
 const bgmAudio = document.getElementById("bgm-home");
 
@@ -10400,8 +10450,23 @@ function mergeStates(local, cloud) {
   for (const k of spKeys) {
     const l = (local.storyProgress && local.storyProgress[k]) || {};
     const c = (cloud.storyProgress && cloud.storyProgress[k]) || {};
+    // scenesReached は union (両端末で開いたシーンを合算)、 maxReachedSceneLabel は ord 比較で大きい方、
+    // lastSceneLabel は lastReadAt が新しい方を採用。 旧実装は これら 3 フィールドを 落としていたため、
+    // 別端末ログイン後に 章ギャラリーが 全ロック表示になる + admin の進捗が 不完全になる事故源だった
+    // (野沢さん指摘 2026-05-14)。
+    const reached = { ...(c.scenesReached || {}), ...(l.scenesReached || {}) };
+    const lOrd = (typeof _sceneLabelToOrd === 'function') ? _sceneLabelToOrd(l.maxReachedSceneLabel) : -1;
+    const cOrd = (typeof _sceneLabelToOrd === 'function') ? _sceneLabelToOrd(c.maxReachedSceneLabel) : -1;
+    const maxLbl = lOrd >= cOrd ? (l.maxReachedSceneLabel || c.maxReachedSceneLabel || null)
+                                : (c.maxReachedSceneLabel || l.maxReachedSceneLabel || null);
+    const lastLbl = (l.lastReadAt || 0) >= (c.lastReadAt || 0)
+      ? (l.lastSceneLabel || c.lastSceneLabel || null)
+      : (c.lastSceneLabel || l.lastSceneLabel || null);
     merged.storyProgress[k] = {
       lastSceneIndex: Math.max(l.lastSceneIndex || 0, c.lastSceneIndex || 0),
+      lastSceneLabel: lastLbl,
+      maxReachedSceneLabel: maxLbl,
+      scenesReached: reached,
       totalScenes: Math.max(l.totalScenes || 0, c.totalScenes || 0),
       lastReadAt: Math.max(l.lastReadAt || 0, c.lastReadAt || 0),
       completed: !!(l.completed || c.completed),

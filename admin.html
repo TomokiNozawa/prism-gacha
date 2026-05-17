@@ -987,7 +987,7 @@ let isAdmin = false;
 const $ = s => document.querySelector(s);
 
 // Season1 定員 (キャラマスター)
-const TIER_MAX = { LR: 1, UR: 14, SSR: 25, SR: 28, R: 22 };  // s1c1〜s1c5 全章 公開済 (LR1+UR14+SSR25+SR28+R22 = 90体、 2026-05-04 v1.4.2e 更新)
+const TIER_MAX = { LR: 2, UR: 22, SSR: 38, SR: 45, R: 33 };  // s1c1〜s1c7 全章 公開済 (LR2+UR22+SSR38+SR45+R33 = 140体、 v1.7.0 更新)
 // 章追加時は scripts/check_repo_rules.py ルール9 (admin TIER_MAX = POOL count 一致) で BLOCKER 自動検出
 // 凸ヒート ソート用: 各tier内のキャラ順 (script.js POOL の定義順 = ID順)。 キャラ追加時は同期更新必須。
 const TIER_ORDER = { LR: 0, UR: 1, SSR: 2, SR: 3, R: 4 };

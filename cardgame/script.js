@@ -42,6 +42,8 @@ const CHAPTER_RELEASE = {
   's1c3': 0,
   's1c4': 0,
   's1c5': new Date('2026-05-06T12:00:00+09:00').getTime(),
+  's1c6': new Date('2026-05-10T12:00:00+09:00').getTime(),  // s1c6 公開 (既存負債、 cardgame gating追加)
+  's1c7': new Date('2026-05-18T00:00:00+09:00').getTime(),  // s1c7 scheduledRelease (= version.json と同期)
 };
 function isChapterReleased(ch) {
   if (!ch || !CHAPTER_RELEASE.hasOwnProperty(ch)) return true;
@@ -327,11 +329,11 @@ function updateMuteUI() {
 // 優先順位: cards.json (手書き完全override) > effects_override.json (effect+effectText のみ) > pool.json (default)
 async function loadMasters() {
   const [c, k, l, p, eo] = await Promise.all([
-    fetch('./cards.json?v=1.6.0').then(r => r.json()),
-    fetch('./combos.json?v=1.6.0').then(r => r.json()),
-    fetch('./lane_effects.json?v=1.6.0').then(r => r.json()),
-    fetch('./data/pool.json?v=1.6.0').then(r => r.json()).catch(() => []),
-    fetch('./effects_override.json?v=1.6.0').then(r => r.json()).catch(() => ({})),
+    fetch('./cards.json?v=1.6.0o').then(r => r.json()),
+    fetch('./combos.json?v=1.6.0o').then(r => r.json()),
+    fetch('./lane_effects.json?v=1.6.0o').then(r => r.json()),
+    fetch('./data/pool.json?v=1.6.0o').then(r => r.json()).catch(() => []),
+    fetch('./effects_override.json?v=1.6.0o').then(r => r.json()).catch(() => ({})),
   ]);
   // pool 全カード ← effects_override で effect/effectText を上書き ← cards.json で完全 override
   const cardsByName = new Map();
