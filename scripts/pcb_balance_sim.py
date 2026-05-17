@@ -199,6 +199,38 @@ def make_church_alliance_deck():
         '白焔教会従士 リッカ', 'ちさと',                                           # R x2
     )
 
+def make_voidtower_deck():
+    """s1c7 voidtower 偏重 (LR ヴォイドラ + 異界塔系 + 共観/沈黙)"""
+    return _by_name(
+        '虚意 ヴォイドラ',  # LR x1
+        '塔主 ザナディア', '影使徒 ウンブリス', '黒月使徒 テネブラ',  # UR x3
+        '異界塔執行官 オブスクル', '共観の使徒 ジュンクトス',  # SSR x2 (UR上限のため)
+        '異界塔の闇衛 ノクサル', '異界塔の魔導兵 アビス', '異界塔の斥候 グリム', '共観の補佐 ニュトラル',  # SR x4
+        '異界塔の伝令 ヴィタ', '異界塔の鍛冶 ザイ',  # R x2
+    )
+
+def make_s1c7_flagship_deck():
+    """s1c7 9派閥旗手 SSR 連合 (LR プリズマ + UR 観測者 + 9派閥旗手 SSR + 援軍)"""
+    return _by_name(
+        '虹意 プリズマ',  # LR x1
+        '沈黙の候補 ミューティス', '共観の使徒 ジュンクトス', 'セラフィエル',  # UR x3
+        '白焔聖騎士団長 オーレン', '紅玉旗艦砲手長 マロン', '銀霜神官長 ヴィルニル',  # SSR x3
+        '空挺艦隊長 メリディア', '巫女連邦軍師 セイラン',  # SSR x2 (= 計5 SSR)
+        '教会の盾 リーラ', '海淵射手 シャラ',  # SR x2
+        '戦場の救護 リサ', '戦場の伝令 タイ',  # R x2
+    )
+
+def make_voidtower_observer_deck():
+    """s1c7 ヴォイドラ + 観測者四席 + 共観 (= プリズマ vs ヴォイドラ 対話の世界観デッキ)"""
+    return _by_name(
+        '虚意 ヴォイドラ',  # LR x1
+        'セラフィエル', '千夜姫 カグヤ', '共観の使徒 ジュンクトス',  # UR x3
+        '塔主 ザナディア', '異界塔執行官 オブスクル', '沈黙の候補 ミューティス',  # SSR x3 (※ミューティスは UR、 3 UR 制限 OK = ザナディア+オブスクル+ミューティス は 1 UR + 2 SSR で OK)
+        # 待って: ミューティスは UR、 既に UR 3 (セラフィエル/カグヤ/ジュンクトス) で 上限。 別キャラに
+        '異界塔の闇衛 ノクサル', '異界塔の魔導兵 アビス', '共観の補佐 ニュトラル',  # SR x3
+        '異界塔の鍛冶 ザイ', '異界塔の歌手 メル',  # R x2
+    )
+
 DECK_PATTERNS = {
     'デフォルト': make_default_deck,  # 比較基準
     '海+プリズマ': make_aquasis_prism_deck,
@@ -209,6 +241,9 @@ DECK_PATTERNS = {
     '銀霜+雪月神殿': make_silver_shrine_deck,
     'ゼノニア+銀霜': make_zenonia_silver_deck,
     '教会連合': make_church_alliance_deck,
+    'S1C7 voidtower偏重': make_voidtower_deck,
+    'S1C7 9派閥旗手連合': make_s1c7_flagship_deck,
+    'S1C7 観測者×ヴォイドラ': make_voidtower_observer_deck,
 }
 
 MAX_DUPS = { 'R': 1, 'SR': 2, 'SSR': 3, 'UR': 4, 'LR': 4 }
