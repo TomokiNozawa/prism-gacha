@@ -1,1049 +1,384 @@
 {
   "_README": "B-1: 90 キャラ効果を派閥+lore+tier別に再設計。 keys は POOL の name 完全一致。 loadMasters で pool.json を上書き。 cards.json は更にこれを上書き (優先順位: cards.json > effects_override.json > pool.json default)。",
+
   "虹意 プリズマ": {
     "effectText": "観測の祝福: 全レーン +3、 自軍コンボ強化",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "all_lanes",
-      "power": 3,
-      "comboBonus": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "all_lanes", "power": 3, "comboBonus": 1 }
   },
+
   "セラフィエル": {
     "effectText": "至天の盾: 自レーン +2、 相手 同レーン最高Pwの効果を 🔇沈黙",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "silence_opp_lane_top",
-      "power": 2
-    }
+    "effect": { "trigger": "onPlay", "target": "silence_opp_lane_top", "power": 2 }
   },
   "千夜姫 カグヤ": {
     "effectText": "月光の記憶: 両隣レーン +3 (千年の月夜)",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "adjacent_lanes",
-      "power": 3
-    }
+    "effect": { "trigger": "onPlay", "target": "adjacent_lanes", "power": 3 }
   },
   "星海のノクス": {
     "effectText": "虚境の編成: 相手 同レーン最高Pwを ❄凍結 2T、 自レーン +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "freeze_opp_lane_top",
-      "power": 1,
-      "duration": 2
-    }
+    "effect": { "trigger": "onPlay", "target": "freeze_opp_lane_top", "power": 1, "duration": 2 }
   },
   "龍帝 アルテミス": {
     "effectText": "千年の覇気: 自身 += 自レーン自軍数、 自レーン +2",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "chain_lane_self",
-      "multiplier": 1,
-      "alsoSelfLane": 2
-    }
+    "effect": { "trigger": "onPlay", "target": "chain_lane_self", "multiplier": 1, "alsoSelfLane": 2 }
   },
   "焔帝 ヒノオウ": {
     "effectText": "焔王の威光: 自レーン +2、 居る限り自レーン全員 +1 (常時オーラ)",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 2,
-      "auraSelfLane": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 2, "auraSelfLane": 1 }
   },
+
   "森の射手 リナエ": {
     "effectText": "祖木の弓: 相手 同レーン -1 (一矢必中)",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "opp_self_lane",
-      "power": -1
-    }
+    "effect": { "trigger": "onPlay", "target": "opp_self_lane", "power": -1 }
   },
   "獣牙 ガルド": {
     "effectText": "月牙の集合: 両隣レーン +2 (群れの号令)",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "adjacent_lanes",
-      "power": 2
-    }
+    "effect": { "trigger": "onPlay", "target": "adjacent_lanes", "power": 2 }
   },
   "竜爵 ヴィル": {
     "effectText": "紫竜の血: 自レーン 紫竜王国 +4、 自レーン +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "buff_faction_lane",
-      "faction": "紫竜王国",
-      "power": 4
-    }
+    "effect": { "trigger": "onPlay", "target": "buff_faction_lane", "faction": "紫竜王国", "power": 4 }
   },
   "仮面騎士 シオン": {
     "effectText": "誓盾と裁罰: 自レーン +2、 相手 同レーン最高Pwを 🔇沈黙",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "silence_opp_lane_top",
-      "power": 2
-    }
+    "effect": { "trigger": "onPlay", "target": "silence_opp_lane_top", "power": 2 }
   },
   "黒猫 ノア": {
     "effectText": "禁書庫の閲覧: 相手 同レーン -1、 コンボ強化 +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "opp_self_lane",
-      "power": -1,
-      "comboBonus": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "opp_self_lane", "power": -1, "comboBonus": 1 }
   },
   "朱音": {
     "effectText": "九尾の魅惑舞: 全相手レーン -1、 自身 +2",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "all_opp_lanes",
-      "power": -1,
-      "selfBonus": 2
-    }
+    "effect": { "trigger": "onPlay", "target": "all_opp_lanes", "power": -1, "selfBonus": 2 }
   },
   "イザベル": {
     "effectText": "波紋の祈り: 自レーン +1、 自身 🌱成長 (毎ターン+1)",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "growth_self",
-      "power": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "growth_self", "power": 1 }
   },
   "ひなた": {
     "effectText": "紅翼の桜散: 自レーン 紅翼皇家 +3",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "buff_faction_lane",
-      "faction": "紅翼皇家",
-      "power": 3
-    }
+    "effect": { "trigger": "onPlay", "target": "buff_faction_lane", "faction": "紅翼皇家", "power": 3 }
   },
+
   "ルミナ": {
     "effectText": "雪月の灯: 自レーン +1、 自身 +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 1,
-      "selfBonus": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 1, "selfBonus": 1 }
   },
   "黒刃 玄": {
     "effectText": "浪人の一刀: 相手 同レーン -2、 自身 +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "opp_self_lane",
-      "power": -2,
-      "selfBonus": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "opp_self_lane", "power": -2, "selfBonus": 1 }
   },
   "セラフィ": {
     "effectText": "詠唱の波: 両隣レーン +1、 自身 +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "adjacent_lanes",
-      "power": 1,
-      "selfBonus": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "adjacent_lanes", "power": 1, "selfBonus": 1 }
   },
   "紅翼 ツキ": {
     "effectText": "紅翼の閃光: 相手 同レーン -2、 自身 +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "opp_self_lane",
-      "power": -2,
-      "selfBonus": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "opp_self_lane", "power": -2, "selfBonus": 1 }
   },
   "薫音": {
     "effectText": "剣師範の構え: 自レーン +2、 自身 +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 2,
-      "selfBonus": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 2, "selfBonus": 1 }
   },
   "リリム": {
     "effectText": "ピンクの鱗: 自レーン 紫竜王国 +2、 自レーン +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "buff_faction_lane",
-      "faction": "紫竜王国",
-      "power": 2
-    }
+    "effect": { "trigger": "onPlay", "target": "buff_faction_lane", "faction": "紫竜王国", "power": 2 }
   },
   "メイリ": {
     "effectText": "治癒の祈り: 自レーン +1 (浄化)",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 1 }
   },
   "詠聖 ベル": {
     "effectText": "原虹の歌声: 自レーン +1、 コンボ強化 +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 1,
-      "comboBonus": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 1, "comboBonus": 1 }
   },
   "影刃 シン": {
     "effectText": "一撃離脱: 🌫自身 ステルス 1T、 相手 同レーン -1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "stealth_self",
-      "power": 0,
-      "duration": 1,
-      "extraOppLane": -1
-    }
+    "effect": { "trigger": "onPlay", "target": "stealth_self", "power": 0, "duration": 1, "extraOppLane": -1 }
   },
   "焔舞 ヒナカ": {
     "effectText": "桜散の舞: 両隣レーン +2、 自身 +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "adjacent_lanes",
-      "power": 2,
-      "selfBonus": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "adjacent_lanes", "power": 2, "selfBonus": 1 }
   },
+
   "ちさと": {
     "effectText": "学院の剣: 自レーン +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 1 }
   },
   "カイ": {
     "effectText": "見習いの矢: 自レーン +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 1 }
   },
   "こはね": {
     "effectText": "雨の夜の影: 🌫自身 ステルス 1T、 自身 +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "stealth_self",
-      "power": 0,
-      "duration": 1,
-      "selfBonus": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "stealth_self", "power": 0, "duration": 1, "selfBonus": 1 }
   },
   "ヴィオラ": {
     "effectText": "半エルフの矢: 相手 同レーン -1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "opp_self_lane",
-      "power": -1
-    }
+    "effect": { "trigger": "onPlay", "target": "opp_self_lane", "power": -1 }
   },
   "アルス": {
     "effectText": "黒曜塔の見習い: 自レーン +1、 コンボ強化 +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 1,
-      "comboBonus": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 1, "comboBonus": 1 }
   },
   "ミレイア": {
     "effectText": "盾の重さ: 自身 +2",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 0,
-      "selfBonus": 2
-    }
+    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 0, "selfBonus": 2 }
   },
+
   "深海女王 ネプテア": {
     "effectText": "青の祈り: 💴手札 最高Costを -2、 自レーン +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "cost_reduce_hand",
-      "power": 2
-    }
+    "effect": { "trigger": "onPlay", "target": "cost_reduce_hand", "power": 2 }
   },
   "波紋の聖女 イザベル": {
     "effectText": "七色の祈り: 自レーン アクアシス +1、 自レーン +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "buff_faction_lane",
-      "faction": "アクアシス",
-      "power": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "buff_faction_lane", "faction": "アクアシス", "power": 1 }
   },
+
   "紅玉海賊団船長 シャンティ": {
     "effectText": "紅玉の采配: 💴手札 最高Costを -2、 自レーン +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "cost_reduce_hand",
-      "power": 2
-    }
+    "effect": { "trigger": "onPlay", "target": "cost_reduce_hand", "power": 2 }
   },
   "白焔教会見習い巫女 ルーナ": {
     "effectText": "見習いの覚醒: 自レーン +1、 自身 🌱成長",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "growth_self",
-      "power": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "growth_self", "power": 1 }
   },
   "アクアシス筆頭魔術師 グラシエル": {
     "effectText": "氷の参謀: 相手 同レーン最高Pwを ❄凍結、 全相手 -1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "freeze_opp_lane_top",
-      "power": 0,
-      "duration": 1,
-      "extraAllOpp": -1
-    }
+    "effect": { "trigger": "onPlay", "target": "freeze_opp_lane_top", "power": 0, "duration": 1, "extraAllOpp": -1 }
   },
+
   "海獣使い モルガ": {
     "effectText": "海獣の召喚: 自レーンに 海賊兵 召喚、 自レーン +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "summon_token",
-      "power": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "summon_token", "power": 1 }
   },
   "珊瑚鎧の海騎士 コラリア": {
     "effectText": "海騎の槍: 自レーン +1、 自身 +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 1,
-      "selfBonus": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 1, "selfBonus": 1 }
   },
   "深海巫女 ティアラ": {
     "effectText": "水晶玉の予兆: 相手 同レーン -2",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "opp_self_lane",
-      "power": -2
-    }
+    "effect": { "trigger": "onPlay", "target": "opp_self_lane", "power": -2 }
   },
   "紅玉海賊団副長 ケイレブ": {
     "effectText": "右腕の指揮: 自レーン 紅玉海賊団 +2、 自身 +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "buff_faction_lane",
-      "faction": "紅玉海賊団",
-      "power": 2
-    }
+    "effect": { "trigger": "onPlay", "target": "buff_faction_lane", "faction": "紅玉海賊団", "power": 2 }
   },
   "白焔教会騎士 ラナス": {
     "effectText": "銀白鎧の誓い: 自レーン +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 1 }
   },
+
   "深海の少女 パール": {
     "effectText": "母さまの背: 自レーン +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 1 }
   },
   "海賊見習い ミカ": {
     "effectText": "あたしの色: 自レーン +1、 自身 +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 1,
-      "selfBonus": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 1, "selfBonus": 1 }
   },
   "珊瑚漁師 エラン": {
     "effectText": "海溝の地図: 両隣レーン +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "adjacent_lanes",
-      "power": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "adjacent_lanes", "power": 1 }
   },
   "海賊団船医 クレオ": {
     "effectText": "薬箱の包帯: 自レーン +1、 自身 🌱成長",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "growth_self",
-      "power": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "growth_self", "power": 1 }
   },
   "白焔教会従士 リッカ": {
     "effectText": "ランタンの灯: 自レーン +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 1 }
   },
+
   "砂海王女 サハナ": {
     "effectText": "七色の風: 自レーン 古龍砂漠サハール +6、 自レーン +1、 自身 +2 (砂海連携の核)",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "buff_faction_lane",
-      "faction": "古龍砂漠サハール",
-      "power": 6,
-      "selfBonus": 2
-    }
+    "effect": { "trigger": "onPlay", "target": "buff_faction_lane", "faction": "古龍砂漠サハール", "power": 6, "selfBonus": 2 }
   },
   "古龍の語り部 ファラー": {
     "effectText": "千年の語り: 自レーン +4、 自身 🌱成長 +1/T (長期戦の語り部)",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "growth_self",
-      "power": 4
-    }
+    "effect": { "trigger": "onPlay", "target": "growth_self", "power": 4 }
   },
+
   "隊商長 アーシャ": {
     "effectText": "商人の采配: 💴手札 最高Costを -1、 自レーン +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "cost_reduce_hand",
-      "power": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "cost_reduce_hand", "power": 1 }
   },
   "砂牙の剣聖 グラン": {
     "effectText": "砂牙の風: 両隣レーン +4、 自身 +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "adjacent_lanes",
-      "power": 4,
-      "selfBonus": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "adjacent_lanes", "power": 4, "selfBonus": 1 }
   },
   "紫竜の侍従 リアム": {
     "effectText": "侍従の忠誠: 自レーン 紫竜王国 +2、 自レーン +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "buff_faction_lane",
-      "faction": "紫竜王国",
-      "power": 2
-    }
+    "effect": { "trigger": "onPlay", "target": "buff_faction_lane", "faction": "紫竜王国", "power": 2 }
   },
+
   "祭舞のサフィラ": {
     "effectText": "七色絹の浄化: 全相手レーン -1、 自レーン +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "all_opp_lanes",
-      "power": -1,
-      "selfBonus": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "all_opp_lanes", "power": -1, "selfBonus": 1 }
   },
   "古龍鍛冶 オウル": {
     "effectText": "古龍の鱗: 自レーンに 砂兵 召喚、 自レーン +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "summon_token",
-      "power": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "summon_token", "power": 1 }
   },
   "砂風の戦士 ライ": {
     "effectText": "双短剣の風: 自レーン +1、 自身 +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 1,
-      "selfBonus": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 1, "selfBonus": 1 }
   },
+
   "砂塵の子 ティナ": {
     "effectText": "砂風の妹: 自レーン +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 1 }
   },
   "砂風の語り部 ナドラ": {
     "effectText": "風の囁き: 自レーン +1、 コンボ強化 +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 1,
-      "comboBonus": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 1, "comboBonus": 1 }
   },
+
   "氷帝 グレイル": {
     "effectText": "凍土の威圧: 自レーン +2、 居る限り相手 同レーン全員 -2 (常時オーラ威圧)",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 2,
-      "auraOppLane": -2
-    }
+    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 2, "auraOppLane": -2 }
   },
   "空挺女皇 ヴァーレ": {
     "effectText": "翼の指令: 全レーン +2、 自レーンに 空挺兵 召喚",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "all_lanes",
-      "power": 2,
-      "summonToken": true
-    }
+    "effect": { "trigger": "onPlay", "target": "all_lanes", "power": 2, "summonToken": true }
   },
+
   "氷塔の聖騎士 リオネ": {
     "effectText": "氷塔の祈り: 相手 同レーン最高Pwを ❄凍結 2T、 自レーン +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "freeze_opp_lane_top",
-      "power": 1,
-      "duration": 2
-    }
+    "effect": { "trigger": "onPlay", "target": "freeze_opp_lane_top", "power": 1, "duration": 2 }
   },
   "空挺城総監 ガリオン": {
     "effectText": "機械連結: 自身 += 自レーン自軍数 ×2、 自レーン +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "chain_lane_self",
-      "multiplier": 2,
-      "alsoSelfLane": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "chain_lane_self", "multiplier": 2, "alsoSelfLane": 1 }
   },
   "氷霜の巫女 ユーリス": {
     "effectText": "氷霜の祈り: 相手 同レーン最高Pwを 🔇沈黙、 自レーン +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "silence_opp_lane_top",
-      "power": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "silence_opp_lane_top", "power": 1 }
   },
   "摂政 ヴァルキ": {
     "effectText": "摂政の采配: 💴手札 最高Costを -1、 自レーン +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "cost_reduce_hand",
-      "power": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "cost_reduce_hand", "power": 1 }
   },
   "北方剣聖 ハグル": {
     "effectText": "北方の双剣: 相手 同レーン -4、 自身 +2",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "opp_self_lane",
-      "power": -4,
-      "selfBonus": 2
-    }
+    "effect": { "trigger": "onPlay", "target": "opp_self_lane", "power": -4, "selfBonus": 2 }
   },
   "空挺城首席学者 ゼピル": {
     "effectText": "理論の召喚: 自レーンに 空挺兵 召喚、 自レーン +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "summon_token",
-      "power": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "summon_token", "power": 1 }
   },
   "真鍮の女将 ハーニア": {
     "effectText": "真鍮の弟子: 自レーン 空挺城ゼノニア +2",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "buff_faction_lane",
-      "faction": "空挺城ゼノニア",
-      "power": 2
-    }
+    "effect": { "trigger": "onPlay", "target": "buff_faction_lane", "faction": "空挺城ゼノニア", "power": 2 }
   },
+
   "氷牙の戦士 イズン": {
     "effectText": "氷牙の一撃: 相手 同レーン -2",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "opp_self_lane",
-      "power": -2
-    }
+    "effect": { "trigger": "onPlay", "target": "opp_self_lane", "power": -2 }
   },
   "空挺整備士 ベル": {
     "effectText": "整備の召喚: 自レーンに 空挺兵 召喚",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "summon_token",
-      "power": 0
-    }
+    "effect": { "trigger": "onPlay", "target": "summon_token", "power": 0 }
   },
   "凍土の狩人 シエラ": {
     "effectText": "雪原の隠密: 🌫自身 ステルス 1T、 相手 同レーン -1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "stealth_self",
-      "power": 0,
-      "duration": 1,
-      "extraOppLane": -1
-    }
+    "effect": { "trigger": "onPlay", "target": "stealth_self", "power": 0, "duration": 1, "extraOppLane": -1 }
   },
   "氷塔の見習い騎士 アスラ": {
     "effectText": "見習いの覚醒: 自レーン +1、 自身 🌱成長",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "growth_self",
-      "power": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "growth_self", "power": 1 }
   },
   "凍土の祭司 イル": {
     "effectText": "凍土の祈り: 相手 同レーン最高Pwを 🔇沈黙",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "silence_opp_lane_top",
-      "power": 0
-    }
+    "effect": { "trigger": "onPlay", "target": "silence_opp_lane_top", "power": 0 }
   },
   "蒸気砲手 ヴィン": {
     "effectText": "蒸気砲: 相手 同レーン -2",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "opp_self_lane",
-      "power": -2
-    }
+    "effect": { "trigger": "onPlay", "target": "opp_self_lane", "power": -2 }
   },
   "空挺機関士 ジン": {
     "effectText": "機械連結: 自身 += 自レーン自軍数 ×1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "chain_lane_self",
-      "multiplier": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "chain_lane_self", "multiplier": 1 }
   },
+
   "凍土の少年 アルク": {
     "effectText": "雪原の少年: 自レーン +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 1 }
   },
   "雪原の少女 ミウ": {
     "effectText": "雪原の少女: 自レーン +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 1 }
   },
   "空の少女 ピピ": {
     "effectText": "空の双子・妹: 自身 +2 (双子の絆)",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 0,
-      "selfBonus": 2
-    }
+    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 0, "selfBonus": 2 }
   },
   "空の少年 ピット": {
     "effectText": "空の双子・兄: 自身 +2 (双子の絆)",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 0,
-      "selfBonus": 2
-    }
+    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 0, "selfBonus": 2 }
   },
+
   "シ・ロエン": {
     "effectText": "黒月の主導: 相手 同レーン最高Pwを 🔇沈黙、 相手 同レーン -3、 自身 +2",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "silence_opp_lane_top",
-      "power": -3,
-      "selfBonus": 2
-    }
+    "effect": { "trigger": "onPlay", "target": "silence_opp_lane_top", "power": -3, "selfBonus": 2 }
   },
   "黒月の盟主 ノクトリア": {
     "effectText": "黒月の呪詛: 全相手レーン -3、 居る限り相手 同レーン全員 -2 (常時オーラ呪詛)",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "all_opp_lanes",
-      "power": -3,
-      "auraOppLane": -2
-    }
+    "effect": { "trigger": "onPlay", "target": "all_opp_lanes", "power": -3, "auraOppLane": -2 }
   },
   "地底市の母 リオラエル": {
     "effectText": "黄金の母: 自レーン1体に ✨黄金化 +5、 居る限り自レーン +2 (常時オーラ祝福)",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "golden_self_lane",
-      "power": 0,
-      "goldPower": 5,
-      "auraSelfLane": 2
-    }
+    "effect": { "trigger": "onPlay", "target": "golden_self_lane", "power": 0, "goldPower": 5, "auraSelfLane": 2 }
   },
+
   "堕者剣聖 ガルヴィン": {
     "effectText": "堕落の一刀: 相手 同レーン -3、 自身 +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "opp_self_lane",
-      "power": -3,
-      "selfBonus": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "opp_self_lane", "power": -3, "selfBonus": 1 }
   },
   "影織りの導師 ルナリア": {
     "effectText": "影の織り手: 自レーン +2、 自身 🌱成長",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "growth_self",
-      "power": 2
-    }
+    "effect": { "trigger": "onPlay", "target": "growth_self", "power": 2 }
   },
   "銀霜剣聖 オリエル": {
     "effectText": "銀霜の剣: 自レーン 銀霜王国 +3",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "buff_faction_lane",
-      "faction": "銀霜王国",
-      "power": 3
-    }
+    "effect": { "trigger": "onPlay", "target": "buff_faction_lane", "faction": "銀霜王国", "power": 3 }
   },
   "銀霜王 ノヴァ": {
     "effectText": "銀霜王の歌: 自レーン +2、 コンボ強化 +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 2,
-      "comboBonus": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 2, "comboBonus": 1 }
   },
+
   "黒月の刺客": {
     "effectText": "黒月の影: 🌫自身 ステルス 1T、 相手 同レーン -2",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "stealth_self",
-      "power": 0,
-      "duration": 1,
-      "extraOppLane": -2
-    }
+    "effect": { "trigger": "onPlay", "target": "stealth_self", "power": 0, "duration": 1, "extraOppLane": -2 }
   },
   "月夜祭司 アスター": {
     "effectText": "月夜の近衛: 自レーン +2",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 2
-    }
+    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 2 }
   },
   "地底市の語り部 オルフェ": {
     "effectText": "地底の語り: 両隣レーン +1、 コンボ強化 +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "adjacent_lanes",
-      "power": 1,
-      "comboBonus": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "adjacent_lanes", "power": 1, "comboBonus": 1 }
   },
+
   "銀霜近衛 セレン": {
     "effectText": "銀霜の近衛: 自レーン +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 1 }
   },
   "雪月神殿見習い ラピス": {
     "effectText": "灯番の見習い: 自レーン +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 1 }
   },
   "地底市の少女 シエル": {
     "effectText": "地底の灯: 自レーン +1、 自身 +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 1,
-      "selfBonus": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 1, "selfBonus": 1 }
   },
   "銀霜の工房娘": {
     "effectText": "工房の手: 自レーン +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 1
-    }
+    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 1 }
   },
   "銀霜の歌姫": {
     "effectText": "銀霜の歌: 自レーン +1、 コンボ強化 +1",
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 1,
-      "comboBonus": 1
-    }
-  },
-  "虚意 ヴォイドラ": {
-    "effect": {
-      "trigger": "onPlay",
-      "target": "all_lanes",
-      "power": 3,
-      "comboBonus": -1
-    },
-    "effectText": "虚意の侵蝕: 全レーン +3、 相手の自然コンボ補正 -1"
-  },
-  "塔主 ザナディア": {
-    "effect": {
-      "trigger": "onPlay",
-      "target": "adjacent_lanes",
-      "power": 3
-    },
-    "effectText": "千年塔主の召喚: 両隣レーン +3 (千年の儀式)"
-  },
-  "影使徒 ウンブリス": {
-    "effect": {
-      "trigger": "onPlay",
-      "target": "silence_opp_lane_top",
-      "power": 2
-    },
-    "effectText": "影の使徒: 自レーン +2、 相手 同レーン最高Pwの効果を 🔇沈黙"
-  },
-  "黒月使徒 テネブラ": {
-    "effect": {
-      "trigger": "onPlay",
-      "target": "chain_lane_self",
-      "multiplier": 1,
-      "alsoSelfLane": 2
-    },
-    "effectText": "千年盟友: 自身 += 自レーン自軍数、 自レーン +2"
-  },
-  "共観の使徒 ジュンクトス": {
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 2,
-      "comboBonus": 1
-    },
-    "effectText": "共観の見届け: 自レーン +2、 コンボ強化 +1"
-  },
-  "沈黙の候補 ミューティス": {
-    "effect": {
-      "trigger": "onPlay",
-      "target": "freeze_opp_lane_top",
-      "power": 1,
-      "duration": 2
-    },
-    "effectText": "沈黙の予知: 相手 同レーン最高Pwを ❄凍結 2T、 自レーン +1"
-  },
-  "白焔聖騎士団長 オーレン": {
-    "effect": {
-      "trigger": "onPlay",
-      "target": "buff_faction_lane",
-      "faction": "白焔教会",
-      "power": 4
-    },
-    "effectText": "白焔の号令: 自レーン 白焔教会 +4、 自レーン +1"
-  },
-  "アクアシス海神官 ナイアス": {
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 2,
-      "auraSelfLane": 1
-    },
-    "effectText": "海の祈り: 自レーン +2、 居る限り自レーン全員 +1 (常時オーラ)"
-  },
-  "紅玉旗艦砲手長 マロン": {
-    "effect": {
-      "trigger": "onPlay",
-      "target": "opp_self_lane",
-      "power": -2,
-      "selfBonus": 1
-    },
-    "effectText": "旗艦砲撃: 相手 同レーン -2、 自身 +1"
-  },
-  "古龍王の使者 アグル": {
-    "effect": {
-      "trigger": "onPlay",
-      "target": "buff_faction_lane",
-      "faction": "古龍砂漠サハール",
-      "power": 3,
-      "comboBonus": 1
-    },
-    "effectText": "千年血脈の伝令: 自レーン 古龍砂漠 +3、 コンボ強化 +1"
-  },
-  "氷霊魔導長 ノエル": {
-    "effect": {
-      "trigger": "onPlay",
-      "target": "freeze_opp_lane_top",
-      "power": 1,
-      "duration": 1
-    },
-    "effectText": "氷霊の理: 相手 同レーン最高Pwを ❄凍結 1T、 自レーン +1"
-  },
-  "空挺艦隊長 メリディア": {
-    "effect": {
-      "trigger": "onPlay",
-      "target": "adjacent_lanes",
-      "power": 2
-    },
-    "effectText": "艦隊司令: 両隣レーン +2 (空挺の翼)"
-  },
-  "銀霜神官長 ヴィルニル": {
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 2,
-      "auraSelfLane": 1
-    },
-    "effectText": "月光の祈祷: 自レーン +2、 居る限り自レーン全員 +1 (常時オーラ)"
-  },
-  "巫女連邦軍師 セイラン": {
-    "effect": {
-      "trigger": "onPlay",
-      "target": "all_lanes",
-      "power": 1,
-      "comboBonus": 1
-    },
-    "effectText": "七色の作戦扇子: 全レーン +1、 コンボ強化 +1"
-  },
-  "異界塔執行官 オブスクル": {
-    "effect": {
-      "trigger": "onPlay",
-      "target": "silence_opp_lane_top",
-      "power": 2
-    },
-    "effectText": "塔の意志: 自レーン +2、 相手 同レーン最高Pwを 🔇沈黙"
-  },
-  "教会の盾 リーラ": {
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 2,
-      "selfBonus": 1
-    },
-    "effectText": "白焔の盾: 自レーン +2、 自身 +1"
-  },
-  "海淵射手 シャラ": {
-    "effect": {
-      "trigger": "onPlay",
-      "target": "opp_self_lane",
-      "power": -2,
-      "selfBonus": 1
-    },
-    "effectText": "海中射撃: 相手 同レーン -2、 自身 +1"
-  },
-  "古龍鎧の戦士 ガロン": {
-    "effect": {
-      "trigger": "onPlay",
-      "target": "buff_faction_lane",
-      "faction": "古龍砂漠サハール",
-      "power": 2,
-      "selfBonus": 1
-    },
-    "effectText": "古龍鱗の重み: 自レーン 古龍砂漠 +2、 自身 +1"
-  },
-  "氷塔の魔導士 セレスタ": {
-    "effect": {
-      "trigger": "onPlay",
-      "target": "adjacent_lanes",
-      "power": 1,
-      "selfBonus": 1
-    },
-    "effectText": "氷晶の波: 両隣レーン +1、 自身 +1"
-  },
-  "空挺機械兵 リガン": {
-    "effect": {
-      "trigger": "onPlay",
-      "target": "opp_self_lane",
-      "power": -2,
-      "selfBonus": 1
-    },
-    "effectText": "蒸気の銃撃: 相手 同レーン -2、 自身 +1"
-  },
-  "銀霜の若騎士 ライオン": {
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 2,
-      "selfBonus": 1
-    },
-    "effectText": "月夜の警護: 自レーン +2、 自身 +1"
-  },
-  "異界塔の闇衛 ノクサル": {
-    "effect": {
-      "trigger": "onPlay",
-      "target": "buff_faction_lane",
-      "faction": "異界の塔ザナド",
-      "power": 2,
-      "selfBonus": 1
-    },
-    "effectText": "影の鎧: 自レーン 異界塔 +2、 自身 +1"
-  },
-  "異界塔の魔導兵 アビス": {
-    "effect": {
-      "trigger": "onPlay",
-      "target": "opp_self_lane",
-      "power": -1,
-      "selfBonus": 1
-    },
-    "effectText": "闇の咒術: 相手 同レーン -1、 自身 +1"
-  },
-  "異界塔の斥候 グリム": {
-    "effect": {
-      "trigger": "onPlay",
-      "target": "stealth_self",
-      "power": 0,
-      "duration": 1,
-      "selfBonus": 1
-    },
-    "effectText": "影の偵察: 🌫自身 ステルス 1T、 自身 +1"
-  },
-  "共観の補佐 ニュトラル": {
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 1,
-      "comboBonus": 1,
-      "selfBonus": 1
-    },
-    "effectText": "共観の進行: 自レーン +1、 コンボ強化 +1、 自身 +1"
-  },
-  "異界塔の伝令 ヴィタ": {
-    "effect": {
-      "trigger": "onPlay",
-      "target": "adjacent_lanes",
-      "power": 1
-    },
-    "effectText": "影の翼: 両隣レーン +1"
-  },
-  "異界塔の鍛冶 ザイ": {
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 1,
-      "comboBonus": 1
-    },
-    "effectText": "千年祈祷の鎚: 自レーン +1、 コンボ強化 +1"
-  },
-  "異界塔の歌手 メル": {
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 1,
-      "selfBonus": 1
-    },
-    "effectText": "千年祈祷歌: 自レーン +1、 自身 +1"
-  },
-  "戦場の救護 リサ": {
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 1,
-      "auraSelfLane": 1
-    },
-    "effectText": "癒しの杖: 自レーン +1、 居る限り自レーン全員 +1 (常時オーラ)"
-  },
-  "戦場の伝令 タイ": {
-    "effect": {
-      "trigger": "onPlay",
-      "target": "self_lane",
-      "power": 1
-    },
-    "effectText": "派閥連携の旗: 自レーン +1"
+    "effect": { "trigger": "onPlay", "target": "self_lane", "power": 1, "comboBonus": 1 }
   }
 }
