@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.6.0o — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.6.0p — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -6996,8 +6996,9 @@ function parseStoryToScenes(md) {
         continue;
       }
       // 章タイトルや「終」は表紙/終ページとして単独シーン化
-      if (line.includes('終')) {
-        scenes.push({ label: '', title: h1title, contentMd: '*— 第1章 完 —*\n\n次章をお楽しみに。', bg: 'finale' });
+      // 注: 「最終章」 等の単語 で誤マッチしないよう、 章末は「第N章 終」 形式の h1 のみに限定
+      if (/^第\d+章\s*[終完]\s*$/.test(h1title)) {
+        scenes.push({ label: '', title: h1title, contentMd: `*— ${h1title} —*\n\n次章をお楽しみに。`, bg: 'finale' });
       } else {
         scenes.push({ label: '', title: h1title, contentMd: '', bg: 'cover', isCover: true });
       }
