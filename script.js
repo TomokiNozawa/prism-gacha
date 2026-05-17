@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.6.0k — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.6.0l — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -7467,6 +7467,9 @@ const STORY_OUTLINE = [
   { id: 's1c5', meta: 'Season 1 — 第5章', title: '黒月の予兆',         icon: '🌑', tagline: '銀霜の月が黒く欠ける夜、 仮面の下のもう一人の自分が、 静かに立ち上がる ─ 光と影、 二つの私の境界で', releaseDate: '2026-05-06T12:00:00+09:00', povCharName: '仮面騎士 シオン' },
   { id: 's1c6', meta: 'Season 1 — 第6章', title: '七座満つる',         icon: '🌈', tagline: '違っていても、 同じ目的を持つ仲間でいられる', releaseDate: '2026-05-10T12:00:00+09:00', povCharName: 'セラフィエル' },
   { id: 's1c7', meta: 'Season 1 — 第7章', title: '黒月決戦',           icon: '☄️', tagline: '影を消すのではなく、 共に在ると認める',                              releaseDate: '2026-05-18T00:00:00+09:00', povCharName: '虹意 プリズマ' },
+  // Season 2 概要 (s1c7 公開後にホームティザーで Coming Soon 表示、 詳細は非公開)
+  // releaseDate なし = colHTML が「🔮 現在制作中」 表示、 povCharName なし = 「主人公:」 行非表示
+  { id: 's2intro', meta: 'Season 2', title: '接続の時代', icon: '🌌', tagline: '並行世界との接続が始まる新たな時代——詳細は近日公開' },
 ];
 
 // POOL から完全一致でキャラ取得 (章末「次章主人公1人だけ」 表示用、 token分解マッチを避けて Spoiler的UR覚醒後と区別)
