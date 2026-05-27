@@ -490,8 +490,14 @@
     h += '<div class="pb-unit-name">' + def.name + '</div>';
     return h;
   }
+  // 原寸PNG(~3MB) ではなく サムネ webp(768x1152, ~200KB) を使う (本体 toThumbUrl と同規約)。
+  // トークンは小さい(60-96px)ため 原寸は重く読込が遅い (s1c7 で顕著、 2026-05-27 修正)。
+  function toThumb(url) {
+    if (!url) return url;
+    return url.replace(/^(.+)\/([^/]+)\.png(\?.*)?$/i, '$1/thumb/$2_thumb.webp$3');
+  }
   function unitStyle(def) {
-    return def.img ? ('background-image:url(' + def.img + ')') : 'background:#333';
+    return def.img ? ('background-image:url(' + toThumb(def.img) + ')') : 'background:#333';
   }
 
   function renderBoard() {
@@ -702,7 +708,7 @@
   async function init() {
     bindEvents();
     try {
-      const res = await fetch('./data/pool.json?v=1.7.0b');
+      const res = await fetch('./data/pool.json?v=1.7.0d');
       POOL = await res.json();
     } catch (e) {
       setMsg('データ読込に失敗しました'); console.error(e); return;
