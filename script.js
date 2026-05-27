@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.7.0b — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.7.0c — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -10679,6 +10679,19 @@ function updateAccountButton() {
     const NEW_BADGE_DURATION_MS = 14 * 24 * 60 * 60 * 1000;  // 14日
     const elapsed = Date.now() - PCB_RELEASE_AT;
     newBadge.style.display = (elapsed >= 0 && elapsed < NEW_BADGE_DURATION_MS) ? '' : 'none';
+  }
+  // Home プリズムボード 主役行 は 全ユーザー表示 (PoC、 ログイン不要、 設計§11 案A)
+  const prismboardEntry = document.getElementById('home-prismboard-row');
+  if (prismboardEntry) {
+    prismboardEntry.style.display = 'flex';
+  }
+  // NEW! バッジ: プリズムボード PoC 公開日 (2026-05-27 00:00 JST) から 14日間表示
+  const pbNewBadge = document.getElementById('home-prismboard-new');
+  if (pbNewBadge) {
+    const PB_RELEASE_AT = Date.parse('2026-05-27T00:00:00+09:00');
+    const PB_NEW_DURATION_MS = 14 * 24 * 60 * 60 * 1000;  // 14日
+    const elapsedPb = Date.now() - PB_RELEASE_AT;
+    pbNewBadge.style.display = (elapsedPb >= 0 && elapsedPb < PB_NEW_DURATION_MS) ? '' : 'none';
   }
   // 初回限定 UR確定10連 バナー: アカウント登録済 + 未消化 で表示
   updateFirstLoginBannerVisibility();

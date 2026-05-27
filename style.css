@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.7.0b — 演出スタイル (Season 1 第1章) / dev は cache buster suffix で進行
+   Prismaera v1.7.0c — 演出スタイル (Season 1 第1章) / dev は cache buster suffix で進行
    ============================================================ */
 :root {
   --bg: #05060d;
@@ -3487,6 +3487,18 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 22px 60px; }
   .home-cardgame-row-meta-tag { padding: 2px 6px; }
   .home-cardgame-row-arrow { font-size: 18px; }
   .home-cardgame-badge { font-size: 10px; padding: 2px 6px; }
+}
+/* プリズムボード行: cardgame行スタイルを流用 + シアン寄りアクセントで差別化 (設計§11) */
+.home-prismboard-row {
+  border-color: rgba(95,223,255,0.50);
+  box-shadow: 0 2px 14px rgba(124,93,255,0.20), 0 1px 6px rgba(95,223,255,0.18);
+}
+.home-prismboard-row:hover {
+  border-color: rgba(95,223,255,0.85);
+  box-shadow: 0 6px 32px rgba(124,93,255,0.40), 0 3px 14px rgba(95,223,255,0.30);
+}
+.home-prismboard-row .home-cardgame-row-icon {
+  filter: drop-shadow(0 0 12px rgba(95,223,255,0.65));
 }
 
 /* ───── 要望フォームモーダル ───── */
