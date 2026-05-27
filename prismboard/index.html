@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="theme-color" content="#0a0a1a">
+<title>プリズムボード | Prismaera</title>
+<link rel="icon" href="/images/icons/icon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="/images/icons/icon-180.png">
+<link rel="stylesheet" href="./style.css?v=1.7.0b">
+</head>
+<body>
+
+<header class="pb-topbar">
+  <a class="pb-back" href="/" aria-label="戻る">←</a>
+  <div class="pb-title">
+    ♟ <span class="pb-title-sub">プリズムボード</span>
+    <span class="pb-phase">PoC</span>
+  </div>
+  <div class="pb-topbar-right">
+    <button class="pb-iconbtn" id="btn-pb-help" aria-label="ヘルプ" title="あそびかた">?</button>
+  </div>
+</header>
+
+<!-- ===== ホーム画面 ===== -->
+<section id="home-screen" class="pb-screen active">
+  <div class="pb-hero">
+    <div class="pb-aurora"></div>
+    <div class="pb-hero-icon">♟</div>
+    <h1 class="pb-hero-title">プリズムボード</h1>
+    <p class="pb-hero-tagline">虹霊を並べ、 自動戦闘で生き残れ ─ オートチェス系サバイバル</p>
+    <span class="pb-hero-badge">Phase 0 PoC ─ 3ラウンド体験版</span>
+  </div>
+
+  <div class="pb-home-rules pb-card">
+    <h2 class="pb-home-rules-title">あそびかた (PoC)</h2>
+    <ul class="pb-home-rules-list">
+      <li><b>ショップ</b>で虹霊を購入(ガチャ未所持でも全員出ます)。</li>
+      <li><b>盤面</b>に配置 ─ 置けるのは<b>レベルの数</b>まで。</li>
+      <li>同じ虹霊が<b>3体</b>そろうと自動で<b>★2に合成</b>(強化)。</li>
+      <li>同じ<b>派閥</b>を2/4/6体そろえると<b>シナジー</b>で全体強化。</li>
+      <li>準備が終わったら<b>「自動戦闘へ」</b> ─ あとは見るだけ。3ラウンド生存を目指す。</li>
+    </ul>
+    <p class="pb-home-rules-note">※ PoC は導入3ラウンド(設計準拠で被ダメ0)。本番は12ラウンド・HP制サバイバルになります。</p>
+  </div>
+
+  <div class="pb-home-actions">
+    <button class="pb-btn primary pb-btn-start" id="btn-start">▶ ゲーム開始</button>
+  </div>
+  <div class="pb-foot-note">プリズムボード PoC v1.7.0b ─ Phase 0 (テンポ確認版)</div>
+</section>
+
+<!-- ===== 試合画面 ===== -->
+<section id="match-screen" class="pb-screen">
+
+  <!-- HUD -->
+  <div class="pb-hud">
+    <div class="pb-hud-block" title="ラウンド進行 (現/全3)">
+      <div class="pb-hud-label">ﾗｳﾝﾄﾞ</div>
+      <div class="pb-hud-value"><span id="hud-round">1</span> / 3</div>
+    </div>
+    <div class="pb-hud-block" title="残りHP (HP0で終了)">
+      <div class="pb-hud-label">HP</div>
+      <div class="pb-hud-value pb-hud-hp"><span id="hud-hp">30</span></div>
+    </div>
+    <div class="pb-hud-block" title="所持ゴールド">
+      <div class="pb-hud-label">ｺﾞｰﾙﾄﾞ</div>
+      <div class="pb-hud-value pb-hud-gold"><span id="hud-gold">3</span></div>
+    </div>
+    <div class="pb-hud-block" title="レベル = 盤面に置ける数 / 累計XP">
+      <div class="pb-hud-label">Lv</div>
+      <div class="pb-hud-value"><span id="hud-level">2</span> <span class="pb-hud-xp">(<span id="hud-xp">0</span>xp)</span></div>
+    </div>
+  </div>
+
+  <!-- シナジーパネル -->
+  <div class="pb-synergy" id="pb-synergy"></div>
+
+  <!-- 敵盤面 -->
+  <div class="pb-board-wrap pb-board-opp-wrap">
+    <div class="pb-board-label"><span class="pb-board-side opp">敵</span> <span id="pb-opp-name">クリープ</span></div>
+    <div class="pb-board pb-board-opp" id="pb-board-opp"></div>
+  </div>
+
+  <!-- 中央メッセージ -->
+  <div class="pb-message" id="pb-message">ショップで購入 → 盤面をタップで配置</div>
+
+  <!-- 自盤面 -->
+  <div class="pb-board-wrap pb-board-me-wrap">
+    <div class="pb-board-label"><span class="pb-board-side me">自</span> 自陣 <span class="pb-board-cap">(配置 <span id="pb-board-count">0</span>/<span id="pb-board-cap">2</span>)</span></div>
+    <div class="pb-board pb-board-me" id="pb-board-me"></div>
+  </div>
+
+  <!-- ベンチ(控え) -->
+  <div class="pb-bench-area">
+    <div class="pb-bench-label">控え <span class="pb-bench-hint" id="pb-bench-hint">─ タップ→盤面で配置</span></div>
+    <div class="pb-bench" id="pb-bench"></div>
+  </div>
+
+  <!-- ショップ -->
+  <div class="pb-shop-area" id="pb-shop-area">
+    <div class="pb-shop-head">
+      <span class="pb-shop-title">🛒 ショップ</span>
+      <div class="pb-shop-controls">
+        <button class="pb-mini-btn" id="btn-buy-xp" title="4ゴールドで経験値+4">XP +4 <span class="pb-mini-cost">4g</span></button>
+        <button class="pb-mini-btn" id="btn-reroll" title="2ゴールドでショップ更新">🔄 更新 <span class="pb-mini-cost">2g</span></button>
+      </div>
+    </div>
+    <div class="pb-shop" id="pb-shop"></div>
+  </div>
+
+  <!-- フェーズ操作バー -->
+  <div class="pb-phasebar">
+    <div class="pb-phase-timer" id="pb-phase-timer"></div>
+    <button class="pb-btn primary" id="btn-to-battle">⚔ 自動戦闘へ</button>
+  </div>
+
+</section>
+
+<!-- ヘルプモーダル -->
+<div id="pb-help-modal" class="pb-modal" hidden>
+  <div class="pb-modal-backdrop" data-close="pb-help-modal"></div>
+  <div class="pb-modal-card pb-help-card" role="dialog" aria-modal="true" aria-labelledby="pb-help-title">
+    <button class="pb-modal-close" data-close="pb-help-modal" aria-label="閉じる">×</button>
+    <h2 class="pb-modal-title" id="pb-help-title">あそびかた</h2>
+    <div class="pb-help-body">
+      <p><b>🎯 目的</b>: 虹霊を並べて自動戦闘で勝ち、ラウンドを生き残る。PoCは全3ラウンド。</p>
+      <p><b>🛒 ショップ</b>: 5枠から購入(コスト=ゴールド)。「更新」でラインナップ変更(2g)。ガチャ未所持キャラも全員出ます。</p>
+      <p><b>📈 レベル</b>: 「XP+4」でレベルUP。<b>レベル=盤面に置ける数</b>(2→8)。高レベルほど強い虹霊が出やすい。</p>
+      <p><b>⭐ 合成</b>: 同じ虹霊が3体そろうと自動で★2(さらに3体で★3)。大幅に強くなる。</p>
+      <p><b>🤝 シナジー</b>: 同じ派閥を2/4/6体並べると全体が強化(ATK+8/18/30%)。</p>
+      <p><b>⚔ 自動戦闘</b>: 準備が済んだら「自動戦闘へ」。配置と編成で勝敗が決まる。</p>
+      <p style="opacity:.7;font-size:12px;margin-top:12px;">PoC v1.7.0b ─ Phase 1 以降で12ラウンド・HP制・ゴースト戦・クラスシナジー・ボスが追加されます。</p>
+    </div>
+    <div class="pb-modal-actions">
+      <button class="pb-btn primary" data-close="pb-help-modal">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- 結果モーダル (ラウンド結果 + 最終) -->
+<div id="pb-result-modal" class="pb-modal pb-modal-result" hidden>
+  <div class="pb-modal-backdrop" data-close-result></div>
+  <div class="pb-modal-card pb-result-card" role="dialog" aria-modal="true" aria-labelledby="pb-result-title">
+    <div class="pb-modal-icon" id="pb-result-icon">🏆</div>
+    <h2 class="pb-modal-title" id="pb-result-title">勝利</h2>
+    <div class="pb-modal-detail" id="pb-result-detail"></div>
+    <div class="pb-modal-actions" id="pb-result-actions"></div>
+  </div>
+</div>
+
+<script src="./script.js?v=1.7.0b"></script>
+</body>
+</html>
