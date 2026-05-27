@@ -153,8 +153,35 @@
   function selectBench(idx) {
     if (S.phase !== 'prep') return;
     S.selBench = (S.selBench === idx) ? -1 : idx;
-    renderBench(); renderBoard();
-    setMsg(S.selBench >= 0 ? '配置先の空きマスをタップ (もう一度タップで選択解除)' : 'ショップで購入 → 盤面をタップで配置');
+    renderBench(); renderBoard(); renderSellButton();
+    setMsg(S.selBench >= 0 ? '空きマスで配置 / 「🗑 売却」 でゴールド返却 (もう一度タップで選択解除)' : 'ショップで購入 → 盤面をタップで配置');
+  }
+
+  // 売却額: ★1=コスト / ★2=コスト×3 / ★3=コスト×9 (投入ゴールド相当を返却)
+  function sellValue(u) { return POOL_BY_ID[u.defId].cost * Math.pow(3, u.star - 1); }
+
+  function sellSelected() {
+    if (S.phase !== 'prep' || S.selBench < 0) return;
+    const u = S.bench[S.selBench];
+    if (!u) return;
+    const v = sellValue(u);
+    S.gold += v;
+    S.bench.splice(S.selBench, 1);
+    S.selBench = -1;
+    flash('🗑 ' + POOL_BY_ID[u.defId].name + ' を売却 (+' + v + 'g)');
+    renderAll();
+  }
+
+  function renderSellButton() {
+    const btn = $('btn-sell');
+    if (!btn) return;
+    const u = (S.phase === 'prep' && S.selBench >= 0) ? S.bench[S.selBench] : null;
+    if (u) {
+      btn.style.display = '';
+      $('sell-amt').textContent = '+' + sellValue(u) + 'g';
+    } else {
+      btn.style.display = 'none';
+    }
   }
 
   function onCellClick(cellIdx) {
@@ -176,11 +203,17 @@
       tryMerge();
       renderAll();
     } else if (S.board[cellIdx]) {
-      // 拾い上げ → 控えへ
+      // 拾い上げ → 控えへ (売却/再配置できるよう選択状態にする)
       if (!benchHasRoom()) { flash('控えが満杯です'); return; }
-      S.bench.push(S.board[cellIdx]);
+      const u = S.board[cellIdx];
       S.board[cellIdx] = null;
+      S.bench.push(u);
+      S.selBench = S.bench.indexOf(u);
       tryMerge();
+      // tryMerge で合成消費された場合は選択解除
+      if (!S.bench[S.selBench] || S.bench[S.selBench].uid !== u.uid) {
+        S.selBench = S.bench.findIndex(x => x.uid === u.uid);
+      }
       renderAll();
     }
   }
@@ -449,7 +482,7 @@
   }
 
   // ===== 描画 =====
-  function renderAll() { renderHud(); renderSynergy(); renderBoard(); renderBench(); renderShop(); }
+  function renderAll() { renderHud(); renderSynergy(); renderBoard(); renderBench(); renderShop(); renderSellButton(); }
 
   function renderHud() {
     $('hud-round').textContent = S.round;
@@ -676,6 +709,7 @@
     $('btn-to-battle').onclick = startBattle;
     $('btn-reroll').onclick = reroll;
     $('btn-buy-xp').onclick = buyXp;
+    $('btn-sell').onclick = sellSelected;
     $('btn-pb-help').onclick = () => openModal('pb-help-modal');
 
     document.querySelectorAll('[data-close]').forEach(el => {
@@ -708,7 +742,7 @@
   async function init() {
     bindEvents();
     try {
-      const res = await fetch('./data/pool.json?v=1.7.0d');
+      const res = await fetch('./data/pool.json?v=1.7.0e');
       POOL = await res.json();
     } catch (e) {
       setMsg('データ読込に失敗しました'); console.error(e); return;

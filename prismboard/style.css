@@ -237,6 +237,10 @@ body.pb-modal-open .pb-modal-card { touch-action: pan-y; }
 .pb-mini-btn:hover { border-color: var(--border-hi); }
 .pb-mini-btn:disabled { opacity: .4; cursor: not-allowed; }
 .pb-mini-cost { color: var(--gold); font-size: 11px; }
+/* 売却ボタン: 返却(gain)を緑、 ボタン枠は赤系でゴミ箱の意味づけ */
+.pb-sell-btn { border-color: rgba(255,138,138,0.5); margin-left: 8px; }
+.pb-sell-btn:hover { border-color: rgba(255,138,138,0.9); }
+.pb-sell-btn .pb-mini-cost { color: var(--hp); }
 .pb-shop { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
 .pb-shop-slot {
   position: relative; border-radius: 10px; overflow: hidden; cursor: pointer;

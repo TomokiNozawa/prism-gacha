@@ -7,7 +7,7 @@
 <title>プリズムボード | Prismaera</title>
 <link rel="icon" href="/images/icons/icon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="/images/icons/icon-180.png">
-<link rel="stylesheet" href="./style.css?v=1.7.0d">
+<link rel="stylesheet" href="./style.css?v=1.7.0e">
 </head>
 <body>
 
@@ -47,7 +47,7 @@
   <div class="pb-home-actions">
     <button class="pb-btn primary pb-btn-start" id="btn-start">▶ ゲーム開始</button>
   </div>
-  <div class="pb-foot-note">プリズムボード PoC v1.7.0d ─ Phase 0 (テンポ確認版)</div>
+  <div class="pb-foot-note">プリズムボード PoC v1.7.0e ─ Phase 0 (テンポ確認版)</div>
 </section>
 
 <!-- ===== 試合画面 ===== -->
@@ -93,7 +93,9 @@
 
   <!-- ベンチ(控え) -->
   <div class="pb-bench-area">
-    <div class="pb-bench-label">控え <span class="pb-bench-hint" id="pb-bench-hint">─ タップ→盤面で配置</span></div>
+    <div class="pb-bench-label">控え <span class="pb-bench-hint" id="pb-bench-hint">─ タップ→盤面で配置</span>
+      <button class="pb-mini-btn pb-sell-btn" id="btn-sell" style="display:none" title="選択中のユニットを売却してゴールド返却">🗑 売却 <span class="pb-mini-cost" id="sell-amt">+0g</span></button>
+    </div>
     <div class="pb-bench" id="pb-bench"></div>
   </div>
 
@@ -129,8 +131,9 @@
       <p><b>📈 レベル</b>: 「XP+4」でレベルUP。<b>レベル=盤面に置ける数</b>(2→8)。高レベルほど強い虹霊が出やすい。</p>
       <p><b>⭐ 合成</b>: 同じ虹霊が3体そろうと自動で★2(さらに3体で★3)。大幅に強くなる。</p>
       <p><b>🤝 シナジー</b>: 同じ派閥を2/4/6体並べると全体が強化(ATK+8/18/30%)。</p>
+      <p><b>🗑 売却</b>: 控え/盤面のユニットをタップ→「🗑 売却」でゴールド返却(★が上がるほど高額)。盤面ユニットはタップで控えに戻ります。</p>
       <p><b>⚔ 自動戦闘</b>: 準備が済んだら「自動戦闘へ」。配置と編成で勝敗が決まる。</p>
-      <p style="opacity:.7;font-size:12px;margin-top:12px;">PoC v1.7.0d ─ Phase 1 以降で12ラウンド・HP制・ゴースト戦・クラスシナジー・ボスが追加されます。</p>
+      <p style="opacity:.7;font-size:12px;margin-top:12px;">PoC v1.7.0e ─ Phase 1 以降で12ラウンド・HP制・ゴースト戦・クラスシナジー・ボスが追加されます。</p>
     </div>
     <div class="pb-modal-actions">
       <button class="pb-btn primary" data-close="pb-help-modal">閉じる</button>
@@ -149,6 +152,6 @@
   </div>
 </div>
 
-<script src="./script.js?v=1.7.0d"></script>
+<script src="./script.js?v=1.7.0e"></script>
 </body>
 </html>
