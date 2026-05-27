@@ -1350,6 +1350,52 @@ def check_dev_suffix_progression():
     return 0
 
 
+def check_dev_ahead_needs_suffix():
+    """ルール7-56 (BLOCKER 2026-05-27 野沢さん指摘「dev は必ずサフィックス、 自動チェックに入ってないの?」):
+    dev branch が origin/main より commit 先行している (= 未マージの dev 作業がある) のに
+    version が origin/main と同一 (サフィックス無し) の状態を検出する。
+    7-23 は「main マージ直後の一時的な同値」を許すため cur_ver==main_ver を OK にしており、
+    その後 dev が commit を積んでも サフィックス bump を強制する仕組みが無かった (= 穴)。
+    docs only の commit でも dev が先行したら サフィックス必須 (野沢さん方針、 例外なし)。
+    検出タイミング: pre-commit は新 commit 作成前のため、 先行 commit が積まれた次回 check で確実に捕捉。
+    詳細: CLAUDE.md feedback_prismaera_version_suffix.md
+    """
+    if _current_branch() != "dev":
+        return 0
+    ver_path = ROOT / "version.json"
+    if not ver_path.exists():
+        return 0
+    try:
+        cur_ver = json.load(ver_path.open(encoding="utf-8"))["version"]
+    except Exception:
+        return 0
+    main_ver = _read_version_at("origin/main")
+    if main_ver is None:
+        return 0
+    if cur_ver != main_ver:
+        # サフィックス付き (or 別 X.Y.Z) → 7-23/7-25 が担保済
+        return 0
+    # cur_ver == main_ver: origin/main より先行 commit があれば サフィックス未付与 = NG
+    r = subprocess.run(["git", "-C", str(ROOT), "rev-list", "--count", "origin/main..HEAD"],
+                       capture_output=True, text=True, encoding="utf-8", errors="replace")
+    if r.returncode != 0:
+        return 0  # origin/main 未取得等 → skip
+    try:
+        ahead = int((r.stdout or "0").strip())
+    except ValueError:
+        return 0
+    if ahead > 0:
+        violations.append(
+            f"[ルール7-56 dev サフィックス未付与 BLOCKER] dev が origin/main より {ahead} commit 先行しているのに "
+            f"version='{cur_ver}' が origin/main と同一 (サフィックス無し)。\n"
+            f"      → dev が main より進んだら 必ず サフィックスを付ける ('{main_ver}a' 〜)。 docs only でも例外なし。\n"
+            f"      → 修正: py scripts/bump_version.py dev-suffix --auto-commit\n"
+            f"      → 詳細: CLAUDE.md feedback_prismaera_version_suffix.md"
+        )
+        return 1
+    return 0
+
+
 def check_cache_buster_format():
     """ルール7-26 (BLOCKER 2026-05-05 野沢さん指示): cache buster (?v=) は version.json の version と完全同期 必須。
     日付ベース (?v=20260505a 等) や 不一致 cache buster は 旧仕様残存・同期漏れ で BLOCKER。
@@ -1689,6 +1735,8 @@ if scope_match('deploy'):
     print(f"  ルール7-24 (main version bump 必須): {n7_24}件 検査 [BLOCKER]")
     n7_25 = check_dev_suffix_progression()
     print(f"  ルール7-25 (dev suffix 1段階 increment): {n7_25}件 検査 [BLOCKER]")
+    n7_56 = check_dev_ahead_needs_suffix()
+    print(f"  ルール7-56 (dev 先行時 サフィックス必須): {n7_56}件 検査 [BLOCKER]")
     n7_26 = check_cache_buster_format()
     print(f"  ルール7-26 (cache buster = version 完全同期): {n7_26}件 検査 [BLOCKER]")
     n7_28 = check_img_cache_version_sync()
