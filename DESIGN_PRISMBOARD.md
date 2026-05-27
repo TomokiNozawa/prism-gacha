@@ -154,6 +154,7 @@ prismboard/
 ## 11. UI / 実装方針(CLAUDE.md 準拠)
 
 - 新ディレクトリ `prismboard/`(`cardgame/` と同様の独立構成: index.html / script.js / style.css / data)。
+- **ホーム導線(案A確定)**: カードバトルと同じく、ホームに **専用の1行 `home-prismboard-row` → `/prismboard/`** を追加する(既存 `home-cardgame-row`[index.html L174 付近]の直下に並べる)。`script.js` の cardgame 表示制御(L10671 付近、`home-cardgame-row` を `display:flex`)と同パターンで表示。未登録者はタップでアカウント登録 prompt(`home-cardgame-row` の `_pcbEntry` ロジック L5571 を踏襲)。NEW! バッジ・aurora 等のスタイルも cardgame 行を流用。**この行追加は実ディレクトリ `/prismboard/` が出来てから(Phase 1 以降)** 行う(先に行だけ足すと 404)。ゲームが3本以上に増える場合は「ミニゲームハブ」へ再構成を検討(案B)。
 - モーダル3点セット(背景scroll lock + MutationObserver + keydown capture)、Esc閉じ/Tabフォーカストラップ、モバイルタップ領域≥44px、既存 `.btn/.card/.modal` デザイン踏襲。
 - データ保持は Firebase(アカウント保持)。未ログイン時はゲスト(ローカル)→ログイン誘導。
 - ストーリー世界観と派閥効果・ボスを整合(派閥名・キャラ性は POOL/STORY に準拠)。
