@@ -742,7 +742,7 @@
   async function init() {
     bindEvents();
     try {
-      const res = await fetch('./data/pool.json?v=1.7.0e');
+      const res = await fetch('./data/pool.json?v=1.7.0f');
       POOL = await res.json();
     } catch (e) {
       setMsg('データ読込に失敗しました'); console.error(e); return;

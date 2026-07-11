@@ -1,5 +1,5 @@
 /* ============================================================
-   Prismaera v1.7.0e — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
+   Prismaera v1.7.0f — 演出&ゲームロジック (Season 1 第1〜2章) / dev は cache buster suffix で進行
    ============================================================ */
 "use strict";
 
@@ -3392,21 +3392,27 @@ let busy = false;
 async function doSingle(opts = {}) {
   if (busy) return;
   busy = true;
-  skipRequested = false;  // 開始時リセット
-  const result = rollOne({ pickup: opts.pickup });
-  applyPull(result);
-  stage.classList.add("active");
-  clearStage();
-  canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-  // 単発はレア度に関係なくクリック/タップ待ち (じっくり見たい)
-  await summonOne(result, { requireTap: true });
-  closeStage();
-  busy = false;
+  // 演出中の例外で busy=true が残留すると全ガチャボタンが永久無反応になるため finally で必ず解除
+  try {
+    skipRequested = false;  // 開始時リセット
+    const result = rollOne({ pickup: opts.pickup });
+    applyPull(result);
+    stage.classList.add("active");
+    clearStage();
+    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    // 単発はレア度に関係なくクリック/タップ待ち (じっくり見たい)
+    await summonOne(result, { requireTap: true });
+  } finally {
+    closeStage();
+    busy = false;
+  }
 }
 
 async function doTen(opts = {}) {
   if (busy) return;
   busy = true;
+  // 演出中の例外で busy=true が残留すると全ガチャボタンが永久無反応になるため finally で必ず解除
+  try {
   skipRequested = false;  // 開始時リセット
   // Phase 1: roll + メタデータ計算 (state mutation のみ、 saveState/updateHUD は遅延)
   const results = [];
@@ -3456,7 +3462,7 @@ async function doTen(opts = {}) {
   // SSR以上が一切無いなら即終了
   const hasHighRareInSequence = sequenced.some(r => order[r.tier] >= 2);
   if (tenSkipMode && !hasHighRareInSequence) {
-    closeStage(); showResult(results, best); busy = false; return;
+    closeStage(); showResult(results, best); return;
   }
 
   // 前9体: showLadder=false (昇格演出なし、装飾のみ)
@@ -3503,7 +3509,10 @@ async function doTen(opts = {}) {
 
   closeStage();
   showResult(results, best);
-  busy = false;
+  } finally {
+    closeStage();  // 例外時の安全網 (冪等、 正常系では直前の closeStage と重複しても無害)
+    busy = false;
+  }
 }
 
 function showHintTap() {
@@ -3930,8 +3939,11 @@ function showCharDetail(c) {
   const idx = detailUnlockedList.findIndex(x => galleryKey(x) === galleryKey(c));
   detailIdx = idx >= 0 ? idx : 0;
   renderCharDetail(c);
-  $("#char-detail").classList.add("active");
-  _lockBodyScroll();
+  // 既に詳細表示中 (関連キャラ辿り等) の再呼び出しでは lock を重ねない (_modalDepth リーク防止)
+  const _cdEl = $("#char-detail");
+  const _wasOpen = _cdEl.classList.contains("active");
+  _cdEl.classList.add("active");
+  if (!_wasOpen) _lockBodyScroll();
 }
 
 // ============================================================
@@ -5574,9 +5586,8 @@ if (_pcbEntry) {
   _pcbEntry.addEventListener('click', (e) => {
     if (!authUser) {
       e.preventDefault();
-      // account-prompt が active なら 維持、 そうでなければ 表示
-      const ap = document.getElementById('account-prompt');
-      if (ap && !ap.classList.contains('active')) ap.classList.add('active');
+      // account-prompt が active なら 維持、 そうでなければ 表示 (lock 込み共通ヘルパー)
+      _showAccountPromptEl();
     }
   });
 }
@@ -5630,11 +5641,12 @@ const STORY_CHAPTER_MARKERS = [
   { storyId: 's1c4', label: '第4章', icon: '❄️', x: 1700, y:  220 }, // 凍土+空 (北方東部、 Coming Soon)、 内側に下げてコンパスローズと干渉回避
   { storyId: 's1c5', label: '第5章', icon: '🌑', x:  300, y: 1380 }, // 銀霜+黒月衆+地底市 (西方氷土の裏側)、 silver(500,1250) の少し南西
   { storyId: 's1c6', label: '第6章', icon: '🌈', x: 1100, y:  950 }, // 巫女連邦リーリエ (中央南東、 academy 上)、 観測者七座祭祀の中心
+  { storyId: 's1c7', label: '第7章', icon: '🌌', x: 1030, y: 1440 }, // 異界塔ザナド voidtower(1000,1580) の直上、 s1c2マーカー(900,1380)/crimson(1300,1450) と干渉回避
 ];
 // S2/S3 派閥ティザー (霧表現): まだ実装されていない領域を「???」 で示す
 // 画像範囲外は viewBox bg で見えにくいため内側に配置
 const STORY_FACTION_TEASER = [
-  { id: 's1c7',    label: '???', subLabel: '— 異界塔ザナド (s1c7) —', x: 1000, y: 1580 },
+  // s1c7 (異界塔ザナド) は 2026-05-18 公開済 → ティザー削除、 voidtower 派閥ノード + 第7章マーカーに置換済
   { id: 'season2', label: '???', subLabel: '— Season 2 領域 —',         x:  150, y: 1500 },
   { id: 'season3', label: '???', subLabel: '— 始原の地 —',               x: 1850, y: 1500 },
 ];
@@ -5932,9 +5944,14 @@ function _showFactionSide(fid) {
     const c = getCharByName ? getCharByName(name) : null;
     chars.push({ name, char: c });
   }
-  // BGM 有無
-  const factionBgmIds = ['church', 'aquasis', 'crimson'];
-  const hasBgm = factionBgmIds.includes(fid);
+  // BGM 有無: 派閥id → BGM_LIST の faction 曲 id マッピング (id 体系が別なので明示マップ、 新派閥BGM追加時はここも更新)
+  const FACTION_BGM_MAP = {
+    church: 'church', aquasis: 'aquasis', crimson: 'crimson', sahar: 'sahar',
+    niiruru: 'niflheim', zenonia: 'aether', shrines: 'kagura', silver: 'frostcrown',
+    voidtower: 'zanado', genso: 'observatorium',
+  };
+  const _bgmId = FACTION_BGM_MAP[fid];
+  const hasBgm = !!(_bgmId && typeof BGM_LIST !== 'undefined' && BGM_LIST.some(b => b.id === _bgmId && b.category === 'faction'));
   // ヘッダ: タイトル + ×閉じるボタン (野沢さん要望 2026-05-06、 派閥詳細閉じてWMだけに戻す)
   let html = `<div class="world-map-side-head">
     <h3>${escapeHtml(fac.label)}</h3>
@@ -6482,7 +6499,6 @@ const FURIGANA = {
   '紫雷': 'しらい',
   '月牙': 'げつが',
   '紅月': 'こうげつ',
-  '誓盾': 'せいとん',
   '裁罰': 'さいばつ',
   // 他 (S1で出る固有名詞・難読語)
   '紅蓮': 'ぐれん',
@@ -7441,7 +7457,7 @@ const STORY_ACT_INTROS = {
   's1c6': {
     'Season 1 第6章 — 七座満つる':      '千年前、 私は最初の羽だった。 千年後、 新しい同胞を迎える夜の話。\n— セラフィエル',
     '第一幕 — 天上から地上へ':          '東の空に、 四つ目の灯火が揺らぎ始めた。 千年待った娘の元へ、 私が降りる。\n— セラフィエル',
-    '第二幕 — 千年の母':                '千年前、 第四席を辞退した若き巫女。 彼女の千年は、 私の千年と、 重なっていた。\n— セラフィエル',
+    '第二幕 — 待ち続けた母':            '千年前、 第四席を辞退した若き巫女。 彼女の千年は、 私の千年と、 重なっていた。\n— セラフィエル',
     '第三幕 — 翼を畳む者の決意':        '最初の羽だった頃の記憶。 そして、 翼を一枚返す日が、 近づいている。\n— セラフィエル',
     '第四幕 — 七座満つる':              '七座、 四つ満ちる。 違っていても、 同じ目的を持つ仲間でいられる夜。\n— セラフィエル',
   },
@@ -7619,7 +7635,7 @@ const STORY_CUTIN_CONFIG = {
   's1c3': [
     // 2-1 アーシャ初登場 → asha_meeting.png 挿絵で代替 (cutin より絵が強い)、 cutin削除
     // 3-1 ファラー初登場: 「幼子が現れた」 の直後に幼子姿の千年級存在の印象を強調
-    { scene: '3-1', charName: '古龍の語り部 ファラー',   marker: '幼子が、現れた' },
+    { scene: '3-1', charName: '古龍の語り部 ファラー',   marker: '幼子が現れた' },
     // サハナ初登場 (2-2) は sand_shadeova_battle 挿絵で代替、 cutin不要
   ],
 };
@@ -7670,7 +7686,7 @@ const LOCATION_CONFIG = {
     '2-1':         { img: '/images/locations/s1c5/thumb/black_moon_grove_thumb.webp' },          // 2-1 月喰いの森 (黒月衆の祭壇)
     '3-1':         { img: '/images/locations/s1c5/thumb/underworld_liora_full_thumb.webp' },     // 3-1 地底市リオラ全景
     '3-3':         { img: '/images/locations/s1c5/thumb/moon_shrine_altar_thumb.webp' },         // 3-3 雪月神殿の祭壇
-    'エピローグ — 観測者三柱、 七座を仰ぐ': { img: '/images/locations/s1c5/thumb/observer_west_close_thumb.webp' },  // エピローグ scene.title 完全一致
+    'エピローグ — 観測者三柱、七座を仰ぐ': { img: '/images/locations/s1c5/thumb/observer_west_close_thumb.webp' },  // エピローグ scene.title 完全一致 (md 見出しは読点後スペース無し)
   },
   's1c6': {
     // 第6章「七座満つる」 背景 (3:4縦長 全 8枚 = プロローグ + 1-1 + 1-2 + 2-1〜2-4 + エピローグ)
@@ -7681,7 +7697,7 @@ const LOCATION_CONFIG = {
     '2-2':         { img: '/images/locations/s1c6/thumb/shrine_chronicle_hall_thumb.webp' },       // 2-2 千年伝承の間 (古文書+壁画)
     '2-3':         { img: '/images/locations/s1c6/thumb/shrine_prayer_tower_thumb.webp' },         // 2-3 月夜の祈祷の塔 (イリス告白)
     '2-4':         { img: '/images/locations/s1c6/thumb/shrine_extinguished_village_thumb.webp' }, // 2-4 灯篭が消えた村跡 (千年前の悲劇)
-    'エピローグ — 七座の四人と、 西の黒月': { img: '/images/locations/s1c6/thumb/observer_east_with_iris_thumb.webp' },  // エピローグ scene.title 完全一致
+    'エピローグ — 七座の四人と、西の黒月': { img: '/images/locations/s1c6/thumb/observer_east_with_iris_thumb.webp' },  // エピローグ scene.title 完全一致 (md 見出しは読点後スペース無し)
   },
   's1c3': {
     // 各シーンの「印象深い1場面」 を 3:4 縦長背景画像として配置
@@ -7750,7 +7766,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
     // (frost_swordmaster_sparring 挿絵は意味不明として削除 — 野沢さん指摘 2026-05-03、 ファイル自体は将来再利用に備えて保持)
     { scene: '2-2',  marker: '五合目で私は双剣を交差させた',                   position: 'before', img: '/images/locations/s1c4/thumb/duel_ice_vs_dragon_thumb.webp' },
     // 第二幕 2-3: アルテミス&ヒノオウ 千年前の回想 (戦友が並ぶ夜)
-    { scene: '2-3',  marker: 'ふと、古い戦場の記憶が不意に蘇った',           position: 'after',  img: '/images/locations/s1c4/thumb/flashback_artemis_hinoo_thumb.webp' },
+    { scene: '2-3',  marker: 'ふと古い戦場の記憶が不意に蘇った',             position: 'after',  img: '/images/locations/s1c4/thumb/flashback_artemis_hinoo_thumb.webp' },
     // 第三幕 3-1: 空挺城ゼノニア 三国会談シーン (ヴァーレ女皇)
     { scene: '3-1',  marker: 'ヴァーレが静かに口を開いた',                     position: 'before', img: '/images/locations/s1c4/thumb/vaire_diplomacy_thumb.webp' },
     // 第三幕 3-1: ゼノニア整備工房の生活感 (ハーニア親方+ベル整備士+ピット見習い)
@@ -7790,7 +7806,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
     // 第三幕 3-2: 「最初の羽」 回想 (プリズマがセラフィエルを生んだ古代の場面)
     { scene: '3-2',  marker: '私の六枚の翼が一つずつほどけていった',             position: 'after',  img: '/images/locations/s1c6/thumb/seraph_first_wing_memory_thumb.webp' },
     // 第四幕 4-1: 山場 第四席「約束」着座の瞬間 (4人初集合、 緑の祈りの環が長く待ち続けて灯る)
-    { scene: '4-1',  marker: '緑の祈りの環が——長く待ち続けた末に、ようやく灯った', position: 'after',  img: '/images/locations/s1c6/thumb/seven_seat_ritual_thumb.webp' },
+    { scene: '4-1',  marker: '緑の祈りの環が長く待ち続けた末にようやく灯った', position: 'after',  img: '/images/locations/s1c6/thumb/seven_seat_ritual_thumb.webp' },
     // 第四幕 4-2: 別れの朝 (半世紀待った母ヴィオレナの最も静かな別れの作法)
     { scene: '4-2',  marker: 'イリスの肩に一度だけ、手を置いた',                  position: 'after',  img: '/images/locations/s1c6/thumb/iris_departure_morning_thumb.webp' },
   ],
@@ -7811,7 +7827,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
   's1c7': [
     // 第7章「黒月決戦」 挿絵 (16:9横長、 全 9枚 = 1-3 + 2-1〜2-4 + 山場3つ)
     // 第一幕 1-3: シオン+シ・ロエン戦場前夜の鏡像 (二つの月、 二人の自分が遠く同じ月を見上げる)
-    { scene: '1-3',  marker: '二つの月——銀と黒——が、戦場の上空で静かに並んで輝いていた', position: 'after', img: '/images/locations/s1c7/thumb/sion_sci_roen_mirror_thumb.webp' },
+    { scene: '1-3',  marker: '銀と黒の二つの月が、戦場の上空で静かに並んで輝いていた', position: 'after', img: '/images/locations/s1c7/thumb/sion_sci_roen_mirror_thumb.webp' },
     // 第二幕 2-1: 教会陣営 vs ガルヴィン+背後ノクトリア (5人対峙、 既存伏線+ノクトリア再登場 同時回収)
     { scene: '2-1',  marker: '四人の剣戟が朝の光の中で、始まった',                              position: 'after', img: '/images/locations/s1c7/thumb/church_vs_garvin_thumb.webp' },
     // 第二幕 2-2: 砂漠陣営+古龍王予兆 (ヴィル+サハナ+ファラー+アグル、 S2C1 古龍王覚醒への前奏)
@@ -7823,7 +7839,7 @@ const STORY_LOCATION_INLINE_CONFIG = {
     // 第三幕 3-1: 山場2 シオン×シ・ロエン無言の頷き (s1c5 分離の儀から半年余り、 最強の静寂)
     { scene: '3-1',  marker: 'それが、千年の意味を全て共有した瞬間だった',                       position: 'after', img: '/images/locations/s1c7/thumb/sion_sci_roen_reunion_thumb.webp' },
     // 第四幕 4-1: 山場1 プリズマ vs ヴォイドラ対話 (「私の影として認める」 = 章テーマの中核)
-    { scene: '4-1',  marker: 'あなたを、私の影として、認めます',                                  position: 'after', img: '/images/locations/s1c7/thumb/prisma_void_dialogue_thumb.webp' },
+    { scene: '4-1',  marker: 'あなたを私の影として認めます',                                      position: 'after', img: '/images/locations/s1c7/thumb/prisma_void_dialogue_thumb.webp' },
     // 第四幕 4-2: ジュンクトス見届け + ヴォイドラ「世界の影として留まる」 受諾 (S2C7 接続の儀への直接前奏)
     { scene: '4-2',  marker: 'これを私、共観の使徒ジュンクトスが世界に向けて見届けます',         position: 'after', img: '/images/locations/s1c7/thumb/junctus_witness_thumb.webp' },
     // 第五幕 5-1: 山場3 プリズマ眠りに入る + 七座+全戦士見送り (Season 1 完結シーン、 千年の幕引き)
@@ -8271,7 +8287,7 @@ const STORY_POV_EXCLUDE_SCENES = {
   's1c5': [
     // プロローグ + エピローグ は観測者三柱 POV — POV (シオン) ではないので除外
     'プロローグ',
-    'エピローグ — 観測者三柱、 七座を仰ぐ',
+    'エピローグ — 観測者三柱、七座を仰ぐ',
   ],
 };
 
@@ -8837,11 +8853,17 @@ function refreshStoryReadBadges() {
 function openStoryList() {
   refreshStoryReadBadges(); // 開く度に最新状態
   const m = document.getElementById('story-list-modal');
-  if (m) m.removeAttribute('hidden');
+  if (m && m.hasAttribute('hidden')) {
+    m.removeAttribute('hidden');
+    _lockBodyScroll();
+  }
 }
 function closeStoryList() {
   const m = document.getElementById('story-list-modal');
-  if (m) m.setAttribute('hidden', '');
+  if (m && !m.hasAttribute('hidden')) {
+    m.setAttribute('hidden', '');
+    _unlockBodyScroll();
+  }
 }
 document.getElementById('btn-story-list')?.addEventListener('click', openStoryList);
 document.querySelector('#story-list-modal .story-list-close')?.addEventListener('click', closeStoryList);
@@ -10515,7 +10537,10 @@ function showAccountModal() {
     switchAccountTab('login');
     setTimeout(() => { const el = $('#login-nickname'); if (el) el.focus(); }, 50);
   }
-  modal.classList.add('active');
+  if (!modal.classList.contains('active')) {
+    modal.classList.add('active');
+    _lockBodyScroll();
+  }
 }
 
 // デバッグ: state.history + best/worst の状態を Clipboard にコピー (admin user のみ)
@@ -10630,7 +10655,10 @@ function showTScoreArchive(type) {
 function closeAccountModal() {
   const modal = $('#account-modal');
   if (!modal) return;
-  modal.classList.remove('active');
+  if (modal.classList.contains('active')) {
+    modal.classList.remove('active');
+    _unlockBodyScroll();
+  }
   const le = $('#login-error'); if (le) le.textContent = '';
   const se = $('#signup-error'); if (se) se.textContent = '';
   const lp = $('#login-passphrase'); if (lp) lp.value = '';
@@ -10856,20 +10884,32 @@ function maybeShowAccountPrompt() {
   if (localStorage.getItem(ACCOUNT_PROMPT_KEY) === 'true') return;
   const hasProgress = (state.total || 0) > 0 && Object.keys(state.unlockedSet || {}).length > 0;
   if (!hasProgress) return;
+  _showAccountPromptEl();
+}
+
+// account-prompt の表示/非表示 共通ヘルパー (scroll lock を必ず対で管理、 多重 lock 防止ガード付き)
+function _showAccountPromptEl() {
   const modal = document.getElementById('account-prompt');
-  if (!modal) return;
-  modal.classList.add('active');
+  if (modal && !modal.classList.contains('active')) {
+    modal.classList.add('active');
+    _lockBodyScroll();
+  }
+}
+function _hideAccountPromptEl() {
+  const modal = document.getElementById('account-prompt');
+  if (modal && modal.classList.contains('active')) {
+    modal.classList.remove('active');
+    _unlockBodyScroll();
+  }
 }
 
 function dismissAccountPrompt() {
   localStorage.setItem(ACCOUNT_PROMPT_KEY, 'true');
-  const modal = document.getElementById('account-prompt');
-  if (modal) modal.classList.remove('active');
+  _hideAccountPromptEl();
 }
 
 function acceptAccountPrompt() {
-  const modal = document.getElementById('account-prompt');
-  if (modal) modal.classList.remove('active');
+  _hideAccountPromptEl();
   // アカウントモーダルの新規登録タブを開く
   showAccountModal();
   switchAccountTab('signup');
@@ -11650,11 +11690,17 @@ function openSettingsModal() {
   const fs = s.fontSize || 'medium';
   m.querySelectorAll('.settings-fontsize-btn').forEach(b => b.classList.toggle('active', b.dataset.size === fs));
   m.querySelector('#settings-power-saver').checked = !!s.powerSaver;
-  m.classList.add('active');
+  if (!m.classList.contains('active')) {
+    m.classList.add('active');
+    _lockBodyScroll();
+  }
 }
 function closeSettingsModal() {
   const m = document.getElementById('settings-modal');
-  if (m) m.classList.remove('active');
+  if (m && m.classList.contains('active')) {
+    m.classList.remove('active');
+    _unlockBodyScroll();
+  }
 }
 // 起動時に設定適用
 applySettings(loadSettings());
@@ -11752,9 +11798,7 @@ function maybeShowWelcomeModal() {
   try {
     if (localStorage.getItem(ACCOUNT_PROMPT_KEY) === 'true') return;
   } catch (e) {}
-  const modal = document.getElementById('account-prompt');
-  if (!modal) return;
-  modal.classList.add('active');
+  _showAccountPromptEl();
   // F3: 表示時刻を localStorage に記録 (24h以内のsignupなら welcome経由扱い)
   try { localStorage.setItem('prism-welcome-shown-ts', String(Date.now())); } catch (e) {}
 }
