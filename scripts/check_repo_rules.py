@@ -64,8 +64,8 @@ def scope_match(*target_scopes):
 #   story:   章本文 / outline / 既存設定齟齬 (ルール 2, 3, 4, 7, 7-1, 7-2, 7-9, 8, 9)
 #   char:    POOL 追加 / 派閥 / 凸秘話 (ルール 7-11, 7-12, 7-18, 7-21, 7-22, 7-30, 7-31, 7-33)
 #   prompt:  画像 / BGM プロンプト (ルール 1, 7-13, 7-14, 7-16, 7-34, 7-35, 7-36, 7-40)
-#   deploy:  cache buster / version / Box sync (ルール 7-23, 7-24, 7-25, 7-26, 7-27, 7-28, 7-37, 7-39)
-#   release: 章公開直前 (ルール 7-19, 7-29, 7-32, 7-38)
+#   deploy:  cache buster / version / Box sync (ルール 7-23, 7-24, 7-25, 7-26, 7-27, 7-28, 7-37, 7-39, 7-57, 7-59, 7-60, 7-61)
+#   release: 章公開直前 (ルール 7-19, 7-29, 7-32, 7-38, 7-58)
 #   all:     全ルール (デフォルト、 月次総点検)
 
 
@@ -3496,6 +3496,286 @@ n9 = check_admin_tier_max()
 print(f"  ルール9 (admin TIER_MAX = pool count): {n9}件 検査 [BLOCKER]")
 n10 = check_admin_bgm_labels()
 print(f"  ルール10 (admin BGM_LABELS 全 BGM 登録): {n10}件 検査 [WARNING]")
+
+# ====== 2026-11-25 追加: メモリだけで機械化されていなかったルールの機械チェック (野沢さん承認) ======
+import os as _os
+
+
+def _git_out(args):
+    """git コマンドの stdout (失敗時 None)"""
+    r = subprocess.run(["git", "-C", str(ROOT)] + args,
+                       capture_output=True, text=True, encoding="utf-8", errors="replace")
+    if r.returncode != 0:
+        return None
+    return r.stdout
+
+
+def _json_at(spec):
+    """git show <spec> の JSON (spec 例: 'HEAD:version.json' / ':version.json' (= staged)). 取れなければ None"""
+    out = _git_out(["show", spec])
+    if not out:
+        return None
+    try:
+        return json.loads(out)
+    except Exception:
+        return None
+
+
+def _version_json_candidates():
+    """コミット対象になりうる version.json (staged 版 / 作業ツリー版) のうち HEAD と内容が違うものを返す。
+    pre-commit では staged 版が本命、 手動実行 (check all) では未 stage の作業ツリー版も検査する。"""
+    head = _json_at("HEAD:version.json")
+    cands = []
+    seen = []
+    staged = _json_at(":version.json")
+    if staged is not None:
+        cands.append(("staged", staged))
+    wt_path = ROOT / "version.json"
+    if wt_path.exists():
+        try:
+            cands.append(("作業ツリー", json.loads(wt_path.read_text(encoding="utf-8"))))
+        except Exception:
+            pass
+    result = []
+    for label, data in cands:
+        if head is not None and data == head:
+            continue
+        if any(data == s for s in seen):
+            continue
+        seen.append(data)
+        result.append((label, data))
+    return head, result
+
+
+def _entry_key(e):
+    if isinstance(e, dict) and e.get("version"):
+        return f"v{e.get('version')}"
+    return json.dumps(e, ensure_ascii=False, sort_keys=True)[:80]
+
+
+def _ver_base_tuple(v):
+    """'1.7.0f' / 'v1.7.0' → (1, 7, 0)。 suffix は無視 (suffix の進行は 7-25 / strip は 7-27 の担当)"""
+    m = re.match(r"^v?(\d+)\.(\d+)\.(\d+)", str(v or ""))
+    return tuple(int(x) for x in m.groups()) if m else None
+
+
+def check_changelog_entry_protect():
+    """ルール7-57 (BLOCKER 2026-11-25、 memory feedback_changelog_merge_entry_protect.md の機械化):
+    version.json の changelog 配列から、 HEAD (マージ中は MERGE_HEAD も) にあった entry が消えていたら BLOCKER。
+    2026-05-18 s1c7 dev → main マージで version.json 衝突を `--theirs` 一括採用 → main 側 v1.7.0 entry
+    (第7章公開のお知らせ本体) が消失した事故の再発防止。
+    pendingChangelog (追記型) は リリース時の集約で正当に減るため、 減少は WARNING で知らせる。
+    意図的な削除 (revert 等) は 野沢さん承認のうえ PRISMAERA_ALLOW_CHANGELOG_SHRINK=1 で WARNING に落とせる。
+    """
+    head, cands = _version_json_candidates()
+    if head is None or not cands:
+        return 0
+    refs = [("HEAD", head)]
+    if _git_out(["rev-parse", "-q", "--verify", "MERGE_HEAD"]):
+        mh = _json_at("MERGE_HEAD:version.json")
+        if mh is not None:
+            refs.append(("MERGE_HEAD", mh))
+    allow = _os.environ.get("PRISMAERA_ALLOW_CHANGELOG_SHRINK") == "1"
+    found = 0
+    for label, data in cands:
+        new_keys = {_entry_key(e) for e in (data.get("changelog") or [])}
+        new_n = len(data.get("changelog") or [])
+        for ref_label, ref in refs:
+            old = ref.get("changelog") or []
+            missing = [k for k in (_entry_key(e) for e in old) if k not in new_keys]
+            if not missing and new_n >= len(old):
+                continue
+            found += 1
+            msg = (
+                f"[ルール7-57 changelog entry 消失 BLOCKER] version.json ({label}) の changelog が {ref_label} より減っている "
+                f"({len(old)} → {new_n} entry、 消えた entry: {', '.join(missing[:8]) or '(重複除去等で件数のみ減少)'})\n"
+                f"      → マージ衝突を `git checkout --theirs/--ours` や「dev 側採用/main 側採用」 で一括解決するのは禁止\n"
+                f"      → 手動 union: git show main:version.json / git show dev:version.json を取り出し、 changelog 配列を\n"
+                f"        concat → version キー重複削除 → date 降順 sort して書き戻す (version/scheduledRelease 等の単一値は個別判定)\n"
+                f"      → commit 前に `git diff HEAD version.json` で entry 数を目視、 減っていたら復活させる\n"
+                f"      → 意図的な削除 (revert 等) のみ 野沢さん承認のうえ PRISMAERA_ALLOW_CHANGELOG_SHRINK=1 で通す\n"
+                f"      → 詳細: memory feedback_changelog_merge_entry_protect.md"
+            )
+            (warnings_only.append(msg.replace(" BLOCKER]", " 承認済 WARNING]", 1)) if allow else violations.append(msg))
+        old_p = head.get("pendingChangelog") or []
+        new_p = data.get("pendingChangelog") or []
+        if len(new_p) < len(old_p):
+            warnings_only.append(
+                f"[ルール7-57 pendingChangelog 減少 WARNING] version.json ({label}) の pendingChangelog が HEAD より減っている "
+                f"({len(old_p)} → {len(new_p)})\n"
+                f"      → リリース時の changelog への集約・整理なら OK。 マージ衝突の一括採用で消えたなら手動 union で復活させる\n"
+                f"      → 詳細: memory feedback_changelog_merge_entry_protect.md"
+            )
+    return found
+
+
+def check_char_thumbs_complete():
+    """ルール7-58 (BLOCKER 2026-11-25、 memory feedback_chapter_release_checklist.md ⑰ の機械化):
+    images/characters/season1/{tier}/ の原寸 PNG (_blink 等の派生は除外、 gen_char_thumbs.py と同じ規約) ごとに
+    {tier}/thumb/{name}_thumb.webp が存在すること。 欠落は BLOCKER (相関図 rel-thumb / ストーリー char chip は
+    CSS background で fallback 無し → 本番でキャラ画像が空欄になる)。 PNG の無い孤児 thumb は WARNING。
+    2026-05-27 s1c7 公開時にサムネ31枚未生成で 相関図・ストーリーのキャラが空欄になった事故の再発防止。
+    """
+    base = ROOT / "images" / "characters" / "season1"
+    if not base.is_dir():
+        return 0
+    missing_all = []
+    orphan_all = []
+    checked = 0
+    for tier in ["lr", "ur", "ssr", "sr", "r"]:
+        tdir = base / tier
+        if not tdir.is_dir():
+            continue
+        pngs = {p.stem for p in tdir.glob("*.png") if not p.stem.endswith("_blink")}
+        thumbs = {p.name[:-len("_thumb.webp")] for p in (tdir / "thumb").glob("*_thumb.webp")} if (tdir / "thumb").is_dir() else set()
+        checked += len(pngs)
+        missing_all += [f"{tier}/thumb/{n}_thumb.webp" for n in sorted(pngs - thumbs)]
+        orphan_all += [f"{tier}/thumb/{n}_thumb.webp" for n in sorted(thumbs - pngs)]
+    if missing_all:
+        violations.append(
+            f"[ルール7-58 キャラ thumb 欠落 BLOCKER] 原寸 PNG に対応する thumb webp が {len(missing_all)}件 欠落: "
+            f"{', '.join(missing_all[:15])}{' 他' + str(len(missing_all) - 15) + '件' if len(missing_all) > 15 else ''}\n"
+            f"      → bash ~/.claude/scripts/run_py.sh scripts/gen_char_thumbs.py  (欠落分のみ生成) を実行し、 生成した webp も git add\n"
+            f"      → 相関図 rel-thumb / ストーリー char chip は fallback 無しのため、 欠落 = 本番でキャラ画像が空欄\n"
+            f"      → 詳細: memory feedback_chapter_release_checklist.md ⑰"
+        )
+    if orphan_all:
+        warnings_only.append(
+            f"[ルール7-58 孤児 thumb WARNING] 原寸 PNG の無い thumb webp {len(orphan_all)}件: {', '.join(orphan_all[:10])}\n"
+            f"      → キャラ改名/削除の取り残し。 参照が無ければ削除を検討 (表示には影響しない)"
+        )
+    return checked
+
+
+def check_scheduled_release_preserved():
+    """ルール7-59 (BLOCKER 2026-11-25、 memory feedback_scheduled_release_patch_safety.md ルール B の機械化):
+    HEAD の version.json に scheduledRelease {version: V} があるのに、 コミット対象版で scheduledRelease が消え、
+    しかも data.version が V に昇格していない (V より小さい) → BLOCKER。
+    2026-05-10 v1.6.0 scheduledRelease 中に bump_version.py patch (v1.5.2) が構造を削除 → 12:00 切替不発 →
+    ユーザーに「v1.6.0 → v1.5.2」 降格通知が出た事故の再発防止。
+    正当な解除 (= 即時公開モード化、 scheduledRelease.version を data.version に昇格) は通す。
+    """
+    head, cands = _version_json_candidates()
+    if head is None or not cands:
+        return 0
+    sched = head.get("scheduledRelease") or {}
+    sched_ver = sched.get("version")
+    if not sched_ver:
+        return 0
+    found = 0
+    for label, data in cands:
+        if data.get("scheduledRelease"):
+            continue
+        new_base = _ver_base_tuple(data.get("version"))
+        sched_base = _ver_base_tuple(sched_ver)
+        if new_base is None or sched_base is None or new_base >= sched_base:
+            continue  # 昇格 (即時公開モード化) = 正当
+        found += 1
+        violations.append(
+            f"[ルール7-59 scheduledRelease 構造消失 BLOCKER] HEAD の scheduledRelease (version='{sched_ver}', at='{sched.get('at', '')}') が "
+            f"version.json ({label}) から消え、 version='{data.get('version')}' のまま (昇格していない)\n"
+            f"      → bump_version.py 等で scheduledRelease が落ちた可能性。 切替時刻の自動切替が不発になり、 ユーザーに降格通知が出る\n"
+            f"      → scheduledRelease 期間中は main に patch を出さない (修正は dev のみ、 切替後に反映)\n"
+            f"      → どうしても必要なら 野沢さん確認のうえ scheduledRelease を解除し version を '{sched_ver}' 以上に昇格 (即時公開モード化)\n"
+            f"      → 詳細: memory feedback_scheduled_release_patch_safety.md"
+        )
+    return found
+
+
+def check_version_no_downgrade():
+    """ルール7-60 (BLOCKER 2026-11-25、 memory feedback_scheduled_release_patch_safety.md ルール C (降格) の機械化):
+    コミット対象 version.json の effective version (scheduledRelease.version があればそれ、 無ければ version) の
+    X.Y.Z が HEAD より小さい → BLOCKER。 suffix の比較はしない (dev の suffix 進行は 7-25、 main の strip は 7-27、
+    同一 version 連発は 7-24 の担当)。 降格するとユーザー端末の lastSeen より古い version になり降格通知が出る。
+    意図的な戻し (revert 等) は 野沢さん承認のうえ PRISMAERA_ALLOW_VERSION_DOWNGRADE=1 で WARNING に落とせる。
+    """
+    head, cands = _version_json_candidates()
+    if head is None or not cands:
+        return 0
+    def eff(d):
+        return (d.get("scheduledRelease") or {}).get("version") or d.get("version")
+    old_v = eff(head)
+    old_b = _ver_base_tuple(old_v)
+    if old_b is None:
+        return 0
+    allow = _os.environ.get("PRISMAERA_ALLOW_VERSION_DOWNGRADE") == "1"
+    found = 0
+    for label, data in cands:
+        new_v = eff(data)
+        new_b = _ver_base_tuple(new_v)
+        if new_b is None or new_b >= old_b:
+            continue
+        found += 1
+        msg = (
+            f"[ルール7-60 version 降格 BLOCKER] version.json ({label}) の effective version '{new_v}' が HEAD の '{old_v}' より小さい\n"
+            f"      → 降格するとユーザーに「v{old_v} → v{new_v}」 の降格通知が出る (2026-05-10 v1.6.0 → v1.5.2 事故)\n"
+            f"      → bump_version.py の mode 誤り / scheduledRelease 消失 / マージの一括採用 を疑う\n"
+            f"      → 意図的な戻し (revert 等) のみ 野沢さん承認のうえ PRISMAERA_ALLOW_VERSION_DOWNGRADE=1 で通す\n"
+            f"      → 詳細: memory feedback_scheduled_release_patch_safety.md"
+        )
+        (warnings_only.append(msg.replace(" BLOCKER]", " 承認済 WARNING]", 1)) if allow else violations.append(msg))
+    return found
+
+
+_CONFLICT_RE = re.compile(r"^(<<<<<<< |>>>>>>> |=======\r?$)", re.M)
+
+
+def check_conflict_markers():
+    """ルール7-61 (BLOCKER 2026-11-25、 memory feedback_merge_marker_check.md の機械化):
+    staged ファイル (staged 版の中身) と 未 stage の変更ファイル (作業ツリー) に 行頭の競合マーカー
+    `<<<<<<< ` / `>>>>>>> ` / `=======` (行全体) が残っていたら BLOCKER。
+    2026-07-03 omoroi-sanma で `tail` で CONFLICT 行を見落とし マーカー入り HTML/JS を commit → 全ページ SyntaxError。
+    """
+    hits = []
+    checked = 0
+    staged = (_git_out(["diff", "--cached", "--name-only", "--diff-filter=ACMR"]) or "").splitlines()
+    unstaged = (_git_out(["diff", "--name-only", "--diff-filter=ACMR"]) or "").splitlines()
+    targets = [(p, "staged") for p in staged if p] + [(p, "作業ツリー") for p in unstaged if p and p not in staged]
+    for path, where in targets:
+        if path.startswith("node_modules/"):
+            continue
+        if where == "staged":
+            r = subprocess.run(["git", "-C", str(ROOT), "show", f":{path}"], capture_output=True)
+            if r.returncode != 0:
+                continue
+            raw = r.stdout
+        else:
+            fp = ROOT / path
+            if not fp.is_file():
+                continue
+            try:
+                raw = fp.read_bytes()
+            except Exception:
+                continue
+        if b"\x00" in raw[:8000]:
+            continue  # バイナリ
+        checked += 1
+        text = raw.decode("utf-8", errors="replace")
+        for m in _CONFLICT_RE.finditer(text):
+            line_no = text.count("\n", 0, m.start()) + 1
+            hits.append(f"{path}:{line_no} ({where}) `{m.group(1).strip()}`")
+    if hits:
+        violations.append(
+            f"[ルール7-61 競合マーカー残存 BLOCKER] {len(hits)}箇所: {', '.join(hits[:12])}{' 他' + str(len(hits) - 12) + '箇所' if len(hits) > 12 else ''}\n"
+            f"      → マージ競合の解決漏れ。 該当箇所を解決してから git add し直す (git add -A は解決完了確認後のみ)\n"
+            f"      → 追記型 JSON (version.json changelog 等) は 一括 --theirs/--ours 禁止、 手動 union (ルール7-57)\n"
+            f"      → 詳細: memory feedback_merge_marker_check.md"
+        )
+    return checked
+
+
+if scope_match('deploy'):
+    n7_57 = check_changelog_entry_protect()
+    print(f"  ルール7-57 (changelog entry 消失防止): {n7_57}件 検出 [BLOCKER]")
+    n7_59 = check_scheduled_release_preserved()
+    print(f"  ルール7-59 (scheduledRelease 構造消失): {n7_59}件 検出 [BLOCKER]")
+    n7_60 = check_version_no_downgrade()
+    print(f"  ルール7-60 (version 降格禁止): {n7_60}件 検出 [BLOCKER]")
+    n7_61 = check_conflict_markers()
+    print(f"  ルール7-61 (競合マーカー残存): {n7_61}ファイル 検査 [BLOCKER]")
+if scope_match('deploy', 'release', 'char'):
+    n7_58 = check_char_thumbs_complete()
+    print(f"  ルール7-58 (キャラ thumb webp 欠落): {n7_58}キャラ 検査 [BLOCKER]")
 
 # === Warning ルール (commit はブロックせず、 開発者手動 review) ===
 violations_blocker = list(violations)  # ここまでが blocker 違反
